@@ -37,6 +37,19 @@ EncodeUIntLE(value, width) ==
     THEN << >>
     ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
 
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
 (***************************************************************************)
 (* A decoder yields the value it read and the bytes left, or fails         *)
 (***************************************************************************)
@@ -50,11 +63,16 @@ ReadBytes(bytes, width) ==
     THEN Fail
     ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
 
-(* The integer a rule depends on *)
+(* The integer a rule depends on, in the byte order the field states *)
 ReadUIntLE(bytes, width) ==
     IF Len(bytes) < width
     THEN Fail
     ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
@@ -66,6 +84,9 @@ Sample(width) ==
     { [i \in 1 .. width |-> 0],
       [i \in 1 .. width |-> 32],
       [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
 
 (* The lists a record is checked over: none, one, and a run of two. What a run has *)
 (* to get right is reading one entry after another, which two of a kind already say. *)
@@ -884,11 +905,11 @@ AdministrativeMessage ==
     [ administrativeMessagePayload : AdministrativeMessagePayload ]
 
 EncodeAdministrativeMessage(message) ==
-    EncodeUIntLE(message.administrativeMessagePayload.tag, 1)
+    EncodeUIntBE(message.administrativeMessagePayload.tag, 1)
         \o EncodeAdministrativeMessagePayload(message.administrativeMessagePayload)
 
 DecodeAdministrativeMessage(bytes) ==
-    LET administrativeMessageType == ReadUIntLE(bytes, 1) IN IF ~administrativeMessageType.ok THEN Fail ELSE
+    LET administrativeMessageType == ReadUIntBE(bytes, 1) IN IF ~administrativeMessageType.ok THEN Fail ELSE
     LET administrativeMessagePayload == DecodeAdministrativeMessagePayload(administrativeMessageType.value, administrativeMessageType.rest) IN IF ~administrativeMessagePayload.ok THEN Fail ELSE
     Ok([ administrativeMessagePayload |-> administrativeMessagePayload.value ], administrativeMessagePayload.rest)
 
@@ -1182,11 +1203,11 @@ ControlMessage ==
     [ controlMessagePayload : ControlMessagePayload ]
 
 EncodeControlMessage(message) ==
-    EncodeUIntLE(message.controlMessagePayload.tag, 1)
+    EncodeUIntBE(message.controlMessagePayload.tag, 1)
         \o EncodeControlMessagePayload(message.controlMessagePayload)
 
 DecodeControlMessage(bytes) ==
-    LET controlMessageType == ReadUIntLE(bytes, 1) IN IF ~controlMessageType.ok THEN Fail ELSE
+    LET controlMessageType == ReadUIntBE(bytes, 1) IN IF ~controlMessageType.ok THEN Fail ELSE
     LET controlMessagePayload == DecodeControlMessagePayload(controlMessageType.value, controlMessageType.rest) IN IF ~controlMessagePayload.ok THEN Fail ELSE
     Ok([ controlMessagePayload |-> controlMessagePayload.value ], controlMessagePayload.rest)
 
@@ -1697,11 +1718,11 @@ QuoteMessage ==
     [ quoteMessagePayload : QuoteMessagePayload ]
 
 EncodeQuoteMessage(message) ==
-    EncodeUIntLE(message.quoteMessagePayload.tag, 1)
+    EncodeUIntBE(message.quoteMessagePayload.tag, 1)
         \o EncodeQuoteMessagePayload(message.quoteMessagePayload)
 
 DecodeQuoteMessage(bytes) ==
-    LET quoteMessageType == ReadUIntLE(bytes, 1) IN IF ~quoteMessageType.ok THEN Fail ELSE
+    LET quoteMessageType == ReadUIntBE(bytes, 1) IN IF ~quoteMessageType.ok THEN Fail ELSE
     LET quoteMessagePayload == DecodeQuoteMessagePayload(quoteMessageType.value, quoteMessageType.rest) IN IF ~quoteMessagePayload.ok THEN Fail ELSE
     Ok([ quoteMessagePayload |-> quoteMessagePayload.value ], quoteMessagePayload.rest)
 
@@ -1757,12 +1778,12 @@ SequencedDataPacket ==
 
 EncodeSequencedDataPacket(message) ==
     message.version
-        \o EncodeUIntLE(message.categoryPayload.tag, 1)
+        \o EncodeUIntBE(message.categoryPayload.tag, 1)
         \o EncodeCategoryPayload(message.categoryPayload)
 
 DecodeSequencedDataPacket(bytes) ==
     LET version == ReadBytes(bytes, 1) IN IF ~version.ok THEN Fail ELSE
-    LET messageCategory == ReadUIntLE(version.rest, 1) IN IF ~messageCategory.ok THEN Fail ELSE
+    LET messageCategory == ReadUIntBE(version.rest, 1) IN IF ~messageCategory.ok THEN Fail ELSE
     LET categoryPayload == DecodeCategoryPayload(messageCategory.value, messageCategory.rest) IN IF ~categoryPayload.ok THEN Fail ELSE
     Ok([ version         |-> version.value,
          categoryPayload |-> categoryPayload.value ], categoryPayload.rest)
@@ -1906,21 +1927,21 @@ ServerPacket ==
     [ serverTcpPayload : ServerTcpPayload ]
 
 EncodeServerPacketBody(message) ==
-    EncodeUIntLE(message.serverTcpPayload.tag, 1)
+    EncodeUIntBE(message.serverTcpPayload.tag, 1)
         \o EncodeServerTcpPayload(message.serverTcpPayload)
 
 (* Packet Length counts the bytes it frames, so it is written from them *)
 EncodeServerPacket(message) ==
     LET body == EncodeServerPacketBody(message)
-    IN  EncodeUIntLE(Len(body), 2) \o body
+    IN  EncodeUIntBE(Len(body), 2) \o body
 
 DecodeServerPacketBody(bytes) ==
-    LET serverPacketType == ReadUIntLE(bytes, 1) IN IF ~serverPacketType.ok THEN Fail ELSE
+    LET serverPacketType == ReadUIntBE(bytes, 1) IN IF ~serverPacketType.ok THEN Fail ELSE
     LET serverTcpPayload == DecodeServerTcpPayload(serverPacketType.value, serverPacketType.rest) IN IF ~serverTcpPayload.ok THEN Fail ELSE
     Ok([ serverTcpPayload |-> serverTcpPayload.value ], serverTcpPayload.rest)
 
 DecodeServerPacket(bytes) ==
-    LET length == ReadUIntLE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
+    LET length == ReadUIntBE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
     IF Len(length.rest) < length.value THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, length.value)
         beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
@@ -1947,7 +1968,10 @@ RoundTripUIntLE ==
             (value < 256 ^ width) =>
                 /\ Len(EncodeUIntLE(value, width)) = width
                 /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
 (* Every Issue Symbol Directory Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripIssueSymbolDirectoryMessage ==
@@ -2175,39 +2199,39 @@ RoundTripServerPacket ==
 
 (* A Administrative Message Payload is selected by the Administrative Message Type it is written under *)
 SelectsAdministrativeMessagePayload ==
-    \A message \in AdministrativeMessagePayload :
+    \A message \in CheckedAdministrativeMessagePayload :
         LET read == DecodeAdministrativeMessagePayload(message.tag, EncodeAdministrativeMessagePayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Control Message Payload is selected by the Control Message Type it is written under *)
 SelectsControlMessagePayload ==
-    \A message \in ControlMessagePayload :
+    \A message \in CheckedControlMessagePayload :
         LET read == DecodeControlMessagePayload(message.tag, EncodeControlMessagePayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Quote Message Payload is selected by the Quote Message Type it is written under *)
 SelectsQuoteMessagePayload ==
-    \A message \in QuoteMessagePayload :
+    \A message \in CheckedQuoteMessagePayload :
         LET read == DecodeQuoteMessagePayload(message.tag, EncodeQuoteMessagePayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Category Payload is selected by the Message Category it is written under *)
 SelectsCategoryPayload ==
-    \A message \in CategoryPayload :
+    \A message \in CheckedCategoryPayload :
         LET read == DecodeCategoryPayload(message.tag, EncodeCategoryPayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Server Tcp Payload is selected by the Server Packet Type it is written under *)
 SelectsServerTcpPayload ==
-    \A message \in ServerTcpPayload :
+    \A message \in CheckedServerTcpPayload :
         LET read == DecodeServerTcpPayload(message.tag, EncodeServerTcpPayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)
 FramesServerPacket ==
-    \A message \in ServerPacket :
+    \A message \in CheckedServerPacket :
         LET bytes == EncodeServerPacket(message)
-        IN  DecodeUIntLE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

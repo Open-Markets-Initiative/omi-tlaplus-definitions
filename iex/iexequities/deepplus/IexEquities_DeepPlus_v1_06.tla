@@ -45,6 +45,19 @@ EncodeUIntLE(value, width) ==
     THEN << >>
     ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
 
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
 (***************************************************************************)
 (* A decoder yields the value it read and the bytes left, or fails         *)
 (***************************************************************************)
@@ -58,11 +71,16 @@ ReadBytes(bytes, width) ==
     THEN Fail
     ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
 
-(* The integer a rule depends on *)
+(* The integer a rule depends on, in the byte order the field states *)
 ReadUIntLE(bytes, width) ==
     IF Len(bytes) < width
     THEN Fail
     ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
@@ -74,6 +92,9 @@ Sample(width) ==
     { [i \in 1 .. width |-> 0],
       [i \in 1 .. width |-> 32],
       [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
 
 (* The lists a record is checked over: none, one, and a run of two. What a run has *)
 (* to get right is reading one entry after another, which two of a kind already say. *)
@@ -871,14 +892,14 @@ EncodeSnapshotDataMessage(message) ==
     message.iexTpHeader
         \o message.iexTpMessageBlockLength
         \o message.iexTpMessageLength
-        \o EncodeUIntLE(message.iexTpMessageData.tag, 1)
+        \o EncodeUIntBE(message.iexTpMessageData.tag, 1)
         \o EncodeIexTpMessageData(message.iexTpMessageData)
 
 DecodeSnapshotDataMessage(bytes) ==
     LET iexTpHeader == ReadBytes(bytes, 1) IN IF ~iexTpHeader.ok THEN Fail ELSE
     LET iexTpMessageBlockLength == ReadBytes(iexTpHeader.rest, 2) IN IF ~iexTpMessageBlockLength.ok THEN Fail ELSE
     LET iexTpMessageLength == ReadBytes(iexTpMessageBlockLength.rest, 2) IN IF ~iexTpMessageLength.ok THEN Fail ELSE
-    LET iexTpMessageType == ReadUIntLE(iexTpMessageLength.rest, 1) IN IF ~iexTpMessageType.ok THEN Fail ELSE
+    LET iexTpMessageType == ReadUIntBE(iexTpMessageLength.rest, 1) IN IF ~iexTpMessageType.ok THEN Fail ELSE
     LET iexTpMessageData == DecodeIexTpMessageData(iexTpMessageType.value, iexTpMessageType.rest) IN IF ~iexTpMessageData.ok THEN Fail ELSE
     Ok([ iexTpHeader             |-> iexTpHeader.value,
          iexTpMessageBlockLength |-> iexTpMessageBlockLength.value,
@@ -973,7 +994,7 @@ Message ==
     [ messageData : MessageData ]
 
 EncodeMessageBody(message) ==
-    EncodeUIntLE(message.messageData.tag, 1)
+    EncodeUIntBE(message.messageData.tag, 1)
         \o EncodeMessageData(message.messageData)
 
 (* Message Length counts the bytes it frames, so it is written from them *)
@@ -982,7 +1003,7 @@ EncodeMessage(message) ==
     IN  EncodeUIntLE(Len(body), 2) \o body
 
 DecodeMessageBody(bytes) ==
-    LET messageType == ReadUIntLE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
+    LET messageType == ReadUIntBE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
     LET messageData == DecodeMessageData(messageType.value, messageType.rest) IN IF ~messageData.ok THEN Fail ELSE
     Ok([ messageData |-> messageData.value ], messageData.rest)
 
@@ -1063,7 +1084,10 @@ RoundTripUIntLE ==
             (value < 256 ^ width) =>
                 /\ Len(EncodeUIntLE(value, width)) = width
                 /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
 (* Every Snapshot Request Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripSnapshotRequestMessage ==
@@ -1235,19 +1259,19 @@ RoundTripPacket ==
 
 (* A Iex Tp Message Data is selected by the Iex Tp Message Type it is written under *)
 SelectsIexTpMessageData ==
-    \A message \in IexTpMessageData :
+    \A message \in CheckedIexTpMessageData :
         LET read == DecodeIexTpMessageData(message.tag, EncodeIexTpMessageData(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Message Data is selected by the Message Type it is written under *)
 SelectsMessageData ==
-    \A message \in MessageData :
+    \A message \in CheckedMessageData :
         LET read == DecodeMessageData(message.tag, EncodeMessageData(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)
 FramesMessage ==
-    \A message \in Message :
+    \A message \in CheckedMessage :
         LET bytes == EncodeMessage(message)
         IN  DecodeUIntLE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
 

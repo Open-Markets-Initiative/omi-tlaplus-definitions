@@ -37,6 +37,19 @@ EncodeUIntLE(value, width) ==
     THEN << >>
     ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
 
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
 (***************************************************************************)
 (* A decoder yields the value it read and the bytes left, or fails         *)
 (***************************************************************************)
@@ -50,11 +63,16 @@ ReadBytes(bytes, width) ==
     THEN Fail
     ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
 
-(* The integer a rule depends on *)
+(* The integer a rule depends on, in the byte order the field states *)
 ReadUIntLE(bytes, width) ==
     IF Len(bytes) < width
     THEN Fail
     ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
@@ -66,6 +84,9 @@ Sample(width) ==
     { [i \in 1 .. width |-> 0],
       [i \in 1 .. width |-> 32],
       [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
 
 (* The lists a record is checked over: none, one, and a run of two. What a run has *)
 (* to get right is reading one entry after another, which two of a kind already say. *)
@@ -454,12 +475,12 @@ SequencedDataPacket ==
 
 EncodeSequencedDataPacket(message) ==
     message.timestamp
-        \o EncodeUIntLE(message.sequencedMessage.tag, 1)
+        \o EncodeUIntBE(message.sequencedMessage.tag, 1)
         \o EncodeSequencedMessage(message.sequencedMessage)
 
 DecodeSequencedDataPacket(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
-    LET messageType == ReadUIntLE(timestamp.rest, 1) IN IF ~messageType.ok THEN Fail ELSE
+    LET messageType == ReadUIntBE(timestamp.rest, 1) IN IF ~messageType.ok THEN Fail ELSE
     LET sequencedMessage == DecodeSequencedMessage(messageType.value, messageType.rest) IN IF ~sequencedMessage.ok THEN Fail ELSE
     Ok([ timestamp        |-> timestamp.value,
          sequencedMessage |-> sequencedMessage.value ], sequencedMessage.rest)
@@ -522,12 +543,12 @@ ServerPacket ==
       soupLf        : Sample(1) ]
 
 EncodeServerPacket(message) ==
-    EncodeUIntLE(message.serverPayload.tag, 1)
+    EncodeUIntBE(message.serverPayload.tag, 1)
         \o EncodeServerPayload(message.serverPayload)
         \o message.soupLf
 
 DecodeServerPacket(bytes) ==
-    LET serverPacketType == ReadUIntLE(bytes, 1) IN IF ~serverPacketType.ok THEN Fail ELSE
+    LET serverPacketType == ReadUIntBE(bytes, 1) IN IF ~serverPacketType.ok THEN Fail ELSE
     LET serverPayload == DecodeServerPayload(serverPacketType.value, serverPacketType.rest) IN IF ~serverPayload.ok THEN Fail ELSE
     LET soupLf == ReadBytes(serverPayload.rest, 1) IN IF ~soupLf.ok THEN Fail ELSE
     Ok([ serverPayload |-> serverPayload.value,
@@ -554,7 +575,10 @@ RoundTripUIntLE ==
             (value < 256 ^ width) =>
                 /\ Len(EncodeUIntLE(value, width)) = width
                 /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
 (* Every Debug Packet decodes back to what was encoded, and leaves nothing over *)
 RoundTripDebugPacket ==
@@ -654,13 +678,13 @@ RoundTripServerPacket ==
 
 (* A Sequenced Message is selected by the Message Type it is written under *)
 SelectsSequencedMessage ==
-    \A message \in SequencedMessage :
+    \A message \in CheckedSequencedMessage :
         LET read == DecodeSequencedMessage(message.tag, EncodeSequencedMessage(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Server Payload is selected by the Server Packet Type it is written under *)
 SelectsServerPayload ==
-    \A message \in ServerPayload :
+    \A message \in CheckedServerPayload :
         LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 

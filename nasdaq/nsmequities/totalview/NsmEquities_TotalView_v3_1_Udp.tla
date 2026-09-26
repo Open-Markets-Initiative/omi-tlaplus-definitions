@@ -41,6 +41,19 @@ EncodeUIntLE(value, width) ==
     THEN << >>
     ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
 
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
 (***************************************************************************)
 (* A decoder yields the value it read and the bytes left, or fails         *)
 (***************************************************************************)
@@ -54,11 +67,16 @@ ReadBytes(bytes, width) ==
     THEN Fail
     ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
 
-(* The integer a rule depends on *)
+(* The integer a rule depends on, in the byte order the field states *)
 ReadUIntLE(bytes, width) ==
     IF Len(bytes) < width
     THEN Fail
     ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
@@ -70,6 +88,9 @@ Sample(width) ==
     { [i \in 1 .. width |-> 0],
       [i \in 1 .. width |-> 32],
       [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
 
 (* The lists a record is checked over: none, one, and a run of two. What a run has *)
 (* to get right is reading one entry after another, which two of a kind already say. *)
@@ -846,21 +867,21 @@ Message ==
     [ payload : Payload ]
 
 EncodeMessageBody(message) ==
-    EncodeUIntLE(message.payload.tag, 1)
+    EncodeUIntBE(message.payload.tag, 1)
         \o EncodePayload(message.payload)
 
 (* Message Length counts the bytes it frames, so it is written from them *)
 EncodeMessage(message) ==
     LET body == EncodeMessageBody(message)
-    IN  EncodeUIntLE(Len(body), 2) \o body
+    IN  EncodeUIntBE(Len(body), 2) \o body
 
 DecodeMessageBody(bytes) ==
-    LET messageType == ReadUIntLE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
+    LET messageType == ReadUIntBE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
     LET payload == DecodePayload(messageType.value, messageType.rest) IN IF ~payload.ok THEN Fail ELSE
     Ok([ payload |-> payload.value ], payload.rest)
 
 DecodeMessage(bytes) ==
-    LET length == ReadUIntLE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
+    LET length == ReadUIntBE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
     IF Len(length.rest) < length.value THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, length.value)
         beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
@@ -926,13 +947,13 @@ Packet ==
 EncodePacket(message) ==
     message.session
         \o message.sequenceNumber
-        \o EncodeUIntLE(Len(message.message), 2)
+        \o EncodeUIntBE(Len(message.message), 2)
         \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
     LET session == ReadBytes(bytes, 10) IN IF ~session.ok THEN Fail ELSE
     LET sequenceNumber == ReadBytes(session.rest, 8) IN IF ~sequenceNumber.ok THEN Fail ELSE
-    LET messageCount == ReadUIntLE(sequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(sequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
     LET message == ReadMessageList(messageCount.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
     Ok([ session        |-> session.value,
          sequenceNumber |-> sequenceNumber.value,
@@ -961,7 +982,10 @@ RoundTripUIntLE ==
             (value < 256 ^ width) =>
                 /\ Len(EncodeUIntLE(value, width)) = width
                 /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
 (* Every Seconds Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecondsMessage ==
@@ -1117,15 +1141,15 @@ RoundTripPacket ==
 
 (* A Payload is selected by the Message Type it is written under *)
 SelectsPayload ==
-    \A message \in Payload :
+    \A message \in CheckedPayload :
         LET read == DecodePayload(message.tag, EncodePayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)
 FramesMessage ==
-    \A message \in Message :
+    \A message \in CheckedMessage :
         LET bytes == EncodeMessage(message)
-        IN  DecodeUIntLE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

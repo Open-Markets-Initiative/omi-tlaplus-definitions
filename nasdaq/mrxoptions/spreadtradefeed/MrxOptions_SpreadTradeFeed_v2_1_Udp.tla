@@ -41,6 +41,19 @@ EncodeUIntLE(value, width) ==
     THEN << >>
     ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
 
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
 (***************************************************************************)
 (* A decoder yields the value it read and the bytes left, or fails         *)
 (***************************************************************************)
@@ -54,11 +67,16 @@ ReadBytes(bytes, width) ==
     THEN Fail
     ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
 
-(* The integer a rule depends on *)
+(* The integer a rule depends on, in the byte order the field states *)
 ReadUIntLE(bytes, width) ==
     IF Len(bytes) < width
     THEN Fail
     ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
@@ -70,6 +88,9 @@ Sample(width) ==
     { [i \in 1 .. width |-> 0],
       [i \in 1 .. width |-> 32],
       [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
 
 (* The lists a record is checked over: none, one, and a run of two. What a run has *)
 (* to get right is reading one entry after another, which two of a kind already say. *)
@@ -223,7 +244,7 @@ EncodeComplexStrategyDirectoryMessage(message) ==
         \o message.strategyType
         \o message.underlyingSymbol
         \o message.reserved16
-        \o EncodeUIntLE(Len(message.legInformation), 1)
+        \o EncodeUIntBE(Len(message.legInformation), 1)
         \o EncodeLegInformationList(message.legInformation)
 
 DecodeComplexStrategyDirectoryMessage(bytes) ==
@@ -233,7 +254,7 @@ DecodeComplexStrategyDirectoryMessage(bytes) ==
     LET strategyType == ReadBytes(strategyId.rest, 1) IN IF ~strategyType.ok THEN Fail ELSE
     LET underlyingSymbol == ReadBytes(strategyType.rest, 13) IN IF ~underlyingSymbol.ok THEN Fail ELSE
     LET reserved16 == ReadBytes(underlyingSymbol.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntLE(reserved16.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadUIntBE(reserved16.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET legInformation == ReadLegInformationList(numberOfLegs.rest, numberOfLegs.value) IN IF ~legInformation.ok THEN Fail ELSE
     Ok([ trackingNumber   |-> trackingNumber.value,
          timestamp        |-> timestamp.value,
@@ -414,21 +435,21 @@ Message ==
     [ udpPayload : UdpPayload ]
 
 EncodeMessageBody(message) ==
-    EncodeUIntLE(message.udpPayload.tag, 1)
+    EncodeUIntBE(message.udpPayload.tag, 1)
         \o EncodeUdpPayload(message.udpPayload)
 
 (* Message Length counts the bytes it frames, so it is written from them *)
 EncodeMessage(message) ==
     LET body == EncodeMessageBody(message)
-    IN  EncodeUIntLE(Len(body), 2) \o body
+    IN  EncodeUIntBE(Len(body), 2) \o body
 
 DecodeMessageBody(bytes) ==
-    LET messageType == ReadUIntLE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
+    LET messageType == ReadUIntBE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
     LET udpPayload == DecodeUdpPayload(messageType.value, messageType.rest) IN IF ~udpPayload.ok THEN Fail ELSE
     Ok([ udpPayload |-> udpPayload.value ], udpPayload.rest)
 
 DecodeMessage(bytes) ==
-    LET length == ReadUIntLE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
+    LET length == ReadUIntBE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
     IF Len(length.rest) < length.value THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, length.value)
         beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
@@ -481,13 +502,13 @@ Packet ==
 EncodePacket(message) ==
     message.udpSession
         \o message.udpSequenceNumber
-        \o EncodeUIntLE(Len(message.message), 2)
+        \o EncodeUIntBE(Len(message.message), 2)
         \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
     LET udpSession == ReadBytes(bytes, 10) IN IF ~udpSession.ok THEN Fail ELSE
     LET udpSequenceNumber == ReadBytes(udpSession.rest, 8) IN IF ~udpSequenceNumber.ok THEN Fail ELSE
-    LET messageCount == ReadUIntLE(udpSequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(udpSequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
     LET message == ReadMessageList(messageCount.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
     Ok([ udpSession        |-> udpSession.value,
          udpSequenceNumber |-> udpSequenceNumber.value,
@@ -516,7 +537,10 @@ RoundTripUIntLE ==
             (value < 256 ^ width) =>
                 /\ Len(EncodeUIntLE(value, width)) = width
                 /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
 (* Every System Event Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripSystemEventMessage ==
@@ -576,15 +600,15 @@ RoundTripPacket ==
 
 (* A Udp Payload is selected by the Message Type it is written under *)
 SelectsUdpPayload ==
-    \A message \in UdpPayload :
+    \A message \in CheckedUdpPayload :
         LET read == DecodeUdpPayload(message.tag, EncodeUdpPayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)
 FramesMessage ==
-    \A message \in Message :
+    \A message \in CheckedMessage :
         LET bytes == EncodeMessage(message)
-        IN  DecodeUIntLE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

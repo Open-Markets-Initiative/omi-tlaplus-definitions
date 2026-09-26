@@ -44,6 +44,19 @@ EncodeUIntLE(value, width) ==
     THEN << >>
     ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
 
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
 (***************************************************************************)
 (* A decoder yields the value it read and the bytes left, or fails         *)
 (***************************************************************************)
@@ -57,11 +70,16 @@ ReadBytes(bytes, width) ==
     THEN Fail
     ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
 
-(* The integer a rule depends on *)
+(* The integer a rule depends on, in the byte order the field states *)
 ReadUIntLE(bytes, width) ==
     IF Len(bytes) < width
     THEN Fail
     ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
@@ -73,6 +91,9 @@ Sample(width) ==
     { [i \in 1 .. width |-> 0],
       [i \in 1 .. width |-> 32],
       [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
 
 (* The lists a record is checked over: none, one, and a run of two. What a run has *)
 (* to get right is reading one entry after another, which two of a kind already say. *)
@@ -372,7 +393,7 @@ EncodeComplexOrderStrategyMessage(message) ==
         \o message.source
         \o message.underlyingSymbol
         \o message.action
-        \o EncodeUIntLE(Len(message.complexOrderStrategyLeg), 1)
+        \o EncodeUIntBE(Len(message.complexOrderStrategyLeg), 1)
         \o EncodeComplexOrderStrategyLegList(message.complexOrderStrategyLeg)
 
 DecodeComplexOrderStrategyMessage(bytes) ==
@@ -381,7 +402,7 @@ DecodeComplexOrderStrategyMessage(bytes) ==
     LET source == ReadBytes(strategyId.rest, 1) IN IF ~source.ok THEN Fail ELSE
     LET underlyingSymbol == ReadBytes(source.rest, 13) IN IF ~underlyingSymbol.ok THEN Fail ELSE
     LET action == ReadBytes(underlyingSymbol.rest, 1) IN IF ~action.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntLE(action.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadUIntBE(action.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET complexOrderStrategyLeg == ReadComplexOrderStrategyLegList(numberOfLegs.rest, numberOfLegs.value) IN IF ~complexOrderStrategyLeg.ok THEN Fail ELSE
     Ok([ timestamp               |-> timestamp.value,
          strategyId              |-> strategyId.value,
@@ -1005,7 +1026,7 @@ EncodeComplexOrderMessage(message) ==
         \o message.timeInForce
         \o message.customerFirmIndicator
         \o message.underlyingSymbol
-        \o EncodeUIntLE(Len(message.complexOrderLeg), 1)
+        \o EncodeUIntBE(Len(message.complexOrderLeg), 1)
         \o EncodeComplexOrderLegList(message.complexOrderLeg)
 
 DecodeComplexOrderMessage(bytes) ==
@@ -1023,7 +1044,7 @@ DecodeComplexOrderMessage(bytes) ==
     LET timeInForce == ReadBytes(allOrNone.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
     LET customerFirmIndicator == ReadBytes(timeInForce.rest, 1) IN IF ~customerFirmIndicator.ok THEN Fail ELSE
     LET underlyingSymbol == ReadBytes(customerFirmIndicator.rest, 13) IN IF ~underlyingSymbol.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntLE(underlyingSymbol.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadUIntBE(underlyingSymbol.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET complexOrderLeg == ReadComplexOrderLegList(numberOfLegs.rest, numberOfLegs.value) IN IF ~complexOrderLeg.ok THEN Fail ELSE
     Ok([ timestamp             |-> timestamp.value,
          strategyId            |-> strategyId.value,
@@ -1373,21 +1394,21 @@ Message ==
     [ payload : Payload ]
 
 EncodeMessageBody(message) ==
-    EncodeUIntLE(message.payload.tag, 1)
+    EncodeUIntBE(message.payload.tag, 1)
         \o EncodePayload(message.payload)
 
 (* Length counts the bytes it frames, so it is written from them *)
 EncodeMessage(message) ==
     LET body == EncodeMessageBody(message)
-    IN  EncodeUIntLE(Len(body), 2) \o body
+    IN  EncodeUIntBE(Len(body), 2) \o body
 
 DecodeMessageBody(bytes) ==
-    LET messageType == ReadUIntLE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
+    LET messageType == ReadUIntBE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
     LET payload == DecodePayload(messageType.value, messageType.rest) IN IF ~payload.ok THEN Fail ELSE
     Ok([ payload |-> payload.value ], payload.rest)
 
 DecodeMessage(bytes) ==
-    LET length == ReadUIntLE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
+    LET length == ReadUIntBE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
     IF Len(length.rest) < length.value THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, length.value)
         beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
@@ -1482,7 +1503,10 @@ RoundTripUIntLE ==
             (value < 256 ^ width) =>
                 /\ Len(EncodeUIntLE(value, width)) = width
                 /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
 (* Every Timestamp decodes back to what was encoded, and leaves nothing over *)
 RoundTripTimestamp ==
@@ -1694,15 +1718,15 @@ RoundTripPacket ==
 
 (* A Payload is selected by the Message Type it is written under *)
 SelectsPayload ==
-    \A message \in Payload :
+    \A message \in CheckedPayload :
         LET read == DecodePayload(message.tag, EncodePayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Length is written from the bytes it frames *)
 FramesMessage ==
-    \A message \in Message :
+    \A message \in CheckedMessage :
         LET bytes == EncodeMessage(message)
-        IN  DecodeUIntLE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

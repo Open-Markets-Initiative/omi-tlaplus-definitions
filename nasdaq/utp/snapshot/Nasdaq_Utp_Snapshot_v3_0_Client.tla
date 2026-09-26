@@ -37,6 +37,19 @@ EncodeUIntLE(value, width) ==
     THEN << >>
     ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
 
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
 (***************************************************************************)
 (* A decoder yields the value it read and the bytes left, or fails         *)
 (***************************************************************************)
@@ -50,11 +63,16 @@ ReadBytes(bytes, width) ==
     THEN Fail
     ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
 
-(* The integer a rule depends on *)
+(* The integer a rule depends on, in the byte order the field states *)
 ReadUIntLE(bytes, width) ==
     IF Len(bytes) < width
     THEN Fail
     ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
@@ -66,6 +84,9 @@ Sample(width) ==
     { [i \in 1 .. width |-> 0],
       [i \in 1 .. width |-> 32],
       [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
 
 (* The lists a record is checked over: none, one, and a run of two. What a run has *)
 (* to get right is reading one entry after another, which two of a kind already say. *)
@@ -183,21 +204,21 @@ ClientPacket ==
     [ clientTcpPayload : ClientTcpPayload ]
 
 EncodeClientPacketBody(message) ==
-    EncodeUIntLE(message.clientTcpPayload.tag, 1)
+    EncodeUIntBE(message.clientTcpPayload.tag, 1)
         \o EncodeClientTcpPayload(message.clientTcpPayload)
 
 (* Packet Length counts the bytes it frames, so it is written from them *)
 EncodeClientPacket(message) ==
     LET body == EncodeClientPacketBody(message)
-    IN  EncodeUIntLE(Len(body), 2) \o body
+    IN  EncodeUIntBE(Len(body), 2) \o body
 
 DecodeClientPacketBody(bytes) ==
-    LET clientPacketType == ReadUIntLE(bytes, 1) IN IF ~clientPacketType.ok THEN Fail ELSE
+    LET clientPacketType == ReadUIntBE(bytes, 1) IN IF ~clientPacketType.ok THEN Fail ELSE
     LET clientTcpPayload == DecodeClientTcpPayload(clientPacketType.value, clientPacketType.rest) IN IF ~clientTcpPayload.ok THEN Fail ELSE
     Ok([ clientTcpPayload |-> clientTcpPayload.value ], clientTcpPayload.rest)
 
 DecodeClientPacket(bytes) ==
-    LET length == ReadUIntLE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
+    LET length == ReadUIntBE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
     IF Len(length.rest) < length.value THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, length.value)
         beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
@@ -224,7 +245,10 @@ RoundTripUIntLE ==
             (value < 256 ^ width) =>
                 /\ Len(EncodeUIntLE(value, width)) = width
                 /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
 (* Every Debug Packet decodes back to what was encoded, and leaves nothing over *)
 RoundTripDebugPacket ==
@@ -252,15 +276,15 @@ RoundTripClientPacket ==
 
 (* A Client Tcp Payload is selected by the Client Packet Type it is written under *)
 SelectsClientTcpPayload ==
-    \A message \in ClientTcpPayload :
+    \A message \in CheckedClientTcpPayload :
         LET read == DecodeClientTcpPayload(message.tag, EncodeClientTcpPayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)
 FramesClientPacket ==
-    \A message \in ClientPacket :
+    \A message \in CheckedClientPacket :
         LET bytes == EncodeClientPacket(message)
-        IN  DecodeUIntLE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)
