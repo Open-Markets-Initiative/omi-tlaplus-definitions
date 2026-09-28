@@ -1,7 +1,7 @@
------------------ MODULE NsmEquities_NoiView_v2_0_20101111 -----------------
+------------------ MODULE NsmEquities_NoiView_v2_0_2010_2 ------------------
 (***************************************************************************)
 (* National Association of Securities Dealers Automated Quotations         *)
-(* (Nasdaq) Net Order Imbalance View v2.0.20101111                         *)
+(* (Nasdaq) Net Order Imbalance View v2.0.2010                             *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)

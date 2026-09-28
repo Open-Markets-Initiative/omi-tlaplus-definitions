@@ -1,7 +1,7 @@
------------------ MODULE NsmEquities_NoiView_v2_1_20130309 -----------------
+------------------ MODULE NsmEquities_NoiView_v2_1_2011_2 ------------------
 (***************************************************************************)
 (* National Association of Securities Dealers Automated Quotations         *)
-(* (Nasdaq) Net Order Imbalance View v2.1.20130309                         *)
+(* (Nasdaq) Net Order Imbalance View v2.1.2011                             *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)
@@ -300,52 +300,6 @@ CheckedNoiiMessage ==
         \cup { [ZeroNoiiMessage EXCEPT !.priceVariationIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Cross Trade Message: 40 bytes                                           *)
-(***************************************************************************)
-
-CrossTradeMessage ==
-    [ shares      : Sample(9),
-      stock       : Sample(8),
-      crossPrice  : Sample(10),
-      matchNumber : Sample(12),
-      crossType   : Sample(1) ]
-
-EncodeCrossTradeMessage(message) ==
-    message.shares
-        \o message.stock
-        \o message.crossPrice
-        \o message.matchNumber
-        \o message.crossType
-
-DecodeCrossTradeMessage(bytes) ==
-    LET shares == ReadBytes(bytes, 9) IN IF ~shares.ok THEN Fail ELSE
-    LET stock == ReadBytes(shares.rest, 8) IN IF ~stock.ok THEN Fail ELSE
-    LET crossPrice == ReadBytes(stock.rest, 10) IN IF ~crossPrice.ok THEN Fail ELSE
-    LET matchNumber == ReadBytes(crossPrice.rest, 12) IN IF ~matchNumber.ok THEN Fail ELSE
-    LET crossType == ReadBytes(matchNumber.rest, 1) IN IF ~crossType.ok THEN Fail ELSE
-    Ok([ shares      |-> shares.value,
-         stock       |-> stock.value,
-         crossPrice  |-> crossPrice.value,
-         matchNumber |-> matchNumber.value,
-         crossType   |-> crossType.value ], crossType.rest)
-
-ZeroCrossTradeMessage ==
-    [ shares      |-> [i \in 1 .. 9 |-> 0],
-      stock       |-> [i \in 1 .. 8 |-> 0],
-      crossPrice  |-> [i \in 1 .. 10 |-> 0],
-      matchNumber |-> [i \in 1 .. 12 |-> 0],
-      crossType   |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Cross Trade Message at zero, then each field in turn at the values it is checked at *)
-CheckedCrossTradeMessage ==
-    { ZeroCrossTradeMessage }
-        \cup { [ZeroCrossTradeMessage EXCEPT !.shares = one] : one \in Sample(9) }
-        \cup { [ZeroCrossTradeMessage EXCEPT !.stock = one] : one \in Sample(8) }
-        \cup { [ZeroCrossTradeMessage EXCEPT !.crossPrice = one] : one \in Sample(10) }
-        \cup { [ZeroCrossTradeMessage EXCEPT !.matchNumber = one] : one \in Sample(12) }
-        \cup { [ZeroCrossTradeMessage EXCEPT !.crossType = one] : one \in Sample(1) }
-
-(***************************************************************************)
 (* Payload, selected by Message Type                                       *)
 (***************************************************************************)
 
@@ -354,7 +308,6 @@ StockDirectoryMessageCode == 82  \* "R"
 StockTradingActionMessageCode == 72  \* "H"
 RegShoRestrictionMessageCode == 89  \* "Y"
 NoiiMessageCode == 73  \* "I"
-CrossTradeMessageCode == 81  \* "Q"
 
 Payload ==
     [ tag : {SystemEventMessageCode}, body : SystemEventMessage ]
@@ -362,7 +315,6 @@ Payload ==
         \cup [ tag : {StockTradingActionMessageCode}, body : StockTradingActionMessage ]
         \cup [ tag : {RegShoRestrictionMessageCode}, body : RegShoRestrictionMessage ]
         \cup [ tag : {NoiiMessageCode}, body : NoiiMessage ]
-        \cup [ tag : {CrossTradeMessageCode}, body : CrossTradeMessage ]
 
 EncodePayload(message) ==
     CASE message.tag = SystemEventMessageCode -> EncodeSystemEventMessage(message.body)
@@ -370,7 +322,6 @@ EncodePayload(message) ==
       [] message.tag = StockTradingActionMessageCode -> EncodeStockTradingActionMessage(message.body)
       [] message.tag = RegShoRestrictionMessageCode -> EncodeRegShoRestrictionMessage(message.body)
       [] message.tag = NoiiMessageCode -> EncodeNoiiMessage(message.body)
-      [] message.tag = CrossTradeMessageCode -> EncodeCrossTradeMessage(message.body)
 
 DecodePayload(tag, bytes) ==
     LET read ==
@@ -379,7 +330,6 @@ DecodePayload(tag, bytes) ==
               [] tag = StockTradingActionMessageCode -> DecodeStockTradingActionMessage(bytes)
               [] tag = RegShoRestrictionMessageCode -> DecodeRegShoRestrictionMessage(bytes)
               [] tag = NoiiMessageCode -> DecodeNoiiMessage(bytes)
-              [] tag = CrossTradeMessageCode -> DecodeCrossTradeMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -392,7 +342,6 @@ CheckedPayload ==
         \cup { [tag |-> StockTradingActionMessageCode, body |-> one] : one \in CheckedStockTradingActionMessage }
         \cup { [tag |-> RegShoRestrictionMessageCode, body |-> one] : one \in CheckedRegShoRestrictionMessage }
         \cup { [tag |-> NoiiMessageCode, body |-> one] : one \in CheckedNoiiMessage }
-        \cup { [tag |-> CrossTradeMessageCode, body |-> one] : one \in CheckedCrossTradeMessage }
 
 (***************************************************************************)
 (* Message, framed by Length                                               *)
@@ -462,8 +411,7 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> StockDirectoryMessageCode, body |-> ZeroStockDirectoryMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> StockTradingActionMessageCode, body |-> ZeroStockTradingActionMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> RegShoRestrictionMessageCode, body |-> ZeroRegShoRestrictionMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> NoiiMessageCode, body |-> ZeroNoiiMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> CrossTradeMessageCode, body |-> ZeroCrossTradeMessage]] }
+      [ZeroMessage EXCEPT !.payload = [tag |-> NoiiMessageCode, body |-> ZeroNoiiMessage]] }
 
 (***************************************************************************)
 (* Packet                                                                  *)
@@ -553,14 +501,6 @@ RoundTripRegShoRestrictionMessage ==
 RoundTripNoiiMessage ==
     \A message \in CheckedNoiiMessage :
         LET read == DecodeNoiiMessage(EncodeNoiiMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cross Trade Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCrossTradeMessage ==
-    \A message \in CheckedCrossTradeMessage :
-        LET read == DecodeCrossTradeMessage(EncodeCrossTradeMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

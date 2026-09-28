@@ -1,7 +1,7 @@
------------------ MODULE NsmEquities_NoiView_v2_0_20100702 -----------------
+------------------ MODULE NsmEquities_NoiView_v2_1_2013_1 ------------------
 (***************************************************************************)
 (* National Association of Securities Dealers Automated Quotations         *)
-(* (Nasdaq) Net Order Imbalance View v2.0.20100702                         *)
+(* (Nasdaq) Net Order Imbalance View v2.1.2013                             *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)
@@ -122,11 +122,11 @@ CheckedSystemEventMessage ==
         \cup { [ZeroSystemEventMessage EXCEPT !.eventCode = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Stock Directory Message: 15 bytes                                       *)
+(* Stock Directory Message: 17 bytes                                       *)
 (***************************************************************************)
 
 StockDirectoryMessage ==
-    [ stock                    : Sample(6),
+    [ stock                    : Sample(8),
       marketCategory           : Sample(1),
       financialStatusIndicator : Sample(1),
       roundLotSize             : Sample(6),
@@ -140,7 +140,7 @@ EncodeStockDirectoryMessage(message) ==
         \o message.roundLotsOnly
 
 DecodeStockDirectoryMessage(bytes) ==
-    LET stock == ReadBytes(bytes, 6) IN IF ~stock.ok THEN Fail ELSE
+    LET stock == ReadBytes(bytes, 8) IN IF ~stock.ok THEN Fail ELSE
     LET marketCategory == ReadBytes(stock.rest, 1) IN IF ~marketCategory.ok THEN Fail ELSE
     LET financialStatusIndicator == ReadBytes(marketCategory.rest, 1) IN IF ~financialStatusIndicator.ok THEN Fail ELSE
     LET roundLotSize == ReadBytes(financialStatusIndicator.rest, 6) IN IF ~roundLotSize.ok THEN Fail ELSE
@@ -152,7 +152,7 @@ DecodeStockDirectoryMessage(bytes) ==
          roundLotsOnly            |-> roundLotsOnly.value ], roundLotsOnly.rest)
 
 ZeroStockDirectoryMessage ==
-    [ stock                    |-> [i \in 1 .. 6 |-> 0],
+    [ stock                    |-> [i \in 1 .. 8 |-> 0],
       marketCategory           |-> [i \in 1 .. 1 |-> 0],
       financialStatusIndicator |-> [i \in 1 .. 1 |-> 0],
       roundLotSize             |-> [i \in 1 .. 6 |-> 0],
@@ -161,61 +161,83 @@ ZeroStockDirectoryMessage ==
 (* Stock Directory Message at zero, then each field in turn at the values it is checked at *)
 CheckedStockDirectoryMessage ==
     { ZeroStockDirectoryMessage }
-        \cup { [ZeroStockDirectoryMessage EXCEPT !.stock = one] : one \in Sample(6) }
+        \cup { [ZeroStockDirectoryMessage EXCEPT !.stock = one] : one \in Sample(8) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.marketCategory = one] : one \in Sample(1) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.financialStatusIndicator = one] : one \in Sample(1) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.roundLotSize = one] : one \in Sample(6) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.roundLotsOnly = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Stock Trading Action Message: 12 bytes                                  *)
+(* Stock Trading Action Message: 13 bytes                                  *)
 (***************************************************************************)
 
 StockTradingActionMessage ==
-    [ stock        : Sample(6),
-      tradingState : Sample(1),
-      reserved1    : Sample(1),
-      reason       : Sample(4) ]
+    [ stock               : Sample(8),
+      currentTradingState : Sample(1),
+      reason              : Sample(4) ]
 
 EncodeStockTradingActionMessage(message) ==
     message.stock
-        \o message.tradingState
-        \o message.reserved1
+        \o message.currentTradingState
         \o message.reason
 
 DecodeStockTradingActionMessage(bytes) ==
-    LET stock == ReadBytes(bytes, 6) IN IF ~stock.ok THEN Fail ELSE
-    LET tradingState == ReadBytes(stock.rest, 1) IN IF ~tradingState.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(tradingState.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
-    LET reason == ReadBytes(reserved1.rest, 4) IN IF ~reason.ok THEN Fail ELSE
-    Ok([ stock        |-> stock.value,
-         tradingState |-> tradingState.value,
-         reserved1    |-> reserved1.value,
-         reason       |-> reason.value ], reason.rest)
+    LET stock == ReadBytes(bytes, 8) IN IF ~stock.ok THEN Fail ELSE
+    LET currentTradingState == ReadBytes(stock.rest, 1) IN IF ~currentTradingState.ok THEN Fail ELSE
+    LET reason == ReadBytes(currentTradingState.rest, 4) IN IF ~reason.ok THEN Fail ELSE
+    Ok([ stock               |-> stock.value,
+         currentTradingState |-> currentTradingState.value,
+         reason              |-> reason.value ], reason.rest)
 
 ZeroStockTradingActionMessage ==
-    [ stock        |-> [i \in 1 .. 6 |-> 0],
-      tradingState |-> [i \in 1 .. 1 |-> 0],
-      reserved1    |-> [i \in 1 .. 1 |-> 0],
-      reason       |-> [i \in 1 .. 4 |-> 0] ]
+    [ stock               |-> [i \in 1 .. 8 |-> 0],
+      currentTradingState |-> [i \in 1 .. 1 |-> 0],
+      reason              |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Stock Trading Action Message at zero, then each field in turn at the values it is checked at *)
 CheckedStockTradingActionMessage ==
     { ZeroStockTradingActionMessage }
-        \cup { [ZeroStockTradingActionMessage EXCEPT !.stock = one] : one \in Sample(6) }
-        \cup { [ZeroStockTradingActionMessage EXCEPT !.tradingState = one] : one \in Sample(1) }
-        \cup { [ZeroStockTradingActionMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
+        \cup { [ZeroStockTradingActionMessage EXCEPT !.stock = one] : one \in Sample(8) }
+        \cup { [ZeroStockTradingActionMessage EXCEPT !.currentTradingState = one] : one \in Sample(1) }
         \cup { [ZeroStockTradingActionMessage EXCEPT !.reason = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Noii Message: 57 bytes                                                  *)
+(* Reg Sho Restriction Message: 9 bytes                                    *)
+(***************************************************************************)
+
+RegShoRestrictionMessage ==
+    [ stock        : Sample(8),
+      regShoAction : Sample(1) ]
+
+EncodeRegShoRestrictionMessage(message) ==
+    message.stock
+        \o message.regShoAction
+
+DecodeRegShoRestrictionMessage(bytes) ==
+    LET stock == ReadBytes(bytes, 8) IN IF ~stock.ok THEN Fail ELSE
+    LET regShoAction == ReadBytes(stock.rest, 1) IN IF ~regShoAction.ok THEN Fail ELSE
+    Ok([ stock        |-> stock.value,
+         regShoAction |-> regShoAction.value ], regShoAction.rest)
+
+ZeroRegShoRestrictionMessage ==
+    [ stock        |-> [i \in 1 .. 8 |-> 0],
+      regShoAction |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Reg Sho Restriction Message at zero, then each field in turn at the values it is checked at *)
+CheckedRegShoRestrictionMessage ==
+    { ZeroRegShoRestrictionMessage }
+        \cup { [ZeroRegShoRestrictionMessage EXCEPT !.stock = one] : one \in Sample(8) }
+        \cup { [ZeroRegShoRestrictionMessage EXCEPT !.regShoAction = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Noii Message: 59 bytes                                                  *)
 (***************************************************************************)
 
 NoiiMessage ==
     [ pairedShares            : Sample(9),
       imbalanceShares         : Sample(9),
       imbalanceDirection      : Sample(1),
-      stock                   : Sample(6),
+      stock                   : Sample(8),
       farPrice                : Sample(10),
       nearPrice               : Sample(10),
       currentReferencePrice   : Sample(10),
@@ -237,7 +259,7 @@ DecodeNoiiMessage(bytes) ==
     LET pairedShares == ReadBytes(bytes, 9) IN IF ~pairedShares.ok THEN Fail ELSE
     LET imbalanceShares == ReadBytes(pairedShares.rest, 9) IN IF ~imbalanceShares.ok THEN Fail ELSE
     LET imbalanceDirection == ReadBytes(imbalanceShares.rest, 1) IN IF ~imbalanceDirection.ok THEN Fail ELSE
-    LET stock == ReadBytes(imbalanceDirection.rest, 6) IN IF ~stock.ok THEN Fail ELSE
+    LET stock == ReadBytes(imbalanceDirection.rest, 8) IN IF ~stock.ok THEN Fail ELSE
     LET farPrice == ReadBytes(stock.rest, 10) IN IF ~farPrice.ok THEN Fail ELSE
     LET nearPrice == ReadBytes(farPrice.rest, 10) IN IF ~nearPrice.ok THEN Fail ELSE
     LET currentReferencePrice == ReadBytes(nearPrice.rest, 10) IN IF ~currentReferencePrice.ok THEN Fail ELSE
@@ -257,7 +279,7 @@ ZeroNoiiMessage ==
     [ pairedShares            |-> [i \in 1 .. 9 |-> 0],
       imbalanceShares         |-> [i \in 1 .. 9 |-> 0],
       imbalanceDirection      |-> [i \in 1 .. 1 |-> 0],
-      stock                   |-> [i \in 1 .. 6 |-> 0],
+      stock                   |-> [i \in 1 .. 8 |-> 0],
       farPrice                |-> [i \in 1 .. 10 |-> 0],
       nearPrice               |-> [i \in 1 .. 10 |-> 0],
       currentReferencePrice   |-> [i \in 1 .. 10 |-> 0],
@@ -270,12 +292,58 @@ CheckedNoiiMessage ==
         \cup { [ZeroNoiiMessage EXCEPT !.pairedShares = one] : one \in Sample(9) }
         \cup { [ZeroNoiiMessage EXCEPT !.imbalanceShares = one] : one \in Sample(9) }
         \cup { [ZeroNoiiMessage EXCEPT !.imbalanceDirection = one] : one \in Sample(1) }
-        \cup { [ZeroNoiiMessage EXCEPT !.stock = one] : one \in Sample(6) }
+        \cup { [ZeroNoiiMessage EXCEPT !.stock = one] : one \in Sample(8) }
         \cup { [ZeroNoiiMessage EXCEPT !.farPrice = one] : one \in Sample(10) }
         \cup { [ZeroNoiiMessage EXCEPT !.nearPrice = one] : one \in Sample(10) }
         \cup { [ZeroNoiiMessage EXCEPT !.currentReferencePrice = one] : one \in Sample(10) }
         \cup { [ZeroNoiiMessage EXCEPT !.crossType = one] : one \in Sample(1) }
         \cup { [ZeroNoiiMessage EXCEPT !.priceVariationIndicator = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Cross Trade Message: 40 bytes                                           *)
+(***************************************************************************)
+
+CrossTradeMessage ==
+    [ shares      : Sample(9),
+      stock       : Sample(8),
+      crossPrice  : Sample(10),
+      matchNumber : Sample(12),
+      crossType   : Sample(1) ]
+
+EncodeCrossTradeMessage(message) ==
+    message.shares
+        \o message.stock
+        \o message.crossPrice
+        \o message.matchNumber
+        \o message.crossType
+
+DecodeCrossTradeMessage(bytes) ==
+    LET shares == ReadBytes(bytes, 9) IN IF ~shares.ok THEN Fail ELSE
+    LET stock == ReadBytes(shares.rest, 8) IN IF ~stock.ok THEN Fail ELSE
+    LET crossPrice == ReadBytes(stock.rest, 10) IN IF ~crossPrice.ok THEN Fail ELSE
+    LET matchNumber == ReadBytes(crossPrice.rest, 12) IN IF ~matchNumber.ok THEN Fail ELSE
+    LET crossType == ReadBytes(matchNumber.rest, 1) IN IF ~crossType.ok THEN Fail ELSE
+    Ok([ shares      |-> shares.value,
+         stock       |-> stock.value,
+         crossPrice  |-> crossPrice.value,
+         matchNumber |-> matchNumber.value,
+         crossType   |-> crossType.value ], crossType.rest)
+
+ZeroCrossTradeMessage ==
+    [ shares      |-> [i \in 1 .. 9 |-> 0],
+      stock       |-> [i \in 1 .. 8 |-> 0],
+      crossPrice  |-> [i \in 1 .. 10 |-> 0],
+      matchNumber |-> [i \in 1 .. 12 |-> 0],
+      crossType   |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Cross Trade Message at zero, then each field in turn at the values it is checked at *)
+CheckedCrossTradeMessage ==
+    { ZeroCrossTradeMessage }
+        \cup { [ZeroCrossTradeMessage EXCEPT !.shares = one] : one \in Sample(9) }
+        \cup { [ZeroCrossTradeMessage EXCEPT !.stock = one] : one \in Sample(8) }
+        \cup { [ZeroCrossTradeMessage EXCEPT !.crossPrice = one] : one \in Sample(10) }
+        \cup { [ZeroCrossTradeMessage EXCEPT !.matchNumber = one] : one \in Sample(12) }
+        \cup { [ZeroCrossTradeMessage EXCEPT !.crossType = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Payload, selected by Message Type                                       *)
@@ -284,26 +352,34 @@ CheckedNoiiMessage ==
 SystemEventMessageCode == 83  \* "S"
 StockDirectoryMessageCode == 82  \* "R"
 StockTradingActionMessageCode == 72  \* "H"
+RegShoRestrictionMessageCode == 89  \* "Y"
 NoiiMessageCode == 73  \* "I"
+CrossTradeMessageCode == 81  \* "Q"
 
 Payload ==
     [ tag : {SystemEventMessageCode}, body : SystemEventMessage ]
         \cup [ tag : {StockDirectoryMessageCode}, body : StockDirectoryMessage ]
         \cup [ tag : {StockTradingActionMessageCode}, body : StockTradingActionMessage ]
+        \cup [ tag : {RegShoRestrictionMessageCode}, body : RegShoRestrictionMessage ]
         \cup [ tag : {NoiiMessageCode}, body : NoiiMessage ]
+        \cup [ tag : {CrossTradeMessageCode}, body : CrossTradeMessage ]
 
 EncodePayload(message) ==
     CASE message.tag = SystemEventMessageCode -> EncodeSystemEventMessage(message.body)
       [] message.tag = StockDirectoryMessageCode -> EncodeStockDirectoryMessage(message.body)
       [] message.tag = StockTradingActionMessageCode -> EncodeStockTradingActionMessage(message.body)
+      [] message.tag = RegShoRestrictionMessageCode -> EncodeRegShoRestrictionMessage(message.body)
       [] message.tag = NoiiMessageCode -> EncodeNoiiMessage(message.body)
+      [] message.tag = CrossTradeMessageCode -> EncodeCrossTradeMessage(message.body)
 
 DecodePayload(tag, bytes) ==
     LET read ==
             CASE tag = SystemEventMessageCode -> DecodeSystemEventMessage(bytes)
               [] tag = StockDirectoryMessageCode -> DecodeStockDirectoryMessage(bytes)
               [] tag = StockTradingActionMessageCode -> DecodeStockTradingActionMessage(bytes)
+              [] tag = RegShoRestrictionMessageCode -> DecodeRegShoRestrictionMessage(bytes)
               [] tag = NoiiMessageCode -> DecodeNoiiMessage(bytes)
+              [] tag = CrossTradeMessageCode -> DecodeCrossTradeMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -314,7 +390,9 @@ CheckedPayload ==
     { [tag |-> SystemEventMessageCode, body |-> one] : one \in CheckedSystemEventMessage }
         \cup { [tag |-> StockDirectoryMessageCode, body |-> one] : one \in CheckedStockDirectoryMessage }
         \cup { [tag |-> StockTradingActionMessageCode, body |-> one] : one \in CheckedStockTradingActionMessage }
+        \cup { [tag |-> RegShoRestrictionMessageCode, body |-> one] : one \in CheckedRegShoRestrictionMessage }
         \cup { [tag |-> NoiiMessageCode, body |-> one] : one \in CheckedNoiiMessage }
+        \cup { [tag |-> CrossTradeMessageCode, body |-> one] : one \in CheckedCrossTradeMessage }
 
 (***************************************************************************)
 (* Message, framed by Length                                               *)
@@ -383,7 +461,9 @@ OneMessage ==
     { [ZeroMessage EXCEPT !.payload = [tag |-> SystemEventMessageCode, body |-> ZeroSystemEventMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> StockDirectoryMessageCode, body |-> ZeroStockDirectoryMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> StockTradingActionMessageCode, body |-> ZeroStockTradingActionMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> NoiiMessageCode, body |-> ZeroNoiiMessage]] }
+      [ZeroMessage EXCEPT !.payload = [tag |-> RegShoRestrictionMessageCode, body |-> ZeroRegShoRestrictionMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> NoiiMessageCode, body |-> ZeroNoiiMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> CrossTradeMessageCode, body |-> ZeroCrossTradeMessage]] }
 
 (***************************************************************************)
 (* Packet                                                                  *)
@@ -461,10 +541,26 @@ RoundTripStockTradingActionMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Reg Sho Restriction Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripRegShoRestrictionMessage ==
+    \A message \in CheckedRegShoRestrictionMessage :
+        LET read == DecodeRegShoRestrictionMessage(EncodeRegShoRestrictionMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Noii Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripNoiiMessage ==
     \A message \in CheckedNoiiMessage :
         LET read == DecodeNoiiMessage(EncodeNoiiMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Cross Trade Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripCrossTradeMessage ==
+    \A message \in CheckedCrossTradeMessage :
+        LET read == DecodeCrossTradeMessage(EncodeCrossTradeMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
