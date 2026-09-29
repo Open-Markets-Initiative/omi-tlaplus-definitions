@@ -1,11 +1,11 @@
------------ MODULE NsmEquities_TotalView_v5_0_2026_Udp_Captures ------------
+--------- MODULE NsmEquities_TotalView_Itch_v5_0_2026_Udp_Captures ---------
 (***************************************************************************)
 (* Recorded National Association of Securities Dealers Automated           *)
 (* Quotations (Nasdaq) TotalView Itch v5.0.2026 packets, as the bytes they *)
 (* were captured as. Each one decodes, consumes the whole packet, and      *)
 (* encodes back to exactly the bytes it was read from.                     *)
 (***************************************************************************)
-EXTENDS NsmEquities_TotalView_v5_0_2026_Udp
+EXTENDS NsmEquities_TotalView_Itch_v5_0_2026_Udp
 
 AddOrderNoMPIDCapture ==
     << 83, 48, 54, 49, 50, 50, 54, 32, 32, 32, 0, 0, 0, 0, 0, 0,

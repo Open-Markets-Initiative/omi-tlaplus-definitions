@@ -1,7 +1,7 @@
----------------- MODULE NsmEquities_TotalView_v5_0_2026_Udp ----------------
+----------------- MODULE NsmEquities_TotalView_v5_2_Server -----------------
 (***************************************************************************)
 (* National Association of Securities Dealers Automated Quotations         *)
-(* (Nasdaq) TotalView Itch v5.0.2026                                       *)
+(* (Nasdaq) TotalView Itch v5.2                                            *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)
@@ -15,9 +15,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
-(* Note: a Message Count of 0 marks Heartbeat and carries no Message.      *)
-(*                                                                         *)
-(* Note: a Message Count of 0 marks End Of Session and carries no Message. *)
+(* Note: Sequenced Data Packet fills what is left of the frame Packet      *)
+(* Length states, which is what it is read from.                           *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -100,6 +99,78 @@ SampleLists(entries) ==
         \cup { <<one, one>> : one \in entries }
 
 (***************************************************************************)
+(* Debug Packet: 1 bytes                                                   *)
+(***************************************************************************)
+
+DebugPacket ==
+    [ debugText : Sample(1) ]
+
+EncodeDebugPacket(message) ==
+    message.debugText
+
+DecodeDebugPacket(bytes) ==
+    LET debugText == ReadBytes(bytes, 1) IN IF ~debugText.ok THEN Fail ELSE
+    Ok([ debugText |-> debugText.value ], debugText.rest)
+
+ZeroDebugPacket ==
+    [ debugText |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Debug Packet at zero, then each field in turn at the values it is checked at *)
+CheckedDebugPacket ==
+    { ZeroDebugPacket }
+        \cup { [ZeroDebugPacket EXCEPT !.debugText = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Login Accepted Packet: 30 bytes                                         *)
+(***************************************************************************)
+
+LoginAcceptedPacket ==
+    [ acceptedSession        : Sample(10),
+      acceptedSequenceNumber : Sample(20) ]
+
+EncodeLoginAcceptedPacket(message) ==
+    message.acceptedSession
+        \o message.acceptedSequenceNumber
+
+DecodeLoginAcceptedPacket(bytes) ==
+    LET acceptedSession == ReadBytes(bytes, 10) IN IF ~acceptedSession.ok THEN Fail ELSE
+    LET acceptedSequenceNumber == ReadBytes(acceptedSession.rest, 20) IN IF ~acceptedSequenceNumber.ok THEN Fail ELSE
+    Ok([ acceptedSession        |-> acceptedSession.value,
+         acceptedSequenceNumber |-> acceptedSequenceNumber.value ], acceptedSequenceNumber.rest)
+
+ZeroLoginAcceptedPacket ==
+    [ acceptedSession        |-> [i \in 1 .. 10 |-> 0],
+      acceptedSequenceNumber |-> [i \in 1 .. 20 |-> 0] ]
+
+(* Login Accepted Packet at zero, then each field in turn at the values it is checked at *)
+CheckedLoginAcceptedPacket ==
+    { ZeroLoginAcceptedPacket }
+        \cup { [ZeroLoginAcceptedPacket EXCEPT !.acceptedSession = one] : one \in Sample(10) }
+        \cup { [ZeroLoginAcceptedPacket EXCEPT !.acceptedSequenceNumber = one] : one \in Sample(20) }
+
+(***************************************************************************)
+(* Login Rejected Packet: 1 bytes                                          *)
+(***************************************************************************)
+
+LoginRejectedPacket ==
+    [ rejectReasonCode : Sample(1) ]
+
+EncodeLoginRejectedPacket(message) ==
+    message.rejectReasonCode
+
+DecodeLoginRejectedPacket(bytes) ==
+    LET rejectReasonCode == ReadBytes(bytes, 1) IN IF ~rejectReasonCode.ok THEN Fail ELSE
+    Ok([ rejectReasonCode |-> rejectReasonCode.value ], rejectReasonCode.rest)
+
+ZeroLoginRejectedPacket ==
+    [ rejectReasonCode |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Login Rejected Packet at zero, then each field in turn at the values it is checked at *)
+CheckedLoginRejectedPacket ==
+    { ZeroLoginRejectedPacket }
+        \cup { [ZeroLoginRejectedPacket EXCEPT !.rejectReasonCode = one] : one \in Sample(1) }
+
+(***************************************************************************)
 (* System Event Message: 11 bytes                                          *)
 (***************************************************************************)
 
@@ -140,7 +211,7 @@ CheckedSystemEventMessage ==
         \cup { [ZeroSystemEventMessage EXCEPT !.eventCode = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Stock Directory Message: 38 bytes                                       *)
+(* Stock Directory Message: 39 bytes                                       *)
 (***************************************************************************)
 
 StockDirectoryMessage ==
@@ -160,7 +231,8 @@ StockDirectoryMessage ==
       luldReferencePriceTier      : Sample(1),
       etpFlag                     : Sample(1),
       etpLeverageFactor           : Sample(4),
-      inverseIndicator            : Sample(1) ]
+      inverseIndicator            : Sample(1),
+      eloFlag                     : Sample(1) ]
 
 EncodeStockDirectoryMessage(message) ==
     message.stockLocate
@@ -180,6 +252,7 @@ EncodeStockDirectoryMessage(message) ==
         \o message.etpFlag
         \o message.etpLeverageFactor
         \o message.inverseIndicator
+        \o message.eloFlag
 
 DecodeStockDirectoryMessage(bytes) ==
     LET stockLocate == ReadBytes(bytes, 2) IN IF ~stockLocate.ok THEN Fail ELSE
@@ -199,6 +272,7 @@ DecodeStockDirectoryMessage(bytes) ==
     LET etpFlag == ReadBytes(luldReferencePriceTier.rest, 1) IN IF ~etpFlag.ok THEN Fail ELSE
     LET etpLeverageFactor == ReadBytes(etpFlag.rest, 4) IN IF ~etpLeverageFactor.ok THEN Fail ELSE
     LET inverseIndicator == ReadBytes(etpLeverageFactor.rest, 1) IN IF ~inverseIndicator.ok THEN Fail ELSE
+    LET eloFlag == ReadBytes(inverseIndicator.rest, 1) IN IF ~eloFlag.ok THEN Fail ELSE
     Ok([ stockLocate                 |-> stockLocate.value,
          trackingNumber              |-> trackingNumber.value,
          timestamp                   |-> timestamp.value,
@@ -215,7 +289,8 @@ DecodeStockDirectoryMessage(bytes) ==
          luldReferencePriceTier      |-> luldReferencePriceTier.value,
          etpFlag                     |-> etpFlag.value,
          etpLeverageFactor           |-> etpLeverageFactor.value,
-         inverseIndicator            |-> inverseIndicator.value ], inverseIndicator.rest)
+         inverseIndicator            |-> inverseIndicator.value,
+         eloFlag                     |-> eloFlag.value ], eloFlag.rest)
 
 ZeroStockDirectoryMessage ==
     [ stockLocate                 |-> [i \in 1 .. 2 |-> 0],
@@ -234,7 +309,8 @@ ZeroStockDirectoryMessage ==
       luldReferencePriceTier      |-> [i \in 1 .. 1 |-> 0],
       etpFlag                     |-> [i \in 1 .. 1 |-> 0],
       etpLeverageFactor           |-> [i \in 1 .. 4 |-> 0],
-      inverseIndicator            |-> [i \in 1 .. 1 |-> 0] ]
+      inverseIndicator            |-> [i \in 1 .. 1 |-> 0],
+      eloFlag                     |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Stock Directory Message at zero, then each field in turn at the values it is checked at *)
 CheckedStockDirectoryMessage ==
@@ -256,6 +332,7 @@ CheckedStockDirectoryMessage ==
         \cup { [ZeroStockDirectoryMessage EXCEPT !.etpFlag = one] : one \in Sample(1) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.etpLeverageFactor = one] : one \in Sample(4) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.inverseIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroStockDirectoryMessage EXCEPT !.eloFlag = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Stock Trading Action Message: 24 bytes                                  *)
@@ -576,7 +653,7 @@ CheckedIpoQuotingPeriodUpdate ==
         \cup { [ZeroIpoQuotingPeriodUpdate EXCEPT !.ipoPrice = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Luld Auction Collar Message: 34 bytes                                   *)
+(* Luld Auction Collar Message: 32 bytes                                   *)
 (***************************************************************************)
 
 LuldAuctionCollarMessage ==
@@ -587,7 +664,7 @@ LuldAuctionCollarMessage ==
       auctionCollarReferencePrice : Sample(4),
       upperAuctionCollarPrice     : Sample(4),
       lowerAuctionCollarPrice     : Sample(4),
-      auctionCollarExtension      : Sample(4) ]
+      auctionCollarExtension      : Sample(2) ]
 
 EncodeLuldAuctionCollarMessage(message) ==
     message.stockLocate
@@ -607,7 +684,7 @@ DecodeLuldAuctionCollarMessage(bytes) ==
     LET auctionCollarReferencePrice == ReadBytes(stock.rest, 4) IN IF ~auctionCollarReferencePrice.ok THEN Fail ELSE
     LET upperAuctionCollarPrice == ReadBytes(auctionCollarReferencePrice.rest, 4) IN IF ~upperAuctionCollarPrice.ok THEN Fail ELSE
     LET lowerAuctionCollarPrice == ReadBytes(upperAuctionCollarPrice.rest, 4) IN IF ~lowerAuctionCollarPrice.ok THEN Fail ELSE
-    LET auctionCollarExtension == ReadBytes(lowerAuctionCollarPrice.rest, 4) IN IF ~auctionCollarExtension.ok THEN Fail ELSE
+    LET auctionCollarExtension == ReadBytes(lowerAuctionCollarPrice.rest, 2) IN IF ~auctionCollarExtension.ok THEN Fail ELSE
     Ok([ stockLocate                 |-> stockLocate.value,
          trackingNumber              |-> trackingNumber.value,
          timestamp                   |-> timestamp.value,
@@ -625,7 +702,7 @@ ZeroLuldAuctionCollarMessage ==
       auctionCollarReferencePrice |-> [i \in 1 .. 4 |-> 0],
       upperAuctionCollarPrice     |-> [i \in 1 .. 4 |-> 0],
       lowerAuctionCollarPrice     |-> [i \in 1 .. 4 |-> 0],
-      auctionCollarExtension      |-> [i \in 1 .. 4 |-> 0] ]
+      auctionCollarExtension      |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Luld Auction Collar Message at zero, then each field in turn at the values it is checked at *)
 CheckedLuldAuctionCollarMessage ==
@@ -637,7 +714,7 @@ CheckedLuldAuctionCollarMessage ==
         \cup { [ZeroLuldAuctionCollarMessage EXCEPT !.auctionCollarReferencePrice = one] : one \in Sample(4) }
         \cup { [ZeroLuldAuctionCollarMessage EXCEPT !.upperAuctionCollarPrice = one] : one \in Sample(4) }
         \cup { [ZeroLuldAuctionCollarMessage EXCEPT !.lowerAuctionCollarPrice = one] : one \in Sample(4) }
-        \cup { [ZeroLuldAuctionCollarMessage EXCEPT !.auctionCollarExtension = one] : one \in Sample(4) }
+        \cup { [ZeroLuldAuctionCollarMessage EXCEPT !.auctionCollarExtension = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Operational Halt Message: 20 bytes                                      *)
@@ -756,7 +833,7 @@ CheckedAddOrderNoMpidAttributionMessage ==
         \cup { [ZeroAddOrderNoMpidAttributionMessage EXCEPT !.price = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Add Order With Mpid Attribution Message: 39 bytes                       *)
+(* Add Order With Mpid Attribution Message: 40 bytes                       *)
 (***************************************************************************)
 
 AddOrderWithMpidAttributionMessage ==
@@ -768,7 +845,8 @@ AddOrderWithMpidAttributionMessage ==
       shares               : Sample(4),
       stock                : Sample(8),
       price                : Sample(4),
-      attribution          : Sample(4) ]
+      attribution          : Sample(4),
+      eloFlag              : Sample(1) ]
 
 EncodeAddOrderWithMpidAttributionMessage(message) ==
     message.stockLocate
@@ -780,6 +858,7 @@ EncodeAddOrderWithMpidAttributionMessage(message) ==
         \o message.stock
         \o message.price
         \o message.attribution
+        \o message.eloFlag
 
 DecodeAddOrderWithMpidAttributionMessage(bytes) ==
     LET stockLocate == ReadBytes(bytes, 2) IN IF ~stockLocate.ok THEN Fail ELSE
@@ -791,6 +870,7 @@ DecodeAddOrderWithMpidAttributionMessage(bytes) ==
     LET stock == ReadBytes(shares.rest, 8) IN IF ~stock.ok THEN Fail ELSE
     LET price == ReadBytes(stock.rest, 4) IN IF ~price.ok THEN Fail ELSE
     LET attribution == ReadBytes(price.rest, 4) IN IF ~attribution.ok THEN Fail ELSE
+    LET eloFlag == ReadBytes(attribution.rest, 1) IN IF ~eloFlag.ok THEN Fail ELSE
     Ok([ stockLocate          |-> stockLocate.value,
          trackingNumber       |-> trackingNumber.value,
          timestamp            |-> timestamp.value,
@@ -799,7 +879,8 @@ DecodeAddOrderWithMpidAttributionMessage(bytes) ==
          shares               |-> shares.value,
          stock                |-> stock.value,
          price                |-> price.value,
-         attribution          |-> attribution.value ], attribution.rest)
+         attribution          |-> attribution.value,
+         eloFlag              |-> eloFlag.value ], eloFlag.rest)
 
 ZeroAddOrderWithMpidAttributionMessage ==
     [ stockLocate          |-> [i \in 1 .. 2 |-> 0],
@@ -810,7 +891,8 @@ ZeroAddOrderWithMpidAttributionMessage ==
       shares               |-> [i \in 1 .. 4 |-> 0],
       stock                |-> [i \in 1 .. 8 |-> 0],
       price                |-> [i \in 1 .. 4 |-> 0],
-      attribution          |-> [i \in 1 .. 4 |-> 0] ]
+      attribution          |-> [i \in 1 .. 4 |-> 0],
+      eloFlag              |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Add Order With Mpid Attribution Message at zero, then each field in turn at the values it is checked at *)
 CheckedAddOrderWithMpidAttributionMessage ==
@@ -824,6 +906,7 @@ CheckedAddOrderWithMpidAttributionMessage ==
         \cup { [ZeroAddOrderWithMpidAttributionMessage EXCEPT !.stock = one] : one \in Sample(8) }
         \cup { [ZeroAddOrderWithMpidAttributionMessage EXCEPT !.price = one] : one \in Sample(4) }
         \cup { [ZeroAddOrderWithMpidAttributionMessage EXCEPT !.attribution = one] : one \in Sample(4) }
+        \cup { [ZeroAddOrderWithMpidAttributionMessage EXCEPT !.eloFlag = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Order Executed Message: 30 bytes                                        *)
@@ -1028,7 +1111,7 @@ CheckedOrderDeleteMessage ==
         \cup { [ZeroOrderDeleteMessage EXCEPT !.orderReferenceNumber = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Order Replace Message: 34 bytes                                         *)
+(* Order Replace Message: 35 bytes                                         *)
 (***************************************************************************)
 
 OrderReplaceMessage ==
@@ -1038,7 +1121,8 @@ OrderReplaceMessage ==
       originalOrderReferenceNumber : Sample(8),
       newOrderReferenceNumber      : Sample(8),
       shares                       : Sample(4),
-      price                        : Sample(4) ]
+      price                        : Sample(4),
+      eloFlag                      : Sample(1) ]
 
 EncodeOrderReplaceMessage(message) ==
     message.stockLocate
@@ -1048,6 +1132,7 @@ EncodeOrderReplaceMessage(message) ==
         \o message.newOrderReferenceNumber
         \o message.shares
         \o message.price
+        \o message.eloFlag
 
 DecodeOrderReplaceMessage(bytes) ==
     LET stockLocate == ReadBytes(bytes, 2) IN IF ~stockLocate.ok THEN Fail ELSE
@@ -1057,13 +1142,15 @@ DecodeOrderReplaceMessage(bytes) ==
     LET newOrderReferenceNumber == ReadBytes(originalOrderReferenceNumber.rest, 8) IN IF ~newOrderReferenceNumber.ok THEN Fail ELSE
     LET shares == ReadBytes(newOrderReferenceNumber.rest, 4) IN IF ~shares.ok THEN Fail ELSE
     LET price == ReadBytes(shares.rest, 4) IN IF ~price.ok THEN Fail ELSE
+    LET eloFlag == ReadBytes(price.rest, 1) IN IF ~eloFlag.ok THEN Fail ELSE
     Ok([ stockLocate                  |-> stockLocate.value,
          trackingNumber               |-> trackingNumber.value,
          timestamp                    |-> timestamp.value,
          originalOrderReferenceNumber |-> originalOrderReferenceNumber.value,
          newOrderReferenceNumber      |-> newOrderReferenceNumber.value,
          shares                       |-> shares.value,
-         price                        |-> price.value ], price.rest)
+         price                        |-> price.value,
+         eloFlag                      |-> eloFlag.value ], eloFlag.rest)
 
 ZeroOrderReplaceMessage ==
     [ stockLocate                  |-> [i \in 1 .. 2 |-> 0],
@@ -1072,7 +1159,8 @@ ZeroOrderReplaceMessage ==
       originalOrderReferenceNumber |-> [i \in 1 .. 8 |-> 0],
       newOrderReferenceNumber      |-> [i \in 1 .. 8 |-> 0],
       shares                       |-> [i \in 1 .. 4 |-> 0],
-      price                        |-> [i \in 1 .. 4 |-> 0] ]
+      price                        |-> [i \in 1 .. 4 |-> 0],
+      eloFlag                      |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Order Replace Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderReplaceMessage ==
@@ -1084,6 +1172,7 @@ CheckedOrderReplaceMessage ==
         \cup { [ZeroOrderReplaceMessage EXCEPT !.newOrderReferenceNumber = one] : one \in Sample(8) }
         \cup { [ZeroOrderReplaceMessage EXCEPT !.shares = one] : one \in Sample(4) }
         \cup { [ZeroOrderReplaceMessage EXCEPT !.price = one] : one \in Sample(4) }
+        \cup { [ZeroOrderReplaceMessage EXCEPT !.eloFlag = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Non Cross Trade Message: 43 bytes                                       *)
@@ -1476,7 +1565,7 @@ CheckedDirectListingWithCapitalRaisePriceDiscoveryMessage ==
         \cup { [ZeroDirectListingWithCapitalRaisePriceDiscoveryMessage EXCEPT !.upperPriceRangeCollar = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Payload, selected by Message Type                                       *)
+(* Sequenced Message, selected by Sequenced Message Type                   *)
 (***************************************************************************)
 
 SystemEventMessageCode == 83  \* "S"
@@ -1503,7 +1592,7 @@ NetOrderImbalanceIndicatorMessageCode == 73  \* "I"
 RetailPriceImprovementIndicatorMessageCode == 78  \* "N"
 DirectListingWithCapitalRaisePriceDiscoveryMessageCode == 79  \* "O"
 
-Payload ==
+SequencedMessage ==
     [ tag : {SystemEventMessageCode}, body : SystemEventMessage ]
         \cup [ tag : {StockDirectoryMessageCode}, body : StockDirectoryMessage ]
         \cup [ tag : {StockTradingActionMessageCode}, body : StockTradingActionMessage ]
@@ -1528,7 +1617,7 @@ Payload ==
         \cup [ tag : {RetailPriceImprovementIndicatorMessageCode}, body : RetailPriceImprovementIndicatorMessage ]
         \cup [ tag : {DirectListingWithCapitalRaisePriceDiscoveryMessageCode}, body : DirectListingWithCapitalRaisePriceDiscoveryMessage ]
 
-EncodePayload(message) ==
+EncodeSequencedMessage(message) ==
     CASE message.tag = SystemEventMessageCode -> EncodeSystemEventMessage(message.body)
       [] message.tag = StockDirectoryMessageCode -> EncodeStockDirectoryMessage(message.body)
       [] message.tag = StockTradingActionMessageCode -> EncodeStockTradingActionMessage(message.body)
@@ -1553,7 +1642,7 @@ EncodePayload(message) ==
       [] message.tag = RetailPriceImprovementIndicatorMessageCode -> EncodeRetailPriceImprovementIndicatorMessage(message.body)
       [] message.tag = DirectListingWithCapitalRaisePriceDiscoveryMessageCode -> EncodeDirectListingWithCapitalRaisePriceDiscoveryMessage(message.body)
 
-DecodePayload(tag, bytes) ==
+DecodeSequencedMessage(tag, bytes) ==
     LET read ==
             CASE tag = SystemEventMessageCode -> DecodeSystemEventMessage(bytes)
               [] tag = StockDirectoryMessageCode -> DecodeStockDirectoryMessage(bytes)
@@ -1581,10 +1670,10 @@ DecodePayload(tag, bytes) ==
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroPayload == [tag |-> SystemEventMessageCode, body |-> ZeroSystemEventMessage]
+ZeroSequencedMessage == [tag |-> SystemEventMessageCode, body |-> ZeroSystemEventMessage]
 
-(* Each Payload in turn, at the values the message it names is checked at *)
-CheckedPayload ==
+(* Each Sequenced Message in turn, at the values the message it names is checked at *)
+CheckedSequencedMessage ==
     { [tag |-> SystemEventMessageCode, body |-> one] : one \in CheckedSystemEventMessage }
         \cup { [tag |-> StockDirectoryMessageCode, body |-> one] : one \in CheckedStockDirectoryMessage }
         \cup { [tag |-> StockTradingActionMessageCode, body |-> one] : one \in CheckedStockTradingActionMessage }
@@ -1610,122 +1699,171 @@ CheckedPayload ==
         \cup { [tag |-> DirectListingWithCapitalRaisePriceDiscoveryMessageCode, body |-> one] : one \in CheckedDirectListingWithCapitalRaisePriceDiscoveryMessage }
 
 (***************************************************************************)
-(* Message, framed by Message Length                                       *)
+(* Sequenced Data Packet                                                   *)
 (***************************************************************************)
 
-Message ==
-    [ payload : Payload ]
+SequencedDataPacket ==
+    [ marketSessionIndicator : Sample(1),
+      sequencedMessage       : SequencedMessage ]
 
-EncodeMessageBody(message) ==
-    EncodeUIntBE(message.payload.tag, 1)
-        \o EncodePayload(message.payload)
+EncodeSequencedDataPacket(message) ==
+    message.marketSessionIndicator
+        \o EncodeUIntBE(message.sequencedMessage.tag, 1)
+        \o EncodeSequencedMessage(message.sequencedMessage)
 
-(* Message Length counts the bytes it frames, so it is written from them *)
-EncodeMessage(message) ==
-    LET body == EncodeMessageBody(message)
+DecodeSequencedDataPacket(bytes) ==
+    LET marketSessionIndicator == ReadBytes(bytes, 1) IN IF ~marketSessionIndicator.ok THEN Fail ELSE
+    LET sequencedMessageType == ReadUIntBE(marketSessionIndicator.rest, 1) IN IF ~sequencedMessageType.ok THEN Fail ELSE
+    LET sequencedMessage == DecodeSequencedMessage(sequencedMessageType.value, sequencedMessageType.rest) IN IF ~sequencedMessage.ok THEN Fail ELSE
+    Ok([ marketSessionIndicator |-> marketSessionIndicator.value,
+         sequencedMessage       |-> sequencedMessage.value ], sequencedMessage.rest)
+
+ZeroSequencedDataPacket ==
+    [ marketSessionIndicator |-> [i \in 1 .. 1 |-> 0],
+      sequencedMessage       |-> ZeroSequencedMessage ]
+
+(* Sequenced Data Packet at zero, then each field in turn at the values it is checked at *)
+CheckedSequencedDataPacket ==
+    { ZeroSequencedDataPacket }
+        \cup { [ZeroSequencedDataPacket EXCEPT !.marketSessionIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroSequencedDataPacket EXCEPT !.sequencedMessage = one] : one \in CheckedSequencedMessage }
+
+(***************************************************************************)
+(* Server Payload, selected by Server Packet Type                          *)
+(***************************************************************************)
+
+DebugPacketCode == 43  \* "+"
+LoginAcceptedPacketCode == 65  \* "A"
+LoginRejectedPacketCode == 74  \* "J"
+SequencedDataPacketCode == 83  \* "S"
+ServerHeartbeatPacketCode == 72  \* "H"
+EndOfSessionPacketCode == 90  \* "Z"
+
+ServerPayload ==
+    [ tag : {DebugPacketCode}, body : DebugPacket ]
+        \cup [ tag : {LoginAcceptedPacketCode}, body : LoginAcceptedPacket ]
+        \cup [ tag : {LoginRejectedPacketCode}, body : LoginRejectedPacket ]
+        \cup [ tag : {SequencedDataPacketCode}, body : SequencedDataPacket ]
+        \cup [ tag : {ServerHeartbeatPacketCode}, body : {0} ]
+        \cup [ tag : {EndOfSessionPacketCode}, body : {0} ]
+
+EncodeServerPayload(message) ==
+    CASE message.tag = DebugPacketCode -> EncodeDebugPacket(message.body)
+      [] message.tag = LoginAcceptedPacketCode -> EncodeLoginAcceptedPacket(message.body)
+      [] message.tag = LoginRejectedPacketCode -> EncodeLoginRejectedPacket(message.body)
+      [] message.tag = SequencedDataPacketCode -> EncodeSequencedDataPacket(message.body)
+      [] message.tag = ServerHeartbeatPacketCode -> << >>
+      [] message.tag = EndOfSessionPacketCode -> << >>
+
+DecodeServerPayload(tag, bytes) ==
+    LET read ==
+            CASE tag = DebugPacketCode -> DecodeDebugPacket(bytes)
+              [] tag = LoginAcceptedPacketCode -> DecodeLoginAcceptedPacket(bytes)
+              [] tag = LoginRejectedPacketCode -> DecodeLoginRejectedPacket(bytes)
+              [] tag = SequencedDataPacketCode -> DecodeSequencedDataPacket(bytes)
+              [] tag = ServerHeartbeatPacketCode -> Ok(0, bytes)
+              [] tag = EndOfSessionPacketCode -> Ok(0, bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroServerPayload == [tag |-> DebugPacketCode, body |-> ZeroDebugPacket]
+
+(* Each Server Payload in turn, at the values the message it names is checked at *)
+CheckedServerPayload ==
+    { [tag |-> DebugPacketCode, body |-> one] : one \in CheckedDebugPacket }
+        \cup { [tag |-> LoginAcceptedPacketCode, body |-> one] : one \in CheckedLoginAcceptedPacket }
+        \cup { [tag |-> LoginRejectedPacketCode, body |-> one] : one \in CheckedLoginRejectedPacket }
+        \cup { [tag |-> SequencedDataPacketCode, body |-> one] : one \in CheckedSequencedDataPacket }
+        \cup { [tag |-> ServerHeartbeatPacketCode, body |-> 0] }
+        \cup { [tag |-> EndOfSessionPacketCode, body |-> 0] }
+
+(***************************************************************************)
+(* Server Soup Bin Tcp Packet, framed by Packet Length                     *)
+(***************************************************************************)
+
+ServerSoupBinTcpPacket ==
+    [ serverPayload : ServerPayload ]
+
+EncodeServerSoupBinTcpPacketBody(message) ==
+    EncodeUIntBE(message.serverPayload.tag, 1)
+        \o EncodeServerPayload(message.serverPayload)
+
+(* Packet Length counts the bytes it frames, so it is written from them *)
+EncodeServerSoupBinTcpPacket(message) ==
+    LET body == EncodeServerSoupBinTcpPacketBody(message)
     IN  EncodeUIntBE(Len(body), 2) \o body
 
-DecodeMessageBody(bytes) ==
-    LET messageType == ReadUIntBE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
-    LET payload == DecodePayload(messageType.value, messageType.rest) IN IF ~payload.ok THEN Fail ELSE
-    Ok([ payload |-> payload.value ], payload.rest)
+DecodeServerSoupBinTcpPacketBody(bytes) ==
+    LET serverPacketType == ReadUIntBE(bytes, 1) IN IF ~serverPacketType.ok THEN Fail ELSE
+    LET serverPayload == DecodeServerPayload(serverPacketType.value, serverPacketType.rest) IN IF ~serverPayload.ok THEN Fail ELSE
+    Ok([ serverPayload |-> serverPayload.value ], serverPayload.rest)
 
-DecodeMessage(bytes) ==
+DecodeServerSoupBinTcpPacket(bytes) ==
     LET length == ReadUIntBE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
     IF Len(length.rest) < length.value THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, length.value)
         beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
-        body   == DecodeMessageBody(framed)
+        body   == DecodeServerSoupBinTcpPacketBody(framed)
     IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
     Ok(body.value, beyond)
 
-ZeroMessage ==
-    [ payload |-> ZeroPayload ]
+ZeroServerSoupBinTcpPacket ==
+    [ serverPayload |-> ZeroServerPayload ]
 
-(* Message at zero, then each field in turn at the values it is checked at *)
-CheckedMessage ==
-    { ZeroMessage }
-        \cup { [ZeroMessage EXCEPT !.payload = one] : one \in CheckedPayload }
+(* Server Soup Bin Tcp Packet at zero, then each field in turn at the values it is checked at *)
+CheckedServerSoupBinTcpPacket ==
+    { ZeroServerSoupBinTcpPacket }
+        \cup { [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = one] : one \in CheckedServerPayload }
 
-(* A run of Message, written one after another *)
-RECURSIVE EncodeMessageList(_)
-EncodeMessageList(messages) ==
+(* A run of Server Soup Bin Tcp Packet, written one after another *)
+RECURSIVE EncodeServerSoupBinTcpPacketList(_)
+EncodeServerSoupBinTcpPacketList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeMessage(Head(messages)) \o EncodeMessageList(Tail(messages))
+    ELSE EncodeServerSoupBinTcpPacket(Head(messages)) \o EncodeServerSoupBinTcpPacketList(Tail(messages))
 
-(* As many Message as the field that counts them says *)
-RECURSIVE ReadMessageList(_, _)
-ReadMessageList(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeMessage(bytes)
+(* As many Server Soup Bin Tcp Packet as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadServerSoupBinTcpPacketAll(_)
+ReadServerSoupBinTcpPacketAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeServerSoupBinTcpPacket(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadMessageList(one.rest, count - 1)
+             ELSE LET more == ReadServerSoupBinTcpPacketAll(one.rest)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Message of each kind, for the lists that carry them *)
-OneMessage ==
-    { [ZeroMessage EXCEPT !.payload = [tag |-> SystemEventMessageCode, body |-> ZeroSystemEventMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> StockDirectoryMessageCode, body |-> ZeroStockDirectoryMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> StockTradingActionMessageCode, body |-> ZeroStockTradingActionMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> RegShoShortSalePriceTestRestrictedIndicatorMessageCode, body |-> ZeroRegShoShortSalePriceTestRestrictedIndicatorMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MarketParticipantPositionMessageCode, body |-> ZeroMarketParticipantPositionMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MwcbDeclineLevelMessageCode, body |-> ZeroMwcbDeclineLevelMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MwcbStatusLevelMessageCode, body |-> ZeroMwcbStatusLevelMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> IpoQuotingPeriodUpdateCode, body |-> ZeroIpoQuotingPeriodUpdate]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> LuldAuctionCollarMessageCode, body |-> ZeroLuldAuctionCollarMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> OperationalHaltMessageCode, body |-> ZeroOperationalHaltMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> AddOrderNoMpidAttributionMessageCode, body |-> ZeroAddOrderNoMpidAttributionMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> AddOrderWithMpidAttributionMessageCode, body |-> ZeroAddOrderWithMpidAttributionMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> OrderExecutedMessageCode, body |-> ZeroOrderExecutedMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> OrderExecutedWithPriceMessageCode, body |-> ZeroOrderExecutedWithPriceMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> OrderCancelMessageCode, body |-> ZeroOrderCancelMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> OrderDeleteMessageCode, body |-> ZeroOrderDeleteMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> OrderReplaceMessageCode, body |-> ZeroOrderReplaceMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> NonCrossTradeMessageCode, body |-> ZeroNonCrossTradeMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> CrossTradeMessageCode, body |-> ZeroCrossTradeMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> BrokenTradeMessageCode, body |-> ZeroBrokenTradeMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> NetOrderImbalanceIndicatorMessageCode, body |-> ZeroNetOrderImbalanceIndicatorMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> RetailPriceImprovementIndicatorMessageCode, body |-> ZeroRetailPriceImprovementIndicatorMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> DirectListingWithCapitalRaisePriceDiscoveryMessageCode, body |-> ZeroDirectListingWithCapitalRaisePriceDiscoveryMessage]] }
+(* One Server Soup Bin Tcp Packet of each kind, for the lists that carry them *)
+OneServerSoupBinTcpPacket ==
+    { [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> DebugPacketCode, body |-> ZeroDebugPacket]],
+      [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> LoginAcceptedPacketCode, body |-> ZeroLoginAcceptedPacket]],
+      [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> LoginRejectedPacketCode, body |-> ZeroLoginRejectedPacket]],
+      [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> SequencedDataPacketCode, body |-> ZeroSequencedDataPacket]],
+      [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> ServerHeartbeatPacketCode, body |-> 0]],
+      [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> EndOfSessionPacketCode, body |-> 0]] }
 
 (***************************************************************************)
-(* Packet                                                                  *)
+(* Server Packet                                                           *)
 (***************************************************************************)
 
-Packet ==
-    [ session        : Sample(10),
-      sequenceNumber : Sample(8),
-      message        : SampleLists(OneMessage) ]
+ServerPacket ==
+    [ serverSoupBinTcpPacket : SampleLists(OneServerSoupBinTcpPacket) ]
 
-EncodePacket(message) ==
-    message.session
-        \o message.sequenceNumber
-        \o EncodeUIntBE(Len(message.message), 2)
-        \o EncodeMessageList(message.message)
+EncodeServerPacket(message) ==
+    EncodeServerSoupBinTcpPacketList(message.serverSoupBinTcpPacket)
 
-DecodePacket(bytes) ==
-    LET session == ReadBytes(bytes, 10) IN IF ~session.ok THEN Fail ELSE
-    LET sequenceNumber == ReadBytes(session.rest, 8) IN IF ~sequenceNumber.ok THEN Fail ELSE
-    LET messageCount == ReadUIntBE(sequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
-    LET message == ReadMessageList(messageCount.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
-    Ok([ session        |-> session.value,
-         sequenceNumber |-> sequenceNumber.value,
-         message        |-> message.value ], message.rest)
+DecodeServerPacket(bytes) ==
+    LET serverSoupBinTcpPacket == ReadServerSoupBinTcpPacketAll(bytes) IN IF ~serverSoupBinTcpPacket.ok THEN Fail ELSE
+    Ok([ serverSoupBinTcpPacket |-> serverSoupBinTcpPacket.value ], serverSoupBinTcpPacket.rest)
 
-ZeroPacket ==
-    [ session        |-> [i \in 1 .. 10 |-> 0],
-      sequenceNumber |-> [i \in 1 .. 8 |-> 0],
-      message        |-> << >> ]
+ZeroServerPacket ==
+    [ serverSoupBinTcpPacket |-> << >> ]
 
-(* Packet at zero, then each field in turn at the values it is checked at *)
-CheckedPacket ==
-    { ZeroPacket }
-        \cup { [ZeroPacket EXCEPT !.session = one] : one \in Sample(10) }
-        \cup { [ZeroPacket EXCEPT !.sequenceNumber = one] : one \in Sample(8) }
-        \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
+(* Server Packet at zero, then each field in turn at the values it is checked at *)
+CheckedServerPacket ==
+    { ZeroServerPacket }
+        \cup { [ZeroServerPacket EXCEPT !.serverSoupBinTcpPacket = one] : one \in SampleLists(OneServerSoupBinTcpPacket) }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -1742,6 +1880,30 @@ RoundTripUIntLE ==
                 /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
                 /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
+
+(* Every Debug Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripDebugPacket ==
+    \A message \in CheckedDebugPacket :
+        LET read == DecodeDebugPacket(EncodeDebugPacket(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Login Accepted Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripLoginAcceptedPacket ==
+    \A message \in CheckedLoginAcceptedPacket :
+        LET read == DecodeLoginAcceptedPacket(EncodeLoginAcceptedPacket(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Login Rejected Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripLoginRejectedPacket ==
+    \A message \in CheckedLoginRejectedPacket :
+        LET read == DecodeLoginRejectedPacket(EncodeLoginRejectedPacket(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
 
 (* Every System Event Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripSystemEventMessage ==
@@ -1927,32 +2089,46 @@ RoundTripDirectListingWithCapitalRaisePriceDiscoveryMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripMessage ==
-    \A message \in CheckedMessage :
-        LET read == DecodeMessage(EncodeMessage(message))
+(* Every Sequenced Data Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripSequencedDataPacket ==
+    \A message \in CheckedSequencedDataPacket :
+        LET read == DecodeSequencedDataPacket(EncodeSequencedDataPacket(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Packet decodes back to what was encoded, and leaves nothing over *)
-RoundTripPacket ==
-    \A message \in CheckedPacket :
-        LET read == DecodePacket(EncodePacket(message))
+(* Every Server Soup Bin Tcp Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripServerSoupBinTcpPacket ==
+    \A message \in CheckedServerSoupBinTcpPacket :
+        LET read == DecodeServerSoupBinTcpPacket(EncodeServerSoupBinTcpPacket(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* A Payload is selected by the Message Type it is written under *)
-SelectsPayload ==
-    \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+(* Every Server Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripServerPacket ==
+    \A message \in CheckedServerPacket :
+        LET read == DecodeServerPacket(EncodeServerPacket(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* A Sequenced Message is selected by the Sequenced Message Type it is written under *)
+SelectsSequencedMessage ==
+    \A message \in CheckedSequencedMessage :
+        LET read == DecodeSequencedMessage(message.tag, EncodeSequencedMessage(message))
         IN  read.ok /\ read.value.tag = message.tag
 
-(* Message Length is written from the bytes it frames *)
-FramesMessage ==
-    \A message \in CheckedMessage :
-        LET bytes == EncodeMessage(message)
+(* A Server Payload is selected by the Server Packet Type it is written under *)
+SelectsServerPayload ==
+    \A message \in CheckedServerPayload :
+        LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* Packet Length is written from the bytes it frames *)
+FramesServerSoupBinTcpPacket ==
+    \A message \in CheckedServerSoupBinTcpPacket :
+        LET bytes == EncodeServerSoupBinTcpPacket(message)
         IN  DecodeUIntBE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
 
 -----------------------------------------------------------------------------

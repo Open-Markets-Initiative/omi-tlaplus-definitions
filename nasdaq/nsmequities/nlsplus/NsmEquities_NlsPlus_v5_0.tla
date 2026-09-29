@@ -1,7 +1,7 @@
---------------------- MODULE NsmEquities_NlsPlus_v4_0 ----------------------
+--------------------- MODULE NsmEquities_NlsPlus_v5_0 ----------------------
 (***************************************************************************)
 (* National Association of Securities Dealers Automated Quotations         *)
-(* (Nasdaq) Last Sale Plus v4.0                                            *)
+(* (Nasdaq) Last Sale Plus v5.0                                            *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)
@@ -104,46 +104,38 @@ SampleLists(entries) ==
 (***************************************************************************)
 
 SystemEventMessage ==
-    [ trackingNumber : Sample(2),
-      timestamp      : Sample(6),
-      eventCode      : Sample(1) ]
+    [ timestamp : Sample(8),
+      eventCode : Sample(1) ]
 
 EncodeSystemEventMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.eventCode
 
 DecodeSystemEventMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET eventCode == ReadBytes(timestamp.rest, 1) IN IF ~eventCode.ok THEN Fail ELSE
-    Ok([ trackingNumber |-> trackingNumber.value,
-         timestamp      |-> timestamp.value,
-         eventCode      |-> eventCode.value ], eventCode.rest)
+    Ok([ timestamp |-> timestamp.value,
+         eventCode |-> eventCode.value ], eventCode.rest)
 
 ZeroSystemEventMessage ==
-    [ trackingNumber |-> [i \in 1 .. 2 |-> 0],
-      timestamp      |-> [i \in 1 .. 6 |-> 0],
-      eventCode      |-> [i \in 1 .. 1 |-> 0] ]
+    [ timestamp |-> [i \in 1 .. 8 |-> 0],
+      eventCode |-> [i \in 1 .. 1 |-> 0] ]
 
 (* System Event Message at zero, then each field in turn at the values it is checked at *)
 CheckedSystemEventMessage ==
     { ZeroSystemEventMessage }
-        \cup { [ZeroSystemEventMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroSystemEventMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroSystemEventMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroSystemEventMessage EXCEPT !.eventCode = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Trade Report Message: 64 bytes                                          *)
+(* Trade Report Message: 63 bytes                                          *)
 (***************************************************************************)
 
 TradeReportMessage ==
-    [ trackingNumber                    : Sample(2),
-      timestamp                         : Sample(6),
+    [ timestamp                         : Sample(8),
       clientTimestamp                   : Sample(8),
       originatingMarketCenterIdentifier : Sample(1),
       issueSymbol                       : Sample(8),
-      securityClass                     : Sample(1),
       tradeControlNumber                : Sample(10),
       tradePrice                        : Sample(8),
       tradeSize                         : Sample(8),
@@ -151,12 +143,10 @@ TradeReportMessage ==
       consolidatedVolume                : Sample(8) ]
 
 EncodeTradeReportMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.clientTimestamp
         \o message.originatingMarketCenterIdentifier
         \o message.issueSymbol
-        \o message.securityClass
         \o message.tradeControlNumber
         \o message.tradePrice
         \o message.tradeSize
@@ -164,23 +154,19 @@ EncodeTradeReportMessage(message) ==
         \o message.consolidatedVolume
 
 DecodeTradeReportMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET clientTimestamp == ReadBytes(timestamp.rest, 8) IN IF ~clientTimestamp.ok THEN Fail ELSE
     LET originatingMarketCenterIdentifier == ReadBytes(clientTimestamp.rest, 1) IN IF ~originatingMarketCenterIdentifier.ok THEN Fail ELSE
     LET issueSymbol == ReadBytes(originatingMarketCenterIdentifier.rest, 8) IN IF ~issueSymbol.ok THEN Fail ELSE
-    LET securityClass == ReadBytes(issueSymbol.rest, 1) IN IF ~securityClass.ok THEN Fail ELSE
-    LET tradeControlNumber == ReadBytes(securityClass.rest, 10) IN IF ~tradeControlNumber.ok THEN Fail ELSE
+    LET tradeControlNumber == ReadBytes(issueSymbol.rest, 10) IN IF ~tradeControlNumber.ok THEN Fail ELSE
     LET tradePrice == ReadBytes(tradeControlNumber.rest, 8) IN IF ~tradePrice.ok THEN Fail ELSE
     LET tradeSize == ReadBytes(tradePrice.rest, 8) IN IF ~tradeSize.ok THEN Fail ELSE
     LET saleConditionModifier == ReadBytes(tradeSize.rest, 4) IN IF ~saleConditionModifier.ok THEN Fail ELSE
     LET consolidatedVolume == ReadBytes(saleConditionModifier.rest, 8) IN IF ~consolidatedVolume.ok THEN Fail ELSE
-    Ok([ trackingNumber                    |-> trackingNumber.value,
-         timestamp                         |-> timestamp.value,
+    Ok([ timestamp                         |-> timestamp.value,
          clientTimestamp                   |-> clientTimestamp.value,
          originatingMarketCenterIdentifier |-> originatingMarketCenterIdentifier.value,
          issueSymbol                       |-> issueSymbol.value,
-         securityClass                     |-> securityClass.value,
          tradeControlNumber                |-> tradeControlNumber.value,
          tradePrice                        |-> tradePrice.value,
          tradeSize                         |-> tradeSize.value,
@@ -188,12 +174,10 @@ DecodeTradeReportMessage(bytes) ==
          consolidatedVolume                |-> consolidatedVolume.value ], consolidatedVolume.rest)
 
 ZeroTradeReportMessage ==
-    [ trackingNumber                    |-> [i \in 1 .. 2 |-> 0],
-      timestamp                         |-> [i \in 1 .. 6 |-> 0],
+    [ timestamp                         |-> [i \in 1 .. 8 |-> 0],
       clientTimestamp                   |-> [i \in 1 .. 8 |-> 0],
       originatingMarketCenterIdentifier |-> [i \in 1 .. 1 |-> 0],
       issueSymbol                       |-> [i \in 1 .. 8 |-> 0],
-      securityClass                     |-> [i \in 1 .. 1 |-> 0],
       tradeControlNumber                |-> [i \in 1 .. 10 |-> 0],
       tradePrice                        |-> [i \in 1 .. 8 |-> 0],
       tradeSize                         |-> [i \in 1 .. 8 |-> 0],
@@ -203,12 +187,10 @@ ZeroTradeReportMessage ==
 (* Trade Report Message at zero, then each field in turn at the values it is checked at *)
 CheckedTradeReportMessage ==
     { ZeroTradeReportMessage }
-        \cup { [ZeroTradeReportMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroTradeReportMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroTradeReportMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroTradeReportMessage EXCEPT !.clientTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroTradeReportMessage EXCEPT !.originatingMarketCenterIdentifier = one] : one \in Sample(1) }
         \cup { [ZeroTradeReportMessage EXCEPT !.issueSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessage EXCEPT !.securityClass = one] : one \in Sample(1) }
         \cup { [ZeroTradeReportMessage EXCEPT !.tradeControlNumber = one] : one \in Sample(10) }
         \cup { [ZeroTradeReportMessage EXCEPT !.tradePrice = one] : one \in Sample(8) }
         \cup { [ZeroTradeReportMessage EXCEPT !.tradeSize = one] : one \in Sample(8) }
@@ -216,16 +198,14 @@ CheckedTradeReportMessage ==
         \cup { [ZeroTradeReportMessage EXCEPT !.consolidatedVolume = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Trade Cancel Error Message: 64 bytes                                    *)
+(* Trade Cancel Error Message: 63 bytes                                    *)
 (***************************************************************************)
 
 TradeCancelErrorMessage ==
-    [ trackingNumber                    : Sample(2),
-      timestamp                         : Sample(6),
+    [ timestamp                         : Sample(8),
       clientTimestamp                   : Sample(8),
       originatingMarketCenterIdentifier : Sample(1),
       issueSymbol                       : Sample(8),
-      securityClass                     : Sample(1),
       originalTradeControlNumber        : Sample(10),
       originalTradePrice                : Sample(8),
       originalTradeSize                 : Sample(8),
@@ -233,12 +213,10 @@ TradeCancelErrorMessage ==
       consolidatedVolume                : Sample(8) ]
 
 EncodeTradeCancelErrorMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.clientTimestamp
         \o message.originatingMarketCenterIdentifier
         \o message.issueSymbol
-        \o message.securityClass
         \o message.originalTradeControlNumber
         \o message.originalTradePrice
         \o message.originalTradeSize
@@ -246,23 +224,19 @@ EncodeTradeCancelErrorMessage(message) ==
         \o message.consolidatedVolume
 
 DecodeTradeCancelErrorMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET clientTimestamp == ReadBytes(timestamp.rest, 8) IN IF ~clientTimestamp.ok THEN Fail ELSE
     LET originatingMarketCenterIdentifier == ReadBytes(clientTimestamp.rest, 1) IN IF ~originatingMarketCenterIdentifier.ok THEN Fail ELSE
     LET issueSymbol == ReadBytes(originatingMarketCenterIdentifier.rest, 8) IN IF ~issueSymbol.ok THEN Fail ELSE
-    LET securityClass == ReadBytes(issueSymbol.rest, 1) IN IF ~securityClass.ok THEN Fail ELSE
-    LET originalTradeControlNumber == ReadBytes(securityClass.rest, 10) IN IF ~originalTradeControlNumber.ok THEN Fail ELSE
+    LET originalTradeControlNumber == ReadBytes(issueSymbol.rest, 10) IN IF ~originalTradeControlNumber.ok THEN Fail ELSE
     LET originalTradePrice == ReadBytes(originalTradeControlNumber.rest, 8) IN IF ~originalTradePrice.ok THEN Fail ELSE
     LET originalTradeSize == ReadBytes(originalTradePrice.rest, 8) IN IF ~originalTradeSize.ok THEN Fail ELSE
     LET originalSaleConditionModifier == ReadBytes(originalTradeSize.rest, 4) IN IF ~originalSaleConditionModifier.ok THEN Fail ELSE
     LET consolidatedVolume == ReadBytes(originalSaleConditionModifier.rest, 8) IN IF ~consolidatedVolume.ok THEN Fail ELSE
-    Ok([ trackingNumber                    |-> trackingNumber.value,
-         timestamp                         |-> timestamp.value,
+    Ok([ timestamp                         |-> timestamp.value,
          clientTimestamp                   |-> clientTimestamp.value,
          originatingMarketCenterIdentifier |-> originatingMarketCenterIdentifier.value,
          issueSymbol                       |-> issueSymbol.value,
-         securityClass                     |-> securityClass.value,
          originalTradeControlNumber        |-> originalTradeControlNumber.value,
          originalTradePrice                |-> originalTradePrice.value,
          originalTradeSize                 |-> originalTradeSize.value,
@@ -270,12 +244,10 @@ DecodeTradeCancelErrorMessage(bytes) ==
          consolidatedVolume                |-> consolidatedVolume.value ], consolidatedVolume.rest)
 
 ZeroTradeCancelErrorMessage ==
-    [ trackingNumber                    |-> [i \in 1 .. 2 |-> 0],
-      timestamp                         |-> [i \in 1 .. 6 |-> 0],
+    [ timestamp                         |-> [i \in 1 .. 8 |-> 0],
       clientTimestamp                   |-> [i \in 1 .. 8 |-> 0],
       originatingMarketCenterIdentifier |-> [i \in 1 .. 1 |-> 0],
       issueSymbol                       |-> [i \in 1 .. 8 |-> 0],
-      securityClass                     |-> [i \in 1 .. 1 |-> 0],
       originalTradeControlNumber        |-> [i \in 1 .. 10 |-> 0],
       originalTradePrice                |-> [i \in 1 .. 8 |-> 0],
       originalTradeSize                 |-> [i \in 1 .. 8 |-> 0],
@@ -285,12 +257,10 @@ ZeroTradeCancelErrorMessage ==
 (* Trade Cancel Error Message at zero, then each field in turn at the values it is checked at *)
 CheckedTradeCancelErrorMessage ==
     { ZeroTradeCancelErrorMessage }
-        \cup { [ZeroTradeCancelErrorMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroTradeCancelErrorMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroTradeCancelErrorMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroTradeCancelErrorMessage EXCEPT !.clientTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroTradeCancelErrorMessage EXCEPT !.originatingMarketCenterIdentifier = one] : one \in Sample(1) }
         \cup { [ZeroTradeCancelErrorMessage EXCEPT !.issueSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelErrorMessage EXCEPT !.securityClass = one] : one \in Sample(1) }
         \cup { [ZeroTradeCancelErrorMessage EXCEPT !.originalTradeControlNumber = one] : one \in Sample(10) }
         \cup { [ZeroTradeCancelErrorMessage EXCEPT !.originalTradePrice = one] : one \in Sample(8) }
         \cup { [ZeroTradeCancelErrorMessage EXCEPT !.originalTradeSize = one] : one \in Sample(8) }
@@ -298,16 +268,14 @@ CheckedTradeCancelErrorMessage ==
         \cup { [ZeroTradeCancelErrorMessage EXCEPT !.consolidatedVolume = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Trade Correction Message: 94 bytes                                      *)
+(* Trade Correction Message: 93 bytes                                      *)
 (***************************************************************************)
 
 TradeCorrectionMessage ==
-    [ trackingNumber                    : Sample(2),
-      timestamp                         : Sample(6),
+    [ timestamp                         : Sample(8),
       clientTimestamp                   : Sample(8),
       originatingMarketCenterIdentifier : Sample(1),
       issueSymbol                       : Sample(8),
-      securityClass                     : Sample(1),
       originalTradeControlNumber        : Sample(10),
       originalTradePrice                : Sample(8),
       originalTradeSize                 : Sample(8),
@@ -319,12 +287,10 @@ TradeCorrectionMessage ==
       consolidatedVolume                : Sample(8) ]
 
 EncodeTradeCorrectionMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.clientTimestamp
         \o message.originatingMarketCenterIdentifier
         \o message.issueSymbol
-        \o message.securityClass
         \o message.originalTradeControlNumber
         \o message.originalTradePrice
         \o message.originalTradeSize
@@ -336,13 +302,11 @@ EncodeTradeCorrectionMessage(message) ==
         \o message.consolidatedVolume
 
 DecodeTradeCorrectionMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET clientTimestamp == ReadBytes(timestamp.rest, 8) IN IF ~clientTimestamp.ok THEN Fail ELSE
     LET originatingMarketCenterIdentifier == ReadBytes(clientTimestamp.rest, 1) IN IF ~originatingMarketCenterIdentifier.ok THEN Fail ELSE
     LET issueSymbol == ReadBytes(originatingMarketCenterIdentifier.rest, 8) IN IF ~issueSymbol.ok THEN Fail ELSE
-    LET securityClass == ReadBytes(issueSymbol.rest, 1) IN IF ~securityClass.ok THEN Fail ELSE
-    LET originalTradeControlNumber == ReadBytes(securityClass.rest, 10) IN IF ~originalTradeControlNumber.ok THEN Fail ELSE
+    LET originalTradeControlNumber == ReadBytes(issueSymbol.rest, 10) IN IF ~originalTradeControlNumber.ok THEN Fail ELSE
     LET originalTradePrice == ReadBytes(originalTradeControlNumber.rest, 8) IN IF ~originalTradePrice.ok THEN Fail ELSE
     LET originalTradeSize == ReadBytes(originalTradePrice.rest, 8) IN IF ~originalTradeSize.ok THEN Fail ELSE
     LET originalSaleConditionModifier == ReadBytes(originalTradeSize.rest, 4) IN IF ~originalSaleConditionModifier.ok THEN Fail ELSE
@@ -351,12 +315,10 @@ DecodeTradeCorrectionMessage(bytes) ==
     LET correctedTradeSize == ReadBytes(correctedTradePrice.rest, 8) IN IF ~correctedTradeSize.ok THEN Fail ELSE
     LET correctedSaleConditionModifier == ReadBytes(correctedTradeSize.rest, 4) IN IF ~correctedSaleConditionModifier.ok THEN Fail ELSE
     LET consolidatedVolume == ReadBytes(correctedSaleConditionModifier.rest, 8) IN IF ~consolidatedVolume.ok THEN Fail ELSE
-    Ok([ trackingNumber                    |-> trackingNumber.value,
-         timestamp                         |-> timestamp.value,
+    Ok([ timestamp                         |-> timestamp.value,
          clientTimestamp                   |-> clientTimestamp.value,
          originatingMarketCenterIdentifier |-> originatingMarketCenterIdentifier.value,
          issueSymbol                       |-> issueSymbol.value,
-         securityClass                     |-> securityClass.value,
          originalTradeControlNumber        |-> originalTradeControlNumber.value,
          originalTradePrice                |-> originalTradePrice.value,
          originalTradeSize                 |-> originalTradeSize.value,
@@ -368,12 +330,10 @@ DecodeTradeCorrectionMessage(bytes) ==
          consolidatedVolume                |-> consolidatedVolume.value ], consolidatedVolume.rest)
 
 ZeroTradeCorrectionMessage ==
-    [ trackingNumber                    |-> [i \in 1 .. 2 |-> 0],
-      timestamp                         |-> [i \in 1 .. 6 |-> 0],
+    [ timestamp                         |-> [i \in 1 .. 8 |-> 0],
       clientTimestamp                   |-> [i \in 1 .. 8 |-> 0],
       originatingMarketCenterIdentifier |-> [i \in 1 .. 1 |-> 0],
       issueSymbol                       |-> [i \in 1 .. 8 |-> 0],
-      securityClass                     |-> [i \in 1 .. 1 |-> 0],
       originalTradeControlNumber        |-> [i \in 1 .. 10 |-> 0],
       originalTradePrice                |-> [i \in 1 .. 8 |-> 0],
       originalTradeSize                 |-> [i \in 1 .. 8 |-> 0],
@@ -387,12 +347,10 @@ ZeroTradeCorrectionMessage ==
 (* Trade Correction Message at zero, then each field in turn at the values it is checked at *)
 CheckedTradeCorrectionMessage ==
     { ZeroTradeCorrectionMessage }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroTradeCorrectionMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroTradeCorrectionMessage EXCEPT !.clientTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroTradeCorrectionMessage EXCEPT !.originatingMarketCenterIdentifier = one] : one \in Sample(1) }
         \cup { [ZeroTradeCorrectionMessage EXCEPT !.issueSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.securityClass = one] : one \in Sample(1) }
         \cup { [ZeroTradeCorrectionMessage EXCEPT !.originalTradeControlNumber = one] : one \in Sample(10) }
         \cup { [ZeroTradeCorrectionMessage EXCEPT !.originalTradePrice = one] : one \in Sample(8) }
         \cup { [ZeroTradeCorrectionMessage EXCEPT !.originalTradeSize = one] : one \in Sample(8) }
@@ -404,54 +362,42 @@ CheckedTradeCorrectionMessage ==
         \cup { [ZeroTradeCorrectionMessage EXCEPT !.consolidatedVolume = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Stock Trading Action Message: 22 bytes                                  *)
+(* Stock Trading Action Message: 21 bytes                                  *)
 (***************************************************************************)
 
 StockTradingActionMessage ==
-    [ trackingNumber      : Sample(2),
-      timestamp           : Sample(6),
+    [ timestamp           : Sample(8),
       issueSymbol         : Sample(8),
-      securityClass       : Sample(1),
       currentTradingState : Sample(1),
       reason              : Sample(4) ]
 
 EncodeStockTradingActionMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.issueSymbol
-        \o message.securityClass
         \o message.currentTradingState
         \o message.reason
 
 DecodeStockTradingActionMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET issueSymbol == ReadBytes(timestamp.rest, 8) IN IF ~issueSymbol.ok THEN Fail ELSE
-    LET securityClass == ReadBytes(issueSymbol.rest, 1) IN IF ~securityClass.ok THEN Fail ELSE
-    LET currentTradingState == ReadBytes(securityClass.rest, 1) IN IF ~currentTradingState.ok THEN Fail ELSE
+    LET currentTradingState == ReadBytes(issueSymbol.rest, 1) IN IF ~currentTradingState.ok THEN Fail ELSE
     LET reason == ReadBytes(currentTradingState.rest, 4) IN IF ~reason.ok THEN Fail ELSE
-    Ok([ trackingNumber      |-> trackingNumber.value,
-         timestamp           |-> timestamp.value,
+    Ok([ timestamp           |-> timestamp.value,
          issueSymbol         |-> issueSymbol.value,
-         securityClass       |-> securityClass.value,
          currentTradingState |-> currentTradingState.value,
          reason              |-> reason.value ], reason.rest)
 
 ZeroStockTradingActionMessage ==
-    [ trackingNumber      |-> [i \in 1 .. 2 |-> 0],
-      timestamp           |-> [i \in 1 .. 6 |-> 0],
+    [ timestamp           |-> [i \in 1 .. 8 |-> 0],
       issueSymbol         |-> [i \in 1 .. 8 |-> 0],
-      securityClass       |-> [i \in 1 .. 1 |-> 0],
       currentTradingState |-> [i \in 1 .. 1 |-> 0],
       reason              |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Stock Trading Action Message at zero, then each field in turn at the values it is checked at *)
 CheckedStockTradingActionMessage ==
     { ZeroStockTradingActionMessage }
-        \cup { [ZeroStockTradingActionMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroStockTradingActionMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroStockTradingActionMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroStockTradingActionMessage EXCEPT !.issueSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroStockTradingActionMessage EXCEPT !.securityClass = one] : one \in Sample(1) }
         \cup { [ZeroStockTradingActionMessage EXCEPT !.currentTradingState = one] : one \in Sample(1) }
         \cup { [ZeroStockTradingActionMessage EXCEPT !.reason = one] : one \in Sample(4) }
 
@@ -460,38 +406,32 @@ CheckedStockTradingActionMessage ==
 (***************************************************************************)
 
 RegShoShortSalePriceTestRestrictedIndicatorMessage ==
-    [ trackingNumber : Sample(2),
-      timestamp      : Sample(6),
-      issueSymbol    : Sample(8),
-      regShoAction   : Sample(1) ]
+    [ timestamp    : Sample(8),
+      issueSymbol  : Sample(8),
+      regShoAction : Sample(1) ]
 
 EncodeRegShoShortSalePriceTestRestrictedIndicatorMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.issueSymbol
         \o message.regShoAction
 
 DecodeRegShoShortSalePriceTestRestrictedIndicatorMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET issueSymbol == ReadBytes(timestamp.rest, 8) IN IF ~issueSymbol.ok THEN Fail ELSE
     LET regShoAction == ReadBytes(issueSymbol.rest, 1) IN IF ~regShoAction.ok THEN Fail ELSE
-    Ok([ trackingNumber |-> trackingNumber.value,
-         timestamp      |-> timestamp.value,
-         issueSymbol    |-> issueSymbol.value,
-         regShoAction   |-> regShoAction.value ], regShoAction.rest)
+    Ok([ timestamp    |-> timestamp.value,
+         issueSymbol  |-> issueSymbol.value,
+         regShoAction |-> regShoAction.value ], regShoAction.rest)
 
 ZeroRegShoShortSalePriceTestRestrictedIndicatorMessage ==
-    [ trackingNumber |-> [i \in 1 .. 2 |-> 0],
-      timestamp      |-> [i \in 1 .. 6 |-> 0],
-      issueSymbol    |-> [i \in 1 .. 8 |-> 0],
-      regShoAction   |-> [i \in 1 .. 1 |-> 0] ]
+    [ timestamp    |-> [i \in 1 .. 8 |-> 0],
+      issueSymbol  |-> [i \in 1 .. 8 |-> 0],
+      regShoAction |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Reg Sho Short Sale Price Test Restricted Indicator Message at zero, then each field in turn at the values it is checked at *)
 CheckedRegShoShortSalePriceTestRestrictedIndicatorMessage ==
     { ZeroRegShoShortSalePriceTestRestrictedIndicatorMessage }
-        \cup { [ZeroRegShoShortSalePriceTestRestrictedIndicatorMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroRegShoShortSalePriceTestRestrictedIndicatorMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroRegShoShortSalePriceTestRestrictedIndicatorMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroRegShoShortSalePriceTestRestrictedIndicatorMessage EXCEPT !.issueSymbol = one] : one \in Sample(8) }
         \cup { [ZeroRegShoShortSalePriceTestRestrictedIndicatorMessage EXCEPT !.regShoAction = one] : one \in Sample(1) }
 
@@ -500,8 +440,7 @@ CheckedRegShoShortSalePriceTestRestrictedIndicatorMessage ==
 (***************************************************************************)
 
 StockDirectoryMessage ==
-    [ trackingNumber              : Sample(2),
-      timestamp                   : Sample(6),
+    [ timestamp                   : Sample(8),
       stock                       : Sample(8),
       marketCategory              : Sample(1),
       financialStatusIndicator    : Sample(1),
@@ -519,8 +458,7 @@ StockDirectoryMessage ==
       bloombergId                 : Sample(12) ]
 
 EncodeStockDirectoryMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.stock
         \o message.marketCategory
         \o message.financialStatusIndicator
@@ -538,8 +476,7 @@ EncodeStockDirectoryMessage(message) ==
         \o message.bloombergId
 
 DecodeStockDirectoryMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET stock == ReadBytes(timestamp.rest, 8) IN IF ~stock.ok THEN Fail ELSE
     LET marketCategory == ReadBytes(stock.rest, 1) IN IF ~marketCategory.ok THEN Fail ELSE
     LET financialStatusIndicator == ReadBytes(marketCategory.rest, 1) IN IF ~financialStatusIndicator.ok THEN Fail ELSE
@@ -555,8 +492,7 @@ DecodeStockDirectoryMessage(bytes) ==
     LET etpLeverageFactor == ReadBytes(etpFlag.rest, 4) IN IF ~etpLeverageFactor.ok THEN Fail ELSE
     LET inverseIndicator == ReadBytes(etpLeverageFactor.rest, 1) IN IF ~inverseIndicator.ok THEN Fail ELSE
     LET bloombergId == ReadBytes(inverseIndicator.rest, 12) IN IF ~bloombergId.ok THEN Fail ELSE
-    Ok([ trackingNumber              |-> trackingNumber.value,
-         timestamp                   |-> timestamp.value,
+    Ok([ timestamp                   |-> timestamp.value,
          stock                       |-> stock.value,
          marketCategory              |-> marketCategory.value,
          financialStatusIndicator    |-> financialStatusIndicator.value,
@@ -574,8 +510,7 @@ DecodeStockDirectoryMessage(bytes) ==
          bloombergId                 |-> bloombergId.value ], bloombergId.rest)
 
 ZeroStockDirectoryMessage ==
-    [ trackingNumber              |-> [i \in 1 .. 2 |-> 0],
-      timestamp                   |-> [i \in 1 .. 6 |-> 0],
+    [ timestamp                   |-> [i \in 1 .. 8 |-> 0],
       stock                       |-> [i \in 1 .. 8 |-> 0],
       marketCategory              |-> [i \in 1 .. 1 |-> 0],
       financialStatusIndicator    |-> [i \in 1 .. 1 |-> 0],
@@ -595,8 +530,7 @@ ZeroStockDirectoryMessage ==
 (* Stock Directory Message at zero, then each field in turn at the values it is checked at *)
 CheckedStockDirectoryMessage ==
     { ZeroStockDirectoryMessage }
-        \cup { [ZeroStockDirectoryMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroStockDirectoryMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroStockDirectoryMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.stock = one] : one \in Sample(8) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.marketCategory = one] : one \in Sample(1) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.financialStatusIndicator = one] : one \in Sample(1) }
@@ -614,60 +548,46 @@ CheckedStockDirectoryMessage ==
         \cup { [ZeroStockDirectoryMessage EXCEPT !.bloombergId = one] : one \in Sample(12) }
 
 (***************************************************************************)
-(* Adjusted Closing Price Message: 25 bytes                                *)
+(* Adjusted Closing Price Message: 24 bytes                                *)
 (***************************************************************************)
 
 AdjustedClosingPriceMessage ==
-    [ trackingNumber       : Sample(2),
-      timestamp            : Sample(6),
+    [ timestamp            : Sample(8),
       issueSymbol          : Sample(8),
-      securityClass        : Sample(1),
       adjustedClosingPrice : Sample(8) ]
 
 EncodeAdjustedClosingPriceMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.issueSymbol
-        \o message.securityClass
         \o message.adjustedClosingPrice
 
 DecodeAdjustedClosingPriceMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET issueSymbol == ReadBytes(timestamp.rest, 8) IN IF ~issueSymbol.ok THEN Fail ELSE
-    LET securityClass == ReadBytes(issueSymbol.rest, 1) IN IF ~securityClass.ok THEN Fail ELSE
-    LET adjustedClosingPrice == ReadBytes(securityClass.rest, 8) IN IF ~adjustedClosingPrice.ok THEN Fail ELSE
-    Ok([ trackingNumber       |-> trackingNumber.value,
-         timestamp            |-> timestamp.value,
+    LET adjustedClosingPrice == ReadBytes(issueSymbol.rest, 8) IN IF ~adjustedClosingPrice.ok THEN Fail ELSE
+    Ok([ timestamp            |-> timestamp.value,
          issueSymbol          |-> issueSymbol.value,
-         securityClass        |-> securityClass.value,
          adjustedClosingPrice |-> adjustedClosingPrice.value ], adjustedClosingPrice.rest)
 
 ZeroAdjustedClosingPriceMessage ==
-    [ trackingNumber       |-> [i \in 1 .. 2 |-> 0],
-      timestamp            |-> [i \in 1 .. 6 |-> 0],
+    [ timestamp            |-> [i \in 1 .. 8 |-> 0],
       issueSymbol          |-> [i \in 1 .. 8 |-> 0],
-      securityClass        |-> [i \in 1 .. 1 |-> 0],
       adjustedClosingPrice |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Adjusted Closing Price Message at zero, then each field in turn at the values it is checked at *)
 CheckedAdjustedClosingPriceMessage ==
     { ZeroAdjustedClosingPriceMessage }
-        \cup { [ZeroAdjustedClosingPriceMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroAdjustedClosingPriceMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroAdjustedClosingPriceMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroAdjustedClosingPriceMessage EXCEPT !.issueSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroAdjustedClosingPriceMessage EXCEPT !.securityClass = one] : one \in Sample(1) }
         \cup { [ZeroAdjustedClosingPriceMessage EXCEPT !.adjustedClosingPrice = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* End Of Day Trade Summary Message: 57 bytes                              *)
+(* End Of Day Trade Summary Message: 56 bytes                              *)
 (***************************************************************************)
 
 EndOfDayTradeSummaryMessage ==
-    [ trackingNumber           : Sample(2),
-      timestamp                : Sample(6),
+    [ timestamp                : Sample(8),
       issueSymbol              : Sample(8),
-      securityClass            : Sample(1),
       consolidatedHighPrice    : Sample(8),
       consolidatedLowPrice     : Sample(8),
       consolidatedClosingPrice : Sample(8),
@@ -675,10 +595,8 @@ EndOfDayTradeSummaryMessage ==
       consolidatedOpenPrice    : Sample(8) ]
 
 EncodeEndOfDayTradeSummaryMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.issueSymbol
-        \o message.securityClass
         \o message.consolidatedHighPrice
         \o message.consolidatedLowPrice
         \o message.consolidatedClosingPrice
@@ -686,19 +604,15 @@ EncodeEndOfDayTradeSummaryMessage(message) ==
         \o message.consolidatedOpenPrice
 
 DecodeEndOfDayTradeSummaryMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET issueSymbol == ReadBytes(timestamp.rest, 8) IN IF ~issueSymbol.ok THEN Fail ELSE
-    LET securityClass == ReadBytes(issueSymbol.rest, 1) IN IF ~securityClass.ok THEN Fail ELSE
-    LET consolidatedHighPrice == ReadBytes(securityClass.rest, 8) IN IF ~consolidatedHighPrice.ok THEN Fail ELSE
+    LET consolidatedHighPrice == ReadBytes(issueSymbol.rest, 8) IN IF ~consolidatedHighPrice.ok THEN Fail ELSE
     LET consolidatedLowPrice == ReadBytes(consolidatedHighPrice.rest, 8) IN IF ~consolidatedLowPrice.ok THEN Fail ELSE
     LET consolidatedClosingPrice == ReadBytes(consolidatedLowPrice.rest, 8) IN IF ~consolidatedClosingPrice.ok THEN Fail ELSE
     LET consolidatedVolume == ReadBytes(consolidatedClosingPrice.rest, 8) IN IF ~consolidatedVolume.ok THEN Fail ELSE
     LET consolidatedOpenPrice == ReadBytes(consolidatedVolume.rest, 8) IN IF ~consolidatedOpenPrice.ok THEN Fail ELSE
-    Ok([ trackingNumber           |-> trackingNumber.value,
-         timestamp                |-> timestamp.value,
+    Ok([ timestamp                |-> timestamp.value,
          issueSymbol              |-> issueSymbol.value,
-         securityClass            |-> securityClass.value,
          consolidatedHighPrice    |-> consolidatedHighPrice.value,
          consolidatedLowPrice     |-> consolidatedLowPrice.value,
          consolidatedClosingPrice |-> consolidatedClosingPrice.value,
@@ -706,10 +620,8 @@ DecodeEndOfDayTradeSummaryMessage(bytes) ==
          consolidatedOpenPrice    |-> consolidatedOpenPrice.value ], consolidatedOpenPrice.rest)
 
 ZeroEndOfDayTradeSummaryMessage ==
-    [ trackingNumber           |-> [i \in 1 .. 2 |-> 0],
-      timestamp                |-> [i \in 1 .. 6 |-> 0],
+    [ timestamp                |-> [i \in 1 .. 8 |-> 0],
       issueSymbol              |-> [i \in 1 .. 8 |-> 0],
-      securityClass            |-> [i \in 1 .. 1 |-> 0],
       consolidatedHighPrice    |-> [i \in 1 .. 8 |-> 0],
       consolidatedLowPrice     |-> [i \in 1 .. 8 |-> 0],
       consolidatedClosingPrice |-> [i \in 1 .. 8 |-> 0],
@@ -719,10 +631,8 @@ ZeroEndOfDayTradeSummaryMessage ==
 (* End Of Day Trade Summary Message at zero, then each field in turn at the values it is checked at *)
 CheckedEndOfDayTradeSummaryMessage ==
     { ZeroEndOfDayTradeSummaryMessage }
-        \cup { [ZeroEndOfDayTradeSummaryMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroEndOfDayTradeSummaryMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroEndOfDayTradeSummaryMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroEndOfDayTradeSummaryMessage EXCEPT !.issueSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroEndOfDayTradeSummaryMessage EXCEPT !.securityClass = one] : one \in Sample(1) }
         \cup { [ZeroEndOfDayTradeSummaryMessage EXCEPT !.consolidatedHighPrice = one] : one \in Sample(8) }
         \cup { [ZeroEndOfDayTradeSummaryMessage EXCEPT !.consolidatedLowPrice = one] : one \in Sample(8) }
         \cup { [ZeroEndOfDayTradeSummaryMessage EXCEPT !.consolidatedClosingPrice = one] : one \in Sample(8) }
@@ -730,54 +640,42 @@ CheckedEndOfDayTradeSummaryMessage ==
         \cup { [ZeroEndOfDayTradeSummaryMessage EXCEPT !.consolidatedOpenPrice = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Ipo Information Message: 26 bytes                                       *)
+(* Ipo Information Message: 25 bytes                                       *)
 (***************************************************************************)
 
 IpoInformationMessage ==
-    [ trackingNumber        : Sample(2),
-      timestamp             : Sample(6),
+    [ timestamp             : Sample(8),
       issueSymbol           : Sample(8),
-      securityClass         : Sample(1),
       referenceForNetChange : Sample(1),
       referencePrice        : Sample(8) ]
 
 EncodeIpoInformationMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.issueSymbol
-        \o message.securityClass
         \o message.referenceForNetChange
         \o message.referencePrice
 
 DecodeIpoInformationMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET issueSymbol == ReadBytes(timestamp.rest, 8) IN IF ~issueSymbol.ok THEN Fail ELSE
-    LET securityClass == ReadBytes(issueSymbol.rest, 1) IN IF ~securityClass.ok THEN Fail ELSE
-    LET referenceForNetChange == ReadBytes(securityClass.rest, 1) IN IF ~referenceForNetChange.ok THEN Fail ELSE
+    LET referenceForNetChange == ReadBytes(issueSymbol.rest, 1) IN IF ~referenceForNetChange.ok THEN Fail ELSE
     LET referencePrice == ReadBytes(referenceForNetChange.rest, 8) IN IF ~referencePrice.ok THEN Fail ELSE
-    Ok([ trackingNumber        |-> trackingNumber.value,
-         timestamp             |-> timestamp.value,
+    Ok([ timestamp             |-> timestamp.value,
          issueSymbol           |-> issueSymbol.value,
-         securityClass         |-> securityClass.value,
          referenceForNetChange |-> referenceForNetChange.value,
          referencePrice        |-> referencePrice.value ], referencePrice.rest)
 
 ZeroIpoInformationMessage ==
-    [ trackingNumber        |-> [i \in 1 .. 2 |-> 0],
-      timestamp             |-> [i \in 1 .. 6 |-> 0],
+    [ timestamp             |-> [i \in 1 .. 8 |-> 0],
       issueSymbol           |-> [i \in 1 .. 8 |-> 0],
-      securityClass         |-> [i \in 1 .. 1 |-> 0],
       referenceForNetChange |-> [i \in 1 .. 1 |-> 0],
       referencePrice        |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Ipo Information Message at zero, then each field in turn at the values it is checked at *)
 CheckedIpoInformationMessage ==
     { ZeroIpoInformationMessage }
-        \cup { [ZeroIpoInformationMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroIpoInformationMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroIpoInformationMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroIpoInformationMessage EXCEPT !.issueSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroIpoInformationMessage EXCEPT !.securityClass = one] : one \in Sample(1) }
         \cup { [ZeroIpoInformationMessage EXCEPT !.referenceForNetChange = one] : one \in Sample(1) }
         \cup { [ZeroIpoInformationMessage EXCEPT !.referencePrice = one] : one \in Sample(8) }
 
@@ -786,43 +684,37 @@ CheckedIpoInformationMessage ==
 (***************************************************************************)
 
 MwcbDeclineLevelMessage ==
-    [ trackingNumber : Sample(2),
-      timestamp      : Sample(6),
-      level1         : Sample(8),
-      level2         : Sample(8),
-      level3         : Sample(8) ]
+    [ timestamp : Sample(8),
+      level1    : Sample(8),
+      level2    : Sample(8),
+      level3    : Sample(8) ]
 
 EncodeMwcbDeclineLevelMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.level1
         \o message.level2
         \o message.level3
 
 DecodeMwcbDeclineLevelMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET level1 == ReadBytes(timestamp.rest, 8) IN IF ~level1.ok THEN Fail ELSE
     LET level2 == ReadBytes(level1.rest, 8) IN IF ~level2.ok THEN Fail ELSE
     LET level3 == ReadBytes(level2.rest, 8) IN IF ~level3.ok THEN Fail ELSE
-    Ok([ trackingNumber |-> trackingNumber.value,
-         timestamp      |-> timestamp.value,
-         level1         |-> level1.value,
-         level2         |-> level2.value,
-         level3         |-> level3.value ], level3.rest)
+    Ok([ timestamp |-> timestamp.value,
+         level1    |-> level1.value,
+         level2    |-> level2.value,
+         level3    |-> level3.value ], level3.rest)
 
 ZeroMwcbDeclineLevelMessage ==
-    [ trackingNumber |-> [i \in 1 .. 2 |-> 0],
-      timestamp      |-> [i \in 1 .. 6 |-> 0],
-      level1         |-> [i \in 1 .. 8 |-> 0],
-      level2         |-> [i \in 1 .. 8 |-> 0],
-      level3         |-> [i \in 1 .. 8 |-> 0] ]
+    [ timestamp |-> [i \in 1 .. 8 |-> 0],
+      level1    |-> [i \in 1 .. 8 |-> 0],
+      level2    |-> [i \in 1 .. 8 |-> 0],
+      level3    |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Mwcb Decline Level Message at zero, then each field in turn at the values it is checked at *)
 CheckedMwcbDeclineLevelMessage ==
     { ZeroMwcbDeclineLevelMessage }
-        \cup { [ZeroMwcbDeclineLevelMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroMwcbDeclineLevelMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroMwcbDeclineLevelMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroMwcbDeclineLevelMessage EXCEPT !.level1 = one] : one \in Sample(8) }
         \cup { [ZeroMwcbDeclineLevelMessage EXCEPT !.level2 = one] : one \in Sample(8) }
         \cup { [ZeroMwcbDeclineLevelMessage EXCEPT !.level3 = one] : one \in Sample(8) }
@@ -832,33 +724,27 @@ CheckedMwcbDeclineLevelMessage ==
 (***************************************************************************)
 
 MwcbStatusMessage ==
-    [ trackingNumber : Sample(2),
-      timestamp      : Sample(6),
-      breachedLevel  : Sample(1) ]
+    [ timestamp     : Sample(8),
+      breachedLevel : Sample(1) ]
 
 EncodeMwcbStatusMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.breachedLevel
 
 DecodeMwcbStatusMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET breachedLevel == ReadBytes(timestamp.rest, 1) IN IF ~breachedLevel.ok THEN Fail ELSE
-    Ok([ trackingNumber |-> trackingNumber.value,
-         timestamp      |-> timestamp.value,
-         breachedLevel  |-> breachedLevel.value ], breachedLevel.rest)
+    Ok([ timestamp     |-> timestamp.value,
+         breachedLevel |-> breachedLevel.value ], breachedLevel.rest)
 
 ZeroMwcbStatusMessage ==
-    [ trackingNumber |-> [i \in 1 .. 2 |-> 0],
-      timestamp      |-> [i \in 1 .. 6 |-> 0],
-      breachedLevel  |-> [i \in 1 .. 1 |-> 0] ]
+    [ timestamp     |-> [i \in 1 .. 8 |-> 0],
+      breachedLevel |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Mwcb Status Message at zero, then each field in turn at the values it is checked at *)
 CheckedMwcbStatusMessage ==
     { ZeroMwcbStatusMessage }
-        \cup { [ZeroMwcbStatusMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroMwcbStatusMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroMwcbStatusMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroMwcbStatusMessage EXCEPT !.breachedLevel = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -866,38 +752,33 @@ CheckedMwcbStatusMessage ==
 (***************************************************************************)
 
 IpoQuotingPeriodUpdateMessage ==
-    [ trackingNumber               : Sample(2),
-      timestamp                    : Sample(6),
+    [ timestamp                    : Sample(8),
       stock                        : Sample(8),
       ipoQuotationReleaseTime      : Sample(4),
       ipoQuotationReleaseQualifier : Sample(1),
       ipoPrice                     : Sample(8) ]
 
 EncodeIpoQuotingPeriodUpdateMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
+    message.timestamp
         \o message.stock
         \o message.ipoQuotationReleaseTime
         \o message.ipoQuotationReleaseQualifier
         \o message.ipoPrice
 
 DecodeIpoQuotingPeriodUpdateMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET stock == ReadBytes(timestamp.rest, 8) IN IF ~stock.ok THEN Fail ELSE
     LET ipoQuotationReleaseTime == ReadBytes(stock.rest, 4) IN IF ~ipoQuotationReleaseTime.ok THEN Fail ELSE
     LET ipoQuotationReleaseQualifier == ReadBytes(ipoQuotationReleaseTime.rest, 1) IN IF ~ipoQuotationReleaseQualifier.ok THEN Fail ELSE
     LET ipoPrice == ReadBytes(ipoQuotationReleaseQualifier.rest, 8) IN IF ~ipoPrice.ok THEN Fail ELSE
-    Ok([ trackingNumber               |-> trackingNumber.value,
-         timestamp                    |-> timestamp.value,
+    Ok([ timestamp                    |-> timestamp.value,
          stock                        |-> stock.value,
          ipoQuotationReleaseTime      |-> ipoQuotationReleaseTime.value,
          ipoQuotationReleaseQualifier |-> ipoQuotationReleaseQualifier.value,
          ipoPrice                     |-> ipoPrice.value ], ipoPrice.rest)
 
 ZeroIpoQuotingPeriodUpdateMessage ==
-    [ trackingNumber               |-> [i \in 1 .. 2 |-> 0],
-      timestamp                    |-> [i \in 1 .. 6 |-> 0],
+    [ timestamp                    |-> [i \in 1 .. 8 |-> 0],
       stock                        |-> [i \in 1 .. 8 |-> 0],
       ipoQuotationReleaseTime      |-> [i \in 1 .. 4 |-> 0],
       ipoQuotationReleaseQualifier |-> [i \in 1 .. 1 |-> 0],
@@ -906,8 +787,7 @@ ZeroIpoQuotingPeriodUpdateMessage ==
 (* Ipo Quoting Period Update Message at zero, then each field in turn at the values it is checked at *)
 CheckedIpoQuotingPeriodUpdateMessage ==
     { ZeroIpoQuotingPeriodUpdateMessage }
-        \cup { [ZeroIpoQuotingPeriodUpdateMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroIpoQuotingPeriodUpdateMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
+        \cup { [ZeroIpoQuotingPeriodUpdateMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroIpoQuotingPeriodUpdateMessage EXCEPT !.stock = one] : one \in Sample(8) }
         \cup { [ZeroIpoQuotingPeriodUpdateMessage EXCEPT !.ipoQuotationReleaseTime = one] : one \in Sample(4) }
         \cup { [ZeroIpoQuotingPeriodUpdateMessage EXCEPT !.ipoQuotationReleaseQualifier = one] : one \in Sample(1) }
@@ -918,44 +798,38 @@ CheckedIpoQuotingPeriodUpdateMessage ==
 (***************************************************************************)
 
 OperationalHaltMessage ==
-    [ trackingNumber        : Sample(2),
-      timestamp             : Sample(6),
-      stockAlpha8           : Sample(8),
+    [ timestamp             : Sample(8),
+      stock                 : Sample(8),
       marketCode            : Sample(1),
       operationalHaltAction : Sample(1) ]
 
 EncodeOperationalHaltMessage(message) ==
-    message.trackingNumber
-        \o message.timestamp
-        \o message.stockAlpha8
+    message.timestamp
+        \o message.stock
         \o message.marketCode
         \o message.operationalHaltAction
 
 DecodeOperationalHaltMessage(bytes) ==
-    LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
-    LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
-    LET stockAlpha8 == ReadBytes(timestamp.rest, 8) IN IF ~stockAlpha8.ok THEN Fail ELSE
-    LET marketCode == ReadBytes(stockAlpha8.rest, 1) IN IF ~marketCode.ok THEN Fail ELSE
+    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
+    LET stock == ReadBytes(timestamp.rest, 8) IN IF ~stock.ok THEN Fail ELSE
+    LET marketCode == ReadBytes(stock.rest, 1) IN IF ~marketCode.ok THEN Fail ELSE
     LET operationalHaltAction == ReadBytes(marketCode.rest, 1) IN IF ~operationalHaltAction.ok THEN Fail ELSE
-    Ok([ trackingNumber        |-> trackingNumber.value,
-         timestamp             |-> timestamp.value,
-         stockAlpha8           |-> stockAlpha8.value,
+    Ok([ timestamp             |-> timestamp.value,
+         stock                 |-> stock.value,
          marketCode            |-> marketCode.value,
          operationalHaltAction |-> operationalHaltAction.value ], operationalHaltAction.rest)
 
 ZeroOperationalHaltMessage ==
-    [ trackingNumber        |-> [i \in 1 .. 2 |-> 0],
-      timestamp             |-> [i \in 1 .. 6 |-> 0],
-      stockAlpha8           |-> [i \in 1 .. 8 |-> 0],
+    [ timestamp             |-> [i \in 1 .. 8 |-> 0],
+      stock                 |-> [i \in 1 .. 8 |-> 0],
       marketCode            |-> [i \in 1 .. 1 |-> 0],
       operationalHaltAction |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Operational Halt Message at zero, then each field in turn at the values it is checked at *)
 CheckedOperationalHaltMessage ==
     { ZeroOperationalHaltMessage }
-        \cup { [ZeroOperationalHaltMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
-        \cup { [ZeroOperationalHaltMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
-        \cup { [ZeroOperationalHaltMessage EXCEPT !.stockAlpha8 = one] : one \in Sample(8) }
+        \cup { [ZeroOperationalHaltMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
+        \cup { [ZeroOperationalHaltMessage EXCEPT !.stock = one] : one \in Sample(8) }
         \cup { [ZeroOperationalHaltMessage EXCEPT !.marketCode = one] : one \in Sample(1) }
         \cup { [ZeroOperationalHaltMessage EXCEPT !.operationalHaltAction = one] : one \in Sample(1) }
 

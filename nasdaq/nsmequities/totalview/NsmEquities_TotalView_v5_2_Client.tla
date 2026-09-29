@@ -1,7 +1,7 @@
--------------- MODULE NsmEquities_TotalView_v5_0_2026_Client ---------------
+----------------- MODULE NsmEquities_TotalView_v5_2_Client -----------------
 (***************************************************************************)
 (* National Association of Securities Dealers Automated Quotations         *)
-(* (Nasdaq) TotalView Itch v5.0.2026                                       *)
+(* (Nasdaq) TotalView Itch v5.2                                            *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)
