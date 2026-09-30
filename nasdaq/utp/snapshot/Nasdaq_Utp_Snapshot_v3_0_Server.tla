@@ -1886,8 +1886,8 @@ ServerTcpPayload ==
         \cup [ tag : {DebugPacketCode}, body : DebugPacket ]
         \cup [ tag : {LoginAcceptedPacketCode}, body : LoginAcceptedPacket ]
         \cup [ tag : {LoginRejectedPacketCode}, body : LoginRejectedPacket ]
-        \cup [ tag : {ServerHeartbeatPacketCode}, body : {0} ]
-        \cup [ tag : {EndOfSessionPacketCode}, body : {0} ]
+        \cup [ tag : {ServerHeartbeatPacketCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {EndOfSessionPacketCode}, body : {[empty |-> 0]} ]
 
 EncodeServerTcpPayload(message) ==
     CASE message.tag = SequencedDataPacketCode -> EncodeSequencedDataPacket(message.body)
@@ -1903,8 +1903,8 @@ DecodeServerTcpPayload(tag, bytes) ==
               [] tag = DebugPacketCode -> DecodeDebugPacket(bytes)
               [] tag = LoginAcceptedPacketCode -> DecodeLoginAcceptedPacket(bytes)
               [] tag = LoginRejectedPacketCode -> DecodeLoginRejectedPacket(bytes)
-              [] tag = ServerHeartbeatPacketCode -> Ok(0, bytes)
-              [] tag = EndOfSessionPacketCode -> Ok(0, bytes)
+              [] tag = ServerHeartbeatPacketCode -> Ok([empty |-> 0], bytes)
+              [] tag = EndOfSessionPacketCode -> Ok([empty |-> 0], bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -1916,8 +1916,8 @@ CheckedServerTcpPayload ==
         \cup { [tag |-> DebugPacketCode, body |-> one] : one \in CheckedDebugPacket }
         \cup { [tag |-> LoginAcceptedPacketCode, body |-> one] : one \in CheckedLoginAcceptedPacket }
         \cup { [tag |-> LoginRejectedPacketCode, body |-> one] : one \in CheckedLoginRejectedPacket }
-        \cup { [tag |-> ServerHeartbeatPacketCode, body |-> 0] }
-        \cup { [tag |-> EndOfSessionPacketCode, body |-> 0] }
+        \cup { [tag |-> ServerHeartbeatPacketCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> EndOfSessionPacketCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
 (* Server Packet, framed by Packet Length                                  *)

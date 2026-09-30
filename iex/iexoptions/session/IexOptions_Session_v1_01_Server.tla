@@ -457,8 +457,8 @@ Payload ==
     [ tag : {LoginRequestMessageCode}, body : LoginRequestMessage ]
         \cup [ tag : {LoginResponseMessageCode}, body : LoginResponseMessage ]
         \cup [ tag : {GatewayHeartbeatMessageCode}, body : GatewayHeartbeatMessage ]
-        \cup [ tag : {ClientHeartbeatMessageCode}, body : {0} ]
-        \cup [ tag : {LogoutRequestMessageCode}, body : {0} ]
+        \cup [ tag : {ClientHeartbeatMessageCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {LogoutRequestMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {TerminateMessageCode}, body : TerminateMessage ]
         \cup [ tag : {SequencedMessageHeaderMessageCode}, body : SequencedMessageHeaderMessage ]
         \cup [ tag : {SubsessionJoinMessageCode}, body : SubsessionJoinMessage ]
@@ -484,8 +484,8 @@ DecodePayload(tag, bytes) ==
             CASE tag = LoginRequestMessageCode -> DecodeLoginRequestMessage(bytes)
               [] tag = LoginResponseMessageCode -> DecodeLoginResponseMessage(bytes)
               [] tag = GatewayHeartbeatMessageCode -> DecodeGatewayHeartbeatMessage(bytes)
-              [] tag = ClientHeartbeatMessageCode -> Ok(0, bytes)
-              [] tag = LogoutRequestMessageCode -> Ok(0, bytes)
+              [] tag = ClientHeartbeatMessageCode -> Ok([empty |-> 0], bytes)
+              [] tag = LogoutRequestMessageCode -> Ok([empty |-> 0], bytes)
               [] tag = TerminateMessageCode -> DecodeTerminateMessage(bytes)
               [] tag = SequencedMessageHeaderMessageCode -> DecodeSequencedMessageHeaderMessage(bytes)
               [] tag = SubsessionJoinMessageCode -> DecodeSubsessionJoinMessage(bytes)
@@ -502,8 +502,8 @@ CheckedPayload ==
     { [tag |-> LoginRequestMessageCode, body |-> one] : one \in CheckedLoginRequestMessage }
         \cup { [tag |-> LoginResponseMessageCode, body |-> one] : one \in CheckedLoginResponseMessage }
         \cup { [tag |-> GatewayHeartbeatMessageCode, body |-> one] : one \in CheckedGatewayHeartbeatMessage }
-        \cup { [tag |-> ClientHeartbeatMessageCode, body |-> 0] }
-        \cup { [tag |-> LogoutRequestMessageCode, body |-> 0] }
+        \cup { [tag |-> ClientHeartbeatMessageCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> TerminateMessageCode, body |-> one] : one \in CheckedTerminateMessage }
         \cup { [tag |-> SequencedMessageHeaderMessageCode, body |-> one] : one \in CheckedSequencedMessageHeaderMessage }
         \cup { [tag |-> SubsessionJoinMessageCode, body |-> one] : one \in CheckedSubsessionJoinMessage }
@@ -592,8 +592,8 @@ OneSbeMessage ==
     { [ZeroSbeMessage EXCEPT !.payload = [tag |-> LoginRequestMessageCode, body |-> ZeroLoginRequestMessage]],
       [ZeroSbeMessage EXCEPT !.payload = [tag |-> LoginResponseMessageCode, body |-> ZeroLoginResponseMessage]],
       [ZeroSbeMessage EXCEPT !.payload = [tag |-> GatewayHeartbeatMessageCode, body |-> ZeroGatewayHeartbeatMessage]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> ClientHeartbeatMessageCode, body |-> 0]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> LogoutRequestMessageCode, body |-> 0]],
+      [ZeroSbeMessage EXCEPT !.payload = [tag |-> ClientHeartbeatMessageCode, body |-> [empty |-> 0]]],
+      [ZeroSbeMessage EXCEPT !.payload = [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]]],
       [ZeroSbeMessage EXCEPT !.payload = [tag |-> TerminateMessageCode, body |-> ZeroTerminateMessage]],
       [ZeroSbeMessage EXCEPT !.payload = [tag |-> SequencedMessageHeaderMessageCode, body |-> ZeroSequencedMessageHeaderMessage]],
       [ZeroSbeMessage EXCEPT !.payload = [tag |-> SubsessionJoinMessageCode, body |-> ZeroSubsessionJoinMessage]],

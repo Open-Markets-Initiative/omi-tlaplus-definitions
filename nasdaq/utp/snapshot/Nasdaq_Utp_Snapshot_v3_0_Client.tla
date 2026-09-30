@@ -169,8 +169,8 @@ LogoutRequestPacketCode == 79  \* "O"
 ClientTcpPayload ==
     [ tag : {DebugPacketCode}, body : DebugPacket ]
         \cup [ tag : {LoginRequestPacketCode}, body : LoginRequestPacket ]
-        \cup [ tag : {ClientHeartbeatPacketCode}, body : {0} ]
-        \cup [ tag : {LogoutRequestPacketCode}, body : {0} ]
+        \cup [ tag : {ClientHeartbeatPacketCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {LogoutRequestPacketCode}, body : {[empty |-> 0]} ]
 
 EncodeClientTcpPayload(message) ==
     CASE message.tag = DebugPacketCode -> EncodeDebugPacket(message.body)
@@ -182,8 +182,8 @@ DecodeClientTcpPayload(tag, bytes) ==
     LET read ==
             CASE tag = DebugPacketCode -> DecodeDebugPacket(bytes)
               [] tag = LoginRequestPacketCode -> DecodeLoginRequestPacket(bytes)
-              [] tag = ClientHeartbeatPacketCode -> Ok(0, bytes)
-              [] tag = LogoutRequestPacketCode -> Ok(0, bytes)
+              [] tag = ClientHeartbeatPacketCode -> Ok([empty |-> 0], bytes)
+              [] tag = LogoutRequestPacketCode -> Ok([empty |-> 0], bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -193,8 +193,8 @@ ZeroClientTcpPayload == [tag |-> DebugPacketCode, body |-> ZeroDebugPacket]
 CheckedClientTcpPayload ==
     { [tag |-> DebugPacketCode, body |-> one] : one \in CheckedDebugPacket }
         \cup { [tag |-> LoginRequestPacketCode, body |-> one] : one \in CheckedLoginRequestPacket }
-        \cup { [tag |-> ClientHeartbeatPacketCode, body |-> 0] }
-        \cup { [tag |-> LogoutRequestPacketCode, body |-> 0] }
+        \cup { [tag |-> ClientHeartbeatPacketCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> LogoutRequestPacketCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
 (* Client Packet, framed by Packet Length                                  *)

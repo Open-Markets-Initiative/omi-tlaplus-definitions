@@ -1576,8 +1576,8 @@ ServerPayload ==
         \cup [ tag : {LoginAcceptedPacketCode}, body : LoginAcceptedPacket ]
         \cup [ tag : {LoginRejectedPacketCode}, body : LoginRejectedPacket ]
         \cup [ tag : {SequencedDataPacketCode}, body : SequencedDataPacket ]
-        \cup [ tag : {ServerHeartbeatCode}, body : {0} ]
-        \cup [ tag : {EndOfSessionCode}, body : {0} ]
+        \cup [ tag : {ServerHeartbeatCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {EndOfSessionCode}, body : {[empty |-> 0]} ]
 
 EncodeServerPayload(message) ==
     CASE message.tag = DebugPacketCode -> EncodeDebugPacket(message.body)
@@ -1593,8 +1593,8 @@ DecodeServerPayload(tag, bytes) ==
               [] tag = LoginAcceptedPacketCode -> DecodeLoginAcceptedPacket(bytes)
               [] tag = LoginRejectedPacketCode -> DecodeLoginRejectedPacket(bytes)
               [] tag = SequencedDataPacketCode -> DecodeSequencedDataPacket(bytes)
-              [] tag = ServerHeartbeatCode -> Ok(0, bytes)
-              [] tag = EndOfSessionCode -> Ok(0, bytes)
+              [] tag = ServerHeartbeatCode -> Ok([empty |-> 0], bytes)
+              [] tag = EndOfSessionCode -> Ok([empty |-> 0], bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -1606,8 +1606,8 @@ CheckedServerPayload ==
         \cup { [tag |-> LoginAcceptedPacketCode, body |-> one] : one \in CheckedLoginAcceptedPacket }
         \cup { [tag |-> LoginRejectedPacketCode, body |-> one] : one \in CheckedLoginRejectedPacket }
         \cup { [tag |-> SequencedDataPacketCode, body |-> one] : one \in CheckedSequencedDataPacket }
-        \cup { [tag |-> ServerHeartbeatCode, body |-> 0] }
-        \cup { [tag |-> EndOfSessionCode, body |-> 0] }
+        \cup { [tag |-> ServerHeartbeatCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> EndOfSessionCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
 (* Server Soup Bin Tcp Packet, framed by Packet Length                     *)
@@ -1672,8 +1672,8 @@ OneServerSoupBinTcpPacket ==
       [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> LoginAcceptedPacketCode, body |-> ZeroLoginAcceptedPacket]],
       [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> LoginRejectedPacketCode, body |-> ZeroLoginRejectedPacket]],
       [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> SequencedDataPacketCode, body |-> ZeroSequencedDataPacket]],
-      [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> ServerHeartbeatCode, body |-> 0]],
-      [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> EndOfSessionCode, body |-> 0]] }
+      [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> ServerHeartbeatCode, body |-> [empty |-> 0]]],
+      [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> EndOfSessionCode, body |-> [empty |-> 0]]] }
 
 (***************************************************************************)
 (* Server Packet                                                           *)

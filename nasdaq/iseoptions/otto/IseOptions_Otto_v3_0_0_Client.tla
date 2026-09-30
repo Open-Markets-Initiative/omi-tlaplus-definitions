@@ -1441,8 +1441,8 @@ ClientPayload ==
     [ tag : {DebugPacketCode}, body : DebugPacket ]
         \cup [ tag : {LoginRequestPacketCode}, body : LoginRequestPacket ]
         \cup [ tag : {UnsequencedDataPacketCode}, body : UnsequencedDataPacket ]
-        \cup [ tag : {ClientHeartbeatPacketCode}, body : {0} ]
-        \cup [ tag : {LogoutRequestPacketCode}, body : {0} ]
+        \cup [ tag : {ClientHeartbeatPacketCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {LogoutRequestPacketCode}, body : {[empty |-> 0]} ]
 
 EncodeClientPayload(message) ==
     CASE message.tag = DebugPacketCode -> EncodeDebugPacket(message.body)
@@ -1456,8 +1456,8 @@ DecodeClientPayload(tag, bytes) ==
             CASE tag = DebugPacketCode -> DecodeDebugPacket(bytes)
               [] tag = LoginRequestPacketCode -> DecodeLoginRequestPacket(bytes)
               [] tag = UnsequencedDataPacketCode -> DecodeUnsequencedDataPacket(bytes)
-              [] tag = ClientHeartbeatPacketCode -> Ok(0, bytes)
-              [] tag = LogoutRequestPacketCode -> Ok(0, bytes)
+              [] tag = ClientHeartbeatPacketCode -> Ok([empty |-> 0], bytes)
+              [] tag = LogoutRequestPacketCode -> Ok([empty |-> 0], bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -1468,8 +1468,8 @@ CheckedClientPayload ==
     { [tag |-> DebugPacketCode, body |-> one] : one \in CheckedDebugPacket }
         \cup { [tag |-> LoginRequestPacketCode, body |-> one] : one \in CheckedLoginRequestPacket }
         \cup { [tag |-> UnsequencedDataPacketCode, body |-> one] : one \in CheckedUnsequencedDataPacket }
-        \cup { [tag |-> ClientHeartbeatPacketCode, body |-> 0] }
-        \cup { [tag |-> LogoutRequestPacketCode, body |-> 0] }
+        \cup { [tag |-> ClientHeartbeatPacketCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> LogoutRequestPacketCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
 (* Client Soup Bin Tcp Packet, framed by Packet Length                     *)
@@ -1533,8 +1533,8 @@ OneClientSoupBinTcpPacket ==
     { [ZeroClientSoupBinTcpPacket EXCEPT !.clientPayload = [tag |-> DebugPacketCode, body |-> ZeroDebugPacket]],
       [ZeroClientSoupBinTcpPacket EXCEPT !.clientPayload = [tag |-> LoginRequestPacketCode, body |-> ZeroLoginRequestPacket]],
       [ZeroClientSoupBinTcpPacket EXCEPT !.clientPayload = [tag |-> UnsequencedDataPacketCode, body |-> ZeroUnsequencedDataPacket]],
-      [ZeroClientSoupBinTcpPacket EXCEPT !.clientPayload = [tag |-> ClientHeartbeatPacketCode, body |-> 0]],
-      [ZeroClientSoupBinTcpPacket EXCEPT !.clientPayload = [tag |-> LogoutRequestPacketCode, body |-> 0]] }
+      [ZeroClientSoupBinTcpPacket EXCEPT !.clientPayload = [tag |-> ClientHeartbeatPacketCode, body |-> [empty |-> 0]]],
+      [ZeroClientSoupBinTcpPacket EXCEPT !.clientPayload = [tag |-> LogoutRequestPacketCode, body |-> [empty |-> 0]]] }
 
 (***************************************************************************)
 (* Client Packet                                                           *)
