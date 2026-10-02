@@ -528,41 +528,66 @@ CheckedQuotationMessage ==
         \cup { [ZeroQuotationMessage EXCEPT !.psxBestOfferSize = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Next Shares Quotation Message: 21 bytes                                 *)
+(* Next Shares Quotation Message: 41 bytes                                 *)
 (***************************************************************************)
 
 NextSharesQuotationMessage ==
-    [ trackingNumber   : Sample(2),
-      timestamp        : Sample(6),
-      nextSharesSymbol : Sample(8),
-      securityClass    : Sample(1),
-      nasdaqBestBid    : Sample(4) ]
+    [ trackingNumber                          : Sample(2),
+      timestamp                               : Sample(6),
+      nextSharesSymbol                        : Sample(8),
+      securityClass                           : Sample(1),
+      nasdaqBestBidProxyPrice                 : Sample(4),
+      nasdaqBestBidSize                       : Sample(4),
+      nasdaqBestBidNavPremiumDiscountAmount   : Sample(4),
+      nasdaqBestOfferProxyPrice               : Sample(4),
+      nasdaqBestOfferSize                     : Sample(4),
+      nasdaqBestOfferNavPremiumDiscountAmount : Sample(4) ]
 
 EncodeNextSharesQuotationMessage(message) ==
     message.trackingNumber
         \o message.timestamp
         \o message.nextSharesSymbol
         \o message.securityClass
-        \o message.nasdaqBestBid
+        \o message.nasdaqBestBidProxyPrice
+        \o message.nasdaqBestBidSize
+        \o message.nasdaqBestBidNavPremiumDiscountAmount
+        \o message.nasdaqBestOfferProxyPrice
+        \o message.nasdaqBestOfferSize
+        \o message.nasdaqBestOfferNavPremiumDiscountAmount
 
 DecodeNextSharesQuotationMessage(bytes) ==
     LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
     LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
     LET nextSharesSymbol == ReadBytes(timestamp.rest, 8) IN IF ~nextSharesSymbol.ok THEN Fail ELSE
     LET securityClass == ReadBytes(nextSharesSymbol.rest, 1) IN IF ~securityClass.ok THEN Fail ELSE
-    LET nasdaqBestBid == ReadBytes(securityClass.rest, 4) IN IF ~nasdaqBestBid.ok THEN Fail ELSE
-    Ok([ trackingNumber   |-> trackingNumber.value,
-         timestamp        |-> timestamp.value,
-         nextSharesSymbol |-> nextSharesSymbol.value,
-         securityClass    |-> securityClass.value,
-         nasdaqBestBid    |-> nasdaqBestBid.value ], nasdaqBestBid.rest)
+    LET nasdaqBestBidProxyPrice == ReadBytes(securityClass.rest, 4) IN IF ~nasdaqBestBidProxyPrice.ok THEN Fail ELSE
+    LET nasdaqBestBidSize == ReadBytes(nasdaqBestBidProxyPrice.rest, 4) IN IF ~nasdaqBestBidSize.ok THEN Fail ELSE
+    LET nasdaqBestBidNavPremiumDiscountAmount == ReadBytes(nasdaqBestBidSize.rest, 4) IN IF ~nasdaqBestBidNavPremiumDiscountAmount.ok THEN Fail ELSE
+    LET nasdaqBestOfferProxyPrice == ReadBytes(nasdaqBestBidNavPremiumDiscountAmount.rest, 4) IN IF ~nasdaqBestOfferProxyPrice.ok THEN Fail ELSE
+    LET nasdaqBestOfferSize == ReadBytes(nasdaqBestOfferProxyPrice.rest, 4) IN IF ~nasdaqBestOfferSize.ok THEN Fail ELSE
+    LET nasdaqBestOfferNavPremiumDiscountAmount == ReadBytes(nasdaqBestOfferSize.rest, 4) IN IF ~nasdaqBestOfferNavPremiumDiscountAmount.ok THEN Fail ELSE
+    Ok([ trackingNumber                          |-> trackingNumber.value,
+         timestamp                               |-> timestamp.value,
+         nextSharesSymbol                        |-> nextSharesSymbol.value,
+         securityClass                           |-> securityClass.value,
+         nasdaqBestBidProxyPrice                 |-> nasdaqBestBidProxyPrice.value,
+         nasdaqBestBidSize                       |-> nasdaqBestBidSize.value,
+         nasdaqBestBidNavPremiumDiscountAmount   |-> nasdaqBestBidNavPremiumDiscountAmount.value,
+         nasdaqBestOfferProxyPrice               |-> nasdaqBestOfferProxyPrice.value,
+         nasdaqBestOfferSize                     |-> nasdaqBestOfferSize.value,
+         nasdaqBestOfferNavPremiumDiscountAmount |-> nasdaqBestOfferNavPremiumDiscountAmount.value ], nasdaqBestOfferNavPremiumDiscountAmount.rest)
 
 ZeroNextSharesQuotationMessage ==
-    [ trackingNumber   |-> [i \in 1 .. 2 |-> 0],
-      timestamp        |-> [i \in 1 .. 6 |-> 0],
-      nextSharesSymbol |-> [i \in 1 .. 8 |-> 0],
-      securityClass    |-> [i \in 1 .. 1 |-> 0],
-      nasdaqBestBid    |-> [i \in 1 .. 4 |-> 0] ]
+    [ trackingNumber                          |-> [i \in 1 .. 2 |-> 0],
+      timestamp                               |-> [i \in 1 .. 6 |-> 0],
+      nextSharesSymbol                        |-> [i \in 1 .. 8 |-> 0],
+      securityClass                           |-> [i \in 1 .. 1 |-> 0],
+      nasdaqBestBidProxyPrice                 |-> [i \in 1 .. 4 |-> 0],
+      nasdaqBestBidSize                       |-> [i \in 1 .. 4 |-> 0],
+      nasdaqBestBidNavPremiumDiscountAmount   |-> [i \in 1 .. 4 |-> 0],
+      nasdaqBestOfferProxyPrice               |-> [i \in 1 .. 4 |-> 0],
+      nasdaqBestOfferSize                     |-> [i \in 1 .. 4 |-> 0],
+      nasdaqBestOfferNavPremiumDiscountAmount |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Next Shares Quotation Message at zero, then each field in turn at the values it is checked at *)
 CheckedNextSharesQuotationMessage ==
@@ -571,7 +596,12 @@ CheckedNextSharesQuotationMessage ==
         \cup { [ZeroNextSharesQuotationMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
         \cup { [ZeroNextSharesQuotationMessage EXCEPT !.nextSharesSymbol = one] : one \in Sample(8) }
         \cup { [ZeroNextSharesQuotationMessage EXCEPT !.securityClass = one] : one \in Sample(1) }
-        \cup { [ZeroNextSharesQuotationMessage EXCEPT !.nasdaqBestBid = one] : one \in Sample(4) }
+        \cup { [ZeroNextSharesQuotationMessage EXCEPT !.nasdaqBestBidProxyPrice = one] : one \in Sample(4) }
+        \cup { [ZeroNextSharesQuotationMessage EXCEPT !.nasdaqBestBidSize = one] : one \in Sample(4) }
+        \cup { [ZeroNextSharesQuotationMessage EXCEPT !.nasdaqBestBidNavPremiumDiscountAmount = one] : one \in Sample(4) }
+        \cup { [ZeroNextSharesQuotationMessage EXCEPT !.nasdaqBestOfferProxyPrice = one] : one \in Sample(4) }
+        \cup { [ZeroNextSharesQuotationMessage EXCEPT !.nasdaqBestOfferSize = one] : one \in Sample(4) }
+        \cup { [ZeroNextSharesQuotationMessage EXCEPT !.nasdaqBestOfferNavPremiumDiscountAmount = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Payload, selected by Message Type                                       *)

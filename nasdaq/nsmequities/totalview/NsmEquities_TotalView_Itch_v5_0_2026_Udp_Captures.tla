@@ -13,7 +13,7 @@ AddOrderNoMPIDCapture ==
        8, 0, 0, 0, 0, 0, 0, 0, 3, 66, 0, 0, 0, 100, 81, 73,
        68, 32, 32, 32, 32, 32, 0, 2, 58, 80 >>
 
-AddOrderwithMpidCapture ==
+AddOrderWithMpidCapture ==
     << 83, 48, 54, 49, 50, 50, 54, 32, 32, 32, 0, 0, 0, 0, 0, 0,
        0, 2, 0, 1, 0, 40, 70, 13, 6, 0, 0, 13, 24, 205, 4, 109,
        119, 0, 0, 0, 0, 0, 0, 141, 174, 66, 0, 0, 0, 100, 68, 89,
@@ -99,7 +99,7 @@ SystemEventCapture ==
        0, 12, 0, 1, 0, 12, 83, 0, 0, 0, 0, 9, 231, 254, 83, 113,
        2, 79 >>
 
-Captures == { AddOrderNoMPIDCapture, AddOrderwithMpidCapture, CrossTradeCapture, LULDAuctionCollarCapture, MarketParticipantPositionCapture, NetOrderImbalanceIndicatorCapture, NonCrossTradeCapture, OrderCancelCapture, OrderDeleteCapture, OrderExecutedCapture, OrderExecutedWithPriceCapture, OrderReplaceCapture, RegSHORestrictionCapture, StockDirectoryCapture, StockTradingActionCapture, SystemEventCapture }
+Captures == { AddOrderNoMPIDCapture, AddOrderWithMpidCapture, CrossTradeCapture, LULDAuctionCollarCapture, MarketParticipantPositionCapture, NetOrderImbalanceIndicatorCapture, NonCrossTradeCapture, OrderCancelCapture, OrderDeleteCapture, OrderExecutedCapture, OrderExecutedWithPriceCapture, OrderReplaceCapture, RegSHORestrictionCapture, StockDirectoryCapture, StockTradingActionCapture, SystemEventCapture }
 
 (* Every recorded packet reads, reads whole, and writes back unchanged *)
 CapturesRoundTrip ==

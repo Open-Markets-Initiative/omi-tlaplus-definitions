@@ -1,7 +1,7 @@
 ----------------- MODULE IseOptions_SpreadOrders_v2_1_Udp ------------------
 (***************************************************************************)
 (* National Association of Securities Dealers Automated Quotations         *)
-(* (Nasdaq) Phlx Options Spread Orders v2.1                                *)
+(* (Nasdaq) ISE Options Spread Orders v2.1                                 *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)

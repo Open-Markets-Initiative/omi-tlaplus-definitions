@@ -37,31 +37,31 @@ AddOrderNoMPIDCapture5 ==
        223, 0, 0, 0, 0, 2, 8, 98, 20, 83, 0, 0, 0, 200, 84, 32,
        32, 32, 32, 32, 32, 32, 0, 2, 39, 244 >>
 
-AddOrderwithMpidCapture1 ==
+AddOrderWithMpidCapture1 ==
     << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 1, 0, 40, 70, 6, 202, 0, 0, 31, 26, 206, 217, 153,
        54, 0, 0, 0, 0, 1, 32, 190, 117, 83, 0, 0, 0, 100, 67, 65,
        83, 89, 32, 32, 32, 32, 0, 38, 253, 64, 70, 76, 84, 85 >>
 
-AddOrderwithMpidCapture2 ==
+AddOrderWithMpidCapture2 ==
     << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 1, 0, 40, 70, 39, 193, 0, 0, 31, 26, 206, 219, 78,
        78, 0, 0, 0, 0, 2, 8, 98, 44, 83, 0, 0, 0, 100, 84, 83,
        86, 84, 32, 32, 32, 32, 0, 1, 2, 52, 70, 76, 84, 85 >>
 
-AddOrderwithMpidCapture3 ==
+AddOrderWithMpidCapture3 ==
     << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 1, 0, 40, 70, 12, 91, 0, 0, 31, 26, 206, 219, 112,
        21, 0, 0, 0, 0, 1, 102, 181, 250, 83, 0, 0, 3, 32, 69, 73,
        68, 79, 32, 32, 32, 32, 0, 3, 162, 120, 71, 83, 67, 79 >>
 
-AddOrderwithMpidCapture4 ==
+AddOrderWithMpidCapture4 ==
     << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 1, 0, 40, 70, 32, 170, 0, 0, 31, 26, 206, 220, 64,
        54, 0, 0, 0, 0, 1, 69, 243, 55, 83, 0, 0, 0, 100, 81, 76,
        89, 83, 32, 32, 32, 32, 0, 24, 128, 168, 70, 76, 84, 85 >>
 
-AddOrderwithMpidCapture5 ==
+AddOrderWithMpidCapture5 ==
     << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 1, 0, 40, 70, 41, 40, 0, 0, 31, 26, 206, 220, 223,
        147, 0, 0, 0, 0, 2, 8, 98, 156, 83, 0, 0, 0, 100, 86, 67,
@@ -417,7 +417,7 @@ SystemEventCapture ==
        0, 0, 0, 1, 0, 12, 83, 0, 0, 0, 0, 31, 26, 206, 219, 2,
        240, 81 >>
 
-Captures == { AddOrderNoMPIDCapture1, AddOrderNoMPIDCapture2, AddOrderNoMPIDCapture3, AddOrderNoMPIDCapture4, AddOrderNoMPIDCapture5, AddOrderwithMpidCapture1, AddOrderwithMpidCapture2, AddOrderwithMpidCapture3, AddOrderwithMpidCapture4, AddOrderwithMpidCapture5, CrossTradeCapture1, CrossTradeCapture2, CrossTradeCapture3, CrossTradeCapture4, CrossTradeCapture5, LULDAuctionCollarCapture1, LULDAuctionCollarCapture2, LULDAuctionCollarCapture3, LULDAuctionCollarCapture4, LULDAuctionCollarCapture5, MarketParticipantPositionCapture1, MarketParticipantPositionCapture2, MarketParticipantPositionCapture3, MarketParticipantPositionCapture4, MarketParticipantPositionCapture5, NetOrderImbalanceIndicatorCapture1, NetOrderImbalanceIndicatorCapture2, NetOrderImbalanceIndicatorCapture3, NetOrderImbalanceIndicatorCapture4, NetOrderImbalanceIndicatorCapture5, NonCrossTradeCapture1, NonCrossTradeCapture2, NonCrossTradeCapture3, NonCrossTradeCapture4, NonCrossTradeCapture5, OrderCancelCapture1, OrderCancelCapture2, OrderCancelCapture3, OrderCancelCapture4, OrderCancelCapture5, OrderDeleteCapture1, OrderDeleteCapture2, OrderDeleteCapture3, OrderDeleteCapture4, OrderDeleteCapture5, OrderExecutedCapture1, OrderExecutedCapture2, OrderExecutedCapture3, OrderExecutedCapture4, OrderExecutedCapture5, OrderExecutedWithPriceCapture1, OrderExecutedWithPriceCapture2, OrderExecutedWithPriceCapture3, OrderExecutedWithPriceCapture4, OrderExecutedWithPriceCapture5, OrderReplaceCapture1, OrderReplaceCapture2, OrderReplaceCapture3, OrderReplaceCapture4, OrderReplaceCapture5, RegSHORestrictionCapture1, RegSHORestrictionCapture2, RegSHORestrictionCapture3, RegSHORestrictionCapture4, RegSHORestrictionCapture5, StockTradingActionCapture1, StockTradingActionCapture2, StockTradingActionCapture3, StockTradingActionCapture4, StockTradingActionCapture5, SystemEventCapture }
+Captures == { AddOrderNoMPIDCapture1, AddOrderNoMPIDCapture2, AddOrderNoMPIDCapture3, AddOrderNoMPIDCapture4, AddOrderNoMPIDCapture5, AddOrderWithMpidCapture1, AddOrderWithMpidCapture2, AddOrderWithMpidCapture3, AddOrderWithMpidCapture4, AddOrderWithMpidCapture5, CrossTradeCapture1, CrossTradeCapture2, CrossTradeCapture3, CrossTradeCapture4, CrossTradeCapture5, LULDAuctionCollarCapture1, LULDAuctionCollarCapture2, LULDAuctionCollarCapture3, LULDAuctionCollarCapture4, LULDAuctionCollarCapture5, MarketParticipantPositionCapture1, MarketParticipantPositionCapture2, MarketParticipantPositionCapture3, MarketParticipantPositionCapture4, MarketParticipantPositionCapture5, NetOrderImbalanceIndicatorCapture1, NetOrderImbalanceIndicatorCapture2, NetOrderImbalanceIndicatorCapture3, NetOrderImbalanceIndicatorCapture4, NetOrderImbalanceIndicatorCapture5, NonCrossTradeCapture1, NonCrossTradeCapture2, NonCrossTradeCapture3, NonCrossTradeCapture4, NonCrossTradeCapture5, OrderCancelCapture1, OrderCancelCapture2, OrderCancelCapture3, OrderCancelCapture4, OrderCancelCapture5, OrderDeleteCapture1, OrderDeleteCapture2, OrderDeleteCapture3, OrderDeleteCapture4, OrderDeleteCapture5, OrderExecutedCapture1, OrderExecutedCapture2, OrderExecutedCapture3, OrderExecutedCapture4, OrderExecutedCapture5, OrderExecutedWithPriceCapture1, OrderExecutedWithPriceCapture2, OrderExecutedWithPriceCapture3, OrderExecutedWithPriceCapture4, OrderExecutedWithPriceCapture5, OrderReplaceCapture1, OrderReplaceCapture2, OrderReplaceCapture3, OrderReplaceCapture4, OrderReplaceCapture5, RegSHORestrictionCapture1, RegSHORestrictionCapture2, RegSHORestrictionCapture3, RegSHORestrictionCapture4, RegSHORestrictionCapture5, StockTradingActionCapture1, StockTradingActionCapture2, StockTradingActionCapture3, StockTradingActionCapture4, StockTradingActionCapture5, SystemEventCapture }
 
 (* Every recorded packet reads, reads whole, and writes back unchanged *)
 CapturesRoundTrip ==
