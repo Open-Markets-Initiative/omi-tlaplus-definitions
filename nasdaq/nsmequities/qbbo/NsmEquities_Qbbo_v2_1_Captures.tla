@@ -1,9 +1,9 @@
 ------------------ MODULE NsmEquities_Qbbo_v2_1_Captures -------------------
 (***************************************************************************)
 (* Recorded National Association of Securities Dealers Automated           *)
-(* Quotations (Nasdaq) Quoted Best Bid And Offer v2.1 packets, as the      *)
-(* bytes they were captured as. Each one decodes, consumes the whole       *)
-(* packet, and encodes back to exactly the bytes it was read from.         *)
+(* Quotations (Nasdaq) Best Bid And Offer v2.1 packets, as the bytes they  *)
+(* were captured as. Each one decodes, consumes the whole packet, and      *)
+(* encodes back to exactly the bytes it was read from.                     *)
 (***************************************************************************)
 EXTENDS NsmEquities_Qbbo_v2_1
 

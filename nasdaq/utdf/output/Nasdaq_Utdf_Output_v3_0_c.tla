@@ -3075,40 +3075,40 @@ OneMessage ==
       [ZeroMessage EXCEPT !.categoryPayload = [tag |-> ControlMessageCode, body |-> ZeroControlMessage]] }
 
 (***************************************************************************)
-(* Mold Udp 64 Packet                                                      *)
+(* Packet                                                                  *)
 (***************************************************************************)
 
-MoldUdp64Packet ==
-    [ udpSession        : Sample(10),
-      udpSequenceNumber : Sample(8),
-      message           : SampleLists(OneMessage) ]
+Packet ==
+    [ session        : Sample(10),
+      sequenceNumber : Sample(8),
+      message        : SampleLists(OneMessage) ]
 
-EncodeMoldUdp64Packet(message) ==
-    message.udpSession
-        \o message.udpSequenceNumber
+EncodePacket(message) ==
+    message.session
+        \o message.sequenceNumber
         \o EncodeUIntBE(Len(message.message), 2)
         \o EncodeMessageList(message.message)
 
-DecodeMoldUdp64Packet(bytes) ==
-    LET udpSession == ReadBytes(bytes, 10) IN IF ~udpSession.ok THEN Fail ELSE
-    LET udpSequenceNumber == ReadBytes(udpSession.rest, 8) IN IF ~udpSequenceNumber.ok THEN Fail ELSE
-    LET messageCount == ReadUIntBE(udpSequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
+DecodePacket(bytes) ==
+    LET session == ReadBytes(bytes, 10) IN IF ~session.ok THEN Fail ELSE
+    LET sequenceNumber == ReadBytes(session.rest, 8) IN IF ~sequenceNumber.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(sequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
     LET message == ReadMessageList(messageCount.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
-    Ok([ udpSession        |-> udpSession.value,
-         udpSequenceNumber |-> udpSequenceNumber.value,
-         message           |-> message.value ], message.rest)
+    Ok([ session        |-> session.value,
+         sequenceNumber |-> sequenceNumber.value,
+         message        |-> message.value ], message.rest)
 
-ZeroMoldUdp64Packet ==
-    [ udpSession        |-> [i \in 1 .. 10 |-> 0],
-      udpSequenceNumber |-> [i \in 1 .. 8 |-> 0],
-      message           |-> << >> ]
+ZeroPacket ==
+    [ session        |-> [i \in 1 .. 10 |-> 0],
+      sequenceNumber |-> [i \in 1 .. 8 |-> 0],
+      message        |-> << >> ]
 
-(* Mold Udp 64 Packet at zero, then each field in turn at the values it is checked at *)
-CheckedMoldUdp64Packet ==
-    { ZeroMoldUdp64Packet }
-        \cup { [ZeroMoldUdp64Packet EXCEPT !.udpSession = one] : one \in Sample(10) }
-        \cup { [ZeroMoldUdp64Packet EXCEPT !.udpSequenceNumber = one] : one \in Sample(8) }
-        \cup { [ZeroMoldUdp64Packet EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
+(* Packet at zero, then each field in turn at the values it is checked at *)
+CheckedPacket ==
+    { ZeroPacket }
+        \cup { [ZeroPacket EXCEPT !.session = one] : one \in Sample(10) }
+        \cup { [ZeroPacket EXCEPT !.sequenceNumber = one] : one \in Sample(8) }
+        \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -3406,10 +3406,10 @@ RoundTripMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mold Udp 64 Packet decodes back to what was encoded, and leaves nothing over *)
-RoundTripMoldUdp64Packet ==
-    \A message \in CheckedMoldUdp64Packet :
-        LET read == DecodeMoldUdp64Packet(EncodeMoldUdp64Packet(message))
+(* Every Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripPacket ==
+    \A message \in CheckedPacket :
+        LET read == DecodePacket(EncodePacket(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

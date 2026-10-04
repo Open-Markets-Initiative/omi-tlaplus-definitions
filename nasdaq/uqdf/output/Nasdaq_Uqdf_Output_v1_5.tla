@@ -2624,35 +2624,35 @@ OneMessage ==
 (***************************************************************************)
 
 Packet ==
-    [ session  : Sample(10),
-      sequence : Sample(8),
-      message  : SampleLists(OneMessage) ]
+    [ session        : Sample(10),
+      sequenceNumber : Sample(8),
+      message        : SampleLists(OneMessage) ]
 
 EncodePacket(message) ==
     message.session
-        \o message.sequence
+        \o message.sequenceNumber
         \o EncodeUIntBE(Len(message.message), 2)
         \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
     LET session == ReadBytes(bytes, 10) IN IF ~session.ok THEN Fail ELSE
-    LET sequence == ReadBytes(session.rest, 8) IN IF ~sequence.ok THEN Fail ELSE
-    LET count == ReadUIntBE(sequence.rest, 2) IN IF ~count.ok THEN Fail ELSE
-    LET message == ReadMessageList(count.rest, count.value) IN IF ~message.ok THEN Fail ELSE
-    Ok([ session  |-> session.value,
-         sequence |-> sequence.value,
-         message  |-> message.value ], message.rest)
+    LET sequenceNumber == ReadBytes(session.rest, 8) IN IF ~sequenceNumber.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(sequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
+    LET message == ReadMessageList(messageCount.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
+    Ok([ session        |-> session.value,
+         sequenceNumber |-> sequenceNumber.value,
+         message        |-> message.value ], message.rest)
 
 ZeroPacket ==
-    [ session  |-> [i \in 1 .. 10 |-> 0],
-      sequence |-> [i \in 1 .. 8 |-> 0],
-      message  |-> << >> ]
+    [ session        |-> [i \in 1 .. 10 |-> 0],
+      sequenceNumber |-> [i \in 1 .. 8 |-> 0],
+      message        |-> << >> ]
 
 (* Packet at zero, then each field in turn at the values it is checked at *)
 CheckedPacket ==
     { ZeroPacket }
         \cup { [ZeroPacket EXCEPT !.session = one] : one \in Sample(10) }
-        \cup { [ZeroPacket EXCEPT !.sequence = one] : one \in Sample(8) }
+        \cup { [ZeroPacket EXCEPT !.sequenceNumber = one] : one \in Sample(8) }
         \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
 
 (***************************************************************************)

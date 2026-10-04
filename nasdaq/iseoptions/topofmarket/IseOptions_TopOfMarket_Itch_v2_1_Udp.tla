@@ -890,35 +890,35 @@ OneMessage ==
 (***************************************************************************)
 
 Packet ==
-    [ udpSession        : Sample(10),
-      udpSequenceNumber : Sample(8),
-      message           : SampleLists(OneMessage) ]
+    [ session        : Sample(10),
+      sequenceNumber : Sample(8),
+      message        : SampleLists(OneMessage) ]
 
 EncodePacket(message) ==
-    message.udpSession
-        \o message.udpSequenceNumber
+    message.session
+        \o message.sequenceNumber
         \o EncodeUIntBE(Len(message.message), 2)
         \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
-    LET udpSession == ReadBytes(bytes, 10) IN IF ~udpSession.ok THEN Fail ELSE
-    LET udpSequenceNumber == ReadBytes(udpSession.rest, 8) IN IF ~udpSequenceNumber.ok THEN Fail ELSE
-    LET messageCount == ReadUIntBE(udpSequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
+    LET session == ReadBytes(bytes, 10) IN IF ~session.ok THEN Fail ELSE
+    LET sequenceNumber == ReadBytes(session.rest, 8) IN IF ~sequenceNumber.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(sequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
     LET message == ReadMessageList(messageCount.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
-    Ok([ udpSession        |-> udpSession.value,
-         udpSequenceNumber |-> udpSequenceNumber.value,
-         message           |-> message.value ], message.rest)
+    Ok([ session        |-> session.value,
+         sequenceNumber |-> sequenceNumber.value,
+         message        |-> message.value ], message.rest)
 
 ZeroPacket ==
-    [ udpSession        |-> [i \in 1 .. 10 |-> 0],
-      udpSequenceNumber |-> [i \in 1 .. 8 |-> 0],
-      message           |-> << >> ]
+    [ session        |-> [i \in 1 .. 10 |-> 0],
+      sequenceNumber |-> [i \in 1 .. 8 |-> 0],
+      message        |-> << >> ]
 
 (* Packet at zero, then each field in turn at the values it is checked at *)
 CheckedPacket ==
     { ZeroPacket }
-        \cup { [ZeroPacket EXCEPT !.udpSession = one] : one \in Sample(10) }
-        \cup { [ZeroPacket EXCEPT !.udpSequenceNumber = one] : one \in Sample(8) }
+        \cup { [ZeroPacket EXCEPT !.session = one] : one \in Sample(10) }
+        \cup { [ZeroPacket EXCEPT !.sequenceNumber = one] : one \in Sample(8) }
         \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
 
 (***************************************************************************)

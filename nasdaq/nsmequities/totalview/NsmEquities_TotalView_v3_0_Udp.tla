@@ -15,9 +15,9 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
-(* Note: a Count of 0 marks Heartbeat and carries no Message.              *)
+(* Note: a Message Count of 0 marks Heartbeat and carries no Message.      *)
 (*                                                                         *)
-(* Note: a Count of 0 marks End Of Session and carries no Message.         *)
+(* Note: a Message Count of 0 marks End Of Session and carries no Message. *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -218,29 +218,29 @@ CheckedStockDirectoryMessage ==
 StockTradingActionMessage ==
     [ stockAlphanumeric6 : Sample(6),
       tradingState       : Sample(1),
-      reserved           : Sample(1),
+      reserved1          : Sample(1),
       reason             : Sample(4) ]
 
 EncodeStockTradingActionMessage(message) ==
     message.stockAlphanumeric6
         \o message.tradingState
-        \o message.reserved
+        \o message.reserved1
         \o message.reason
 
 DecodeStockTradingActionMessage(bytes) ==
     LET stockAlphanumeric6 == ReadBytes(bytes, 6) IN IF ~stockAlphanumeric6.ok THEN Fail ELSE
     LET tradingState == ReadBytes(stockAlphanumeric6.rest, 1) IN IF ~tradingState.ok THEN Fail ELSE
-    LET reserved == ReadBytes(tradingState.rest, 1) IN IF ~reserved.ok THEN Fail ELSE
-    LET reason == ReadBytes(reserved.rest, 4) IN IF ~reason.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(tradingState.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET reason == ReadBytes(reserved1.rest, 4) IN IF ~reason.ok THEN Fail ELSE
     Ok([ stockAlphanumeric6 |-> stockAlphanumeric6.value,
          tradingState       |-> tradingState.value,
-         reserved           |-> reserved.value,
+         reserved1          |-> reserved1.value,
          reason             |-> reason.value ], reason.rest)
 
 ZeroStockTradingActionMessage ==
     [ stockAlphanumeric6 |-> [i \in 1 .. 6 |-> 0],
       tradingState       |-> [i \in 1 .. 1 |-> 0],
-      reserved           |-> [i \in 1 .. 1 |-> 0],
+      reserved1          |-> [i \in 1 .. 1 |-> 0],
       reason             |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Stock Trading Action Message at zero, then each field in turn at the values it is checked at *)
@@ -248,7 +248,7 @@ CheckedStockTradingActionMessage ==
     { ZeroStockTradingActionMessage }
         \cup { [ZeroStockTradingActionMessage EXCEPT !.stockAlphanumeric6 = one] : one \in Sample(6) }
         \cup { [ZeroStockTradingActionMessage EXCEPT !.tradingState = one] : one \in Sample(1) }
-        \cup { [ZeroStockTradingActionMessage EXCEPT !.reserved = one] : one \in Sample(1) }
+        \cup { [ZeroStockTradingActionMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroStockTradingActionMessage EXCEPT !.reason = one] : one \in Sample(4) }
 
 (***************************************************************************)
@@ -815,7 +815,7 @@ CheckedPayload ==
         \cup { [tag |-> NetOrderImbalanceIndicatorMessageCode, body |-> one] : one \in CheckedNetOrderImbalanceIndicatorMessage }
 
 (***************************************************************************)
-(* Message, framed by Length                                               *)
+(* Message, framed by Message Length                                       *)
 (***************************************************************************)
 
 Message ==
@@ -825,7 +825,7 @@ EncodeMessageBody(message) ==
     EncodeUIntBE(message.payload.tag, 1)
         \o EncodePayload(message.payload)
 
-(* Length counts the bytes it frames, so it is written from them *)
+(* Message Length counts the bytes it frames, so it is written from them *)
 EncodeMessage(message) ==
     LET body == EncodeMessageBody(message)
     IN  EncodeUIntBE(Len(body), 2) \o body
@@ -894,35 +894,35 @@ OneMessage ==
 (***************************************************************************)
 
 Packet ==
-    [ session  : Sample(10),
-      sequence : Sample(4),
-      message  : SampleLists(OneMessage) ]
+    [ session        : Sample(10),
+      sequenceNumber : Sample(4),
+      message        : SampleLists(OneMessage) ]
 
 EncodePacket(message) ==
     message.session
-        \o message.sequence
+        \o message.sequenceNumber
         \o EncodeUIntLE(Len(message.message), 2)
         \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
     LET session == ReadBytes(bytes, 10) IN IF ~session.ok THEN Fail ELSE
-    LET sequence == ReadBytes(session.rest, 4) IN IF ~sequence.ok THEN Fail ELSE
-    LET count == ReadUIntLE(sequence.rest, 2) IN IF ~count.ok THEN Fail ELSE
-    LET message == ReadMessageList(count.rest, count.value) IN IF ~message.ok THEN Fail ELSE
-    Ok([ session  |-> session.value,
-         sequence |-> sequence.value,
-         message  |-> message.value ], message.rest)
+    LET sequenceNumber == ReadBytes(session.rest, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
+    LET messageCount == ReadUIntLE(sequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
+    LET message == ReadMessageList(messageCount.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
+    Ok([ session        |-> session.value,
+         sequenceNumber |-> sequenceNumber.value,
+         message        |-> message.value ], message.rest)
 
 ZeroPacket ==
-    [ session  |-> [i \in 1 .. 10 |-> 0],
-      sequence |-> [i \in 1 .. 4 |-> 0],
-      message  |-> << >> ]
+    [ session        |-> [i \in 1 .. 10 |-> 0],
+      sequenceNumber |-> [i \in 1 .. 4 |-> 0],
+      message        |-> << >> ]
 
 (* Packet at zero, then each field in turn at the values it is checked at *)
 CheckedPacket ==
     { ZeroPacket }
         \cup { [ZeroPacket EXCEPT !.session = one] : one \in Sample(10) }
-        \cup { [ZeroPacket EXCEPT !.sequence = one] : one \in Sample(4) }
+        \cup { [ZeroPacket EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
         \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
 
 (***************************************************************************)
@@ -1091,7 +1091,7 @@ SelectsPayload ==
         LET read == DecodePayload(message.tag, EncodePayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
-(* Length is written from the bytes it frames *)
+(* Message Length is written from the bytes it frames *)
 FramesMessage ==
     \A message \in CheckedMessage :
         LET bytes == EncodeMessage(message)

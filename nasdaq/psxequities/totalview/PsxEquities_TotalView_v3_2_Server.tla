@@ -384,29 +384,29 @@ CheckedStockDirectoryMessage ==
 StockTradingActionMessage ==
     [ stock        : Sample(8),
       tradingState : Sample(1),
-      reserved     : Sample(1),
+      reserved1    : Sample(1),
       reason       : Sample(4) ]
 
 EncodeStockTradingActionMessage(message) ==
     message.stock
         \o message.tradingState
-        \o message.reserved
+        \o message.reserved1
         \o message.reason
 
 DecodeStockTradingActionMessage(bytes) ==
     LET stock == ReadBytes(bytes, 8) IN IF ~stock.ok THEN Fail ELSE
     LET tradingState == ReadBytes(stock.rest, 1) IN IF ~tradingState.ok THEN Fail ELSE
-    LET reserved == ReadBytes(tradingState.rest, 1) IN IF ~reserved.ok THEN Fail ELSE
-    LET reason == ReadBytes(reserved.rest, 4) IN IF ~reason.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(tradingState.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET reason == ReadBytes(reserved1.rest, 4) IN IF ~reason.ok THEN Fail ELSE
     Ok([ stock        |-> stock.value,
          tradingState |-> tradingState.value,
-         reserved     |-> reserved.value,
+         reserved1    |-> reserved1.value,
          reason       |-> reason.value ], reason.rest)
 
 ZeroStockTradingActionMessage ==
     [ stock        |-> [i \in 1 .. 8 |-> 0],
       tradingState |-> [i \in 1 .. 1 |-> 0],
-      reserved     |-> [i \in 1 .. 1 |-> 0],
+      reserved1    |-> [i \in 1 .. 1 |-> 0],
       reason       |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Stock Trading Action Message at zero, then each field in turn at the values it is checked at *)
@@ -414,7 +414,7 @@ CheckedStockTradingActionMessage ==
     { ZeroStockTradingActionMessage }
         \cup { [ZeroStockTradingActionMessage EXCEPT !.stock = one] : one \in Sample(8) }
         \cup { [ZeroStockTradingActionMessage EXCEPT !.tradingState = one] : one \in Sample(1) }
-        \cup { [ZeroStockTradingActionMessage EXCEPT !.reserved = one] : one \in Sample(1) }
+        \cup { [ZeroStockTradingActionMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroStockTradingActionMessage EXCEPT !.reason = one] : one \in Sample(4) }
 
 (***************************************************************************)

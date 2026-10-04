@@ -1,7 +1,7 @@
 -------------------- MODULE NsmEquities_Qbbo_v2_1_2026 ---------------------
 (***************************************************************************)
 (* National Association of Securities Dealers Automated Quotations         *)
-(* (Nasdaq) Quoted Best Bid And Offer v2.1.2026                            *)
+(* (Nasdaq) Best Bid And Offer v2.1.2026                                   *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)

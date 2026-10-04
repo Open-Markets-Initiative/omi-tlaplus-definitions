@@ -118,12 +118,12 @@ CheckedDebugPacket ==
         \cup { [ZeroDebugPacket EXCEPT !.text = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Login Accepted Packet: 20 bytes                                         *)
+(* Login Accepted Packet: 14 bytes                                         *)
 (***************************************************************************)
 
 LoginAcceptedPacket ==
     [ session        : Sample(10),
-      sequenceNumber : Sample(10) ]
+      sequenceNumber : Sample(4) ]
 
 EncodeLoginAcceptedPacket(message) ==
     message.session
@@ -131,19 +131,19 @@ EncodeLoginAcceptedPacket(message) ==
 
 DecodeLoginAcceptedPacket(bytes) ==
     LET session == ReadBytes(bytes, 10) IN IF ~session.ok THEN Fail ELSE
-    LET sequenceNumber == ReadBytes(session.rest, 10) IN IF ~sequenceNumber.ok THEN Fail ELSE
+    LET sequenceNumber == ReadBytes(session.rest, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     Ok([ session        |-> session.value,
          sequenceNumber |-> sequenceNumber.value ], sequenceNumber.rest)
 
 ZeroLoginAcceptedPacket ==
     [ session        |-> [i \in 1 .. 10 |-> 0],
-      sequenceNumber |-> [i \in 1 .. 10 |-> 0] ]
+      sequenceNumber |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Login Accepted Packet at zero, then each field in turn at the values it is checked at *)
 CheckedLoginAcceptedPacket ==
     { ZeroLoginAcceptedPacket }
         \cup { [ZeroLoginAcceptedPacket EXCEPT !.session = one] : one \in Sample(10) }
-        \cup { [ZeroLoginAcceptedPacket EXCEPT !.sequenceNumber = one] : one \in Sample(10) }
+        \cup { [ZeroLoginAcceptedPacket EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Login Rejected Packet: 1 bytes                                          *)
