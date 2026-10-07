@@ -72,16 +72,6 @@ StockTradingActionMessageCapture ==
        0, 1, 0, 1, 0, 17, 72, 28, 18, 227, 192, 65, 32, 32, 32, 32,
        32, 84, 32, 32, 32, 32, 32 >>
 
-StockTradingActionMessageWithStockDirectoryMessageCapture1 ==
-    << 83, 48, 51, 50, 52, 48, 57, 118, 52, 46, 0, 0, 0, 0, 0, 0,
-       0, 1, 0, 1, 0, 18, 82, 28, 3, 161, 128, 65, 32, 32, 32, 32,
-       32, 84, 32, 0, 0, 0, 100, 78 >>
-
-StockTradingActionMessageWithStockDirectoryMessageCapture2 ==
-    << 83, 48, 51, 50, 52, 48, 57, 118, 52, 46, 0, 0, 0, 0, 0, 0,
-       0, 1, 0, 1, 0, 17, 72, 28, 18, 227, 192, 65, 32, 32, 32, 32,
-       32, 84, 32, 32, 32, 32, 32 >>
-
 SystemEventMessageCapture ==
     << 83, 48, 51, 50, 52, 48, 57, 118, 52, 46, 0, 0, 0, 0, 0, 0,
        0, 1, 0, 1, 0, 6, 83, 23, 169, 189, 64, 79 >>
@@ -96,7 +86,7 @@ TradeMessageCapture ==
        1, 92, 121, 66, 0, 0, 3, 132, 71, 76, 68, 32, 32, 32, 0, 13,
        238, 204, 0, 0, 0, 0, 0, 0, 0, 2 >>
 
-Captures == { AddOrderMessageCapture, AddOrderWithMpidMessageCapture, BrokenTradeMessageCapture, CrossTradeMessageCapture, MarketParticipantPositionMessageCapture, NetOrderImbalanceIndicatorMessageCapture, OrderCancelMessageCapture, OrderDeleteMessageCapture, OrderExecutedMessageCapture, OrderExecutedWithPriceMessageCapture, StockDirectoryMessageCapture, StockTradingActionMessageCapture, StockTradingActionMessageWithStockDirectoryMessageCapture1, StockTradingActionMessageWithStockDirectoryMessageCapture2, SystemEventMessageCapture, TimestampMessageCapture, TradeMessageCapture }
+Captures == { AddOrderMessageCapture, AddOrderWithMpidMessageCapture, BrokenTradeMessageCapture, CrossTradeMessageCapture, MarketParticipantPositionMessageCapture, NetOrderImbalanceIndicatorMessageCapture, OrderCancelMessageCapture, OrderDeleteMessageCapture, OrderExecutedMessageCapture, OrderExecutedWithPriceMessageCapture, StockDirectoryMessageCapture, StockTradingActionMessageCapture, SystemEventMessageCapture, TimestampMessageCapture, TradeMessageCapture }
 
 (* Every recorded packet reads, reads whole, and writes back unchanged *)
 CapturesRoundTrip ==

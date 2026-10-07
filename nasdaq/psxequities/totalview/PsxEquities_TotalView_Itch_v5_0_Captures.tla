@@ -262,42 +262,42 @@ SystemEventMessageCapture ==
        0, 0, 0, 1, 0, 12, 83, 0, 0, 0, 0, 31, 26, 206, 219, 133,
        252, 81 >>
 
-TradeMessageNoncrossCapture1 ==
+TradeMessageNonCrossCapture1 ==
     << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 1, 0, 44, 80, 1, 199, 0, 2, 31, 26, 208, 162, 201,
        239, 0, 0, 0, 0, 0, 0, 0, 0, 66, 0, 0, 0, 1, 65, 77,
        65, 84, 32, 32, 32, 32, 0, 23, 8, 24, 0, 0, 0, 0, 0, 0,
        104, 77 >>
 
-TradeMessageNoncrossCapture2 ==
+TradeMessageNonCrossCapture2 ==
     << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 1, 0, 44, 80, 26, 38, 0, 2, 31, 26, 224, 54, 173,
        127, 0, 0, 0, 0, 0, 0, 0, 0, 66, 0, 0, 0, 100, 77, 79,
        65, 84, 32, 32, 32, 32, 0, 11, 235, 44, 0, 0, 0, 0, 0, 0,
        104, 99 >>
 
-TradeMessageNoncrossCapture3 ==
+TradeMessageNonCrossCapture3 ==
     << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 1, 0, 44, 80, 1, 199, 0, 2, 31, 26, 231, 179, 239,
        164, 0, 0, 0, 0, 0, 0, 0, 0, 66, 0, 0, 0, 1, 65, 77,
        65, 84, 32, 32, 32, 32, 0, 23, 8, 24, 0, 0, 0, 0, 0, 0,
        104, 130 >>
 
-TradeMessageNoncrossCapture4 ==
+TradeMessageNonCrossCapture4 ==
     << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 1, 0, 44, 80, 44, 33, 0, 2, 31, 26, 232, 107, 25,
        170, 0, 0, 0, 0, 0, 0, 0, 0, 66, 0, 0, 0, 24, 90, 77,
        32, 32, 32, 32, 32, 32, 0, 10, 65, 200, 0, 0, 0, 0, 0, 0,
        104, 135 >>
 
-TradeMessageNoncrossCapture5 ==
+TradeMessageNonCrossCapture5 ==
     << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 1, 0, 44, 80, 39, 177, 0, 2, 31, 26, 233, 59, 97,
        48, 0, 0, 0, 0, 0, 0, 0, 0, 66, 0, 0, 0, 60, 84, 83,
        76, 65, 32, 32, 32, 32, 0, 36, 171, 228, 0, 0, 0, 0, 0, 0,
        104, 136 >>
 
-Captures == { AddOrderNoMpidAttributionMessageCapture1, AddOrderNoMpidAttributionMessageCapture2, AddOrderNoMpidAttributionMessageCapture3, AddOrderNoMpidAttributionMessageCapture4, AddOrderNoMpidAttributionMessageCapture5, AddOrderWithMpidAttributionMessageCapture1, AddOrderWithMpidAttributionMessageCapture2, AddOrderWithMpidAttributionMessageCapture3, AddOrderWithMpidAttributionMessageCapture4, AddOrderWithMpidAttributionMessageCapture5, OrderCancelMessageCapture1, OrderCancelMessageCapture2, OrderCancelMessageCapture3, OrderCancelMessageCapture4, OrderCancelMessageCapture5, OrderDeleteMessageCapture1, OrderDeleteMessageCapture2, OrderDeleteMessageCapture3, OrderDeleteMessageCapture4, OrderDeleteMessageCapture5, OrderExecutedMessageCapture1, OrderExecutedMessageCapture2, OrderExecutedMessageCapture3, OrderExecutedMessageCapture4, OrderExecutedMessageCapture5, OrderExecutedWithPriceMessageCapture1, OrderExecutedWithPriceMessageCapture2, OrderExecutedWithPriceMessageCapture3, OrderExecutedWithPriceMessageCapture4, OrderExecutedWithPriceMessageCapture5, OrderReplaceMessageCapture1, OrderReplaceMessageCapture2, OrderReplaceMessageCapture3, OrderReplaceMessageCapture4, OrderReplaceMessageCapture5, RegShoShortSalePriceTestRestrictedIndicatorMessageCapture1, RegShoShortSalePriceTestRestrictedIndicatorMessageCapture2, RegShoShortSalePriceTestRestrictedIndicatorMessageCapture3, RegShoShortSalePriceTestRestrictedIndicatorMessageCapture4, RegShoShortSalePriceTestRestrictedIndicatorMessageCapture5, StockTradingActionMessageCapture1, StockTradingActionMessageCapture2, StockTradingActionMessageCapture3, StockTradingActionMessageCapture4, StockTradingActionMessageCapture5, SystemEventMessageCapture, TradeMessageNoncrossCapture1, TradeMessageNoncrossCapture2, TradeMessageNoncrossCapture3, TradeMessageNoncrossCapture4, TradeMessageNoncrossCapture5 }
+Captures == { AddOrderNoMpidAttributionMessageCapture1, AddOrderNoMpidAttributionMessageCapture2, AddOrderNoMpidAttributionMessageCapture3, AddOrderNoMpidAttributionMessageCapture4, AddOrderNoMpidAttributionMessageCapture5, AddOrderWithMpidAttributionMessageCapture1, AddOrderWithMpidAttributionMessageCapture2, AddOrderWithMpidAttributionMessageCapture3, AddOrderWithMpidAttributionMessageCapture4, AddOrderWithMpidAttributionMessageCapture5, OrderCancelMessageCapture1, OrderCancelMessageCapture2, OrderCancelMessageCapture3, OrderCancelMessageCapture4, OrderCancelMessageCapture5, OrderDeleteMessageCapture1, OrderDeleteMessageCapture2, OrderDeleteMessageCapture3, OrderDeleteMessageCapture4, OrderDeleteMessageCapture5, OrderExecutedMessageCapture1, OrderExecutedMessageCapture2, OrderExecutedMessageCapture3, OrderExecutedMessageCapture4, OrderExecutedMessageCapture5, OrderExecutedWithPriceMessageCapture1, OrderExecutedWithPriceMessageCapture2, OrderExecutedWithPriceMessageCapture3, OrderExecutedWithPriceMessageCapture4, OrderExecutedWithPriceMessageCapture5, OrderReplaceMessageCapture1, OrderReplaceMessageCapture2, OrderReplaceMessageCapture3, OrderReplaceMessageCapture4, OrderReplaceMessageCapture5, RegShoShortSalePriceTestRestrictedIndicatorMessageCapture1, RegShoShortSalePriceTestRestrictedIndicatorMessageCapture2, RegShoShortSalePriceTestRestrictedIndicatorMessageCapture3, RegShoShortSalePriceTestRestrictedIndicatorMessageCapture4, RegShoShortSalePriceTestRestrictedIndicatorMessageCapture5, StockTradingActionMessageCapture1, StockTradingActionMessageCapture2, StockTradingActionMessageCapture3, StockTradingActionMessageCapture4, StockTradingActionMessageCapture5, SystemEventMessageCapture, TradeMessageNonCrossCapture1, TradeMessageNonCrossCapture2, TradeMessageNonCrossCapture3, TradeMessageNonCrossCapture4, TradeMessageNonCrossCapture5 }
 
 (* Every recorded packet reads, reads whole, and writes back unchanged *)
 CapturesRoundTrip ==

@@ -1799,26 +1799,26 @@ CheckedSequencedDataPacket ==
         \cup { [ZeroSequencedDataPacket EXCEPT !.categoryPayload = one] : one \in CheckedCategoryPayload }
 
 (***************************************************************************)
-(* Debug Packet: 1 bytes                                                   *)
+(* Debug Packet                                                            *)
 (***************************************************************************)
 
 DebugPacket ==
-    [ debugText : Sample(1) ]
+    [ debugText : SampleBytes ]
 
 EncodeDebugPacket(message) ==
     message.debugText
 
 DecodeDebugPacket(bytes) ==
-    LET debugText == ReadBytes(bytes, 1) IN IF ~debugText.ok THEN Fail ELSE
+    LET debugText == Ok(bytes, << >>) IN IF ~debugText.ok THEN Fail ELSE
     Ok([ debugText |-> debugText.value ], debugText.rest)
 
 ZeroDebugPacket ==
-    [ debugText |-> [i \in 1 .. 1 |-> 0] ]
+    [ debugText |-> << >> ]
 
 (* Debug Packet at zero, then each field in turn at the values it is checked at *)
 CheckedDebugPacket ==
     { ZeroDebugPacket }
-        \cup { [ZeroDebugPacket EXCEPT !.debugText = one] : one \in Sample(1) }
+        \cup { [ZeroDebugPacket EXCEPT !.debugText = one] : one \in SampleBytes }
 
 (***************************************************************************)
 (* Login Accepted Packet: 30 bytes                                         *)
