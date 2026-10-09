@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 437 | 516050 |
+| 457 | 529418 |
 
 ## Testing
 
@@ -37,11 +37,11 @@ The Open Markets Initiative (Omi) is a group of technologists dedicated to enhan
 Other generated code can be found at [Omi Repositories](https://github.com/Open-Markets-Initiative/Directory/tree/main/Repositories "Open Markets Initiative Repositories"); for Omi rules and regulations, see [Omi Directory](https://github.com/Open-Markets-Initiative/Directory "Open Markets Initiative Directory").
 ## Organizations
 
-> [Iex][Iex.Directory] · [Nasdaq][Nasdaq.Directory]
+> [Iex][Iex.Directory] · [Nasdaq][Nasdaq.Directory] · [Tradelogiq][Tradelogiq.Directory]
 
 ## Exchanges
 
-> [BxEquities][BxEquities.Exchange] · [GemxOptions][GemxOptions.Exchange] · [IexEquities][IexEquities.Exchange] · [IexOptions][IexOptions.Exchange] · [IseOptions][IseOptions.Exchange] · [MrxOptions][MrxOptions.Exchange] · [NasdaqCanada][NasdaqCanada.Exchange] · [NfxFutures][NfxFutures.Exchange] · [NomOptions][NomOptions.Exchange] · [NordicDerivatives][NordicDerivatives.Exchange] · [NordicEquities][NordicEquities.Exchange] · [NsmEquities][NsmEquities.Exchange] · [NtxEquities][NtxEquities.Exchange] · [NtxOptions][NtxOptions.Exchange] · [PhlxOptions][PhlxOptions.Exchange] · [PsxEquities][PsxEquities.Exchange]
+> [BxEquities][BxEquities.Exchange] · [GemxOptions][GemxOptions.Exchange] · [IexEquities][IexEquities.Exchange] · [IexOptions][IexOptions.Exchange] · [IseOptions][IseOptions.Exchange] · [LynxAts][LynxAts.Ats] · [MrxOptions][MrxOptions.Exchange] · [NasdaqCanada][NasdaqCanada.Exchange] · [NfxFutures][NfxFutures.Exchange] · [NomOptions][NomOptions.Exchange] · [NordicDerivatives][NordicDerivatives.Exchange] · [NordicEquities][NordicEquities.Exchange] · [NsmEquities][NsmEquities.Exchange] · [NtxEquities][NtxEquities.Exchange] · [NtxOptions][NtxOptions.Exchange] · [OmegaAts][OmegaAts.Ats] · [PhlxOptions][PhlxOptions.Exchange] · [PsxEquities][PsxEquities.Exchange]
 
 ## Consolidators
 
@@ -206,15 +206,27 @@ Enjoy.
 [Nasdaq.Utdf.Output]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/Utdf/Output.md "Output"
 [Nasdaq.Utp.Input]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/Utp/Input.md ""
 [Nasdaq.Utp.Snapshot]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nasdaq/Protocols/Utp/Snapshot.md "Snapshot"
+[Tradelogiq.LynxAts.MulticastLevel1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/LynxAts/MulticastLevel1.md "Lynx Multicast Level 1"
+[Tradelogiq.LynxAts.MulticastLevel2]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/LynxAts/MulticastLevel2.md "Lynx Multicast Level 2"
+[Tradelogiq.LynxAts.SnapshotRecovery]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/LynxAts/SnapshotRecovery.md "Lynx Snapshot Recovery"
+[Tradelogiq.LynxAts.TcpLevel1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/LynxAts/TcpLevel1.md "Lynx Tcp Level 1"
+[Tradelogiq.LynxAts.TcpLevel2]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/LynxAts/TcpLevel2.md "Lynx Tcp Level 2"
+[Tradelogiq.OmegaAts.MulticastLevel1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/OmegaAts/MulticastLevel1.md "Omega Multicast Level 1"
+[Tradelogiq.OmegaAts.MulticastLevel2]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/OmegaAts/MulticastLevel2.md "Omega Multicast Level 2"
+[Tradelogiq.OmegaAts.SnapshotRecovery]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/OmegaAts/SnapshotRecovery.md "Omega Snapshot Recovery"
+[Tradelogiq.OmegaAts.TcpLevel1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/OmegaAts/TcpLevel1.md "Omega Tcp Level 1"
+[Tradelogiq.OmegaAts.TcpLevel2]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/OmegaAts/TcpLevel2.md "Omega Tcp Level 2"
 
 [Iex.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/iex "Investors Exchange"
 [Nasdaq.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq "National Association of Securities Dealers Automated Quotations (Nasdaq)"
+[Tradelogiq.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/tradelogiq "Tradelogiq Markets Inc."
 
 [BxEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/bxequities "Nasdaq BX"
 [GemxOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/gemxoptions "Nasdaq GEMX"
 [IexEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/iex/iexequities "IEX Equities"
 [IexOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/iex/iexoptions "IEX Options"
 [IseOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/iseoptions "Nasdaq ISE"
+[LynxAts.Ats]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/tradelogiq "Lynx ATS"
 [MrxOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/mrxoptions "Nasdaq MRX"
 [NasdaqCanada.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/nasdaqcanada "Nasdaq Canada"
 [NfxFutures.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/nfxfutures "Nasdaq Futures"
@@ -224,6 +236,7 @@ Enjoy.
 [NsmEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/nsmequities "Nasdaq Stock Market"
 [NtxEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/ntxequities "Nasdaq Texas"
 [NtxOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/ntxoptions "Nasdaq Texas Options"
+[OmegaAts.Ats]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/tradelogiq "Omega ATS"
 [PhlxOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/phlxoptions "Nasdaq PHLX"
 [PsxEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/psxequities "Nasdaq PSX"
 [Uqdf.Consolidator]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/uqdf "Nasdaq UTP Quote Data Feed"
