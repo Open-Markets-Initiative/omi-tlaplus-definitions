@@ -123,175 +123,6 @@ CheckedLoginRequestMessage ==
         \cup { [ZeroLoginRequestMessage EXCEPT !.token = one] : one \in Sample(32) }
 
 (***************************************************************************)
-(* Login Response Message: 17 bytes                                        *)
-(***************************************************************************)
-
-LoginResponseMessage ==
-    [ logonId : Sample(16),
-      status  : Sample(1) ]
-
-EncodeLoginResponseMessage(message) ==
-    message.logonId
-        \o message.status
-
-DecodeLoginResponseMessage(bytes) ==
-    LET logonId == ReadBytes(bytes, 16) IN IF ~logonId.ok THEN Fail ELSE
-    LET status == ReadBytes(logonId.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    Ok([ logonId |-> logonId.value,
-         status  |-> status.value ], status.rest)
-
-ZeroLoginResponseMessage ==
-    [ logonId |-> [i \in 1 .. 16 |-> 0],
-      status  |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Login Response Message at zero, then each field in turn at the values it is checked at *)
-CheckedLoginResponseMessage ==
-    { ZeroLoginResponseMessage }
-        \cup { [ZeroLoginResponseMessage EXCEPT !.logonId = one] : one \in Sample(16) }
-        \cup { [ZeroLoginResponseMessage EXCEPT !.status = one] : one \in Sample(1) }
-
-(***************************************************************************)
-(* Sub Sessions Group: 14 bytes                                            *)
-(***************************************************************************)
-
-SubSessionsGroup ==
-    [ subsessionType : Sample(1),
-      subsessionId   : Sample(8),
-      joined         : Sample(1),
-      nextSeqNo      : Sample(4) ]
-
-EncodeSubSessionsGroup(message) ==
-    message.subsessionType
-        \o message.subsessionId
-        \o message.joined
-        \o message.nextSeqNo
-
-DecodeSubSessionsGroup(bytes) ==
-    LET subsessionType == ReadBytes(bytes, 1) IN IF ~subsessionType.ok THEN Fail ELSE
-    LET subsessionId == ReadBytes(subsessionType.rest, 8) IN IF ~subsessionId.ok THEN Fail ELSE
-    LET joined == ReadBytes(subsessionId.rest, 1) IN IF ~joined.ok THEN Fail ELSE
-    LET nextSeqNo == ReadBytes(joined.rest, 4) IN IF ~nextSeqNo.ok THEN Fail ELSE
-    Ok([ subsessionType |-> subsessionType.value,
-         subsessionId   |-> subsessionId.value,
-         joined         |-> joined.value,
-         nextSeqNo      |-> nextSeqNo.value ], nextSeqNo.rest)
-
-ZeroSubSessionsGroup ==
-    [ subsessionType |-> [i \in 1 .. 1 |-> 0],
-      subsessionId   |-> [i \in 1 .. 8 |-> 0],
-      joined         |-> [i \in 1 .. 1 |-> 0],
-      nextSeqNo      |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Sub Sessions Group at zero, then each field in turn at the values it is checked at *)
-CheckedSubSessionsGroup ==
-    { ZeroSubSessionsGroup }
-        \cup { [ZeroSubSessionsGroup EXCEPT !.subsessionType = one] : one \in Sample(1) }
-        \cup { [ZeroSubSessionsGroup EXCEPT !.subsessionId = one] : one \in Sample(8) }
-        \cup { [ZeroSubSessionsGroup EXCEPT !.joined = one] : one \in Sample(1) }
-        \cup { [ZeroSubSessionsGroup EXCEPT !.nextSeqNo = one] : one \in Sample(4) }
-
-(* A run of Sub Sessions Group, written one after another *)
-RECURSIVE EncodeSubSessionsGroupList(_)
-EncodeSubSessionsGroupList(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeSubSessionsGroup(Head(messages)) \o EncodeSubSessionsGroupList(Tail(messages))
-
-(* As many Sub Sessions Group as the field that counts them says *)
-RECURSIVE ReadSubSessionsGroupList(_, _)
-ReadSubSessionsGroupList(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeSubSessionsGroup(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadSubSessionsGroupList(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Sub Sessions Group of each kind, for the lists that carry them *)
-OneSubSessionsGroup == { ZeroSubSessionsGroup }
-
-(***************************************************************************)
-(* Sub Sessions Groups                                                     *)
-(***************************************************************************)
-
-SubSessionsGroups ==
-    [ blockLengthShort : Sample(1),
-      subSessionsGroup : SampleLists(OneSubSessionsGroup) ]
-
-EncodeSubSessionsGroups(message) ==
-    message.blockLengthShort
-        \o EncodeUIntBE(Len(message.subSessionsGroup), 1)
-        \o EncodeSubSessionsGroupList(message.subSessionsGroup)
-
-DecodeSubSessionsGroups(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET subSessionsGroup == ReadSubSessionsGroupList(numInGroup.rest, numInGroup.value) IN IF ~subSessionsGroup.ok THEN Fail ELSE
-    Ok([ blockLengthShort |-> blockLengthShort.value,
-         subSessionsGroup |-> subSessionsGroup.value ], subSessionsGroup.rest)
-
-ZeroSubSessionsGroups ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
-      subSessionsGroup |-> << >> ]
-
-(* Sub Sessions Groups at zero, then each field in turn at the values it is checked at *)
-CheckedSubSessionsGroups ==
-    { ZeroSubSessionsGroups }
-        \cup { [ZeroSubSessionsGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
-        \cup { [ZeroSubSessionsGroups EXCEPT !.subSessionsGroup = one] : one \in SampleLists(OneSubSessionsGroup) }
-
-(***************************************************************************)
-(* Gateway Heartbeat Message                                               *)
-(***************************************************************************)
-
-GatewayHeartbeatMessage ==
-    [ keepAlive         : Sample(1),
-      subSessionsGroups : SubSessionsGroups ]
-
-EncodeGatewayHeartbeatMessage(message) ==
-    message.keepAlive
-        \o EncodeSubSessionsGroups(message.subSessionsGroups)
-
-DecodeGatewayHeartbeatMessage(bytes) ==
-    LET keepAlive == ReadBytes(bytes, 1) IN IF ~keepAlive.ok THEN Fail ELSE
-    LET subSessionsGroups == DecodeSubSessionsGroups(keepAlive.rest) IN IF ~subSessionsGroups.ok THEN Fail ELSE
-    Ok([ keepAlive         |-> keepAlive.value,
-         subSessionsGroups |-> subSessionsGroups.value ], subSessionsGroups.rest)
-
-ZeroGatewayHeartbeatMessage ==
-    [ keepAlive         |-> [i \in 1 .. 1 |-> 0],
-      subSessionsGroups |-> ZeroSubSessionsGroups ]
-
-(* Gateway Heartbeat Message at zero, then each field in turn at the values it is checked at *)
-CheckedGatewayHeartbeatMessage ==
-    { ZeroGatewayHeartbeatMessage }
-        \cup { [ZeroGatewayHeartbeatMessage EXCEPT !.keepAlive = one] : one \in Sample(1) }
-        \cup { [ZeroGatewayHeartbeatMessage EXCEPT !.subSessionsGroups = one] : one \in CheckedSubSessionsGroups }
-
-(***************************************************************************)
-(* Terminate Message: 1 bytes                                              *)
-(***************************************************************************)
-
-TerminateMessage ==
-    [ reason : Sample(1) ]
-
-EncodeTerminateMessage(message) ==
-    message.reason
-
-DecodeTerminateMessage(bytes) ==
-    LET reason == ReadBytes(bytes, 1) IN IF ~reason.ok THEN Fail ELSE
-    Ok([ reason |-> reason.value ], reason.rest)
-
-ZeroTerminateMessage ==
-    [ reason |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Terminate Message at zero, then each field in turn at the values it is checked at *)
-CheckedTerminateMessage ==
-    { ZeroTerminateMessage }
-        \cup { [ZeroTerminateMessage EXCEPT !.reason = one] : one \in Sample(1) }
-
-(***************************************************************************)
 (* Sequenced Message Header Message: 20 bytes                              *)
 (***************************************************************************)
 
@@ -360,34 +191,6 @@ CheckedSubsessionJoinMessage ==
         \cup { [ZeroSubsessionJoinMessage EXCEPT !.endSequence = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Subsession Join Response Message: 9 bytes                               *)
-(***************************************************************************)
-
-SubsessionJoinResponseMessage ==
-    [ subsessionId : Sample(8),
-      status       : Sample(1) ]
-
-EncodeSubsessionJoinResponseMessage(message) ==
-    message.subsessionId
-        \o message.status
-
-DecodeSubsessionJoinResponseMessage(bytes) ==
-    LET subsessionId == ReadBytes(bytes, 8) IN IF ~subsessionId.ok THEN Fail ELSE
-    LET status == ReadBytes(subsessionId.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    Ok([ subsessionId |-> subsessionId.value,
-         status       |-> status.value ], status.rest)
-
-ZeroSubsessionJoinResponseMessage ==
-    [ subsessionId |-> [i \in 1 .. 8 |-> 0],
-      status       |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Subsession Join Response Message at zero, then each field in turn at the values it is checked at *)
-CheckedSubsessionJoinResponseMessage ==
-    { ZeroSubsessionJoinResponseMessage }
-        \cup { [ZeroSubsessionJoinResponseMessage EXCEPT !.subsessionId = one] : one \in Sample(8) }
-        \cup { [ZeroSubsessionJoinResponseMessage EXCEPT !.status = one] : one \in Sample(1) }
-
-(***************************************************************************)
 (* Subsession Leave Message: 8 bytes                                       *)
 (***************************************************************************)
 
@@ -410,218 +213,156 @@ CheckedSubsessionLeaveMessage ==
         \cup { [ZeroSubsessionLeaveMessage EXCEPT !.subsessionId = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Subsession Leave Response Message: 9 bytes                              *)
+(* Client Payload, selected by Schema Id and Template Id                   *)
 (***************************************************************************)
 
-SubsessionLeaveResponseMessage ==
-    [ subsessionId : Sample(8),
-      reason       : Sample(1) ]
+LoginRequestMessageCode == <<20000, 1>>  \* 0x4e20, 0x01
+ClientHeartbeatMessageCode == <<20000, 4>>  \* 0x4e20, 0x04
+LogoutRequestMessageCode == <<20000, 5>>  \* 0x4e20, 0x05
+SequencedMessageHeaderMessageCode == <<20000, 7>>  \* 0x4e20, 0x07
+SubsessionJoinMessageCode == <<20000, 8>>  \* 0x4e20, 0x08
+SubsessionLeaveMessageCode == <<20000, 10>>  \* 0x4e20, 0x0a
 
-EncodeSubsessionLeaveResponseMessage(message) ==
-    message.subsessionId
-        \o message.reason
-
-DecodeSubsessionLeaveResponseMessage(bytes) ==
-    LET subsessionId == ReadBytes(bytes, 8) IN IF ~subsessionId.ok THEN Fail ELSE
-    LET reason == ReadBytes(subsessionId.rest, 1) IN IF ~reason.ok THEN Fail ELSE
-    Ok([ subsessionId |-> subsessionId.value,
-         reason       |-> reason.value ], reason.rest)
-
-ZeroSubsessionLeaveResponseMessage ==
-    [ subsessionId |-> [i \in 1 .. 8 |-> 0],
-      reason       |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Subsession Leave Response Message at zero, then each field in turn at the values it is checked at *)
-CheckedSubsessionLeaveResponseMessage ==
-    { ZeroSubsessionLeaveResponseMessage }
-        \cup { [ZeroSubsessionLeaveResponseMessage EXCEPT !.subsessionId = one] : one \in Sample(8) }
-        \cup { [ZeroSubsessionLeaveResponseMessage EXCEPT !.reason = one] : one \in Sample(1) }
-
-(***************************************************************************)
-(* Payload, selected by Template Id                                        *)
-(***************************************************************************)
-
-LoginRequestMessageCode == 1  \* 0x01
-LoginResponseMessageCode == 2  \* 0x02
-GatewayHeartbeatMessageCode == 3  \* 0x03
-ClientHeartbeatMessageCode == 4  \* 0x04
-LogoutRequestMessageCode == 5  \* 0x05
-TerminateMessageCode == 6  \* 0x06
-SequencedMessageHeaderMessageCode == 7  \* 0x07
-SubsessionJoinMessageCode == 8  \* 0x08
-SubsessionJoinResponseMessageCode == 9  \* 0x09
-SubsessionLeaveMessageCode == 10  \* 0x0a
-SubsessionLeaveResponseMessageCode == 11  \* 0x0b
-
-Payload ==
+ClientPayload ==
     [ tag : {LoginRequestMessageCode}, body : LoginRequestMessage ]
-        \cup [ tag : {LoginResponseMessageCode}, body : LoginResponseMessage ]
-        \cup [ tag : {GatewayHeartbeatMessageCode}, body : GatewayHeartbeatMessage ]
         \cup [ tag : {ClientHeartbeatMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {LogoutRequestMessageCode}, body : {[empty |-> 0]} ]
-        \cup [ tag : {TerminateMessageCode}, body : TerminateMessage ]
         \cup [ tag : {SequencedMessageHeaderMessageCode}, body : SequencedMessageHeaderMessage ]
         \cup [ tag : {SubsessionJoinMessageCode}, body : SubsessionJoinMessage ]
-        \cup [ tag : {SubsessionJoinResponseMessageCode}, body : SubsessionJoinResponseMessage ]
         \cup [ tag : {SubsessionLeaveMessageCode}, body : SubsessionLeaveMessage ]
-        \cup [ tag : {SubsessionLeaveResponseMessageCode}, body : SubsessionLeaveResponseMessage ]
 
-EncodePayload(message) ==
+EncodeClientPayload(message) ==
     CASE message.tag = LoginRequestMessageCode -> EncodeLoginRequestMessage(message.body)
-      [] message.tag = LoginResponseMessageCode -> EncodeLoginResponseMessage(message.body)
-      [] message.tag = GatewayHeartbeatMessageCode -> EncodeGatewayHeartbeatMessage(message.body)
       [] message.tag = ClientHeartbeatMessageCode -> << >>
       [] message.tag = LogoutRequestMessageCode -> << >>
-      [] message.tag = TerminateMessageCode -> EncodeTerminateMessage(message.body)
       [] message.tag = SequencedMessageHeaderMessageCode -> EncodeSequencedMessageHeaderMessage(message.body)
       [] message.tag = SubsessionJoinMessageCode -> EncodeSubsessionJoinMessage(message.body)
-      [] message.tag = SubsessionJoinResponseMessageCode -> EncodeSubsessionJoinResponseMessage(message.body)
       [] message.tag = SubsessionLeaveMessageCode -> EncodeSubsessionLeaveMessage(message.body)
-      [] message.tag = SubsessionLeaveResponseMessageCode -> EncodeSubsessionLeaveResponseMessage(message.body)
 
-DecodePayload(tag, bytes) ==
+DecodeClientPayload(schemaId, templateId, bytes) ==
     LET read ==
-            CASE tag = LoginRequestMessageCode -> DecodeLoginRequestMessage(bytes)
-              [] tag = LoginResponseMessageCode -> DecodeLoginResponseMessage(bytes)
-              [] tag = GatewayHeartbeatMessageCode -> DecodeGatewayHeartbeatMessage(bytes)
-              [] tag = ClientHeartbeatMessageCode -> Ok([empty |-> 0], bytes)
-              [] tag = LogoutRequestMessageCode -> Ok([empty |-> 0], bytes)
-              [] tag = TerminateMessageCode -> DecodeTerminateMessage(bytes)
-              [] tag = SequencedMessageHeaderMessageCode -> DecodeSequencedMessageHeaderMessage(bytes)
-              [] tag = SubsessionJoinMessageCode -> DecodeSubsessionJoinMessage(bytes)
-              [] tag = SubsessionJoinResponseMessageCode -> DecodeSubsessionJoinResponseMessage(bytes)
-              [] tag = SubsessionLeaveMessageCode -> DecodeSubsessionLeaveMessage(bytes)
-              [] tag = SubsessionLeaveResponseMessageCode -> DecodeSubsessionLeaveResponseMessage(bytes)
+            CASE <<schemaId, templateId>> = LoginRequestMessageCode -> DecodeLoginRequestMessage(bytes)
+              [] <<schemaId, templateId>> = ClientHeartbeatMessageCode -> Ok([empty |-> 0], bytes)
+              [] <<schemaId, templateId>> = LogoutRequestMessageCode -> Ok([empty |-> 0], bytes)
+              [] <<schemaId, templateId>> = SequencedMessageHeaderMessageCode -> DecodeSequencedMessageHeaderMessage(bytes)
+              [] <<schemaId, templateId>> = SubsessionJoinMessageCode -> DecodeSubsessionJoinMessage(bytes)
+              [] <<schemaId, templateId>> = SubsessionLeaveMessageCode -> DecodeSubsessionLeaveMessage(bytes)
               [] OTHER -> Fail
-    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> <<schemaId, templateId>>, body |-> read.value], read.rest)
 
-ZeroPayload == [tag |-> LoginRequestMessageCode, body |-> ZeroLoginRequestMessage]
+ZeroClientPayload == [tag |-> LoginRequestMessageCode, body |-> ZeroLoginRequestMessage]
 
-(* Each Payload in turn, at the values the message it names is checked at *)
-CheckedPayload ==
+(* Each Client Payload in turn, at the values the message it names is checked at *)
+CheckedClientPayload ==
     { [tag |-> LoginRequestMessageCode, body |-> one] : one \in CheckedLoginRequestMessage }
-        \cup { [tag |-> LoginResponseMessageCode, body |-> one] : one \in CheckedLoginResponseMessage }
-        \cup { [tag |-> GatewayHeartbeatMessageCode, body |-> one] : one \in CheckedGatewayHeartbeatMessage }
         \cup { [tag |-> ClientHeartbeatMessageCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]] }
-        \cup { [tag |-> TerminateMessageCode, body |-> one] : one \in CheckedTerminateMessage }
         \cup { [tag |-> SequencedMessageHeaderMessageCode, body |-> one] : one \in CheckedSequencedMessageHeaderMessage }
         \cup { [tag |-> SubsessionJoinMessageCode, body |-> one] : one \in CheckedSubsessionJoinMessage }
-        \cup { [tag |-> SubsessionJoinResponseMessageCode, body |-> one] : one \in CheckedSubsessionJoinResponseMessage }
         \cup { [tag |-> SubsessionLeaveMessageCode, body |-> one] : one \in CheckedSubsessionLeaveMessage }
-        \cup { [tag |-> SubsessionLeaveResponseMessageCode, body |-> one] : one \in CheckedSubsessionLeaveResponseMessage }
 
 (***************************************************************************)
-(* Sbe Message, framed by Packet Length                                    *)
+(* Client Sbe Message, framed by Packet Length                             *)
 (***************************************************************************)
 
-SbeMessage ==
-    [ blockLength : Sample(2),
-      schemaId    : Sample(2),
-      version     : Sample(2),
-      payload     : Payload ]
+ClientSbeMessage ==
+    [ blockLength   : Sample(2),
+      version       : Sample(2),
+      clientPayload : ClientPayload ]
 
-EncodeSbeMessageBody(message) ==
+EncodeClientSbeMessageBody(message) ==
     message.blockLength
-        \o EncodeUIntLE(message.payload.tag, 2)
-        \o message.schemaId
+        \o EncodeUIntLE(message.clientPayload.tag[2], 2)
+        \o EncodeUIntLE(message.clientPayload.tag[1], 2)
         \o message.version
-        \o EncodePayload(message.payload)
+        \o EncodeClientPayload(message.clientPayload)
 
 (* Packet Length counts the bytes it frames, so it is written from them *)
-EncodeSbeMessage(message) ==
-    LET body == EncodeSbeMessageBody(message)
+EncodeClientSbeMessage(message) ==
+    LET body == EncodeClientSbeMessageBody(message)
     IN  EncodeUIntLE(Len(body) + 2, 2) \o body
 
-DecodeSbeMessageBody(bytes) ==
+DecodeClientSbeMessageBody(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET templateId == ReadUIntLE(blockLength.rest, 2) IN IF ~templateId.ok THEN Fail ELSE
-    LET schemaId == ReadBytes(templateId.rest, 2) IN IF ~schemaId.ok THEN Fail ELSE
+    LET schemaId == ReadUIntLE(templateId.rest, 2) IN IF ~schemaId.ok THEN Fail ELSE
     LET version == ReadBytes(schemaId.rest, 2) IN IF ~version.ok THEN Fail ELSE
-    LET payload == DecodePayload(templateId.value, version.rest) IN IF ~payload.ok THEN Fail ELSE
-    Ok([ blockLength |-> blockLength.value,
-         schemaId    |-> schemaId.value,
-         version     |-> version.value,
-         payload     |-> payload.value ], payload.rest)
+    LET clientPayload == DecodeClientPayload(schemaId.value, templateId.value, version.rest) IN IF ~clientPayload.ok THEN Fail ELSE
+    Ok([ blockLength   |-> blockLength.value,
+         version       |-> version.value,
+         clientPayload |-> clientPayload.value ], clientPayload.rest)
 
-DecodeSbeMessage(bytes) ==
+DecodeClientSbeMessage(bytes) ==
     LET length == ReadUIntLE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
     LET size == length.value - 2 IN
     IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, size)
         beyond == SubSeq(length.rest, size + 1, Len(length.rest))
-        body   == DecodeSbeMessageBody(framed)
+        body   == DecodeClientSbeMessageBody(framed)
     IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
     Ok(body.value, beyond)
 
-ZeroSbeMessage ==
-    [ blockLength |-> [i \in 1 .. 2 |-> 0],
-      schemaId    |-> [i \in 1 .. 2 |-> 0],
-      version     |-> [i \in 1 .. 2 |-> 0],
-      payload     |-> ZeroPayload ]
+ZeroClientSbeMessage ==
+    [ blockLength   |-> [i \in 1 .. 2 |-> 0],
+      version       |-> [i \in 1 .. 2 |-> 0],
+      clientPayload |-> ZeroClientPayload ]
 
-(* Sbe Message at zero, then each field in turn at the values it is checked at *)
-CheckedSbeMessage ==
-    { ZeroSbeMessage }
-        \cup { [ZeroSbeMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroSbeMessage EXCEPT !.schemaId = one] : one \in Sample(2) }
-        \cup { [ZeroSbeMessage EXCEPT !.version = one] : one \in Sample(2) }
-        \cup { [ZeroSbeMessage EXCEPT !.payload = one] : one \in CheckedPayload }
+(* Client Sbe Message at zero, then each field in turn at the values it is checked at *)
+CheckedClientSbeMessage ==
+    { ZeroClientSbeMessage }
+        \cup { [ZeroClientSbeMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroClientSbeMessage EXCEPT !.version = one] : one \in Sample(2) }
+        \cup { [ZeroClientSbeMessage EXCEPT !.clientPayload = one] : one \in CheckedClientPayload }
 
-(* A run of Sbe Message, written one after another *)
-RECURSIVE EncodeSbeMessageList(_)
-EncodeSbeMessageList(messages) ==
+(* A run of Client Sbe Message, written one after another *)
+RECURSIVE EncodeClientSbeMessageList(_)
+EncodeClientSbeMessageList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeSbeMessage(Head(messages)) \o EncodeSbeMessageList(Tail(messages))
+    ELSE EncodeClientSbeMessage(Head(messages)) \o EncodeClientSbeMessageList(Tail(messages))
 
-(* As many Sbe Message as the bytes hold, which is what its payload rule states. *)
+(* As many Client Sbe Message as the bytes hold, which is what its payload rule states. *)
 (* Each one takes bytes off the reader, so the run ends where the data does. *)
-RECURSIVE ReadSbeMessageAll(_)
-ReadSbeMessageAll(bytes) ==
+RECURSIVE ReadClientSbeMessageAll(_)
+ReadClientSbeMessageAll(bytes) ==
     IF bytes = << >>
     THEN Ok(<< >>, << >>)
-    ELSE LET one == DecodeSbeMessage(bytes)
+    ELSE LET one == DecodeClientSbeMessage(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadSbeMessageAll(one.rest)
+             ELSE LET more == ReadClientSbeMessageAll(one.rest)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Sbe Message of each kind, for the lists that carry them *)
-OneSbeMessage ==
-    { [ZeroSbeMessage EXCEPT !.payload = [tag |-> LoginRequestMessageCode, body |-> ZeroLoginRequestMessage]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> LoginResponseMessageCode, body |-> ZeroLoginResponseMessage]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> GatewayHeartbeatMessageCode, body |-> ZeroGatewayHeartbeatMessage]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> ClientHeartbeatMessageCode, body |-> [empty |-> 0]]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> TerminateMessageCode, body |-> ZeroTerminateMessage]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> SequencedMessageHeaderMessageCode, body |-> ZeroSequencedMessageHeaderMessage]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> SubsessionJoinMessageCode, body |-> ZeroSubsessionJoinMessage]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> SubsessionJoinResponseMessageCode, body |-> ZeroSubsessionJoinResponseMessage]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> SubsessionLeaveMessageCode, body |-> ZeroSubsessionLeaveMessage]],
-      [ZeroSbeMessage EXCEPT !.payload = [tag |-> SubsessionLeaveResponseMessageCode, body |-> ZeroSubsessionLeaveResponseMessage]] }
+(* One Client Sbe Message of each kind, for the lists that carry them *)
+OneClientSbeMessage ==
+    { [ZeroClientSbeMessage EXCEPT !.clientPayload = [tag |-> LoginRequestMessageCode, body |-> ZeroLoginRequestMessage]],
+      [ZeroClientSbeMessage EXCEPT !.clientPayload = [tag |-> ClientHeartbeatMessageCode, body |-> [empty |-> 0]]],
+      [ZeroClientSbeMessage EXCEPT !.clientPayload = [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]]],
+      [ZeroClientSbeMessage EXCEPT !.clientPayload = [tag |-> SequencedMessageHeaderMessageCode, body |-> ZeroSequencedMessageHeaderMessage]],
+      [ZeroClientSbeMessage EXCEPT !.clientPayload = [tag |-> SubsessionJoinMessageCode, body |-> ZeroSubsessionJoinMessage]],
+      [ZeroClientSbeMessage EXCEPT !.clientPayload = [tag |-> SubsessionLeaveMessageCode, body |-> ZeroSubsessionLeaveMessage]] }
 
 (***************************************************************************)
 (* Client Packet                                                           *)
 (***************************************************************************)
 
 ClientPacket ==
-    [ sbeMessage : SampleLists(OneSbeMessage) ]
+    [ clientSbeMessage : SampleLists(OneClientSbeMessage) ]
 
 EncodeClientPacket(message) ==
-    EncodeSbeMessageList(message.sbeMessage)
+    EncodeClientSbeMessageList(message.clientSbeMessage)
 
 DecodeClientPacket(bytes) ==
-    LET sbeMessage == ReadSbeMessageAll(bytes) IN IF ~sbeMessage.ok THEN Fail ELSE
-    Ok([ sbeMessage |-> sbeMessage.value ], sbeMessage.rest)
+    LET clientSbeMessage == ReadClientSbeMessageAll(bytes) IN IF ~clientSbeMessage.ok THEN Fail ELSE
+    Ok([ clientSbeMessage |-> clientSbeMessage.value ], clientSbeMessage.rest)
 
 ZeroClientPacket ==
-    [ sbeMessage |-> << >> ]
+    [ clientSbeMessage |-> << >> ]
 
 (* Client Packet at zero, then each field in turn at the values it is checked at *)
 CheckedClientPacket ==
     { ZeroClientPacket }
-        \cup { [ZeroClientPacket EXCEPT !.sbeMessage = one] : one \in SampleLists(OneSbeMessage) }
+        \cup { [ZeroClientPacket EXCEPT !.clientSbeMessage = one] : one \in SampleLists(OneClientSbeMessage) }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -647,46 +388,6 @@ RoundTripLoginRequestMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Login Response Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripLoginResponseMessage ==
-    \A message \in CheckedLoginResponseMessage :
-        LET read == DecodeLoginResponseMessage(EncodeLoginResponseMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Sub Sessions Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripSubSessionsGroup ==
-    \A message \in CheckedSubSessionsGroup :
-        LET read == DecodeSubSessionsGroup(EncodeSubSessionsGroup(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Sub Sessions Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripSubSessionsGroups ==
-    \A message \in CheckedSubSessionsGroups :
-        LET read == DecodeSubSessionsGroups(EncodeSubSessionsGroups(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Gateway Heartbeat Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripGatewayHeartbeatMessage ==
-    \A message \in CheckedGatewayHeartbeatMessage :
-        LET read == DecodeGatewayHeartbeatMessage(EncodeGatewayHeartbeatMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Terminate Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripTerminateMessage ==
-    \A message \in CheckedTerminateMessage :
-        LET read == DecodeTerminateMessage(EncodeTerminateMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
 (* Every Sequenced Message Header Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripSequencedMessageHeaderMessage ==
     \A message \in CheckedSequencedMessageHeaderMessage :
@@ -703,14 +404,6 @@ RoundTripSubsessionJoinMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Subsession Join Response Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripSubsessionJoinResponseMessage ==
-    \A message \in CheckedSubsessionJoinResponseMessage :
-        LET read == DecodeSubsessionJoinResponseMessage(EncodeSubsessionJoinResponseMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
 (* Every Subsession Leave Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripSubsessionLeaveMessage ==
     \A message \in CheckedSubsessionLeaveMessage :
@@ -719,18 +412,10 @@ RoundTripSubsessionLeaveMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Subsession Leave Response Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripSubsessionLeaveResponseMessage ==
-    \A message \in CheckedSubsessionLeaveResponseMessage :
-        LET read == DecodeSubsessionLeaveResponseMessage(EncodeSubsessionLeaveResponseMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Sbe Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripSbeMessage ==
-    \A message \in CheckedSbeMessage :
-        LET read == DecodeSbeMessage(EncodeSbeMessage(message))
+(* Every Client Sbe Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripClientSbeMessage ==
+    \A message \in CheckedClientSbeMessage :
+        LET read == DecodeClientSbeMessage(EncodeClientSbeMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -743,16 +428,16 @@ RoundTripClientPacket ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* A Payload is selected by the Template Id it is written under *)
-SelectsPayload ==
-    \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+(* A Client Payload is selected by the Schema Id it is written under *)
+SelectsClientPayload ==
+    \A message \in CheckedClientPayload :
+        LET read == DecodeClientPayload(message.tag[1], message.tag[2], EncodeClientPayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)
-FramesSbeMessage ==
-    \A message \in CheckedSbeMessage :
-        LET bytes == EncodeSbeMessage(message)
+FramesClientSbeMessage ==
+    \A message \in CheckedClientSbeMessage :
+        LET bytes == EncodeClientSbeMessage(message)
         IN  DecodeUIntLE(SubSeq(bytes, 1, 2)) = Len(bytes) - 0
 
 -----------------------------------------------------------------------------
