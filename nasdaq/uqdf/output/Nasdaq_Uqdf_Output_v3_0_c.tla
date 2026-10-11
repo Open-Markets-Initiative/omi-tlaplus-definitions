@@ -25,6 +25,9 @@
 (* Note: a Bolo Appendage Indicator of any value but 50 or 51 or 53        *)
 (* carries none of them.                                                   *)
 (*                                                                         *)
+(* Note: a Odd Lot Attachment Type of any value but 50 or 51 or 53 carries *)
+(* none of them.                                                           *)
+(*                                                                         *)
 (* Note: a Finra Adf Mpid Appendage Indicator of any value but 50 carries  *)
 (* none of them.                                                           *)
 (***************************************************************************)
@@ -1096,6 +1099,170 @@ CheckedBoloAppendageIndicatorChoice ==
         \cup { [tag |-> BoloAppendageIndicatorNoneCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
+(* Odd Lot Price Level Attachment Short Form: 6 bytes                      *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentShortForm ==
+    [ marketCenterId      : Sample(1),
+      side                : Sample(1),
+      oddLotPriceShort    : Sample(2),
+      sharesAtOddLotPrice : Sample(2) ]
+
+EncodeOddLotPriceLevelAttachmentShortForm(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceShort
+        \o message.sharesAtOddLotPrice
+
+DecodeOddLotPriceLevelAttachmentShortForm(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceShort == ReadBytes(side.rest, 2) IN IF ~oddLotPriceShort.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceShort.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    Ok([ marketCenterId      |-> marketCenterId.value,
+         side                |-> side.value,
+         oddLotPriceShort    |-> oddLotPriceShort.value,
+         sharesAtOddLotPrice |-> sharesAtOddLotPrice.value ], sharesAtOddLotPrice.rest)
+
+ZeroOddLotPriceLevelAttachmentShortForm ==
+    [ marketCenterId      |-> [i \in 1 .. 1 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceShort    |-> [i \in 1 .. 2 |-> 0],
+      sharesAtOddLotPrice |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Short Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentShortForm ==
+    { ZeroOddLotPriceLevelAttachmentShortForm }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm EXCEPT !.oddLotPriceShort = one] : one \in Sample(2) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Odd Lot Price Level Attachment Long Form: 12 bytes                      *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentLongForm ==
+    [ marketCenterId      : Sample(1),
+      side                : Sample(1),
+      oddLotPriceLong     : Sample(8),
+      sharesAtOddLotPrice : Sample(2) ]
+
+EncodeOddLotPriceLevelAttachmentLongForm(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceLong
+        \o message.sharesAtOddLotPrice
+
+DecodeOddLotPriceLevelAttachmentLongForm(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceLong == ReadBytes(side.rest, 8) IN IF ~oddLotPriceLong.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceLong.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    Ok([ marketCenterId      |-> marketCenterId.value,
+         side                |-> side.value,
+         oddLotPriceLong     |-> oddLotPriceLong.value,
+         sharesAtOddLotPrice |-> sharesAtOddLotPrice.value ], sharesAtOddLotPrice.rest)
+
+ZeroOddLotPriceLevelAttachmentLongForm ==
+    [ marketCenterId      |-> [i \in 1 .. 1 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceLong     |-> [i \in 1 .. 8 |-> 0],
+      sharesAtOddLotPrice |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Long Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentLongForm ==
+    { ZeroOddLotPriceLevelAttachmentLongForm }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm EXCEPT !.oddLotPriceLong = one] : one \in Sample(8) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Odd Lot Price Level Attachment Adf Mpid Form: 16 bytes                  *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentAdfMpidForm ==
+    [ marketCenterId                 : Sample(1),
+      side                           : Sample(1),
+      oddLotPriceLong                : Sample(8),
+      sharesAtOddLotPrice            : Sample(2),
+      adfMarketParticipantIdentifier : Sample(4) ]
+
+EncodeOddLotPriceLevelAttachmentAdfMpidForm(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceLong
+        \o message.sharesAtOddLotPrice
+        \o message.adfMarketParticipantIdentifier
+
+DecodeOddLotPriceLevelAttachmentAdfMpidForm(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceLong == ReadBytes(side.rest, 8) IN IF ~oddLotPriceLong.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceLong.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    LET adfMarketParticipantIdentifier == ReadBytes(sharesAtOddLotPrice.rest, 4) IN IF ~adfMarketParticipantIdentifier.ok THEN Fail ELSE
+    Ok([ marketCenterId                 |-> marketCenterId.value,
+         side                           |-> side.value,
+         oddLotPriceLong                |-> oddLotPriceLong.value,
+         sharesAtOddLotPrice            |-> sharesAtOddLotPrice.value,
+         adfMarketParticipantIdentifier |-> adfMarketParticipantIdentifier.value ], adfMarketParticipantIdentifier.rest)
+
+ZeroOddLotPriceLevelAttachmentAdfMpidForm ==
+    [ marketCenterId                 |-> [i \in 1 .. 1 |-> 0],
+      side                           |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceLong                |-> [i \in 1 .. 8 |-> 0],
+      sharesAtOddLotPrice            |-> [i \in 1 .. 2 |-> 0],
+      adfMarketParticipantIdentifier |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Adf Mpid Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentAdfMpidForm ==
+    { ZeroOddLotPriceLevelAttachmentAdfMpidForm }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm EXCEPT !.oddLotPriceLong = one] : one \in Sample(8) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm EXCEPT !.adfMarketParticipantIdentifier = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* What Odd Lot Attachment Type decides is present                         *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentShortFormCode == 50  \* "2"
+OddLotPriceLevelAttachmentLongFormCode == 51  \* "3"
+OddLotPriceLevelAttachmentAdfMpidFormCode == 53  \* "5"
+OddLotAttachmentTypeNoneCode == 0  \* 
+
+OddLotAttachmentTypeChoice ==
+    [ tag : {OddLotPriceLevelAttachmentShortFormCode}, body : OddLotPriceLevelAttachmentShortForm ]
+        \cup [ tag : {OddLotPriceLevelAttachmentLongFormCode}, body : OddLotPriceLevelAttachmentLongForm ]
+        \cup [ tag : {OddLotPriceLevelAttachmentAdfMpidFormCode}, body : OddLotPriceLevelAttachmentAdfMpidForm ]
+        \cup [ tag : {OddLotAttachmentTypeNoneCode}, body : {[empty |-> 0]} ]
+
+EncodeOddLotAttachmentTypeChoice(message) ==
+    CASE message.tag = OddLotPriceLevelAttachmentShortFormCode -> EncodeOddLotPriceLevelAttachmentShortForm(message.body)
+      [] message.tag = OddLotPriceLevelAttachmentLongFormCode -> EncodeOddLotPriceLevelAttachmentLongForm(message.body)
+      [] message.tag = OddLotPriceLevelAttachmentAdfMpidFormCode -> EncodeOddLotPriceLevelAttachmentAdfMpidForm(message.body)
+      [] OTHER -> << >>
+
+DecodeOddLotAttachmentTypeChoice(tag, bytes) ==
+    LET read ==
+            CASE tag = OddLotPriceLevelAttachmentShortFormCode -> DecodeOddLotPriceLevelAttachmentShortForm(bytes)
+              [] tag = OddLotPriceLevelAttachmentLongFormCode -> DecodeOddLotPriceLevelAttachmentLongForm(bytes)
+              [] tag = OddLotPriceLevelAttachmentAdfMpidFormCode -> DecodeOddLotPriceLevelAttachmentAdfMpidForm(bytes)
+              [] OTHER -> Ok([empty |-> 0], bytes)
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroOddLotAttachmentTypeChoice == [tag |-> OddLotPriceLevelAttachmentShortFormCode, body |-> ZeroOddLotPriceLevelAttachmentShortForm]
+
+(* Each Odd Lot Attachment Type in turn, at the values the message it names is checked at *)
+CheckedOddLotAttachmentTypeChoice ==
+    { [tag |-> OddLotPriceLevelAttachmentShortFormCode, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentShortForm }
+        \cup { [tag |-> OddLotPriceLevelAttachmentLongFormCode, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentLongForm }
+        \cup { [tag |-> OddLotPriceLevelAttachmentAdfMpidFormCode, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentAdfMpidForm }
+        \cup { [tag |-> OddLotAttachmentTypeNoneCode, body |-> [empty |-> 0]] }
+
+(***************************************************************************)
 (* Combined Quote Message Short Form Message                               *)
 (***************************************************************************)
 
@@ -1115,10 +1282,10 @@ CombinedQuoteMessageShortFormMessage ==
       luldBboIndicator             : Sample(1),
       retailInterestIndicator      : Sample(1),
       luldNationalBboIndicator     : Sample(1),
-      oddLotAttachmentType         : Sample(1),
-      oddLotAttachmentCount        : Sample(2),
+      oddLotAttachmentCount        : 0 .. 255,
       nbboAppendageIndicatorChoice : NbboAppendageIndicatorChoice3,
-      boloAppendageIndicatorChoice : BoloAppendageIndicatorChoice ]
+      boloAppendageIndicatorChoice : BoloAppendageIndicatorChoice,
+      oddLotAttachmentTypeChoice   : OddLotAttachmentTypeChoice ]
 
 EncodeCombinedQuoteMessageShortFormMessage(message) ==
     message.marketCenterOriginator
@@ -1138,10 +1305,11 @@ EncodeCombinedQuoteMessageShortFormMessage(message) ==
         \o EncodeUIntBE(message.nbboAppendageIndicatorChoice.tag, 1)
         \o message.luldNationalBboIndicator
         \o EncodeUIntBE(message.boloAppendageIndicatorChoice.tag, 1)
-        \o message.oddLotAttachmentType
-        \o message.oddLotAttachmentCount
+        \o EncodeUIntBE(message.oddLotAttachmentTypeChoice.tag, 1)
+        \o EncodeUIntBE(message.oddLotAttachmentCount, 2)
         \o EncodeNbboAppendageIndicatorChoice3(message.nbboAppendageIndicatorChoice)
         \o EncodeBoloAppendageIndicatorChoice(message.boloAppendageIndicatorChoice)
+        \o EncodeOddLotAttachmentTypeChoice(message.oddLotAttachmentTypeChoice)
 
 DecodeCombinedQuoteMessageShortFormMessage(bytes) ==
     LET marketCenterOriginator == ReadBytes(bytes, 1) IN IF ~marketCenterOriginator.ok THEN Fail ELSE
@@ -1161,10 +1329,11 @@ DecodeCombinedQuoteMessageShortFormMessage(bytes) ==
     LET nbboAppendageIndicator == ReadUIntBE(retailInterestIndicator.rest, 1) IN IF ~nbboAppendageIndicator.ok THEN Fail ELSE
     LET luldNationalBboIndicator == ReadBytes(nbboAppendageIndicator.rest, 1) IN IF ~luldNationalBboIndicator.ok THEN Fail ELSE
     LET boloAppendageIndicator == ReadUIntBE(luldNationalBboIndicator.rest, 1) IN IF ~boloAppendageIndicator.ok THEN Fail ELSE
-    LET oddLotAttachmentType == ReadBytes(boloAppendageIndicator.rest, 1) IN IF ~oddLotAttachmentType.ok THEN Fail ELSE
-    LET oddLotAttachmentCount == ReadBytes(oddLotAttachmentType.rest, 2) IN IF ~oddLotAttachmentCount.ok THEN Fail ELSE
+    LET oddLotAttachmentType == ReadUIntBE(boloAppendageIndicator.rest, 1) IN IF ~oddLotAttachmentType.ok THEN Fail ELSE
+    LET oddLotAttachmentCount == ReadUIntBE(oddLotAttachmentType.rest, 2) IN IF ~oddLotAttachmentCount.ok THEN Fail ELSE
     LET nbboAppendageIndicatorChoice == DecodeNbboAppendageIndicatorChoice3(nbboAppendageIndicator.value, oddLotAttachmentCount.rest) IN IF ~nbboAppendageIndicatorChoice.ok THEN Fail ELSE
     LET boloAppendageIndicatorChoice == DecodeBoloAppendageIndicatorChoice(boloAppendageIndicator.value, nbboAppendageIndicatorChoice.rest) IN IF ~boloAppendageIndicatorChoice.ok THEN Fail ELSE
+    LET oddLotAttachmentTypeChoice == DecodeOddLotAttachmentTypeChoice(oddLotAttachmentType.value, boloAppendageIndicatorChoice.rest) IN IF ~oddLotAttachmentTypeChoice.ok THEN Fail ELSE
     Ok([ marketCenterOriginator       |-> marketCenterOriginator.value,
          subMarketCenterId            |-> subMarketCenterId.value,
          sipTimestamp                 |-> sipTimestamp.value,
@@ -1180,10 +1349,10 @@ DecodeCombinedQuoteMessageShortFormMessage(bytes) ==
          luldBboIndicator             |-> luldBboIndicator.value,
          retailInterestIndicator      |-> retailInterestIndicator.value,
          luldNationalBboIndicator     |-> luldNationalBboIndicator.value,
-         oddLotAttachmentType         |-> oddLotAttachmentType.value,
          oddLotAttachmentCount        |-> oddLotAttachmentCount.value,
          nbboAppendageIndicatorChoice |-> nbboAppendageIndicatorChoice.value,
-         boloAppendageIndicatorChoice |-> boloAppendageIndicatorChoice.value ], boloAppendageIndicatorChoice.rest)
+         boloAppendageIndicatorChoice |-> boloAppendageIndicatorChoice.value,
+         oddLotAttachmentTypeChoice   |-> oddLotAttachmentTypeChoice.value ], oddLotAttachmentTypeChoice.rest)
 
 ZeroCombinedQuoteMessageShortFormMessage ==
     [ marketCenterOriginator       |-> [i \in 1 .. 1 |-> 0],
@@ -1201,10 +1370,10 @@ ZeroCombinedQuoteMessageShortFormMessage ==
       luldBboIndicator             |-> [i \in 1 .. 1 |-> 0],
       retailInterestIndicator      |-> [i \in 1 .. 1 |-> 0],
       luldNationalBboIndicator     |-> [i \in 1 .. 1 |-> 0],
-      oddLotAttachmentType         |-> [i \in 1 .. 1 |-> 0],
-      oddLotAttachmentCount        |-> [i \in 1 .. 2 |-> 0],
+      oddLotAttachmentCount        |-> 0,
       nbboAppendageIndicatorChoice |-> ZeroNbboAppendageIndicatorChoice3,
-      boloAppendageIndicatorChoice |-> ZeroBoloAppendageIndicatorChoice ]
+      boloAppendageIndicatorChoice |-> ZeroBoloAppendageIndicatorChoice,
+      oddLotAttachmentTypeChoice   |-> ZeroOddLotAttachmentTypeChoice ]
 
 (* Combined Quote Message Short Form Message at zero, then each field in turn at the values it is checked at *)
 CheckedCombinedQuoteMessageShortFormMessage ==
@@ -1224,10 +1393,10 @@ CheckedCombinedQuoteMessageShortFormMessage ==
         \cup { [ZeroCombinedQuoteMessageShortFormMessage EXCEPT !.luldBboIndicator = one] : one \in Sample(1) }
         \cup { [ZeroCombinedQuoteMessageShortFormMessage EXCEPT !.retailInterestIndicator = one] : one \in Sample(1) }
         \cup { [ZeroCombinedQuoteMessageShortFormMessage EXCEPT !.luldNationalBboIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroCombinedQuoteMessageShortFormMessage EXCEPT !.oddLotAttachmentType = one] : one \in Sample(1) }
-        \cup { [ZeroCombinedQuoteMessageShortFormMessage EXCEPT !.oddLotAttachmentCount = one] : one \in Sample(2) }
+        \cup { [ZeroCombinedQuoteMessageShortFormMessage EXCEPT !.oddLotAttachmentCount = one] : one \in {0, 1, 255} }
         \cup { [ZeroCombinedQuoteMessageShortFormMessage EXCEPT !.nbboAppendageIndicatorChoice = one] : one \in CheckedNbboAppendageIndicatorChoice3 }
         \cup { [ZeroCombinedQuoteMessageShortFormMessage EXCEPT !.boloAppendageIndicatorChoice = one] : one \in CheckedBoloAppendageIndicatorChoice }
+        \cup { [ZeroCombinedQuoteMessageShortFormMessage EXCEPT !.oddLotAttachmentTypeChoice = one] : one \in CheckedOddLotAttachmentTypeChoice }
 
 (***************************************************************************)
 (* National Bbo Appendage Shortform: 11 bytes                              *)
@@ -1641,6 +1810,170 @@ CheckedBoloAppendageIndicatorChoice2 ==
         \cup { [tag |-> BoloAppendageIndicatorNoneCode2, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
+(* Odd Lot Price Level Attachment Short Form: 6 bytes                      *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentShortForm2 ==
+    [ marketCenterId      : Sample(1),
+      side                : Sample(1),
+      oddLotPriceShort    : Sample(2),
+      sharesAtOddLotPrice : Sample(2) ]
+
+EncodeOddLotPriceLevelAttachmentShortForm2(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceShort
+        \o message.sharesAtOddLotPrice
+
+DecodeOddLotPriceLevelAttachmentShortForm2(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceShort == ReadBytes(side.rest, 2) IN IF ~oddLotPriceShort.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceShort.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    Ok([ marketCenterId      |-> marketCenterId.value,
+         side                |-> side.value,
+         oddLotPriceShort    |-> oddLotPriceShort.value,
+         sharesAtOddLotPrice |-> sharesAtOddLotPrice.value ], sharesAtOddLotPrice.rest)
+
+ZeroOddLotPriceLevelAttachmentShortForm2 ==
+    [ marketCenterId      |-> [i \in 1 .. 1 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceShort    |-> [i \in 1 .. 2 |-> 0],
+      sharesAtOddLotPrice |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Short Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentShortForm2 ==
+    { ZeroOddLotPriceLevelAttachmentShortForm2 }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm2 EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm2 EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm2 EXCEPT !.oddLotPriceShort = one] : one \in Sample(2) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm2 EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Odd Lot Price Level Attachment Long Form: 12 bytes                      *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentLongForm2 ==
+    [ marketCenterId      : Sample(1),
+      side                : Sample(1),
+      oddLotPriceLong     : Sample(8),
+      sharesAtOddLotPrice : Sample(2) ]
+
+EncodeOddLotPriceLevelAttachmentLongForm2(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceLong
+        \o message.sharesAtOddLotPrice
+
+DecodeOddLotPriceLevelAttachmentLongForm2(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceLong == ReadBytes(side.rest, 8) IN IF ~oddLotPriceLong.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceLong.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    Ok([ marketCenterId      |-> marketCenterId.value,
+         side                |-> side.value,
+         oddLotPriceLong     |-> oddLotPriceLong.value,
+         sharesAtOddLotPrice |-> sharesAtOddLotPrice.value ], sharesAtOddLotPrice.rest)
+
+ZeroOddLotPriceLevelAttachmentLongForm2 ==
+    [ marketCenterId      |-> [i \in 1 .. 1 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceLong     |-> [i \in 1 .. 8 |-> 0],
+      sharesAtOddLotPrice |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Long Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentLongForm2 ==
+    { ZeroOddLotPriceLevelAttachmentLongForm2 }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm2 EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm2 EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm2 EXCEPT !.oddLotPriceLong = one] : one \in Sample(8) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm2 EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Odd Lot Price Level Attachment Adf Mpid Form: 16 bytes                  *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentAdfMpidForm2 ==
+    [ marketCenterId                 : Sample(1),
+      side                           : Sample(1),
+      oddLotPriceLong                : Sample(8),
+      sharesAtOddLotPrice            : Sample(2),
+      adfMarketParticipantIdentifier : Sample(4) ]
+
+EncodeOddLotPriceLevelAttachmentAdfMpidForm2(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceLong
+        \o message.sharesAtOddLotPrice
+        \o message.adfMarketParticipantIdentifier
+
+DecodeOddLotPriceLevelAttachmentAdfMpidForm2(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceLong == ReadBytes(side.rest, 8) IN IF ~oddLotPriceLong.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceLong.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    LET adfMarketParticipantIdentifier == ReadBytes(sharesAtOddLotPrice.rest, 4) IN IF ~adfMarketParticipantIdentifier.ok THEN Fail ELSE
+    Ok([ marketCenterId                 |-> marketCenterId.value,
+         side                           |-> side.value,
+         oddLotPriceLong                |-> oddLotPriceLong.value,
+         sharesAtOddLotPrice            |-> sharesAtOddLotPrice.value,
+         adfMarketParticipantIdentifier |-> adfMarketParticipantIdentifier.value ], adfMarketParticipantIdentifier.rest)
+
+ZeroOddLotPriceLevelAttachmentAdfMpidForm2 ==
+    [ marketCenterId                 |-> [i \in 1 .. 1 |-> 0],
+      side                           |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceLong                |-> [i \in 1 .. 8 |-> 0],
+      sharesAtOddLotPrice            |-> [i \in 1 .. 2 |-> 0],
+      adfMarketParticipantIdentifier |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Adf Mpid Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentAdfMpidForm2 ==
+    { ZeroOddLotPriceLevelAttachmentAdfMpidForm2 }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm2 EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm2 EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm2 EXCEPT !.oddLotPriceLong = one] : one \in Sample(8) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm2 EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm2 EXCEPT !.adfMarketParticipantIdentifier = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* What Odd Lot Attachment Type decides is present                         *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentShortFormCode2 == 50  \* "2"
+OddLotPriceLevelAttachmentLongFormCode2 == 51  \* "3"
+OddLotPriceLevelAttachmentAdfMpidFormCode2 == 53  \* "5"
+OddLotAttachmentTypeNoneCode2 == 0  \* 
+
+OddLotAttachmentTypeChoice2 ==
+    [ tag : {OddLotPriceLevelAttachmentShortFormCode2}, body : OddLotPriceLevelAttachmentShortForm2 ]
+        \cup [ tag : {OddLotPriceLevelAttachmentLongFormCode2}, body : OddLotPriceLevelAttachmentLongForm2 ]
+        \cup [ tag : {OddLotPriceLevelAttachmentAdfMpidFormCode2}, body : OddLotPriceLevelAttachmentAdfMpidForm2 ]
+        \cup [ tag : {OddLotAttachmentTypeNoneCode2}, body : {[empty |-> 0]} ]
+
+EncodeOddLotAttachmentTypeChoice2(message) ==
+    CASE message.tag = OddLotPriceLevelAttachmentShortFormCode2 -> EncodeOddLotPriceLevelAttachmentShortForm2(message.body)
+      [] message.tag = OddLotPriceLevelAttachmentLongFormCode2 -> EncodeOddLotPriceLevelAttachmentLongForm2(message.body)
+      [] message.tag = OddLotPriceLevelAttachmentAdfMpidFormCode2 -> EncodeOddLotPriceLevelAttachmentAdfMpidForm2(message.body)
+      [] OTHER -> << >>
+
+DecodeOddLotAttachmentTypeChoice2(tag, bytes) ==
+    LET read ==
+            CASE tag = OddLotPriceLevelAttachmentShortFormCode2 -> DecodeOddLotPriceLevelAttachmentShortForm2(bytes)
+              [] tag = OddLotPriceLevelAttachmentLongFormCode2 -> DecodeOddLotPriceLevelAttachmentLongForm2(bytes)
+              [] tag = OddLotPriceLevelAttachmentAdfMpidFormCode2 -> DecodeOddLotPriceLevelAttachmentAdfMpidForm2(bytes)
+              [] OTHER -> Ok([empty |-> 0], bytes)
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroOddLotAttachmentTypeChoice2 == [tag |-> OddLotPriceLevelAttachmentShortFormCode2, body |-> ZeroOddLotPriceLevelAttachmentShortForm2]
+
+(* Each Odd Lot Attachment Type in turn, at the values the message it names is checked at *)
+CheckedOddLotAttachmentTypeChoice2 ==
+    { [tag |-> OddLotPriceLevelAttachmentShortFormCode2, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentShortForm2 }
+        \cup { [tag |-> OddLotPriceLevelAttachmentLongFormCode2, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentLongForm2 }
+        \cup { [tag |-> OddLotPriceLevelAttachmentAdfMpidFormCode2, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentAdfMpidForm2 }
+        \cup { [tag |-> OddLotAttachmentTypeNoneCode2, body |-> [empty |-> 0]] }
+
+(***************************************************************************)
 (* Combined Quote Message Long Form Message                                *)
 (***************************************************************************)
 
@@ -1661,11 +1994,11 @@ CombinedQuoteMessageLongFormMessage ==
       luldBboIndicator                     : Sample(1),
       retailInterestIndicator              : Sample(1),
       luldNationalBboIndicator             : Sample(1),
-      oddLotAttachmentType                 : Sample(1),
-      oddLotAttachmentCount                : Sample(2),
+      oddLotAttachmentCount                : 0 .. 255,
       nbboAppendageIndicatorChoice         : NbboAppendageIndicatorChoice4,
       finraAdfMpidAppendageIndicatorChoice : FinraAdfMpidAppendageIndicatorChoice,
-      boloAppendageIndicatorChoice         : BoloAppendageIndicatorChoice2 ]
+      boloAppendageIndicatorChoice         : BoloAppendageIndicatorChoice2,
+      oddLotAttachmentTypeChoice           : OddLotAttachmentTypeChoice2 ]
 
 EncodeCombinedQuoteMessageLongFormMessage(message) ==
     message.marketCenterOriginator
@@ -1687,11 +2020,12 @@ EncodeCombinedQuoteMessageLongFormMessage(message) ==
         \o message.luldNationalBboIndicator
         \o EncodeUIntBE(message.finraAdfMpidAppendageIndicatorChoice.tag, 1)
         \o EncodeUIntBE(message.boloAppendageIndicatorChoice.tag, 1)
-        \o message.oddLotAttachmentType
-        \o message.oddLotAttachmentCount
+        \o EncodeUIntBE(message.oddLotAttachmentTypeChoice.tag, 1)
+        \o EncodeUIntBE(message.oddLotAttachmentCount, 2)
         \o EncodeNbboAppendageIndicatorChoice4(message.nbboAppendageIndicatorChoice)
         \o EncodeFinraAdfMpidAppendageIndicatorChoice(message.finraAdfMpidAppendageIndicatorChoice)
         \o EncodeBoloAppendageIndicatorChoice2(message.boloAppendageIndicatorChoice)
+        \o EncodeOddLotAttachmentTypeChoice2(message.oddLotAttachmentTypeChoice)
 
 DecodeCombinedQuoteMessageLongFormMessage(bytes) ==
     LET marketCenterOriginator == ReadBytes(bytes, 1) IN IF ~marketCenterOriginator.ok THEN Fail ELSE
@@ -1713,11 +2047,12 @@ DecodeCombinedQuoteMessageLongFormMessage(bytes) ==
     LET luldNationalBboIndicator == ReadBytes(nbboAppendageIndicator.rest, 1) IN IF ~luldNationalBboIndicator.ok THEN Fail ELSE
     LET finraAdfMpidAppendageIndicator == ReadUIntBE(luldNationalBboIndicator.rest, 1) IN IF ~finraAdfMpidAppendageIndicator.ok THEN Fail ELSE
     LET boloAppendageIndicator == ReadUIntBE(finraAdfMpidAppendageIndicator.rest, 1) IN IF ~boloAppendageIndicator.ok THEN Fail ELSE
-    LET oddLotAttachmentType == ReadBytes(boloAppendageIndicator.rest, 1) IN IF ~oddLotAttachmentType.ok THEN Fail ELSE
-    LET oddLotAttachmentCount == ReadBytes(oddLotAttachmentType.rest, 2) IN IF ~oddLotAttachmentCount.ok THEN Fail ELSE
+    LET oddLotAttachmentType == ReadUIntBE(boloAppendageIndicator.rest, 1) IN IF ~oddLotAttachmentType.ok THEN Fail ELSE
+    LET oddLotAttachmentCount == ReadUIntBE(oddLotAttachmentType.rest, 2) IN IF ~oddLotAttachmentCount.ok THEN Fail ELSE
     LET nbboAppendageIndicatorChoice == DecodeNbboAppendageIndicatorChoice4(nbboAppendageIndicator.value, oddLotAttachmentCount.rest) IN IF ~nbboAppendageIndicatorChoice.ok THEN Fail ELSE
     LET finraAdfMpidAppendageIndicatorChoice == DecodeFinraAdfMpidAppendageIndicatorChoice(finraAdfMpidAppendageIndicator.value, nbboAppendageIndicatorChoice.rest) IN IF ~finraAdfMpidAppendageIndicatorChoice.ok THEN Fail ELSE
     LET boloAppendageIndicatorChoice == DecodeBoloAppendageIndicatorChoice2(boloAppendageIndicator.value, finraAdfMpidAppendageIndicatorChoice.rest) IN IF ~boloAppendageIndicatorChoice.ok THEN Fail ELSE
+    LET oddLotAttachmentTypeChoice == DecodeOddLotAttachmentTypeChoice2(oddLotAttachmentType.value, boloAppendageIndicatorChoice.rest) IN IF ~oddLotAttachmentTypeChoice.ok THEN Fail ELSE
     Ok([ marketCenterOriginator               |-> marketCenterOriginator.value,
          subMarketCenterId                    |-> subMarketCenterId.value,
          sipTimestamp                         |-> sipTimestamp.value,
@@ -1734,11 +2069,11 @@ DecodeCombinedQuoteMessageLongFormMessage(bytes) ==
          luldBboIndicator                     |-> luldBboIndicator.value,
          retailInterestIndicator              |-> retailInterestIndicator.value,
          luldNationalBboIndicator             |-> luldNationalBboIndicator.value,
-         oddLotAttachmentType                 |-> oddLotAttachmentType.value,
          oddLotAttachmentCount                |-> oddLotAttachmentCount.value,
          nbboAppendageIndicatorChoice         |-> nbboAppendageIndicatorChoice.value,
          finraAdfMpidAppendageIndicatorChoice |-> finraAdfMpidAppendageIndicatorChoice.value,
-         boloAppendageIndicatorChoice         |-> boloAppendageIndicatorChoice.value ], boloAppendageIndicatorChoice.rest)
+         boloAppendageIndicatorChoice         |-> boloAppendageIndicatorChoice.value,
+         oddLotAttachmentTypeChoice           |-> oddLotAttachmentTypeChoice.value ], oddLotAttachmentTypeChoice.rest)
 
 ZeroCombinedQuoteMessageLongFormMessage ==
     [ marketCenterOriginator               |-> [i \in 1 .. 1 |-> 0],
@@ -1757,11 +2092,11 @@ ZeroCombinedQuoteMessageLongFormMessage ==
       luldBboIndicator                     |-> [i \in 1 .. 1 |-> 0],
       retailInterestIndicator              |-> [i \in 1 .. 1 |-> 0],
       luldNationalBboIndicator             |-> [i \in 1 .. 1 |-> 0],
-      oddLotAttachmentType                 |-> [i \in 1 .. 1 |-> 0],
-      oddLotAttachmentCount                |-> [i \in 1 .. 2 |-> 0],
+      oddLotAttachmentCount                |-> 0,
       nbboAppendageIndicatorChoice         |-> ZeroNbboAppendageIndicatorChoice4,
       finraAdfMpidAppendageIndicatorChoice |-> ZeroFinraAdfMpidAppendageIndicatorChoice,
-      boloAppendageIndicatorChoice         |-> ZeroBoloAppendageIndicatorChoice2 ]
+      boloAppendageIndicatorChoice         |-> ZeroBoloAppendageIndicatorChoice2,
+      oddLotAttachmentTypeChoice           |-> ZeroOddLotAttachmentTypeChoice2 ]
 
 (* Combined Quote Message Long Form Message at zero, then each field in turn at the values it is checked at *)
 CheckedCombinedQuoteMessageLongFormMessage ==
@@ -1782,11 +2117,11 @@ CheckedCombinedQuoteMessageLongFormMessage ==
         \cup { [ZeroCombinedQuoteMessageLongFormMessage EXCEPT !.luldBboIndicator = one] : one \in Sample(1) }
         \cup { [ZeroCombinedQuoteMessageLongFormMessage EXCEPT !.retailInterestIndicator = one] : one \in Sample(1) }
         \cup { [ZeroCombinedQuoteMessageLongFormMessage EXCEPT !.luldNationalBboIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroCombinedQuoteMessageLongFormMessage EXCEPT !.oddLotAttachmentType = one] : one \in Sample(1) }
-        \cup { [ZeroCombinedQuoteMessageLongFormMessage EXCEPT !.oddLotAttachmentCount = one] : one \in Sample(2) }
+        \cup { [ZeroCombinedQuoteMessageLongFormMessage EXCEPT !.oddLotAttachmentCount = one] : one \in {0, 1, 255} }
         \cup { [ZeroCombinedQuoteMessageLongFormMessage EXCEPT !.nbboAppendageIndicatorChoice = one] : one \in CheckedNbboAppendageIndicatorChoice4 }
         \cup { [ZeroCombinedQuoteMessageLongFormMessage EXCEPT !.finraAdfMpidAppendageIndicatorChoice = one] : one \in CheckedFinraAdfMpidAppendageIndicatorChoice }
         \cup { [ZeroCombinedQuoteMessageLongFormMessage EXCEPT !.boloAppendageIndicatorChoice = one] : one \in CheckedBoloAppendageIndicatorChoice2 }
+        \cup { [ZeroCombinedQuoteMessageLongFormMessage EXCEPT !.oddLotAttachmentTypeChoice = one] : one \in CheckedOddLotAttachmentTypeChoice2 }
 
 (***************************************************************************)
 (* Bolo Appendage Short Form: 10 bytes                                     *)
@@ -1995,6 +2330,170 @@ CheckedBoloAppendageIndicatorChoice3 ==
         \cup { [tag |-> BoloAppendageIndicatorNoneCode3, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
+(* Odd Lot Price Level Attachment Short Form: 6 bytes                      *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentShortForm3 ==
+    [ marketCenterId      : Sample(1),
+      side                : Sample(1),
+      oddLotPriceShort    : Sample(2),
+      sharesAtOddLotPrice : Sample(2) ]
+
+EncodeOddLotPriceLevelAttachmentShortForm3(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceShort
+        \o message.sharesAtOddLotPrice
+
+DecodeOddLotPriceLevelAttachmentShortForm3(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceShort == ReadBytes(side.rest, 2) IN IF ~oddLotPriceShort.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceShort.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    Ok([ marketCenterId      |-> marketCenterId.value,
+         side                |-> side.value,
+         oddLotPriceShort    |-> oddLotPriceShort.value,
+         sharesAtOddLotPrice |-> sharesAtOddLotPrice.value ], sharesAtOddLotPrice.rest)
+
+ZeroOddLotPriceLevelAttachmentShortForm3 ==
+    [ marketCenterId      |-> [i \in 1 .. 1 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceShort    |-> [i \in 1 .. 2 |-> 0],
+      sharesAtOddLotPrice |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Short Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentShortForm3 ==
+    { ZeroOddLotPriceLevelAttachmentShortForm3 }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm3 EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm3 EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm3 EXCEPT !.oddLotPriceShort = one] : one \in Sample(2) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm3 EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Odd Lot Price Level Attachment Long Form: 12 bytes                      *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentLongForm3 ==
+    [ marketCenterId      : Sample(1),
+      side                : Sample(1),
+      oddLotPriceLong     : Sample(8),
+      sharesAtOddLotPrice : Sample(2) ]
+
+EncodeOddLotPriceLevelAttachmentLongForm3(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceLong
+        \o message.sharesAtOddLotPrice
+
+DecodeOddLotPriceLevelAttachmentLongForm3(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceLong == ReadBytes(side.rest, 8) IN IF ~oddLotPriceLong.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceLong.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    Ok([ marketCenterId      |-> marketCenterId.value,
+         side                |-> side.value,
+         oddLotPriceLong     |-> oddLotPriceLong.value,
+         sharesAtOddLotPrice |-> sharesAtOddLotPrice.value ], sharesAtOddLotPrice.rest)
+
+ZeroOddLotPriceLevelAttachmentLongForm3 ==
+    [ marketCenterId      |-> [i \in 1 .. 1 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceLong     |-> [i \in 1 .. 8 |-> 0],
+      sharesAtOddLotPrice |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Long Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentLongForm3 ==
+    { ZeroOddLotPriceLevelAttachmentLongForm3 }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm3 EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm3 EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm3 EXCEPT !.oddLotPriceLong = one] : one \in Sample(8) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm3 EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Odd Lot Price Level Attachment Adf Mpid Form: 16 bytes                  *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentAdfMpidForm3 ==
+    [ marketCenterId                 : Sample(1),
+      side                           : Sample(1),
+      oddLotPriceLong                : Sample(8),
+      sharesAtOddLotPrice            : Sample(2),
+      adfMarketParticipantIdentifier : Sample(4) ]
+
+EncodeOddLotPriceLevelAttachmentAdfMpidForm3(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceLong
+        \o message.sharesAtOddLotPrice
+        \o message.adfMarketParticipantIdentifier
+
+DecodeOddLotPriceLevelAttachmentAdfMpidForm3(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceLong == ReadBytes(side.rest, 8) IN IF ~oddLotPriceLong.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceLong.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    LET adfMarketParticipantIdentifier == ReadBytes(sharesAtOddLotPrice.rest, 4) IN IF ~adfMarketParticipantIdentifier.ok THEN Fail ELSE
+    Ok([ marketCenterId                 |-> marketCenterId.value,
+         side                           |-> side.value,
+         oddLotPriceLong                |-> oddLotPriceLong.value,
+         sharesAtOddLotPrice            |-> sharesAtOddLotPrice.value,
+         adfMarketParticipantIdentifier |-> adfMarketParticipantIdentifier.value ], adfMarketParticipantIdentifier.rest)
+
+ZeroOddLotPriceLevelAttachmentAdfMpidForm3 ==
+    [ marketCenterId                 |-> [i \in 1 .. 1 |-> 0],
+      side                           |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceLong                |-> [i \in 1 .. 8 |-> 0],
+      sharesAtOddLotPrice            |-> [i \in 1 .. 2 |-> 0],
+      adfMarketParticipantIdentifier |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Adf Mpid Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentAdfMpidForm3 ==
+    { ZeroOddLotPriceLevelAttachmentAdfMpidForm3 }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm3 EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm3 EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm3 EXCEPT !.oddLotPriceLong = one] : one \in Sample(8) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm3 EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm3 EXCEPT !.adfMarketParticipantIdentifier = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* What Odd Lot Attachment Type decides is present                         *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentShortFormCode3 == 50  \* "2"
+OddLotPriceLevelAttachmentLongFormCode3 == 51  \* "3"
+OddLotPriceLevelAttachmentAdfMpidFormCode3 == 53  \* "5"
+OddLotAttachmentTypeNoneCode3 == 0  \* 
+
+OddLotAttachmentTypeChoice3 ==
+    [ tag : {OddLotPriceLevelAttachmentShortFormCode3}, body : OddLotPriceLevelAttachmentShortForm3 ]
+        \cup [ tag : {OddLotPriceLevelAttachmentLongFormCode3}, body : OddLotPriceLevelAttachmentLongForm3 ]
+        \cup [ tag : {OddLotPriceLevelAttachmentAdfMpidFormCode3}, body : OddLotPriceLevelAttachmentAdfMpidForm3 ]
+        \cup [ tag : {OddLotAttachmentTypeNoneCode3}, body : {[empty |-> 0]} ]
+
+EncodeOddLotAttachmentTypeChoice3(message) ==
+    CASE message.tag = OddLotPriceLevelAttachmentShortFormCode3 -> EncodeOddLotPriceLevelAttachmentShortForm3(message.body)
+      [] message.tag = OddLotPriceLevelAttachmentLongFormCode3 -> EncodeOddLotPriceLevelAttachmentLongForm3(message.body)
+      [] message.tag = OddLotPriceLevelAttachmentAdfMpidFormCode3 -> EncodeOddLotPriceLevelAttachmentAdfMpidForm3(message.body)
+      [] OTHER -> << >>
+
+DecodeOddLotAttachmentTypeChoice3(tag, bytes) ==
+    LET read ==
+            CASE tag = OddLotPriceLevelAttachmentShortFormCode3 -> DecodeOddLotPriceLevelAttachmentShortForm3(bytes)
+              [] tag = OddLotPriceLevelAttachmentLongFormCode3 -> DecodeOddLotPriceLevelAttachmentLongForm3(bytes)
+              [] tag = OddLotPriceLevelAttachmentAdfMpidFormCode3 -> DecodeOddLotPriceLevelAttachmentAdfMpidForm3(bytes)
+              [] OTHER -> Ok([empty |-> 0], bytes)
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroOddLotAttachmentTypeChoice3 == [tag |-> OddLotPriceLevelAttachmentShortFormCode3, body |-> ZeroOddLotPriceLevelAttachmentShortForm3]
+
+(* Each Odd Lot Attachment Type in turn, at the values the message it names is checked at *)
+CheckedOddLotAttachmentTypeChoice3 ==
+    { [tag |-> OddLotPriceLevelAttachmentShortFormCode3, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentShortForm3 }
+        \cup { [tag |-> OddLotPriceLevelAttachmentLongFormCode3, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentLongForm3 }
+        \cup { [tag |-> OddLotPriceLevelAttachmentAdfMpidFormCode3, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentAdfMpidForm3 }
+        \cup { [tag |-> OddLotAttachmentTypeNoneCode3, body |-> [empty |-> 0]] }
+
+(***************************************************************************)
 (* Odd Lot Quote Message Short Form Message                                *)
 (***************************************************************************)
 
@@ -2006,9 +2505,9 @@ OddLotQuoteMessageShortFormMessage ==
       participantToken             : Sample(8),
       symbolShort                  : Sample(5),
       sipGeneratedUpdateFlag       : Sample(1),
-      oddLotAttachmentType         : Sample(1),
-      oddLotAttachmentCount        : Sample(2),
-      boloAppendageIndicatorChoice : BoloAppendageIndicatorChoice3 ]
+      oddLotAttachmentCount        : 0 .. 255,
+      boloAppendageIndicatorChoice : BoloAppendageIndicatorChoice3,
+      oddLotAttachmentTypeChoice   : OddLotAttachmentTypeChoice3 ]
 
 EncodeOddLotQuoteMessageShortFormMessage(message) ==
     message.marketCenterOriginator
@@ -2019,9 +2518,10 @@ EncodeOddLotQuoteMessageShortFormMessage(message) ==
         \o message.symbolShort
         \o message.sipGeneratedUpdateFlag
         \o EncodeUIntBE(message.boloAppendageIndicatorChoice.tag, 1)
-        \o message.oddLotAttachmentType
-        \o message.oddLotAttachmentCount
+        \o EncodeUIntBE(message.oddLotAttachmentTypeChoice.tag, 1)
+        \o EncodeUIntBE(message.oddLotAttachmentCount, 2)
         \o EncodeBoloAppendageIndicatorChoice3(message.boloAppendageIndicatorChoice)
+        \o EncodeOddLotAttachmentTypeChoice3(message.oddLotAttachmentTypeChoice)
 
 DecodeOddLotQuoteMessageShortFormMessage(bytes) ==
     LET marketCenterOriginator == ReadBytes(bytes, 1) IN IF ~marketCenterOriginator.ok THEN Fail ELSE
@@ -2032,9 +2532,10 @@ DecodeOddLotQuoteMessageShortFormMessage(bytes) ==
     LET symbolShort == ReadBytes(participantToken.rest, 5) IN IF ~symbolShort.ok THEN Fail ELSE
     LET sipGeneratedUpdateFlag == ReadBytes(symbolShort.rest, 1) IN IF ~sipGeneratedUpdateFlag.ok THEN Fail ELSE
     LET boloAppendageIndicator == ReadUIntBE(sipGeneratedUpdateFlag.rest, 1) IN IF ~boloAppendageIndicator.ok THEN Fail ELSE
-    LET oddLotAttachmentType == ReadBytes(boloAppendageIndicator.rest, 1) IN IF ~oddLotAttachmentType.ok THEN Fail ELSE
-    LET oddLotAttachmentCount == ReadBytes(oddLotAttachmentType.rest, 2) IN IF ~oddLotAttachmentCount.ok THEN Fail ELSE
+    LET oddLotAttachmentType == ReadUIntBE(boloAppendageIndicator.rest, 1) IN IF ~oddLotAttachmentType.ok THEN Fail ELSE
+    LET oddLotAttachmentCount == ReadUIntBE(oddLotAttachmentType.rest, 2) IN IF ~oddLotAttachmentCount.ok THEN Fail ELSE
     LET boloAppendageIndicatorChoice == DecodeBoloAppendageIndicatorChoice3(boloAppendageIndicator.value, oddLotAttachmentCount.rest) IN IF ~boloAppendageIndicatorChoice.ok THEN Fail ELSE
+    LET oddLotAttachmentTypeChoice == DecodeOddLotAttachmentTypeChoice3(oddLotAttachmentType.value, boloAppendageIndicatorChoice.rest) IN IF ~oddLotAttachmentTypeChoice.ok THEN Fail ELSE
     Ok([ marketCenterOriginator       |-> marketCenterOriginator.value,
          subMarketCenterId            |-> subMarketCenterId.value,
          sipTimestamp                 |-> sipTimestamp.value,
@@ -2042,9 +2543,9 @@ DecodeOddLotQuoteMessageShortFormMessage(bytes) ==
          participantToken             |-> participantToken.value,
          symbolShort                  |-> symbolShort.value,
          sipGeneratedUpdateFlag       |-> sipGeneratedUpdateFlag.value,
-         oddLotAttachmentType         |-> oddLotAttachmentType.value,
          oddLotAttachmentCount        |-> oddLotAttachmentCount.value,
-         boloAppendageIndicatorChoice |-> boloAppendageIndicatorChoice.value ], boloAppendageIndicatorChoice.rest)
+         boloAppendageIndicatorChoice |-> boloAppendageIndicatorChoice.value,
+         oddLotAttachmentTypeChoice   |-> oddLotAttachmentTypeChoice.value ], oddLotAttachmentTypeChoice.rest)
 
 ZeroOddLotQuoteMessageShortFormMessage ==
     [ marketCenterOriginator       |-> [i \in 1 .. 1 |-> 0],
@@ -2054,9 +2555,9 @@ ZeroOddLotQuoteMessageShortFormMessage ==
       participantToken             |-> [i \in 1 .. 8 |-> 0],
       symbolShort                  |-> [i \in 1 .. 5 |-> 0],
       sipGeneratedUpdateFlag       |-> [i \in 1 .. 1 |-> 0],
-      oddLotAttachmentType         |-> [i \in 1 .. 1 |-> 0],
-      oddLotAttachmentCount        |-> [i \in 1 .. 2 |-> 0],
-      boloAppendageIndicatorChoice |-> ZeroBoloAppendageIndicatorChoice3 ]
+      oddLotAttachmentCount        |-> 0,
+      boloAppendageIndicatorChoice |-> ZeroBoloAppendageIndicatorChoice3,
+      oddLotAttachmentTypeChoice   |-> ZeroOddLotAttachmentTypeChoice3 ]
 
 (* Odd Lot Quote Message Short Form Message at zero, then each field in turn at the values it is checked at *)
 CheckedOddLotQuoteMessageShortFormMessage ==
@@ -2068,9 +2569,9 @@ CheckedOddLotQuoteMessageShortFormMessage ==
         \cup { [ZeroOddLotQuoteMessageShortFormMessage EXCEPT !.participantToken = one] : one \in Sample(8) }
         \cup { [ZeroOddLotQuoteMessageShortFormMessage EXCEPT !.symbolShort = one] : one \in Sample(5) }
         \cup { [ZeroOddLotQuoteMessageShortFormMessage EXCEPT !.sipGeneratedUpdateFlag = one] : one \in Sample(1) }
-        \cup { [ZeroOddLotQuoteMessageShortFormMessage EXCEPT !.oddLotAttachmentType = one] : one \in Sample(1) }
-        \cup { [ZeroOddLotQuoteMessageShortFormMessage EXCEPT !.oddLotAttachmentCount = one] : one \in Sample(2) }
+        \cup { [ZeroOddLotQuoteMessageShortFormMessage EXCEPT !.oddLotAttachmentCount = one] : one \in {0, 1, 255} }
         \cup { [ZeroOddLotQuoteMessageShortFormMessage EXCEPT !.boloAppendageIndicatorChoice = one] : one \in CheckedBoloAppendageIndicatorChoice3 }
+        \cup { [ZeroOddLotQuoteMessageShortFormMessage EXCEPT !.oddLotAttachmentTypeChoice = one] : one \in CheckedOddLotAttachmentTypeChoice3 }
 
 (***************************************************************************)
 (* Bolo Appendage Short Form: 10 bytes                                     *)
@@ -2279,6 +2780,170 @@ CheckedBoloAppendageIndicatorChoice4 ==
         \cup { [tag |-> BoloAppendageIndicatorNoneCode4, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
+(* Odd Lot Price Level Attachment Short Form: 6 bytes                      *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentShortForm4 ==
+    [ marketCenterId      : Sample(1),
+      side                : Sample(1),
+      oddLotPriceShort    : Sample(2),
+      sharesAtOddLotPrice : Sample(2) ]
+
+EncodeOddLotPriceLevelAttachmentShortForm4(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceShort
+        \o message.sharesAtOddLotPrice
+
+DecodeOddLotPriceLevelAttachmentShortForm4(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceShort == ReadBytes(side.rest, 2) IN IF ~oddLotPriceShort.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceShort.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    Ok([ marketCenterId      |-> marketCenterId.value,
+         side                |-> side.value,
+         oddLotPriceShort    |-> oddLotPriceShort.value,
+         sharesAtOddLotPrice |-> sharesAtOddLotPrice.value ], sharesAtOddLotPrice.rest)
+
+ZeroOddLotPriceLevelAttachmentShortForm4 ==
+    [ marketCenterId      |-> [i \in 1 .. 1 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceShort    |-> [i \in 1 .. 2 |-> 0],
+      sharesAtOddLotPrice |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Short Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentShortForm4 ==
+    { ZeroOddLotPriceLevelAttachmentShortForm4 }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm4 EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm4 EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm4 EXCEPT !.oddLotPriceShort = one] : one \in Sample(2) }
+        \cup { [ZeroOddLotPriceLevelAttachmentShortForm4 EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Odd Lot Price Level Attachment Long Form: 12 bytes                      *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentLongForm4 ==
+    [ marketCenterId      : Sample(1),
+      side                : Sample(1),
+      oddLotPriceLong     : Sample(8),
+      sharesAtOddLotPrice : Sample(2) ]
+
+EncodeOddLotPriceLevelAttachmentLongForm4(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceLong
+        \o message.sharesAtOddLotPrice
+
+DecodeOddLotPriceLevelAttachmentLongForm4(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceLong == ReadBytes(side.rest, 8) IN IF ~oddLotPriceLong.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceLong.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    Ok([ marketCenterId      |-> marketCenterId.value,
+         side                |-> side.value,
+         oddLotPriceLong     |-> oddLotPriceLong.value,
+         sharesAtOddLotPrice |-> sharesAtOddLotPrice.value ], sharesAtOddLotPrice.rest)
+
+ZeroOddLotPriceLevelAttachmentLongForm4 ==
+    [ marketCenterId      |-> [i \in 1 .. 1 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceLong     |-> [i \in 1 .. 8 |-> 0],
+      sharesAtOddLotPrice |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Long Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentLongForm4 ==
+    { ZeroOddLotPriceLevelAttachmentLongForm4 }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm4 EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm4 EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm4 EXCEPT !.oddLotPriceLong = one] : one \in Sample(8) }
+        \cup { [ZeroOddLotPriceLevelAttachmentLongForm4 EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Odd Lot Price Level Attachment Adf Mpid Form: 16 bytes                  *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentAdfMpidForm4 ==
+    [ marketCenterId                 : Sample(1),
+      side                           : Sample(1),
+      oddLotPriceLong                : Sample(8),
+      sharesAtOddLotPrice            : Sample(2),
+      adfMarketParticipantIdentifier : Sample(4) ]
+
+EncodeOddLotPriceLevelAttachmentAdfMpidForm4(message) ==
+    message.marketCenterId
+        \o message.side
+        \o message.oddLotPriceLong
+        \o message.sharesAtOddLotPrice
+        \o message.adfMarketParticipantIdentifier
+
+DecodeOddLotPriceLevelAttachmentAdfMpidForm4(bytes) ==
+    LET marketCenterId == ReadBytes(bytes, 1) IN IF ~marketCenterId.ok THEN Fail ELSE
+    LET side == ReadBytes(marketCenterId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET oddLotPriceLong == ReadBytes(side.rest, 8) IN IF ~oddLotPriceLong.ok THEN Fail ELSE
+    LET sharesAtOddLotPrice == ReadBytes(oddLotPriceLong.rest, 2) IN IF ~sharesAtOddLotPrice.ok THEN Fail ELSE
+    LET adfMarketParticipantIdentifier == ReadBytes(sharesAtOddLotPrice.rest, 4) IN IF ~adfMarketParticipantIdentifier.ok THEN Fail ELSE
+    Ok([ marketCenterId                 |-> marketCenterId.value,
+         side                           |-> side.value,
+         oddLotPriceLong                |-> oddLotPriceLong.value,
+         sharesAtOddLotPrice            |-> sharesAtOddLotPrice.value,
+         adfMarketParticipantIdentifier |-> adfMarketParticipantIdentifier.value ], adfMarketParticipantIdentifier.rest)
+
+ZeroOddLotPriceLevelAttachmentAdfMpidForm4 ==
+    [ marketCenterId                 |-> [i \in 1 .. 1 |-> 0],
+      side                           |-> [i \in 1 .. 1 |-> 0],
+      oddLotPriceLong                |-> [i \in 1 .. 8 |-> 0],
+      sharesAtOddLotPrice            |-> [i \in 1 .. 2 |-> 0],
+      adfMarketParticipantIdentifier |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Odd Lot Price Level Attachment Adf Mpid Form at zero, then each field in turn at the values it is checked at *)
+CheckedOddLotPriceLevelAttachmentAdfMpidForm4 ==
+    { ZeroOddLotPriceLevelAttachmentAdfMpidForm4 }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm4 EXCEPT !.marketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm4 EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm4 EXCEPT !.oddLotPriceLong = one] : one \in Sample(8) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm4 EXCEPT !.sharesAtOddLotPrice = one] : one \in Sample(2) }
+        \cup { [ZeroOddLotPriceLevelAttachmentAdfMpidForm4 EXCEPT !.adfMarketParticipantIdentifier = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* What Odd Lot Attachment Type decides is present                         *)
+(***************************************************************************)
+
+OddLotPriceLevelAttachmentShortFormCode4 == 50  \* "2"
+OddLotPriceLevelAttachmentLongFormCode4 == 51  \* "3"
+OddLotPriceLevelAttachmentAdfMpidFormCode4 == 53  \* "5"
+OddLotAttachmentTypeNoneCode4 == 0  \* 
+
+OddLotAttachmentTypeChoice4 ==
+    [ tag : {OddLotPriceLevelAttachmentShortFormCode4}, body : OddLotPriceLevelAttachmentShortForm4 ]
+        \cup [ tag : {OddLotPriceLevelAttachmentLongFormCode4}, body : OddLotPriceLevelAttachmentLongForm4 ]
+        \cup [ tag : {OddLotPriceLevelAttachmentAdfMpidFormCode4}, body : OddLotPriceLevelAttachmentAdfMpidForm4 ]
+        \cup [ tag : {OddLotAttachmentTypeNoneCode4}, body : {[empty |-> 0]} ]
+
+EncodeOddLotAttachmentTypeChoice4(message) ==
+    CASE message.tag = OddLotPriceLevelAttachmentShortFormCode4 -> EncodeOddLotPriceLevelAttachmentShortForm4(message.body)
+      [] message.tag = OddLotPriceLevelAttachmentLongFormCode4 -> EncodeOddLotPriceLevelAttachmentLongForm4(message.body)
+      [] message.tag = OddLotPriceLevelAttachmentAdfMpidFormCode4 -> EncodeOddLotPriceLevelAttachmentAdfMpidForm4(message.body)
+      [] OTHER -> << >>
+
+DecodeOddLotAttachmentTypeChoice4(tag, bytes) ==
+    LET read ==
+            CASE tag = OddLotPriceLevelAttachmentShortFormCode4 -> DecodeOddLotPriceLevelAttachmentShortForm4(bytes)
+              [] tag = OddLotPriceLevelAttachmentLongFormCode4 -> DecodeOddLotPriceLevelAttachmentLongForm4(bytes)
+              [] tag = OddLotPriceLevelAttachmentAdfMpidFormCode4 -> DecodeOddLotPriceLevelAttachmentAdfMpidForm4(bytes)
+              [] OTHER -> Ok([empty |-> 0], bytes)
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroOddLotAttachmentTypeChoice4 == [tag |-> OddLotPriceLevelAttachmentShortFormCode4, body |-> ZeroOddLotPriceLevelAttachmentShortForm4]
+
+(* Each Odd Lot Attachment Type in turn, at the values the message it names is checked at *)
+CheckedOddLotAttachmentTypeChoice4 ==
+    { [tag |-> OddLotPriceLevelAttachmentShortFormCode4, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentShortForm4 }
+        \cup { [tag |-> OddLotPriceLevelAttachmentLongFormCode4, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentLongForm4 }
+        \cup { [tag |-> OddLotPriceLevelAttachmentAdfMpidFormCode4, body |-> one] : one \in CheckedOddLotPriceLevelAttachmentAdfMpidForm4 }
+        \cup { [tag |-> OddLotAttachmentTypeNoneCode4, body |-> [empty |-> 0]] }
+
+(***************************************************************************)
 (* Odd Lot Quote Message Long Form Message                                 *)
 (***************************************************************************)
 
@@ -2291,9 +2956,9 @@ OddLotQuoteMessageLongFormMessage ==
       adfTimestamp                 : Sample(8),
       symbolLong                   : Sample(11),
       sipGeneratedUpdateFlag       : Sample(1),
-      oddLotAttachmentType         : Sample(1),
-      oddLotAttachmentCount        : Sample(2),
-      boloAppendageIndicatorChoice : BoloAppendageIndicatorChoice4 ]
+      oddLotAttachmentCount        : 0 .. 255,
+      boloAppendageIndicatorChoice : BoloAppendageIndicatorChoice4,
+      oddLotAttachmentTypeChoice   : OddLotAttachmentTypeChoice4 ]
 
 EncodeOddLotQuoteMessageLongFormMessage(message) ==
     message.marketCenterOriginator
@@ -2305,9 +2970,10 @@ EncodeOddLotQuoteMessageLongFormMessage(message) ==
         \o message.symbolLong
         \o message.sipGeneratedUpdateFlag
         \o EncodeUIntBE(message.boloAppendageIndicatorChoice.tag, 1)
-        \o message.oddLotAttachmentType
-        \o message.oddLotAttachmentCount
+        \o EncodeUIntBE(message.oddLotAttachmentTypeChoice.tag, 1)
+        \o EncodeUIntBE(message.oddLotAttachmentCount, 2)
         \o EncodeBoloAppendageIndicatorChoice4(message.boloAppendageIndicatorChoice)
+        \o EncodeOddLotAttachmentTypeChoice4(message.oddLotAttachmentTypeChoice)
 
 DecodeOddLotQuoteMessageLongFormMessage(bytes) ==
     LET marketCenterOriginator == ReadBytes(bytes, 1) IN IF ~marketCenterOriginator.ok THEN Fail ELSE
@@ -2319,9 +2985,10 @@ DecodeOddLotQuoteMessageLongFormMessage(bytes) ==
     LET symbolLong == ReadBytes(adfTimestamp.rest, 11) IN IF ~symbolLong.ok THEN Fail ELSE
     LET sipGeneratedUpdateFlag == ReadBytes(symbolLong.rest, 1) IN IF ~sipGeneratedUpdateFlag.ok THEN Fail ELSE
     LET boloAppendageIndicator == ReadUIntBE(sipGeneratedUpdateFlag.rest, 1) IN IF ~boloAppendageIndicator.ok THEN Fail ELSE
-    LET oddLotAttachmentType == ReadBytes(boloAppendageIndicator.rest, 1) IN IF ~oddLotAttachmentType.ok THEN Fail ELSE
-    LET oddLotAttachmentCount == ReadBytes(oddLotAttachmentType.rest, 2) IN IF ~oddLotAttachmentCount.ok THEN Fail ELSE
+    LET oddLotAttachmentType == ReadUIntBE(boloAppendageIndicator.rest, 1) IN IF ~oddLotAttachmentType.ok THEN Fail ELSE
+    LET oddLotAttachmentCount == ReadUIntBE(oddLotAttachmentType.rest, 2) IN IF ~oddLotAttachmentCount.ok THEN Fail ELSE
     LET boloAppendageIndicatorChoice == DecodeBoloAppendageIndicatorChoice4(boloAppendageIndicator.value, oddLotAttachmentCount.rest) IN IF ~boloAppendageIndicatorChoice.ok THEN Fail ELSE
+    LET oddLotAttachmentTypeChoice == DecodeOddLotAttachmentTypeChoice4(oddLotAttachmentType.value, boloAppendageIndicatorChoice.rest) IN IF ~oddLotAttachmentTypeChoice.ok THEN Fail ELSE
     Ok([ marketCenterOriginator       |-> marketCenterOriginator.value,
          subMarketCenterId            |-> subMarketCenterId.value,
          sipTimestamp                 |-> sipTimestamp.value,
@@ -2330,9 +2997,9 @@ DecodeOddLotQuoteMessageLongFormMessage(bytes) ==
          adfTimestamp                 |-> adfTimestamp.value,
          symbolLong                   |-> symbolLong.value,
          sipGeneratedUpdateFlag       |-> sipGeneratedUpdateFlag.value,
-         oddLotAttachmentType         |-> oddLotAttachmentType.value,
          oddLotAttachmentCount        |-> oddLotAttachmentCount.value,
-         boloAppendageIndicatorChoice |-> boloAppendageIndicatorChoice.value ], boloAppendageIndicatorChoice.rest)
+         boloAppendageIndicatorChoice |-> boloAppendageIndicatorChoice.value,
+         oddLotAttachmentTypeChoice   |-> oddLotAttachmentTypeChoice.value ], oddLotAttachmentTypeChoice.rest)
 
 ZeroOddLotQuoteMessageLongFormMessage ==
     [ marketCenterOriginator       |-> [i \in 1 .. 1 |-> 0],
@@ -2343,9 +3010,9 @@ ZeroOddLotQuoteMessageLongFormMessage ==
       adfTimestamp                 |-> [i \in 1 .. 8 |-> 0],
       symbolLong                   |-> [i \in 1 .. 11 |-> 0],
       sipGeneratedUpdateFlag       |-> [i \in 1 .. 1 |-> 0],
-      oddLotAttachmentType         |-> [i \in 1 .. 1 |-> 0],
-      oddLotAttachmentCount        |-> [i \in 1 .. 2 |-> 0],
-      boloAppendageIndicatorChoice |-> ZeroBoloAppendageIndicatorChoice4 ]
+      oddLotAttachmentCount        |-> 0,
+      boloAppendageIndicatorChoice |-> ZeroBoloAppendageIndicatorChoice4,
+      oddLotAttachmentTypeChoice   |-> ZeroOddLotAttachmentTypeChoice4 ]
 
 (* Odd Lot Quote Message Long Form Message at zero, then each field in turn at the values it is checked at *)
 CheckedOddLotQuoteMessageLongFormMessage ==
@@ -2358,9 +3025,9 @@ CheckedOddLotQuoteMessageLongFormMessage ==
         \cup { [ZeroOddLotQuoteMessageLongFormMessage EXCEPT !.adfTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroOddLotQuoteMessageLongFormMessage EXCEPT !.symbolLong = one] : one \in Sample(11) }
         \cup { [ZeroOddLotQuoteMessageLongFormMessage EXCEPT !.sipGeneratedUpdateFlag = one] : one \in Sample(1) }
-        \cup { [ZeroOddLotQuoteMessageLongFormMessage EXCEPT !.oddLotAttachmentType = one] : one \in Sample(1) }
-        \cup { [ZeroOddLotQuoteMessageLongFormMessage EXCEPT !.oddLotAttachmentCount = one] : one \in Sample(2) }
+        \cup { [ZeroOddLotQuoteMessageLongFormMessage EXCEPT !.oddLotAttachmentCount = one] : one \in {0, 1, 255} }
         \cup { [ZeroOddLotQuoteMessageLongFormMessage EXCEPT !.boloAppendageIndicatorChoice = one] : one \in CheckedBoloAppendageIndicatorChoice4 }
+        \cup { [ZeroOddLotQuoteMessageLongFormMessage EXCEPT !.oddLotAttachmentTypeChoice = one] : one \in CheckedOddLotAttachmentTypeChoice4 }
 
 (***************************************************************************)
 (* Quote Message Payload, selected by Quote Message Type                   *)
@@ -3931,6 +4598,30 @@ RoundTripBoloAppendageMpidForm ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Odd Lot Price Level Attachment Short Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentShortForm ==
+    \A message \in CheckedOddLotPriceLevelAttachmentShortForm :
+        LET read == DecodeOddLotPriceLevelAttachmentShortForm(EncodeOddLotPriceLevelAttachmentShortForm(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Odd Lot Price Level Attachment Long Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentLongForm ==
+    \A message \in CheckedOddLotPriceLevelAttachmentLongForm :
+        LET read == DecodeOddLotPriceLevelAttachmentLongForm(EncodeOddLotPriceLevelAttachmentLongForm(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Odd Lot Price Level Attachment Adf Mpid Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentAdfMpidForm ==
+    \A message \in CheckedOddLotPriceLevelAttachmentAdfMpidForm :
+        LET read == DecodeOddLotPriceLevelAttachmentAdfMpidForm(EncodeOddLotPriceLevelAttachmentAdfMpidForm(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Combined Quote Message Short Form Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripCombinedQuoteMessageShortFormMessage ==
     \A message \in CheckedCombinedQuoteMessageShortFormMessage :
@@ -3987,6 +4678,30 @@ RoundTripBoloAppendageMpidForm2 ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Odd Lot Price Level Attachment Short Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentShortForm2 ==
+    \A message \in CheckedOddLotPriceLevelAttachmentShortForm2 :
+        LET read == DecodeOddLotPriceLevelAttachmentShortForm2(EncodeOddLotPriceLevelAttachmentShortForm2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Odd Lot Price Level Attachment Long Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentLongForm2 ==
+    \A message \in CheckedOddLotPriceLevelAttachmentLongForm2 :
+        LET read == DecodeOddLotPriceLevelAttachmentLongForm2(EncodeOddLotPriceLevelAttachmentLongForm2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Odd Lot Price Level Attachment Adf Mpid Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentAdfMpidForm2 ==
+    \A message \in CheckedOddLotPriceLevelAttachmentAdfMpidForm2 :
+        LET read == DecodeOddLotPriceLevelAttachmentAdfMpidForm2(EncodeOddLotPriceLevelAttachmentAdfMpidForm2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Combined Quote Message Long Form Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripCombinedQuoteMessageLongFormMessage ==
     \A message \in CheckedCombinedQuoteMessageLongFormMessage :
@@ -4019,6 +4734,30 @@ RoundTripBoloAppendageMpidForm3 ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Odd Lot Price Level Attachment Short Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentShortForm3 ==
+    \A message \in CheckedOddLotPriceLevelAttachmentShortForm3 :
+        LET read == DecodeOddLotPriceLevelAttachmentShortForm3(EncodeOddLotPriceLevelAttachmentShortForm3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Odd Lot Price Level Attachment Long Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentLongForm3 ==
+    \A message \in CheckedOddLotPriceLevelAttachmentLongForm3 :
+        LET read == DecodeOddLotPriceLevelAttachmentLongForm3(EncodeOddLotPriceLevelAttachmentLongForm3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Odd Lot Price Level Attachment Adf Mpid Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentAdfMpidForm3 ==
+    \A message \in CheckedOddLotPriceLevelAttachmentAdfMpidForm3 :
+        LET read == DecodeOddLotPriceLevelAttachmentAdfMpidForm3(EncodeOddLotPriceLevelAttachmentAdfMpidForm3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Odd Lot Quote Message Short Form Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripOddLotQuoteMessageShortFormMessage ==
     \A message \in CheckedOddLotQuoteMessageShortFormMessage :
@@ -4047,6 +4786,30 @@ RoundTripBoloAppendageLongForm4 ==
 RoundTripBoloAppendageMpidForm4 ==
     \A message \in CheckedBoloAppendageMpidForm4 :
         LET read == DecodeBoloAppendageMpidForm4(EncodeBoloAppendageMpidForm4(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Odd Lot Price Level Attachment Short Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentShortForm4 ==
+    \A message \in CheckedOddLotPriceLevelAttachmentShortForm4 :
+        LET read == DecodeOddLotPriceLevelAttachmentShortForm4(EncodeOddLotPriceLevelAttachmentShortForm4(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Odd Lot Price Level Attachment Long Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentLongForm4 ==
+    \A message \in CheckedOddLotPriceLevelAttachmentLongForm4 :
+        LET read == DecodeOddLotPriceLevelAttachmentLongForm4(EncodeOddLotPriceLevelAttachmentLongForm4(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Odd Lot Price Level Attachment Adf Mpid Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripOddLotPriceLevelAttachmentAdfMpidForm4 ==
+    \A message \in CheckedOddLotPriceLevelAttachmentAdfMpidForm4 :
+        LET read == DecodeOddLotPriceLevelAttachmentAdfMpidForm4(EncodeOddLotPriceLevelAttachmentAdfMpidForm4(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4259,6 +5022,12 @@ SelectsBoloAppendageIndicatorChoice ==
         LET read == DecodeBoloAppendageIndicatorChoice(message.tag, EncodeBoloAppendageIndicatorChoice(message))
         IN  read.ok /\ read.value.tag = message.tag
 
+(* A Odd Lot Attachment Type is selected by the Odd Lot Attachment Type it is written under *)
+SelectsOddLotAttachmentTypeChoice ==
+    \A message \in CheckedOddLotAttachmentTypeChoice :
+        LET read == DecodeOddLotAttachmentTypeChoice(message.tag, EncodeOddLotAttachmentTypeChoice(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
 (* A Nbbo Appendage Indicator is selected by the Nbbo Appendage Indicator it is written under *)
 SelectsNbboAppendageIndicatorChoice4 ==
     \A message \in CheckedNbboAppendageIndicatorChoice4 :
@@ -4277,16 +5046,34 @@ SelectsBoloAppendageIndicatorChoice2 ==
         LET read == DecodeBoloAppendageIndicatorChoice2(message.tag, EncodeBoloAppendageIndicatorChoice2(message))
         IN  read.ok /\ read.value.tag = message.tag
 
+(* A Odd Lot Attachment Type is selected by the Odd Lot Attachment Type it is written under *)
+SelectsOddLotAttachmentTypeChoice2 ==
+    \A message \in CheckedOddLotAttachmentTypeChoice2 :
+        LET read == DecodeOddLotAttachmentTypeChoice2(message.tag, EncodeOddLotAttachmentTypeChoice2(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
 (* A Bolo Appendage Indicator is selected by the Bolo Appendage Indicator it is written under *)
 SelectsBoloAppendageIndicatorChoice3 ==
     \A message \in CheckedBoloAppendageIndicatorChoice3 :
         LET read == DecodeBoloAppendageIndicatorChoice3(message.tag, EncodeBoloAppendageIndicatorChoice3(message))
         IN  read.ok /\ read.value.tag = message.tag
 
+(* A Odd Lot Attachment Type is selected by the Odd Lot Attachment Type it is written under *)
+SelectsOddLotAttachmentTypeChoice3 ==
+    \A message \in CheckedOddLotAttachmentTypeChoice3 :
+        LET read == DecodeOddLotAttachmentTypeChoice3(message.tag, EncodeOddLotAttachmentTypeChoice3(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
 (* A Bolo Appendage Indicator is selected by the Bolo Appendage Indicator it is written under *)
 SelectsBoloAppendageIndicatorChoice4 ==
     \A message \in CheckedBoloAppendageIndicatorChoice4 :
         LET read == DecodeBoloAppendageIndicatorChoice4(message.tag, EncodeBoloAppendageIndicatorChoice4(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* A Odd Lot Attachment Type is selected by the Odd Lot Attachment Type it is written under *)
+SelectsOddLotAttachmentTypeChoice4 ==
+    \A message \in CheckedOddLotAttachmentTypeChoice4 :
+        LET read == DecodeOddLotAttachmentTypeChoice4(message.tag, EncodeOddLotAttachmentTypeChoice4(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Quote Message Payload is selected by the Quote Message Type it is written under *)
