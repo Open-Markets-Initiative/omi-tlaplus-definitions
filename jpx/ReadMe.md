@@ -1,0 +1,62 @@
+[![Jpx](https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Images/Logo.png)](https://www.jpx.co.jp/english)
+
+
+## Japan Exchange Group
+
+| Division | [Protocol][Omi.Jpx.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Transport | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Jpx.Specifications] |
+| --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| [FseEquities][FseEquities.Exchange] | [MarketByOrder][Jpx.FseEquities.MarketByOrder] | [Flex][Omi.Encoding.Flex] | [1.1][Jpx.FseEquities.MarketByOrder.Flex.v1.1.Udp.Definition] | [Udp][Jpx.FseEquities.MarketByOrder.Flex.v1.1.Udp.Definition] | 11/20/2024 | 817 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [pdf][Jpx.FseEquities.MarketByOrder.Flex.v1.1.Pdf] |
+| [NseEquities][NseEquities.Exchange] | [MarketByOrder][Jpx.NseEquities.MarketByOrder] | [Flex][Omi.Encoding.Flex] | [1.1][Jpx.NseEquities.MarketByOrder.Flex.v1.1.Udp.Definition] | [Udp][Jpx.NseEquities.MarketByOrder.Flex.v1.1.Udp.Definition] | 11/20/2024 | 817 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [pdf][Jpx.NseEquities.MarketByOrder.Flex.v1.1.Pdf] |
+| [OseDerivatives][OseDerivatives.Exchange] | [GeniumInet][Jpx.OseDerivatives.GeniumInet] | [Itch][Omi.Encoding.Itch] | [5.0.6][Jpx.OseDerivatives.GeniumInet.Itch.v5.0.6.Definition] |  | 5/8/2024 | 1316 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [pdf][Jpx.OseDerivatives.GeniumInet.Itch.v5.0.6.Pdf] |
+| [OseDerivatives][OseDerivatives.Exchange] | [GeniumInet][Jpx.OseDerivatives.GeniumInet] | [Ouch][Omi.Encoding.Ouch] | [5.0][Jpx.OseDerivatives.GeniumInet.Ouch.v5.0.Client.Definition] | [Client][Jpx.OseDerivatives.GeniumInet.Ouch.v5.0.Client.Definition] | 9/16/2020 | 792 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [pdf][Jpx.OseDerivatives.GeniumInet.Ouch.v5.0.Pdf] |
+| [OseDerivatives][OseDerivatives.Exchange] | [GeniumInet][Jpx.OseDerivatives.GeniumInet] | [Ouch][Omi.Encoding.Ouch] | [5.0][Jpx.OseDerivatives.GeniumInet.Ouch.v5.0.Server.Definition] | [Server][Jpx.OseDerivatives.GeniumInet.Ouch.v5.0.Server.Definition] | 9/16/2020 | 900 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [pdf][Jpx.OseDerivatives.GeniumInet.Ouch.v5.0.Pdf] |
+| [SseEquities][SseEquities.Exchange] | [MarketByOrder][Jpx.SseEquities.MarketByOrder] | [Flex][Omi.Encoding.Flex] | [1.1][Jpx.SseEquities.MarketByOrder.Flex.v1.1.Udp.Definition] | [Udp][Jpx.SseEquities.MarketByOrder.Flex.v1.1.Udp.Definition] | 11/20/2024 | 817 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [pdf][Jpx.SseEquities.MarketByOrder.Flex.v1.1.Pdf] |
+| [TseEquities][TseEquities.Exchange] | [MarketByOrder][Jpx.TseEquities.MarketByOrder] | [Flex][Omi.Encoding.Flex] | [1.1][Jpx.TseEquities.MarketByOrder.Flex.v1.1.Udp.Definition] | [Udp][Jpx.TseEquities.MarketByOrder.Flex.v1.1.Udp.Definition] | 11/20/2024 | 817 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [pdf][Jpx.TseEquities.MarketByOrder.Flex.v1.1.Pdf] |
+
+
+<p align="center"><a href="https://www.jpx.co.jp/english" title="Japan Exchange Group Website"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Website.png" alt="Website" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/company/japan-exchange-group" title="Japan Exchange Group on LinkedIn"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/LinkedIn.png" alt="LinkedIn" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://en.wikipedia.org/wiki/Japan_Exchange_Group" title="Japan Exchange Group on Wikipedia"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Wikipedia.png" alt="Wikipedia" width="32" height="32"></a></p>
+
+
+[Omi.Glossary.Deployment]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Protocol Deployment"
+[Omi.Glossary.Deployment.Active]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Protocol is in active production"
+[Omi.Glossary.Deployment.Deprecated]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Protocol is no longer in active use"
+[Omi.Glossary.Deployment.Pending]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Protocol is not yet deployed to an active production environment"
+[Omi.Glossary.Deployment.Observability]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Protocol is carried for observability rather than trading"
+[Omi.Glossary.Deployment.Header]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Header only protocol provided for debugging"
+[Omi.Glossary.Deployment.Unknown]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Deployment.md "Deployment: Protocol deployment is unknown"
+[Omi.Glossary.Testing]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Protocol Testing Status"
+[Omi.Glossary.Testing.Verified]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has been tested on live data"
+[Omi.Glossary.Testing.Incomplete]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has been tested on live data but contains known issues"
+[Omi.Glossary.Testing.Beta]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has not been tested and structure is speculative"
+[Omi.Glossary.Testing.Untested]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol has not been tested on live data"
+[Omi.Glossary.Testing.Unavailable]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Glossary/Testing.md "Testing Status: Protocol does not state a testing status"
+[Omi.Encoding.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Protocols/ReadMe.md "Encoding Directory"
+[Omi.Jpx.Protocol.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Jpx/Protocols "Jpx Protocol Directory"
+[Omi.Jpx.Specifications]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Jpx/Specifications "Jpx Specifications Directory"
+[Omi.Encoding.Flex]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Flex.md "Flex Encoding"
+[Omi.Encoding.Itch]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Itch.md "Itch Encoding"
+[Omi.Encoding.Ouch]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Ouch.md "Ouch Encoding"
+[FseEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Jpx/Protocols/FseEquities "Jpx FseEquities"
+[NseEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Jpx/Protocols/NseEquities "Jpx NseEquities"
+[OseDerivatives.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Jpx/Protocols/OseDerivatives "Jpx OseDerivatives"
+[SseEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Jpx/Protocols/SseEquities "Jpx SseEquities"
+[TseEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Jpx/Protocols/TseEquities "Jpx TseEquities"
+[Jpx.FseEquities.MarketByOrder]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Protocols/FseEquities/MarketByOrder.md "Market By Order"
+[Jpx.NseEquities.MarketByOrder]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Protocols/NseEquities/MarketByOrder.md "Market By Order"
+[Jpx.OseDerivatives.GeniumInet]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Protocols/OseDerivatives/GeniumInet.md "Genium Inet"
+[Jpx.SseEquities.MarketByOrder]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Protocols/SseEquities/MarketByOrder.md "Market By Order"
+[Jpx.TseEquities.MarketByOrder]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Protocols/TseEquities/MarketByOrder.md "Market By Order"
+
+[Jpx.FseEquities.MarketByOrder.Flex.v1.1.Udp.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/jpx/fseequities/marketbyorder/FseEquities_MarketByOrder_v1_1_Udp.tla "Jpx FseEquities MarketByOrder Flex v1.1 Tla Definition"
+[Jpx.FseEquities.MarketByOrder.Flex.v1.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Specifications/Equities\Mbo\Jpx.Equities.Mbo.Flex.v1.1.pdf "Japan Exchange Group 1.1 Pdf"
+[Jpx.NseEquities.MarketByOrder.Flex.v1.1.Udp.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/jpx/nseequities/marketbyorder/NseEquities_MarketByOrder_v1_1_Udp.tla "Jpx NseEquities MarketByOrder Flex v1.1 Tla Definition"
+[Jpx.NseEquities.MarketByOrder.Flex.v1.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Specifications/Equities\Mbo\Jpx.Equities.Mbo.Flex.v1.1.pdf "Japan Exchange Group 1.1 Pdf"
+[Jpx.OseDerivatives.GeniumInet.Itch.v5.0.6.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/jpx/osederivatives/geniuminet/OseDerivatives_GeniumInet_v5_0_6.tla "Jpx OseDerivatives GeniumInet Itch v5.0.6 Tla Definition"
+[Jpx.OseDerivatives.GeniumInet.Itch.v5.0.6.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Specifications/OseDerivatives\Itch\Jpx.OseDerivatives.GeniumInet.Itch.v5.0.6.pdf "Japan Exchange Group 5.0.6 Pdf"
+[Jpx.OseDerivatives.GeniumInet.Ouch.v5.0.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/jpx/osederivatives/geniuminet/OseDerivatives_GeniumInet_v5_0_Client.tla "Jpx OseDerivatives GeniumInet Ouch v5.0 Tla Definition"
+[Jpx.OseDerivatives.GeniumInet.Ouch.v5.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Specifications/OseDerivatives\Ouch\Jpx.OseDerivatives.GeniumInet.Ouch.v5.0.pdf "Japan Exchange Group 5.0 Pdf"
+[Jpx.OseDerivatives.GeniumInet.Ouch.v5.0.Server.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/jpx/osederivatives/geniuminet/OseDerivatives_GeniumInet_v5_0_Server.tla "Jpx OseDerivatives GeniumInet Ouch v5.0 Tla Definition"
+[Jpx.SseEquities.MarketByOrder.Flex.v1.1.Udp.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/jpx/sseequities/marketbyorder/SseEquities_MarketByOrder_v1_1_Udp.tla "Jpx SseEquities MarketByOrder Flex v1.1 Tla Definition"
+[Jpx.SseEquities.MarketByOrder.Flex.v1.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Specifications/Equities\Mbo\Jpx.Equities.Mbo.Flex.v1.1.pdf "Japan Exchange Group 1.1 Pdf"
+[Jpx.TseEquities.MarketByOrder.Flex.v1.1.Udp.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/jpx/tseequities/marketbyorder/TseEquities_MarketByOrder_v1_1_Udp.tla "Jpx TseEquities MarketByOrder Flex v1.1 Tla Definition"
+[Jpx.TseEquities.MarketByOrder.Flex.v1.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Jpx/Specifications/Equities\Mbo\Jpx.Equities.Mbo.Flex.v1.1.pdf "Japan Exchange Group 1.1 Pdf"

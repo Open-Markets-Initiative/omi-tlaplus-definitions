@@ -1,0 +1,911 @@
+----------------------- MODULE JnxEquities_Pts_v2_0 ------------------------
+(***************************************************************************)
+(* Japannext Securities Proprietary Trading System v2.0                    *)
+(*                                                                         *)
+(* Generated from the binary model. A field is the bytes it occupies; an   *)
+(* integer is read only where a rule depends on one - a length, a count, a *)
+(* message type - which are the dependencies the parse rules run on.       *)
+(*                                                                         *)
+(* TLC checks that every record decodes back to what was encoded, that a   *)
+(* dispatch selects the message its type names, and that a derived length  *)
+(* or count is written from what it describes.                             *)
+(*                                                                         *)
+(* Note: TLC evaluates integers in 32 bits, so a field wider than that has *)
+(* no range it can enumerate; every field is checked as its bytes, which   *)
+(* is exact at any width.                                                  *)
+(*                                                                         *)
+(* Note: a Message Count of 0 marks Heartbeat and carries no Message.      *)
+(*                                                                         *)
+(* Note: a Message Count of 0 marks End Of Session and carries no Message. *)
+(***************************************************************************)
+EXTENDS Integers, Sequences
+
+(***************************************************************************)
+(* Wire primitives                                                         *)
+(***************************************************************************)
+
+Byte == 0 .. 255
+
+(* An unsigned integer, least significant byte first. Read only where a rule *)
+(* depends on the value: a length, a count, a message type. *)
+RECURSIVE DecodeUIntLE(_)
+DecodeUIntLE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE Head(bytes) + 256 * DecodeUIntLE(Tail(bytes))
+
+RECURSIVE EncodeUIntLE(_, _)
+EncodeUIntLE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
+
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
+(***************************************************************************)
+(* A decoder yields the value it read and the bytes left, or fails         *)
+(***************************************************************************)
+
+Fail == [ok |-> FALSE]
+Ok(value, rest) == [ok |-> TRUE, value |-> value, rest |-> rest]
+
+(* The bytes a field of this width occupies, kept as they lie *)
+ReadBytes(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
+
+(* The integer a rule depends on, in the byte order the field states *)
+ReadUIntLE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+(***************************************************************************)
+(* The values a field is checked at: zero, the spaces a text field is      *)
+(* padded with, and                                                        *)
+(* every bit set, which is where an encoding goes wrong if it goes wrong   *)
+(***************************************************************************)
+
+Sample(width) ==
+    { [i \in 1 .. width |-> 0],
+      [i \in 1 .. width |-> 32],
+      [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
+
+(* The lists a record is checked over: none, one, and a run of two. What a run has *)
+(* to get right is reading one entry after another, which two of a kind already say. *)
+SampleLists(entries) ==
+    { << >> }
+        \cup { <<one>> : one \in entries }
+        \cup { <<one, one>> : one \in entries }
+
+(***************************************************************************)
+(* Seconds Message: 4 bytes                                                *)
+(***************************************************************************)
+
+SecondsMessage ==
+    [ seconds : Sample(4) ]
+
+EncodeSecondsMessage(message) ==
+    message.seconds
+
+DecodeSecondsMessage(bytes) ==
+    LET seconds == ReadBytes(bytes, 4) IN IF ~seconds.ok THEN Fail ELSE
+    Ok([ seconds |-> seconds.value ], seconds.rest)
+
+ZeroSecondsMessage ==
+    [ seconds |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Seconds Message at zero, then each field in turn at the values it is checked at *)
+CheckedSecondsMessage ==
+    { ZeroSecondsMessage }
+        \cup { [ZeroSecondsMessage EXCEPT !.seconds = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* System Event Message: 9 bytes                                           *)
+(***************************************************************************)
+
+SystemEventMessage ==
+    [ nanoseconds : Sample(4),
+      group       : Sample(4),
+      systemEvent : Sample(1) ]
+
+EncodeSystemEventMessage(message) ==
+    message.nanoseconds
+        \o message.group
+        \o message.systemEvent
+
+DecodeSystemEventMessage(bytes) ==
+    LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
+    LET group == ReadBytes(nanoseconds.rest, 4) IN IF ~group.ok THEN Fail ELSE
+    LET systemEvent == ReadBytes(group.rest, 1) IN IF ~systemEvent.ok THEN Fail ELSE
+    Ok([ nanoseconds |-> nanoseconds.value,
+         group       |-> group.value,
+         systemEvent |-> systemEvent.value ], systemEvent.rest)
+
+ZeroSystemEventMessage ==
+    [ nanoseconds |-> [i \in 1 .. 4 |-> 0],
+      group       |-> [i \in 1 .. 4 |-> 0],
+      systemEvent |-> [i \in 1 .. 1 |-> 0] ]
+
+(* System Event Message at zero, then each field in turn at the values it is checked at *)
+CheckedSystemEventMessage ==
+    { ZeroSystemEventMessage }
+        \cup { [ZeroSystemEventMessage EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+        \cup { [ZeroSystemEventMessage EXCEPT !.group = one] : one \in Sample(4) }
+        \cup { [ZeroSystemEventMessage EXCEPT !.systemEvent = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Price Tick Size Message: 16 bytes                                       *)
+(***************************************************************************)
+
+PriceTickSizeMessage ==
+    [ nanoseconds          : Sample(4),
+      priceTickSizeTableId : Sample(4),
+      priceTickSize        : Sample(4),
+      priceStart           : Sample(4) ]
+
+EncodePriceTickSizeMessage(message) ==
+    message.nanoseconds
+        \o message.priceTickSizeTableId
+        \o message.priceTickSize
+        \o message.priceStart
+
+DecodePriceTickSizeMessage(bytes) ==
+    LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
+    LET priceTickSizeTableId == ReadBytes(nanoseconds.rest, 4) IN IF ~priceTickSizeTableId.ok THEN Fail ELSE
+    LET priceTickSize == ReadBytes(priceTickSizeTableId.rest, 4) IN IF ~priceTickSize.ok THEN Fail ELSE
+    LET priceStart == ReadBytes(priceTickSize.rest, 4) IN IF ~priceStart.ok THEN Fail ELSE
+    Ok([ nanoseconds          |-> nanoseconds.value,
+         priceTickSizeTableId |-> priceTickSizeTableId.value,
+         priceTickSize        |-> priceTickSize.value,
+         priceStart           |-> priceStart.value ], priceStart.rest)
+
+ZeroPriceTickSizeMessage ==
+    [ nanoseconds          |-> [i \in 1 .. 4 |-> 0],
+      priceTickSizeTableId |-> [i \in 1 .. 4 |-> 0],
+      priceTickSize        |-> [i \in 1 .. 4 |-> 0],
+      priceStart           |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Price Tick Size Message at zero, then each field in turn at the values it is checked at *)
+CheckedPriceTickSizeMessage ==
+    { ZeroPriceTickSizeMessage }
+        \cup { [ZeroPriceTickSizeMessage EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+        \cup { [ZeroPriceTickSizeMessage EXCEPT !.priceTickSizeTableId = one] : one \in Sample(4) }
+        \cup { [ZeroPriceTickSizeMessage EXCEPT !.priceTickSize = one] : one \in Sample(4) }
+        \cup { [ZeroPriceTickSizeMessage EXCEPT !.priceStart = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Orderbook Directory Message: 44 bytes                                   *)
+(***************************************************************************)
+
+OrderbookDirectoryMessage ==
+    [ nanoseconds          : Sample(4),
+      orderbookId          : Sample(4),
+      orderbookCode        : Sample(12),
+      group                : Sample(4),
+      roundLotSize         : Sample(4),
+      priceTickSizeTableId : Sample(4),
+      priceDecimals        : Sample(4),
+      upperPriceLimit      : Sample(4),
+      lowerPriceLimit      : Sample(4) ]
+
+EncodeOrderbookDirectoryMessage(message) ==
+    message.nanoseconds
+        \o message.orderbookId
+        \o message.orderbookCode
+        \o message.group
+        \o message.roundLotSize
+        \o message.priceTickSizeTableId
+        \o message.priceDecimals
+        \o message.upperPriceLimit
+        \o message.lowerPriceLimit
+
+DecodeOrderbookDirectoryMessage(bytes) ==
+    LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
+    LET orderbookId == ReadBytes(nanoseconds.rest, 4) IN IF ~orderbookId.ok THEN Fail ELSE
+    LET orderbookCode == ReadBytes(orderbookId.rest, 12) IN IF ~orderbookCode.ok THEN Fail ELSE
+    LET group == ReadBytes(orderbookCode.rest, 4) IN IF ~group.ok THEN Fail ELSE
+    LET roundLotSize == ReadBytes(group.rest, 4) IN IF ~roundLotSize.ok THEN Fail ELSE
+    LET priceTickSizeTableId == ReadBytes(roundLotSize.rest, 4) IN IF ~priceTickSizeTableId.ok THEN Fail ELSE
+    LET priceDecimals == ReadBytes(priceTickSizeTableId.rest, 4) IN IF ~priceDecimals.ok THEN Fail ELSE
+    LET upperPriceLimit == ReadBytes(priceDecimals.rest, 4) IN IF ~upperPriceLimit.ok THEN Fail ELSE
+    LET lowerPriceLimit == ReadBytes(upperPriceLimit.rest, 4) IN IF ~lowerPriceLimit.ok THEN Fail ELSE
+    Ok([ nanoseconds          |-> nanoseconds.value,
+         orderbookId          |-> orderbookId.value,
+         orderbookCode        |-> orderbookCode.value,
+         group                |-> group.value,
+         roundLotSize         |-> roundLotSize.value,
+         priceTickSizeTableId |-> priceTickSizeTableId.value,
+         priceDecimals        |-> priceDecimals.value,
+         upperPriceLimit      |-> upperPriceLimit.value,
+         lowerPriceLimit      |-> lowerPriceLimit.value ], lowerPriceLimit.rest)
+
+ZeroOrderbookDirectoryMessage ==
+    [ nanoseconds          |-> [i \in 1 .. 4 |-> 0],
+      orderbookId          |-> [i \in 1 .. 4 |-> 0],
+      orderbookCode        |-> [i \in 1 .. 12 |-> 0],
+      group                |-> [i \in 1 .. 4 |-> 0],
+      roundLotSize         |-> [i \in 1 .. 4 |-> 0],
+      priceTickSizeTableId |-> [i \in 1 .. 4 |-> 0],
+      priceDecimals        |-> [i \in 1 .. 4 |-> 0],
+      upperPriceLimit      |-> [i \in 1 .. 4 |-> 0],
+      lowerPriceLimit      |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Orderbook Directory Message at zero, then each field in turn at the values it is checked at *)
+CheckedOrderbookDirectoryMessage ==
+    { ZeroOrderbookDirectoryMessage }
+        \cup { [ZeroOrderbookDirectoryMessage EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+        \cup { [ZeroOrderbookDirectoryMessage EXCEPT !.orderbookId = one] : one \in Sample(4) }
+        \cup { [ZeroOrderbookDirectoryMessage EXCEPT !.orderbookCode = one] : one \in Sample(12) }
+        \cup { [ZeroOrderbookDirectoryMessage EXCEPT !.group = one] : one \in Sample(4) }
+        \cup { [ZeroOrderbookDirectoryMessage EXCEPT !.roundLotSize = one] : one \in Sample(4) }
+        \cup { [ZeroOrderbookDirectoryMessage EXCEPT !.priceTickSizeTableId = one] : one \in Sample(4) }
+        \cup { [ZeroOrderbookDirectoryMessage EXCEPT !.priceDecimals = one] : one \in Sample(4) }
+        \cup { [ZeroOrderbookDirectoryMessage EXCEPT !.upperPriceLimit = one] : one \in Sample(4) }
+        \cup { [ZeroOrderbookDirectoryMessage EXCEPT !.lowerPriceLimit = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Trading State Message: 13 bytes                                         *)
+(***************************************************************************)
+
+TradingStateMessage ==
+    [ nanoseconds  : Sample(4),
+      orderbookId  : Sample(4),
+      group        : Sample(4),
+      tradingState : Sample(1) ]
+
+EncodeTradingStateMessage(message) ==
+    message.nanoseconds
+        \o message.orderbookId
+        \o message.group
+        \o message.tradingState
+
+DecodeTradingStateMessage(bytes) ==
+    LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
+    LET orderbookId == ReadBytes(nanoseconds.rest, 4) IN IF ~orderbookId.ok THEN Fail ELSE
+    LET group == ReadBytes(orderbookId.rest, 4) IN IF ~group.ok THEN Fail ELSE
+    LET tradingState == ReadBytes(group.rest, 1) IN IF ~tradingState.ok THEN Fail ELSE
+    Ok([ nanoseconds  |-> nanoseconds.value,
+         orderbookId  |-> orderbookId.value,
+         group        |-> group.value,
+         tradingState |-> tradingState.value ], tradingState.rest)
+
+ZeroTradingStateMessage ==
+    [ nanoseconds  |-> [i \in 1 .. 4 |-> 0],
+      orderbookId  |-> [i \in 1 .. 4 |-> 0],
+      group        |-> [i \in 1 .. 4 |-> 0],
+      tradingState |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Trading State Message at zero, then each field in turn at the values it is checked at *)
+CheckedTradingStateMessage ==
+    { ZeroTradingStateMessage }
+        \cup { [ZeroTradingStateMessage EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+        \cup { [ZeroTradingStateMessage EXCEPT !.orderbookId = one] : one \in Sample(4) }
+        \cup { [ZeroTradingStateMessage EXCEPT !.group = one] : one \in Sample(4) }
+        \cup { [ZeroTradingStateMessage EXCEPT !.tradingState = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Short Selling Price Restriction State Message: 13 bytes                 *)
+(***************************************************************************)
+
+ShortSellingPriceRestrictionStateMessage ==
+    [ nanoseconds       : Sample(4),
+      orderbookId       : Sample(4),
+      group             : Sample(4),
+      shortSellingState : Sample(1) ]
+
+EncodeShortSellingPriceRestrictionStateMessage(message) ==
+    message.nanoseconds
+        \o message.orderbookId
+        \o message.group
+        \o message.shortSellingState
+
+DecodeShortSellingPriceRestrictionStateMessage(bytes) ==
+    LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
+    LET orderbookId == ReadBytes(nanoseconds.rest, 4) IN IF ~orderbookId.ok THEN Fail ELSE
+    LET group == ReadBytes(orderbookId.rest, 4) IN IF ~group.ok THEN Fail ELSE
+    LET shortSellingState == ReadBytes(group.rest, 1) IN IF ~shortSellingState.ok THEN Fail ELSE
+    Ok([ nanoseconds       |-> nanoseconds.value,
+         orderbookId       |-> orderbookId.value,
+         group             |-> group.value,
+         shortSellingState |-> shortSellingState.value ], shortSellingState.rest)
+
+ZeroShortSellingPriceRestrictionStateMessage ==
+    [ nanoseconds       |-> [i \in 1 .. 4 |-> 0],
+      orderbookId       |-> [i \in 1 .. 4 |-> 0],
+      group             |-> [i \in 1 .. 4 |-> 0],
+      shortSellingState |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Short Selling Price Restriction State Message at zero, then each field in turn at the values it is checked at *)
+CheckedShortSellingPriceRestrictionStateMessage ==
+    { ZeroShortSellingPriceRestrictionStateMessage }
+        \cup { [ZeroShortSellingPriceRestrictionStateMessage EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+        \cup { [ZeroShortSellingPriceRestrictionStateMessage EXCEPT !.orderbookId = one] : one \in Sample(4) }
+        \cup { [ZeroShortSellingPriceRestrictionStateMessage EXCEPT !.group = one] : one \in Sample(4) }
+        \cup { [ZeroShortSellingPriceRestrictionStateMessage EXCEPT !.shortSellingState = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Order Added Message No Attributes: 29 bytes                             *)
+(***************************************************************************)
+
+OrderAddedMessageNoAttributes ==
+    [ nanoseconds      : Sample(4),
+      orderNumber      : Sample(8),
+      buySellIndicator : Sample(1),
+      quantity         : Sample(4),
+      orderbookId      : Sample(4),
+      group            : Sample(4),
+      price            : Sample(4) ]
+
+EncodeOrderAddedMessageNoAttributes(message) ==
+    message.nanoseconds
+        \o message.orderNumber
+        \o message.buySellIndicator
+        \o message.quantity
+        \o message.orderbookId
+        \o message.group
+        \o message.price
+
+DecodeOrderAddedMessageNoAttributes(bytes) ==
+    LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
+    LET orderNumber == ReadBytes(nanoseconds.rest, 8) IN IF ~orderNumber.ok THEN Fail ELSE
+    LET buySellIndicator == ReadBytes(orderNumber.rest, 1) IN IF ~buySellIndicator.ok THEN Fail ELSE
+    LET quantity == ReadBytes(buySellIndicator.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
+    LET orderbookId == ReadBytes(quantity.rest, 4) IN IF ~orderbookId.ok THEN Fail ELSE
+    LET group == ReadBytes(orderbookId.rest, 4) IN IF ~group.ok THEN Fail ELSE
+    LET price == ReadBytes(group.rest, 4) IN IF ~price.ok THEN Fail ELSE
+    Ok([ nanoseconds      |-> nanoseconds.value,
+         orderNumber      |-> orderNumber.value,
+         buySellIndicator |-> buySellIndicator.value,
+         quantity         |-> quantity.value,
+         orderbookId      |-> orderbookId.value,
+         group            |-> group.value,
+         price            |-> price.value ], price.rest)
+
+ZeroOrderAddedMessageNoAttributes ==
+    [ nanoseconds      |-> [i \in 1 .. 4 |-> 0],
+      orderNumber      |-> [i \in 1 .. 8 |-> 0],
+      buySellIndicator |-> [i \in 1 .. 1 |-> 0],
+      quantity         |-> [i \in 1 .. 4 |-> 0],
+      orderbookId      |-> [i \in 1 .. 4 |-> 0],
+      group            |-> [i \in 1 .. 4 |-> 0],
+      price            |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Order Added Message No Attributes at zero, then each field in turn at the values it is checked at *)
+CheckedOrderAddedMessageNoAttributes ==
+    { ZeroOrderAddedMessageNoAttributes }
+        \cup { [ZeroOrderAddedMessageNoAttributes EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddedMessageNoAttributes EXCEPT !.orderNumber = one] : one \in Sample(8) }
+        \cup { [ZeroOrderAddedMessageNoAttributes EXCEPT !.buySellIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAddedMessageNoAttributes EXCEPT !.quantity = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddedMessageNoAttributes EXCEPT !.orderbookId = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddedMessageNoAttributes EXCEPT !.group = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddedMessageNoAttributes EXCEPT !.price = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Order Added With Attributes Message: 34 bytes                           *)
+(***************************************************************************)
+
+OrderAddedWithAttributesMessage ==
+    [ nanoseconds      : Sample(4),
+      orderNumber      : Sample(8),
+      buySellIndicator : Sample(1),
+      quantity         : Sample(4),
+      orderbookId      : Sample(4),
+      group            : Sample(4),
+      price            : Sample(4),
+      attribution      : Sample(4),
+      orderType        : Sample(1) ]
+
+EncodeOrderAddedWithAttributesMessage(message) ==
+    message.nanoseconds
+        \o message.orderNumber
+        \o message.buySellIndicator
+        \o message.quantity
+        \o message.orderbookId
+        \o message.group
+        \o message.price
+        \o message.attribution
+        \o message.orderType
+
+DecodeOrderAddedWithAttributesMessage(bytes) ==
+    LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
+    LET orderNumber == ReadBytes(nanoseconds.rest, 8) IN IF ~orderNumber.ok THEN Fail ELSE
+    LET buySellIndicator == ReadBytes(orderNumber.rest, 1) IN IF ~buySellIndicator.ok THEN Fail ELSE
+    LET quantity == ReadBytes(buySellIndicator.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
+    LET orderbookId == ReadBytes(quantity.rest, 4) IN IF ~orderbookId.ok THEN Fail ELSE
+    LET group == ReadBytes(orderbookId.rest, 4) IN IF ~group.ok THEN Fail ELSE
+    LET price == ReadBytes(group.rest, 4) IN IF ~price.ok THEN Fail ELSE
+    LET attribution == ReadBytes(price.rest, 4) IN IF ~attribution.ok THEN Fail ELSE
+    LET orderType == ReadBytes(attribution.rest, 1) IN IF ~orderType.ok THEN Fail ELSE
+    Ok([ nanoseconds      |-> nanoseconds.value,
+         orderNumber      |-> orderNumber.value,
+         buySellIndicator |-> buySellIndicator.value,
+         quantity         |-> quantity.value,
+         orderbookId      |-> orderbookId.value,
+         group            |-> group.value,
+         price            |-> price.value,
+         attribution      |-> attribution.value,
+         orderType        |-> orderType.value ], orderType.rest)
+
+ZeroOrderAddedWithAttributesMessage ==
+    [ nanoseconds      |-> [i \in 1 .. 4 |-> 0],
+      orderNumber      |-> [i \in 1 .. 8 |-> 0],
+      buySellIndicator |-> [i \in 1 .. 1 |-> 0],
+      quantity         |-> [i \in 1 .. 4 |-> 0],
+      orderbookId      |-> [i \in 1 .. 4 |-> 0],
+      group            |-> [i \in 1 .. 4 |-> 0],
+      price            |-> [i \in 1 .. 4 |-> 0],
+      attribution      |-> [i \in 1 .. 4 |-> 0],
+      orderType        |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Order Added With Attributes Message at zero, then each field in turn at the values it is checked at *)
+CheckedOrderAddedWithAttributesMessage ==
+    { ZeroOrderAddedWithAttributesMessage }
+        \cup { [ZeroOrderAddedWithAttributesMessage EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddedWithAttributesMessage EXCEPT !.orderNumber = one] : one \in Sample(8) }
+        \cup { [ZeroOrderAddedWithAttributesMessage EXCEPT !.buySellIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAddedWithAttributesMessage EXCEPT !.quantity = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddedWithAttributesMessage EXCEPT !.orderbookId = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddedWithAttributesMessage EXCEPT !.group = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddedWithAttributesMessage EXCEPT !.price = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddedWithAttributesMessage EXCEPT !.attribution = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddedWithAttributesMessage EXCEPT !.orderType = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Order Executed Message: 24 bytes                                        *)
+(***************************************************************************)
+
+OrderExecutedMessage ==
+    [ nanoseconds      : Sample(4),
+      orderNumber      : Sample(8),
+      executedQuantity : Sample(4),
+      matchNumber      : Sample(8) ]
+
+EncodeOrderExecutedMessage(message) ==
+    message.nanoseconds
+        \o message.orderNumber
+        \o message.executedQuantity
+        \o message.matchNumber
+
+DecodeOrderExecutedMessage(bytes) ==
+    LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
+    LET orderNumber == ReadBytes(nanoseconds.rest, 8) IN IF ~orderNumber.ok THEN Fail ELSE
+    LET executedQuantity == ReadBytes(orderNumber.rest, 4) IN IF ~executedQuantity.ok THEN Fail ELSE
+    LET matchNumber == ReadBytes(executedQuantity.rest, 8) IN IF ~matchNumber.ok THEN Fail ELSE
+    Ok([ nanoseconds      |-> nanoseconds.value,
+         orderNumber      |-> orderNumber.value,
+         executedQuantity |-> executedQuantity.value,
+         matchNumber      |-> matchNumber.value ], matchNumber.rest)
+
+ZeroOrderExecutedMessage ==
+    [ nanoseconds      |-> [i \in 1 .. 4 |-> 0],
+      orderNumber      |-> [i \in 1 .. 8 |-> 0],
+      executedQuantity |-> [i \in 1 .. 4 |-> 0],
+      matchNumber      |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Order Executed Message at zero, then each field in turn at the values it is checked at *)
+CheckedOrderExecutedMessage ==
+    { ZeroOrderExecutedMessage }
+        \cup { [ZeroOrderExecutedMessage EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+        \cup { [ZeroOrderExecutedMessage EXCEPT !.orderNumber = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecutedMessage EXCEPT !.executedQuantity = one] : one \in Sample(4) }
+        \cup { [ZeroOrderExecutedMessage EXCEPT !.matchNumber = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Order Deleted Message: 12 bytes                                         *)
+(***************************************************************************)
+
+OrderDeletedMessage ==
+    [ nanoseconds : Sample(4),
+      orderNumber : Sample(8) ]
+
+EncodeOrderDeletedMessage(message) ==
+    message.nanoseconds
+        \o message.orderNumber
+
+DecodeOrderDeletedMessage(bytes) ==
+    LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
+    LET orderNumber == ReadBytes(nanoseconds.rest, 8) IN IF ~orderNumber.ok THEN Fail ELSE
+    Ok([ nanoseconds |-> nanoseconds.value,
+         orderNumber |-> orderNumber.value ], orderNumber.rest)
+
+ZeroOrderDeletedMessage ==
+    [ nanoseconds |-> [i \in 1 .. 4 |-> 0],
+      orderNumber |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Order Deleted Message at zero, then each field in turn at the values it is checked at *)
+CheckedOrderDeletedMessage ==
+    { ZeroOrderDeletedMessage }
+        \cup { [ZeroOrderDeletedMessage EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+        \cup { [ZeroOrderDeletedMessage EXCEPT !.orderNumber = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Order Replaced Message: 28 bytes                                        *)
+(***************************************************************************)
+
+OrderReplacedMessage ==
+    [ nanoseconds         : Sample(4),
+      originalOrderNumber : Sample(8),
+      newOrderNumber      : Sample(8),
+      quantity            : Sample(4),
+      price               : Sample(4) ]
+
+EncodeOrderReplacedMessage(message) ==
+    message.nanoseconds
+        \o message.originalOrderNumber
+        \o message.newOrderNumber
+        \o message.quantity
+        \o message.price
+
+DecodeOrderReplacedMessage(bytes) ==
+    LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
+    LET originalOrderNumber == ReadBytes(nanoseconds.rest, 8) IN IF ~originalOrderNumber.ok THEN Fail ELSE
+    LET newOrderNumber == ReadBytes(originalOrderNumber.rest, 8) IN IF ~newOrderNumber.ok THEN Fail ELSE
+    LET quantity == ReadBytes(newOrderNumber.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
+    LET price == ReadBytes(quantity.rest, 4) IN IF ~price.ok THEN Fail ELSE
+    Ok([ nanoseconds         |-> nanoseconds.value,
+         originalOrderNumber |-> originalOrderNumber.value,
+         newOrderNumber      |-> newOrderNumber.value,
+         quantity            |-> quantity.value,
+         price               |-> price.value ], price.rest)
+
+ZeroOrderReplacedMessage ==
+    [ nanoseconds         |-> [i \in 1 .. 4 |-> 0],
+      originalOrderNumber |-> [i \in 1 .. 8 |-> 0],
+      newOrderNumber      |-> [i \in 1 .. 8 |-> 0],
+      quantity            |-> [i \in 1 .. 4 |-> 0],
+      price               |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Order Replaced Message at zero, then each field in turn at the values it is checked at *)
+CheckedOrderReplacedMessage ==
+    { ZeroOrderReplacedMessage }
+        \cup { [ZeroOrderReplacedMessage EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+        \cup { [ZeroOrderReplacedMessage EXCEPT !.originalOrderNumber = one] : one \in Sample(8) }
+        \cup { [ZeroOrderReplacedMessage EXCEPT !.newOrderNumber = one] : one \in Sample(8) }
+        \cup { [ZeroOrderReplacedMessage EXCEPT !.quantity = one] : one \in Sample(4) }
+        \cup { [ZeroOrderReplacedMessage EXCEPT !.price = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Payload, selected by Message Type                                       *)
+(***************************************************************************)
+
+SecondsMessageCode == 84  \* "T"
+SystemEventMessageCode == 83  \* "S"
+PriceTickSizeMessageCode == 76  \* "L"
+OrderbookDirectoryMessageCode == 82  \* "R"
+TradingStateMessageCode == 72  \* "H"
+ShortSellingPriceRestrictionStateMessageCode == 89  \* "Y"
+OrderAddedMessageNoAttributesCode == 65  \* "A"
+OrderAddedWithAttributesMessageCode == 70  \* "F"
+OrderExecutedMessageCode == 69  \* "E"
+OrderDeletedMessageCode == 68  \* "D"
+OrderReplacedMessageCode == 85  \* "U"
+
+Payload ==
+    [ tag : {SecondsMessageCode}, body : SecondsMessage ]
+        \cup [ tag : {SystemEventMessageCode}, body : SystemEventMessage ]
+        \cup [ tag : {PriceTickSizeMessageCode}, body : PriceTickSizeMessage ]
+        \cup [ tag : {OrderbookDirectoryMessageCode}, body : OrderbookDirectoryMessage ]
+        \cup [ tag : {TradingStateMessageCode}, body : TradingStateMessage ]
+        \cup [ tag : {ShortSellingPriceRestrictionStateMessageCode}, body : ShortSellingPriceRestrictionStateMessage ]
+        \cup [ tag : {OrderAddedMessageNoAttributesCode}, body : OrderAddedMessageNoAttributes ]
+        \cup [ tag : {OrderAddedWithAttributesMessageCode}, body : OrderAddedWithAttributesMessage ]
+        \cup [ tag : {OrderExecutedMessageCode}, body : OrderExecutedMessage ]
+        \cup [ tag : {OrderDeletedMessageCode}, body : OrderDeletedMessage ]
+        \cup [ tag : {OrderReplacedMessageCode}, body : OrderReplacedMessage ]
+
+EncodePayload(message) ==
+    CASE message.tag = SecondsMessageCode -> EncodeSecondsMessage(message.body)
+      [] message.tag = SystemEventMessageCode -> EncodeSystemEventMessage(message.body)
+      [] message.tag = PriceTickSizeMessageCode -> EncodePriceTickSizeMessage(message.body)
+      [] message.tag = OrderbookDirectoryMessageCode -> EncodeOrderbookDirectoryMessage(message.body)
+      [] message.tag = TradingStateMessageCode -> EncodeTradingStateMessage(message.body)
+      [] message.tag = ShortSellingPriceRestrictionStateMessageCode -> EncodeShortSellingPriceRestrictionStateMessage(message.body)
+      [] message.tag = OrderAddedMessageNoAttributesCode -> EncodeOrderAddedMessageNoAttributes(message.body)
+      [] message.tag = OrderAddedWithAttributesMessageCode -> EncodeOrderAddedWithAttributesMessage(message.body)
+      [] message.tag = OrderExecutedMessageCode -> EncodeOrderExecutedMessage(message.body)
+      [] message.tag = OrderDeletedMessageCode -> EncodeOrderDeletedMessage(message.body)
+      [] message.tag = OrderReplacedMessageCode -> EncodeOrderReplacedMessage(message.body)
+
+DecodePayload(tag, bytes) ==
+    LET read ==
+            CASE tag = SecondsMessageCode -> DecodeSecondsMessage(bytes)
+              [] tag = SystemEventMessageCode -> DecodeSystemEventMessage(bytes)
+              [] tag = PriceTickSizeMessageCode -> DecodePriceTickSizeMessage(bytes)
+              [] tag = OrderbookDirectoryMessageCode -> DecodeOrderbookDirectoryMessage(bytes)
+              [] tag = TradingStateMessageCode -> DecodeTradingStateMessage(bytes)
+              [] tag = ShortSellingPriceRestrictionStateMessageCode -> DecodeShortSellingPriceRestrictionStateMessage(bytes)
+              [] tag = OrderAddedMessageNoAttributesCode -> DecodeOrderAddedMessageNoAttributes(bytes)
+              [] tag = OrderAddedWithAttributesMessageCode -> DecodeOrderAddedWithAttributesMessage(bytes)
+              [] tag = OrderExecutedMessageCode -> DecodeOrderExecutedMessage(bytes)
+              [] tag = OrderDeletedMessageCode -> DecodeOrderDeletedMessage(bytes)
+              [] tag = OrderReplacedMessageCode -> DecodeOrderReplacedMessage(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroPayload == [tag |-> SecondsMessageCode, body |-> ZeroSecondsMessage]
+
+(* Each Payload in turn, at the values the message it names is checked at *)
+CheckedPayload ==
+    { [tag |-> SecondsMessageCode, body |-> one] : one \in CheckedSecondsMessage }
+        \cup { [tag |-> SystemEventMessageCode, body |-> one] : one \in CheckedSystemEventMessage }
+        \cup { [tag |-> PriceTickSizeMessageCode, body |-> one] : one \in CheckedPriceTickSizeMessage }
+        \cup { [tag |-> OrderbookDirectoryMessageCode, body |-> one] : one \in CheckedOrderbookDirectoryMessage }
+        \cup { [tag |-> TradingStateMessageCode, body |-> one] : one \in CheckedTradingStateMessage }
+        \cup { [tag |-> ShortSellingPriceRestrictionStateMessageCode, body |-> one] : one \in CheckedShortSellingPriceRestrictionStateMessage }
+        \cup { [tag |-> OrderAddedMessageNoAttributesCode, body |-> one] : one \in CheckedOrderAddedMessageNoAttributes }
+        \cup { [tag |-> OrderAddedWithAttributesMessageCode, body |-> one] : one \in CheckedOrderAddedWithAttributesMessage }
+        \cup { [tag |-> OrderExecutedMessageCode, body |-> one] : one \in CheckedOrderExecutedMessage }
+        \cup { [tag |-> OrderDeletedMessageCode, body |-> one] : one \in CheckedOrderDeletedMessage }
+        \cup { [tag |-> OrderReplacedMessageCode, body |-> one] : one \in CheckedOrderReplacedMessage }
+
+(***************************************************************************)
+(* Message, framed by Message Length                                       *)
+(***************************************************************************)
+
+Message ==
+    [ payload : Payload ]
+
+EncodeMessageBody(message) ==
+    EncodeUIntBE(message.payload.tag, 1)
+        \o EncodePayload(message.payload)
+
+(* Message Length counts the bytes it frames, so it is written from them *)
+EncodeMessage(message) ==
+    LET body == EncodeMessageBody(message)
+    IN  EncodeUIntBE(Len(body), 2) \o body
+
+DecodeMessageBody(bytes) ==
+    LET messageType == ReadUIntBE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
+    LET payload == DecodePayload(messageType.value, messageType.rest) IN IF ~payload.ok THEN Fail ELSE
+    Ok([ payload |-> payload.value ], payload.rest)
+
+DecodeMessage(bytes) ==
+    LET length == ReadUIntBE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
+    IF Len(length.rest) < length.value THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, length.value)
+        beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
+        body   == DecodeMessageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroMessage ==
+    [ payload |-> ZeroPayload ]
+
+(* Message at zero, then each field in turn at the values it is checked at *)
+CheckedMessage ==
+    { ZeroMessage }
+        \cup { [ZeroMessage EXCEPT !.payload = one] : one \in CheckedPayload }
+
+(* A run of Message, written one after another *)
+RECURSIVE EncodeMessageList(_)
+EncodeMessageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeMessage(Head(messages)) \o EncodeMessageList(Tail(messages))
+
+(* As many Message as the field that counts them says *)
+RECURSIVE ReadMessageList(_, _)
+ReadMessageList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeMessage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadMessageList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Message of each kind, for the lists that carry them *)
+OneMessage ==
+    { [ZeroMessage EXCEPT !.payload = [tag |-> SecondsMessageCode, body |-> ZeroSecondsMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> SystemEventMessageCode, body |-> ZeroSystemEventMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> PriceTickSizeMessageCode, body |-> ZeroPriceTickSizeMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OrderbookDirectoryMessageCode, body |-> ZeroOrderbookDirectoryMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> TradingStateMessageCode, body |-> ZeroTradingStateMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> ShortSellingPriceRestrictionStateMessageCode, body |-> ZeroShortSellingPriceRestrictionStateMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OrderAddedMessageNoAttributesCode, body |-> ZeroOrderAddedMessageNoAttributes]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OrderAddedWithAttributesMessageCode, body |-> ZeroOrderAddedWithAttributesMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OrderExecutedMessageCode, body |-> ZeroOrderExecutedMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OrderDeletedMessageCode, body |-> ZeroOrderDeletedMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OrderReplacedMessageCode, body |-> ZeroOrderReplacedMessage]] }
+
+(***************************************************************************)
+(* Packet                                                                  *)
+(***************************************************************************)
+
+Packet ==
+    [ session        : Sample(10),
+      sequenceNumber : Sample(8),
+      message        : SampleLists(OneMessage) ]
+
+EncodePacket(message) ==
+    message.session
+        \o message.sequenceNumber
+        \o EncodeUIntBE(Len(message.message), 2)
+        \o EncodeMessageList(message.message)
+
+DecodePacket(bytes) ==
+    LET session == ReadBytes(bytes, 10) IN IF ~session.ok THEN Fail ELSE
+    LET sequenceNumber == ReadBytes(session.rest, 8) IN IF ~sequenceNumber.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(sequenceNumber.rest, 2) IN IF ~messageCount.ok THEN Fail ELSE
+    LET message == ReadMessageList(messageCount.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
+    Ok([ session        |-> session.value,
+         sequenceNumber |-> sequenceNumber.value,
+         message        |-> message.value ], message.rest)
+
+ZeroPacket ==
+    [ session        |-> [i \in 1 .. 10 |-> 0],
+      sequenceNumber |-> [i \in 1 .. 8 |-> 0],
+      message        |-> << >> ]
+
+(* Packet at zero, then each field in turn at the values it is checked at *)
+CheckedPacket ==
+    { ZeroPacket }
+        \cup { [ZeroPacket EXCEPT !.session = one] : one \in Sample(10) }
+        \cup { [ZeroPacket EXCEPT !.sequenceNumber = one] : one \in Sample(8) }
+        \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
+
+(***************************************************************************)
+(* What TLC checks                                                         *)
+(***************************************************************************)
+
+(* An integer a rule depends on writes its width and reads back what was written *)
+RoundTripUIntLE ==
+    \A width \in 1 .. 3 :
+        \A value \in {0, 1, 255, 256, 65535} :
+            (value < 256 ^ width) =>
+                /\ Len(EncodeUIntLE(value, width)) = width
+                /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
+                /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
+
+(* Every Seconds Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripSecondsMessage ==
+    \A message \in CheckedSecondsMessage :
+        LET read == DecodeSecondsMessage(EncodeSecondsMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every System Event Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripSystemEventMessage ==
+    \A message \in CheckedSystemEventMessage :
+        LET read == DecodeSystemEventMessage(EncodeSystemEventMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Price Tick Size Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripPriceTickSizeMessage ==
+    \A message \in CheckedPriceTickSizeMessage :
+        LET read == DecodePriceTickSizeMessage(EncodePriceTickSizeMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Orderbook Directory Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderbookDirectoryMessage ==
+    \A message \in CheckedOrderbookDirectoryMessage :
+        LET read == DecodeOrderbookDirectoryMessage(EncodeOrderbookDirectoryMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Trading State Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTradingStateMessage ==
+    \A message \in CheckedTradingStateMessage :
+        LET read == DecodeTradingStateMessage(EncodeTradingStateMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Short Selling Price Restriction State Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripShortSellingPriceRestrictionStateMessage ==
+    \A message \in CheckedShortSellingPriceRestrictionStateMessage :
+        LET read == DecodeShortSellingPriceRestrictionStateMessage(EncodeShortSellingPriceRestrictionStateMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Order Added Message No Attributes decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderAddedMessageNoAttributes ==
+    \A message \in CheckedOrderAddedMessageNoAttributes :
+        LET read == DecodeOrderAddedMessageNoAttributes(EncodeOrderAddedMessageNoAttributes(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Order Added With Attributes Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderAddedWithAttributesMessage ==
+    \A message \in CheckedOrderAddedWithAttributesMessage :
+        LET read == DecodeOrderAddedWithAttributesMessage(EncodeOrderAddedWithAttributesMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Order Executed Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderExecutedMessage ==
+    \A message \in CheckedOrderExecutedMessage :
+        LET read == DecodeOrderExecutedMessage(EncodeOrderExecutedMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Order Deleted Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderDeletedMessage ==
+    \A message \in CheckedOrderDeletedMessage :
+        LET read == DecodeOrderDeletedMessage(EncodeOrderDeletedMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Order Replaced Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderReplacedMessage ==
+    \A message \in CheckedOrderReplacedMessage :
+        LET read == DecodeOrderReplacedMessage(EncodeOrderReplacedMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMessage ==
+    \A message \in CheckedMessage :
+        LET read == DecodeMessage(EncodeMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripPacket ==
+    \A message \in CheckedPacket :
+        LET read == DecodePacket(EncodePacket(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* A Payload is selected by the Message Type it is written under *)
+SelectsPayload ==
+    \A message \in CheckedPayload :
+        LET read == DecodePayload(message.tag, EncodePayload(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* Message Length is written from the bytes it frames *)
+FramesMessage ==
+    \A message \in CheckedMessage :
+        LET bytes == EncodeMessage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
+
+-----------------------------------------------------------------------------
+(* The state the session machine will run over. It stands still until there are *)
+(* transitions to take. *)
+
+VARIABLE parsed
+
+Init == parsed = << >>
+Next == UNCHANGED parsed
+Spec == Init /\ [][Next]_parsed
+
+=============================================================================

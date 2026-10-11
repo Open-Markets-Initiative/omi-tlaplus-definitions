@@ -1,0 +1,784 @@
+----------------- MODULE C1Options_OpeningProcess_v1_0_30 ------------------
+(***************************************************************************)
+(* Chicago Board Options Exchange Opening Process v1.0.30                  *)
+(*                                                                         *)
+(* Generated from the binary model. A field is the bytes it occupies; an   *)
+(* integer is read only where a rule depends on one - a length, a count, a *)
+(* message type - which are the dependencies the parse rules run on.       *)
+(*                                                                         *)
+(* TLC checks that every record decodes back to what was encoded, that a   *)
+(* dispatch selects the message its type names, and that a derived length  *)
+(* or count is written from what it describes.                             *)
+(*                                                                         *)
+(* Note: TLC evaluates integers in 32 bits, so a field wider than that has *)
+(* no range it can enumerate; every field is checked as its bytes, which   *)
+(* is exact at any width.                                                  *)
+(*                                                                         *)
+(* Note: a Message Count of 0 marks Heartbeat and carries no Message.      *)
+(***************************************************************************)
+EXTENDS Integers, Sequences
+
+(***************************************************************************)
+(* Wire primitives                                                         *)
+(***************************************************************************)
+
+Byte == 0 .. 255
+
+(* An unsigned integer, least significant byte first. Read only where a rule *)
+(* depends on the value: a length, a count, a message type. *)
+RECURSIVE DecodeUIntLE(_)
+DecodeUIntLE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE Head(bytes) + 256 * DecodeUIntLE(Tail(bytes))
+
+RECURSIVE EncodeUIntLE(_, _)
+EncodeUIntLE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
+
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
+(***************************************************************************)
+(* A decoder yields the value it read and the bytes left, or fails         *)
+(***************************************************************************)
+
+Fail == [ok |-> FALSE]
+Ok(value, rest) == [ok |-> TRUE, value |-> value, rest |-> rest]
+
+(* The bytes a field of this width occupies, kept as they lie *)
+ReadBytes(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
+
+(* The integer a rule depends on, in the byte order the field states *)
+ReadUIntLE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+(***************************************************************************)
+(* The values a field is checked at: zero, the spaces a text field is      *)
+(* padded with, and                                                        *)
+(* every bit set, which is where an encoding goes wrong if it goes wrong   *)
+(***************************************************************************)
+
+Sample(width) ==
+    { [i \in 1 .. width |-> 0],
+      [i \in 1 .. width |-> 32],
+      [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
+
+(* The lists a record is checked over: none, one, and a run of two. What a run has *)
+(* to get right is reading one entry after another, which two of a kind already say. *)
+SampleLists(entries) ==
+    { << >> }
+        \cup { <<one>> : one \in entries }
+        \cup { <<one, one>> : one \in entries }
+
+(***************************************************************************)
+(* Time Reference Message: 16 bytes                                        *)
+(***************************************************************************)
+
+TimeReferenceMessage ==
+    [ midnightReference : Sample(4),
+      timeReference     : Sample(4),
+      timeOffset        : Sample(4),
+      tradeDate         : Sample(4) ]
+
+EncodeTimeReferenceMessage(message) ==
+    message.midnightReference
+        \o message.timeReference
+        \o message.timeOffset
+        \o message.tradeDate
+
+DecodeTimeReferenceMessage(bytes) ==
+    LET midnightReference == ReadBytes(bytes, 4) IN IF ~midnightReference.ok THEN Fail ELSE
+    LET timeReference == ReadBytes(midnightReference.rest, 4) IN IF ~timeReference.ok THEN Fail ELSE
+    LET timeOffset == ReadBytes(timeReference.rest, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    LET tradeDate == ReadBytes(timeOffset.rest, 4) IN IF ~tradeDate.ok THEN Fail ELSE
+    Ok([ midnightReference |-> midnightReference.value,
+         timeReference     |-> timeReference.value,
+         timeOffset        |-> timeOffset.value,
+         tradeDate         |-> tradeDate.value ], tradeDate.rest)
+
+ZeroTimeReferenceMessage ==
+    [ midnightReference |-> [i \in 1 .. 4 |-> 0],
+      timeReference     |-> [i \in 1 .. 4 |-> 0],
+      timeOffset        |-> [i \in 1 .. 4 |-> 0],
+      tradeDate         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Time Reference Message at zero, then each field in turn at the values it is checked at *)
+CheckedTimeReferenceMessage ==
+    { ZeroTimeReferenceMessage }
+        \cup { [ZeroTimeReferenceMessage EXCEPT !.midnightReference = one] : one \in Sample(4) }
+        \cup { [ZeroTimeReferenceMessage EXCEPT !.timeReference = one] : one \in Sample(4) }
+        \cup { [ZeroTimeReferenceMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+        \cup { [ZeroTimeReferenceMessage EXCEPT !.tradeDate = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Time Message: 8 bytes                                                   *)
+(***************************************************************************)
+
+TimeMessage ==
+    [ time      : Sample(4),
+      epochTime : Sample(4) ]
+
+EncodeTimeMessage(message) ==
+    message.time
+        \o message.epochTime
+
+DecodeTimeMessage(bytes) ==
+    LET time == ReadBytes(bytes, 4) IN IF ~time.ok THEN Fail ELSE
+    LET epochTime == ReadBytes(time.rest, 4) IN IF ~epochTime.ok THEN Fail ELSE
+    Ok([ time      |-> time.value,
+         epochTime |-> epochTime.value ], epochTime.rest)
+
+ZeroTimeMessage ==
+    [ time      |-> [i \in 1 .. 4 |-> 0],
+      epochTime |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Time Message at zero, then each field in turn at the values it is checked at *)
+CheckedTimeMessage ==
+    { ZeroTimeMessage }
+        \cup { [ZeroTimeMessage EXCEPT !.time = one] : one \in Sample(4) }
+        \cup { [ZeroTimeMessage EXCEPT !.epochTime = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Options Auction Update Message: 62 bytes                                *)
+(***************************************************************************)
+
+OptionsAuctionUpdateMessage ==
+    [ timeOffset                : Sample(4),
+      symbol                    : Sample(8),
+      auctionType               : Sample(1),
+      referencePrice            : Sample(8),
+      buyContracts              : Sample(4),
+      sellContracts             : Sample(4),
+      indicativePrice           : Sample(8),
+      auctionOnlyPrice          : Sample(8),
+      openingCondition          : Sample(1),
+      compositeMarketBidPrice   : Sample(8),
+      compositeMarketOfferPrice : Sample(8) ]
+
+EncodeOptionsAuctionUpdateMessage(message) ==
+    message.timeOffset
+        \o message.symbol
+        \o message.auctionType
+        \o message.referencePrice
+        \o message.buyContracts
+        \o message.sellContracts
+        \o message.indicativePrice
+        \o message.auctionOnlyPrice
+        \o message.openingCondition
+        \o message.compositeMarketBidPrice
+        \o message.compositeMarketOfferPrice
+
+DecodeOptionsAuctionUpdateMessage(bytes) ==
+    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    LET symbol == ReadBytes(timeOffset.rest, 8) IN IF ~symbol.ok THEN Fail ELSE
+    LET auctionType == ReadBytes(symbol.rest, 1) IN IF ~auctionType.ok THEN Fail ELSE
+    LET referencePrice == ReadBytes(auctionType.rest, 8) IN IF ~referencePrice.ok THEN Fail ELSE
+    LET buyContracts == ReadBytes(referencePrice.rest, 4) IN IF ~buyContracts.ok THEN Fail ELSE
+    LET sellContracts == ReadBytes(buyContracts.rest, 4) IN IF ~sellContracts.ok THEN Fail ELSE
+    LET indicativePrice == ReadBytes(sellContracts.rest, 8) IN IF ~indicativePrice.ok THEN Fail ELSE
+    LET auctionOnlyPrice == ReadBytes(indicativePrice.rest, 8) IN IF ~auctionOnlyPrice.ok THEN Fail ELSE
+    LET openingCondition == ReadBytes(auctionOnlyPrice.rest, 1) IN IF ~openingCondition.ok THEN Fail ELSE
+    LET compositeMarketBidPrice == ReadBytes(openingCondition.rest, 8) IN IF ~compositeMarketBidPrice.ok THEN Fail ELSE
+    LET compositeMarketOfferPrice == ReadBytes(compositeMarketBidPrice.rest, 8) IN IF ~compositeMarketOfferPrice.ok THEN Fail ELSE
+    Ok([ timeOffset                |-> timeOffset.value,
+         symbol                    |-> symbol.value,
+         auctionType               |-> auctionType.value,
+         referencePrice            |-> referencePrice.value,
+         buyContracts              |-> buyContracts.value,
+         sellContracts             |-> sellContracts.value,
+         indicativePrice           |-> indicativePrice.value,
+         auctionOnlyPrice          |-> auctionOnlyPrice.value,
+         openingCondition          |-> openingCondition.value,
+         compositeMarketBidPrice   |-> compositeMarketBidPrice.value,
+         compositeMarketOfferPrice |-> compositeMarketOfferPrice.value ], compositeMarketOfferPrice.rest)
+
+ZeroOptionsAuctionUpdateMessage ==
+    [ timeOffset                |-> [i \in 1 .. 4 |-> 0],
+      symbol                    |-> [i \in 1 .. 8 |-> 0],
+      auctionType               |-> [i \in 1 .. 1 |-> 0],
+      referencePrice            |-> [i \in 1 .. 8 |-> 0],
+      buyContracts              |-> [i \in 1 .. 4 |-> 0],
+      sellContracts             |-> [i \in 1 .. 4 |-> 0],
+      indicativePrice           |-> [i \in 1 .. 8 |-> 0],
+      auctionOnlyPrice          |-> [i \in 1 .. 8 |-> 0],
+      openingCondition          |-> [i \in 1 .. 1 |-> 0],
+      compositeMarketBidPrice   |-> [i \in 1 .. 8 |-> 0],
+      compositeMarketOfferPrice |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Options Auction Update Message at zero, then each field in turn at the values it is checked at *)
+CheckedOptionsAuctionUpdateMessage ==
+    { ZeroOptionsAuctionUpdateMessage }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.symbol = one] : one \in Sample(8) }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.auctionType = one] : one \in Sample(1) }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.referencePrice = one] : one \in Sample(8) }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.buyContracts = one] : one \in Sample(4) }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.sellContracts = one] : one \in Sample(4) }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.indicativePrice = one] : one \in Sample(8) }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.auctionOnlyPrice = one] : one \in Sample(8) }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.openingCondition = one] : one \in Sample(1) }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.compositeMarketBidPrice = one] : one \in Sample(8) }
+        \cup { [ZeroOptionsAuctionUpdateMessage EXCEPT !.compositeMarketOfferPrice = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Auction Summary Message: 25 bytes                                       *)
+(***************************************************************************)
+
+AuctionSummaryMessage ==
+    [ timeOffset  : Sample(4),
+      symbol      : Sample(8),
+      auctionType : Sample(1),
+      price       : Sample(8),
+      quantity    : Sample(4) ]
+
+EncodeAuctionSummaryMessage(message) ==
+    message.timeOffset
+        \o message.symbol
+        \o message.auctionType
+        \o message.price
+        \o message.quantity
+
+DecodeAuctionSummaryMessage(bytes) ==
+    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    LET symbol == ReadBytes(timeOffset.rest, 8) IN IF ~symbol.ok THEN Fail ELSE
+    LET auctionType == ReadBytes(symbol.rest, 1) IN IF ~auctionType.ok THEN Fail ELSE
+    LET price == ReadBytes(auctionType.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET quantity == ReadBytes(price.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
+    Ok([ timeOffset  |-> timeOffset.value,
+         symbol      |-> symbol.value,
+         auctionType |-> auctionType.value,
+         price       |-> price.value,
+         quantity    |-> quantity.value ], quantity.rest)
+
+ZeroAuctionSummaryMessage ==
+    [ timeOffset  |-> [i \in 1 .. 4 |-> 0],
+      symbol      |-> [i \in 1 .. 8 |-> 0],
+      auctionType |-> [i \in 1 .. 1 |-> 0],
+      price       |-> [i \in 1 .. 8 |-> 0],
+      quantity    |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Auction Summary Message at zero, then each field in turn at the values it is checked at *)
+CheckedAuctionSummaryMessage ==
+    { ZeroAuctionSummaryMessage }
+        \cup { [ZeroAuctionSummaryMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+        \cup { [ZeroAuctionSummaryMessage EXCEPT !.symbol = one] : one \in Sample(8) }
+        \cup { [ZeroAuctionSummaryMessage EXCEPT !.auctionType = one] : one \in Sample(1) }
+        \cup { [ZeroAuctionSummaryMessage EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroAuctionSummaryMessage EXCEPT !.quantity = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Width Update Message: 17 bytes                                          *)
+(***************************************************************************)
+
+WidthUpdateMessage ==
+    [ timeOffset : Sample(4),
+      underlying : Sample(8),
+      widthType  : Sample(1),
+      multiplier : Sample(4) ]
+
+EncodeWidthUpdateMessage(message) ==
+    message.timeOffset
+        \o message.underlying
+        \o message.widthType
+        \o message.multiplier
+
+DecodeWidthUpdateMessage(bytes) ==
+    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    LET underlying == ReadBytes(timeOffset.rest, 8) IN IF ~underlying.ok THEN Fail ELSE
+    LET widthType == ReadBytes(underlying.rest, 1) IN IF ~widthType.ok THEN Fail ELSE
+    LET multiplier == ReadBytes(widthType.rest, 4) IN IF ~multiplier.ok THEN Fail ELSE
+    Ok([ timeOffset |-> timeOffset.value,
+         underlying |-> underlying.value,
+         widthType  |-> widthType.value,
+         multiplier |-> multiplier.value ], multiplier.rest)
+
+ZeroWidthUpdateMessage ==
+    [ timeOffset |-> [i \in 1 .. 4 |-> 0],
+      underlying |-> [i \in 1 .. 8 |-> 0],
+      widthType  |-> [i \in 1 .. 1 |-> 0],
+      multiplier |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Width Update Message at zero, then each field in turn at the values it is checked at *)
+CheckedWidthUpdateMessage ==
+    { ZeroWidthUpdateMessage }
+        \cup { [ZeroWidthUpdateMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+        \cup { [ZeroWidthUpdateMessage EXCEPT !.underlying = one] : one \in Sample(8) }
+        \cup { [ZeroWidthUpdateMessage EXCEPT !.widthType = one] : one \in Sample(1) }
+        \cup { [ZeroWidthUpdateMessage EXCEPT !.multiplier = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Symbol Mapping Message: 36 bytes                                        *)
+(***************************************************************************)
+
+SymbolMappingMessage ==
+    [ feedSymbol      : Sample(6),
+      osiSymbol       : Sample(21),
+      symbolCondition : Sample(1),
+      underlying      : Sample(8) ]
+
+EncodeSymbolMappingMessage(message) ==
+    message.feedSymbol
+        \o message.osiSymbol
+        \o message.symbolCondition
+        \o message.underlying
+
+DecodeSymbolMappingMessage(bytes) ==
+    LET feedSymbol == ReadBytes(bytes, 6) IN IF ~feedSymbol.ok THEN Fail ELSE
+    LET osiSymbol == ReadBytes(feedSymbol.rest, 21) IN IF ~osiSymbol.ok THEN Fail ELSE
+    LET symbolCondition == ReadBytes(osiSymbol.rest, 1) IN IF ~symbolCondition.ok THEN Fail ELSE
+    LET underlying == ReadBytes(symbolCondition.rest, 8) IN IF ~underlying.ok THEN Fail ELSE
+    Ok([ feedSymbol      |-> feedSymbol.value,
+         osiSymbol       |-> osiSymbol.value,
+         symbolCondition |-> symbolCondition.value,
+         underlying      |-> underlying.value ], underlying.rest)
+
+ZeroSymbolMappingMessage ==
+    [ feedSymbol      |-> [i \in 1 .. 6 |-> 0],
+      osiSymbol       |-> [i \in 1 .. 21 |-> 0],
+      symbolCondition |-> [i \in 1 .. 1 |-> 0],
+      underlying      |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Symbol Mapping Message at zero, then each field in turn at the values it is checked at *)
+CheckedSymbolMappingMessage ==
+    { ZeroSymbolMappingMessage }
+        \cup { [ZeroSymbolMappingMessage EXCEPT !.feedSymbol = one] : one \in Sample(6) }
+        \cup { [ZeroSymbolMappingMessage EXCEPT !.osiSymbol = one] : one \in Sample(21) }
+        \cup { [ZeroSymbolMappingMessage EXCEPT !.symbolCondition = one] : one \in Sample(1) }
+        \cup { [ZeroSymbolMappingMessage EXCEPT !.underlying = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* End Of Session Message: 4 bytes                                         *)
+(***************************************************************************)
+
+EndOfSessionMessage ==
+    [ timeOffset : Sample(4) ]
+
+EncodeEndOfSessionMessage(message) ==
+    message.timeOffset
+
+DecodeEndOfSessionMessage(bytes) ==
+    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    Ok([ timeOffset |-> timeOffset.value ], timeOffset.rest)
+
+ZeroEndOfSessionMessage ==
+    [ timeOffset |-> [i \in 1 .. 4 |-> 0] ]
+
+(* End Of Session Message at zero, then each field in turn at the values it is checked at *)
+CheckedEndOfSessionMessage ==
+    { ZeroEndOfSessionMessage }
+        \cup { [ZeroEndOfSessionMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Soq Strike Range Update Message: 40 bytes                               *)
+(***************************************************************************)
+
+SoqStrikeRangeUpdateMessage ==
+    [ timeOffset       : Sample(4),
+      soqIdentifier    : Sample(20),
+      lowerStrikePrice : Sample(8),
+      upperStrikePrice : Sample(8) ]
+
+EncodeSoqStrikeRangeUpdateMessage(message) ==
+    message.timeOffset
+        \o message.soqIdentifier
+        \o message.lowerStrikePrice
+        \o message.upperStrikePrice
+
+DecodeSoqStrikeRangeUpdateMessage(bytes) ==
+    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    LET soqIdentifier == ReadBytes(timeOffset.rest, 20) IN IF ~soqIdentifier.ok THEN Fail ELSE
+    LET lowerStrikePrice == ReadBytes(soqIdentifier.rest, 8) IN IF ~lowerStrikePrice.ok THEN Fail ELSE
+    LET upperStrikePrice == ReadBytes(lowerStrikePrice.rest, 8) IN IF ~upperStrikePrice.ok THEN Fail ELSE
+    Ok([ timeOffset       |-> timeOffset.value,
+         soqIdentifier    |-> soqIdentifier.value,
+         lowerStrikePrice |-> lowerStrikePrice.value,
+         upperStrikePrice |-> upperStrikePrice.value ], upperStrikePrice.rest)
+
+ZeroSoqStrikeRangeUpdateMessage ==
+    [ timeOffset       |-> [i \in 1 .. 4 |-> 0],
+      soqIdentifier    |-> [i \in 1 .. 20 |-> 0],
+      lowerStrikePrice |-> [i \in 1 .. 8 |-> 0],
+      upperStrikePrice |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Soq Strike Range Update Message at zero, then each field in turn at the values it is checked at *)
+CheckedSoqStrikeRangeUpdateMessage ==
+    { ZeroSoqStrikeRangeUpdateMessage }
+        \cup { [ZeroSoqStrikeRangeUpdateMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+        \cup { [ZeroSoqStrikeRangeUpdateMessage EXCEPT !.soqIdentifier = one] : one \in Sample(20) }
+        \cup { [ZeroSoqStrikeRangeUpdateMessage EXCEPT !.lowerStrikePrice = one] : one \in Sample(8) }
+        \cup { [ZeroSoqStrikeRangeUpdateMessage EXCEPT !.upperStrikePrice = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Constituent Symbol Mapping Message: 56 bytes                            *)
+(***************************************************************************)
+
+ConstituentSymbolMappingMessage ==
+    [ feedSymbol      : Sample(6),
+      osiSymbol       : Sample(21),
+      symbolCondition : Sample(1),
+      underlying      : Sample(8),
+      soqIdentifier   : Sample(20) ]
+
+EncodeConstituentSymbolMappingMessage(message) ==
+    message.feedSymbol
+        \o message.osiSymbol
+        \o message.symbolCondition
+        \o message.underlying
+        \o message.soqIdentifier
+
+DecodeConstituentSymbolMappingMessage(bytes) ==
+    LET feedSymbol == ReadBytes(bytes, 6) IN IF ~feedSymbol.ok THEN Fail ELSE
+    LET osiSymbol == ReadBytes(feedSymbol.rest, 21) IN IF ~osiSymbol.ok THEN Fail ELSE
+    LET symbolCondition == ReadBytes(osiSymbol.rest, 1) IN IF ~symbolCondition.ok THEN Fail ELSE
+    LET underlying == ReadBytes(symbolCondition.rest, 8) IN IF ~underlying.ok THEN Fail ELSE
+    LET soqIdentifier == ReadBytes(underlying.rest, 20) IN IF ~soqIdentifier.ok THEN Fail ELSE
+    Ok([ feedSymbol      |-> feedSymbol.value,
+         osiSymbol       |-> osiSymbol.value,
+         symbolCondition |-> symbolCondition.value,
+         underlying      |-> underlying.value,
+         soqIdentifier   |-> soqIdentifier.value ], soqIdentifier.rest)
+
+ZeroConstituentSymbolMappingMessage ==
+    [ feedSymbol      |-> [i \in 1 .. 6 |-> 0],
+      osiSymbol       |-> [i \in 1 .. 21 |-> 0],
+      symbolCondition |-> [i \in 1 .. 1 |-> 0],
+      underlying      |-> [i \in 1 .. 8 |-> 0],
+      soqIdentifier   |-> [i \in 1 .. 20 |-> 0] ]
+
+(* Constituent Symbol Mapping Message at zero, then each field in turn at the values it is checked at *)
+CheckedConstituentSymbolMappingMessage ==
+    { ZeroConstituentSymbolMappingMessage }
+        \cup { [ZeroConstituentSymbolMappingMessage EXCEPT !.feedSymbol = one] : one \in Sample(6) }
+        \cup { [ZeroConstituentSymbolMappingMessage EXCEPT !.osiSymbol = one] : one \in Sample(21) }
+        \cup { [ZeroConstituentSymbolMappingMessage EXCEPT !.symbolCondition = one] : one \in Sample(1) }
+        \cup { [ZeroConstituentSymbolMappingMessage EXCEPT !.underlying = one] : one \in Sample(8) }
+        \cup { [ZeroConstituentSymbolMappingMessage EXCEPT !.soqIdentifier = one] : one \in Sample(20) }
+
+(***************************************************************************)
+(* Payload, selected by Message Type                                       *)
+(***************************************************************************)
+
+TimeReferenceMessageCode == 177  \* 0xb1
+TimeMessageCode == 32  \* 0x20
+OptionsAuctionUpdateMessageCode == 209  \* 0xd1
+AuctionSummaryMessageCode == 150  \* 0x96
+WidthUpdateMessageCode == 210  \* 0xd2
+SymbolMappingMessageCode == 46  \* 0x2e
+EndOfSessionMessageCode == 45  \* 0x2d
+SoqStrikeRangeUpdateMessageCode == 157  \* 0x9d
+ConstituentSymbolMappingMessageCode == 158  \* 0x9e
+
+Payload ==
+    [ tag : {TimeReferenceMessageCode}, body : TimeReferenceMessage ]
+        \cup [ tag : {TimeMessageCode}, body : TimeMessage ]
+        \cup [ tag : {OptionsAuctionUpdateMessageCode}, body : OptionsAuctionUpdateMessage ]
+        \cup [ tag : {AuctionSummaryMessageCode}, body : AuctionSummaryMessage ]
+        \cup [ tag : {WidthUpdateMessageCode}, body : WidthUpdateMessage ]
+        \cup [ tag : {SymbolMappingMessageCode}, body : SymbolMappingMessage ]
+        \cup [ tag : {EndOfSessionMessageCode}, body : EndOfSessionMessage ]
+        \cup [ tag : {SoqStrikeRangeUpdateMessageCode}, body : SoqStrikeRangeUpdateMessage ]
+        \cup [ tag : {ConstituentSymbolMappingMessageCode}, body : ConstituentSymbolMappingMessage ]
+
+EncodePayload(message) ==
+    CASE message.tag = TimeReferenceMessageCode -> EncodeTimeReferenceMessage(message.body)
+      [] message.tag = TimeMessageCode -> EncodeTimeMessage(message.body)
+      [] message.tag = OptionsAuctionUpdateMessageCode -> EncodeOptionsAuctionUpdateMessage(message.body)
+      [] message.tag = AuctionSummaryMessageCode -> EncodeAuctionSummaryMessage(message.body)
+      [] message.tag = WidthUpdateMessageCode -> EncodeWidthUpdateMessage(message.body)
+      [] message.tag = SymbolMappingMessageCode -> EncodeSymbolMappingMessage(message.body)
+      [] message.tag = EndOfSessionMessageCode -> EncodeEndOfSessionMessage(message.body)
+      [] message.tag = SoqStrikeRangeUpdateMessageCode -> EncodeSoqStrikeRangeUpdateMessage(message.body)
+      [] message.tag = ConstituentSymbolMappingMessageCode -> EncodeConstituentSymbolMappingMessage(message.body)
+
+DecodePayload(tag, bytes) ==
+    LET read ==
+            CASE tag = TimeReferenceMessageCode -> DecodeTimeReferenceMessage(bytes)
+              [] tag = TimeMessageCode -> DecodeTimeMessage(bytes)
+              [] tag = OptionsAuctionUpdateMessageCode -> DecodeOptionsAuctionUpdateMessage(bytes)
+              [] tag = AuctionSummaryMessageCode -> DecodeAuctionSummaryMessage(bytes)
+              [] tag = WidthUpdateMessageCode -> DecodeWidthUpdateMessage(bytes)
+              [] tag = SymbolMappingMessageCode -> DecodeSymbolMappingMessage(bytes)
+              [] tag = EndOfSessionMessageCode -> DecodeEndOfSessionMessage(bytes)
+              [] tag = SoqStrikeRangeUpdateMessageCode -> DecodeSoqStrikeRangeUpdateMessage(bytes)
+              [] tag = ConstituentSymbolMappingMessageCode -> DecodeConstituentSymbolMappingMessage(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroPayload == [tag |-> TimeReferenceMessageCode, body |-> ZeroTimeReferenceMessage]
+
+(* Each Payload in turn, at the values the message it names is checked at *)
+CheckedPayload ==
+    { [tag |-> TimeReferenceMessageCode, body |-> one] : one \in CheckedTimeReferenceMessage }
+        \cup { [tag |-> TimeMessageCode, body |-> one] : one \in CheckedTimeMessage }
+        \cup { [tag |-> OptionsAuctionUpdateMessageCode, body |-> one] : one \in CheckedOptionsAuctionUpdateMessage }
+        \cup { [tag |-> AuctionSummaryMessageCode, body |-> one] : one \in CheckedAuctionSummaryMessage }
+        \cup { [tag |-> WidthUpdateMessageCode, body |-> one] : one \in CheckedWidthUpdateMessage }
+        \cup { [tag |-> SymbolMappingMessageCode, body |-> one] : one \in CheckedSymbolMappingMessage }
+        \cup { [tag |-> EndOfSessionMessageCode, body |-> one] : one \in CheckedEndOfSessionMessage }
+        \cup { [tag |-> SoqStrikeRangeUpdateMessageCode, body |-> one] : one \in CheckedSoqStrikeRangeUpdateMessage }
+        \cup { [tag |-> ConstituentSymbolMappingMessageCode, body |-> one] : one \in CheckedConstituentSymbolMappingMessage }
+
+(***************************************************************************)
+(* Message, framed by Message Length                                       *)
+(***************************************************************************)
+
+Message ==
+    [ payload : Payload ]
+
+EncodeMessageBody(message) ==
+    EncodeUIntLE(message.payload.tag, 1)
+        \o EncodePayload(message.payload)
+
+(* Message Length counts the bytes it frames, so it is written from them *)
+EncodeMessage(message) ==
+    LET body == EncodeMessageBody(message)
+    IN  EncodeUIntLE(Len(body) + 1, 1) \o body
+
+DecodeMessageBody(bytes) ==
+    LET messageType == ReadUIntLE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
+    LET payload == DecodePayload(messageType.value, messageType.rest) IN IF ~payload.ok THEN Fail ELSE
+    Ok([ payload |-> payload.value ], payload.rest)
+
+DecodeMessage(bytes) ==
+    LET length == ReadUIntLE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    LET size == length.value - 1 IN
+    IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, size)
+        beyond == SubSeq(length.rest, size + 1, Len(length.rest))
+        body   == DecodeMessageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroMessage ==
+    [ payload |-> ZeroPayload ]
+
+(* Message at zero, then each field in turn at the values it is checked at *)
+CheckedMessage ==
+    { ZeroMessage }
+        \cup { [ZeroMessage EXCEPT !.payload = one] : one \in CheckedPayload }
+
+(* A run of Message, written one after another *)
+RECURSIVE EncodeMessageList(_)
+EncodeMessageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeMessage(Head(messages)) \o EncodeMessageList(Tail(messages))
+
+(* As many Message as the field that counts them says *)
+RECURSIVE ReadMessageList(_, _)
+ReadMessageList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeMessage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadMessageList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Message of each kind, for the lists that carry them *)
+OneMessage ==
+    { [ZeroMessage EXCEPT !.payload = [tag |-> TimeReferenceMessageCode, body |-> ZeroTimeReferenceMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> TimeMessageCode, body |-> ZeroTimeMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OptionsAuctionUpdateMessageCode, body |-> ZeroOptionsAuctionUpdateMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> AuctionSummaryMessageCode, body |-> ZeroAuctionSummaryMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> WidthUpdateMessageCode, body |-> ZeroWidthUpdateMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> SymbolMappingMessageCode, body |-> ZeroSymbolMappingMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> EndOfSessionMessageCode, body |-> ZeroEndOfSessionMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> SoqStrikeRangeUpdateMessageCode, body |-> ZeroSoqStrikeRangeUpdateMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> ConstituentSymbolMappingMessageCode, body |-> ZeroConstituentSymbolMappingMessage]] }
+
+(***************************************************************************)
+(* Packet                                                                  *)
+(***************************************************************************)
+
+Packet ==
+    [ length   : Sample(2),
+      unit     : Sample(1),
+      sequence : Sample(4),
+      message  : SampleLists(OneMessage) ]
+
+EncodePacket(message) ==
+    message.length
+        \o EncodeUIntLE(Len(message.message), 1)
+        \o message.unit
+        \o message.sequence
+        \o EncodeMessageList(message.message)
+
+DecodePacket(bytes) ==
+    LET length == ReadBytes(bytes, 2) IN IF ~length.ok THEN Fail ELSE
+    LET messageCount == ReadUIntLE(length.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
+    LET unit == ReadBytes(messageCount.rest, 1) IN IF ~unit.ok THEN Fail ELSE
+    LET sequence == ReadBytes(unit.rest, 4) IN IF ~sequence.ok THEN Fail ELSE
+    LET message == ReadMessageList(sequence.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
+    Ok([ length   |-> length.value,
+         unit     |-> unit.value,
+         sequence |-> sequence.value,
+         message  |-> message.value ], message.rest)
+
+ZeroPacket ==
+    [ length   |-> [i \in 1 .. 2 |-> 0],
+      unit     |-> [i \in 1 .. 1 |-> 0],
+      sequence |-> [i \in 1 .. 4 |-> 0],
+      message  |-> << >> ]
+
+(* Packet at zero, then each field in turn at the values it is checked at *)
+CheckedPacket ==
+    { ZeroPacket }
+        \cup { [ZeroPacket EXCEPT !.length = one] : one \in Sample(2) }
+        \cup { [ZeroPacket EXCEPT !.unit = one] : one \in Sample(1) }
+        \cup { [ZeroPacket EXCEPT !.sequence = one] : one \in Sample(4) }
+        \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
+
+(***************************************************************************)
+(* What TLC checks                                                         *)
+(***************************************************************************)
+
+(* An integer a rule depends on writes its width and reads back what was written *)
+RoundTripUIntLE ==
+    \A width \in 1 .. 3 :
+        \A value \in {0, 1, 255, 256, 65535} :
+            (value < 256 ^ width) =>
+                /\ Len(EncodeUIntLE(value, width)) = width
+                /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
+                /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
+
+(* Every Time Reference Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTimeReferenceMessage ==
+    \A message \in CheckedTimeReferenceMessage :
+        LET read == DecodeTimeReferenceMessage(EncodeTimeReferenceMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Time Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTimeMessage ==
+    \A message \in CheckedTimeMessage :
+        LET read == DecodeTimeMessage(EncodeTimeMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Options Auction Update Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOptionsAuctionUpdateMessage ==
+    \A message \in CheckedOptionsAuctionUpdateMessage :
+        LET read == DecodeOptionsAuctionUpdateMessage(EncodeOptionsAuctionUpdateMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Auction Summary Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripAuctionSummaryMessage ==
+    \A message \in CheckedAuctionSummaryMessage :
+        LET read == DecodeAuctionSummaryMessage(EncodeAuctionSummaryMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Width Update Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripWidthUpdateMessage ==
+    \A message \in CheckedWidthUpdateMessage :
+        LET read == DecodeWidthUpdateMessage(EncodeWidthUpdateMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Symbol Mapping Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripSymbolMappingMessage ==
+    \A message \in CheckedSymbolMappingMessage :
+        LET read == DecodeSymbolMappingMessage(EncodeSymbolMappingMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every End Of Session Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripEndOfSessionMessage ==
+    \A message \in CheckedEndOfSessionMessage :
+        LET read == DecodeEndOfSessionMessage(EncodeEndOfSessionMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Soq Strike Range Update Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripSoqStrikeRangeUpdateMessage ==
+    \A message \in CheckedSoqStrikeRangeUpdateMessage :
+        LET read == DecodeSoqStrikeRangeUpdateMessage(EncodeSoqStrikeRangeUpdateMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Constituent Symbol Mapping Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripConstituentSymbolMappingMessage ==
+    \A message \in CheckedConstituentSymbolMappingMessage :
+        LET read == DecodeConstituentSymbolMappingMessage(EncodeConstituentSymbolMappingMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMessage ==
+    \A message \in CheckedMessage :
+        LET read == DecodeMessage(EncodeMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripPacket ==
+    \A message \in CheckedPacket :
+        LET read == DecodePacket(EncodePacket(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* A Payload is selected by the Message Type it is written under *)
+SelectsPayload ==
+    \A message \in CheckedPayload :
+        LET read == DecodePayload(message.tag, EncodePayload(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* Message Length is written from the bytes it frames *)
+FramesMessage ==
+    \A message \in CheckedMessage :
+        LET bytes == EncodeMessage(message)
+        IN  DecodeUIntLE(SubSeq(bytes, 1, 1)) = Len(bytes) - 0
+
+-----------------------------------------------------------------------------
+(* The state the session machine will run over. It stands still until there are *)
+(* transitions to take. *)
+
+VARIABLE parsed
+
+Init == parsed = << >>
+Next == UNCHANGED parsed
+Spec == Init /\ [][Next]_parsed
+
+=============================================================================
