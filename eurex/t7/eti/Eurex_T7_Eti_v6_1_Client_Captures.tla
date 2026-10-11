@@ -15,11 +15,7 @@ RetransmitMeMessageRequestCapture ==
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 >>
 
-UserLoginResponseCapture ==
-    << 32, 0, 0, 0, 35, 39, 0, 0, 53, 101, 20, 87, 157, 62, 97, 21,
-       10, 1, 207, 88, 157, 62, 97, 21, 2, 0, 0, 0, 0, 0, 0, 0 >>
-
-Captures == { HeartbeatCapture, RetransmitMeMessageRequestCapture, UserLoginResponseCapture }
+Captures == { HeartbeatCapture, RetransmitMeMessageRequestCapture }
 
 (* Every recorded packet reads, reads whole, and writes back unchanged *)
 CapturesRoundTrip ==

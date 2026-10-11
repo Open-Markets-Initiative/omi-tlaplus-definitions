@@ -547,27 +547,27 @@ CheckedOrderClearingFieldsGroups ==
 (***************************************************************************)
 
 NotUsedGroups ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeNotUsedGroups(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeNotUsedGroups(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroNotUsedGroups ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNotUsedGroups ==
     { ZeroNotUsedGroups }
-        \cup { [ZeroNotUsedGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroNotUsedGroups EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroNotUsedGroups EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -575,27 +575,27 @@ CheckedNotUsedGroups ==
 (***************************************************************************)
 
 OtherNotUsedGroups ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeOtherNotUsedGroups(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeOtherNotUsedGroups(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroOtherNotUsedGroups ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Other Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedOtherNotUsedGroups ==
     { ZeroOtherNotUsedGroups }
-        \cup { [ZeroOtherNotUsedGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroOtherNotUsedGroups EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroOtherNotUsedGroups EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -2129,27 +2129,27 @@ CheckedCancelReplaceClearingFieldsGroups ==
 (***************************************************************************)
 
 NotUsedGroups2 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeNotUsedGroups2(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeNotUsedGroups2(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroNotUsedGroups2 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNotUsedGroups2 ==
     { ZeroNotUsedGroups2 }
-        \cup { [ZeroNotUsedGroups2 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroNotUsedGroups2 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroNotUsedGroups2 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -2157,27 +2157,27 @@ CheckedNotUsedGroups2 ==
 (***************************************************************************)
 
 OtherNotUsedGroups2 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeOtherNotUsedGroups2(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeOtherNotUsedGroups2(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroOtherNotUsedGroups2 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Other Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedOtherNotUsedGroups2 ==
     { ZeroOtherNotUsedGroups2 }
-        \cup { [ZeroOtherNotUsedGroups2 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroOtherNotUsedGroups2 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroOtherNotUsedGroups2 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -3460,27 +3460,27 @@ CheckedQuoteRequestMessage ==
 (***************************************************************************)
 
 NotUsedGroups3 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeNotUsedGroups3(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeNotUsedGroups3(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroNotUsedGroups3 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNotUsedGroups3 ==
     { ZeroNotUsedGroups3 }
-        \cup { [ZeroNotUsedGroups3 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroNotUsedGroups3 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroNotUsedGroups3 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -3488,27 +3488,27 @@ CheckedNotUsedGroups3 ==
 (***************************************************************************)
 
 OtherNotUsedGroups3 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeOtherNotUsedGroups3(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeOtherNotUsedGroups3(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroOtherNotUsedGroups3 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Other Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedOtherNotUsedGroups3 ==
     { ZeroOtherNotUsedGroups3 }
-        \cup { [ZeroOtherNotUsedGroups3 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroOtherNotUsedGroups3 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroOtherNotUsedGroups3 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -3622,27 +3622,27 @@ CheckedCancelRequestMessage ==
 (***************************************************************************)
 
 NotUsedGroups4 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeNotUsedGroups4(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeNotUsedGroups4(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroNotUsedGroups4 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNotUsedGroups4 ==
     { ZeroNotUsedGroups4 }
-        \cup { [ZeroNotUsedGroups4 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroNotUsedGroups4 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroNotUsedGroups4 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -3650,27 +3650,27 @@ CheckedNotUsedGroups4 ==
 (***************************************************************************)
 
 OtherNotUsedGroups4 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeOtherNotUsedGroups4(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeOtherNotUsedGroups4(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroOtherNotUsedGroups4 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Other Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedOtherNotUsedGroups4 ==
     { ZeroOtherNotUsedGroups4 }
-        \cup { [ZeroOtherNotUsedGroups4 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroOtherNotUsedGroups4 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroOtherNotUsedGroups4 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -5031,27 +5031,27 @@ CheckedRfqlpMatchingStatusMessage ==
 (***************************************************************************)
 
 NotUsedGroups5 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeNotUsedGroups5(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeNotUsedGroups5(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroNotUsedGroups5 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNotUsedGroups5 ==
     { ZeroNotUsedGroups5 }
-        \cup { [ZeroNotUsedGroups5 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroNotUsedGroups5 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroNotUsedGroups5 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -8084,27 +8084,27 @@ CheckedTechnicalRejectMessage ==
 (***************************************************************************)
 
 NotUsedGroups6 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeNotUsedGroups6(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeNotUsedGroups6(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroNotUsedGroups6 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNotUsedGroups6 ==
     { ZeroNotUsedGroups6 }
-        \cup { [ZeroNotUsedGroups6 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroNotUsedGroups6 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroNotUsedGroups6 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -8350,27 +8350,27 @@ CheckedDeclarationEntryMessage ==
 (***************************************************************************)
 
 NotUsedGroups7 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeNotUsedGroups7(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeNotUsedGroups7(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroNotUsedGroups7 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNotUsedGroups7 ==
     { ZeroNotUsedGroups7 }
-        \cup { [ZeroNotUsedGroups7 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroNotUsedGroups7 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroNotUsedGroups7 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -8460,27 +8460,27 @@ CheckedDeclarationEntryAckMessage ==
 (***************************************************************************)
 
 NotUsedGroups8 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeNotUsedGroups8(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeNotUsedGroups8(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroNotUsedGroups8 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNotUsedGroups8 ==
     { ZeroNotUsedGroups8 }
-        \cup { [ZeroNotUsedGroups8 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroNotUsedGroups8 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroNotUsedGroups8 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -8488,27 +8488,27 @@ CheckedNotUsedGroups8 ==
 (***************************************************************************)
 
 OtherNotUsedGroups5 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeOtherNotUsedGroups5(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeOtherNotUsedGroups5(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroOtherNotUsedGroups5 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Other Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedOtherNotUsedGroups5 ==
     { ZeroOtherNotUsedGroups5 }
-        \cup { [ZeroOtherNotUsedGroups5 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroOtherNotUsedGroups5 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroOtherNotUsedGroups5 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)
@@ -8970,27 +8970,27 @@ CheckedFundPriceInputAckMessage ==
 (***************************************************************************)
 
 NotUsedGroups9 ==
-    [ blockLengthShort : Sample(1),
+    [ blockLengthShort : 0 .. 255,
       numInGroup       : 0 .. 255 ]
 
 EncodeNotUsedGroups9(message) ==
-    message.blockLengthShort
+    EncodeUIntBE(message.blockLengthShort, 1)
         \o EncodeUIntBE(message.numInGroup, 1)
 
 DecodeNotUsedGroups9(bytes) ==
-    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET blockLengthShort == ReadUIntBE(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
     Ok([ blockLengthShort |-> blockLengthShort.value,
          numInGroup       |-> numInGroup.value ], numInGroup.rest)
 
 ZeroNotUsedGroups9 ==
-    [ blockLengthShort |-> [i \in 1 .. 1 |-> 0],
+    [ blockLengthShort |-> 0,
       numInGroup       |-> 0 ]
 
 (* Not Used Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNotUsedGroups9 ==
     { ZeroNotUsedGroups9 }
-        \cup { [ZeroNotUsedGroups9 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroNotUsedGroups9 EXCEPT !.blockLengthShort = one] : one \in {0, 1, 255} }
         \cup { [ZeroNotUsedGroups9 EXCEPT !.numInGroup = one] : one \in {0, 1, 255} }
 
 (***************************************************************************)

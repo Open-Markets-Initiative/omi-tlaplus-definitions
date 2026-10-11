@@ -305,915 +305,6 @@ CheckedStreamCompleteMessage ==
         \cup { [ZeroStreamCompleteMessage EXCEPT !.totalSequenceCount = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Risk Settings Query Message: 20 bytes                                   *)
-(***************************************************************************)
-
-RiskSettingsQueryMessage ==
-    [ clordid : Sample(20) ]
-
-EncodeRiskSettingsQueryMessage(message) ==
-    message.clordid
-
-DecodeRiskSettingsQueryMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    Ok([ clordid |-> clordid.value ], clordid.rest)
-
-ZeroRiskSettingsQueryMessage ==
-    [ clordid |-> [i \in 1 .. 20 |-> 0] ]
-
-(* Risk Settings Query Message at zero, then each field in turn at the values it is checked at *)
-CheckedRiskSettingsQueryMessage ==
-    { ZeroRiskSettingsQueryMessage }
-        \cup { [ZeroRiskSettingsQueryMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-
-(***************************************************************************)
-(* Active Risk Threshold Change Req Message: 34 bytes                      *)
-(***************************************************************************)
-
-ActiveRiskThresholdChangeReqMessage ==
-    [ clordid                                        : Sample(20),
-      underlierActiveRiskThresholdChangeReqUnderlier : Sample(6),
-      efidActiveRiskThresholdChangeReqEfid           : Sample(4),
-      thresholdQuantity                              : Sample(4) ]
-
-EncodeActiveRiskThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierActiveRiskThresholdChangeReqUnderlier
-        \o message.efidActiveRiskThresholdChangeReqEfid
-        \o message.thresholdQuantity
-
-DecodeActiveRiskThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierActiveRiskThresholdChangeReqUnderlier == ReadBytes(clordid.rest, 6) IN IF ~underlierActiveRiskThresholdChangeReqUnderlier.ok THEN Fail ELSE
-    LET efidActiveRiskThresholdChangeReqEfid == ReadBytes(underlierActiveRiskThresholdChangeReqUnderlier.rest, 4) IN IF ~efidActiveRiskThresholdChangeReqEfid.ok THEN Fail ELSE
-    LET thresholdQuantity == ReadBytes(efidActiveRiskThresholdChangeReqEfid.rest, 4) IN IF ~thresholdQuantity.ok THEN Fail ELSE
-    Ok([ clordid                                        |-> clordid.value,
-         underlierActiveRiskThresholdChangeReqUnderlier |-> underlierActiveRiskThresholdChangeReqUnderlier.value,
-         efidActiveRiskThresholdChangeReqEfid           |-> efidActiveRiskThresholdChangeReqEfid.value,
-         thresholdQuantity                              |-> thresholdQuantity.value ], thresholdQuantity.rest)
-
-ZeroActiveRiskThresholdChangeReqMessage ==
-    [ clordid                                        |-> [i \in 1 .. 20 |-> 0],
-      underlierActiveRiskThresholdChangeReqUnderlier |-> [i \in 1 .. 6 |-> 0],
-      efidActiveRiskThresholdChangeReqEfid           |-> [i \in 1 .. 4 |-> 0],
-      thresholdQuantity                              |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Active Risk Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedActiveRiskThresholdChangeReqMessage ==
-    { ZeroActiveRiskThresholdChangeReqMessage }
-        \cup { [ZeroActiveRiskThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroActiveRiskThresholdChangeReqMessage EXCEPT !.underlierActiveRiskThresholdChangeReqUnderlier = one] : one \in Sample(6) }
-        \cup { [ZeroActiveRiskThresholdChangeReqMessage EXCEPT !.efidActiveRiskThresholdChangeReqEfid = one] : one \in Sample(4) }
-        \cup { [ZeroActiveRiskThresholdChangeReqMessage EXCEPT !.thresholdQuantity = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Active Risk Acknowledgement Req Message: 34 bytes                       *)
-(***************************************************************************)
-
-ActiveRiskAcknowledgementReqMessage ==
-    [ clordid   : Sample(20),
-      underlier : Sample(6),
-      efid      : Sample(4),
-      quantity  : Sample(4) ]
-
-EncodeActiveRiskAcknowledgementReqMessage(message) ==
-    message.clordid
-        \o message.underlier
-        \o message.efid
-        \o message.quantity
-
-DecodeActiveRiskAcknowledgementReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlier == ReadBytes(clordid.rest, 6) IN IF ~underlier.ok THEN Fail ELSE
-    LET efid == ReadBytes(underlier.rest, 4) IN IF ~efid.ok THEN Fail ELSE
-    LET quantity == ReadBytes(efid.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
-    Ok([ clordid   |-> clordid.value,
-         underlier |-> underlier.value,
-         efid      |-> efid.value,
-         quantity  |-> quantity.value ], quantity.rest)
-
-ZeroActiveRiskAcknowledgementReqMessage ==
-    [ clordid   |-> [i \in 1 .. 20 |-> 0],
-      underlier |-> [i \in 1 .. 6 |-> 0],
-      efid      |-> [i \in 1 .. 4 |-> 0],
-      quantity  |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Active Risk Acknowledgement Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedActiveRiskAcknowledgementReqMessage ==
-    { ZeroActiveRiskAcknowledgementReqMessage }
-        \cup { [ZeroActiveRiskAcknowledgementReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroActiveRiskAcknowledgementReqMessage EXCEPT !.underlier = one] : one \in Sample(6) }
-        \cup { [ZeroActiveRiskAcknowledgementReqMessage EXCEPT !.efid = one] : one \in Sample(4) }
-        \cup { [ZeroActiveRiskAcknowledgementReqMessage EXCEPT !.quantity = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Volume Threshold Change Req Message: 44 bytes                        *)
-(***************************************************************************)
-
-CpVolumeThresholdChangeReqMessage ==
-    [ clordid              : Sample(20),
-      underlierOptional    : Sample(6),
-      efidOptional         : Sample(4),
-      riskGroupId          : Sample(2),
-      volume               : Sample(8),
-      periodInMilliSeconds : Sample(4) ]
-
-EncodeCpVolumeThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.volume
-        \o message.periodInMilliSeconds
-
-DecodeCpVolumeThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET volume == ReadBytes(riskGroupId.rest, 8) IN IF ~volume.ok THEN Fail ELSE
-    LET periodInMilliSeconds == ReadBytes(volume.rest, 4) IN IF ~periodInMilliSeconds.ok THEN Fail ELSE
-    Ok([ clordid              |-> clordid.value,
-         underlierOptional    |-> underlierOptional.value,
-         efidOptional         |-> efidOptional.value,
-         riskGroupId          |-> riskGroupId.value,
-         volume               |-> volume.value,
-         periodInMilliSeconds |-> periodInMilliSeconds.value ], periodInMilliSeconds.rest)
-
-ZeroCpVolumeThresholdChangeReqMessage ==
-    [ clordid              |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional    |-> [i \in 1 .. 6 |-> 0],
-      efidOptional         |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId          |-> [i \in 1 .. 2 |-> 0],
-      volume               |-> [i \in 1 .. 8 |-> 0],
-      periodInMilliSeconds |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Volume Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpVolumeThresholdChangeReqMessage ==
-    { ZeroCpVolumeThresholdChangeReqMessage }
-        \cup { [ZeroCpVolumeThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpVolumeThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpVolumeThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpVolumeThresholdChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroCpVolumeThresholdChangeReqMessage EXCEPT !.volume = one] : one \in Sample(8) }
-        \cup { [ZeroCpVolumeThresholdChangeReqMessage EXCEPT !.periodInMilliSeconds = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Executed Notional Threshold Change Req Message: 40 bytes             *)
-(***************************************************************************)
-
-CpExecutedNotionalThresholdChangeReqMessage ==
-    [ clordid              : Sample(20),
-      underlierOptional    : Sample(6),
-      efidOptional         : Sample(4),
-      riskGroupId          : Sample(2),
-      priceInDollars       : Sample(4),
-      periodInMilliSeconds : Sample(4) ]
-
-EncodeCpExecutedNotionalThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.priceInDollars
-        \o message.periodInMilliSeconds
-
-DecodeCpExecutedNotionalThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET priceInDollars == ReadBytes(riskGroupId.rest, 4) IN IF ~priceInDollars.ok THEN Fail ELSE
-    LET periodInMilliSeconds == ReadBytes(priceInDollars.rest, 4) IN IF ~periodInMilliSeconds.ok THEN Fail ELSE
-    Ok([ clordid              |-> clordid.value,
-         underlierOptional    |-> underlierOptional.value,
-         efidOptional         |-> efidOptional.value,
-         riskGroupId          |-> riskGroupId.value,
-         priceInDollars       |-> priceInDollars.value,
-         periodInMilliSeconds |-> periodInMilliSeconds.value ], periodInMilliSeconds.rest)
-
-ZeroCpExecutedNotionalThresholdChangeReqMessage ==
-    [ clordid              |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional    |-> [i \in 1 .. 6 |-> 0],
-      efidOptional         |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId          |-> [i \in 1 .. 2 |-> 0],
-      priceInDollars       |-> [i \in 1 .. 4 |-> 0],
-      periodInMilliSeconds |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Executed Notional Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpExecutedNotionalThresholdChangeReqMessage ==
-    { ZeroCpExecutedNotionalThresholdChangeReqMessage }
-        \cup { [ZeroCpExecutedNotionalThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpExecutedNotionalThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpExecutedNotionalThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpExecutedNotionalThresholdChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroCpExecutedNotionalThresholdChangeReqMessage EXCEPT !.priceInDollars = one] : one \in Sample(4) }
-        \cup { [ZeroCpExecutedNotionalThresholdChangeReqMessage EXCEPT !.periodInMilliSeconds = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Total Executions Threshold Change Req Message: 40 bytes              *)
-(***************************************************************************)
-
-CpTotalExecutionsThresholdChangeReqMessage ==
-    [ clordid              : Sample(20),
-      underlierOptional    : Sample(6),
-      efidOptional         : Sample(4),
-      riskGroupId          : Sample(2),
-      totalExecutions      : Sample(4),
-      periodInMilliSeconds : Sample(4) ]
-
-EncodeCpTotalExecutionsThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.totalExecutions
-        \o message.periodInMilliSeconds
-
-DecodeCpTotalExecutionsThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET totalExecutions == ReadBytes(riskGroupId.rest, 4) IN IF ~totalExecutions.ok THEN Fail ELSE
-    LET periodInMilliSeconds == ReadBytes(totalExecutions.rest, 4) IN IF ~periodInMilliSeconds.ok THEN Fail ELSE
-    Ok([ clordid              |-> clordid.value,
-         underlierOptional    |-> underlierOptional.value,
-         efidOptional         |-> efidOptional.value,
-         riskGroupId          |-> riskGroupId.value,
-         totalExecutions      |-> totalExecutions.value,
-         periodInMilliSeconds |-> periodInMilliSeconds.value ], periodInMilliSeconds.rest)
-
-ZeroCpTotalExecutionsThresholdChangeReqMessage ==
-    [ clordid              |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional    |-> [i \in 1 .. 6 |-> 0],
-      efidOptional         |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId          |-> [i \in 1 .. 2 |-> 0],
-      totalExecutions      |-> [i \in 1 .. 4 |-> 0],
-      periodInMilliSeconds |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Total Executions Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpTotalExecutionsThresholdChangeReqMessage ==
-    { ZeroCpTotalExecutionsThresholdChangeReqMessage }
-        \cup { [ZeroCpTotalExecutionsThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpTotalExecutionsThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpTotalExecutionsThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpTotalExecutionsThresholdChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroCpTotalExecutionsThresholdChangeReqMessage EXCEPT !.totalExecutions = one] : one \in Sample(4) }
-        \cup { [ZeroCpTotalExecutionsThresholdChangeReqMessage EXCEPT !.periodInMilliSeconds = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Percent Outstanding Contracts Threshold Change Req Message: 38 bytes *)
-(***************************************************************************)
-
-CpPercentOutstandingContractsThresholdChangeReqMessage ==
-    [ clordid              : Sample(20),
-      underlierOptional    : Sample(6),
-      efidOptional         : Sample(4),
-      percent              : Sample(4),
-      periodInMilliSeconds : Sample(4) ]
-
-EncodeCpPercentOutstandingContractsThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.percent
-        \o message.periodInMilliSeconds
-
-DecodeCpPercentOutstandingContractsThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET percent == ReadBytes(efidOptional.rest, 4) IN IF ~percent.ok THEN Fail ELSE
-    LET periodInMilliSeconds == ReadBytes(percent.rest, 4) IN IF ~periodInMilliSeconds.ok THEN Fail ELSE
-    Ok([ clordid              |-> clordid.value,
-         underlierOptional    |-> underlierOptional.value,
-         efidOptional         |-> efidOptional.value,
-         percent              |-> percent.value,
-         periodInMilliSeconds |-> periodInMilliSeconds.value ], periodInMilliSeconds.rest)
-
-ZeroCpPercentOutstandingContractsThresholdChangeReqMessage ==
-    [ clordid              |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional    |-> [i \in 1 .. 6 |-> 0],
-      efidOptional         |-> [i \in 1 .. 4 |-> 0],
-      percent              |-> [i \in 1 .. 4 |-> 0],
-      periodInMilliSeconds |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Percent Outstanding Contracts Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpPercentOutstandingContractsThresholdChangeReqMessage ==
-    { ZeroCpPercentOutstandingContractsThresholdChangeReqMessage }
-        \cup { [ZeroCpPercentOutstandingContractsThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpPercentOutstandingContractsThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpPercentOutstandingContractsThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpPercentOutstandingContractsThresholdChangeReqMessage EXCEPT !.percent = one] : one \in Sample(4) }
-        \cup { [ZeroCpPercentOutstandingContractsThresholdChangeReqMessage EXCEPT !.periodInMilliSeconds = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Breach Count Threshold Change Req Message: 40 bytes                  *)
-(***************************************************************************)
-
-CpBreachCountThresholdChangeReqMessage ==
-    [ clordid              : Sample(20),
-      underlierOptional    : Sample(6),
-      efidOptional         : Sample(4),
-      riskGroupId          : Sample(2),
-      count                : Sample(4),
-      periodInMilliSeconds : Sample(4) ]
-
-EncodeCpBreachCountThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.count
-        \o message.periodInMilliSeconds
-
-DecodeCpBreachCountThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET count == ReadBytes(riskGroupId.rest, 4) IN IF ~count.ok THEN Fail ELSE
-    LET periodInMilliSeconds == ReadBytes(count.rest, 4) IN IF ~periodInMilliSeconds.ok THEN Fail ELSE
-    Ok([ clordid              |-> clordid.value,
-         underlierOptional    |-> underlierOptional.value,
-         efidOptional         |-> efidOptional.value,
-         riskGroupId          |-> riskGroupId.value,
-         count                |-> count.value,
-         periodInMilliSeconds |-> periodInMilliSeconds.value ], periodInMilliSeconds.rest)
-
-ZeroCpBreachCountThresholdChangeReqMessage ==
-    [ clordid              |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional    |-> [i \in 1 .. 6 |-> 0],
-      efidOptional         |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId          |-> [i \in 1 .. 2 |-> 0],
-      count                |-> [i \in 1 .. 4 |-> 0],
-      periodInMilliSeconds |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Breach Count Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpBreachCountThresholdChangeReqMessage ==
-    { ZeroCpBreachCountThresholdChangeReqMessage }
-        \cup { [ZeroCpBreachCountThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpBreachCountThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpBreachCountThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpBreachCountThresholdChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroCpBreachCountThresholdChangeReqMessage EXCEPT !.count = one] : one \in Sample(4) }
-        \cup { [ZeroCpBreachCountThresholdChangeReqMessage EXCEPT !.periodInMilliSeconds = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Manual Cp Breach Trigger Req Message: 33 bytes                          *)
-(***************************************************************************)
-
-ManualCpBreachTriggerReqMessage ==
-    [ clordid           : Sample(20),
-      underlierOptional : Sample(6),
-      efidOptional      : Sample(4),
-      riskGroupId       : Sample(2),
-      sendCancels       : Sample(1) ]
-
-EncodeManualCpBreachTriggerReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.sendCancels
-
-DecodeManualCpBreachTriggerReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET sendCancels == ReadBytes(riskGroupId.rest, 1) IN IF ~sendCancels.ok THEN Fail ELSE
-    Ok([ clordid           |-> clordid.value,
-         underlierOptional |-> underlierOptional.value,
-         efidOptional      |-> efidOptional.value,
-         riskGroupId       |-> riskGroupId.value,
-         sendCancels       |-> sendCancels.value ], sendCancels.rest)
-
-ZeroManualCpBreachTriggerReqMessage ==
-    [ clordid           |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidOptional      |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId       |-> [i \in 1 .. 2 |-> 0],
-      sendCancels       |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Manual Cp Breach Trigger Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedManualCpBreachTriggerReqMessage ==
-    { ZeroManualCpBreachTriggerReqMessage }
-        \cup { [ZeroManualCpBreachTriggerReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroManualCpBreachTriggerReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroManualCpBreachTriggerReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroManualCpBreachTriggerReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroManualCpBreachTriggerReqMessage EXCEPT !.sendCancels = one] : one \in Sample(1) }
-
-(***************************************************************************)
-(* Cp Clear Breach Req Message: 28 bytes                                   *)
-(***************************************************************************)
-
-CpClearBreachReqMessage ==
-    [ clordid  : Sample(20),
-      breachId : Sample(8) ]
-
-EncodeCpClearBreachReqMessage(message) ==
-    message.clordid
-        \o message.breachId
-
-DecodeCpClearBreachReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET breachId == ReadBytes(clordid.rest, 8) IN IF ~breachId.ok THEN Fail ELSE
-    Ok([ clordid  |-> clordid.value,
-         breachId |-> breachId.value ], breachId.rest)
-
-ZeroCpClearBreachReqMessage ==
-    [ clordid  |-> [i \in 1 .. 20 |-> 0],
-      breachId |-> [i \in 1 .. 8 |-> 0] ]
-
-(* Cp Clear Breach Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpClearBreachReqMessage ==
-    { ZeroCpClearBreachReqMessage }
-        \cup { [ZeroCpClearBreachReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpClearBreachReqMessage EXCEPT !.breachId = one] : one \in Sample(8) }
-
-(***************************************************************************)
-(* Single Order Allow Iso Orders Change Req Message: 33 bytes              *)
-(***************************************************************************)
-
-SingleOrderAllowIsoOrdersChangeReqMessage ==
-    [ clordid           : Sample(20),
-      underlierOptional : Sample(6),
-      efidOptional      : Sample(4),
-      riskGroupId       : Sample(2),
-      allowIsoOrders    : Sample(1) ]
-
-EncodeSingleOrderAllowIsoOrdersChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.allowIsoOrders
-
-DecodeSingleOrderAllowIsoOrdersChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET allowIsoOrders == ReadBytes(riskGroupId.rest, 1) IN IF ~allowIsoOrders.ok THEN Fail ELSE
-    Ok([ clordid           |-> clordid.value,
-         underlierOptional |-> underlierOptional.value,
-         efidOptional      |-> efidOptional.value,
-         riskGroupId       |-> riskGroupId.value,
-         allowIsoOrders    |-> allowIsoOrders.value ], allowIsoOrders.rest)
-
-ZeroSingleOrderAllowIsoOrdersChangeReqMessage ==
-    [ clordid           |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidOptional      |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId       |-> [i \in 1 .. 2 |-> 0],
-      allowIsoOrders    |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Single Order Allow Iso Orders Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedSingleOrderAllowIsoOrdersChangeReqMessage ==
-    { ZeroSingleOrderAllowIsoOrdersChangeReqMessage }
-        \cup { [ZeroSingleOrderAllowIsoOrdersChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroSingleOrderAllowIsoOrdersChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroSingleOrderAllowIsoOrdersChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroSingleOrderAllowIsoOrdersChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroSingleOrderAllowIsoOrdersChangeReqMessage EXCEPT !.allowIsoOrders = one] : one \in Sample(1) }
-
-(***************************************************************************)
-(* Single Order Allow Orders In Crossed Market Change Req Message: 33      *)
-(* bytes                                                                   *)
-(***************************************************************************)
-
-SingleOrderAllowOrdersInCrossedMarketChangeReqMessage ==
-    [ clordid           : Sample(20),
-      underlierOptional : Sample(6),
-      efidOptional      : Sample(4),
-      riskGroupId       : Sample(2),
-      allowOrders       : Sample(1) ]
-
-EncodeSingleOrderAllowOrdersInCrossedMarketChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.allowOrders
-
-DecodeSingleOrderAllowOrdersInCrossedMarketChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET allowOrders == ReadBytes(riskGroupId.rest, 1) IN IF ~allowOrders.ok THEN Fail ELSE
-    Ok([ clordid           |-> clordid.value,
-         underlierOptional |-> underlierOptional.value,
-         efidOptional      |-> efidOptional.value,
-         riskGroupId       |-> riskGroupId.value,
-         allowOrders       |-> allowOrders.value ], allowOrders.rest)
-
-ZeroSingleOrderAllowOrdersInCrossedMarketChangeReqMessage ==
-    [ clordid           |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidOptional      |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId       |-> [i \in 1 .. 2 |-> 0],
-      allowOrders       |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Single Order Allow Orders In Crossed Market Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedSingleOrderAllowOrdersInCrossedMarketChangeReqMessage ==
-    { ZeroSingleOrderAllowOrdersInCrossedMarketChangeReqMessage }
-        \cup { [ZeroSingleOrderAllowOrdersInCrossedMarketChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroSingleOrderAllowOrdersInCrossedMarketChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroSingleOrderAllowOrdersInCrossedMarketChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroSingleOrderAllowOrdersInCrossedMarketChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroSingleOrderAllowOrdersInCrossedMarketChangeReqMessage EXCEPT !.allowOrders = one] : one \in Sample(1) }
-
-(***************************************************************************)
-(* Single Order Max Notional Change Req Message: 36 bytes                  *)
-(***************************************************************************)
-
-SingleOrderMaxNotionalChangeReqMessage ==
-    [ clordid              : Sample(20),
-      underlierOptional    : Sample(6),
-      efidOptional         : Sample(4),
-      riskGroupId          : Sample(2),
-      maxNotionalInDollars : Sample(4) ]
-
-EncodeSingleOrderMaxNotionalChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.maxNotionalInDollars
-
-DecodeSingleOrderMaxNotionalChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET maxNotionalInDollars == ReadBytes(riskGroupId.rest, 4) IN IF ~maxNotionalInDollars.ok THEN Fail ELSE
-    Ok([ clordid              |-> clordid.value,
-         underlierOptional    |-> underlierOptional.value,
-         efidOptional         |-> efidOptional.value,
-         riskGroupId          |-> riskGroupId.value,
-         maxNotionalInDollars |-> maxNotionalInDollars.value ], maxNotionalInDollars.rest)
-
-ZeroSingleOrderMaxNotionalChangeReqMessage ==
-    [ clordid              |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional    |-> [i \in 1 .. 6 |-> 0],
-      efidOptional         |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId          |-> [i \in 1 .. 2 |-> 0],
-      maxNotionalInDollars |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Single Order Max Notional Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedSingleOrderMaxNotionalChangeReqMessage ==
-    { ZeroSingleOrderMaxNotionalChangeReqMessage }
-        \cup { [ZeroSingleOrderMaxNotionalChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroSingleOrderMaxNotionalChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroSingleOrderMaxNotionalChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroSingleOrderMaxNotionalChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroSingleOrderMaxNotionalChangeReqMessage EXCEPT !.maxNotionalInDollars = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Single Order Max Contracts Change Req Message: 36 bytes                 *)
-(***************************************************************************)
-
-SingleOrderMaxContractsChangeReqMessage ==
-    [ clordid           : Sample(20),
-      underlierOptional : Sample(6),
-      efidOptional      : Sample(4),
-      riskGroupId       : Sample(2),
-      maxContracts      : Sample(4) ]
-
-EncodeSingleOrderMaxContractsChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.maxContracts
-
-DecodeSingleOrderMaxContractsChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET maxContracts == ReadBytes(riskGroupId.rest, 4) IN IF ~maxContracts.ok THEN Fail ELSE
-    Ok([ clordid           |-> clordid.value,
-         underlierOptional |-> underlierOptional.value,
-         efidOptional      |-> efidOptional.value,
-         riskGroupId       |-> riskGroupId.value,
-         maxContracts      |-> maxContracts.value ], maxContracts.rest)
-
-ZeroSingleOrderMaxContractsChangeReqMessage ==
-    [ clordid           |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidOptional      |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId       |-> [i \in 1 .. 2 |-> 0],
-      maxContracts      |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Single Order Max Contracts Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedSingleOrderMaxContractsChangeReqMessage ==
-    { ZeroSingleOrderMaxContractsChangeReqMessage }
-        \cup { [ZeroSingleOrderMaxContractsChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroSingleOrderMaxContractsChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroSingleOrderMaxContractsChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroSingleOrderMaxContractsChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroSingleOrderMaxContractsChangeReqMessage EXCEPT !.maxContracts = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Gross Notional Threshold Change Req Message: 36 bytes                *)
-(***************************************************************************)
-
-CpGrossNotionalThresholdChangeReqMessage ==
-    [ clordid           : Sample(20),
-      underlierOptional : Sample(6),
-      efidOptional      : Sample(4),
-      riskGroupId       : Sample(2),
-      priceInDollars    : Sample(4) ]
-
-EncodeCpGrossNotionalThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.priceInDollars
-
-DecodeCpGrossNotionalThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET priceInDollars == ReadBytes(riskGroupId.rest, 4) IN IF ~priceInDollars.ok THEN Fail ELSE
-    Ok([ clordid           |-> clordid.value,
-         underlierOptional |-> underlierOptional.value,
-         efidOptional      |-> efidOptional.value,
-         riskGroupId       |-> riskGroupId.value,
-         priceInDollars    |-> priceInDollars.value ], priceInDollars.rest)
-
-ZeroCpGrossNotionalThresholdChangeReqMessage ==
-    [ clordid           |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidOptional      |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId       |-> [i \in 1 .. 2 |-> 0],
-      priceInDollars    |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Gross Notional Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpGrossNotionalThresholdChangeReqMessage ==
-    { ZeroCpGrossNotionalThresholdChangeReqMessage }
-        \cup { [ZeroCpGrossNotionalThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpGrossNotionalThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpGrossNotionalThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpGrossNotionalThresholdChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroCpGrossNotionalThresholdChangeReqMessage EXCEPT !.priceInDollars = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Market Order Gross Notional Threshold Change Req Message: 36 bytes   *)
-(***************************************************************************)
-
-CpMarketOrderGrossNotionalThresholdChangeReqMessage ==
-    [ clordid           : Sample(20),
-      underlierOptional : Sample(6),
-      efidOptional      : Sample(4),
-      riskGroupId       : Sample(2),
-      priceInDollars    : Sample(4) ]
-
-EncodeCpMarketOrderGrossNotionalThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.priceInDollars
-
-DecodeCpMarketOrderGrossNotionalThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET priceInDollars == ReadBytes(riskGroupId.rest, 4) IN IF ~priceInDollars.ok THEN Fail ELSE
-    Ok([ clordid           |-> clordid.value,
-         underlierOptional |-> underlierOptional.value,
-         efidOptional      |-> efidOptional.value,
-         riskGroupId       |-> riskGroupId.value,
-         priceInDollars    |-> priceInDollars.value ], priceInDollars.rest)
-
-ZeroCpMarketOrderGrossNotionalThresholdChangeReqMessage ==
-    [ clordid           |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidOptional      |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId       |-> [i \in 1 .. 2 |-> 0],
-      priceInDollars    |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Market Order Gross Notional Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpMarketOrderGrossNotionalThresholdChangeReqMessage ==
-    { ZeroCpMarketOrderGrossNotionalThresholdChangeReqMessage }
-        \cup { [ZeroCpMarketOrderGrossNotionalThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpMarketOrderGrossNotionalThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpMarketOrderGrossNotionalThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpMarketOrderGrossNotionalThresholdChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroCpMarketOrderGrossNotionalThresholdChangeReqMessage EXCEPT !.priceInDollars = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Net Notional Threshold Change Req Message: 36 bytes                  *)
-(***************************************************************************)
-
-CpNetNotionalThresholdChangeReqMessage ==
-    [ clordid           : Sample(20),
-      underlierOptional : Sample(6),
-      efidOptional      : Sample(4),
-      riskGroupId       : Sample(2),
-      priceInDollars    : Sample(4) ]
-
-EncodeCpNetNotionalThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.priceInDollars
-
-DecodeCpNetNotionalThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET priceInDollars == ReadBytes(riskGroupId.rest, 4) IN IF ~priceInDollars.ok THEN Fail ELSE
-    Ok([ clordid           |-> clordid.value,
-         underlierOptional |-> underlierOptional.value,
-         efidOptional      |-> efidOptional.value,
-         riskGroupId       |-> riskGroupId.value,
-         priceInDollars    |-> priceInDollars.value ], priceInDollars.rest)
-
-ZeroCpNetNotionalThresholdChangeReqMessage ==
-    [ clordid           |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidOptional      |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId       |-> [i \in 1 .. 2 |-> 0],
-      priceInDollars    |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Net Notional Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpNetNotionalThresholdChangeReqMessage ==
-    { ZeroCpNetNotionalThresholdChangeReqMessage }
-        \cup { [ZeroCpNetNotionalThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpNetNotionalThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpNetNotionalThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpNetNotionalThresholdChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroCpNetNotionalThresholdChangeReqMessage EXCEPT !.priceInDollars = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Market Order Net Notional Threshold Change Req Message: 36 bytes     *)
-(***************************************************************************)
-
-CpMarketOrderNetNotionalThresholdChangeReqMessage ==
-    [ clordid           : Sample(20),
-      underlierOptional : Sample(6),
-      efidOptional      : Sample(4),
-      riskGroupId       : Sample(2),
-      priceInDollars    : Sample(4) ]
-
-EncodeCpMarketOrderNetNotionalThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.priceInDollars
-
-DecodeCpMarketOrderNetNotionalThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET priceInDollars == ReadBytes(riskGroupId.rest, 4) IN IF ~priceInDollars.ok THEN Fail ELSE
-    Ok([ clordid           |-> clordid.value,
-         underlierOptional |-> underlierOptional.value,
-         efidOptional      |-> efidOptional.value,
-         riskGroupId       |-> riskGroupId.value,
-         priceInDollars    |-> priceInDollars.value ], priceInDollars.rest)
-
-ZeroCpMarketOrderNetNotionalThresholdChangeReqMessage ==
-    [ clordid           |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidOptional      |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId       |-> [i \in 1 .. 2 |-> 0],
-      priceInDollars    |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Market Order Net Notional Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpMarketOrderNetNotionalThresholdChangeReqMessage ==
-    { ZeroCpMarketOrderNetNotionalThresholdChangeReqMessage }
-        \cup { [ZeroCpMarketOrderNetNotionalThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpMarketOrderNetNotionalThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpMarketOrderNetNotionalThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpMarketOrderNetNotionalThresholdChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroCpMarketOrderNetNotionalThresholdChangeReqMessage EXCEPT !.priceInDollars = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Duplicate Order Threshold Change Req Message: 41 bytes               *)
-(***************************************************************************)
-
-CpDuplicateOrderThresholdChangeReqMessage ==
-    [ clordid                         : Sample(20),
-      underlierOptional               : Sample(6),
-      efidOptional                    : Sample(4),
-      riskGroupId                     : Sample(2),
-      maxDupOrders                    : Sample(4),
-      useOrderPriceInDupCheckOptional : Sample(1),
-      periodInMilliSeconds            : Sample(4) ]
-
-EncodeCpDuplicateOrderThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.maxDupOrders
-        \o message.useOrderPriceInDupCheckOptional
-        \o message.periodInMilliSeconds
-
-DecodeCpDuplicateOrderThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET maxDupOrders == ReadBytes(riskGroupId.rest, 4) IN IF ~maxDupOrders.ok THEN Fail ELSE
-    LET useOrderPriceInDupCheckOptional == ReadBytes(maxDupOrders.rest, 1) IN IF ~useOrderPriceInDupCheckOptional.ok THEN Fail ELSE
-    LET periodInMilliSeconds == ReadBytes(useOrderPriceInDupCheckOptional.rest, 4) IN IF ~periodInMilliSeconds.ok THEN Fail ELSE
-    Ok([ clordid                         |-> clordid.value,
-         underlierOptional               |-> underlierOptional.value,
-         efidOptional                    |-> efidOptional.value,
-         riskGroupId                     |-> riskGroupId.value,
-         maxDupOrders                    |-> maxDupOrders.value,
-         useOrderPriceInDupCheckOptional |-> useOrderPriceInDupCheckOptional.value,
-         periodInMilliSeconds            |-> periodInMilliSeconds.value ], periodInMilliSeconds.rest)
-
-ZeroCpDuplicateOrderThresholdChangeReqMessage ==
-    [ clordid                         |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional               |-> [i \in 1 .. 6 |-> 0],
-      efidOptional                    |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId                     |-> [i \in 1 .. 2 |-> 0],
-      maxDupOrders                    |-> [i \in 1 .. 4 |-> 0],
-      useOrderPriceInDupCheckOptional |-> [i \in 1 .. 1 |-> 0],
-      periodInMilliSeconds            |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Duplicate Order Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpDuplicateOrderThresholdChangeReqMessage ==
-    { ZeroCpDuplicateOrderThresholdChangeReqMessage }
-        \cup { [ZeroCpDuplicateOrderThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpDuplicateOrderThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpDuplicateOrderThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpDuplicateOrderThresholdChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroCpDuplicateOrderThresholdChangeReqMessage EXCEPT !.maxDupOrders = one] : one \in Sample(4) }
-        \cup { [ZeroCpDuplicateOrderThresholdChangeReqMessage EXCEPT !.useOrderPriceInDupCheckOptional = one] : one \in Sample(1) }
-        \cup { [ZeroCpDuplicateOrderThresholdChangeReqMessage EXCEPT !.periodInMilliSeconds = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Cp Order Rate Threshold Change Req Message: 40 bytes                    *)
-(***************************************************************************)
-
-CpOrderRateThresholdChangeReqMessage ==
-    [ clordid              : Sample(20),
-      underlierOptional    : Sample(6),
-      efidOptional         : Sample(4),
-      riskGroupId          : Sample(2),
-      maxOrderMsgs         : Sample(4),
-      periodInMilliSeconds : Sample(4) ]
-
-EncodeCpOrderRateThresholdChangeReqMessage(message) ==
-    message.clordid
-        \o message.underlierOptional
-        \o message.efidOptional
-        \o message.riskGroupId
-        \o message.maxOrderMsgs
-        \o message.periodInMilliSeconds
-
-DecodeCpOrderRateThresholdChangeReqMessage(bytes) ==
-    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
-    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
-    LET maxOrderMsgs == ReadBytes(riskGroupId.rest, 4) IN IF ~maxOrderMsgs.ok THEN Fail ELSE
-    LET periodInMilliSeconds == ReadBytes(maxOrderMsgs.rest, 4) IN IF ~periodInMilliSeconds.ok THEN Fail ELSE
-    Ok([ clordid              |-> clordid.value,
-         underlierOptional    |-> underlierOptional.value,
-         efidOptional         |-> efidOptional.value,
-         riskGroupId          |-> riskGroupId.value,
-         maxOrderMsgs         |-> maxOrderMsgs.value,
-         periodInMilliSeconds |-> periodInMilliSeconds.value ], periodInMilliSeconds.rest)
-
-ZeroCpOrderRateThresholdChangeReqMessage ==
-    [ clordid              |-> [i \in 1 .. 20 |-> 0],
-      underlierOptional    |-> [i \in 1 .. 6 |-> 0],
-      efidOptional         |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId          |-> [i \in 1 .. 2 |-> 0],
-      maxOrderMsgs         |-> [i \in 1 .. 4 |-> 0],
-      periodInMilliSeconds |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Cp Order Rate Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
-CheckedCpOrderRateThresholdChangeReqMessage ==
-    { ZeroCpOrderRateThresholdChangeReqMessage }
-        \cup { [ZeroCpOrderRateThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroCpOrderRateThresholdChangeReqMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroCpOrderRateThresholdChangeReqMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCpOrderRateThresholdChangeReqMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroCpOrderRateThresholdChangeReqMessage EXCEPT !.maxOrderMsgs = one] : one \in Sample(4) }
-        \cup { [ZeroCpOrderRateThresholdChangeReqMessage EXCEPT !.periodInMilliSeconds = one] : one \in Sample(4) }
-
-(***************************************************************************)
 (* Active Risk Threshold State Message: 34 bytes                           *)
 (***************************************************************************)
 
@@ -2560,29 +1651,9 @@ CheckedCpOrderRateThresholdStateMessage ==
         \cup { [ZeroCpOrderRateThresholdStateMessage EXCEPT !.periodInMilliSeconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Payload, selected by Template Id                                        *)
+(* Server Payload, selected by Template Id                                 *)
 (***************************************************************************)
 
-RiskSettingsQueryMessageCode == 1  \* 0x01
-ActiveRiskThresholdChangeReqMessageCode == 2  \* 0x02
-ActiveRiskAcknowledgementReqMessageCode == 3  \* 0x03
-CpVolumeThresholdChangeReqMessageCode == 4  \* 0x04
-CpExecutedNotionalThresholdChangeReqMessageCode == 5  \* 0x05
-CpTotalExecutionsThresholdChangeReqMessageCode == 6  \* 0x06
-CpPercentOutstandingContractsThresholdChangeReqMessageCode == 7  \* 0x07
-CpBreachCountThresholdChangeReqMessageCode == 8  \* 0x08
-ManualCpBreachTriggerReqMessageCode == 9  \* 0x09
-CpClearBreachReqMessageCode == 10  \* 0x0a
-SingleOrderAllowIsoOrdersChangeReqMessageCode == 11  \* 0x0b
-SingleOrderAllowOrdersInCrossedMarketChangeReqMessageCode == 12  \* 0x0c
-SingleOrderMaxNotionalChangeReqMessageCode == 13  \* 0x0d
-SingleOrderMaxContractsChangeReqMessageCode == 14  \* 0x0e
-CpGrossNotionalThresholdChangeReqMessageCode == 18  \* 0x12
-CpMarketOrderGrossNotionalThresholdChangeReqMessageCode == 19  \* 0x13
-CpNetNotionalThresholdChangeReqMessageCode == 20  \* 0x14
-CpMarketOrderNetNotionalThresholdChangeReqMessageCode == 21  \* 0x15
-CpDuplicateOrderThresholdChangeReqMessageCode == 22  \* 0x16
-CpOrderRateThresholdChangeReqMessageCode == 23  \* 0x17
 ActiveRiskThresholdStateMessageCode == 30  \* 0x1e
 ActiveRiskThresholdChangeRejMessageCode == 31  \* 0x1f
 ActiveRiskAcknowledgedMessageCode == 32  \* 0x20
@@ -2613,28 +1684,8 @@ CpMarketOrderNetNotionalThresholdStateMessageCode == 63  \* 0x3f
 CpDuplicateOrderThresholdStateMessageCode == 64  \* 0x40
 CpOrderRateThresholdStateMessageCode == 65  \* 0x41
 
-Payload ==
-    [ tag : {RiskSettingsQueryMessageCode}, body : RiskSettingsQueryMessage ]
-        \cup [ tag : {ActiveRiskThresholdChangeReqMessageCode}, body : ActiveRiskThresholdChangeReqMessage ]
-        \cup [ tag : {ActiveRiskAcknowledgementReqMessageCode}, body : ActiveRiskAcknowledgementReqMessage ]
-        \cup [ tag : {CpVolumeThresholdChangeReqMessageCode}, body : CpVolumeThresholdChangeReqMessage ]
-        \cup [ tag : {CpExecutedNotionalThresholdChangeReqMessageCode}, body : CpExecutedNotionalThresholdChangeReqMessage ]
-        \cup [ tag : {CpTotalExecutionsThresholdChangeReqMessageCode}, body : CpTotalExecutionsThresholdChangeReqMessage ]
-        \cup [ tag : {CpPercentOutstandingContractsThresholdChangeReqMessageCode}, body : CpPercentOutstandingContractsThresholdChangeReqMessage ]
-        \cup [ tag : {CpBreachCountThresholdChangeReqMessageCode}, body : CpBreachCountThresholdChangeReqMessage ]
-        \cup [ tag : {ManualCpBreachTriggerReqMessageCode}, body : ManualCpBreachTriggerReqMessage ]
-        \cup [ tag : {CpClearBreachReqMessageCode}, body : CpClearBreachReqMessage ]
-        \cup [ tag : {SingleOrderAllowIsoOrdersChangeReqMessageCode}, body : SingleOrderAllowIsoOrdersChangeReqMessage ]
-        \cup [ tag : {SingleOrderAllowOrdersInCrossedMarketChangeReqMessageCode}, body : SingleOrderAllowOrdersInCrossedMarketChangeReqMessage ]
-        \cup [ tag : {SingleOrderMaxNotionalChangeReqMessageCode}, body : SingleOrderMaxNotionalChangeReqMessage ]
-        \cup [ tag : {SingleOrderMaxContractsChangeReqMessageCode}, body : SingleOrderMaxContractsChangeReqMessage ]
-        \cup [ tag : {CpGrossNotionalThresholdChangeReqMessageCode}, body : CpGrossNotionalThresholdChangeReqMessage ]
-        \cup [ tag : {CpMarketOrderGrossNotionalThresholdChangeReqMessageCode}, body : CpMarketOrderGrossNotionalThresholdChangeReqMessage ]
-        \cup [ tag : {CpNetNotionalThresholdChangeReqMessageCode}, body : CpNetNotionalThresholdChangeReqMessage ]
-        \cup [ tag : {CpMarketOrderNetNotionalThresholdChangeReqMessageCode}, body : CpMarketOrderNetNotionalThresholdChangeReqMessage ]
-        \cup [ tag : {CpDuplicateOrderThresholdChangeReqMessageCode}, body : CpDuplicateOrderThresholdChangeReqMessage ]
-        \cup [ tag : {CpOrderRateThresholdChangeReqMessageCode}, body : CpOrderRateThresholdChangeReqMessage ]
-        \cup [ tag : {ActiveRiskThresholdStateMessageCode}, body : ActiveRiskThresholdStateMessage ]
+ServerPayload ==
+    [ tag : {ActiveRiskThresholdStateMessageCode}, body : ActiveRiskThresholdStateMessage ]
         \cup [ tag : {ActiveRiskThresholdChangeRejMessageCode}, body : ActiveRiskThresholdChangeRejMessage ]
         \cup [ tag : {ActiveRiskAcknowledgedMessageCode}, body : ActiveRiskAcknowledgedMessage ]
         \cup [ tag : {ActiveRiskAcknowledgeRejMessageCode}, body : ActiveRiskAcknowledgeRejMessage ]
@@ -2664,28 +1715,8 @@ Payload ==
         \cup [ tag : {CpDuplicateOrderThresholdStateMessageCode}, body : CpDuplicateOrderThresholdStateMessage ]
         \cup [ tag : {CpOrderRateThresholdStateMessageCode}, body : CpOrderRateThresholdStateMessage ]
 
-EncodePayload(message) ==
-    CASE message.tag = RiskSettingsQueryMessageCode -> EncodeRiskSettingsQueryMessage(message.body)
-      [] message.tag = ActiveRiskThresholdChangeReqMessageCode -> EncodeActiveRiskThresholdChangeReqMessage(message.body)
-      [] message.tag = ActiveRiskAcknowledgementReqMessageCode -> EncodeActiveRiskAcknowledgementReqMessage(message.body)
-      [] message.tag = CpVolumeThresholdChangeReqMessageCode -> EncodeCpVolumeThresholdChangeReqMessage(message.body)
-      [] message.tag = CpExecutedNotionalThresholdChangeReqMessageCode -> EncodeCpExecutedNotionalThresholdChangeReqMessage(message.body)
-      [] message.tag = CpTotalExecutionsThresholdChangeReqMessageCode -> EncodeCpTotalExecutionsThresholdChangeReqMessage(message.body)
-      [] message.tag = CpPercentOutstandingContractsThresholdChangeReqMessageCode -> EncodeCpPercentOutstandingContractsThresholdChangeReqMessage(message.body)
-      [] message.tag = CpBreachCountThresholdChangeReqMessageCode -> EncodeCpBreachCountThresholdChangeReqMessage(message.body)
-      [] message.tag = ManualCpBreachTriggerReqMessageCode -> EncodeManualCpBreachTriggerReqMessage(message.body)
-      [] message.tag = CpClearBreachReqMessageCode -> EncodeCpClearBreachReqMessage(message.body)
-      [] message.tag = SingleOrderAllowIsoOrdersChangeReqMessageCode -> EncodeSingleOrderAllowIsoOrdersChangeReqMessage(message.body)
-      [] message.tag = SingleOrderAllowOrdersInCrossedMarketChangeReqMessageCode -> EncodeSingleOrderAllowOrdersInCrossedMarketChangeReqMessage(message.body)
-      [] message.tag = SingleOrderMaxNotionalChangeReqMessageCode -> EncodeSingleOrderMaxNotionalChangeReqMessage(message.body)
-      [] message.tag = SingleOrderMaxContractsChangeReqMessageCode -> EncodeSingleOrderMaxContractsChangeReqMessage(message.body)
-      [] message.tag = CpGrossNotionalThresholdChangeReqMessageCode -> EncodeCpGrossNotionalThresholdChangeReqMessage(message.body)
-      [] message.tag = CpMarketOrderGrossNotionalThresholdChangeReqMessageCode -> EncodeCpMarketOrderGrossNotionalThresholdChangeReqMessage(message.body)
-      [] message.tag = CpNetNotionalThresholdChangeReqMessageCode -> EncodeCpNetNotionalThresholdChangeReqMessage(message.body)
-      [] message.tag = CpMarketOrderNetNotionalThresholdChangeReqMessageCode -> EncodeCpMarketOrderNetNotionalThresholdChangeReqMessage(message.body)
-      [] message.tag = CpDuplicateOrderThresholdChangeReqMessageCode -> EncodeCpDuplicateOrderThresholdChangeReqMessage(message.body)
-      [] message.tag = CpOrderRateThresholdChangeReqMessageCode -> EncodeCpOrderRateThresholdChangeReqMessage(message.body)
-      [] message.tag = ActiveRiskThresholdStateMessageCode -> EncodeActiveRiskThresholdStateMessage(message.body)
+EncodeServerPayload(message) ==
+    CASE message.tag = ActiveRiskThresholdStateMessageCode -> EncodeActiveRiskThresholdStateMessage(message.body)
       [] message.tag = ActiveRiskThresholdChangeRejMessageCode -> EncodeActiveRiskThresholdChangeRejMessage(message.body)
       [] message.tag = ActiveRiskAcknowledgedMessageCode -> EncodeActiveRiskAcknowledgedMessage(message.body)
       [] message.tag = ActiveRiskAcknowledgeRejMessageCode -> EncodeActiveRiskAcknowledgeRejMessage(message.body)
@@ -2715,29 +1746,9 @@ EncodePayload(message) ==
       [] message.tag = CpDuplicateOrderThresholdStateMessageCode -> EncodeCpDuplicateOrderThresholdStateMessage(message.body)
       [] message.tag = CpOrderRateThresholdStateMessageCode -> EncodeCpOrderRateThresholdStateMessage(message.body)
 
-DecodePayload(tag, bytes) ==
+DecodeServerPayload(tag, bytes) ==
     LET read ==
-            CASE tag = RiskSettingsQueryMessageCode -> DecodeRiskSettingsQueryMessage(bytes)
-              [] tag = ActiveRiskThresholdChangeReqMessageCode -> DecodeActiveRiskThresholdChangeReqMessage(bytes)
-              [] tag = ActiveRiskAcknowledgementReqMessageCode -> DecodeActiveRiskAcknowledgementReqMessage(bytes)
-              [] tag = CpVolumeThresholdChangeReqMessageCode -> DecodeCpVolumeThresholdChangeReqMessage(bytes)
-              [] tag = CpExecutedNotionalThresholdChangeReqMessageCode -> DecodeCpExecutedNotionalThresholdChangeReqMessage(bytes)
-              [] tag = CpTotalExecutionsThresholdChangeReqMessageCode -> DecodeCpTotalExecutionsThresholdChangeReqMessage(bytes)
-              [] tag = CpPercentOutstandingContractsThresholdChangeReqMessageCode -> DecodeCpPercentOutstandingContractsThresholdChangeReqMessage(bytes)
-              [] tag = CpBreachCountThresholdChangeReqMessageCode -> DecodeCpBreachCountThresholdChangeReqMessage(bytes)
-              [] tag = ManualCpBreachTriggerReqMessageCode -> DecodeManualCpBreachTriggerReqMessage(bytes)
-              [] tag = CpClearBreachReqMessageCode -> DecodeCpClearBreachReqMessage(bytes)
-              [] tag = SingleOrderAllowIsoOrdersChangeReqMessageCode -> DecodeSingleOrderAllowIsoOrdersChangeReqMessage(bytes)
-              [] tag = SingleOrderAllowOrdersInCrossedMarketChangeReqMessageCode -> DecodeSingleOrderAllowOrdersInCrossedMarketChangeReqMessage(bytes)
-              [] tag = SingleOrderMaxNotionalChangeReqMessageCode -> DecodeSingleOrderMaxNotionalChangeReqMessage(bytes)
-              [] tag = SingleOrderMaxContractsChangeReqMessageCode -> DecodeSingleOrderMaxContractsChangeReqMessage(bytes)
-              [] tag = CpGrossNotionalThresholdChangeReqMessageCode -> DecodeCpGrossNotionalThresholdChangeReqMessage(bytes)
-              [] tag = CpMarketOrderGrossNotionalThresholdChangeReqMessageCode -> DecodeCpMarketOrderGrossNotionalThresholdChangeReqMessage(bytes)
-              [] tag = CpNetNotionalThresholdChangeReqMessageCode -> DecodeCpNetNotionalThresholdChangeReqMessage(bytes)
-              [] tag = CpMarketOrderNetNotionalThresholdChangeReqMessageCode -> DecodeCpMarketOrderNetNotionalThresholdChangeReqMessage(bytes)
-              [] tag = CpDuplicateOrderThresholdChangeReqMessageCode -> DecodeCpDuplicateOrderThresholdChangeReqMessage(bytes)
-              [] tag = CpOrderRateThresholdChangeReqMessageCode -> DecodeCpOrderRateThresholdChangeReqMessage(bytes)
-              [] tag = ActiveRiskThresholdStateMessageCode -> DecodeActiveRiskThresholdStateMessage(bytes)
+            CASE tag = ActiveRiskThresholdStateMessageCode -> DecodeActiveRiskThresholdStateMessage(bytes)
               [] tag = ActiveRiskThresholdChangeRejMessageCode -> DecodeActiveRiskThresholdChangeRejMessage(bytes)
               [] tag = ActiveRiskAcknowledgedMessageCode -> DecodeActiveRiskAcknowledgedMessage(bytes)
               [] tag = ActiveRiskAcknowledgeRejMessageCode -> DecodeActiveRiskAcknowledgeRejMessage(bytes)
@@ -2769,31 +1780,11 @@ DecodePayload(tag, bytes) ==
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroPayload == [tag |-> RiskSettingsQueryMessageCode, body |-> ZeroRiskSettingsQueryMessage]
+ZeroServerPayload == [tag |-> ActiveRiskThresholdStateMessageCode, body |-> ZeroActiveRiskThresholdStateMessage]
 
-(* Each Payload in turn, at the values the message it names is checked at *)
-CheckedPayload ==
-    { [tag |-> RiskSettingsQueryMessageCode, body |-> one] : one \in CheckedRiskSettingsQueryMessage }
-        \cup { [tag |-> ActiveRiskThresholdChangeReqMessageCode, body |-> one] : one \in CheckedActiveRiskThresholdChangeReqMessage }
-        \cup { [tag |-> ActiveRiskAcknowledgementReqMessageCode, body |-> one] : one \in CheckedActiveRiskAcknowledgementReqMessage }
-        \cup { [tag |-> CpVolumeThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpVolumeThresholdChangeReqMessage }
-        \cup { [tag |-> CpExecutedNotionalThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpExecutedNotionalThresholdChangeReqMessage }
-        \cup { [tag |-> CpTotalExecutionsThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpTotalExecutionsThresholdChangeReqMessage }
-        \cup { [tag |-> CpPercentOutstandingContractsThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpPercentOutstandingContractsThresholdChangeReqMessage }
-        \cup { [tag |-> CpBreachCountThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpBreachCountThresholdChangeReqMessage }
-        \cup { [tag |-> ManualCpBreachTriggerReqMessageCode, body |-> one] : one \in CheckedManualCpBreachTriggerReqMessage }
-        \cup { [tag |-> CpClearBreachReqMessageCode, body |-> one] : one \in CheckedCpClearBreachReqMessage }
-        \cup { [tag |-> SingleOrderAllowIsoOrdersChangeReqMessageCode, body |-> one] : one \in CheckedSingleOrderAllowIsoOrdersChangeReqMessage }
-        \cup { [tag |-> SingleOrderAllowOrdersInCrossedMarketChangeReqMessageCode, body |-> one] : one \in CheckedSingleOrderAllowOrdersInCrossedMarketChangeReqMessage }
-        \cup { [tag |-> SingleOrderMaxNotionalChangeReqMessageCode, body |-> one] : one \in CheckedSingleOrderMaxNotionalChangeReqMessage }
-        \cup { [tag |-> SingleOrderMaxContractsChangeReqMessageCode, body |-> one] : one \in CheckedSingleOrderMaxContractsChangeReqMessage }
-        \cup { [tag |-> CpGrossNotionalThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpGrossNotionalThresholdChangeReqMessage }
-        \cup { [tag |-> CpMarketOrderGrossNotionalThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpMarketOrderGrossNotionalThresholdChangeReqMessage }
-        \cup { [tag |-> CpNetNotionalThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpNetNotionalThresholdChangeReqMessage }
-        \cup { [tag |-> CpMarketOrderNetNotionalThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpMarketOrderNetNotionalThresholdChangeReqMessage }
-        \cup { [tag |-> CpDuplicateOrderThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpDuplicateOrderThresholdChangeReqMessage }
-        \cup { [tag |-> CpOrderRateThresholdChangeReqMessageCode, body |-> one] : one \in CheckedCpOrderRateThresholdChangeReqMessage }
-        \cup { [tag |-> ActiveRiskThresholdStateMessageCode, body |-> one] : one \in CheckedActiveRiskThresholdStateMessage }
+(* Each Server Payload in turn, at the values the message it names is checked at *)
+CheckedServerPayload ==
+    { [tag |-> ActiveRiskThresholdStateMessageCode, body |-> one] : one \in CheckedActiveRiskThresholdStateMessage }
         \cup { [tag |-> ActiveRiskThresholdChangeRejMessageCode, body |-> one] : one \in CheckedActiveRiskThresholdChangeRejMessage }
         \cup { [tag |-> ActiveRiskAcknowledgedMessageCode, body |-> one] : one \in CheckedActiveRiskAcknowledgedMessage }
         \cup { [tag |-> ActiveRiskAcknowledgeRejMessageCode, body |-> one] : one \in CheckedActiveRiskAcknowledgeRejMessage }
@@ -2824,68 +1815,68 @@ CheckedPayload ==
         \cup { [tag |-> CpOrderRateThresholdStateMessageCode, body |-> one] : one \in CheckedCpOrderRateThresholdStateMessage }
 
 (***************************************************************************)
-(* Sbe Message                                                             *)
+(* Server Sbe Message                                                      *)
 (***************************************************************************)
 
-SbeMessage ==
-    [ blockLength : Sample(2),
-      schemaId    : Sample(1),
-      version     : Sample(2),
-      payload     : Payload ]
+ServerSbeMessage ==
+    [ blockLength   : Sample(2),
+      schemaId      : Sample(1),
+      version       : Sample(2),
+      serverPayload : ServerPayload ]
 
-EncodeSbeMessage(message) ==
+EncodeServerSbeMessage(message) ==
     message.blockLength
-        \o EncodeUIntBE(message.payload.tag, 1)
+        \o EncodeUIntBE(message.serverPayload.tag, 1)
         \o message.schemaId
         \o message.version
-        \o EncodePayload(message.payload)
+        \o EncodeServerPayload(message.serverPayload)
 
-DecodeSbeMessage(bytes) ==
+DecodeServerSbeMessage(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET templateId == ReadUIntBE(blockLength.rest, 1) IN IF ~templateId.ok THEN Fail ELSE
     LET schemaId == ReadBytes(templateId.rest, 1) IN IF ~schemaId.ok THEN Fail ELSE
     LET version == ReadBytes(schemaId.rest, 2) IN IF ~version.ok THEN Fail ELSE
-    LET payload == DecodePayload(templateId.value, version.rest) IN IF ~payload.ok THEN Fail ELSE
-    Ok([ blockLength |-> blockLength.value,
-         schemaId    |-> schemaId.value,
-         version     |-> version.value,
-         payload     |-> payload.value ], payload.rest)
+    LET serverPayload == DecodeServerPayload(templateId.value, version.rest) IN IF ~serverPayload.ok THEN Fail ELSE
+    Ok([ blockLength   |-> blockLength.value,
+         schemaId      |-> schemaId.value,
+         version       |-> version.value,
+         serverPayload |-> serverPayload.value ], serverPayload.rest)
 
-ZeroSbeMessage ==
-    [ blockLength |-> [i \in 1 .. 2 |-> 0],
-      schemaId    |-> [i \in 1 .. 1 |-> 0],
-      version     |-> [i \in 1 .. 2 |-> 0],
-      payload     |-> ZeroPayload ]
+ZeroServerSbeMessage ==
+    [ blockLength   |-> [i \in 1 .. 2 |-> 0],
+      schemaId      |-> [i \in 1 .. 1 |-> 0],
+      version       |-> [i \in 1 .. 2 |-> 0],
+      serverPayload |-> ZeroServerPayload ]
 
-(* Sbe Message at zero, then each field in turn at the values it is checked at *)
-CheckedSbeMessage ==
-    { ZeroSbeMessage }
-        \cup { [ZeroSbeMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroSbeMessage EXCEPT !.schemaId = one] : one \in Sample(1) }
-        \cup { [ZeroSbeMessage EXCEPT !.version = one] : one \in Sample(2) }
-        \cup { [ZeroSbeMessage EXCEPT !.payload = one] : one \in CheckedPayload }
+(* Server Sbe Message at zero, then each field in turn at the values it is checked at *)
+CheckedServerSbeMessage ==
+    { ZeroServerSbeMessage }
+        \cup { [ZeroServerSbeMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroServerSbeMessage EXCEPT !.schemaId = one] : one \in Sample(1) }
+        \cup { [ZeroServerSbeMessage EXCEPT !.version = one] : one \in Sample(2) }
+        \cup { [ZeroServerSbeMessage EXCEPT !.serverPayload = one] : one \in CheckedServerPayload }
 
 (***************************************************************************)
 (* Sequenced Message                                                       *)
 (***************************************************************************)
 
 SequencedMessage ==
-    [ sbeMessage : SbeMessage ]
+    [ serverSbeMessage : ServerSbeMessage ]
 
 EncodeSequencedMessage(message) ==
-    EncodeSbeMessage(message.sbeMessage)
+    EncodeServerSbeMessage(message.serverSbeMessage)
 
 DecodeSequencedMessage(bytes) ==
-    LET sbeMessage == DecodeSbeMessage(bytes) IN IF ~sbeMessage.ok THEN Fail ELSE
-    Ok([ sbeMessage |-> sbeMessage.value ], sbeMessage.rest)
+    LET serverSbeMessage == DecodeServerSbeMessage(bytes) IN IF ~serverSbeMessage.ok THEN Fail ELSE
+    Ok([ serverSbeMessage |-> serverSbeMessage.value ], serverSbeMessage.rest)
 
 ZeroSequencedMessage ==
-    [ sbeMessage |-> ZeroSbeMessage ]
+    [ serverSbeMessage |-> ZeroServerSbeMessage ]
 
 (* Sequenced Message at zero, then each field in turn at the values it is checked at *)
 CheckedSequencedMessage ==
     { ZeroSequencedMessage }
-        \cup { [ZeroSequencedMessage EXCEPT !.sbeMessage = one] : one \in CheckedSbeMessage }
+        \cup { [ZeroSequencedMessage EXCEPT !.serverSbeMessage = one] : one \in CheckedServerSbeMessage }
 
 (***************************************************************************)
 (* Server Data, selected by Message Type                                   *)
@@ -3070,166 +2061,6 @@ RoundTripStreamRejectedMessage ==
 RoundTripStreamCompleteMessage ==
     \A message \in CheckedStreamCompleteMessage :
         LET read == DecodeStreamCompleteMessage(EncodeStreamCompleteMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Risk Settings Query Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripRiskSettingsQueryMessage ==
-    \A message \in CheckedRiskSettingsQueryMessage :
-        LET read == DecodeRiskSettingsQueryMessage(EncodeRiskSettingsQueryMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Active Risk Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripActiveRiskThresholdChangeReqMessage ==
-    \A message \in CheckedActiveRiskThresholdChangeReqMessage :
-        LET read == DecodeActiveRiskThresholdChangeReqMessage(EncodeActiveRiskThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Active Risk Acknowledgement Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripActiveRiskAcknowledgementReqMessage ==
-    \A message \in CheckedActiveRiskAcknowledgementReqMessage :
-        LET read == DecodeActiveRiskAcknowledgementReqMessage(EncodeActiveRiskAcknowledgementReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Volume Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpVolumeThresholdChangeReqMessage ==
-    \A message \in CheckedCpVolumeThresholdChangeReqMessage :
-        LET read == DecodeCpVolumeThresholdChangeReqMessage(EncodeCpVolumeThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Executed Notional Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpExecutedNotionalThresholdChangeReqMessage ==
-    \A message \in CheckedCpExecutedNotionalThresholdChangeReqMessage :
-        LET read == DecodeCpExecutedNotionalThresholdChangeReqMessage(EncodeCpExecutedNotionalThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Total Executions Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpTotalExecutionsThresholdChangeReqMessage ==
-    \A message \in CheckedCpTotalExecutionsThresholdChangeReqMessage :
-        LET read == DecodeCpTotalExecutionsThresholdChangeReqMessage(EncodeCpTotalExecutionsThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Percent Outstanding Contracts Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpPercentOutstandingContractsThresholdChangeReqMessage ==
-    \A message \in CheckedCpPercentOutstandingContractsThresholdChangeReqMessage :
-        LET read == DecodeCpPercentOutstandingContractsThresholdChangeReqMessage(EncodeCpPercentOutstandingContractsThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Breach Count Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpBreachCountThresholdChangeReqMessage ==
-    \A message \in CheckedCpBreachCountThresholdChangeReqMessage :
-        LET read == DecodeCpBreachCountThresholdChangeReqMessage(EncodeCpBreachCountThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Manual Cp Breach Trigger Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripManualCpBreachTriggerReqMessage ==
-    \A message \in CheckedManualCpBreachTriggerReqMessage :
-        LET read == DecodeManualCpBreachTriggerReqMessage(EncodeManualCpBreachTriggerReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Clear Breach Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpClearBreachReqMessage ==
-    \A message \in CheckedCpClearBreachReqMessage :
-        LET read == DecodeCpClearBreachReqMessage(EncodeCpClearBreachReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Single Order Allow Iso Orders Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripSingleOrderAllowIsoOrdersChangeReqMessage ==
-    \A message \in CheckedSingleOrderAllowIsoOrdersChangeReqMessage :
-        LET read == DecodeSingleOrderAllowIsoOrdersChangeReqMessage(EncodeSingleOrderAllowIsoOrdersChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Single Order Allow Orders In Crossed Market Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripSingleOrderAllowOrdersInCrossedMarketChangeReqMessage ==
-    \A message \in CheckedSingleOrderAllowOrdersInCrossedMarketChangeReqMessage :
-        LET read == DecodeSingleOrderAllowOrdersInCrossedMarketChangeReqMessage(EncodeSingleOrderAllowOrdersInCrossedMarketChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Single Order Max Notional Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripSingleOrderMaxNotionalChangeReqMessage ==
-    \A message \in CheckedSingleOrderMaxNotionalChangeReqMessage :
-        LET read == DecodeSingleOrderMaxNotionalChangeReqMessage(EncodeSingleOrderMaxNotionalChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Single Order Max Contracts Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripSingleOrderMaxContractsChangeReqMessage ==
-    \A message \in CheckedSingleOrderMaxContractsChangeReqMessage :
-        LET read == DecodeSingleOrderMaxContractsChangeReqMessage(EncodeSingleOrderMaxContractsChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Gross Notional Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpGrossNotionalThresholdChangeReqMessage ==
-    \A message \in CheckedCpGrossNotionalThresholdChangeReqMessage :
-        LET read == DecodeCpGrossNotionalThresholdChangeReqMessage(EncodeCpGrossNotionalThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Market Order Gross Notional Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpMarketOrderGrossNotionalThresholdChangeReqMessage ==
-    \A message \in CheckedCpMarketOrderGrossNotionalThresholdChangeReqMessage :
-        LET read == DecodeCpMarketOrderGrossNotionalThresholdChangeReqMessage(EncodeCpMarketOrderGrossNotionalThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Net Notional Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpNetNotionalThresholdChangeReqMessage ==
-    \A message \in CheckedCpNetNotionalThresholdChangeReqMessage :
-        LET read == DecodeCpNetNotionalThresholdChangeReqMessage(EncodeCpNetNotionalThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Market Order Net Notional Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpMarketOrderNetNotionalThresholdChangeReqMessage ==
-    \A message \in CheckedCpMarketOrderNetNotionalThresholdChangeReqMessage :
-        LET read == DecodeCpMarketOrderNetNotionalThresholdChangeReqMessage(EncodeCpMarketOrderNetNotionalThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Duplicate Order Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpDuplicateOrderThresholdChangeReqMessage ==
-    \A message \in CheckedCpDuplicateOrderThresholdChangeReqMessage :
-        LET read == DecodeCpDuplicateOrderThresholdChangeReqMessage(EncodeCpDuplicateOrderThresholdChangeReqMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Cp Order Rate Threshold Change Req Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCpOrderRateThresholdChangeReqMessage ==
-    \A message \in CheckedCpOrderRateThresholdChangeReqMessage :
-        LET read == DecodeCpOrderRateThresholdChangeReqMessage(EncodeCpOrderRateThresholdChangeReqMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3466,10 +2297,10 @@ RoundTripCpOrderRateThresholdStateMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Sbe Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripSbeMessage ==
-    \A message \in CheckedSbeMessage :
-        LET read == DecodeSbeMessage(EncodeSbeMessage(message))
+(* Every Server Sbe Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripServerSbeMessage ==
+    \A message \in CheckedServerSbeMessage :
+        LET read == DecodeServerSbeMessage(EncodeServerSbeMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3490,10 +2321,10 @@ RoundTripServerPacket ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* A Payload is selected by the Template Id it is written under *)
-SelectsPayload ==
-    \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+(* A Server Payload is selected by the Template Id it is written under *)
+SelectsServerPayload ==
+    \A message \in CheckedServerPayload :
+        LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Server Data is selected by the Message Type it is written under *)
