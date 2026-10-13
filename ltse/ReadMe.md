@@ -34,6 +34,6 @@
 
 [Ltse.LtseEquities.Memo.Sbe.v1.12.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/ltse/ltseequities/memo/LtseEquities_Memo_v1_12_Client.tla "Ltse LtseEquities Memo Sbe v1.12 Tla Definition"
 [Ltse.LtseEquities.Memo.Sbe.v1.12.Url]: https://ltse.com/trading/user-guide-technical-specifications "Long-Term Stock Exchange 1.12 Url"
-[Ltse.LtseEquities.Memo.Sbe.v1.12.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/LtseEquities/Memo/Ltse.LtseEquities.Memo.Sbe.v1.12.pdf "Long-Term Stock Exchange 1.12 Pdf"
-[Ltse.LtseEquities.Memo.Sbe.v1.12.Xml]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/LtseEquities/Memo/Ltse.LtseEquities.Memo.Sbe.v1.12.xml "Long-Term Stock Exchange 1.12 Xml"
+[Ltse.LtseEquities.Memo.Sbe.v1.12.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/Equities/Memo/Ltse.LtseEquities.Memo.Sbe.v1.12.pdf "Long-Term Stock Exchange 1.12 Pdf"
+[Ltse.LtseEquities.Memo.Sbe.v1.12.Xml]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Specifications/Equities/Memo/Ltse.LtseEquities.Memo.Sbe.v1.12.xml "Long-Term Stock Exchange 1.12 Xml"
 [Ltse.LtseEquities.Memo.Sbe.v1.12.Server.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/ltse/ltseequities/memo/LtseEquities_Memo_v1_12_Server.tla "Ltse LtseEquities Memo Sbe v1.12 Tla Definition"

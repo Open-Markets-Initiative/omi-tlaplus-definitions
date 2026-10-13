@@ -15,9 +15,6 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
-(* Note: Appendage Length and what follows it are read only when the       *)
-(* message runs on past what precedes them.                                *)
-(*                                                                         *)
 (* Note: Unsequenced Data Packet fills what is left of the frame Packet    *)
 (* Length states, which is what it is read from.                           *)
 (***************************************************************************)
@@ -2411,15 +2408,15 @@ OneAccountQueryRequestAppendage ==
 (* Account Query Request Message                                           *)
 (***************************************************************************)
 
-AccountQueryRequestMessageTail ==
+AccountQueryRequestMessage ==
     [ accountQueryRequestAppendage : SampleLists(OneAccountQueryRequestAppendage) ]
 
-EncodeAccountQueryRequestMessageTail(message) ==
+EncodeAccountQueryRequestMessage(message) ==
     LET payload == EncodeAccountQueryRequestAppendageList(message.accountQueryRequestAppendage)
     IN  EncodeUIntBE(Len(payload), 2)
             \o payload
 
-DecodeAccountQueryRequestMessageTail(bytes) ==
+DecodeAccountQueryRequestMessage(bytes) ==
     LET appendageLength == ReadUIntBE(bytes, 2) IN IF ~appendageLength.ok THEN Fail ELSE
     IF Len(appendageLength.rest) < appendageLength.value THEN Fail ELSE
     LET framed == SubSeq(appendageLength.rest, 1, appendageLength.value)
@@ -2428,48 +2425,13 @@ DecodeAccountQueryRequestMessageTail(bytes) ==
     IN  IF ~accountQueryRequestAppendage.ok \/ accountQueryRequestAppendage.rest # << >> THEN Fail ELSE
     Ok([ accountQueryRequestAppendage |-> accountQueryRequestAppendage.value ], beyond)
 
-ZeroAccountQueryRequestMessageTail ==
-    [ accountQueryRequestAppendage |-> << >> ]
-
-(* Account Query Request Message at zero, then each field in turn at the values it is checked at *)
-CheckedAccountQueryRequestMessageTail ==
-    { ZeroAccountQueryRequestMessageTail }
-        \cup { [ZeroAccountQueryRequestMessageTail EXCEPT !.accountQueryRequestAppendage = one] : one \in SampleLists(OneAccountQueryRequestAppendage) }
-
-(* Account Query Request Message runs on only when bytes remain, so it is there or it is not *)
-WithoutAccountQueryRequestMessageTail == [there |-> FALSE, value |-> ZeroAccountQueryRequestMessageTail]
-
-MaybeAccountQueryRequestMessageTail ==
-    { WithoutAccountQueryRequestMessageTail }
-        \cup { [there |-> TRUE, value |-> one] : one \in CheckedAccountQueryRequestMessageTail }
-
-ReadAccountQueryRequestMessageTailMaybe(bytes) ==
-    IF bytes = << >> THEN Ok(WithoutAccountQueryRequestMessageTail, << >>)
-    ELSE LET one == DecodeAccountQueryRequestMessageTail(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
-
-(***************************************************************************)
-(* Account Query Request Message                                           *)
-(***************************************************************************)
-
-AccountQueryRequestMessage ==
-    [ accountQueryRequestMessageTail : MaybeAccountQueryRequestMessageTail ]
-
-EncodeAccountQueryRequestMessage(message) ==
-    IF message.accountQueryRequestMessageTail.there THEN EncodeAccountQueryRequestMessageTail(message.accountQueryRequestMessageTail.value) ELSE << >>
-
-DecodeAccountQueryRequestMessage(bytes) ==
-    LET accountQueryRequestMessageTail == ReadAccountQueryRequestMessageTailMaybe(bytes) IN IF ~accountQueryRequestMessageTail.ok THEN Fail ELSE
-    Ok([ accountQueryRequestMessageTail |-> accountQueryRequestMessageTail.value ], accountQueryRequestMessageTail.rest)
-
 ZeroAccountQueryRequestMessage ==
-    [ accountQueryRequestMessageTail |-> WithoutAccountQueryRequestMessageTail ]
+    [ accountQueryRequestAppendage |-> << >> ]
 
 (* Account Query Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedAccountQueryRequestMessage ==
     { ZeroAccountQueryRequestMessage }
-        \cup { [ZeroAccountQueryRequestMessage EXCEPT !.accountQueryRequestMessageTail = one] : one \in MaybeAccountQueryRequestMessageTail }
+        \cup { [ZeroAccountQueryRequestMessage EXCEPT !.accountQueryRequestAppendage = one] : one \in SampleLists(OneAccountQueryRequestAppendage) }
 
 (***************************************************************************)
 (* Unsequenced Message, selected by Unsequenced Message Type               *)
@@ -3245,14 +3207,6 @@ RoundTripUserRefIdx4 ==
 RoundTripAccountQueryRequestAppendage ==
     \A message \in CheckedAccountQueryRequestAppendage :
         LET read == DecodeAccountQueryRequestAppendage(EncodeAccountQueryRequestAppendage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Account Query Request Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripAccountQueryRequestMessageTail ==
-    \A message \in CheckedAccountQueryRequestMessageTail :
-        LET read == DecodeAccountQueryRequestMessageTail(EncodeAccountQueryRequestMessageTail(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

@@ -15,6 +15,9 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* Note: Appendage Length and what follows it are read only when the       *)
+(* message runs on past what precedes them.                                *)
+(*                                                                         *)
 (* Note: Sequenced Data Packet fills what is left of the frame Packet      *)
 (* Length states, which is what it is read from.                           *)
 (***************************************************************************)
@@ -353,26 +356,26 @@ CheckedDiscretionPrice ==
         \cup { [ZeroDiscretionPrice EXCEPT !.discretionPrice = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Discretion Peg Type: 1 bytes                                            *)
+(* Discretion Price Type: 1 bytes                                          *)
 (***************************************************************************)
 
-DiscretionPegType ==
-    [ discretionPegType : Sample(1) ]
+DiscretionPriceType ==
+    [ discretionPriceType : Sample(1) ]
 
-EncodeDiscretionPegType(message) ==
-    message.discretionPegType
+EncodeDiscretionPriceType(message) ==
+    message.discretionPriceType
 
-DecodeDiscretionPegType(bytes) ==
-    LET discretionPegType == ReadBytes(bytes, 1) IN IF ~discretionPegType.ok THEN Fail ELSE
-    Ok([ discretionPegType |-> discretionPegType.value ], discretionPegType.rest)
+DecodeDiscretionPriceType(bytes) ==
+    LET discretionPriceType == ReadBytes(bytes, 1) IN IF ~discretionPriceType.ok THEN Fail ELSE
+    Ok([ discretionPriceType |-> discretionPriceType.value ], discretionPriceType.rest)
 
-ZeroDiscretionPegType ==
-    [ discretionPegType |-> [i \in 1 .. 1 |-> 0] ]
+ZeroDiscretionPriceType ==
+    [ discretionPriceType |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Discretion Peg Type at zero, then each field in turn at the values it is checked at *)
-CheckedDiscretionPegType ==
-    { ZeroDiscretionPegType }
-        \cup { [ZeroDiscretionPegType EXCEPT !.discretionPegType = one] : one \in Sample(1) }
+(* Discretion Price Type at zero, then each field in turn at the values it is checked at *)
+CheckedDiscretionPriceType ==
+    { ZeroDiscretionPriceType }
+        \cup { [ZeroDiscretionPriceType EXCEPT !.discretionPriceType = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Discretion Peg Offset: 4 bytes                                          *)
@@ -551,6 +554,116 @@ CheckedBboWeightIndicator ==
         \cup { [ZeroBboWeightIndicator EXCEPT !.bboWeightIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)
+(* Group Id: 2 bytes                                                       *)
+(***************************************************************************)
+
+GroupId ==
+    [ groupId : Sample(2) ]
+
+EncodeGroupId(message) ==
+    message.groupId
+
+DecodeGroupId(bytes) ==
+    LET groupId == ReadBytes(bytes, 2) IN IF ~groupId.ok THEN Fail ELSE
+    Ok([ groupId |-> groupId.value ], groupId.rest)
+
+ZeroGroupId ==
+    [ groupId |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Group Id at zero, then each field in turn at the values it is checked at *)
+CheckedGroupId ==
+    { ZeroGroupId }
+        \cup { [ZeroGroupId EXCEPT !.groupId = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Shares Located: 1 bytes                                                 *)
+(***************************************************************************)
+
+SharesLocated ==
+    [ sharesLocated : Sample(1) ]
+
+EncodeSharesLocated(message) ==
+    message.sharesLocated
+
+DecodeSharesLocated(bytes) ==
+    LET sharesLocated == ReadBytes(bytes, 1) IN IF ~sharesLocated.ok THEN Fail ELSE
+    Ok([ sharesLocated |-> sharesLocated.value ], sharesLocated.rest)
+
+ZeroSharesLocated ==
+    [ sharesLocated |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Shares Located at zero, then each field in turn at the values it is checked at *)
+CheckedSharesLocated ==
+    { ZeroSharesLocated }
+        \cup { [ZeroSharesLocated EXCEPT !.sharesLocated = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx ==
+    { ZeroUserRefIdx }
+        \cup { [ZeroUserRefIdx EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Aiq Strategy: 1 bytes                                                   *)
+(***************************************************************************)
+
+AiqStrategy ==
+    [ aiqStrategy : Sample(1) ]
+
+EncodeAiqStrategy(message) ==
+    message.aiqStrategy
+
+DecodeAiqStrategy(bytes) ==
+    LET aiqStrategy == ReadBytes(bytes, 1) IN IF ~aiqStrategy.ok THEN Fail ELSE
+    Ok([ aiqStrategy |-> aiqStrategy.value ], aiqStrategy.rest)
+
+ZeroAiqStrategy ==
+    [ aiqStrategy |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Aiq Strategy at zero, then each field in turn at the values it is checked at *)
+CheckedAiqStrategy ==
+    { ZeroAiqStrategy }
+        \cup { [ZeroAiqStrategy EXCEPT !.aiqStrategy = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Aiq Group Id: 2 bytes                                                   *)
+(***************************************************************************)
+
+AiqGroupId ==
+    [ aiqGroupId : Sample(2) ]
+
+EncodeAiqGroupId(message) ==
+    message.aiqGroupId
+
+DecodeAiqGroupId(bytes) ==
+    LET aiqGroupId == ReadBytes(bytes, 2) IN IF ~aiqGroupId.ok THEN Fail ELSE
+    Ok([ aiqGroupId |-> aiqGroupId.value ], aiqGroupId.rest)
+
+ZeroAiqGroupId ==
+    [ aiqGroupId |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Aiq Group Id at zero, then each field in turn at the values it is checked at *)
+CheckedAiqGroupId ==
+    { ZeroAiqGroupId }
+        \cup { [ZeroAiqGroupId EXCEPT !.aiqGroupId = one] : one \in Sample(2) }
+
+(***************************************************************************)
 (* Order Accepted Optional Value, selected by Order Accepted Optional      *)
 (* Field                                                                   *)
 (***************************************************************************)
@@ -562,7 +675,7 @@ MaxFloorCode == 5  \* 0x05
 PriceTypeCode == 6  \* 0x06
 PegOffsetCode == 7  \* 0x07
 DiscretionPriceCode == 9  \* 0x09
-DiscretionPegTypeCode == 10  \* 0x0a
+DiscretionPriceTypeCode == 10  \* 0x0a
 DiscretionPegOffsetCode == 11  \* 0x0b
 PostOnlyCode == 12  \* 0x0c
 RandomReservesCode == 13  \* 0x0d
@@ -571,6 +684,11 @@ ExpireTimeCode == 15  \* 0x0f
 TradeNowCode == 16  \* 0x10
 HandleInstCode == 17  \* 0x11
 BboWeightIndicatorCode == 18  \* 0x12
+GroupIdCode == 24  \* 0x18
+SharesLocatedCode == 25  \* 0x19
+UserRefIdxCode == 28  \* 0x1c
+AiqStrategyCode == 29  \* 0x1d
+AiqGroupIdCode == 30  \* 0x1e
 
 OrderAcceptedOptionalValue ==
     [ tag : {FirmCode}, body : Firm ]
@@ -580,7 +698,7 @@ OrderAcceptedOptionalValue ==
         \cup [ tag : {PriceTypeCode}, body : PriceType ]
         \cup [ tag : {PegOffsetCode}, body : PegOffset ]
         \cup [ tag : {DiscretionPriceCode}, body : DiscretionPrice ]
-        \cup [ tag : {DiscretionPegTypeCode}, body : DiscretionPegType ]
+        \cup [ tag : {DiscretionPriceTypeCode}, body : DiscretionPriceType ]
         \cup [ tag : {DiscretionPegOffsetCode}, body : DiscretionPegOffset ]
         \cup [ tag : {PostOnlyCode}, body : PostOnly ]
         \cup [ tag : {RandomReservesCode}, body : RandomReserves ]
@@ -589,6 +707,11 @@ OrderAcceptedOptionalValue ==
         \cup [ tag : {TradeNowCode}, body : TradeNow ]
         \cup [ tag : {HandleInstCode}, body : HandleInst ]
         \cup [ tag : {BboWeightIndicatorCode}, body : BboWeightIndicator ]
+        \cup [ tag : {GroupIdCode}, body : GroupId ]
+        \cup [ tag : {SharesLocatedCode}, body : SharesLocated ]
+        \cup [ tag : {UserRefIdxCode}, body : UserRefIdx ]
+        \cup [ tag : {AiqStrategyCode}, body : AiqStrategy ]
+        \cup [ tag : {AiqGroupIdCode}, body : AiqGroupId ]
 
 EncodeOrderAcceptedOptionalValue(message) ==
     CASE message.tag = FirmCode -> EncodeFirm(message.body)
@@ -598,7 +721,7 @@ EncodeOrderAcceptedOptionalValue(message) ==
       [] message.tag = PriceTypeCode -> EncodePriceType(message.body)
       [] message.tag = PegOffsetCode -> EncodePegOffset(message.body)
       [] message.tag = DiscretionPriceCode -> EncodeDiscretionPrice(message.body)
-      [] message.tag = DiscretionPegTypeCode -> EncodeDiscretionPegType(message.body)
+      [] message.tag = DiscretionPriceTypeCode -> EncodeDiscretionPriceType(message.body)
       [] message.tag = DiscretionPegOffsetCode -> EncodeDiscretionPegOffset(message.body)
       [] message.tag = PostOnlyCode -> EncodePostOnly(message.body)
       [] message.tag = RandomReservesCode -> EncodeRandomReserves(message.body)
@@ -607,6 +730,11 @@ EncodeOrderAcceptedOptionalValue(message) ==
       [] message.tag = TradeNowCode -> EncodeTradeNow(message.body)
       [] message.tag = HandleInstCode -> EncodeHandleInst(message.body)
       [] message.tag = BboWeightIndicatorCode -> EncodeBboWeightIndicator(message.body)
+      [] message.tag = GroupIdCode -> EncodeGroupId(message.body)
+      [] message.tag = SharesLocatedCode -> EncodeSharesLocated(message.body)
+      [] message.tag = UserRefIdxCode -> EncodeUserRefIdx(message.body)
+      [] message.tag = AiqStrategyCode -> EncodeAiqStrategy(message.body)
+      [] message.tag = AiqGroupIdCode -> EncodeAiqGroupId(message.body)
 
 DecodeOrderAcceptedOptionalValue(tag, bytes) ==
     LET read ==
@@ -617,7 +745,7 @@ DecodeOrderAcceptedOptionalValue(tag, bytes) ==
               [] tag = PriceTypeCode -> DecodePriceType(bytes)
               [] tag = PegOffsetCode -> DecodePegOffset(bytes)
               [] tag = DiscretionPriceCode -> DecodeDiscretionPrice(bytes)
-              [] tag = DiscretionPegTypeCode -> DecodeDiscretionPegType(bytes)
+              [] tag = DiscretionPriceTypeCode -> DecodeDiscretionPriceType(bytes)
               [] tag = DiscretionPegOffsetCode -> DecodeDiscretionPegOffset(bytes)
               [] tag = PostOnlyCode -> DecodePostOnly(bytes)
               [] tag = RandomReservesCode -> DecodeRandomReserves(bytes)
@@ -626,6 +754,11 @@ DecodeOrderAcceptedOptionalValue(tag, bytes) ==
               [] tag = TradeNowCode -> DecodeTradeNow(bytes)
               [] tag = HandleInstCode -> DecodeHandleInst(bytes)
               [] tag = BboWeightIndicatorCode -> DecodeBboWeightIndicator(bytes)
+              [] tag = GroupIdCode -> DecodeGroupId(bytes)
+              [] tag = SharesLocatedCode -> DecodeSharesLocated(bytes)
+              [] tag = UserRefIdxCode -> DecodeUserRefIdx(bytes)
+              [] tag = AiqStrategyCode -> DecodeAiqStrategy(bytes)
+              [] tag = AiqGroupIdCode -> DecodeAiqGroupId(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -640,7 +773,7 @@ CheckedOrderAcceptedOptionalValue ==
         \cup { [tag |-> PriceTypeCode, body |-> one] : one \in CheckedPriceType }
         \cup { [tag |-> PegOffsetCode, body |-> one] : one \in CheckedPegOffset }
         \cup { [tag |-> DiscretionPriceCode, body |-> one] : one \in CheckedDiscretionPrice }
-        \cup { [tag |-> DiscretionPegTypeCode, body |-> one] : one \in CheckedDiscretionPegType }
+        \cup { [tag |-> DiscretionPriceTypeCode, body |-> one] : one \in CheckedDiscretionPriceType }
         \cup { [tag |-> DiscretionPegOffsetCode, body |-> one] : one \in CheckedDiscretionPegOffset }
         \cup { [tag |-> PostOnlyCode, body |-> one] : one \in CheckedPostOnly }
         \cup { [tag |-> RandomReservesCode, body |-> one] : one \in CheckedRandomReserves }
@@ -649,6 +782,11 @@ CheckedOrderAcceptedOptionalValue ==
         \cup { [tag |-> TradeNowCode, body |-> one] : one \in CheckedTradeNow }
         \cup { [tag |-> HandleInstCode, body |-> one] : one \in CheckedHandleInst }
         \cup { [tag |-> BboWeightIndicatorCode, body |-> one] : one \in CheckedBboWeightIndicator }
+        \cup { [tag |-> GroupIdCode, body |-> one] : one \in CheckedGroupId }
+        \cup { [tag |-> SharesLocatedCode, body |-> one] : one \in CheckedSharesLocated }
+        \cup { [tag |-> UserRefIdxCode, body |-> one] : one \in CheckedUserRefIdx }
+        \cup { [tag |-> AiqStrategyCode, body |-> one] : one \in CheckedAiqStrategy }
+        \cup { [tag |-> AiqGroupIdCode, body |-> one] : one \in CheckedAiqGroupId }
 
 (***************************************************************************)
 (* Order Accepted Appendage, framed by Optional Field Length               *)
@@ -716,7 +854,7 @@ OneOrderAcceptedAppendage ==
       [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> PriceTypeCode, body |-> ZeroPriceType]],
       [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> PegOffsetCode, body |-> ZeroPegOffset]],
       [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> DiscretionPriceCode, body |-> ZeroDiscretionPrice]],
-      [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> DiscretionPegTypeCode, body |-> ZeroDiscretionPegType]],
+      [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> DiscretionPriceTypeCode, body |-> ZeroDiscretionPriceType]],
       [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> DiscretionPegOffsetCode, body |-> ZeroDiscretionPegOffset]],
       [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> PostOnlyCode, body |-> ZeroPostOnly]],
       [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> RandomReservesCode, body |-> ZeroRandomReserves]],
@@ -724,7 +862,12 @@ OneOrderAcceptedAppendage ==
       [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> ExpireTimeCode, body |-> ZeroExpireTime]],
       [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> TradeNowCode, body |-> ZeroTradeNow]],
       [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> HandleInstCode, body |-> ZeroHandleInst]],
-      [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> BboWeightIndicatorCode, body |-> ZeroBboWeightIndicator]] }
+      [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> BboWeightIndicatorCode, body |-> ZeroBboWeightIndicator]],
+      [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> GroupIdCode, body |-> ZeroGroupId]],
+      [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> SharesLocatedCode, body |-> ZeroSharesLocated]],
+      [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> UserRefIdxCode, body |-> ZeroUserRefIdx]],
+      [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> AiqStrategyCode, body |-> ZeroAiqStrategy]],
+      [ZeroOrderAcceptedAppendage EXCEPT !.orderAcceptedOptionalValue = [tag |-> AiqGroupIdCode, body |-> ZeroAiqGroupId]] }
 
 (***************************************************************************)
 (* Order Accepted Message                                                  *)
@@ -1038,6 +1181,72 @@ CheckedBboWeightIndicator2 ==
         \cup { [ZeroBboWeightIndicator2 EXCEPT !.bboWeightIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx2 ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx2(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx2(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx2 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx2 ==
+    { ZeroUserRefIdx2 }
+        \cup { [ZeroUserRefIdx2 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Aiq Strategy: 1 bytes                                                   *)
+(***************************************************************************)
+
+AiqStrategy2 ==
+    [ aiqStrategy : Sample(1) ]
+
+EncodeAiqStrategy2(message) ==
+    message.aiqStrategy
+
+DecodeAiqStrategy2(bytes) ==
+    LET aiqStrategy == ReadBytes(bytes, 1) IN IF ~aiqStrategy.ok THEN Fail ELSE
+    Ok([ aiqStrategy |-> aiqStrategy.value ], aiqStrategy.rest)
+
+ZeroAiqStrategy2 ==
+    [ aiqStrategy |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Aiq Strategy at zero, then each field in turn at the values it is checked at *)
+CheckedAiqStrategy2 ==
+    { ZeroAiqStrategy2 }
+        \cup { [ZeroAiqStrategy2 EXCEPT !.aiqStrategy = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Aiq Group Id: 2 bytes                                                   *)
+(***************************************************************************)
+
+AiqGroupId2 ==
+    [ aiqGroupId : Sample(2) ]
+
+EncodeAiqGroupId2(message) ==
+    message.aiqGroupId
+
+DecodeAiqGroupId2(bytes) ==
+    LET aiqGroupId == ReadBytes(bytes, 2) IN IF ~aiqGroupId.ok THEN Fail ELSE
+    Ok([ aiqGroupId |-> aiqGroupId.value ], aiqGroupId.rest)
+
+ZeroAiqGroupId2 ==
+    [ aiqGroupId |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Aiq Group Id at zero, then each field in turn at the values it is checked at *)
+CheckedAiqGroupId2 ==
+    { ZeroAiqGroupId2 }
+        \cup { [ZeroAiqGroupId2 EXCEPT !.aiqGroupId = one] : one \in Sample(2) }
+
+(***************************************************************************)
 (* Replaced Message Optional Value, selected by Replaced Message Optional  *)
 (* Field                                                                   *)
 (***************************************************************************)
@@ -1051,6 +1260,9 @@ ExpireTimeCode2 == 15  \* 0x0f
 TradeNowCode2 == 16  \* 0x10
 HandleInstCode2 == 17  \* 0x11
 BboWeightIndicatorCode2 == 18  \* 0x12
+UserRefIdxCode2 == 28  \* 0x1c
+AiqStrategyCode2 == 29  \* 0x1d
+AiqGroupIdCode2 == 30  \* 0x1e
 
 ReplacedMessageOptionalValue ==
     [ tag : {FirmCode2}, body : Firm2 ]
@@ -1062,6 +1274,9 @@ ReplacedMessageOptionalValue ==
         \cup [ tag : {TradeNowCode2}, body : TradeNow2 ]
         \cup [ tag : {HandleInstCode2}, body : HandleInst2 ]
         \cup [ tag : {BboWeightIndicatorCode2}, body : BboWeightIndicator2 ]
+        \cup [ tag : {UserRefIdxCode2}, body : UserRefIdx2 ]
+        \cup [ tag : {AiqStrategyCode2}, body : AiqStrategy2 ]
+        \cup [ tag : {AiqGroupIdCode2}, body : AiqGroupId2 ]
 
 EncodeReplacedMessageOptionalValue(message) ==
     CASE message.tag = FirmCode2 -> EncodeFirm2(message.body)
@@ -1073,6 +1288,9 @@ EncodeReplacedMessageOptionalValue(message) ==
       [] message.tag = TradeNowCode2 -> EncodeTradeNow2(message.body)
       [] message.tag = HandleInstCode2 -> EncodeHandleInst2(message.body)
       [] message.tag = BboWeightIndicatorCode2 -> EncodeBboWeightIndicator2(message.body)
+      [] message.tag = UserRefIdxCode2 -> EncodeUserRefIdx2(message.body)
+      [] message.tag = AiqStrategyCode2 -> EncodeAiqStrategy2(message.body)
+      [] message.tag = AiqGroupIdCode2 -> EncodeAiqGroupId2(message.body)
 
 DecodeReplacedMessageOptionalValue(tag, bytes) ==
     LET read ==
@@ -1085,6 +1303,9 @@ DecodeReplacedMessageOptionalValue(tag, bytes) ==
               [] tag = TradeNowCode2 -> DecodeTradeNow2(bytes)
               [] tag = HandleInstCode2 -> DecodeHandleInst2(bytes)
               [] tag = BboWeightIndicatorCode2 -> DecodeBboWeightIndicator2(bytes)
+              [] tag = UserRefIdxCode2 -> DecodeUserRefIdx2(bytes)
+              [] tag = AiqStrategyCode2 -> DecodeAiqStrategy2(bytes)
+              [] tag = AiqGroupIdCode2 -> DecodeAiqGroupId2(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -1101,6 +1322,9 @@ CheckedReplacedMessageOptionalValue ==
         \cup { [tag |-> TradeNowCode2, body |-> one] : one \in CheckedTradeNow2 }
         \cup { [tag |-> HandleInstCode2, body |-> one] : one \in CheckedHandleInst2 }
         \cup { [tag |-> BboWeightIndicatorCode2, body |-> one] : one \in CheckedBboWeightIndicator2 }
+        \cup { [tag |-> UserRefIdxCode2, body |-> one] : one \in CheckedUserRefIdx2 }
+        \cup { [tag |-> AiqStrategyCode2, body |-> one] : one \in CheckedAiqStrategy2 }
+        \cup { [tag |-> AiqGroupIdCode2, body |-> one] : one \in CheckedAiqGroupId2 }
 
 (***************************************************************************)
 (* Replaced Message Appendage, framed by Optional Field Length             *)
@@ -1169,7 +1393,10 @@ OneReplacedMessageAppendage ==
       [ZeroReplacedMessageAppendage EXCEPT !.replacedMessageOptionalValue = [tag |-> ExpireTimeCode2, body |-> ZeroExpireTime2]],
       [ZeroReplacedMessageAppendage EXCEPT !.replacedMessageOptionalValue = [tag |-> TradeNowCode2, body |-> ZeroTradeNow2]],
       [ZeroReplacedMessageAppendage EXCEPT !.replacedMessageOptionalValue = [tag |-> HandleInstCode2, body |-> ZeroHandleInst2]],
-      [ZeroReplacedMessageAppendage EXCEPT !.replacedMessageOptionalValue = [tag |-> BboWeightIndicatorCode2, body |-> ZeroBboWeightIndicator2]] }
+      [ZeroReplacedMessageAppendage EXCEPT !.replacedMessageOptionalValue = [tag |-> BboWeightIndicatorCode2, body |-> ZeroBboWeightIndicator2]],
+      [ZeroReplacedMessageAppendage EXCEPT !.replacedMessageOptionalValue = [tag |-> UserRefIdxCode2, body |-> ZeroUserRefIdx2]],
+      [ZeroReplacedMessageAppendage EXCEPT !.replacedMessageOptionalValue = [tag |-> AiqStrategyCode2, body |-> ZeroAiqStrategy2]],
+      [ZeroReplacedMessageAppendage EXCEPT !.replacedMessageOptionalValue = [tag |-> AiqGroupIdCode2, body |-> ZeroAiqGroupId2]] }
 
 (***************************************************************************)
 (* Replaced Message                                                        *)
@@ -1291,36 +1518,191 @@ CheckedReplacedMessage ==
         \cup { [ZeroReplacedMessage EXCEPT !.replacedMessageAppendage = one] : one \in SampleLists(OneReplacedMessageAppendage) }
 
 (***************************************************************************)
-(* Canceled Message: 17 bytes                                              *)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx3 ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx3(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx3(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx3 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx3 ==
+    { ZeroUserRefIdx3 }
+        \cup { [ZeroUserRefIdx3 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Canceled Message Optional Value, selected by Canceled Message Optional  *)
+(* Field                                                                   *)
+(***************************************************************************)
+
+UserRefIdxCode3 == 28  \* 0x1c
+
+CanceledMessageOptionalValue ==
+    [ tag : {UserRefIdxCode3}, body : UserRefIdx3 ]
+
+EncodeCanceledMessageOptionalValue(message) ==
+    CASE message.tag = UserRefIdxCode3 -> EncodeUserRefIdx3(message.body)
+
+DecodeCanceledMessageOptionalValue(tag, bytes) ==
+    LET read ==
+            CASE tag = UserRefIdxCode3 -> DecodeUserRefIdx3(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroCanceledMessageOptionalValue == [tag |-> UserRefIdxCode3, body |-> ZeroUserRefIdx3]
+
+(* Each Canceled Message Optional Value in turn, at the values the message it names is checked at *)
+CheckedCanceledMessageOptionalValue ==
+    { [tag |-> UserRefIdxCode3, body |-> one] : one \in CheckedUserRefIdx3 }
+
+(***************************************************************************)
+(* Canceled Message Appendage, framed by Optional Field Length             *)
+(***************************************************************************)
+
+CanceledMessageAppendage ==
+    [ canceledMessageOptionalValue : CanceledMessageOptionalValue ]
+
+EncodeCanceledMessageAppendageBody(message) ==
+    EncodeUIntBE(message.canceledMessageOptionalValue.tag, 1)
+        \o EncodeCanceledMessageOptionalValue(message.canceledMessageOptionalValue)
+
+(* Optional Field Length counts the bytes it frames, so it is written from them *)
+EncodeCanceledMessageAppendage(message) ==
+    LET body == EncodeCanceledMessageAppendageBody(message)
+    IN  EncodeUIntBE(Len(body), 1) \o body
+
+DecodeCanceledMessageAppendageBody(bytes) ==
+    LET canceledMessageOptionalField == ReadUIntBE(bytes, 1) IN IF ~canceledMessageOptionalField.ok THEN Fail ELSE
+    LET canceledMessageOptionalValue == DecodeCanceledMessageOptionalValue(canceledMessageOptionalField.value, canceledMessageOptionalField.rest) IN IF ~canceledMessageOptionalValue.ok THEN Fail ELSE
+    Ok([ canceledMessageOptionalValue |-> canceledMessageOptionalValue.value ], canceledMessageOptionalValue.rest)
+
+DecodeCanceledMessageAppendage(bytes) ==
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    IF Len(length.rest) < length.value THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, length.value)
+        beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
+        body   == DecodeCanceledMessageAppendageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroCanceledMessageAppendage ==
+    [ canceledMessageOptionalValue |-> ZeroCanceledMessageOptionalValue ]
+
+(* Canceled Message Appendage at zero, then each field in turn at the values it is checked at *)
+CheckedCanceledMessageAppendage ==
+    { ZeroCanceledMessageAppendage }
+        \cup { [ZeroCanceledMessageAppendage EXCEPT !.canceledMessageOptionalValue = one] : one \in CheckedCanceledMessageOptionalValue }
+
+(* A run of Canceled Message Appendage, written one after another *)
+RECURSIVE EncodeCanceledMessageAppendageList(_)
+EncodeCanceledMessageAppendageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeCanceledMessageAppendage(Head(messages)) \o EncodeCanceledMessageAppendageList(Tail(messages))
+
+(* As many Canceled Message Appendage as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadCanceledMessageAppendageAll(_)
+ReadCanceledMessageAppendageAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeCanceledMessageAppendage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadCanceledMessageAppendageAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Canceled Message Appendage of each kind, for the lists that carry them *)
+OneCanceledMessageAppendage ==
+    { [ZeroCanceledMessageAppendage EXCEPT !.canceledMessageOptionalValue = [tag |-> UserRefIdxCode3, body |-> ZeroUserRefIdx3]] }
+
+(***************************************************************************)
+(* Canceled Message                                                        *)
+(***************************************************************************)
+
+CanceledMessageTail ==
+    [ canceledMessageAppendage : SampleLists(OneCanceledMessageAppendage) ]
+
+EncodeCanceledMessageTail(message) ==
+    LET payload == EncodeCanceledMessageAppendageList(message.canceledMessageAppendage)
+    IN  EncodeUIntBE(Len(payload), 2)
+            \o payload
+
+DecodeCanceledMessageTail(bytes) ==
+    LET appendageLength == ReadUIntBE(bytes, 2) IN IF ~appendageLength.ok THEN Fail ELSE
+    IF Len(appendageLength.rest) < appendageLength.value THEN Fail ELSE
+    LET framed == SubSeq(appendageLength.rest, 1, appendageLength.value)
+        beyond == SubSeq(appendageLength.rest, appendageLength.value + 1, Len(appendageLength.rest))
+        canceledMessageAppendage == ReadCanceledMessageAppendageAll(framed)
+    IN  IF ~canceledMessageAppendage.ok \/ canceledMessageAppendage.rest # << >> THEN Fail ELSE
+    Ok([ canceledMessageAppendage |-> canceledMessageAppendage.value ], beyond)
+
+ZeroCanceledMessageTail ==
+    [ canceledMessageAppendage |-> << >> ]
+
+(* Canceled Message at zero, then each field in turn at the values it is checked at *)
+CheckedCanceledMessageTail ==
+    { ZeroCanceledMessageTail }
+        \cup { [ZeroCanceledMessageTail EXCEPT !.canceledMessageAppendage = one] : one \in SampleLists(OneCanceledMessageAppendage) }
+
+(* Canceled Message runs on only when bytes remain, so it is there or it is not *)
+WithoutCanceledMessageTail == [there |-> FALSE, value |-> ZeroCanceledMessageTail]
+
+MaybeCanceledMessageTail ==
+    { WithoutCanceledMessageTail }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedCanceledMessageTail }
+
+ReadCanceledMessageTailMaybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutCanceledMessageTail, << >>)
+    ELSE LET one == DecodeCanceledMessageTail(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Canceled Message                                                        *)
 (***************************************************************************)
 
 CanceledMessage ==
-    [ timestamp         : Sample(8),
-      userRefNum        : Sample(4),
-      quantity          : Sample(4),
-      cancelOrderReason : Sample(1) ]
+    [ timestamp           : Sample(8),
+      userRefNum          : Sample(4),
+      quantity            : Sample(4),
+      cancelOrderReason   : Sample(1),
+      canceledMessageTail : MaybeCanceledMessageTail ]
 
 EncodeCanceledMessage(message) ==
     message.timestamp
         \o message.userRefNum
         \o message.quantity
         \o message.cancelOrderReason
+        \o IF message.canceledMessageTail.there THEN EncodeCanceledMessageTail(message.canceledMessageTail.value) ELSE << >>
 
 DecodeCanceledMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET userRefNum == ReadBytes(timestamp.rest, 4) IN IF ~userRefNum.ok THEN Fail ELSE
     LET quantity == ReadBytes(userRefNum.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
     LET cancelOrderReason == ReadBytes(quantity.rest, 1) IN IF ~cancelOrderReason.ok THEN Fail ELSE
-    Ok([ timestamp         |-> timestamp.value,
-         userRefNum        |-> userRefNum.value,
-         quantity          |-> quantity.value,
-         cancelOrderReason |-> cancelOrderReason.value ], cancelOrderReason.rest)
+    LET canceledMessageTail == ReadCanceledMessageTailMaybe(cancelOrderReason.rest) IN IF ~canceledMessageTail.ok THEN Fail ELSE
+    Ok([ timestamp           |-> timestamp.value,
+         userRefNum          |-> userRefNum.value,
+         quantity            |-> quantity.value,
+         cancelOrderReason   |-> cancelOrderReason.value,
+         canceledMessageTail |-> canceledMessageTail.value ], canceledMessageTail.rest)
 
 ZeroCanceledMessage ==
-    [ timestamp         |-> [i \in 1 .. 8 |-> 0],
-      userRefNum        |-> [i \in 1 .. 4 |-> 0],
-      quantity          |-> [i \in 1 .. 4 |-> 0],
-      cancelOrderReason |-> [i \in 1 .. 1 |-> 0] ]
+    [ timestamp           |-> [i \in 1 .. 8 |-> 0],
+      userRefNum          |-> [i \in 1 .. 4 |-> 0],
+      quantity            |-> [i \in 1 .. 4 |-> 0],
+      cancelOrderReason   |-> [i \in 1 .. 1 |-> 0],
+      canceledMessageTail |-> WithoutCanceledMessageTail ]
 
 (* Canceled Message at zero, then each field in turn at the values it is checked at *)
 CheckedCanceledMessage ==
@@ -1329,9 +1711,159 @@ CheckedCanceledMessage ==
         \cup { [ZeroCanceledMessage EXCEPT !.userRefNum = one] : one \in Sample(4) }
         \cup { [ZeroCanceledMessage EXCEPT !.quantity = one] : one \in Sample(4) }
         \cup { [ZeroCanceledMessage EXCEPT !.cancelOrderReason = one] : one \in Sample(1) }
+        \cup { [ZeroCanceledMessage EXCEPT !.canceledMessageTail = one] : one \in MaybeCanceledMessageTail }
 
 (***************************************************************************)
-(* Aiq Canceled Message: 30 bytes                                          *)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx4 ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx4(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx4(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx4 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx4 ==
+    { ZeroUserRefIdx4 }
+        \cup { [ZeroUserRefIdx4 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Aiq Canceled Optional Value, selected by Aiq Canceled Optional Field    *)
+(***************************************************************************)
+
+UserRefIdxCode4 == 28  \* 0x1c
+
+AiqCanceledOptionalValue ==
+    [ tag : {UserRefIdxCode4}, body : UserRefIdx4 ]
+
+EncodeAiqCanceledOptionalValue(message) ==
+    CASE message.tag = UserRefIdxCode4 -> EncodeUserRefIdx4(message.body)
+
+DecodeAiqCanceledOptionalValue(tag, bytes) ==
+    LET read ==
+            CASE tag = UserRefIdxCode4 -> DecodeUserRefIdx4(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroAiqCanceledOptionalValue == [tag |-> UserRefIdxCode4, body |-> ZeroUserRefIdx4]
+
+(* Each Aiq Canceled Optional Value in turn, at the values the message it names is checked at *)
+CheckedAiqCanceledOptionalValue ==
+    { [tag |-> UserRefIdxCode4, body |-> one] : one \in CheckedUserRefIdx4 }
+
+(***************************************************************************)
+(* Aiq Canceled Appendage, framed by Optional Field Length                 *)
+(***************************************************************************)
+
+AiqCanceledAppendage ==
+    [ aiqCanceledOptionalValue : AiqCanceledOptionalValue ]
+
+EncodeAiqCanceledAppendageBody(message) ==
+    EncodeUIntBE(message.aiqCanceledOptionalValue.tag, 1)
+        \o EncodeAiqCanceledOptionalValue(message.aiqCanceledOptionalValue)
+
+(* Optional Field Length counts the bytes it frames, so it is written from them *)
+EncodeAiqCanceledAppendage(message) ==
+    LET body == EncodeAiqCanceledAppendageBody(message)
+    IN  EncodeUIntBE(Len(body), 1) \o body
+
+DecodeAiqCanceledAppendageBody(bytes) ==
+    LET aiqCanceledOptionalField == ReadUIntBE(bytes, 1) IN IF ~aiqCanceledOptionalField.ok THEN Fail ELSE
+    LET aiqCanceledOptionalValue == DecodeAiqCanceledOptionalValue(aiqCanceledOptionalField.value, aiqCanceledOptionalField.rest) IN IF ~aiqCanceledOptionalValue.ok THEN Fail ELSE
+    Ok([ aiqCanceledOptionalValue |-> aiqCanceledOptionalValue.value ], aiqCanceledOptionalValue.rest)
+
+DecodeAiqCanceledAppendage(bytes) ==
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    IF Len(length.rest) < length.value THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, length.value)
+        beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
+        body   == DecodeAiqCanceledAppendageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroAiqCanceledAppendage ==
+    [ aiqCanceledOptionalValue |-> ZeroAiqCanceledOptionalValue ]
+
+(* Aiq Canceled Appendage at zero, then each field in turn at the values it is checked at *)
+CheckedAiqCanceledAppendage ==
+    { ZeroAiqCanceledAppendage }
+        \cup { [ZeroAiqCanceledAppendage EXCEPT !.aiqCanceledOptionalValue = one] : one \in CheckedAiqCanceledOptionalValue }
+
+(* A run of Aiq Canceled Appendage, written one after another *)
+RECURSIVE EncodeAiqCanceledAppendageList(_)
+EncodeAiqCanceledAppendageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeAiqCanceledAppendage(Head(messages)) \o EncodeAiqCanceledAppendageList(Tail(messages))
+
+(* As many Aiq Canceled Appendage as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadAiqCanceledAppendageAll(_)
+ReadAiqCanceledAppendageAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeAiqCanceledAppendage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadAiqCanceledAppendageAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Aiq Canceled Appendage of each kind, for the lists that carry them *)
+OneAiqCanceledAppendage ==
+    { [ZeroAiqCanceledAppendage EXCEPT !.aiqCanceledOptionalValue = [tag |-> UserRefIdxCode4, body |-> ZeroUserRefIdx4]] }
+
+(***************************************************************************)
+(* Aiq Canceled Message                                                    *)
+(***************************************************************************)
+
+AiqCanceledMessageTail ==
+    [ aiqCanceledAppendage : SampleLists(OneAiqCanceledAppendage) ]
+
+EncodeAiqCanceledMessageTail(message) ==
+    LET payload == EncodeAiqCanceledAppendageList(message.aiqCanceledAppendage)
+    IN  EncodeUIntBE(Len(payload), 2)
+            \o payload
+
+DecodeAiqCanceledMessageTail(bytes) ==
+    LET appendageLength == ReadUIntBE(bytes, 2) IN IF ~appendageLength.ok THEN Fail ELSE
+    IF Len(appendageLength.rest) < appendageLength.value THEN Fail ELSE
+    LET framed == SubSeq(appendageLength.rest, 1, appendageLength.value)
+        beyond == SubSeq(appendageLength.rest, appendageLength.value + 1, Len(appendageLength.rest))
+        aiqCanceledAppendage == ReadAiqCanceledAppendageAll(framed)
+    IN  IF ~aiqCanceledAppendage.ok \/ aiqCanceledAppendage.rest # << >> THEN Fail ELSE
+    Ok([ aiqCanceledAppendage |-> aiqCanceledAppendage.value ], beyond)
+
+ZeroAiqCanceledMessageTail ==
+    [ aiqCanceledAppendage |-> << >> ]
+
+(* Aiq Canceled Message at zero, then each field in turn at the values it is checked at *)
+CheckedAiqCanceledMessageTail ==
+    { ZeroAiqCanceledMessageTail }
+        \cup { [ZeroAiqCanceledMessageTail EXCEPT !.aiqCanceledAppendage = one] : one \in SampleLists(OneAiqCanceledAppendage) }
+
+(* Aiq Canceled Message runs on only when bytes remain, so it is there or it is not *)
+WithoutAiqCanceledMessageTail == [there |-> FALSE, value |-> ZeroAiqCanceledMessageTail]
+
+MaybeAiqCanceledMessageTail ==
+    { WithoutAiqCanceledMessageTail }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedAiqCanceledMessageTail }
+
+ReadAiqCanceledMessageTailMaybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutAiqCanceledMessageTail, << >>)
+    ELSE LET one == DecodeAiqCanceledMessageTail(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Aiq Canceled Message                                                    *)
 (***************************************************************************)
 
 AiqCanceledMessage ==
@@ -1341,7 +1873,9 @@ AiqCanceledMessage ==
       orderCancelReason            : Sample(1),
       quantityPreventedFromTrading : Sample(4),
       executionPrice               : Sample(8),
-      liquidityFlag                : Sample(1) ]
+      liquidityFlag                : Sample(1),
+      aiqStrategy                  : Sample(1),
+      aiqCanceledMessageTail       : MaybeAiqCanceledMessageTail ]
 
 EncodeAiqCanceledMessage(message) ==
     message.timestamp
@@ -1351,6 +1885,8 @@ EncodeAiqCanceledMessage(message) ==
         \o message.quantityPreventedFromTrading
         \o message.executionPrice
         \o message.liquidityFlag
+        \o message.aiqStrategy
+        \o IF message.aiqCanceledMessageTail.there THEN EncodeAiqCanceledMessageTail(message.aiqCanceledMessageTail.value) ELSE << >>
 
 DecodeAiqCanceledMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
@@ -1360,13 +1896,17 @@ DecodeAiqCanceledMessage(bytes) ==
     LET quantityPreventedFromTrading == ReadBytes(orderCancelReason.rest, 4) IN IF ~quantityPreventedFromTrading.ok THEN Fail ELSE
     LET executionPrice == ReadBytes(quantityPreventedFromTrading.rest, 8) IN IF ~executionPrice.ok THEN Fail ELSE
     LET liquidityFlag == ReadBytes(executionPrice.rest, 1) IN IF ~liquidityFlag.ok THEN Fail ELSE
+    LET aiqStrategy == ReadBytes(liquidityFlag.rest, 1) IN IF ~aiqStrategy.ok THEN Fail ELSE
+    LET aiqCanceledMessageTail == ReadAiqCanceledMessageTailMaybe(aiqStrategy.rest) IN IF ~aiqCanceledMessageTail.ok THEN Fail ELSE
     Ok([ timestamp                    |-> timestamp.value,
          userRefNum                   |-> userRefNum.value,
          decrementShares              |-> decrementShares.value,
          orderCancelReason            |-> orderCancelReason.value,
          quantityPreventedFromTrading |-> quantityPreventedFromTrading.value,
          executionPrice               |-> executionPrice.value,
-         liquidityFlag                |-> liquidityFlag.value ], liquidityFlag.rest)
+         liquidityFlag                |-> liquidityFlag.value,
+         aiqStrategy                  |-> aiqStrategy.value,
+         aiqCanceledMessageTail       |-> aiqCanceledMessageTail.value ], aiqCanceledMessageTail.rest)
 
 ZeroAiqCanceledMessage ==
     [ timestamp                    |-> [i \in 1 .. 8 |-> 0],
@@ -1375,7 +1915,9 @@ ZeroAiqCanceledMessage ==
       orderCancelReason            |-> [i \in 1 .. 1 |-> 0],
       quantityPreventedFromTrading |-> [i \in 1 .. 4 |-> 0],
       executionPrice               |-> [i \in 1 .. 8 |-> 0],
-      liquidityFlag                |-> [i \in 1 .. 1 |-> 0] ]
+      liquidityFlag                |-> [i \in 1 .. 1 |-> 0],
+      aiqStrategy                  |-> [i \in 1 .. 1 |-> 0],
+      aiqCanceledMessageTail       |-> WithoutAiqCanceledMessageTail ]
 
 (* Aiq Canceled Message at zero, then each field in turn at the values it is checked at *)
 CheckedAiqCanceledMessage ==
@@ -1387,80 +1929,55 @@ CheckedAiqCanceledMessage ==
         \cup { [ZeroAiqCanceledMessage EXCEPT !.quantityPreventedFromTrading = one] : one \in Sample(4) }
         \cup { [ZeroAiqCanceledMessage EXCEPT !.executionPrice = one] : one \in Sample(8) }
         \cup { [ZeroAiqCanceledMessage EXCEPT !.liquidityFlag = one] : one \in Sample(1) }
+        \cup { [ZeroAiqCanceledMessage EXCEPT !.aiqStrategy = one] : one \in Sample(1) }
+        \cup { [ZeroAiqCanceledMessage EXCEPT !.aiqCanceledMessageTail = one] : one \in MaybeAiqCanceledMessageTail }
 
 (***************************************************************************)
-(* Reference Price: 8 bytes                                                *)
+(* User Ref Idx: 1 bytes                                                   *)
 (***************************************************************************)
 
-ReferencePrice ==
-    [ referencePrice : Sample(8) ]
+UserRefIdx5 ==
+    [ userRefIdx : Sample(1) ]
 
-EncodeReferencePrice(message) ==
-    message.referencePrice
+EncodeUserRefIdx5(message) ==
+    message.userRefIdx
 
-DecodeReferencePrice(bytes) ==
-    LET referencePrice == ReadBytes(bytes, 8) IN IF ~referencePrice.ok THEN Fail ELSE
-    Ok([ referencePrice |-> referencePrice.value ], referencePrice.rest)
+DecodeUserRefIdx5(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
 
-ZeroReferencePrice ==
-    [ referencePrice |-> [i \in 1 .. 8 |-> 0] ]
+ZeroUserRefIdx5 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Reference Price at zero, then each field in turn at the values it is checked at *)
-CheckedReferencePrice ==
-    { ZeroReferencePrice }
-        \cup { [ZeroReferencePrice EXCEPT !.referencePrice = one] : one \in Sample(8) }
-
-(***************************************************************************)
-(* Reference Price Type: 1 bytes                                           *)
-(***************************************************************************)
-
-ReferencePriceType ==
-    [ referencePriceType : Sample(1) ]
-
-EncodeReferencePriceType(message) ==
-    message.referencePriceType
-
-DecodeReferencePriceType(bytes) ==
-    LET referencePriceType == ReadBytes(bytes, 1) IN IF ~referencePriceType.ok THEN Fail ELSE
-    Ok([ referencePriceType |-> referencePriceType.value ], referencePriceType.rest)
-
-ZeroReferencePriceType ==
-    [ referencePriceType |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Reference Price Type at zero, then each field in turn at the values it is checked at *)
-CheckedReferencePriceType ==
-    { ZeroReferencePriceType }
-        \cup { [ZeroReferencePriceType EXCEPT !.referencePriceType = one] : one \in Sample(1) }
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx5 ==
+    { ZeroUserRefIdx5 }
+        \cup { [ZeroUserRefIdx5 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Order Executed Optional Value, selected by Order Executed Optional      *)
 (* Field                                                                   *)
 (***************************************************************************)
 
-ReferencePriceCode == 19  \* 0x13
-ReferencePriceTypeCode == 20  \* 0x14
+UserRefIdxCode5 == 28  \* 0x1c
 
 OrderExecutedOptionalValue ==
-    [ tag : {ReferencePriceCode}, body : ReferencePrice ]
-        \cup [ tag : {ReferencePriceTypeCode}, body : ReferencePriceType ]
+    [ tag : {UserRefIdxCode5}, body : UserRefIdx5 ]
 
 EncodeOrderExecutedOptionalValue(message) ==
-    CASE message.tag = ReferencePriceCode -> EncodeReferencePrice(message.body)
-      [] message.tag = ReferencePriceTypeCode -> EncodeReferencePriceType(message.body)
+    CASE message.tag = UserRefIdxCode5 -> EncodeUserRefIdx5(message.body)
 
 DecodeOrderExecutedOptionalValue(tag, bytes) ==
     LET read ==
-            CASE tag = ReferencePriceCode -> DecodeReferencePrice(bytes)
-              [] tag = ReferencePriceTypeCode -> DecodeReferencePriceType(bytes)
+            CASE tag = UserRefIdxCode5 -> DecodeUserRefIdx5(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroOrderExecutedOptionalValue == [tag |-> ReferencePriceCode, body |-> ZeroReferencePrice]
+ZeroOrderExecutedOptionalValue == [tag |-> UserRefIdxCode5, body |-> ZeroUserRefIdx5]
 
 (* Each Order Executed Optional Value in turn, at the values the message it names is checked at *)
 CheckedOrderExecutedOptionalValue ==
-    { [tag |-> ReferencePriceCode, body |-> one] : one \in CheckedReferencePrice }
-        \cup { [tag |-> ReferencePriceTypeCode, body |-> one] : one \in CheckedReferencePriceType }
+    { [tag |-> UserRefIdxCode5, body |-> one] : one \in CheckedUserRefIdx5 }
 
 (***************************************************************************)
 (* Order Executed Appendage, framed by Optional Field Length               *)
@@ -1521,8 +2038,7 @@ ReadOrderExecutedAppendageAll(bytes) ==
 
 (* One Order Executed Appendage of each kind, for the lists that carry them *)
 OneOrderExecutedAppendage ==
-    { [ZeroOrderExecutedAppendage EXCEPT !.orderExecutedOptionalValue = [tag |-> ReferencePriceCode, body |-> ZeroReferencePrice]],
-      [ZeroOrderExecutedAppendage EXCEPT !.orderExecutedOptionalValue = [tag |-> ReferencePriceTypeCode, body |-> ZeroReferencePriceType]] }
+    { [ZeroOrderExecutedAppendage EXCEPT !.orderExecutedOptionalValue = [tag |-> UserRefIdxCode5, body |-> ZeroUserRefIdx5]] }
 
 (***************************************************************************)
 (* Order Executed Message                                                  *)
@@ -1590,15 +2106,165 @@ CheckedOrderExecutedMessage ==
         \cup { [ZeroOrderExecutedMessage EXCEPT !.orderExecutedAppendage = one] : one \in SampleLists(OneOrderExecutedAppendage) }
 
 (***************************************************************************)
-(* Broken Trade Message: 35 bytes                                          *)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx6 ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx6(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx6(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx6 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx6 ==
+    { ZeroUserRefIdx6 }
+        \cup { [ZeroUserRefIdx6 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Broken Trade Optional Value, selected by Broken Trade Optional Field    *)
+(***************************************************************************)
+
+UserRefIdxCode6 == 28  \* 0x1c
+
+BrokenTradeOptionalValue ==
+    [ tag : {UserRefIdxCode6}, body : UserRefIdx6 ]
+
+EncodeBrokenTradeOptionalValue(message) ==
+    CASE message.tag = UserRefIdxCode6 -> EncodeUserRefIdx6(message.body)
+
+DecodeBrokenTradeOptionalValue(tag, bytes) ==
+    LET read ==
+            CASE tag = UserRefIdxCode6 -> DecodeUserRefIdx6(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroBrokenTradeOptionalValue == [tag |-> UserRefIdxCode6, body |-> ZeroUserRefIdx6]
+
+(* Each Broken Trade Optional Value in turn, at the values the message it names is checked at *)
+CheckedBrokenTradeOptionalValue ==
+    { [tag |-> UserRefIdxCode6, body |-> one] : one \in CheckedUserRefIdx6 }
+
+(***************************************************************************)
+(* Broken Trade Appendage, framed by Optional Field Length                 *)
+(***************************************************************************)
+
+BrokenTradeAppendage ==
+    [ brokenTradeOptionalValue : BrokenTradeOptionalValue ]
+
+EncodeBrokenTradeAppendageBody(message) ==
+    EncodeUIntBE(message.brokenTradeOptionalValue.tag, 1)
+        \o EncodeBrokenTradeOptionalValue(message.brokenTradeOptionalValue)
+
+(* Optional Field Length counts the bytes it frames, so it is written from them *)
+EncodeBrokenTradeAppendage(message) ==
+    LET body == EncodeBrokenTradeAppendageBody(message)
+    IN  EncodeUIntBE(Len(body), 1) \o body
+
+DecodeBrokenTradeAppendageBody(bytes) ==
+    LET brokenTradeOptionalField == ReadUIntBE(bytes, 1) IN IF ~brokenTradeOptionalField.ok THEN Fail ELSE
+    LET brokenTradeOptionalValue == DecodeBrokenTradeOptionalValue(brokenTradeOptionalField.value, brokenTradeOptionalField.rest) IN IF ~brokenTradeOptionalValue.ok THEN Fail ELSE
+    Ok([ brokenTradeOptionalValue |-> brokenTradeOptionalValue.value ], brokenTradeOptionalValue.rest)
+
+DecodeBrokenTradeAppendage(bytes) ==
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    IF Len(length.rest) < length.value THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, length.value)
+        beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
+        body   == DecodeBrokenTradeAppendageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroBrokenTradeAppendage ==
+    [ brokenTradeOptionalValue |-> ZeroBrokenTradeOptionalValue ]
+
+(* Broken Trade Appendage at zero, then each field in turn at the values it is checked at *)
+CheckedBrokenTradeAppendage ==
+    { ZeroBrokenTradeAppendage }
+        \cup { [ZeroBrokenTradeAppendage EXCEPT !.brokenTradeOptionalValue = one] : one \in CheckedBrokenTradeOptionalValue }
+
+(* A run of Broken Trade Appendage, written one after another *)
+RECURSIVE EncodeBrokenTradeAppendageList(_)
+EncodeBrokenTradeAppendageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBrokenTradeAppendage(Head(messages)) \o EncodeBrokenTradeAppendageList(Tail(messages))
+
+(* As many Broken Trade Appendage as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadBrokenTradeAppendageAll(_)
+ReadBrokenTradeAppendageAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeBrokenTradeAppendage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBrokenTradeAppendageAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Broken Trade Appendage of each kind, for the lists that carry them *)
+OneBrokenTradeAppendage ==
+    { [ZeroBrokenTradeAppendage EXCEPT !.brokenTradeOptionalValue = [tag |-> UserRefIdxCode6, body |-> ZeroUserRefIdx6]] }
+
+(***************************************************************************)
+(* Broken Trade Message                                                    *)
+(***************************************************************************)
+
+BrokenTradeMessageTail ==
+    [ brokenTradeAppendage : SampleLists(OneBrokenTradeAppendage) ]
+
+EncodeBrokenTradeMessageTail(message) ==
+    LET payload == EncodeBrokenTradeAppendageList(message.brokenTradeAppendage)
+    IN  EncodeUIntBE(Len(payload), 2)
+            \o payload
+
+DecodeBrokenTradeMessageTail(bytes) ==
+    LET appendageLength == ReadUIntBE(bytes, 2) IN IF ~appendageLength.ok THEN Fail ELSE
+    IF Len(appendageLength.rest) < appendageLength.value THEN Fail ELSE
+    LET framed == SubSeq(appendageLength.rest, 1, appendageLength.value)
+        beyond == SubSeq(appendageLength.rest, appendageLength.value + 1, Len(appendageLength.rest))
+        brokenTradeAppendage == ReadBrokenTradeAppendageAll(framed)
+    IN  IF ~brokenTradeAppendage.ok \/ brokenTradeAppendage.rest # << >> THEN Fail ELSE
+    Ok([ brokenTradeAppendage |-> brokenTradeAppendage.value ], beyond)
+
+ZeroBrokenTradeMessageTail ==
+    [ brokenTradeAppendage |-> << >> ]
+
+(* Broken Trade Message at zero, then each field in turn at the values it is checked at *)
+CheckedBrokenTradeMessageTail ==
+    { ZeroBrokenTradeMessageTail }
+        \cup { [ZeroBrokenTradeMessageTail EXCEPT !.brokenTradeAppendage = one] : one \in SampleLists(OneBrokenTradeAppendage) }
+
+(* Broken Trade Message runs on only when bytes remain, so it is there or it is not *)
+WithoutBrokenTradeMessageTail == [there |-> FALSE, value |-> ZeroBrokenTradeMessageTail]
+
+MaybeBrokenTradeMessageTail ==
+    { WithoutBrokenTradeMessageTail }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedBrokenTradeMessageTail }
+
+ReadBrokenTradeMessageTailMaybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutBrokenTradeMessageTail, << >>)
+    ELSE LET one == DecodeBrokenTradeMessageTail(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Broken Trade Message                                                    *)
 (***************************************************************************)
 
 BrokenTradeMessage ==
-    [ timestamp         : Sample(8),
-      userRefNum        : Sample(4),
-      matchNumber       : Sample(8),
-      brokenTradeReason : Sample(1),
-      clordid           : Sample(14) ]
+    [ timestamp              : Sample(8),
+      userRefNum             : Sample(4),
+      matchNumber            : Sample(8),
+      brokenTradeReason      : Sample(1),
+      clordid                : Sample(14),
+      brokenTradeMessageTail : MaybeBrokenTradeMessageTail ]
 
 EncodeBrokenTradeMessage(message) ==
     message.timestamp
@@ -1606,6 +2272,7 @@ EncodeBrokenTradeMessage(message) ==
         \o message.matchNumber
         \o message.brokenTradeReason
         \o message.clordid
+        \o IF message.brokenTradeMessageTail.there THEN EncodeBrokenTradeMessageTail(message.brokenTradeMessageTail.value) ELSE << >>
 
 DecodeBrokenTradeMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
@@ -1613,18 +2280,21 @@ DecodeBrokenTradeMessage(bytes) ==
     LET matchNumber == ReadBytes(userRefNum.rest, 8) IN IF ~matchNumber.ok THEN Fail ELSE
     LET brokenTradeReason == ReadBytes(matchNumber.rest, 1) IN IF ~brokenTradeReason.ok THEN Fail ELSE
     LET clordid == ReadBytes(brokenTradeReason.rest, 14) IN IF ~clordid.ok THEN Fail ELSE
-    Ok([ timestamp         |-> timestamp.value,
-         userRefNum        |-> userRefNum.value,
-         matchNumber       |-> matchNumber.value,
-         brokenTradeReason |-> brokenTradeReason.value,
-         clordid           |-> clordid.value ], clordid.rest)
+    LET brokenTradeMessageTail == ReadBrokenTradeMessageTailMaybe(clordid.rest) IN IF ~brokenTradeMessageTail.ok THEN Fail ELSE
+    Ok([ timestamp              |-> timestamp.value,
+         userRefNum             |-> userRefNum.value,
+         matchNumber            |-> matchNumber.value,
+         brokenTradeReason      |-> brokenTradeReason.value,
+         clordid                |-> clordid.value,
+         brokenTradeMessageTail |-> brokenTradeMessageTail.value ], brokenTradeMessageTail.rest)
 
 ZeroBrokenTradeMessage ==
-    [ timestamp         |-> [i \in 1 .. 8 |-> 0],
-      userRefNum        |-> [i \in 1 .. 4 |-> 0],
-      matchNumber       |-> [i \in 1 .. 8 |-> 0],
-      brokenTradeReason |-> [i \in 1 .. 1 |-> 0],
-      clordid           |-> [i \in 1 .. 14 |-> 0] ]
+    [ timestamp              |-> [i \in 1 .. 8 |-> 0],
+      userRefNum             |-> [i \in 1 .. 4 |-> 0],
+      matchNumber            |-> [i \in 1 .. 8 |-> 0],
+      brokenTradeReason      |-> [i \in 1 .. 1 |-> 0],
+      clordid                |-> [i \in 1 .. 14 |-> 0],
+      brokenTradeMessageTail |-> WithoutBrokenTradeMessageTail ]
 
 (* Broken Trade Message at zero, then each field in turn at the values it is checked at *)
 CheckedBrokenTradeMessage ==
@@ -1634,102 +2304,194 @@ CheckedBrokenTradeMessage ==
         \cup { [ZeroBrokenTradeMessage EXCEPT !.matchNumber = one] : one \in Sample(8) }
         \cup { [ZeroBrokenTradeMessage EXCEPT !.brokenTradeReason = one] : one \in Sample(1) }
         \cup { [ZeroBrokenTradeMessage EXCEPT !.clordid = one] : one \in Sample(14) }
+        \cup { [ZeroBrokenTradeMessage EXCEPT !.brokenTradeMessageTail = one] : one \in MaybeBrokenTradeMessageTail }
 
 (***************************************************************************)
-(* Trade Correction Message: 48 bytes                                      *)
+(* User Ref Idx: 1 bytes                                                   *)
 (***************************************************************************)
 
-TradeCorrectionMessage ==
-    [ timestamp             : Sample(8),
-      userRefNum            : Sample(4),
-      quantity              : Sample(4),
-      price                 : Sample(8),
-      liquidityFlag         : Sample(1),
-      matchNumber           : Sample(8),
-      tradeCorrectionReason : Sample(1),
-      clordid               : Sample(14) ]
+UserRefIdx7 ==
+    [ userRefIdx : Sample(1) ]
 
-EncodeTradeCorrectionMessage(message) ==
-    message.timestamp
-        \o message.userRefNum
-        \o message.quantity
-        \o message.price
-        \o message.liquidityFlag
-        \o message.matchNumber
-        \o message.tradeCorrectionReason
-        \o message.clordid
+EncodeUserRefIdx7(message) ==
+    message.userRefIdx
 
-DecodeTradeCorrectionMessage(bytes) ==
-    LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
-    LET userRefNum == ReadBytes(timestamp.rest, 4) IN IF ~userRefNum.ok THEN Fail ELSE
-    LET quantity == ReadBytes(userRefNum.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
-    LET price == ReadBytes(quantity.rest, 8) IN IF ~price.ok THEN Fail ELSE
-    LET liquidityFlag == ReadBytes(price.rest, 1) IN IF ~liquidityFlag.ok THEN Fail ELSE
-    LET matchNumber == ReadBytes(liquidityFlag.rest, 8) IN IF ~matchNumber.ok THEN Fail ELSE
-    LET tradeCorrectionReason == ReadBytes(matchNumber.rest, 1) IN IF ~tradeCorrectionReason.ok THEN Fail ELSE
-    LET clordid == ReadBytes(tradeCorrectionReason.rest, 14) IN IF ~clordid.ok THEN Fail ELSE
-    Ok([ timestamp             |-> timestamp.value,
-         userRefNum            |-> userRefNum.value,
-         quantity              |-> quantity.value,
-         price                 |-> price.value,
-         liquidityFlag         |-> liquidityFlag.value,
-         matchNumber           |-> matchNumber.value,
-         tradeCorrectionReason |-> tradeCorrectionReason.value,
-         clordid               |-> clordid.value ], clordid.rest)
+DecodeUserRefIdx7(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
 
-ZeroTradeCorrectionMessage ==
-    [ timestamp             |-> [i \in 1 .. 8 |-> 0],
-      userRefNum            |-> [i \in 1 .. 4 |-> 0],
-      quantity              |-> [i \in 1 .. 4 |-> 0],
-      price                 |-> [i \in 1 .. 8 |-> 0],
-      liquidityFlag         |-> [i \in 1 .. 1 |-> 0],
-      matchNumber           |-> [i \in 1 .. 8 |-> 0],
-      tradeCorrectionReason |-> [i \in 1 .. 1 |-> 0],
-      clordid               |-> [i \in 1 .. 14 |-> 0] ]
+ZeroUserRefIdx7 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Trade Correction Message at zero, then each field in turn at the values it is checked at *)
-CheckedTradeCorrectionMessage ==
-    { ZeroTradeCorrectionMessage }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.userRefNum = one] : one \in Sample(4) }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.quantity = one] : one \in Sample(4) }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.liquidityFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.matchNumber = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.tradeCorrectionReason = one] : one \in Sample(1) }
-        \cup { [ZeroTradeCorrectionMessage EXCEPT !.clordid = one] : one \in Sample(14) }
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx7 ==
+    { ZeroUserRefIdx7 }
+        \cup { [ZeroUserRefIdx7 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Rejected Order Message: 28 bytes                                        *)
+(* Rejected Order Optional Value, selected by Rejected Order Optional      *)
+(* Field                                                                   *)
+(***************************************************************************)
+
+UserRefIdxCode7 == 28  \* 0x1c
+
+RejectedOrderOptionalValue ==
+    [ tag : {UserRefIdxCode7}, body : UserRefIdx7 ]
+
+EncodeRejectedOrderOptionalValue(message) ==
+    CASE message.tag = UserRefIdxCode7 -> EncodeUserRefIdx7(message.body)
+
+DecodeRejectedOrderOptionalValue(tag, bytes) ==
+    LET read ==
+            CASE tag = UserRefIdxCode7 -> DecodeUserRefIdx7(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroRejectedOrderOptionalValue == [tag |-> UserRefIdxCode7, body |-> ZeroUserRefIdx7]
+
+(* Each Rejected Order Optional Value in turn, at the values the message it names is checked at *)
+CheckedRejectedOrderOptionalValue ==
+    { [tag |-> UserRefIdxCode7, body |-> one] : one \in CheckedUserRefIdx7 }
+
+(***************************************************************************)
+(* Rejected Order Appendage, framed by Optional Field Length               *)
+(***************************************************************************)
+
+RejectedOrderAppendage ==
+    [ rejectedOrderOptionalValue : RejectedOrderOptionalValue ]
+
+EncodeRejectedOrderAppendageBody(message) ==
+    EncodeUIntBE(message.rejectedOrderOptionalValue.tag, 1)
+        \o EncodeRejectedOrderOptionalValue(message.rejectedOrderOptionalValue)
+
+(* Optional Field Length counts the bytes it frames, so it is written from them *)
+EncodeRejectedOrderAppendage(message) ==
+    LET body == EncodeRejectedOrderAppendageBody(message)
+    IN  EncodeUIntBE(Len(body), 1) \o body
+
+DecodeRejectedOrderAppendageBody(bytes) ==
+    LET rejectedOrderOptionalField == ReadUIntBE(bytes, 1) IN IF ~rejectedOrderOptionalField.ok THEN Fail ELSE
+    LET rejectedOrderOptionalValue == DecodeRejectedOrderOptionalValue(rejectedOrderOptionalField.value, rejectedOrderOptionalField.rest) IN IF ~rejectedOrderOptionalValue.ok THEN Fail ELSE
+    Ok([ rejectedOrderOptionalValue |-> rejectedOrderOptionalValue.value ], rejectedOrderOptionalValue.rest)
+
+DecodeRejectedOrderAppendage(bytes) ==
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    IF Len(length.rest) < length.value THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, length.value)
+        beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
+        body   == DecodeRejectedOrderAppendageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroRejectedOrderAppendage ==
+    [ rejectedOrderOptionalValue |-> ZeroRejectedOrderOptionalValue ]
+
+(* Rejected Order Appendage at zero, then each field in turn at the values it is checked at *)
+CheckedRejectedOrderAppendage ==
+    { ZeroRejectedOrderAppendage }
+        \cup { [ZeroRejectedOrderAppendage EXCEPT !.rejectedOrderOptionalValue = one] : one \in CheckedRejectedOrderOptionalValue }
+
+(* A run of Rejected Order Appendage, written one after another *)
+RECURSIVE EncodeRejectedOrderAppendageList(_)
+EncodeRejectedOrderAppendageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeRejectedOrderAppendage(Head(messages)) \o EncodeRejectedOrderAppendageList(Tail(messages))
+
+(* As many Rejected Order Appendage as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadRejectedOrderAppendageAll(_)
+ReadRejectedOrderAppendageAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeRejectedOrderAppendage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadRejectedOrderAppendageAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Rejected Order Appendage of each kind, for the lists that carry them *)
+OneRejectedOrderAppendage ==
+    { [ZeroRejectedOrderAppendage EXCEPT !.rejectedOrderOptionalValue = [tag |-> UserRefIdxCode7, body |-> ZeroUserRefIdx7]] }
+
+(***************************************************************************)
+(* Rejected Order Message                                                  *)
+(***************************************************************************)
+
+RejectedOrderMessageTail ==
+    [ rejectedOrderAppendage : SampleLists(OneRejectedOrderAppendage) ]
+
+EncodeRejectedOrderMessageTail(message) ==
+    LET payload == EncodeRejectedOrderAppendageList(message.rejectedOrderAppendage)
+    IN  EncodeUIntBE(Len(payload), 2)
+            \o payload
+
+DecodeRejectedOrderMessageTail(bytes) ==
+    LET appendageLength == ReadUIntBE(bytes, 2) IN IF ~appendageLength.ok THEN Fail ELSE
+    IF Len(appendageLength.rest) < appendageLength.value THEN Fail ELSE
+    LET framed == SubSeq(appendageLength.rest, 1, appendageLength.value)
+        beyond == SubSeq(appendageLength.rest, appendageLength.value + 1, Len(appendageLength.rest))
+        rejectedOrderAppendage == ReadRejectedOrderAppendageAll(framed)
+    IN  IF ~rejectedOrderAppendage.ok \/ rejectedOrderAppendage.rest # << >> THEN Fail ELSE
+    Ok([ rejectedOrderAppendage |-> rejectedOrderAppendage.value ], beyond)
+
+ZeroRejectedOrderMessageTail ==
+    [ rejectedOrderAppendage |-> << >> ]
+
+(* Rejected Order Message at zero, then each field in turn at the values it is checked at *)
+CheckedRejectedOrderMessageTail ==
+    { ZeroRejectedOrderMessageTail }
+        \cup { [ZeroRejectedOrderMessageTail EXCEPT !.rejectedOrderAppendage = one] : one \in SampleLists(OneRejectedOrderAppendage) }
+
+(* Rejected Order Message runs on only when bytes remain, so it is there or it is not *)
+WithoutRejectedOrderMessageTail == [there |-> FALSE, value |-> ZeroRejectedOrderMessageTail]
+
+MaybeRejectedOrderMessageTail ==
+    { WithoutRejectedOrderMessageTail }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedRejectedOrderMessageTail }
+
+ReadRejectedOrderMessageTailMaybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutRejectedOrderMessageTail, << >>)
+    ELSE LET one == DecodeRejectedOrderMessageTail(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Rejected Order Message                                                  *)
 (***************************************************************************)
 
 RejectedOrderMessage ==
-    [ timestamp           : Sample(8),
-      userRefNum          : Sample(4),
-      rejectedOrderReason : Sample(2),
-      clordid             : Sample(14) ]
+    [ timestamp                : Sample(8),
+      userRefNum               : Sample(4),
+      rejectedOrderReason      : Sample(2),
+      clordid                  : Sample(14),
+      rejectedOrderMessageTail : MaybeRejectedOrderMessageTail ]
 
 EncodeRejectedOrderMessage(message) ==
     message.timestamp
         \o message.userRefNum
         \o message.rejectedOrderReason
         \o message.clordid
+        \o IF message.rejectedOrderMessageTail.there THEN EncodeRejectedOrderMessageTail(message.rejectedOrderMessageTail.value) ELSE << >>
 
 DecodeRejectedOrderMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET userRefNum == ReadBytes(timestamp.rest, 4) IN IF ~userRefNum.ok THEN Fail ELSE
     LET rejectedOrderReason == ReadBytes(userRefNum.rest, 2) IN IF ~rejectedOrderReason.ok THEN Fail ELSE
     LET clordid == ReadBytes(rejectedOrderReason.rest, 14) IN IF ~clordid.ok THEN Fail ELSE
-    Ok([ timestamp           |-> timestamp.value,
-         userRefNum          |-> userRefNum.value,
-         rejectedOrderReason |-> rejectedOrderReason.value,
-         clordid             |-> clordid.value ], clordid.rest)
+    LET rejectedOrderMessageTail == ReadRejectedOrderMessageTailMaybe(clordid.rest) IN IF ~rejectedOrderMessageTail.ok THEN Fail ELSE
+    Ok([ timestamp                |-> timestamp.value,
+         userRefNum               |-> userRefNum.value,
+         rejectedOrderReason      |-> rejectedOrderReason.value,
+         clordid                  |-> clordid.value,
+         rejectedOrderMessageTail |-> rejectedOrderMessageTail.value ], rejectedOrderMessageTail.rest)
 
 ZeroRejectedOrderMessage ==
-    [ timestamp           |-> [i \in 1 .. 8 |-> 0],
-      userRefNum          |-> [i \in 1 .. 4 |-> 0],
-      rejectedOrderReason |-> [i \in 1 .. 2 |-> 0],
-      clordid             |-> [i \in 1 .. 14 |-> 0] ]
+    [ timestamp                |-> [i \in 1 .. 8 |-> 0],
+      userRefNum               |-> [i \in 1 .. 4 |-> 0],
+      rejectedOrderReason      |-> [i \in 1 .. 2 |-> 0],
+      clordid                  |-> [i \in 1 .. 14 |-> 0],
+      rejectedOrderMessageTail |-> WithoutRejectedOrderMessageTail ]
 
 (* Rejected Order Message at zero, then each field in turn at the values it is checked at *)
 CheckedRejectedOrderMessage ==
@@ -1738,73 +2500,536 @@ CheckedRejectedOrderMessage ==
         \cup { [ZeroRejectedOrderMessage EXCEPT !.userRefNum = one] : one \in Sample(4) }
         \cup { [ZeroRejectedOrderMessage EXCEPT !.rejectedOrderReason = one] : one \in Sample(2) }
         \cup { [ZeroRejectedOrderMessage EXCEPT !.clordid = one] : one \in Sample(14) }
+        \cup { [ZeroRejectedOrderMessage EXCEPT !.rejectedOrderMessageTail = one] : one \in MaybeRejectedOrderMessageTail }
 
 (***************************************************************************)
-(* Cancel Pending Message: 12 bytes                                        *)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx8 ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx8(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx8(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx8 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx8 ==
+    { ZeroUserRefIdx8 }
+        \cup { [ZeroUserRefIdx8 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Cancel Pending Optional Value, selected by Cancel Pending Optional      *)
+(* Field                                                                   *)
+(***************************************************************************)
+
+UserRefIdxCode8 == 28  \* 0x1c
+
+CancelPendingOptionalValue ==
+    [ tag : {UserRefIdxCode8}, body : UserRefIdx8 ]
+
+EncodeCancelPendingOptionalValue(message) ==
+    CASE message.tag = UserRefIdxCode8 -> EncodeUserRefIdx8(message.body)
+
+DecodeCancelPendingOptionalValue(tag, bytes) ==
+    LET read ==
+            CASE tag = UserRefIdxCode8 -> DecodeUserRefIdx8(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroCancelPendingOptionalValue == [tag |-> UserRefIdxCode8, body |-> ZeroUserRefIdx8]
+
+(* Each Cancel Pending Optional Value in turn, at the values the message it names is checked at *)
+CheckedCancelPendingOptionalValue ==
+    { [tag |-> UserRefIdxCode8, body |-> one] : one \in CheckedUserRefIdx8 }
+
+(***************************************************************************)
+(* Cancel Pending Appendage, framed by Optional Field Length               *)
+(***************************************************************************)
+
+CancelPendingAppendage ==
+    [ cancelPendingOptionalValue : CancelPendingOptionalValue ]
+
+EncodeCancelPendingAppendageBody(message) ==
+    EncodeUIntBE(message.cancelPendingOptionalValue.tag, 1)
+        \o EncodeCancelPendingOptionalValue(message.cancelPendingOptionalValue)
+
+(* Optional Field Length counts the bytes it frames, so it is written from them *)
+EncodeCancelPendingAppendage(message) ==
+    LET body == EncodeCancelPendingAppendageBody(message)
+    IN  EncodeUIntBE(Len(body), 1) \o body
+
+DecodeCancelPendingAppendageBody(bytes) ==
+    LET cancelPendingOptionalField == ReadUIntBE(bytes, 1) IN IF ~cancelPendingOptionalField.ok THEN Fail ELSE
+    LET cancelPendingOptionalValue == DecodeCancelPendingOptionalValue(cancelPendingOptionalField.value, cancelPendingOptionalField.rest) IN IF ~cancelPendingOptionalValue.ok THEN Fail ELSE
+    Ok([ cancelPendingOptionalValue |-> cancelPendingOptionalValue.value ], cancelPendingOptionalValue.rest)
+
+DecodeCancelPendingAppendage(bytes) ==
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    IF Len(length.rest) < length.value THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, length.value)
+        beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
+        body   == DecodeCancelPendingAppendageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroCancelPendingAppendage ==
+    [ cancelPendingOptionalValue |-> ZeroCancelPendingOptionalValue ]
+
+(* Cancel Pending Appendage at zero, then each field in turn at the values it is checked at *)
+CheckedCancelPendingAppendage ==
+    { ZeroCancelPendingAppendage }
+        \cup { [ZeroCancelPendingAppendage EXCEPT !.cancelPendingOptionalValue = one] : one \in CheckedCancelPendingOptionalValue }
+
+(* A run of Cancel Pending Appendage, written one after another *)
+RECURSIVE EncodeCancelPendingAppendageList(_)
+EncodeCancelPendingAppendageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeCancelPendingAppendage(Head(messages)) \o EncodeCancelPendingAppendageList(Tail(messages))
+
+(* As many Cancel Pending Appendage as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadCancelPendingAppendageAll(_)
+ReadCancelPendingAppendageAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeCancelPendingAppendage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadCancelPendingAppendageAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Cancel Pending Appendage of each kind, for the lists that carry them *)
+OneCancelPendingAppendage ==
+    { [ZeroCancelPendingAppendage EXCEPT !.cancelPendingOptionalValue = [tag |-> UserRefIdxCode8, body |-> ZeroUserRefIdx8]] }
+
+(***************************************************************************)
+(* Cancel Pending Message                                                  *)
+(***************************************************************************)
+
+CancelPendingMessageTail ==
+    [ cancelPendingAppendage : SampleLists(OneCancelPendingAppendage) ]
+
+EncodeCancelPendingMessageTail(message) ==
+    LET payload == EncodeCancelPendingAppendageList(message.cancelPendingAppendage)
+    IN  EncodeUIntBE(Len(payload), 2)
+            \o payload
+
+DecodeCancelPendingMessageTail(bytes) ==
+    LET appendageLength == ReadUIntBE(bytes, 2) IN IF ~appendageLength.ok THEN Fail ELSE
+    IF Len(appendageLength.rest) < appendageLength.value THEN Fail ELSE
+    LET framed == SubSeq(appendageLength.rest, 1, appendageLength.value)
+        beyond == SubSeq(appendageLength.rest, appendageLength.value + 1, Len(appendageLength.rest))
+        cancelPendingAppendage == ReadCancelPendingAppendageAll(framed)
+    IN  IF ~cancelPendingAppendage.ok \/ cancelPendingAppendage.rest # << >> THEN Fail ELSE
+    Ok([ cancelPendingAppendage |-> cancelPendingAppendage.value ], beyond)
+
+ZeroCancelPendingMessageTail ==
+    [ cancelPendingAppendage |-> << >> ]
+
+(* Cancel Pending Message at zero, then each field in turn at the values it is checked at *)
+CheckedCancelPendingMessageTail ==
+    { ZeroCancelPendingMessageTail }
+        \cup { [ZeroCancelPendingMessageTail EXCEPT !.cancelPendingAppendage = one] : one \in SampleLists(OneCancelPendingAppendage) }
+
+(* Cancel Pending Message runs on only when bytes remain, so it is there or it is not *)
+WithoutCancelPendingMessageTail == [there |-> FALSE, value |-> ZeroCancelPendingMessageTail]
+
+MaybeCancelPendingMessageTail ==
+    { WithoutCancelPendingMessageTail }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedCancelPendingMessageTail }
+
+ReadCancelPendingMessageTailMaybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutCancelPendingMessageTail, << >>)
+    ELSE LET one == DecodeCancelPendingMessageTail(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Cancel Pending Message                                                  *)
 (***************************************************************************)
 
 CancelPendingMessage ==
-    [ timestamp  : Sample(8),
-      userRefNum : Sample(4) ]
+    [ timestamp                : Sample(8),
+      userRefNum               : Sample(4),
+      cancelPendingMessageTail : MaybeCancelPendingMessageTail ]
 
 EncodeCancelPendingMessage(message) ==
     message.timestamp
         \o message.userRefNum
+        \o IF message.cancelPendingMessageTail.there THEN EncodeCancelPendingMessageTail(message.cancelPendingMessageTail.value) ELSE << >>
 
 DecodeCancelPendingMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET userRefNum == ReadBytes(timestamp.rest, 4) IN IF ~userRefNum.ok THEN Fail ELSE
-    Ok([ timestamp  |-> timestamp.value,
-         userRefNum |-> userRefNum.value ], userRefNum.rest)
+    LET cancelPendingMessageTail == ReadCancelPendingMessageTailMaybe(userRefNum.rest) IN IF ~cancelPendingMessageTail.ok THEN Fail ELSE
+    Ok([ timestamp                |-> timestamp.value,
+         userRefNum               |-> userRefNum.value,
+         cancelPendingMessageTail |-> cancelPendingMessageTail.value ], cancelPendingMessageTail.rest)
 
 ZeroCancelPendingMessage ==
-    [ timestamp  |-> [i \in 1 .. 8 |-> 0],
-      userRefNum |-> [i \in 1 .. 4 |-> 0] ]
+    [ timestamp                |-> [i \in 1 .. 8 |-> 0],
+      userRefNum               |-> [i \in 1 .. 4 |-> 0],
+      cancelPendingMessageTail |-> WithoutCancelPendingMessageTail ]
 
 (* Cancel Pending Message at zero, then each field in turn at the values it is checked at *)
 CheckedCancelPendingMessage ==
     { ZeroCancelPendingMessage }
         \cup { [ZeroCancelPendingMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroCancelPendingMessage EXCEPT !.userRefNum = one] : one \in Sample(4) }
+        \cup { [ZeroCancelPendingMessage EXCEPT !.cancelPendingMessageTail = one] : one \in MaybeCancelPendingMessageTail }
 
 (***************************************************************************)
-(* Cancel Reject Message: 12 bytes                                         *)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx9 ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx9(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx9(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx9 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx9 ==
+    { ZeroUserRefIdx9 }
+        \cup { [ZeroUserRefIdx9 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Cancel Reject Optional Value, selected by Cancel Reject Optional Field  *)
+(***************************************************************************)
+
+UserRefIdxCode9 == 28  \* 0x1c
+
+CancelRejectOptionalValue ==
+    [ tag : {UserRefIdxCode9}, body : UserRefIdx9 ]
+
+EncodeCancelRejectOptionalValue(message) ==
+    CASE message.tag = UserRefIdxCode9 -> EncodeUserRefIdx9(message.body)
+
+DecodeCancelRejectOptionalValue(tag, bytes) ==
+    LET read ==
+            CASE tag = UserRefIdxCode9 -> DecodeUserRefIdx9(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroCancelRejectOptionalValue == [tag |-> UserRefIdxCode9, body |-> ZeroUserRefIdx9]
+
+(* Each Cancel Reject Optional Value in turn, at the values the message it names is checked at *)
+CheckedCancelRejectOptionalValue ==
+    { [tag |-> UserRefIdxCode9, body |-> one] : one \in CheckedUserRefIdx9 }
+
+(***************************************************************************)
+(* Cancel Reject Appendage, framed by Optional Field Length                *)
+(***************************************************************************)
+
+CancelRejectAppendage ==
+    [ cancelRejectOptionalValue : CancelRejectOptionalValue ]
+
+EncodeCancelRejectAppendageBody(message) ==
+    EncodeUIntBE(message.cancelRejectOptionalValue.tag, 1)
+        \o EncodeCancelRejectOptionalValue(message.cancelRejectOptionalValue)
+
+(* Optional Field Length counts the bytes it frames, so it is written from them *)
+EncodeCancelRejectAppendage(message) ==
+    LET body == EncodeCancelRejectAppendageBody(message)
+    IN  EncodeUIntBE(Len(body), 1) \o body
+
+DecodeCancelRejectAppendageBody(bytes) ==
+    LET cancelRejectOptionalField == ReadUIntBE(bytes, 1) IN IF ~cancelRejectOptionalField.ok THEN Fail ELSE
+    LET cancelRejectOptionalValue == DecodeCancelRejectOptionalValue(cancelRejectOptionalField.value, cancelRejectOptionalField.rest) IN IF ~cancelRejectOptionalValue.ok THEN Fail ELSE
+    Ok([ cancelRejectOptionalValue |-> cancelRejectOptionalValue.value ], cancelRejectOptionalValue.rest)
+
+DecodeCancelRejectAppendage(bytes) ==
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    IF Len(length.rest) < length.value THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, length.value)
+        beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
+        body   == DecodeCancelRejectAppendageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroCancelRejectAppendage ==
+    [ cancelRejectOptionalValue |-> ZeroCancelRejectOptionalValue ]
+
+(* Cancel Reject Appendage at zero, then each field in turn at the values it is checked at *)
+CheckedCancelRejectAppendage ==
+    { ZeroCancelRejectAppendage }
+        \cup { [ZeroCancelRejectAppendage EXCEPT !.cancelRejectOptionalValue = one] : one \in CheckedCancelRejectOptionalValue }
+
+(* A run of Cancel Reject Appendage, written one after another *)
+RECURSIVE EncodeCancelRejectAppendageList(_)
+EncodeCancelRejectAppendageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeCancelRejectAppendage(Head(messages)) \o EncodeCancelRejectAppendageList(Tail(messages))
+
+(* As many Cancel Reject Appendage as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadCancelRejectAppendageAll(_)
+ReadCancelRejectAppendageAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeCancelRejectAppendage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadCancelRejectAppendageAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Cancel Reject Appendage of each kind, for the lists that carry them *)
+OneCancelRejectAppendage ==
+    { [ZeroCancelRejectAppendage EXCEPT !.cancelRejectOptionalValue = [tag |-> UserRefIdxCode9, body |-> ZeroUserRefIdx9]] }
+
+(***************************************************************************)
+(* Cancel Reject Message                                                   *)
+(***************************************************************************)
+
+CancelRejectMessageTail ==
+    [ cancelRejectAppendage : SampleLists(OneCancelRejectAppendage) ]
+
+EncodeCancelRejectMessageTail(message) ==
+    LET payload == EncodeCancelRejectAppendageList(message.cancelRejectAppendage)
+    IN  EncodeUIntBE(Len(payload), 2)
+            \o payload
+
+DecodeCancelRejectMessageTail(bytes) ==
+    LET appendageLength == ReadUIntBE(bytes, 2) IN IF ~appendageLength.ok THEN Fail ELSE
+    IF Len(appendageLength.rest) < appendageLength.value THEN Fail ELSE
+    LET framed == SubSeq(appendageLength.rest, 1, appendageLength.value)
+        beyond == SubSeq(appendageLength.rest, appendageLength.value + 1, Len(appendageLength.rest))
+        cancelRejectAppendage == ReadCancelRejectAppendageAll(framed)
+    IN  IF ~cancelRejectAppendage.ok \/ cancelRejectAppendage.rest # << >> THEN Fail ELSE
+    Ok([ cancelRejectAppendage |-> cancelRejectAppendage.value ], beyond)
+
+ZeroCancelRejectMessageTail ==
+    [ cancelRejectAppendage |-> << >> ]
+
+(* Cancel Reject Message at zero, then each field in turn at the values it is checked at *)
+CheckedCancelRejectMessageTail ==
+    { ZeroCancelRejectMessageTail }
+        \cup { [ZeroCancelRejectMessageTail EXCEPT !.cancelRejectAppendage = one] : one \in SampleLists(OneCancelRejectAppendage) }
+
+(* Cancel Reject Message runs on only when bytes remain, so it is there or it is not *)
+WithoutCancelRejectMessageTail == [there |-> FALSE, value |-> ZeroCancelRejectMessageTail]
+
+MaybeCancelRejectMessageTail ==
+    { WithoutCancelRejectMessageTail }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedCancelRejectMessageTail }
+
+ReadCancelRejectMessageTailMaybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutCancelRejectMessageTail, << >>)
+    ELSE LET one == DecodeCancelRejectMessageTail(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Cancel Reject Message                                                   *)
 (***************************************************************************)
 
 CancelRejectMessage ==
-    [ timestamp  : Sample(8),
-      userRefNum : Sample(4) ]
+    [ timestamp               : Sample(8),
+      userRefNum              : Sample(4),
+      cancelRejectMessageTail : MaybeCancelRejectMessageTail ]
 
 EncodeCancelRejectMessage(message) ==
     message.timestamp
         \o message.userRefNum
+        \o IF message.cancelRejectMessageTail.there THEN EncodeCancelRejectMessageTail(message.cancelRejectMessageTail.value) ELSE << >>
 
 DecodeCancelRejectMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET userRefNum == ReadBytes(timestamp.rest, 4) IN IF ~userRefNum.ok THEN Fail ELSE
-    Ok([ timestamp  |-> timestamp.value,
-         userRefNum |-> userRefNum.value ], userRefNum.rest)
+    LET cancelRejectMessageTail == ReadCancelRejectMessageTailMaybe(userRefNum.rest) IN IF ~cancelRejectMessageTail.ok THEN Fail ELSE
+    Ok([ timestamp               |-> timestamp.value,
+         userRefNum              |-> userRefNum.value,
+         cancelRejectMessageTail |-> cancelRejectMessageTail.value ], cancelRejectMessageTail.rest)
 
 ZeroCancelRejectMessage ==
-    [ timestamp  |-> [i \in 1 .. 8 |-> 0],
-      userRefNum |-> [i \in 1 .. 4 |-> 0] ]
+    [ timestamp               |-> [i \in 1 .. 8 |-> 0],
+      userRefNum              |-> [i \in 1 .. 4 |-> 0],
+      cancelRejectMessageTail |-> WithoutCancelRejectMessageTail ]
 
 (* Cancel Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedCancelRejectMessage ==
     { ZeroCancelRejectMessage }
         \cup { [ZeroCancelRejectMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroCancelRejectMessage EXCEPT !.userRefNum = one] : one \in Sample(4) }
+        \cup { [ZeroCancelRejectMessage EXCEPT !.cancelRejectMessageTail = one] : one \in MaybeCancelRejectMessageTail }
 
 (***************************************************************************)
-(* Order Priority Update Message: 29 bytes                                 *)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx10 ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx10(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx10(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx10 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx10 ==
+    { ZeroUserRefIdx10 }
+        \cup { [ZeroUserRefIdx10 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Order Priority Update Optional Value, selected by Order Priority Update *)
+(* Optional Field                                                          *)
+(***************************************************************************)
+
+UserRefIdxCode10 == 28  \* 0x1c
+
+OrderPriorityUpdateOptionalValue ==
+    [ tag : {UserRefIdxCode10}, body : UserRefIdx10 ]
+
+EncodeOrderPriorityUpdateOptionalValue(message) ==
+    CASE message.tag = UserRefIdxCode10 -> EncodeUserRefIdx10(message.body)
+
+DecodeOrderPriorityUpdateOptionalValue(tag, bytes) ==
+    LET read ==
+            CASE tag = UserRefIdxCode10 -> DecodeUserRefIdx10(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroOrderPriorityUpdateOptionalValue == [tag |-> UserRefIdxCode10, body |-> ZeroUserRefIdx10]
+
+(* Each Order Priority Update Optional Value in turn, at the values the message it names is checked at *)
+CheckedOrderPriorityUpdateOptionalValue ==
+    { [tag |-> UserRefIdxCode10, body |-> one] : one \in CheckedUserRefIdx10 }
+
+(***************************************************************************)
+(* Order Priority Update Appendage, framed by Optional Field Length        *)
+(***************************************************************************)
+
+OrderPriorityUpdateAppendage ==
+    [ orderPriorityUpdateOptionalValue : OrderPriorityUpdateOptionalValue ]
+
+EncodeOrderPriorityUpdateAppendageBody(message) ==
+    EncodeUIntBE(message.orderPriorityUpdateOptionalValue.tag, 1)
+        \o EncodeOrderPriorityUpdateOptionalValue(message.orderPriorityUpdateOptionalValue)
+
+(* Optional Field Length counts the bytes it frames, so it is written from them *)
+EncodeOrderPriorityUpdateAppendage(message) ==
+    LET body == EncodeOrderPriorityUpdateAppendageBody(message)
+    IN  EncodeUIntBE(Len(body), 1) \o body
+
+DecodeOrderPriorityUpdateAppendageBody(bytes) ==
+    LET orderPriorityUpdateOptionalField == ReadUIntBE(bytes, 1) IN IF ~orderPriorityUpdateOptionalField.ok THEN Fail ELSE
+    LET orderPriorityUpdateOptionalValue == DecodeOrderPriorityUpdateOptionalValue(orderPriorityUpdateOptionalField.value, orderPriorityUpdateOptionalField.rest) IN IF ~orderPriorityUpdateOptionalValue.ok THEN Fail ELSE
+    Ok([ orderPriorityUpdateOptionalValue |-> orderPriorityUpdateOptionalValue.value ], orderPriorityUpdateOptionalValue.rest)
+
+DecodeOrderPriorityUpdateAppendage(bytes) ==
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    IF Len(length.rest) < length.value THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, length.value)
+        beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
+        body   == DecodeOrderPriorityUpdateAppendageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroOrderPriorityUpdateAppendage ==
+    [ orderPriorityUpdateOptionalValue |-> ZeroOrderPriorityUpdateOptionalValue ]
+
+(* Order Priority Update Appendage at zero, then each field in turn at the values it is checked at *)
+CheckedOrderPriorityUpdateAppendage ==
+    { ZeroOrderPriorityUpdateAppendage }
+        \cup { [ZeroOrderPriorityUpdateAppendage EXCEPT !.orderPriorityUpdateOptionalValue = one] : one \in CheckedOrderPriorityUpdateOptionalValue }
+
+(* A run of Order Priority Update Appendage, written one after another *)
+RECURSIVE EncodeOrderPriorityUpdateAppendageList(_)
+EncodeOrderPriorityUpdateAppendageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeOrderPriorityUpdateAppendage(Head(messages)) \o EncodeOrderPriorityUpdateAppendageList(Tail(messages))
+
+(* As many Order Priority Update Appendage as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadOrderPriorityUpdateAppendageAll(_)
+ReadOrderPriorityUpdateAppendageAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeOrderPriorityUpdateAppendage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadOrderPriorityUpdateAppendageAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Order Priority Update Appendage of each kind, for the lists that carry them *)
+OneOrderPriorityUpdateAppendage ==
+    { [ZeroOrderPriorityUpdateAppendage EXCEPT !.orderPriorityUpdateOptionalValue = [tag |-> UserRefIdxCode10, body |-> ZeroUserRefIdx10]] }
+
+(***************************************************************************)
+(* Order Priority Update Message                                           *)
+(***************************************************************************)
+
+OrderPriorityUpdateMessageTail ==
+    [ orderPriorityUpdateAppendage : SampleLists(OneOrderPriorityUpdateAppendage) ]
+
+EncodeOrderPriorityUpdateMessageTail(message) ==
+    LET payload == EncodeOrderPriorityUpdateAppendageList(message.orderPriorityUpdateAppendage)
+    IN  EncodeUIntBE(Len(payload), 2)
+            \o payload
+
+DecodeOrderPriorityUpdateMessageTail(bytes) ==
+    LET appendageLength == ReadUIntBE(bytes, 2) IN IF ~appendageLength.ok THEN Fail ELSE
+    IF Len(appendageLength.rest) < appendageLength.value THEN Fail ELSE
+    LET framed == SubSeq(appendageLength.rest, 1, appendageLength.value)
+        beyond == SubSeq(appendageLength.rest, appendageLength.value + 1, Len(appendageLength.rest))
+        orderPriorityUpdateAppendage == ReadOrderPriorityUpdateAppendageAll(framed)
+    IN  IF ~orderPriorityUpdateAppendage.ok \/ orderPriorityUpdateAppendage.rest # << >> THEN Fail ELSE
+    Ok([ orderPriorityUpdateAppendage |-> orderPriorityUpdateAppendage.value ], beyond)
+
+ZeroOrderPriorityUpdateMessageTail ==
+    [ orderPriorityUpdateAppendage |-> << >> ]
+
+(* Order Priority Update Message at zero, then each field in turn at the values it is checked at *)
+CheckedOrderPriorityUpdateMessageTail ==
+    { ZeroOrderPriorityUpdateMessageTail }
+        \cup { [ZeroOrderPriorityUpdateMessageTail EXCEPT !.orderPriorityUpdateAppendage = one] : one \in SampleLists(OneOrderPriorityUpdateAppendage) }
+
+(* Order Priority Update Message runs on only when bytes remain, so it is there or it is not *)
+WithoutOrderPriorityUpdateMessageTail == [there |-> FALSE, value |-> ZeroOrderPriorityUpdateMessageTail]
+
+MaybeOrderPriorityUpdateMessageTail ==
+    { WithoutOrderPriorityUpdateMessageTail }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedOrderPriorityUpdateMessageTail }
+
+ReadOrderPriorityUpdateMessageTailMaybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutOrderPriorityUpdateMessageTail, << >>)
+    ELSE LET one == DecodeOrderPriorityUpdateMessageTail(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Order Priority Update Message                                           *)
 (***************************************************************************)
 
 OrderPriorityUpdateMessage ==
-    [ timestamp            : Sample(8),
-      userRefNum           : Sample(4),
-      price                : Sample(8),
-      display              : Sample(1),
-      orderReferenceNumber : Sample(8) ]
+    [ timestamp                      : Sample(8),
+      userRefNum                     : Sample(4),
+      price                          : Sample(8),
+      display                        : Sample(1),
+      orderReferenceNumber           : Sample(8),
+      orderPriorityUpdateMessageTail : MaybeOrderPriorityUpdateMessageTail ]
 
 EncodeOrderPriorityUpdateMessage(message) ==
     message.timestamp
@@ -1812,6 +3037,7 @@ EncodeOrderPriorityUpdateMessage(message) ==
         \o message.price
         \o message.display
         \o message.orderReferenceNumber
+        \o IF message.orderPriorityUpdateMessageTail.there THEN EncodeOrderPriorityUpdateMessageTail(message.orderPriorityUpdateMessageTail.value) ELSE << >>
 
 DecodeOrderPriorityUpdateMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
@@ -1819,18 +3045,21 @@ DecodeOrderPriorityUpdateMessage(bytes) ==
     LET price == ReadBytes(userRefNum.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET display == ReadBytes(price.rest, 1) IN IF ~display.ok THEN Fail ELSE
     LET orderReferenceNumber == ReadBytes(display.rest, 8) IN IF ~orderReferenceNumber.ok THEN Fail ELSE
-    Ok([ timestamp            |-> timestamp.value,
-         userRefNum           |-> userRefNum.value,
-         price                |-> price.value,
-         display              |-> display.value,
-         orderReferenceNumber |-> orderReferenceNumber.value ], orderReferenceNumber.rest)
+    LET orderPriorityUpdateMessageTail == ReadOrderPriorityUpdateMessageTailMaybe(orderReferenceNumber.rest) IN IF ~orderPriorityUpdateMessageTail.ok THEN Fail ELSE
+    Ok([ timestamp                      |-> timestamp.value,
+         userRefNum                     |-> userRefNum.value,
+         price                          |-> price.value,
+         display                        |-> display.value,
+         orderReferenceNumber           |-> orderReferenceNumber.value,
+         orderPriorityUpdateMessageTail |-> orderPriorityUpdateMessageTail.value ], orderPriorityUpdateMessageTail.rest)
 
 ZeroOrderPriorityUpdateMessage ==
-    [ timestamp            |-> [i \in 1 .. 8 |-> 0],
-      userRefNum           |-> [i \in 1 .. 4 |-> 0],
-      price                |-> [i \in 1 .. 8 |-> 0],
-      display              |-> [i \in 1 .. 1 |-> 0],
-      orderReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
+    [ timestamp                      |-> [i \in 1 .. 8 |-> 0],
+      userRefNum                     |-> [i \in 1 .. 4 |-> 0],
+      price                          |-> [i \in 1 .. 8 |-> 0],
+      display                        |-> [i \in 1 .. 1 |-> 0],
+      orderReferenceNumber           |-> [i \in 1 .. 8 |-> 0],
+      orderPriorityUpdateMessageTail |-> WithoutOrderPriorityUpdateMessageTail ]
 
 (* Order Priority Update Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderPriorityUpdateMessage ==
@@ -1840,38 +3069,250 @@ CheckedOrderPriorityUpdateMessage ==
         \cup { [ZeroOrderPriorityUpdateMessage EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroOrderPriorityUpdateMessage EXCEPT !.display = one] : one \in Sample(1) }
         \cup { [ZeroOrderPriorityUpdateMessage EXCEPT !.orderReferenceNumber = one] : one \in Sample(8) }
+        \cup { [ZeroOrderPriorityUpdateMessage EXCEPT !.orderPriorityUpdateMessageTail = one] : one \in MaybeOrderPriorityUpdateMessageTail }
 
 (***************************************************************************)
-(* Order Modified Message: 17 bytes                                        *)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx11 ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx11(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx11(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx11 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx11 ==
+    { ZeroUserRefIdx11 }
+        \cup { [ZeroUserRefIdx11 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Shares Located: 1 bytes                                                 *)
+(***************************************************************************)
+
+SharesLocated2 ==
+    [ sharesLocated : Sample(1) ]
+
+EncodeSharesLocated2(message) ==
+    message.sharesLocated
+
+DecodeSharesLocated2(bytes) ==
+    LET sharesLocated == ReadBytes(bytes, 1) IN IF ~sharesLocated.ok THEN Fail ELSE
+    Ok([ sharesLocated |-> sharesLocated.value ], sharesLocated.rest)
+
+ZeroSharesLocated2 ==
+    [ sharesLocated |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Shares Located at zero, then each field in turn at the values it is checked at *)
+CheckedSharesLocated2 ==
+    { ZeroSharesLocated2 }
+        \cup { [ZeroSharesLocated2 EXCEPT !.sharesLocated = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Locate Broker: 4 bytes                                                  *)
+(***************************************************************************)
+
+LocateBroker ==
+    [ locateBroker : Sample(4) ]
+
+EncodeLocateBroker(message) ==
+    message.locateBroker
+
+DecodeLocateBroker(bytes) ==
+    LET locateBroker == ReadBytes(bytes, 4) IN IF ~locateBroker.ok THEN Fail ELSE
+    Ok([ locateBroker |-> locateBroker.value ], locateBroker.rest)
+
+ZeroLocateBroker ==
+    [ locateBroker |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Locate Broker at zero, then each field in turn at the values it is checked at *)
+CheckedLocateBroker ==
+    { ZeroLocateBroker }
+        \cup { [ZeroLocateBroker EXCEPT !.locateBroker = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Order Modified Optional Value, selected by Order Modified Optional      *)
+(* Field                                                                   *)
+(***************************************************************************)
+
+UserRefIdxCode11 == 28  \* 0x1c
+SharesLocatedCode2 == 25  \* 0x19
+LocateBrokerCode == 26  \* 0x1a
+
+OrderModifiedOptionalValue ==
+    [ tag : {UserRefIdxCode11}, body : UserRefIdx11 ]
+        \cup [ tag : {SharesLocatedCode2}, body : SharesLocated2 ]
+        \cup [ tag : {LocateBrokerCode}, body : LocateBroker ]
+
+EncodeOrderModifiedOptionalValue(message) ==
+    CASE message.tag = UserRefIdxCode11 -> EncodeUserRefIdx11(message.body)
+      [] message.tag = SharesLocatedCode2 -> EncodeSharesLocated2(message.body)
+      [] message.tag = LocateBrokerCode -> EncodeLocateBroker(message.body)
+
+DecodeOrderModifiedOptionalValue(tag, bytes) ==
+    LET read ==
+            CASE tag = UserRefIdxCode11 -> DecodeUserRefIdx11(bytes)
+              [] tag = SharesLocatedCode2 -> DecodeSharesLocated2(bytes)
+              [] tag = LocateBrokerCode -> DecodeLocateBroker(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroOrderModifiedOptionalValue == [tag |-> UserRefIdxCode11, body |-> ZeroUserRefIdx11]
+
+(* Each Order Modified Optional Value in turn, at the values the message it names is checked at *)
+CheckedOrderModifiedOptionalValue ==
+    { [tag |-> UserRefIdxCode11, body |-> one] : one \in CheckedUserRefIdx11 }
+        \cup { [tag |-> SharesLocatedCode2, body |-> one] : one \in CheckedSharesLocated2 }
+        \cup { [tag |-> LocateBrokerCode, body |-> one] : one \in CheckedLocateBroker }
+
+(***************************************************************************)
+(* Order Modified Appendage, framed by Optional Field Length               *)
+(***************************************************************************)
+
+OrderModifiedAppendage ==
+    [ orderModifiedOptionalValue : OrderModifiedOptionalValue ]
+
+EncodeOrderModifiedAppendageBody(message) ==
+    EncodeUIntBE(message.orderModifiedOptionalValue.tag, 1)
+        \o EncodeOrderModifiedOptionalValue(message.orderModifiedOptionalValue)
+
+(* Optional Field Length counts the bytes it frames, so it is written from them *)
+EncodeOrderModifiedAppendage(message) ==
+    LET body == EncodeOrderModifiedAppendageBody(message)
+    IN  EncodeUIntBE(Len(body), 1) \o body
+
+DecodeOrderModifiedAppendageBody(bytes) ==
+    LET orderModifiedOptionalField == ReadUIntBE(bytes, 1) IN IF ~orderModifiedOptionalField.ok THEN Fail ELSE
+    LET orderModifiedOptionalValue == DecodeOrderModifiedOptionalValue(orderModifiedOptionalField.value, orderModifiedOptionalField.rest) IN IF ~orderModifiedOptionalValue.ok THEN Fail ELSE
+    Ok([ orderModifiedOptionalValue |-> orderModifiedOptionalValue.value ], orderModifiedOptionalValue.rest)
+
+DecodeOrderModifiedAppendage(bytes) ==
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    IF Len(length.rest) < length.value THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, length.value)
+        beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
+        body   == DecodeOrderModifiedAppendageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroOrderModifiedAppendage ==
+    [ orderModifiedOptionalValue |-> ZeroOrderModifiedOptionalValue ]
+
+(* Order Modified Appendage at zero, then each field in turn at the values it is checked at *)
+CheckedOrderModifiedAppendage ==
+    { ZeroOrderModifiedAppendage }
+        \cup { [ZeroOrderModifiedAppendage EXCEPT !.orderModifiedOptionalValue = one] : one \in CheckedOrderModifiedOptionalValue }
+
+(* A run of Order Modified Appendage, written one after another *)
+RECURSIVE EncodeOrderModifiedAppendageList(_)
+EncodeOrderModifiedAppendageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeOrderModifiedAppendage(Head(messages)) \o EncodeOrderModifiedAppendageList(Tail(messages))
+
+(* As many Order Modified Appendage as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadOrderModifiedAppendageAll(_)
+ReadOrderModifiedAppendageAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeOrderModifiedAppendage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadOrderModifiedAppendageAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Order Modified Appendage of each kind, for the lists that carry them *)
+OneOrderModifiedAppendage ==
+    { [ZeroOrderModifiedAppendage EXCEPT !.orderModifiedOptionalValue = [tag |-> UserRefIdxCode11, body |-> ZeroUserRefIdx11]],
+      [ZeroOrderModifiedAppendage EXCEPT !.orderModifiedOptionalValue = [tag |-> SharesLocatedCode2, body |-> ZeroSharesLocated2]],
+      [ZeroOrderModifiedAppendage EXCEPT !.orderModifiedOptionalValue = [tag |-> LocateBrokerCode, body |-> ZeroLocateBroker]] }
+
+(***************************************************************************)
+(* Order Modified Message                                                  *)
+(***************************************************************************)
+
+OrderModifiedMessageTail ==
+    [ orderModifiedAppendage : SampleLists(OneOrderModifiedAppendage) ]
+
+EncodeOrderModifiedMessageTail(message) ==
+    LET payload == EncodeOrderModifiedAppendageList(message.orderModifiedAppendage)
+    IN  EncodeUIntBE(Len(payload), 2)
+            \o payload
+
+DecodeOrderModifiedMessageTail(bytes) ==
+    LET appendageLength == ReadUIntBE(bytes, 2) IN IF ~appendageLength.ok THEN Fail ELSE
+    IF Len(appendageLength.rest) < appendageLength.value THEN Fail ELSE
+    LET framed == SubSeq(appendageLength.rest, 1, appendageLength.value)
+        beyond == SubSeq(appendageLength.rest, appendageLength.value + 1, Len(appendageLength.rest))
+        orderModifiedAppendage == ReadOrderModifiedAppendageAll(framed)
+    IN  IF ~orderModifiedAppendage.ok \/ orderModifiedAppendage.rest # << >> THEN Fail ELSE
+    Ok([ orderModifiedAppendage |-> orderModifiedAppendage.value ], beyond)
+
+ZeroOrderModifiedMessageTail ==
+    [ orderModifiedAppendage |-> << >> ]
+
+(* Order Modified Message at zero, then each field in turn at the values it is checked at *)
+CheckedOrderModifiedMessageTail ==
+    { ZeroOrderModifiedMessageTail }
+        \cup { [ZeroOrderModifiedMessageTail EXCEPT !.orderModifiedAppendage = one] : one \in SampleLists(OneOrderModifiedAppendage) }
+
+(* Order Modified Message runs on only when bytes remain, so it is there or it is not *)
+WithoutOrderModifiedMessageTail == [there |-> FALSE, value |-> ZeroOrderModifiedMessageTail]
+
+MaybeOrderModifiedMessageTail ==
+    { WithoutOrderModifiedMessageTail }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedOrderModifiedMessageTail }
+
+ReadOrderModifiedMessageTailMaybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutOrderModifiedMessageTail, << >>)
+    ELSE LET one == DecodeOrderModifiedMessageTail(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Order Modified Message                                                  *)
 (***************************************************************************)
 
 OrderModifiedMessage ==
-    [ timestamp  : Sample(8),
-      userRefNum : Sample(4),
-      side       : Sample(1),
-      quantity   : Sample(4) ]
+    [ timestamp                : Sample(8),
+      userRefNum               : Sample(4),
+      side                     : Sample(1),
+      quantity                 : Sample(4),
+      orderModifiedMessageTail : MaybeOrderModifiedMessageTail ]
 
 EncodeOrderModifiedMessage(message) ==
     message.timestamp
         \o message.userRefNum
         \o message.side
         \o message.quantity
+        \o IF message.orderModifiedMessageTail.there THEN EncodeOrderModifiedMessageTail(message.orderModifiedMessageTail.value) ELSE << >>
 
 DecodeOrderModifiedMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET userRefNum == ReadBytes(timestamp.rest, 4) IN IF ~userRefNum.ok THEN Fail ELSE
     LET side == ReadBytes(userRefNum.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET quantity == ReadBytes(side.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
-    Ok([ timestamp  |-> timestamp.value,
-         userRefNum |-> userRefNum.value,
-         side       |-> side.value,
-         quantity   |-> quantity.value ], quantity.rest)
+    LET orderModifiedMessageTail == ReadOrderModifiedMessageTailMaybe(quantity.rest) IN IF ~orderModifiedMessageTail.ok THEN Fail ELSE
+    Ok([ timestamp                |-> timestamp.value,
+         userRefNum               |-> userRefNum.value,
+         side                     |-> side.value,
+         quantity                 |-> quantity.value,
+         orderModifiedMessageTail |-> orderModifiedMessageTail.value ], orderModifiedMessageTail.rest)
 
 ZeroOrderModifiedMessage ==
-    [ timestamp  |-> [i \in 1 .. 8 |-> 0],
-      userRefNum |-> [i \in 1 .. 4 |-> 0],
-      side       |-> [i \in 1 .. 1 |-> 0],
-      quantity   |-> [i \in 1 .. 4 |-> 0] ]
+    [ timestamp                |-> [i \in 1 .. 8 |-> 0],
+      userRefNum               |-> [i \in 1 .. 4 |-> 0],
+      side                     |-> [i \in 1 .. 1 |-> 0],
+      quantity                 |-> [i \in 1 .. 4 |-> 0],
+      orderModifiedMessageTail |-> WithoutOrderModifiedMessageTail ]
 
 (* Order Modified Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderModifiedMessage ==
@@ -1880,6 +3321,7 @@ CheckedOrderModifiedMessage ==
         \cup { [ZeroOrderModifiedMessage EXCEPT !.userRefNum = one] : one \in Sample(4) }
         \cup { [ZeroOrderModifiedMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroOrderModifiedMessage EXCEPT !.quantity = one] : one \in Sample(4) }
+        \cup { [ZeroOrderModifiedMessage EXCEPT !.orderModifiedMessageTail = one] : one \in MaybeOrderModifiedMessageTail }
 
 (***************************************************************************)
 (* Display Quantity: 4 bytes                                               *)
@@ -1948,6 +3390,28 @@ CheckedSecondaryOrdRefNum ==
         \cup { [ZeroSecondaryOrdRefNum EXCEPT !.secondaryOrdRefNum = one] : one \in Sample(8) }
 
 (***************************************************************************)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx12 ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx12(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx12(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx12 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx12 ==
+    { ZeroUserRefIdx12 }
+        \cup { [ZeroUserRefIdx12 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
 (* Order Restated Optional Value, selected by Order Restated Optional      *)
 (* Field                                                                   *)
 (***************************************************************************)
@@ -1955,22 +3419,26 @@ CheckedSecondaryOrdRefNum ==
 DisplayQuantityCode == 22  \* 0x16
 DisplayPriceCode == 23  \* 0x17
 SecondaryOrdRefNumCode == 1  \* 0x01
+UserRefIdxCode12 == 28  \* 0x1c
 
 OrderRestatedOptionalValue ==
     [ tag : {DisplayQuantityCode}, body : DisplayQuantity ]
         \cup [ tag : {DisplayPriceCode}, body : DisplayPrice ]
         \cup [ tag : {SecondaryOrdRefNumCode}, body : SecondaryOrdRefNum ]
+        \cup [ tag : {UserRefIdxCode12}, body : UserRefIdx12 ]
 
 EncodeOrderRestatedOptionalValue(message) ==
     CASE message.tag = DisplayQuantityCode -> EncodeDisplayQuantity(message.body)
       [] message.tag = DisplayPriceCode -> EncodeDisplayPrice(message.body)
       [] message.tag = SecondaryOrdRefNumCode -> EncodeSecondaryOrdRefNum(message.body)
+      [] message.tag = UserRefIdxCode12 -> EncodeUserRefIdx12(message.body)
 
 DecodeOrderRestatedOptionalValue(tag, bytes) ==
     LET read ==
             CASE tag = DisplayQuantityCode -> DecodeDisplayQuantity(bytes)
               [] tag = DisplayPriceCode -> DecodeDisplayPrice(bytes)
               [] tag = SecondaryOrdRefNumCode -> DecodeSecondaryOrdRefNum(bytes)
+              [] tag = UserRefIdxCode12 -> DecodeUserRefIdx12(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -1981,6 +3449,7 @@ CheckedOrderRestatedOptionalValue ==
     { [tag |-> DisplayQuantityCode, body |-> one] : one \in CheckedDisplayQuantity }
         \cup { [tag |-> DisplayPriceCode, body |-> one] : one \in CheckedDisplayPrice }
         \cup { [tag |-> SecondaryOrdRefNumCode, body |-> one] : one \in CheckedSecondaryOrdRefNum }
+        \cup { [tag |-> UserRefIdxCode12, body |-> one] : one \in CheckedUserRefIdx12 }
 
 (***************************************************************************)
 (* Order Restated Appendage, framed by Optional Field Length               *)
@@ -2043,7 +3512,8 @@ ReadOrderRestatedAppendageAll(bytes) ==
 OneOrderRestatedAppendage ==
     { [ZeroOrderRestatedAppendage EXCEPT !.orderRestatedOptionalValue = [tag |-> DisplayQuantityCode, body |-> ZeroDisplayQuantity]],
       [ZeroOrderRestatedAppendage EXCEPT !.orderRestatedOptionalValue = [tag |-> DisplayPriceCode, body |-> ZeroDisplayPrice]],
-      [ZeroOrderRestatedAppendage EXCEPT !.orderRestatedOptionalValue = [tag |-> SecondaryOrdRefNumCode, body |-> ZeroSecondaryOrdRefNum]] }
+      [ZeroOrderRestatedAppendage EXCEPT !.orderRestatedOptionalValue = [tag |-> SecondaryOrdRefNumCode, body |-> ZeroSecondaryOrdRefNum]],
+      [ZeroOrderRestatedAppendage EXCEPT !.orderRestatedOptionalValue = [tag |-> UserRefIdxCode12, body |-> ZeroUserRefIdx12]] }
 
 (***************************************************************************)
 (* Order Restated Message                                                  *)
@@ -2093,32 +3563,188 @@ CheckedOrderRestatedMessage ==
         \cup { [ZeroOrderRestatedMessage EXCEPT !.orderRestatedAppendage = one] : one \in SampleLists(OneOrderRestatedAppendage) }
 
 (***************************************************************************)
-(* Account Query Response Message: 12 bytes                                *)
+(* User Ref Idx: 1 bytes                                                   *)
+(***************************************************************************)
+
+UserRefIdx13 ==
+    [ userRefIdx : Sample(1) ]
+
+EncodeUserRefIdx13(message) ==
+    message.userRefIdx
+
+DecodeUserRefIdx13(bytes) ==
+    LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
+    Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
+
+ZeroUserRefIdx13 ==
+    [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
+
+(* User Ref Idx at zero, then each field in turn at the values it is checked at *)
+CheckedUserRefIdx13 ==
+    { ZeroUserRefIdx13 }
+        \cup { [ZeroUserRefIdx13 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Account Query Response Optional Value, selected by Account Query        *)
+(* Response Optional Field                                                 *)
+(***************************************************************************)
+
+UserRefIdxCode13 == 28  \* 0x1c
+
+AccountQueryResponseOptionalValue ==
+    [ tag : {UserRefIdxCode13}, body : UserRefIdx13 ]
+
+EncodeAccountQueryResponseOptionalValue(message) ==
+    CASE message.tag = UserRefIdxCode13 -> EncodeUserRefIdx13(message.body)
+
+DecodeAccountQueryResponseOptionalValue(tag, bytes) ==
+    LET read ==
+            CASE tag = UserRefIdxCode13 -> DecodeUserRefIdx13(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroAccountQueryResponseOptionalValue == [tag |-> UserRefIdxCode13, body |-> ZeroUserRefIdx13]
+
+(* Each Account Query Response Optional Value in turn, at the values the message it names is checked at *)
+CheckedAccountQueryResponseOptionalValue ==
+    { [tag |-> UserRefIdxCode13, body |-> one] : one \in CheckedUserRefIdx13 }
+
+(***************************************************************************)
+(* Account Query Response Appendage, framed by Optional Field Length       *)
+(***************************************************************************)
+
+AccountQueryResponseAppendage ==
+    [ accountQueryResponseOptionalValue : AccountQueryResponseOptionalValue ]
+
+EncodeAccountQueryResponseAppendageBody(message) ==
+    EncodeUIntBE(message.accountQueryResponseOptionalValue.tag, 1)
+        \o EncodeAccountQueryResponseOptionalValue(message.accountQueryResponseOptionalValue)
+
+(* Optional Field Length counts the bytes it frames, so it is written from them *)
+EncodeAccountQueryResponseAppendage(message) ==
+    LET body == EncodeAccountQueryResponseAppendageBody(message)
+    IN  EncodeUIntBE(Len(body), 1) \o body
+
+DecodeAccountQueryResponseAppendageBody(bytes) ==
+    LET accountQueryResponseOptionalField == ReadUIntBE(bytes, 1) IN IF ~accountQueryResponseOptionalField.ok THEN Fail ELSE
+    LET accountQueryResponseOptionalValue == DecodeAccountQueryResponseOptionalValue(accountQueryResponseOptionalField.value, accountQueryResponseOptionalField.rest) IN IF ~accountQueryResponseOptionalValue.ok THEN Fail ELSE
+    Ok([ accountQueryResponseOptionalValue |-> accountQueryResponseOptionalValue.value ], accountQueryResponseOptionalValue.rest)
+
+DecodeAccountQueryResponseAppendage(bytes) ==
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    IF Len(length.rest) < length.value THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, length.value)
+        beyond == SubSeq(length.rest, length.value + 1, Len(length.rest))
+        body   == DecodeAccountQueryResponseAppendageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
+
+ZeroAccountQueryResponseAppendage ==
+    [ accountQueryResponseOptionalValue |-> ZeroAccountQueryResponseOptionalValue ]
+
+(* Account Query Response Appendage at zero, then each field in turn at the values it is checked at *)
+CheckedAccountQueryResponseAppendage ==
+    { ZeroAccountQueryResponseAppendage }
+        \cup { [ZeroAccountQueryResponseAppendage EXCEPT !.accountQueryResponseOptionalValue = one] : one \in CheckedAccountQueryResponseOptionalValue }
+
+(* A run of Account Query Response Appendage, written one after another *)
+RECURSIVE EncodeAccountQueryResponseAppendageList(_)
+EncodeAccountQueryResponseAppendageList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeAccountQueryResponseAppendage(Head(messages)) \o EncodeAccountQueryResponseAppendageList(Tail(messages))
+
+(* As many Account Query Response Appendage as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadAccountQueryResponseAppendageAll(_)
+ReadAccountQueryResponseAppendageAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeAccountQueryResponseAppendage(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadAccountQueryResponseAppendageAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Account Query Response Appendage of each kind, for the lists that carry them *)
+OneAccountQueryResponseAppendage ==
+    { [ZeroAccountQueryResponseAppendage EXCEPT !.accountQueryResponseOptionalValue = [tag |-> UserRefIdxCode13, body |-> ZeroUserRefIdx13]] }
+
+(***************************************************************************)
+(* Account Query Response Message                                          *)
+(***************************************************************************)
+
+AccountQueryResponseMessageTail ==
+    [ accountQueryResponseAppendage : SampleLists(OneAccountQueryResponseAppendage) ]
+
+EncodeAccountQueryResponseMessageTail(message) ==
+    LET payload == EncodeAccountQueryResponseAppendageList(message.accountQueryResponseAppendage)
+    IN  EncodeUIntBE(Len(payload), 2)
+            \o payload
+
+DecodeAccountQueryResponseMessageTail(bytes) ==
+    LET appendageLength == ReadUIntBE(bytes, 2) IN IF ~appendageLength.ok THEN Fail ELSE
+    IF Len(appendageLength.rest) < appendageLength.value THEN Fail ELSE
+    LET framed == SubSeq(appendageLength.rest, 1, appendageLength.value)
+        beyond == SubSeq(appendageLength.rest, appendageLength.value + 1, Len(appendageLength.rest))
+        accountQueryResponseAppendage == ReadAccountQueryResponseAppendageAll(framed)
+    IN  IF ~accountQueryResponseAppendage.ok \/ accountQueryResponseAppendage.rest # << >> THEN Fail ELSE
+    Ok([ accountQueryResponseAppendage |-> accountQueryResponseAppendage.value ], beyond)
+
+ZeroAccountQueryResponseMessageTail ==
+    [ accountQueryResponseAppendage |-> << >> ]
+
+(* Account Query Response Message at zero, then each field in turn at the values it is checked at *)
+CheckedAccountQueryResponseMessageTail ==
+    { ZeroAccountQueryResponseMessageTail }
+        \cup { [ZeroAccountQueryResponseMessageTail EXCEPT !.accountQueryResponseAppendage = one] : one \in SampleLists(OneAccountQueryResponseAppendage) }
+
+(* Account Query Response Message runs on only when bytes remain, so it is there or it is not *)
+WithoutAccountQueryResponseMessageTail == [there |-> FALSE, value |-> ZeroAccountQueryResponseMessageTail]
+
+MaybeAccountQueryResponseMessageTail ==
+    { WithoutAccountQueryResponseMessageTail }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedAccountQueryResponseMessageTail }
+
+ReadAccountQueryResponseMessageTailMaybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutAccountQueryResponseMessageTail, << >>)
+    ELSE LET one == DecodeAccountQueryResponseMessageTail(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Account Query Response Message                                          *)
 (***************************************************************************)
 
 AccountQueryResponseMessage ==
-    [ timestamp      : Sample(8),
-      nextUserRefNum : Sample(4) ]
+    [ timestamp                       : Sample(8),
+      nextUserRefNum                  : Sample(4),
+      accountQueryResponseMessageTail : MaybeAccountQueryResponseMessageTail ]
 
 EncodeAccountQueryResponseMessage(message) ==
     message.timestamp
         \o message.nextUserRefNum
+        \o IF message.accountQueryResponseMessageTail.there THEN EncodeAccountQueryResponseMessageTail(message.accountQueryResponseMessageTail.value) ELSE << >>
 
 DecodeAccountQueryResponseMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET nextUserRefNum == ReadBytes(timestamp.rest, 4) IN IF ~nextUserRefNum.ok THEN Fail ELSE
-    Ok([ timestamp      |-> timestamp.value,
-         nextUserRefNum |-> nextUserRefNum.value ], nextUserRefNum.rest)
+    LET accountQueryResponseMessageTail == ReadAccountQueryResponseMessageTailMaybe(nextUserRefNum.rest) IN IF ~accountQueryResponseMessageTail.ok THEN Fail ELSE
+    Ok([ timestamp                       |-> timestamp.value,
+         nextUserRefNum                  |-> nextUserRefNum.value,
+         accountQueryResponseMessageTail |-> accountQueryResponseMessageTail.value ], accountQueryResponseMessageTail.rest)
 
 ZeroAccountQueryResponseMessage ==
-    [ timestamp      |-> [i \in 1 .. 8 |-> 0],
-      nextUserRefNum |-> [i \in 1 .. 4 |-> 0] ]
+    [ timestamp                       |-> [i \in 1 .. 8 |-> 0],
+      nextUserRefNum                  |-> [i \in 1 .. 4 |-> 0],
+      accountQueryResponseMessageTail |-> WithoutAccountQueryResponseMessageTail ]
 
 (* Account Query Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedAccountQueryResponseMessage ==
     { ZeroAccountQueryResponseMessage }
         \cup { [ZeroAccountQueryResponseMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroAccountQueryResponseMessage EXCEPT !.nextUserRefNum = one] : one \in Sample(4) }
+        \cup { [ZeroAccountQueryResponseMessage EXCEPT !.accountQueryResponseMessageTail = one] : one \in MaybeAccountQueryResponseMessageTail }
 
 (***************************************************************************)
 (* Side: 1 bytes                                                           *)
@@ -2146,45 +3772,45 @@ CheckedSide ==
 (* Group Id: 2 bytes                                                       *)
 (***************************************************************************)
 
-GroupId ==
+GroupId2 ==
     [ groupId : Sample(2) ]
 
-EncodeGroupId(message) ==
+EncodeGroupId2(message) ==
     message.groupId
 
-DecodeGroupId(bytes) ==
+DecodeGroupId2(bytes) ==
     LET groupId == ReadBytes(bytes, 2) IN IF ~groupId.ok THEN Fail ELSE
     Ok([ groupId |-> groupId.value ], groupId.rest)
 
-ZeroGroupId ==
+ZeroGroupId2 ==
     [ groupId |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Group Id at zero, then each field in turn at the values it is checked at *)
-CheckedGroupId ==
-    { ZeroGroupId }
-        \cup { [ZeroGroupId EXCEPT !.groupId = one] : one \in Sample(2) }
+CheckedGroupId2 ==
+    { ZeroGroupId2 }
+        \cup { [ZeroGroupId2 EXCEPT !.groupId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* User Ref Idx: 1 bytes                                                   *)
 (***************************************************************************)
 
-UserRefIdx ==
+UserRefIdx14 ==
     [ userRefIdx : Sample(1) ]
 
-EncodeUserRefIdx(message) ==
+EncodeUserRefIdx14(message) ==
     message.userRefIdx
 
-DecodeUserRefIdx(bytes) ==
+DecodeUserRefIdx14(bytes) ==
     LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
     Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
 
-ZeroUserRefIdx ==
+ZeroUserRefIdx14 ==
     [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
 
 (* User Ref Idx at zero, then each field in turn at the values it is checked at *)
-CheckedUserRefIdx ==
-    { ZeroUserRefIdx }
-        \cup { [ZeroUserRefIdx EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+CheckedUserRefIdx14 ==
+    { ZeroUserRefIdx14 }
+        \cup { [ZeroUserRefIdx14 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Mass Cancel Response Optional Value, selected by Mass Cancel Response   *)
@@ -2192,24 +3818,24 @@ CheckedUserRefIdx ==
 (***************************************************************************)
 
 SideCode == 27  \* 0x1b
-GroupIdCode == 24  \* 0x18
-UserRefIdxCode == 28  \* 0x1c
+GroupIdCode2 == 24  \* 0x18
+UserRefIdxCode14 == 28  \* 0x1c
 
 MassCancelResponseOptionalValue ==
     [ tag : {SideCode}, body : Side ]
-        \cup [ tag : {GroupIdCode}, body : GroupId ]
-        \cup [ tag : {UserRefIdxCode}, body : UserRefIdx ]
+        \cup [ tag : {GroupIdCode2}, body : GroupId2 ]
+        \cup [ tag : {UserRefIdxCode14}, body : UserRefIdx14 ]
 
 EncodeMassCancelResponseOptionalValue(message) ==
     CASE message.tag = SideCode -> EncodeSide(message.body)
-      [] message.tag = GroupIdCode -> EncodeGroupId(message.body)
-      [] message.tag = UserRefIdxCode -> EncodeUserRefIdx(message.body)
+      [] message.tag = GroupIdCode2 -> EncodeGroupId2(message.body)
+      [] message.tag = UserRefIdxCode14 -> EncodeUserRefIdx14(message.body)
 
 DecodeMassCancelResponseOptionalValue(tag, bytes) ==
     LET read ==
             CASE tag = SideCode -> DecodeSide(bytes)
-              [] tag = GroupIdCode -> DecodeGroupId(bytes)
-              [] tag = UserRefIdxCode -> DecodeUserRefIdx(bytes)
+              [] tag = GroupIdCode2 -> DecodeGroupId2(bytes)
+              [] tag = UserRefIdxCode14 -> DecodeUserRefIdx14(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -2218,8 +3844,8 @@ ZeroMassCancelResponseOptionalValue == [tag |-> SideCode, body |-> ZeroSide]
 (* Each Mass Cancel Response Optional Value in turn, at the values the message it names is checked at *)
 CheckedMassCancelResponseOptionalValue ==
     { [tag |-> SideCode, body |-> one] : one \in CheckedSide }
-        \cup { [tag |-> GroupIdCode, body |-> one] : one \in CheckedGroupId }
-        \cup { [tag |-> UserRefIdxCode, body |-> one] : one \in CheckedUserRefIdx }
+        \cup { [tag |-> GroupIdCode2, body |-> one] : one \in CheckedGroupId2 }
+        \cup { [tag |-> UserRefIdxCode14, body |-> one] : one \in CheckedUserRefIdx14 }
 
 (***************************************************************************)
 (* Mass Cancel Response Appendage, framed by Optional Field Length         *)
@@ -2281,8 +3907,8 @@ ReadMassCancelResponseAppendageAll(bytes) ==
 (* One Mass Cancel Response Appendage of each kind, for the lists that carry them *)
 OneMassCancelResponseAppendage ==
     { [ZeroMassCancelResponseAppendage EXCEPT !.massCancelResponseOptionalValue = [tag |-> SideCode, body |-> ZeroSide]],
-      [ZeroMassCancelResponseAppendage EXCEPT !.massCancelResponseOptionalValue = [tag |-> GroupIdCode, body |-> ZeroGroupId]],
-      [ZeroMassCancelResponseAppendage EXCEPT !.massCancelResponseOptionalValue = [tag |-> UserRefIdxCode, body |-> ZeroUserRefIdx]] }
+      [ZeroMassCancelResponseAppendage EXCEPT !.massCancelResponseOptionalValue = [tag |-> GroupIdCode2, body |-> ZeroGroupId2]],
+      [ZeroMassCancelResponseAppendage EXCEPT !.massCancelResponseOptionalValue = [tag |-> UserRefIdxCode14, body |-> ZeroUserRefIdx14]] }
 
 (***************************************************************************)
 (* Mass Cancel Response Message                                            *)
@@ -2341,48 +3967,48 @@ CheckedMassCancelResponseMessage ==
 (* User Ref Idx: 1 bytes                                                   *)
 (***************************************************************************)
 
-UserRefIdx2 ==
+UserRefIdx15 ==
     [ userRefIdx : Sample(1) ]
 
-EncodeUserRefIdx2(message) ==
+EncodeUserRefIdx15(message) ==
     message.userRefIdx
 
-DecodeUserRefIdx2(bytes) ==
+DecodeUserRefIdx15(bytes) ==
     LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
     Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
 
-ZeroUserRefIdx2 ==
+ZeroUserRefIdx15 ==
     [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
 
 (* User Ref Idx at zero, then each field in turn at the values it is checked at *)
-CheckedUserRefIdx2 ==
-    { ZeroUserRefIdx2 }
-        \cup { [ZeroUserRefIdx2 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+CheckedUserRefIdx15 ==
+    { ZeroUserRefIdx15 }
+        \cup { [ZeroUserRefIdx15 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Disable Order Entry Response Optional Value, selected by Disable Order  *)
 (* Entry Response Optional Field                                           *)
 (***************************************************************************)
 
-UserRefIdxCode2 == 28  \* 0x1c
+UserRefIdxCode15 == 28  \* 0x1c
 
 DisableOrderEntryResponseOptionalValue ==
-    [ tag : {UserRefIdxCode2}, body : UserRefIdx2 ]
+    [ tag : {UserRefIdxCode15}, body : UserRefIdx15 ]
 
 EncodeDisableOrderEntryResponseOptionalValue(message) ==
-    CASE message.tag = UserRefIdxCode2 -> EncodeUserRefIdx2(message.body)
+    CASE message.tag = UserRefIdxCode15 -> EncodeUserRefIdx15(message.body)
 
 DecodeDisableOrderEntryResponseOptionalValue(tag, bytes) ==
     LET read ==
-            CASE tag = UserRefIdxCode2 -> DecodeUserRefIdx2(bytes)
+            CASE tag = UserRefIdxCode15 -> DecodeUserRefIdx15(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroDisableOrderEntryResponseOptionalValue == [tag |-> UserRefIdxCode2, body |-> ZeroUserRefIdx2]
+ZeroDisableOrderEntryResponseOptionalValue == [tag |-> UserRefIdxCode15, body |-> ZeroUserRefIdx15]
 
 (* Each Disable Order Entry Response Optional Value in turn, at the values the message it names is checked at *)
 CheckedDisableOrderEntryResponseOptionalValue ==
-    { [tag |-> UserRefIdxCode2, body |-> one] : one \in CheckedUserRefIdx2 }
+    { [tag |-> UserRefIdxCode15, body |-> one] : one \in CheckedUserRefIdx15 }
 
 (***************************************************************************)
 (* Disable Order Entry Response Appendage, framed by Optional Field Length *)
@@ -2443,7 +4069,7 @@ ReadDisableOrderEntryResponseAppendageAll(bytes) ==
 
 (* One Disable Order Entry Response Appendage of each kind, for the lists that carry them *)
 OneDisableOrderEntryResponseAppendage ==
-    { [ZeroDisableOrderEntryResponseAppendage EXCEPT !.disableOrderEntryResponseOptionalValue = [tag |-> UserRefIdxCode2, body |-> ZeroUserRefIdx2]] }
+    { [ZeroDisableOrderEntryResponseAppendage EXCEPT !.disableOrderEntryResponseOptionalValue = [tag |-> UserRefIdxCode15, body |-> ZeroUserRefIdx15]] }
 
 (***************************************************************************)
 (* Disable Order Entry Response Message                                    *)
@@ -2496,48 +4122,48 @@ CheckedDisableOrderEntryResponseMessage ==
 (* User Ref Idx: 1 bytes                                                   *)
 (***************************************************************************)
 
-UserRefIdx3 ==
+UserRefIdx16 ==
     [ userRefIdx : Sample(1) ]
 
-EncodeUserRefIdx3(message) ==
+EncodeUserRefIdx16(message) ==
     message.userRefIdx
 
-DecodeUserRefIdx3(bytes) ==
+DecodeUserRefIdx16(bytes) ==
     LET userRefIdx == ReadBytes(bytes, 1) IN IF ~userRefIdx.ok THEN Fail ELSE
     Ok([ userRefIdx |-> userRefIdx.value ], userRefIdx.rest)
 
-ZeroUserRefIdx3 ==
+ZeroUserRefIdx16 ==
     [ userRefIdx |-> [i \in 1 .. 1 |-> 0] ]
 
 (* User Ref Idx at zero, then each field in turn at the values it is checked at *)
-CheckedUserRefIdx3 ==
-    { ZeroUserRefIdx3 }
-        \cup { [ZeroUserRefIdx3 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
+CheckedUserRefIdx16 ==
+    { ZeroUserRefIdx16 }
+        \cup { [ZeroUserRefIdx16 EXCEPT !.userRefIdx = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Enable Order Entry Response Optional Value, selected by Enable Order    *)
 (* Entry Response Optional Field                                           *)
 (***************************************************************************)
 
-UserRefIdxCode3 == 28  \* 0x1c
+UserRefIdxCode16 == 28  \* 0x1c
 
 EnableOrderEntryResponseOptionalValue ==
-    [ tag : {UserRefIdxCode3}, body : UserRefIdx3 ]
+    [ tag : {UserRefIdxCode16}, body : UserRefIdx16 ]
 
 EncodeEnableOrderEntryResponseOptionalValue(message) ==
-    CASE message.tag = UserRefIdxCode3 -> EncodeUserRefIdx3(message.body)
+    CASE message.tag = UserRefIdxCode16 -> EncodeUserRefIdx16(message.body)
 
 DecodeEnableOrderEntryResponseOptionalValue(tag, bytes) ==
     LET read ==
-            CASE tag = UserRefIdxCode3 -> DecodeUserRefIdx3(bytes)
+            CASE tag = UserRefIdxCode16 -> DecodeUserRefIdx16(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroEnableOrderEntryResponseOptionalValue == [tag |-> UserRefIdxCode3, body |-> ZeroUserRefIdx3]
+ZeroEnableOrderEntryResponseOptionalValue == [tag |-> UserRefIdxCode16, body |-> ZeroUserRefIdx16]
 
 (* Each Enable Order Entry Response Optional Value in turn, at the values the message it names is checked at *)
 CheckedEnableOrderEntryResponseOptionalValue ==
-    { [tag |-> UserRefIdxCode3, body |-> one] : one \in CheckedUserRefIdx3 }
+    { [tag |-> UserRefIdxCode16, body |-> one] : one \in CheckedUserRefIdx16 }
 
 (***************************************************************************)
 (* Enable Order Entry Response Appendage, framed by Optional Field Length  *)
@@ -2598,7 +4224,7 @@ ReadEnableOrderEntryResponseAppendageAll(bytes) ==
 
 (* One Enable Order Entry Response Appendage of each kind, for the lists that carry them *)
 OneEnableOrderEntryResponseAppendage ==
-    { [ZeroEnableOrderEntryResponseAppendage EXCEPT !.enableOrderEntryResponseOptionalValue = [tag |-> UserRefIdxCode3, body |-> ZeroUserRefIdx3]] }
+    { [ZeroEnableOrderEntryResponseAppendage EXCEPT !.enableOrderEntryResponseOptionalValue = [tag |-> UserRefIdxCode16, body |-> ZeroUserRefIdx16]] }
 
 (***************************************************************************)
 (* Enable Order Entry Response Message                                     *)
@@ -2658,7 +4284,6 @@ CanceledMessageCode == 67  \* "C"
 AiqCanceledMessageCode == 68  \* "D"
 OrderExecutedMessageCode == 69  \* "E"
 BrokenTradeMessageCode == 66  \* "B"
-TradeCorrectionMessageCode == 70  \* "F"
 RejectedOrderMessageCode == 74  \* "J"
 CancelPendingMessageCode == 80  \* "P"
 CancelRejectMessageCode == 73  \* "I"
@@ -2678,7 +4303,6 @@ SequencedMessage ==
         \cup [ tag : {AiqCanceledMessageCode}, body : AiqCanceledMessage ]
         \cup [ tag : {OrderExecutedMessageCode}, body : OrderExecutedMessage ]
         \cup [ tag : {BrokenTradeMessageCode}, body : BrokenTradeMessage ]
-        \cup [ tag : {TradeCorrectionMessageCode}, body : TradeCorrectionMessage ]
         \cup [ tag : {RejectedOrderMessageCode}, body : RejectedOrderMessage ]
         \cup [ tag : {CancelPendingMessageCode}, body : CancelPendingMessage ]
         \cup [ tag : {CancelRejectMessageCode}, body : CancelRejectMessage ]
@@ -2698,7 +4322,6 @@ EncodeSequencedMessage(message) ==
       [] message.tag = AiqCanceledMessageCode -> EncodeAiqCanceledMessage(message.body)
       [] message.tag = OrderExecutedMessageCode -> EncodeOrderExecutedMessage(message.body)
       [] message.tag = BrokenTradeMessageCode -> EncodeBrokenTradeMessage(message.body)
-      [] message.tag = TradeCorrectionMessageCode -> EncodeTradeCorrectionMessage(message.body)
       [] message.tag = RejectedOrderMessageCode -> EncodeRejectedOrderMessage(message.body)
       [] message.tag = CancelPendingMessageCode -> EncodeCancelPendingMessage(message.body)
       [] message.tag = CancelRejectMessageCode -> EncodeCancelRejectMessage(message.body)
@@ -2719,7 +4342,6 @@ DecodeSequencedMessage(tag, bytes) ==
               [] tag = AiqCanceledMessageCode -> DecodeAiqCanceledMessage(bytes)
               [] tag = OrderExecutedMessageCode -> DecodeOrderExecutedMessage(bytes)
               [] tag = BrokenTradeMessageCode -> DecodeBrokenTradeMessage(bytes)
-              [] tag = TradeCorrectionMessageCode -> DecodeTradeCorrectionMessage(bytes)
               [] tag = RejectedOrderMessageCode -> DecodeRejectedOrderMessage(bytes)
               [] tag = CancelPendingMessageCode -> DecodeCancelPendingMessage(bytes)
               [] tag = CancelRejectMessageCode -> DecodeCancelRejectMessage(bytes)
@@ -2744,7 +4366,6 @@ CheckedSequencedMessage ==
         \cup { [tag |-> AiqCanceledMessageCode, body |-> one] : one \in CheckedAiqCanceledMessage }
         \cup { [tag |-> OrderExecutedMessageCode, body |-> one] : one \in CheckedOrderExecutedMessage }
         \cup { [tag |-> BrokenTradeMessageCode, body |-> one] : one \in CheckedBrokenTradeMessage }
-        \cup { [tag |-> TradeCorrectionMessageCode, body |-> one] : one \in CheckedTradeCorrectionMessage }
         \cup { [tag |-> RejectedOrderMessageCode, body |-> one] : one \in CheckedRejectedOrderMessage }
         \cup { [tag |-> CancelPendingMessageCode, body |-> one] : one \in CheckedCancelPendingMessage }
         \cup { [tag |-> CancelRejectMessageCode, body |-> one] : one \in CheckedCancelRejectMessage }
@@ -3021,10 +4642,10 @@ RoundTripDiscretionPrice ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Discretion Peg Type decodes back to what was encoded, and leaves nothing over *)
-RoundTripDiscretionPegType ==
-    \A message \in CheckedDiscretionPegType :
-        LET read == DecodeDiscretionPegType(EncodeDiscretionPegType(message))
+(* Every Discretion Price Type decodes back to what was encoded, and leaves nothing over *)
+RoundTripDiscretionPriceType ==
+    \A message \in CheckedDiscretionPriceType :
+        LET read == DecodeDiscretionPriceType(EncodeDiscretionPriceType(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3089,6 +4710,46 @@ RoundTripHandleInst ==
 RoundTripBboWeightIndicator ==
     \A message \in CheckedBboWeightIndicator :
         LET read == DecodeBboWeightIndicator(EncodeBboWeightIndicator(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Group Id decodes back to what was encoded, and leaves nothing over *)
+RoundTripGroupId ==
+    \A message \in CheckedGroupId :
+        LET read == DecodeGroupId(EncodeGroupId(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Shares Located decodes back to what was encoded, and leaves nothing over *)
+RoundTripSharesLocated ==
+    \A message \in CheckedSharesLocated :
+        LET read == DecodeSharesLocated(EncodeSharesLocated(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx ==
+    \A message \in CheckedUserRefIdx :
+        LET read == DecodeUserRefIdx(EncodeUserRefIdx(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Aiq Strategy decodes back to what was encoded, and leaves nothing over *)
+RoundTripAiqStrategy ==
+    \A message \in CheckedAiqStrategy :
+        LET read == DecodeAiqStrategy(EncodeAiqStrategy(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Aiq Group Id decodes back to what was encoded, and leaves nothing over *)
+RoundTripAiqGroupId ==
+    \A message \in CheckedAiqGroupId :
+        LET read == DecodeAiqGroupId(EncodeAiqGroupId(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3181,6 +4842,30 @@ RoundTripBboWeightIndicator2 ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx2 ==
+    \A message \in CheckedUserRefIdx2 :
+        LET read == DecodeUserRefIdx2(EncodeUserRefIdx2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Aiq Strategy decodes back to what was encoded, and leaves nothing over *)
+RoundTripAiqStrategy2 ==
+    \A message \in CheckedAiqStrategy2 :
+        LET read == DecodeAiqStrategy2(EncodeAiqStrategy2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Aiq Group Id decodes back to what was encoded, and leaves nothing over *)
+RoundTripAiqGroupId2 ==
+    \A message \in CheckedAiqGroupId2 :
+        LET read == DecodeAiqGroupId2(EncodeAiqGroupId2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Replaced Message Appendage decodes back to what was encoded, and leaves nothing over *)
 RoundTripReplacedMessageAppendage ==
     \A message \in CheckedReplacedMessageAppendage :
@@ -3197,10 +4882,58 @@ RoundTripReplacedMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx3 ==
+    \A message \in CheckedUserRefIdx3 :
+        LET read == DecodeUserRefIdx3(EncodeUserRefIdx3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Canceled Message Appendage decodes back to what was encoded, and leaves nothing over *)
+RoundTripCanceledMessageAppendage ==
+    \A message \in CheckedCanceledMessageAppendage :
+        LET read == DecodeCanceledMessageAppendage(EncodeCanceledMessageAppendage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Canceled Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripCanceledMessageTail ==
+    \A message \in CheckedCanceledMessageTail :
+        LET read == DecodeCanceledMessageTail(EncodeCanceledMessageTail(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Canceled Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripCanceledMessage ==
     \A message \in CheckedCanceledMessage :
         LET read == DecodeCanceledMessage(EncodeCanceledMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx4 ==
+    \A message \in CheckedUserRefIdx4 :
+        LET read == DecodeUserRefIdx4(EncodeUserRefIdx4(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Aiq Canceled Appendage decodes back to what was encoded, and leaves nothing over *)
+RoundTripAiqCanceledAppendage ==
+    \A message \in CheckedAiqCanceledAppendage :
+        LET read == DecodeAiqCanceledAppendage(EncodeAiqCanceledAppendage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Aiq Canceled Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripAiqCanceledMessageTail ==
+    \A message \in CheckedAiqCanceledMessageTail :
+        LET read == DecodeAiqCanceledMessageTail(EncodeAiqCanceledMessageTail(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3213,18 +4946,10 @@ RoundTripAiqCanceledMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Reference Price decodes back to what was encoded, and leaves nothing over *)
-RoundTripReferencePrice ==
-    \A message \in CheckedReferencePrice :
-        LET read == DecodeReferencePrice(EncodeReferencePrice(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Reference Price Type decodes back to what was encoded, and leaves nothing over *)
-RoundTripReferencePriceType ==
-    \A message \in CheckedReferencePriceType :
-        LET read == DecodeReferencePriceType(EncodeReferencePriceType(message))
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx5 ==
+    \A message \in CheckedUserRefIdx5 :
+        LET read == DecodeUserRefIdx5(EncodeUserRefIdx5(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3245,6 +4970,30 @@ RoundTripOrderExecutedMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx6 ==
+    \A message \in CheckedUserRefIdx6 :
+        LET read == DecodeUserRefIdx6(EncodeUserRefIdx6(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Broken Trade Appendage decodes back to what was encoded, and leaves nothing over *)
+RoundTripBrokenTradeAppendage ==
+    \A message \in CheckedBrokenTradeAppendage :
+        LET read == DecodeBrokenTradeAppendage(EncodeBrokenTradeAppendage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Broken Trade Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripBrokenTradeMessageTail ==
+    \A message \in CheckedBrokenTradeMessageTail :
+        LET read == DecodeBrokenTradeMessageTail(EncodeBrokenTradeMessageTail(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Broken Trade Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripBrokenTradeMessage ==
     \A message \in CheckedBrokenTradeMessage :
@@ -3253,10 +5002,26 @@ RoundTripBrokenTradeMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Trade Correction Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripTradeCorrectionMessage ==
-    \A message \in CheckedTradeCorrectionMessage :
-        LET read == DecodeTradeCorrectionMessage(EncodeTradeCorrectionMessage(message))
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx7 ==
+    \A message \in CheckedUserRefIdx7 :
+        LET read == DecodeUserRefIdx7(EncodeUserRefIdx7(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Rejected Order Appendage decodes back to what was encoded, and leaves nothing over *)
+RoundTripRejectedOrderAppendage ==
+    \A message \in CheckedRejectedOrderAppendage :
+        LET read == DecodeRejectedOrderAppendage(EncodeRejectedOrderAppendage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Rejected Order Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripRejectedOrderMessageTail ==
+    \A message \in CheckedRejectedOrderMessageTail :
+        LET read == DecodeRejectedOrderMessageTail(EncodeRejectedOrderMessageTail(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3269,10 +5034,58 @@ RoundTripRejectedOrderMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx8 ==
+    \A message \in CheckedUserRefIdx8 :
+        LET read == DecodeUserRefIdx8(EncodeUserRefIdx8(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Cancel Pending Appendage decodes back to what was encoded, and leaves nothing over *)
+RoundTripCancelPendingAppendage ==
+    \A message \in CheckedCancelPendingAppendage :
+        LET read == DecodeCancelPendingAppendage(EncodeCancelPendingAppendage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Cancel Pending Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripCancelPendingMessageTail ==
+    \A message \in CheckedCancelPendingMessageTail :
+        LET read == DecodeCancelPendingMessageTail(EncodeCancelPendingMessageTail(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Cancel Pending Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripCancelPendingMessage ==
     \A message \in CheckedCancelPendingMessage :
         LET read == DecodeCancelPendingMessage(EncodeCancelPendingMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx9 ==
+    \A message \in CheckedUserRefIdx9 :
+        LET read == DecodeUserRefIdx9(EncodeUserRefIdx9(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Cancel Reject Appendage decodes back to what was encoded, and leaves nothing over *)
+RoundTripCancelRejectAppendage ==
+    \A message \in CheckedCancelRejectAppendage :
+        LET read == DecodeCancelRejectAppendage(EncodeCancelRejectAppendage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Cancel Reject Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripCancelRejectMessageTail ==
+    \A message \in CheckedCancelRejectMessageTail :
+        LET read == DecodeCancelRejectMessageTail(EncodeCancelRejectMessageTail(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3285,10 +5098,74 @@ RoundTripCancelRejectMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx10 ==
+    \A message \in CheckedUserRefIdx10 :
+        LET read == DecodeUserRefIdx10(EncodeUserRefIdx10(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Order Priority Update Appendage decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderPriorityUpdateAppendage ==
+    \A message \in CheckedOrderPriorityUpdateAppendage :
+        LET read == DecodeOrderPriorityUpdateAppendage(EncodeOrderPriorityUpdateAppendage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Order Priority Update Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderPriorityUpdateMessageTail ==
+    \A message \in CheckedOrderPriorityUpdateMessageTail :
+        LET read == DecodeOrderPriorityUpdateMessageTail(EncodeOrderPriorityUpdateMessageTail(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Order Priority Update Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrderPriorityUpdateMessage ==
     \A message \in CheckedOrderPriorityUpdateMessage :
         LET read == DecodeOrderPriorityUpdateMessage(EncodeOrderPriorityUpdateMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx11 ==
+    \A message \in CheckedUserRefIdx11 :
+        LET read == DecodeUserRefIdx11(EncodeUserRefIdx11(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Shares Located decodes back to what was encoded, and leaves nothing over *)
+RoundTripSharesLocated2 ==
+    \A message \in CheckedSharesLocated2 :
+        LET read == DecodeSharesLocated2(EncodeSharesLocated2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Locate Broker decodes back to what was encoded, and leaves nothing over *)
+RoundTripLocateBroker ==
+    \A message \in CheckedLocateBroker :
+        LET read == DecodeLocateBroker(EncodeLocateBroker(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Order Modified Appendage decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderModifiedAppendage ==
+    \A message \in CheckedOrderModifiedAppendage :
+        LET read == DecodeOrderModifiedAppendage(EncodeOrderModifiedAppendage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Order Modified Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderModifiedMessageTail ==
+    \A message \in CheckedOrderModifiedMessageTail :
+        LET read == DecodeOrderModifiedMessageTail(EncodeOrderModifiedMessageTail(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3325,6 +5202,14 @@ RoundTripSecondaryOrdRefNum ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx12 ==
+    \A message \in CheckedUserRefIdx12 :
+        LET read == DecodeUserRefIdx12(EncodeUserRefIdx12(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Order Restated Appendage decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrderRestatedAppendage ==
     \A message \in CheckedOrderRestatedAppendage :
@@ -3337,6 +5222,30 @@ RoundTripOrderRestatedAppendage ==
 RoundTripOrderRestatedMessage ==
     \A message \in CheckedOrderRestatedMessage :
         LET read == DecodeOrderRestatedMessage(EncodeOrderRestatedMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
+RoundTripUserRefIdx13 ==
+    \A message \in CheckedUserRefIdx13 :
+        LET read == DecodeUserRefIdx13(EncodeUserRefIdx13(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Account Query Response Appendage decodes back to what was encoded, and leaves nothing over *)
+RoundTripAccountQueryResponseAppendage ==
+    \A message \in CheckedAccountQueryResponseAppendage :
+        LET read == DecodeAccountQueryResponseAppendage(EncodeAccountQueryResponseAppendage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Account Query Response Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripAccountQueryResponseMessageTail ==
+    \A message \in CheckedAccountQueryResponseMessageTail :
+        LET read == DecodeAccountQueryResponseMessageTail(EncodeAccountQueryResponseMessageTail(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3358,17 +5267,17 @@ RoundTripSide ==
             /\ read.rest = << >>
 
 (* Every Group Id decodes back to what was encoded, and leaves nothing over *)
-RoundTripGroupId ==
-    \A message \in CheckedGroupId :
-        LET read == DecodeGroupId(EncodeGroupId(message))
+RoundTripGroupId2 ==
+    \A message \in CheckedGroupId2 :
+        LET read == DecodeGroupId2(EncodeGroupId2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
-RoundTripUserRefIdx ==
-    \A message \in CheckedUserRefIdx :
-        LET read == DecodeUserRefIdx(EncodeUserRefIdx(message))
+RoundTripUserRefIdx14 ==
+    \A message \in CheckedUserRefIdx14 :
+        LET read == DecodeUserRefIdx14(EncodeUserRefIdx14(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3390,9 +5299,9 @@ RoundTripMassCancelResponseMessage ==
             /\ read.rest = << >>
 
 (* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
-RoundTripUserRefIdx2 ==
-    \A message \in CheckedUserRefIdx2 :
-        LET read == DecodeUserRefIdx2(EncodeUserRefIdx2(message))
+RoundTripUserRefIdx15 ==
+    \A message \in CheckedUserRefIdx15 :
+        LET read == DecodeUserRefIdx15(EncodeUserRefIdx15(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3414,9 +5323,9 @@ RoundTripDisableOrderEntryResponseMessage ==
             /\ read.rest = << >>
 
 (* Every User Ref Idx decodes back to what was encoded, and leaves nothing over *)
-RoundTripUserRefIdx3 ==
-    \A message \in CheckedUserRefIdx3 :
-        LET read == DecodeUserRefIdx3(EncodeUserRefIdx3(message))
+RoundTripUserRefIdx16 ==
+    \A message \in CheckedUserRefIdx16 :
+        LET read == DecodeUserRefIdx16(EncodeUserRefIdx16(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3473,16 +5382,70 @@ SelectsReplacedMessageOptionalValue ==
         LET read == DecodeReplacedMessageOptionalValue(message.tag, EncodeReplacedMessageOptionalValue(message))
         IN  read.ok /\ read.value.tag = message.tag
 
+(* A Canceled Message Optional Value is selected by the Canceled Message Optional Field it is written under *)
+SelectsCanceledMessageOptionalValue ==
+    \A message \in CheckedCanceledMessageOptionalValue :
+        LET read == DecodeCanceledMessageOptionalValue(message.tag, EncodeCanceledMessageOptionalValue(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* A Aiq Canceled Optional Value is selected by the Aiq Canceled Optional Field it is written under *)
+SelectsAiqCanceledOptionalValue ==
+    \A message \in CheckedAiqCanceledOptionalValue :
+        LET read == DecodeAiqCanceledOptionalValue(message.tag, EncodeAiqCanceledOptionalValue(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
 (* A Order Executed Optional Value is selected by the Order Executed Optional Field it is written under *)
 SelectsOrderExecutedOptionalValue ==
     \A message \in CheckedOrderExecutedOptionalValue :
         LET read == DecodeOrderExecutedOptionalValue(message.tag, EncodeOrderExecutedOptionalValue(message))
         IN  read.ok /\ read.value.tag = message.tag
 
+(* A Broken Trade Optional Value is selected by the Broken Trade Optional Field it is written under *)
+SelectsBrokenTradeOptionalValue ==
+    \A message \in CheckedBrokenTradeOptionalValue :
+        LET read == DecodeBrokenTradeOptionalValue(message.tag, EncodeBrokenTradeOptionalValue(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* A Rejected Order Optional Value is selected by the Rejected Order Optional Field it is written under *)
+SelectsRejectedOrderOptionalValue ==
+    \A message \in CheckedRejectedOrderOptionalValue :
+        LET read == DecodeRejectedOrderOptionalValue(message.tag, EncodeRejectedOrderOptionalValue(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* A Cancel Pending Optional Value is selected by the Cancel Pending Optional Field it is written under *)
+SelectsCancelPendingOptionalValue ==
+    \A message \in CheckedCancelPendingOptionalValue :
+        LET read == DecodeCancelPendingOptionalValue(message.tag, EncodeCancelPendingOptionalValue(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* A Cancel Reject Optional Value is selected by the Cancel Reject Optional Field it is written under *)
+SelectsCancelRejectOptionalValue ==
+    \A message \in CheckedCancelRejectOptionalValue :
+        LET read == DecodeCancelRejectOptionalValue(message.tag, EncodeCancelRejectOptionalValue(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* A Order Priority Update Optional Value is selected by the Order Priority Update Optional Field it is written under *)
+SelectsOrderPriorityUpdateOptionalValue ==
+    \A message \in CheckedOrderPriorityUpdateOptionalValue :
+        LET read == DecodeOrderPriorityUpdateOptionalValue(message.tag, EncodeOrderPriorityUpdateOptionalValue(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* A Order Modified Optional Value is selected by the Order Modified Optional Field it is written under *)
+SelectsOrderModifiedOptionalValue ==
+    \A message \in CheckedOrderModifiedOptionalValue :
+        LET read == DecodeOrderModifiedOptionalValue(message.tag, EncodeOrderModifiedOptionalValue(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
 (* A Order Restated Optional Value is selected by the Order Restated Optional Field it is written under *)
 SelectsOrderRestatedOptionalValue ==
     \A message \in CheckedOrderRestatedOptionalValue :
         LET read == DecodeOrderRestatedOptionalValue(message.tag, EncodeOrderRestatedOptionalValue(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* A Account Query Response Optional Value is selected by the Account Query Response Optional Field it is written under *)
+SelectsAccountQueryResponseOptionalValue ==
+    \A message \in CheckedAccountQueryResponseOptionalValue :
+        LET read == DecodeAccountQueryResponseOptionalValue(message.tag, EncodeAccountQueryResponseOptionalValue(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Mass Cancel Response Optional Value is selected by the Mass Cancel Response Optional Field it is written under *)
@@ -3528,15 +5491,69 @@ FramesReplacedMessageAppendage ==
         IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
 
 (* Optional Field Length is written from the bytes it frames *)
+FramesCanceledMessageAppendage ==
+    \A message \in CheckedCanceledMessageAppendage :
+        LET bytes == EncodeCanceledMessageAppendage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
+
+(* Optional Field Length is written from the bytes it frames *)
+FramesAiqCanceledAppendage ==
+    \A message \in CheckedAiqCanceledAppendage :
+        LET bytes == EncodeAiqCanceledAppendage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
+
+(* Optional Field Length is written from the bytes it frames *)
 FramesOrderExecutedAppendage ==
     \A message \in CheckedOrderExecutedAppendage :
         LET bytes == EncodeOrderExecutedAppendage(message)
         IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
 
 (* Optional Field Length is written from the bytes it frames *)
+FramesBrokenTradeAppendage ==
+    \A message \in CheckedBrokenTradeAppendage :
+        LET bytes == EncodeBrokenTradeAppendage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
+
+(* Optional Field Length is written from the bytes it frames *)
+FramesRejectedOrderAppendage ==
+    \A message \in CheckedRejectedOrderAppendage :
+        LET bytes == EncodeRejectedOrderAppendage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
+
+(* Optional Field Length is written from the bytes it frames *)
+FramesCancelPendingAppendage ==
+    \A message \in CheckedCancelPendingAppendage :
+        LET bytes == EncodeCancelPendingAppendage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
+
+(* Optional Field Length is written from the bytes it frames *)
+FramesCancelRejectAppendage ==
+    \A message \in CheckedCancelRejectAppendage :
+        LET bytes == EncodeCancelRejectAppendage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
+
+(* Optional Field Length is written from the bytes it frames *)
+FramesOrderPriorityUpdateAppendage ==
+    \A message \in CheckedOrderPriorityUpdateAppendage :
+        LET bytes == EncodeOrderPriorityUpdateAppendage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
+
+(* Optional Field Length is written from the bytes it frames *)
+FramesOrderModifiedAppendage ==
+    \A message \in CheckedOrderModifiedAppendage :
+        LET bytes == EncodeOrderModifiedAppendage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
+
+(* Optional Field Length is written from the bytes it frames *)
 FramesOrderRestatedAppendage ==
     \A message \in CheckedOrderRestatedAppendage :
         LET bytes == EncodeOrderRestatedAppendage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
+
+(* Optional Field Length is written from the bytes it frames *)
+FramesAccountQueryResponseAppendage ==
+    \A message \in CheckedAccountQueryResponseAppendage :
+        LET bytes == EncodeAccountQueryResponseAppendage(message)
         IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 1
 
 (* Optional Field Length is written from the bytes it frames *)

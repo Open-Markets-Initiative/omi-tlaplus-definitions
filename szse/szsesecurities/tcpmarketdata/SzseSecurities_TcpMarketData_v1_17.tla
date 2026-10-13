@@ -3129,6 +3129,7 @@ CheckedTransactionTickDataOfBidQuotationMessage ==
 
 LogonMessageCode == 1  \* 0x01
 LogoutMessageCode == 2  \* 0x02
+HeartbeatMessageCode == 3  \* 0x03
 ChannelHeartbeatMessageCode == 390095  \* 0x5f3cf
 RetransmittingMessageCode == 390094  \* 0x5f3ce
 ClientUserInformationReportingMessageCode == 390093  \* 0x5f3cd
@@ -3161,6 +3162,7 @@ TransactionTickDataOfBidQuotationMessageCode == 300491  \* 0x495cb
 Payload ==
     [ tag : {LogonMessageCode}, body : LogonMessage ]
         \cup [ tag : {LogoutMessageCode}, body : LogoutMessage ]
+        \cup [ tag : {HeartbeatMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {ChannelHeartbeatMessageCode}, body : ChannelHeartbeatMessage ]
         \cup [ tag : {RetransmittingMessageCode}, body : RetransmittingMessage ]
         \cup [ tag : {ClientUserInformationReportingMessageCode}, body : ClientUserInformationReportingMessage ]
@@ -3193,6 +3195,7 @@ Payload ==
 EncodePayload(message) ==
     CASE message.tag = LogonMessageCode -> EncodeLogonMessage(message.body)
       [] message.tag = LogoutMessageCode -> EncodeLogoutMessage(message.body)
+      [] message.tag = HeartbeatMessageCode -> << >>
       [] message.tag = ChannelHeartbeatMessageCode -> EncodeChannelHeartbeatMessage(message.body)
       [] message.tag = RetransmittingMessageCode -> EncodeRetransmittingMessage(message.body)
       [] message.tag = ClientUserInformationReportingMessageCode -> EncodeClientUserInformationReportingMessage(message.body)
@@ -3226,6 +3229,7 @@ DecodePayload(tag, bytes) ==
     LET read ==
             CASE tag = LogonMessageCode -> DecodeLogonMessage(bytes)
               [] tag = LogoutMessageCode -> DecodeLogoutMessage(bytes)
+              [] tag = HeartbeatMessageCode -> Ok([empty |-> 0], bytes)
               [] tag = ChannelHeartbeatMessageCode -> DecodeChannelHeartbeatMessage(bytes)
               [] tag = RetransmittingMessageCode -> DecodeRetransmittingMessage(bytes)
               [] tag = ClientUserInformationReportingMessageCode -> DecodeClientUserInformationReportingMessage(bytes)
@@ -3263,6 +3267,7 @@ ZeroPayload == [tag |-> LogonMessageCode, body |-> ZeroLogonMessage]
 CheckedPayload ==
     { [tag |-> LogonMessageCode, body |-> one] : one \in CheckedLogonMessage }
         \cup { [tag |-> LogoutMessageCode, body |-> one] : one \in CheckedLogoutMessage }
+        \cup { [tag |-> HeartbeatMessageCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> ChannelHeartbeatMessageCode, body |-> one] : one \in CheckedChannelHeartbeatMessage }
         \cup { [tag |-> RetransmittingMessageCode, body |-> one] : one \in CheckedRetransmittingMessage }
         \cup { [tag |-> ClientUserInformationReportingMessageCode, body |-> one] : one \in CheckedClientUserInformationReportingMessage }
