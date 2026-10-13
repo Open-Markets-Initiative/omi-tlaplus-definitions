@@ -33,4 +33,4 @@
 
 [Ice.IceFutures.Bgw.Sbe.v7.0.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/ice/icefutures/bgw/IceFutures_Bgw_v7_0.tla "Ice IceFutures Bgw Sbe v7.0 Tla Definition"
 [Ice.IceFutures.Bgw.Sbe.v7.0.Url]: https://service.ice.com/s/article/Binary-Order-API "Intercontinental Exchange 7.0 Url"
-[Ice.IceFutures.Bgw.Sbe.v7.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ice/Specifications/ "Intercontinental Exchange 7.0 Pdf"
+[Ice.IceFutures.Bgw.Sbe.v7.0.Pdf]: https://service.ice.com/s/article/Binary-Order-API "Intercontinental Exchange 7.0 Pdf"

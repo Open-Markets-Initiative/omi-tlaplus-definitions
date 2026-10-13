@@ -55,7 +55,7 @@
 [Biva.BivaEquities.LastSale.Itch.v1.12.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Biva/Specifications/ "Bolsa Institucional de Valores 1.12 Pdf"
 [Biva.BivaEquities.OrderEntry.Ouch.v1.05.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/biva/bivaequities/orderentry/BivaEquities_OrderEntry_v1_05_Client.tla "Biva BivaEquities OrderEntry Ouch v1.05 Tla Definition"
 [Biva.BivaEquities.OrderEntry.Ouch.v1.05.Url]: https://www.biva.mx/en/web/portal-en/technology "Bolsa Institucional de Valores 1.05 Url"
-[Biva.BivaEquities.OrderEntry.Ouch.v1.05.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Biva/Specifications/ "Bolsa Institucional de Valores 1.05 Pdf"
+[Biva.BivaEquities.OrderEntry.Ouch.v1.05.Pdf]: https://www.biva.mx/en/web/portal-en/technology "Bolsa Institucional de Valores 1.05 Pdf"
 [Biva.BivaEquities.OrderEntry.Ouch.v1.05.Server.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/biva/bivaequities/orderentry/BivaEquities_OrderEntry_v1_05_Server.tla "Biva BivaEquities OrderEntry Ouch v1.05 Tla Definition"
 [Biva.BivaEquities.TotalView.Glimpse.v1.12.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/biva/bivaequities/totalview/BivaEquities_TotalView_Glimpse_v1_12_Client.tla "Biva BivaEquities TotalView Glimpse v1.12 Tla Definition"
 [Biva.BivaEquities.TotalView.Glimpse.v1.12.Url]: https://www.biva.mx/en/web/portal-en/technology "Bolsa Institucional de Valores 1.12 Url"

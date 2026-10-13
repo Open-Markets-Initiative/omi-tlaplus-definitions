@@ -688,8 +688,29 @@ CheckedLegDefinition ==
         \cup { [ZeroLegDefinition EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroLegDefinition EXCEPT !.legSecurityType = one] : one \in Sample(1) }
 
+(* A run of Leg Definition, written one after another *)
+RECURSIVE EncodeLegDefinitionList(_)
+EncodeLegDefinitionList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeLegDefinition(Head(messages)) \o EncodeLegDefinitionList(Tail(messages))
+
+(* As many Leg Definition as the field that counts them says *)
+RECURSIVE ReadLegDefinitionList(_, _)
+ReadLegDefinitionList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeLegDefinition(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadLegDefinitionList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Leg Definition of each kind, for the lists that carry them *)
+OneLegDefinition == { ZeroLegDefinition }
+
 (***************************************************************************)
-(* Complex Symbol Definition Message: 44 bytes                             *)
+(* Complex Symbol Definition Message                                       *)
 (***************************************************************************)
 
 ComplexSymbolDefinitionMessage ==
@@ -700,9 +721,8 @@ ComplexSymbolDefinitionMessage ==
       systemId      : Sample(1),
       reserved1     : Sample(1),
       streamId      : Sample(2),
-      noOfLegs      : Sample(2),
       reserved2     : Sample(2),
-      legDefinition : LegDefinition ]
+      legDefinition : SampleLists(OneLegDefinition) ]
 
 EncodeComplexSymbolDefinitionMessage(message) ==
     message.complexIndex
@@ -712,9 +732,9 @@ EncodeComplexSymbolDefinitionMessage(message) ==
         \o message.systemId
         \o message.reserved1
         \o message.streamId
-        \o message.noOfLegs
+        \o EncodeUIntLE(Len(message.legDefinition), 2)
         \o message.reserved2
-        \o EncodeLegDefinition(message.legDefinition)
+        \o EncodeLegDefinitionList(message.legDefinition)
 
 DecodeComplexSymbolDefinitionMessage(bytes) ==
     LET complexIndex == ReadBytes(bytes, 4) IN IF ~complexIndex.ok THEN Fail ELSE
@@ -724,9 +744,9 @@ DecodeComplexSymbolDefinitionMessage(bytes) ==
     LET systemId == ReadBytes(marketId.rest, 1) IN IF ~systemId.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(systemId.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET streamId == ReadBytes(reserved1.rest, 2) IN IF ~streamId.ok THEN Fail ELSE
-    LET noOfLegs == ReadBytes(streamId.rest, 2) IN IF ~noOfLegs.ok THEN Fail ELSE
+    LET noOfLegs == ReadUIntLE(streamId.rest, 2) IN IF ~noOfLegs.ok THEN Fail ELSE
     LET reserved2 == ReadBytes(noOfLegs.rest, 2) IN IF ~reserved2.ok THEN Fail ELSE
-    LET legDefinition == DecodeLegDefinition(reserved2.rest) IN IF ~legDefinition.ok THEN Fail ELSE
+    LET legDefinition == ReadLegDefinitionList(reserved2.rest, noOfLegs.value) IN IF ~legDefinition.ok THEN Fail ELSE
     Ok([ complexIndex  |-> complexIndex.value,
          complexSymbol |-> complexSymbol.value,
          channelId     |-> channelId.value,
@@ -734,7 +754,6 @@ DecodeComplexSymbolDefinitionMessage(bytes) ==
          systemId      |-> systemId.value,
          reserved1     |-> reserved1.value,
          streamId      |-> streamId.value,
-         noOfLegs      |-> noOfLegs.value,
          reserved2     |-> reserved2.value,
          legDefinition |-> legDefinition.value ], legDefinition.rest)
 
@@ -746,9 +765,8 @@ ZeroComplexSymbolDefinitionMessage ==
       systemId      |-> [i \in 1 .. 1 |-> 0],
       reserved1     |-> [i \in 1 .. 1 |-> 0],
       streamId      |-> [i \in 1 .. 2 |-> 0],
-      noOfLegs      |-> [i \in 1 .. 2 |-> 0],
       reserved2     |-> [i \in 1 .. 2 |-> 0],
-      legDefinition |-> ZeroLegDefinition ]
+      legDefinition |-> << >> ]
 
 (* Complex Symbol Definition Message at zero, then each field in turn at the values it is checked at *)
 CheckedComplexSymbolDefinitionMessage ==
@@ -760,9 +778,8 @@ CheckedComplexSymbolDefinitionMessage ==
         \cup { [ZeroComplexSymbolDefinitionMessage EXCEPT !.systemId = one] : one \in Sample(1) }
         \cup { [ZeroComplexSymbolDefinitionMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroComplexSymbolDefinitionMessage EXCEPT !.streamId = one] : one \in Sample(2) }
-        \cup { [ZeroComplexSymbolDefinitionMessage EXCEPT !.noOfLegs = one] : one \in Sample(2) }
         \cup { [ZeroComplexSymbolDefinitionMessage EXCEPT !.reserved2 = one] : one \in Sample(2) }
-        \cup { [ZeroComplexSymbolDefinitionMessage EXCEPT !.legDefinition = one] : one \in CheckedLegDefinition }
+        \cup { [ZeroComplexSymbolDefinitionMessage EXCEPT !.legDefinition = one] : one \in SampleLists(OneLegDefinition) }
 
 (***************************************************************************)
 (* Stream Id Message: 4 bytes                                              *)

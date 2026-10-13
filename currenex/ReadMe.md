@@ -6,7 +6,6 @@
 | [Protocol][Omi.Currenex.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Currenex.Specifications] |
 | --- | --- | --- | ---: | ---: | --- | --- | --- |
 | [Esp][Currenex.CurrenexForex.Esp] | [Cbp][Omi.Encoding.Cbp] | [9][Currenex.CurrenexForex.Esp.Cbp.v9.Definition] | 3/24/2021 | 757 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Currenex.CurrenexForex.Esp.Cbp.v9.Url] - [pdf][Currenex.CurrenexForex.Esp.Cbp.v9.Pdf] |
-| [OrderService][Currenex.CurrenexForex.OrderService] | [Cbp][Omi.Encoding.Cbp] | [26][Currenex.CurrenexForex.OrderService.Cbp.v26.Definition] | 4/6/2024 | 1194 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][Currenex.CurrenexForex.OrderService.Cbp.v26.Url] - [pdf][Currenex.CurrenexForex.OrderService.Cbp.v26.Pdf] |
 
 
 <p align="center"><a href="https://currenex.com" title="Currenex Website"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Website.png" alt="Website" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/showcase/currenex/" title="Currenex on LinkedIn"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/LinkedIn.png" alt="LinkedIn" width="32" height="32"></a></p>
@@ -31,11 +30,7 @@
 [Omi.Encoding.Cbp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Cbp.md "Cbp Encoding"
 [CurrenexForex.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Currenex/Protocols/CurrenexForex "Currenex CurrenexForex"
 [Currenex.CurrenexForex.Esp]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Currenex/Protocols/CurrenexForex/Esp.md "Executable Streaming Prices"
-[Currenex.CurrenexForex.OrderService]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Currenex/Protocols/CurrenexForex/OrderService.md "Order Service"
 
 [Currenex.CurrenexForex.Esp.Cbp.v9.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/currenex/esp/CurrenexForex_Esp_v9.tla "Currenex Esp Cbp v9 Tla Definition"
 [Currenex.CurrenexForex.Esp.Cbp.v9.Url]: https://www.currenex.com/support "Currenex 9 Url"
-[Currenex.CurrenexForex.Esp.Cbp.v9.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Currenex/Specifications/Esp/Currenex.Forex.Esp.Cbp.v9.pdf "Currenex 9 Pdf"
-[Currenex.CurrenexForex.OrderService.Cbp.v26.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/currenex/orderservice/CurrenexForex_OrderService_v26.tla "Currenex OrderService Cbp v26 Tla Definition"
-[Currenex.CurrenexForex.OrderService.Cbp.v26.Url]: https://www.currenex.com/support "Currenex 26 Url"
-[Currenex.CurrenexForex.OrderService.Cbp.v26.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Currenex/Specifications/OrderService/Currenex.Forex.OrderService.Cbp.v26.pdf "Currenex 26 Pdf"
+[Currenex.CurrenexForex.Esp.Cbp.v9.Pdf]: https://www.currenex.com/support/documentation/currenex/ITCH-Spec.pdf "Currenex 9 Pdf"
