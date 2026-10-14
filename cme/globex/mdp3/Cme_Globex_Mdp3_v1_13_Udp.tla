@@ -261,26 +261,26 @@ CheckedAdminLogin ==
         \cup { [ZeroAdminLogin EXCEPT !.heartBtInt = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Admin Logout: 100 bytes                                                 *)
+(* Admin Logout: 180 bytes                                                 *)
 (***************************************************************************)
 
 AdminLogout ==
-    [ text : Sample(100) ]
+    [ logoutText : Sample(180) ]
 
 EncodeAdminLogout(message) ==
-    message.text
+    message.logoutText
 
 DecodeAdminLogout(bytes) ==
-    LET text == ReadBytes(bytes, 100) IN IF ~text.ok THEN Fail ELSE
-    Ok([ text |-> text.value ], text.rest)
+    LET logoutText == ReadBytes(bytes, 180) IN IF ~logoutText.ok THEN Fail ELSE
+    Ok([ logoutText |-> logoutText.value ], logoutText.rest)
 
 ZeroAdminLogout ==
-    [ text |-> [i \in 1 .. 100 |-> 0] ]
+    [ logoutText |-> [i \in 1 .. 180 |-> 0] ]
 
 (* Admin Logout at zero, then each field in turn at the values it is checked at *)
 CheckedAdminLogout ==
     { ZeroAdminLogout }
-        \cup { [ZeroAdminLogout EXCEPT !.text = one] : one \in Sample(100) }
+        \cup { [ZeroAdminLogout EXCEPT !.logoutText = one] : one \in Sample(180) }
 
 (***************************************************************************)
 (* Security Status: 30 bytes                                               *)

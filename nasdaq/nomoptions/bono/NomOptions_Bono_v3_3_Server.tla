@@ -17,6 +17,9 @@
 (*                                                                         *)
 (* Note: Sequenced Data Packet fills what is left of the frame Packet      *)
 (* Length states, which is what it is read from.                           *)
+(*                                                                         *)
+(* Note: a Server Soup Bin Tcp Packet that ends the session is the last of *)
+(* its Server Packet: nothing may follow it.                               *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -1014,6 +1017,9 @@ CheckedServerSoupBinTcpPacket ==
     { ZeroServerSoupBinTcpPacket }
         \cup { [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = one] : one \in CheckedServerPayload }
 
+(* Does a Server Soup Bin Tcp Packet end the session? Nothing may follow one that does *)
+EndsSessionServerSoupBinTcpPacket(message) == message.serverPayload.tag \in {EndOfSessionPacketCode}
+
 (* A run of Server Soup Bin Tcp Packet, written one after another *)
 RECURSIVE EncodeServerSoupBinTcpPacketList(_)
 EncodeServerSoupBinTcpPacketList(messages) ==
@@ -1023,12 +1029,14 @@ EncodeServerSoupBinTcpPacketList(messages) ==
 
 (* As many Server Soup Bin Tcp Packet as the bytes hold, which is what its payload rule states. *)
 (* Each one takes bytes off the reader, so the run ends where the data does. *)
+(* Only the last of them may end the session, so one that does with bytes left fails *)
 RECURSIVE ReadServerSoupBinTcpPacketAll(_)
 ReadServerSoupBinTcpPacketAll(bytes) ==
     IF bytes = << >>
     THEN Ok(<< >>, << >>)
     ELSE LET one == DecodeServerSoupBinTcpPacket(bytes)
          IN  IF ~one.ok THEN Fail
+             ELSE IF EndsSessionServerSoupBinTcpPacket(one.value) /\ one.rest # << >> THEN Fail
              ELSE LET more == ReadServerSoupBinTcpPacketAll(one.rest)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
@@ -1042,12 +1050,18 @@ OneServerSoupBinTcpPacket ==
       [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> ServerHeartbeatPacketCode, body |-> [empty |-> 0]]],
       [ZeroServerSoupBinTcpPacket EXCEPT !.serverPayload = [tag |-> EndOfSessionPacketCode, body |-> [empty |-> 0]]] }
 
+(* The runs of Server Soup Bin Tcp Packet checked: none, one, two of a kind and each kind followed by *)
+(* another, keeping those in which only the last may end the session *)
+SampleServerSoupBinTcpPacketLists ==
+    { run \in SampleLists(OneServerSoupBinTcpPacket) \cup { <<one, other>> : one \in OneServerSoupBinTcpPacket, other \in OneServerSoupBinTcpPacket } :
+          \A at \in 1 .. Len(run) - 1 : ~EndsSessionServerSoupBinTcpPacket(run[at]) }
+
 (***************************************************************************)
 (* Server Packet                                                           *)
 (***************************************************************************)
 
 ServerPacket ==
-    [ serverSoupBinTcpPacket : SampleLists(OneServerSoupBinTcpPacket) ]
+    [ serverSoupBinTcpPacket : SampleServerSoupBinTcpPacketLists ]
 
 EncodeServerPacket(message) ==
     EncodeServerSoupBinTcpPacketList(message.serverSoupBinTcpPacket)
@@ -1062,7 +1076,7 @@ ZeroServerPacket ==
 (* Server Packet at zero, then each field in turn at the values it is checked at *)
 CheckedServerPacket ==
     { ZeroServerPacket }
-        \cup { [ZeroServerPacket EXCEPT !.serverSoupBinTcpPacket = one] : one \in SampleLists(OneServerSoupBinTcpPacket) }
+        \cup { [ZeroServerPacket EXCEPT !.serverSoupBinTcpPacket = one] : one \in SampleServerSoupBinTcpPacketLists }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -1257,6 +1271,12 @@ FramesServerSoupBinTcpPacket ==
     \A message \in CheckedServerSoupBinTcpPacket :
         LET bytes == EncodeServerSoupBinTcpPacket(message)
         IN  DecodeUIntBE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
+
+(* A Server Soup Bin Tcp Packet that ends the session is the last of its Server Packet: a run with one after it does not decode *)
+EndsSessionLastServerSoupBinTcpPacket ==
+    \A last \in { one \in OneServerSoupBinTcpPacket : EndsSessionServerSoupBinTcpPacket(one) } :
+        \A after \in OneServerSoupBinTcpPacket :
+            ~ReadServerSoupBinTcpPacketAll(EncodeServerSoupBinTcpPacketList(<<last, after>>)).ok
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

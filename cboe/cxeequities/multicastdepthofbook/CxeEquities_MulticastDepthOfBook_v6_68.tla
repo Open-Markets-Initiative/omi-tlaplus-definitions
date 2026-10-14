@@ -1,7 +1,6 @@
-------------- MODULE DxeDerivatives_MulticastDepthOfBook_v6_67 -------------
+-------------- MODULE CxeEquities_MulticastDepthOfBook_v6_68 ---------------
 (***************************************************************************)
-(* Chicago Board Options Exchange Europe Derivatives Multicast Depth Of    *)
-(* Book v6.67                                                              *)
+(* Chicago Board Options Exchange Multicast Depth Of Book v6.68            *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)

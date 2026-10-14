@@ -13,6 +13,9 @@
 (* Note: TLC evaluates integers in 32 bits, so a field wider than that has *)
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
+(*                                                                         *)
+(* Note: a Client Soup Tcp Packet that ends the session is the last of its *)
+(* Client Packet: nothing may follow it.                                   *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -233,6 +236,9 @@ CheckedClientSoupTcpPacket ==
     { ZeroClientSoupTcpPacket }
         \cup { [ZeroClientSoupTcpPacket EXCEPT !.clientPayload = one] : one \in CheckedClientPayload }
 
+(* Does a Client Soup Tcp Packet end the session? Nothing may follow one that does *)
+EndsSessionClientSoupTcpPacket(message) == message.clientPayload.tag \in {LogoutRequestCode}
+
 (* A run of Client Soup Tcp Packet, written one after another *)
 RECURSIVE EncodeClientSoupTcpPacketList(_)
 EncodeClientSoupTcpPacketList(messages) ==
@@ -242,12 +248,14 @@ EncodeClientSoupTcpPacketList(messages) ==
 
 (* As many Client Soup Tcp Packet as the bytes hold, which is what its payload rule states. *)
 (* Each one takes bytes off the reader, so the run ends where the data does. *)
+(* Only the last of them may end the session, so one that does with bytes left fails *)
 RECURSIVE ReadClientSoupTcpPacketAll(_)
 ReadClientSoupTcpPacketAll(bytes) ==
     IF bytes = << >>
     THEN Ok(<< >>, << >>)
     ELSE LET one == DecodeClientSoupTcpPacket(bytes)
          IN  IF ~one.ok THEN Fail
+             ELSE IF EndsSessionClientSoupTcpPacket(one.value) /\ one.rest # << >> THEN Fail
              ELSE LET more == ReadClientSoupTcpPacketAll(one.rest)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
@@ -259,12 +267,18 @@ OneClientSoupTcpPacket ==
       [ZeroClientSoupTcpPacket EXCEPT !.clientPayload = [tag |-> ClientHeartbeatCode, body |-> [empty |-> 0]]],
       [ZeroClientSoupTcpPacket EXCEPT !.clientPayload = [tag |-> LogoutRequestCode, body |-> [empty |-> 0]]] }
 
+(* The runs of Client Soup Tcp Packet checked: none, one, two of a kind and each kind followed by *)
+(* another, keeping those in which only the last may end the session *)
+SampleClientSoupTcpPacketLists ==
+    { run \in SampleLists(OneClientSoupTcpPacket) \cup { <<one, other>> : one \in OneClientSoupTcpPacket, other \in OneClientSoupTcpPacket } :
+          \A at \in 1 .. Len(run) - 1 : ~EndsSessionClientSoupTcpPacket(run[at]) }
+
 (***************************************************************************)
 (* Client Packet                                                           *)
 (***************************************************************************)
 
 ClientPacket ==
-    [ clientSoupTcpPacket : SampleLists(OneClientSoupTcpPacket) ]
+    [ clientSoupTcpPacket : SampleClientSoupTcpPacketLists ]
 
 EncodeClientPacket(message) ==
     EncodeClientSoupTcpPacketList(message.clientSoupTcpPacket)
@@ -279,7 +293,7 @@ ZeroClientPacket ==
 (* Client Packet at zero, then each field in turn at the values it is checked at *)
 CheckedClientPacket ==
     { ZeroClientPacket }
-        \cup { [ZeroClientPacket EXCEPT !.clientSoupTcpPacket = one] : one \in SampleLists(OneClientSoupTcpPacket) }
+        \cup { [ZeroClientPacket EXCEPT !.clientSoupTcpPacket = one] : one \in SampleClientSoupTcpPacketLists }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -340,6 +354,12 @@ FramesClientSoupTcpPacket ==
     \A message \in CheckedClientSoupTcpPacket :
         LET bytes == EncodeClientSoupTcpPacket(message)
         IN  DecodeUIntBE(SubSeq(bytes, 1, 2)) = Len(bytes) - 2
+
+(* A Client Soup Tcp Packet that ends the session is the last of its Client Packet: a run with one after it does not decode *)
+EndsSessionLastClientSoupTcpPacket ==
+    \A last \in { one \in OneClientSoupTcpPacket : EndsSessionClientSoupTcpPacket(one) } :
+        \A after \in OneClientSoupTcpPacket :
+            ~ReadClientSoupTcpPacketAll(EncodeClientSoupTcpPacketList(<<last, after>>)).ok
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

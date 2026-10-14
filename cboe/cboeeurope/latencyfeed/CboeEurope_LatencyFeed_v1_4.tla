@@ -101,23 +101,23 @@ SampleLists(entries) ==
 (***************************************************************************)
 
 LatencyStatMessage ==
-    [ measurementType     : Sample(1),
-      matchingUnit        : Sample(1),
-      beginTime           : Sample(4),
-      endTime             : Sample(4),
-      count               : Sample(4),
-      minimum             : Sample(8),
-      maximum             : Sample(8),
-      average             : Sample(8),
-      standardDeviation   : Sample(8),
-      mode                : Sample(8),
-      t999Percentile      : Sample(8),
-      t99Percentile       : Sample(8),
-      t95Percentile       : Sample(8),
-      t90Percentile       : Sample(8),
-      t75Percentile       : Sample(8),
-      t50PercentileMedian : Sample(8),
-      t25Percentile       : Sample(8) ]
+    [ measurementType    : Sample(1),
+      matchingUnit       : Sample(1),
+      beginTime          : Sample(4),
+      endTime            : Sample(4),
+      count              : Sample(4),
+      minimum            : Sample(8),
+      maximum            : Sample(8),
+      average            : Sample(8),
+      standardDeviation  : Sample(8),
+      mode               : Sample(8),
+      percentile99Point9 : Sample(8),
+      percentile99       : Sample(8),
+      percentile95       : Sample(8),
+      percentile90       : Sample(8),
+      percentile75       : Sample(8),
+      percentile50       : Sample(8),
+      percentile25       : Sample(8) ]
 
 EncodeLatencyStatMessage(message) ==
     message.measurementType
@@ -130,13 +130,13 @@ EncodeLatencyStatMessage(message) ==
         \o message.average
         \o message.standardDeviation
         \o message.mode
-        \o message.t999Percentile
-        \o message.t99Percentile
-        \o message.t95Percentile
-        \o message.t90Percentile
-        \o message.t75Percentile
-        \o message.t50PercentileMedian
-        \o message.t25Percentile
+        \o message.percentile99Point9
+        \o message.percentile99
+        \o message.percentile95
+        \o message.percentile90
+        \o message.percentile75
+        \o message.percentile50
+        \o message.percentile25
 
 DecodeLatencyStatMessage(bytes) ==
     LET measurementType == ReadBytes(bytes, 1) IN IF ~measurementType.ok THEN Fail ELSE
@@ -149,49 +149,49 @@ DecodeLatencyStatMessage(bytes) ==
     LET average == ReadBytes(maximum.rest, 8) IN IF ~average.ok THEN Fail ELSE
     LET standardDeviation == ReadBytes(average.rest, 8) IN IF ~standardDeviation.ok THEN Fail ELSE
     LET mode == ReadBytes(standardDeviation.rest, 8) IN IF ~mode.ok THEN Fail ELSE
-    LET t999Percentile == ReadBytes(mode.rest, 8) IN IF ~t999Percentile.ok THEN Fail ELSE
-    LET t99Percentile == ReadBytes(t999Percentile.rest, 8) IN IF ~t99Percentile.ok THEN Fail ELSE
-    LET t95Percentile == ReadBytes(t99Percentile.rest, 8) IN IF ~t95Percentile.ok THEN Fail ELSE
-    LET t90Percentile == ReadBytes(t95Percentile.rest, 8) IN IF ~t90Percentile.ok THEN Fail ELSE
-    LET t75Percentile == ReadBytes(t90Percentile.rest, 8) IN IF ~t75Percentile.ok THEN Fail ELSE
-    LET t50PercentileMedian == ReadBytes(t75Percentile.rest, 8) IN IF ~t50PercentileMedian.ok THEN Fail ELSE
-    LET t25Percentile == ReadBytes(t50PercentileMedian.rest, 8) IN IF ~t25Percentile.ok THEN Fail ELSE
-    Ok([ measurementType     |-> measurementType.value,
-         matchingUnit        |-> matchingUnit.value,
-         beginTime           |-> beginTime.value,
-         endTime             |-> endTime.value,
-         count               |-> count.value,
-         minimum             |-> minimum.value,
-         maximum             |-> maximum.value,
-         average             |-> average.value,
-         standardDeviation   |-> standardDeviation.value,
-         mode                |-> mode.value,
-         t999Percentile      |-> t999Percentile.value,
-         t99Percentile       |-> t99Percentile.value,
-         t95Percentile       |-> t95Percentile.value,
-         t90Percentile       |-> t90Percentile.value,
-         t75Percentile       |-> t75Percentile.value,
-         t50PercentileMedian |-> t50PercentileMedian.value,
-         t25Percentile       |-> t25Percentile.value ], t25Percentile.rest)
+    LET percentile99Point9 == ReadBytes(mode.rest, 8) IN IF ~percentile99Point9.ok THEN Fail ELSE
+    LET percentile99 == ReadBytes(percentile99Point9.rest, 8) IN IF ~percentile99.ok THEN Fail ELSE
+    LET percentile95 == ReadBytes(percentile99.rest, 8) IN IF ~percentile95.ok THEN Fail ELSE
+    LET percentile90 == ReadBytes(percentile95.rest, 8) IN IF ~percentile90.ok THEN Fail ELSE
+    LET percentile75 == ReadBytes(percentile90.rest, 8) IN IF ~percentile75.ok THEN Fail ELSE
+    LET percentile50 == ReadBytes(percentile75.rest, 8) IN IF ~percentile50.ok THEN Fail ELSE
+    LET percentile25 == ReadBytes(percentile50.rest, 8) IN IF ~percentile25.ok THEN Fail ELSE
+    Ok([ measurementType    |-> measurementType.value,
+         matchingUnit       |-> matchingUnit.value,
+         beginTime          |-> beginTime.value,
+         endTime            |-> endTime.value,
+         count              |-> count.value,
+         minimum            |-> minimum.value,
+         maximum            |-> maximum.value,
+         average            |-> average.value,
+         standardDeviation  |-> standardDeviation.value,
+         mode               |-> mode.value,
+         percentile99Point9 |-> percentile99Point9.value,
+         percentile99       |-> percentile99.value,
+         percentile95       |-> percentile95.value,
+         percentile90       |-> percentile90.value,
+         percentile75       |-> percentile75.value,
+         percentile50       |-> percentile50.value,
+         percentile25       |-> percentile25.value ], percentile25.rest)
 
 ZeroLatencyStatMessage ==
-    [ measurementType     |-> [i \in 1 .. 1 |-> 0],
-      matchingUnit        |-> [i \in 1 .. 1 |-> 0],
-      beginTime           |-> [i \in 1 .. 4 |-> 0],
-      endTime             |-> [i \in 1 .. 4 |-> 0],
-      count               |-> [i \in 1 .. 4 |-> 0],
-      minimum             |-> [i \in 1 .. 8 |-> 0],
-      maximum             |-> [i \in 1 .. 8 |-> 0],
-      average             |-> [i \in 1 .. 8 |-> 0],
-      standardDeviation   |-> [i \in 1 .. 8 |-> 0],
-      mode                |-> [i \in 1 .. 8 |-> 0],
-      t999Percentile      |-> [i \in 1 .. 8 |-> 0],
-      t99Percentile       |-> [i \in 1 .. 8 |-> 0],
-      t95Percentile       |-> [i \in 1 .. 8 |-> 0],
-      t90Percentile       |-> [i \in 1 .. 8 |-> 0],
-      t75Percentile       |-> [i \in 1 .. 8 |-> 0],
-      t50PercentileMedian |-> [i \in 1 .. 8 |-> 0],
-      t25Percentile       |-> [i \in 1 .. 8 |-> 0] ]
+    [ measurementType    |-> [i \in 1 .. 1 |-> 0],
+      matchingUnit       |-> [i \in 1 .. 1 |-> 0],
+      beginTime          |-> [i \in 1 .. 4 |-> 0],
+      endTime            |-> [i \in 1 .. 4 |-> 0],
+      count              |-> [i \in 1 .. 4 |-> 0],
+      minimum            |-> [i \in 1 .. 8 |-> 0],
+      maximum            |-> [i \in 1 .. 8 |-> 0],
+      average            |-> [i \in 1 .. 8 |-> 0],
+      standardDeviation  |-> [i \in 1 .. 8 |-> 0],
+      mode               |-> [i \in 1 .. 8 |-> 0],
+      percentile99Point9 |-> [i \in 1 .. 8 |-> 0],
+      percentile99       |-> [i \in 1 .. 8 |-> 0],
+      percentile95       |-> [i \in 1 .. 8 |-> 0],
+      percentile90       |-> [i \in 1 .. 8 |-> 0],
+      percentile75       |-> [i \in 1 .. 8 |-> 0],
+      percentile50       |-> [i \in 1 .. 8 |-> 0],
+      percentile25       |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Latency Stat Message at zero, then each field in turn at the values it is checked at *)
 CheckedLatencyStatMessage ==
@@ -206,13 +206,13 @@ CheckedLatencyStatMessage ==
         \cup { [ZeroLatencyStatMessage EXCEPT !.average = one] : one \in Sample(8) }
         \cup { [ZeroLatencyStatMessage EXCEPT !.standardDeviation = one] : one \in Sample(8) }
         \cup { [ZeroLatencyStatMessage EXCEPT !.mode = one] : one \in Sample(8) }
-        \cup { [ZeroLatencyStatMessage EXCEPT !.t999Percentile = one] : one \in Sample(8) }
-        \cup { [ZeroLatencyStatMessage EXCEPT !.t99Percentile = one] : one \in Sample(8) }
-        \cup { [ZeroLatencyStatMessage EXCEPT !.t95Percentile = one] : one \in Sample(8) }
-        \cup { [ZeroLatencyStatMessage EXCEPT !.t90Percentile = one] : one \in Sample(8) }
-        \cup { [ZeroLatencyStatMessage EXCEPT !.t75Percentile = one] : one \in Sample(8) }
-        \cup { [ZeroLatencyStatMessage EXCEPT !.t50PercentileMedian = one] : one \in Sample(8) }
-        \cup { [ZeroLatencyStatMessage EXCEPT !.t25Percentile = one] : one \in Sample(8) }
+        \cup { [ZeroLatencyStatMessage EXCEPT !.percentile99Point9 = one] : one \in Sample(8) }
+        \cup { [ZeroLatencyStatMessage EXCEPT !.percentile99 = one] : one \in Sample(8) }
+        \cup { [ZeroLatencyStatMessage EXCEPT !.percentile95 = one] : one \in Sample(8) }
+        \cup { [ZeroLatencyStatMessage EXCEPT !.percentile90 = one] : one \in Sample(8) }
+        \cup { [ZeroLatencyStatMessage EXCEPT !.percentile75 = one] : one \in Sample(8) }
+        \cup { [ZeroLatencyStatMessage EXCEPT !.percentile50 = one] : one \in Sample(8) }
+        \cup { [ZeroLatencyStatMessage EXCEPT !.percentile25 = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Payload, selected by Message Type                                       *)
