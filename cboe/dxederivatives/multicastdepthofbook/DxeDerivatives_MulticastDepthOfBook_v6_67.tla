@@ -833,21 +833,21 @@ CheckedTradeFlags2 ==
 (***************************************************************************)
 
 TradeShortMessage ==
-    [ timeOffset     : Sample(4),
-      orderId        : Sample(8),
-      sideIndicator  : Sample(1),
-      contractsShort : Sample(2),
-      symbolShort    : Sample(6),
-      priceShort     : Sample(2),
-      executionId    : Sample(8),
-      tradeFlags     : TradeFlags2 ]
+    [ timeOffset          : Sample(4),
+      orderId             : Sample(8),
+      sideIndicator       : Sample(1),
+      contractsShort      : Sample(2),
+      symbolAlphanumeric6 : Sample(6),
+      priceShort          : Sample(2),
+      executionId         : Sample(8),
+      tradeFlags          : TradeFlags2 ]
 
 EncodeTradeShortMessage(message) ==
     message.timeOffset
         \o message.orderId
         \o message.sideIndicator
         \o message.contractsShort
-        \o message.symbolShort
+        \o message.symbolAlphanumeric6
         \o message.priceShort
         \o message.executionId
         \o EncodeTradeFlags2(message.tradeFlags)
@@ -857,28 +857,28 @@ DecodeTradeShortMessage(bytes) ==
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
     LET contractsShort == ReadBytes(sideIndicator.rest, 2) IN IF ~contractsShort.ok THEN Fail ELSE
-    LET symbolShort == ReadBytes(contractsShort.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
-    LET priceShort == ReadBytes(symbolShort.rest, 2) IN IF ~priceShort.ok THEN Fail ELSE
+    LET symbolAlphanumeric6 == ReadBytes(contractsShort.rest, 6) IN IF ~symbolAlphanumeric6.ok THEN Fail ELSE
+    LET priceShort == ReadBytes(symbolAlphanumeric6.rest, 2) IN IF ~priceShort.ok THEN Fail ELSE
     LET executionId == ReadBytes(priceShort.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
     LET tradeFlags == DecodeTradeFlags2(executionId.rest) IN IF ~tradeFlags.ok THEN Fail ELSE
-    Ok([ timeOffset     |-> timeOffset.value,
-         orderId        |-> orderId.value,
-         sideIndicator  |-> sideIndicator.value,
-         contractsShort |-> contractsShort.value,
-         symbolShort    |-> symbolShort.value,
-         priceShort     |-> priceShort.value,
-         executionId    |-> executionId.value,
-         tradeFlags     |-> tradeFlags.value ], tradeFlags.rest)
+    Ok([ timeOffset          |-> timeOffset.value,
+         orderId             |-> orderId.value,
+         sideIndicator       |-> sideIndicator.value,
+         contractsShort      |-> contractsShort.value,
+         symbolAlphanumeric6 |-> symbolAlphanumeric6.value,
+         priceShort          |-> priceShort.value,
+         executionId         |-> executionId.value,
+         tradeFlags          |-> tradeFlags.value ], tradeFlags.rest)
 
 ZeroTradeShortMessage ==
-    [ timeOffset     |-> [i \in 1 .. 4 |-> 0],
-      orderId        |-> [i \in 1 .. 8 |-> 0],
-      sideIndicator  |-> [i \in 1 .. 1 |-> 0],
-      contractsShort |-> [i \in 1 .. 2 |-> 0],
-      symbolShort    |-> [i \in 1 .. 6 |-> 0],
-      priceShort     |-> [i \in 1 .. 2 |-> 0],
-      executionId    |-> [i \in 1 .. 8 |-> 0],
-      tradeFlags     |-> ZeroTradeFlags2 ]
+    [ timeOffset          |-> [i \in 1 .. 4 |-> 0],
+      orderId             |-> [i \in 1 .. 8 |-> 0],
+      sideIndicator       |-> [i \in 1 .. 1 |-> 0],
+      contractsShort      |-> [i \in 1 .. 2 |-> 0],
+      symbolAlphanumeric6 |-> [i \in 1 .. 6 |-> 0],
+      priceShort          |-> [i \in 1 .. 2 |-> 0],
+      executionId         |-> [i \in 1 .. 8 |-> 0],
+      tradeFlags          |-> ZeroTradeFlags2 ]
 
 (* Trade Short Message at zero, then each field in turn at the values it is checked at *)
 CheckedTradeShortMessage ==
@@ -887,7 +887,7 @@ CheckedTradeShortMessage ==
         \cup { [ZeroTradeShortMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroTradeShortMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
         \cup { [ZeroTradeShortMessage EXCEPT !.contractsShort = one] : one \in Sample(2) }
-        \cup { [ZeroTradeShortMessage EXCEPT !.symbolShort = one] : one \in Sample(6) }
+        \cup { [ZeroTradeShortMessage EXCEPT !.symbolAlphanumeric6 = one] : one \in Sample(6) }
         \cup { [ZeroTradeShortMessage EXCEPT !.priceShort = one] : one \in Sample(2) }
         \cup { [ZeroTradeShortMessage EXCEPT !.executionId = one] : one \in Sample(8) }
         \cup { [ZeroTradeShortMessage EXCEPT !.tradeFlags = one] : one \in CheckedTradeFlags2 }
@@ -1397,7 +1397,7 @@ CheckedStatisticsMessage ==
         \cup { [ZeroStatisticsMessage EXCEPT !.priceDetermination = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Auction Update Message: 29 bytes                                        *)
+(* Auction Update Message: 33 bytes                                        *)
 (***************************************************************************)
 
 AuctionUpdateMessage ==
@@ -1405,7 +1405,7 @@ AuctionUpdateMessage ==
       symbolShort      : Sample(6),
       auctionType      : Sample(1),
       referencePrice   : Sample(8),
-      indicativePrice  : Sample(4),
+      indicativePrice  : Sample(8),
       indicativeShares : Sample(4),
       outsideTolerance : Sample(1),
       includesPrimary  : Sample(1) ]
@@ -1425,7 +1425,7 @@ DecodeAuctionUpdateMessage(bytes) ==
     LET symbolShort == ReadBytes(timeOffset.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
     LET auctionType == ReadBytes(symbolShort.rest, 1) IN IF ~auctionType.ok THEN Fail ELSE
     LET referencePrice == ReadBytes(auctionType.rest, 8) IN IF ~referencePrice.ok THEN Fail ELSE
-    LET indicativePrice == ReadBytes(referencePrice.rest, 4) IN IF ~indicativePrice.ok THEN Fail ELSE
+    LET indicativePrice == ReadBytes(referencePrice.rest, 8) IN IF ~indicativePrice.ok THEN Fail ELSE
     LET indicativeShares == ReadBytes(indicativePrice.rest, 4) IN IF ~indicativeShares.ok THEN Fail ELSE
     LET outsideTolerance == ReadBytes(indicativeShares.rest, 1) IN IF ~outsideTolerance.ok THEN Fail ELSE
     LET includesPrimary == ReadBytes(outsideTolerance.rest, 1) IN IF ~includesPrimary.ok THEN Fail ELSE
@@ -1443,7 +1443,7 @@ ZeroAuctionUpdateMessage ==
       symbolShort      |-> [i \in 1 .. 6 |-> 0],
       auctionType      |-> [i \in 1 .. 1 |-> 0],
       referencePrice   |-> [i \in 1 .. 8 |-> 0],
-      indicativePrice  |-> [i \in 1 .. 4 |-> 0],
+      indicativePrice  |-> [i \in 1 .. 8 |-> 0],
       indicativeShares |-> [i \in 1 .. 4 |-> 0],
       outsideTolerance |-> [i \in 1 .. 1 |-> 0],
       includesPrimary  |-> [i \in 1 .. 1 |-> 0] ]
@@ -1455,7 +1455,7 @@ CheckedAuctionUpdateMessage ==
         \cup { [ZeroAuctionUpdateMessage EXCEPT !.symbolShort = one] : one \in Sample(6) }
         \cup { [ZeroAuctionUpdateMessage EXCEPT !.auctionType = one] : one \in Sample(1) }
         \cup { [ZeroAuctionUpdateMessage EXCEPT !.referencePrice = one] : one \in Sample(8) }
-        \cup { [ZeroAuctionUpdateMessage EXCEPT !.indicativePrice = one] : one \in Sample(4) }
+        \cup { [ZeroAuctionUpdateMessage EXCEPT !.indicativePrice = one] : one \in Sample(8) }
         \cup { [ZeroAuctionUpdateMessage EXCEPT !.indicativeShares = one] : one \in Sample(4) }
         \cup { [ZeroAuctionUpdateMessage EXCEPT !.outsideTolerance = one] : one \in Sample(1) }
         \cup { [ZeroAuctionUpdateMessage EXCEPT !.includesPrimary = one] : one \in Sample(1) }
@@ -1507,76 +1507,76 @@ CheckedAuctionSummaryMessage ==
         \cup { [ZeroAuctionSummaryMessage EXCEPT !.sharesLong = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Index Quote Message: 23 bytes                                           *)
+(* Index Quote Message: 27 bytes                                           *)
 (***************************************************************************)
 
 IndexQuoteMessage ==
-    [ timeOffset  : Sample(4),
-      indexTicker : Sample(10),
-      indexPrice  : Sample(8),
-      indexStatus : Sample(1) ]
+    [ indexTimestamp : Sample(8),
+      indexTicker    : Sample(10),
+      indexPrice     : Sample(8),
+      indexStatus    : Sample(1) ]
 
 EncodeIndexQuoteMessage(message) ==
-    message.timeOffset
+    message.indexTimestamp
         \o message.indexTicker
         \o message.indexPrice
         \o message.indexStatus
 
 DecodeIndexQuoteMessage(bytes) ==
-    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
-    LET indexTicker == ReadBytes(timeOffset.rest, 10) IN IF ~indexTicker.ok THEN Fail ELSE
+    LET indexTimestamp == ReadBytes(bytes, 8) IN IF ~indexTimestamp.ok THEN Fail ELSE
+    LET indexTicker == ReadBytes(indexTimestamp.rest, 10) IN IF ~indexTicker.ok THEN Fail ELSE
     LET indexPrice == ReadBytes(indexTicker.rest, 8) IN IF ~indexPrice.ok THEN Fail ELSE
     LET indexStatus == ReadBytes(indexPrice.rest, 1) IN IF ~indexStatus.ok THEN Fail ELSE
-    Ok([ timeOffset  |-> timeOffset.value,
-         indexTicker |-> indexTicker.value,
-         indexPrice  |-> indexPrice.value,
-         indexStatus |-> indexStatus.value ], indexStatus.rest)
+    Ok([ indexTimestamp |-> indexTimestamp.value,
+         indexTicker    |-> indexTicker.value,
+         indexPrice     |-> indexPrice.value,
+         indexStatus    |-> indexStatus.value ], indexStatus.rest)
 
 ZeroIndexQuoteMessage ==
-    [ timeOffset  |-> [i \in 1 .. 4 |-> 0],
-      indexTicker |-> [i \in 1 .. 10 |-> 0],
-      indexPrice  |-> [i \in 1 .. 8 |-> 0],
-      indexStatus |-> [i \in 1 .. 1 |-> 0] ]
+    [ indexTimestamp |-> [i \in 1 .. 8 |-> 0],
+      indexTicker    |-> [i \in 1 .. 10 |-> 0],
+      indexPrice     |-> [i \in 1 .. 8 |-> 0],
+      indexStatus    |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Index Quote Message at zero, then each field in turn at the values it is checked at *)
 CheckedIndexQuoteMessage ==
     { ZeroIndexQuoteMessage }
-        \cup { [ZeroIndexQuoteMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+        \cup { [ZeroIndexQuoteMessage EXCEPT !.indexTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroIndexQuoteMessage EXCEPT !.indexTicker = one] : one \in Sample(10) }
         \cup { [ZeroIndexQuoteMessage EXCEPT !.indexPrice = one] : one \in Sample(8) }
         \cup { [ZeroIndexQuoteMessage EXCEPT !.indexStatus = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Index Quote Edsp Message: 22 bytes                                      *)
+(* Index Quote Edsp Message: 26 bytes                                      *)
 (***************************************************************************)
 
 IndexQuoteEdspMessage ==
-    [ timeOffset  : Sample(4),
-      indexTicker : Sample(10),
-      indexPrice  : Sample(8) ]
+    [ indexTimestamp : Sample(8),
+      indexTicker    : Sample(10),
+      indexPrice     : Sample(8) ]
 
 EncodeIndexQuoteEdspMessage(message) ==
-    message.timeOffset
+    message.indexTimestamp
         \o message.indexTicker
         \o message.indexPrice
 
 DecodeIndexQuoteEdspMessage(bytes) ==
-    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
-    LET indexTicker == ReadBytes(timeOffset.rest, 10) IN IF ~indexTicker.ok THEN Fail ELSE
+    LET indexTimestamp == ReadBytes(bytes, 8) IN IF ~indexTimestamp.ok THEN Fail ELSE
+    LET indexTicker == ReadBytes(indexTimestamp.rest, 10) IN IF ~indexTicker.ok THEN Fail ELSE
     LET indexPrice == ReadBytes(indexTicker.rest, 8) IN IF ~indexPrice.ok THEN Fail ELSE
-    Ok([ timeOffset  |-> timeOffset.value,
-         indexTicker |-> indexTicker.value,
-         indexPrice  |-> indexPrice.value ], indexPrice.rest)
+    Ok([ indexTimestamp |-> indexTimestamp.value,
+         indexTicker    |-> indexTicker.value,
+         indexPrice     |-> indexPrice.value ], indexPrice.rest)
 
 ZeroIndexQuoteEdspMessage ==
-    [ timeOffset  |-> [i \in 1 .. 4 |-> 0],
-      indexTicker |-> [i \in 1 .. 10 |-> 0],
-      indexPrice  |-> [i \in 1 .. 8 |-> 0] ]
+    [ indexTimestamp |-> [i \in 1 .. 8 |-> 0],
+      indexTicker    |-> [i \in 1 .. 10 |-> 0],
+      indexPrice     |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Index Quote Edsp Message at zero, then each field in turn at the values it is checked at *)
 CheckedIndexQuoteEdspMessage ==
     { ZeroIndexQuoteEdspMessage }
-        \cup { [ZeroIndexQuoteEdspMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+        \cup { [ZeroIndexQuoteEdspMessage EXCEPT !.indexTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroIndexQuoteEdspMessage EXCEPT !.indexTicker = one] : one \in Sample(10) }
         \cup { [ZeroIndexQuoteEdspMessage EXCEPT !.indexPrice = one] : one \in Sample(8) }
 

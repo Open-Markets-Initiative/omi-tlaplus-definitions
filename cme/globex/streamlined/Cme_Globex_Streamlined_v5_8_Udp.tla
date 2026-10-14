@@ -177,644 +177,644 @@ CheckedAdminLogout ==
 (***************************************************************************)
 
 MdEntryPxDecimalOptional ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeMdEntryPxDecimalOptional(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeMdEntryPxDecimalOptional(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroMdEntryPxDecimalOptional ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Md Entry Px Decimal Optional at zero, then each field in turn at the values it is checked at *)
 CheckedMdEntryPxDecimalOptional ==
     { ZeroMdEntryPxDecimalOptional }
         \cup { [ZeroMdEntryPxDecimalOptional EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroMdEntryPxDecimalOptional EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroMdEntryPxDecimalOptional EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Cal Fut Px Optional: 9 bytes                                            *)
 (***************************************************************************)
 
 CalFutPxOptional ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeCalFutPxOptional(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeCalFutPxOptional(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroCalFutPxOptional ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Cal Fut Px Optional at zero, then each field in turn at the values it is checked at *)
 CheckedCalFutPxOptional ==
     { ZeroCalFutPxOptional }
         \cup { [ZeroCalFutPxOptional EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroCalFutPxOptional EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroCalFutPxOptional EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Coupon Rate Optional: 5 bytes                                           *)
 (***************************************************************************)
 
 CouponRateOptional ==
-    [ mantissa32 : Sample(4),
-      exponent   : Sample(1) ]
+    [ mantissa32       : Sample(4),
+      exponentOptional : Sample(1) ]
 
 EncodeCouponRateOptional(message) ==
     message.mantissa32
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeCouponRateOptional(bytes) ==
     LET mantissa32 == ReadBytes(bytes, 4) IN IF ~mantissa32.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa32.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa32 |-> mantissa32.value,
-         exponent   |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa32.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa32       |-> mantissa32.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroCouponRateOptional ==
-    [ mantissa32 |-> [i \in 1 .. 4 |-> 0],
-      exponent   |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa32       |-> [i \in 1 .. 4 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Coupon Rate Optional at zero, then each field in turn at the values it is checked at *)
 CheckedCouponRateOptional ==
     { ZeroCouponRateOptional }
         \cup { [ZeroCouponRateOptional EXCEPT !.mantissa32 = one] : one \in Sample(4) }
-        \cup { [ZeroCouponRateOptional EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroCouponRateOptional EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Fair Coupon Pct: 9 bytes                                                *)
 (***************************************************************************)
 
 FairCouponPct ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeFairCouponPct(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeFairCouponPct(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroFairCouponPct ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Fair Coupon Pct at zero, then each field in turn at the values it is checked at *)
 CheckedFairCouponPct ==
     { ZeroFairCouponPct }
         \cup { [ZeroFairCouponPct EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroFairCouponPct EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroFairCouponPct EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Leg Purchase Rate: 9 bytes                                              *)
 (***************************************************************************)
 
 LegPurchaseRate ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeLegPurchaseRate(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeLegPurchaseRate(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroLegPurchaseRate ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Leg Purchase Rate at zero, then each field in turn at the values it is checked at *)
 CheckedLegPurchaseRate ==
     { ZeroLegPurchaseRate }
         \cup { [ZeroLegPurchaseRate EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroLegPurchaseRate EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroLegPurchaseRate EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Fixed Npv: 9 bytes                                                      *)
 (***************************************************************************)
 
 FixedNpv ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeFixedNpv(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeFixedNpv(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroFixedNpv ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Fixed Npv at zero, then each field in turn at the values it is checked at *)
 CheckedFixedNpv ==
     { ZeroFixedNpv }
         \cup { [ZeroFixedNpv EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroFixedNpv EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroFixedNpv EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Float Npv: 9 bytes                                                      *)
 (***************************************************************************)
 
 FloatNpv ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeFloatNpv(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeFloatNpv(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroFloatNpv ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Float Npv at zero, then each field in turn at the values it is checked at *)
 CheckedFloatNpv ==
     { ZeroFloatNpv }
         \cup { [ZeroFloatNpv EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroFloatNpv EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroFloatNpv EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Npv: 9 bytes                                                            *)
 (***************************************************************************)
 
 Npv ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeNpv(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeNpv(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroNpv ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Npv at zero, then each field in turn at the values it is checked at *)
 CheckedNpv ==
     { ZeroNpv }
         \cup { [ZeroNpv EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroNpv EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroNpv EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Accrued Coupons: 9 bytes                                                *)
 (***************************************************************************)
 
 AccruedCoupons ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeAccruedCoupons(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeAccruedCoupons(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroAccruedCoupons ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Accrued Coupons at zero, then each field in turn at the values it is checked at *)
 CheckedAccruedCoupons ==
     { ZeroAccruedCoupons }
         \cup { [ZeroAccruedCoupons EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroAccruedCoupons EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroAccruedCoupons EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Daily Incremental Eris Pai: 9 bytes                                     *)
 (***************************************************************************)
 
 DailyIncrementalErisPai ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeDailyIncrementalErisPai(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeDailyIncrementalErisPai(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroDailyIncrementalErisPai ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Daily Incremental Eris Pai at zero, then each field in turn at the values it is checked at *)
 CheckedDailyIncrementalErisPai ==
     { ZeroDailyIncrementalErisPai }
         \cup { [ZeroDailyIncrementalErisPai EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroDailyIncrementalErisPai EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroDailyIncrementalErisPai EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Eris Pai: 9 bytes                                                       *)
 (***************************************************************************)
 
 ErisPai ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeErisPai(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeErisPai(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroErisPai ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Eris Pai at zero, then each field in turn at the values it is checked at *)
 CheckedErisPai ==
     { ZeroErisPai }
         \cup { [ZeroErisPai EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroErisPai EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroErisPai EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Fed Funds Rate: 9 bytes                                                 *)
 (***************************************************************************)
 
 FedFundsRate ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeFedFundsRate(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeFedFundsRate(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroFedFundsRate ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Fed Funds Rate at zero, then each field in turn at the values it is checked at *)
 CheckedFedFundsRate ==
     { ZeroFedFundsRate }
         \cup { [ZeroFedFundsRate EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroFedFundsRate EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroFedFundsRate EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Min Price Increment Optional: 9 bytes                                   *)
 (***************************************************************************)
 
 MinPriceIncrementOptional ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeMinPriceIncrementOptional(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeMinPriceIncrementOptional(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroMinPriceIncrementOptional ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Min Price Increment Optional at zero, then each field in turn at the values it is checked at *)
 CheckedMinPriceIncrementOptional ==
     { ZeroMinPriceIncrementOptional }
         \cup { [ZeroMinPriceIncrementOptional EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroMinPriceIncrementOptional EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroMinPriceIncrementOptional EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Fixed Payment: 9 bytes                                                  *)
 (***************************************************************************)
 
 FixedPayment ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeFixedPayment(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeFixedPayment(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroFixedPayment ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Fixed Payment at zero, then each field in turn at the values it is checked at *)
 CheckedFixedPayment ==
     { ZeroFixedPayment }
         \cup { [ZeroFixedPayment EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroFixedPayment EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroFixedPayment EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Floating Payment: 9 bytes                                               *)
 (***************************************************************************)
 
 FloatingPayment ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeFloatingPayment(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeFloatingPayment(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroFloatingPayment ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Floating Payment at zero, then each field in turn at the values it is checked at *)
 CheckedFloatingPayment ==
     { ZeroFloatingPayment }
         \cup { [ZeroFloatingPayment EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroFloatingPayment EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroFloatingPayment EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Next Fixed Payment Amount: 9 bytes                                      *)
 (***************************************************************************)
 
 NextFixedPaymentAmount ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeNextFixedPaymentAmount(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeNextFixedPaymentAmount(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroNextFixedPaymentAmount ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Next Fixed Payment Amount at zero, then each field in turn at the values it is checked at *)
 CheckedNextFixedPaymentAmount ==
     { ZeroNextFixedPaymentAmount }
         \cup { [ZeroNextFixedPaymentAmount EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroNextFixedPaymentAmount EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroNextFixedPaymentAmount EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Next Floating Payment Amount: 9 bytes                                   *)
 (***************************************************************************)
 
 NextFloatingPaymentAmount ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeNextFloatingPaymentAmount(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeNextFloatingPaymentAmount(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroNextFloatingPaymentAmount ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Next Floating Payment Amount at zero, then each field in turn at the values it is checked at *)
 CheckedNextFloatingPaymentAmount ==
     { ZeroNextFloatingPaymentAmount }
         \cup { [ZeroNextFloatingPaymentAmount EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroNextFloatingPaymentAmount EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroNextFloatingPaymentAmount EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Previous Eris Pai: 9 bytes                                              *)
 (***************************************************************************)
 
 PreviousErisPai ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodePreviousErisPai(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodePreviousErisPai(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroPreviousErisPai ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Previous Eris Pai at zero, then each field in turn at the values it is checked at *)
 CheckedPreviousErisPai ==
     { ZeroPreviousErisPai }
         \cup { [ZeroPreviousErisPai EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroPreviousErisPai EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroPreviousErisPai EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Leg Contract Multiplier: 9 bytes                                        *)
 (***************************************************************************)
 
 LegContractMultiplier ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeLegContractMultiplier(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeLegContractMultiplier(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroLegContractMultiplier ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Leg Contract Multiplier at zero, then each field in turn at the values it is checked at *)
 CheckedLegContractMultiplier ==
     { ZeroLegContractMultiplier }
         \cup { [ZeroLegContractMultiplier EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroLegContractMultiplier EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroLegContractMultiplier EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* P V 01: 9 bytes                                                         *)
 (***************************************************************************)
 
 PV01 ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodePV01(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodePV01(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroPV01 ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* P V 01 at zero, then each field in turn at the values it is checked at *)
 CheckedPV01 ==
     { ZeroPV01 }
         \cup { [ZeroPV01 EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroPV01 EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroPV01 EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* D V 01: 9 bytes                                                         *)
 (***************************************************************************)
 
 DV01 ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeDV01(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeDV01(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroDV01 ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* D V 01 at zero, then each field in turn at the values it is checked at *)
 CheckedDV01 ==
     { ZeroDV01 }
         \cup { [ZeroDV01 EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroDV01 EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroDV01 EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Settlement Npv: 9 bytes                                                 *)
 (***************************************************************************)
 
 SettlementNpv ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeSettlementNpv(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeSettlementNpv(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroSettlementNpv ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Settlement Npv at zero, then each field in turn at the values it is checked at *)
 CheckedSettlementNpv ==
     { ZeroSettlementNpv }
         \cup { [ZeroSettlementNpv EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroSettlementNpv EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroSettlementNpv EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Final Settlement Futures Price: 9 bytes                                 *)
 (***************************************************************************)
 
 FinalSettlementFuturesPrice ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissa         : Sample(8),
+      exponentOptional : Sample(1) ]
 
 EncodeFinalSettlementFuturesPrice(message) ==
     message.mantissa
-        \o message.exponent
+        \o message.exponentOptional
 
 DecodeFinalSettlementFuturesPrice(bytes) ==
     LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET exponentOptional == ReadBytes(mantissa.rest, 1) IN IF ~exponentOptional.ok THEN Fail ELSE
+    Ok([ mantissa         |-> mantissa.value,
+         exponentOptional |-> exponentOptional.value ], exponentOptional.rest)
 
 ZeroFinalSettlementFuturesPrice ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissa         |-> [i \in 1 .. 8 |-> 0],
+      exponentOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Final Settlement Futures Price at zero, then each field in turn at the values it is checked at *)
 CheckedFinalSettlementFuturesPrice ==
     { ZeroFinalSettlementFuturesPrice }
         \cup { [ZeroFinalSettlementFuturesPrice EXCEPT !.mantissa = one] : one \in Sample(8) }
-        \cup { [ZeroFinalSettlementFuturesPrice EXCEPT !.exponent = one] : one \in Sample(1) }
+        \cup { [ZeroFinalSettlementFuturesPrice EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Eris Security Alt Id Group: 27 bytes                                    *)

@@ -110,58 +110,6 @@ SampleLists(entries) ==
         \cup { <<one, one>> : one \in entries }
 
 (***************************************************************************)
-(* Packet Header: 10 bytes                                                 *)
-(***************************************************************************)
-
-PacketHeader ==
-    [ channelId       : Sample(1),
-      incarnation     : Sample(2),
-      source          : Sample(1),
-      packetFlags     : Sample(1),
-      messageSequence : Sample(4),
-      messageCount    : Sample(1) ]
-
-EncodePacketHeader(message) ==
-    message.channelId
-        \o message.incarnation
-        \o message.source
-        \o message.packetFlags
-        \o message.messageSequence
-        \o message.messageCount
-
-DecodePacketHeader(bytes) ==
-    LET channelId == ReadBytes(bytes, 1) IN IF ~channelId.ok THEN Fail ELSE
-    LET incarnation == ReadBytes(channelId.rest, 2) IN IF ~incarnation.ok THEN Fail ELSE
-    LET source == ReadBytes(incarnation.rest, 1) IN IF ~source.ok THEN Fail ELSE
-    LET packetFlags == ReadBytes(source.rest, 1) IN IF ~packetFlags.ok THEN Fail ELSE
-    LET messageSequence == ReadBytes(packetFlags.rest, 4) IN IF ~messageSequence.ok THEN Fail ELSE
-    LET messageCount == ReadBytes(messageSequence.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
-    Ok([ channelId       |-> channelId.value,
-         incarnation     |-> incarnation.value,
-         source          |-> source.value,
-         packetFlags     |-> packetFlags.value,
-         messageSequence |-> messageSequence.value,
-         messageCount    |-> messageCount.value ], messageCount.rest)
-
-ZeroPacketHeader ==
-    [ channelId       |-> [i \in 1 .. 1 |-> 0],
-      incarnation     |-> [i \in 1 .. 2 |-> 0],
-      source          |-> [i \in 1 .. 1 |-> 0],
-      packetFlags     |-> [i \in 1 .. 1 |-> 0],
-      messageSequence |-> [i \in 1 .. 4 |-> 0],
-      messageCount    |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Packet Header at zero, then each field in turn at the values it is checked at *)
-CheckedPacketHeader ==
-    { ZeroPacketHeader }
-        \cup { [ZeroPacketHeader EXCEPT !.channelId = one] : one \in Sample(1) }
-        \cup { [ZeroPacketHeader EXCEPT !.incarnation = one] : one \in Sample(2) }
-        \cup { [ZeroPacketHeader EXCEPT !.source = one] : one \in Sample(1) }
-        \cup { [ZeroPacketHeader EXCEPT !.packetFlags = one] : one \in Sample(1) }
-        \cup { [ZeroPacketHeader EXCEPT !.messageSequence = one] : one \in Sample(4) }
-        \cup { [ZeroPacketHeader EXCEPT !.messageCount = one] : one \in Sample(1) }
-
-(***************************************************************************)
 (* Instrument Trading Status Incremental Message: 25 bytes                 *)
 (***************************************************************************)
 
@@ -2456,15 +2404,14 @@ EncodeSbeFrameList(messages) ==
     THEN << >>
     ELSE EncodeSbeFrame(Head(messages)) \o EncodeSbeFrameList(Tail(messages))
 
-(* As many Sbe Frame as the bytes hold, which is what its payload rule states. *)
-(* Each one takes bytes off the reader, so the run ends where the data does. *)
-RECURSIVE ReadSbeFrameAll(_)
-ReadSbeFrameAll(bytes) ==
-    IF bytes = << >>
-    THEN Ok(<< >>, << >>)
+(* As many Sbe Frame as the field that counts them says *)
+RECURSIVE ReadSbeFrameList(_, _)
+ReadSbeFrameList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
     ELSE LET one == DecodeSbeFrame(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadSbeFrameAll(one.rest)
+             ELSE LET more == ReadSbeFrameList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
@@ -2489,27 +2436,53 @@ OneSbeFrame ==
 (***************************************************************************)
 
 Packet ==
-    [ packetHeader : PacketHeader,
-      sbeFrame     : SampleLists(OneSbeFrame) ]
+    [ channelId       : Sample(1),
+      incarnation     : Sample(2),
+      source          : Sample(1),
+      packetFlags     : Sample(1),
+      messageSequence : Sample(4),
+      sbeFrame        : SampleLists(OneSbeFrame) ]
 
 EncodePacket(message) ==
-    EncodePacketHeader(message.packetHeader)
+    message.channelId
+        \o message.incarnation
+        \o message.source
+        \o message.packetFlags
+        \o message.messageSequence
+        \o EncodeUIntBE(Len(message.sbeFrame), 1)
         \o EncodeSbeFrameList(message.sbeFrame)
 
 DecodePacket(bytes) ==
-    LET packetHeader == DecodePacketHeader(bytes) IN IF ~packetHeader.ok THEN Fail ELSE
-    LET sbeFrame == ReadSbeFrameAll(packetHeader.rest) IN IF ~sbeFrame.ok THEN Fail ELSE
-    Ok([ packetHeader |-> packetHeader.value,
-         sbeFrame     |-> sbeFrame.value ], sbeFrame.rest)
+    LET channelId == ReadBytes(bytes, 1) IN IF ~channelId.ok THEN Fail ELSE
+    LET incarnation == ReadBytes(channelId.rest, 2) IN IF ~incarnation.ok THEN Fail ELSE
+    LET source == ReadBytes(incarnation.rest, 1) IN IF ~source.ok THEN Fail ELSE
+    LET packetFlags == ReadBytes(source.rest, 1) IN IF ~packetFlags.ok THEN Fail ELSE
+    LET messageSequence == ReadBytes(packetFlags.rest, 4) IN IF ~messageSequence.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(messageSequence.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
+    LET sbeFrame == ReadSbeFrameList(messageCount.rest, messageCount.value) IN IF ~sbeFrame.ok THEN Fail ELSE
+    Ok([ channelId       |-> channelId.value,
+         incarnation     |-> incarnation.value,
+         source          |-> source.value,
+         packetFlags     |-> packetFlags.value,
+         messageSequence |-> messageSequence.value,
+         sbeFrame        |-> sbeFrame.value ], sbeFrame.rest)
 
 ZeroPacket ==
-    [ packetHeader |-> ZeroPacketHeader,
-      sbeFrame     |-> << >> ]
+    [ channelId       |-> [i \in 1 .. 1 |-> 0],
+      incarnation     |-> [i \in 1 .. 2 |-> 0],
+      source          |-> [i \in 1 .. 1 |-> 0],
+      packetFlags     |-> [i \in 1 .. 1 |-> 0],
+      messageSequence |-> [i \in 1 .. 4 |-> 0],
+      sbeFrame        |-> << >> ]
 
 (* Packet at zero, then each field in turn at the values it is checked at *)
 CheckedPacket ==
     { ZeroPacket }
-        \cup { [ZeroPacket EXCEPT !.packetHeader = one] : one \in CheckedPacketHeader }
+        \cup { [ZeroPacket EXCEPT !.channelId = one] : one \in Sample(1) }
+        \cup { [ZeroPacket EXCEPT !.incarnation = one] : one \in Sample(2) }
+        \cup { [ZeroPacket EXCEPT !.source = one] : one \in Sample(1) }
+        \cup { [ZeroPacket EXCEPT !.packetFlags = one] : one \in Sample(1) }
+        \cup { [ZeroPacket EXCEPT !.messageSequence = one] : one \in Sample(4) }
         \cup { [ZeroPacket EXCEPT !.sbeFrame = one] : one \in SampleLists(OneSbeFrame) }
 
 (***************************************************************************)
@@ -2527,14 +2500,6 @@ RoundTripUIntLE ==
                 /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
                 /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
-
-(* Every Packet Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripPacketHeader ==
-    \A message \in CheckedPacketHeader :
-        LET read == DecodePacketHeader(EncodePacketHeader(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
 
 (* Every Instrument Trading Status Incremental Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripInstrumentTradingStatusIncrementalMessage ==

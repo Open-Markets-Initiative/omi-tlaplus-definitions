@@ -975,68 +975,68 @@ CheckedPayload ==
         \cup { [tag |-> RetransmissionResponseMessageCode, body |-> one] : one \in CheckedRetransmissionResponseMessage }
 
 (***************************************************************************)
-(* Messages                                                                *)
+(* Message                                                                 *)
 (***************************************************************************)
 
-Messages ==
+Message ==
     [ msgSize : 0 .. 255,
       payload : Payload ]
 
-EncodeMessages(message) ==
+EncodeMessage(message) ==
     EncodeUIntLE(message.msgSize, 2)
         \o EncodeUIntLE(message.payload.tag, 2)
         \o EncodePayload(message.payload)
 
-DecodeMessages(bytes) ==
+DecodeMessage(bytes) ==
     LET msgSize == ReadUIntLE(bytes, 2) IN IF ~msgSize.ok THEN Fail ELSE
     LET msgType == ReadUIntLE(msgSize.rest, 2) IN IF ~msgType.ok THEN Fail ELSE
     LET payload == DecodePayload(msgType.value, msgType.rest) IN IF ~payload.ok THEN Fail ELSE
     Ok([ msgSize |-> msgSize.value,
          payload |-> payload.value ], payload.rest)
 
-ZeroMessages ==
+ZeroMessage ==
     [ msgSize |-> 0,
       payload |-> ZeroPayload ]
 
-(* Messages at zero, then each field in turn at the values it is checked at *)
-CheckedMessages ==
-    { ZeroMessages }
-        \cup { [ZeroMessages EXCEPT !.msgSize = one] : one \in {0, 1, 255} }
-        \cup { [ZeroMessages EXCEPT !.payload = one] : one \in CheckedPayload }
+(* Message at zero, then each field in turn at the values it is checked at *)
+CheckedMessage ==
+    { ZeroMessage }
+        \cup { [ZeroMessage EXCEPT !.msgSize = one] : one \in {0, 1, 255} }
+        \cup { [ZeroMessage EXCEPT !.payload = one] : one \in CheckedPayload }
 
-(* A run of Messages, written one after another *)
-RECURSIVE EncodeMessagesList(_)
-EncodeMessagesList(messages) ==
+(* A run of Message, written one after another *)
+RECURSIVE EncodeMessageList(_)
+EncodeMessageList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeMessages(Head(messages)) \o EncodeMessagesList(Tail(messages))
+    ELSE EncodeMessage(Head(messages)) \o EncodeMessageList(Tail(messages))
 
-(* As many Messages as the field that counts them says *)
-RECURSIVE ReadMessagesList(_, _)
-ReadMessagesList(bytes, count) ==
+(* As many Message as the field that counts them says *)
+RECURSIVE ReadMessageList(_, _)
+ReadMessageList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeMessages(bytes)
+    ELSE LET one == DecodeMessage(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadMessagesList(one.rest, count - 1)
+             ELSE LET more == ReadMessageList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Messages of each kind, for the lists that carry them *)
-OneMessages ==
-    { [ZeroMessages EXCEPT !.payload = [tag |-> SequenceResetMessageCode, body |-> ZeroSequenceResetMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> MarketStateContractMessageCode, body |-> ZeroMarketStateContractMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> MarketStateInstrumentMessageCode, body |-> ZeroMarketStateInstrumentMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> IndicativeOpeningPriceMessageCode, body |-> ZeroIndicativeOpeningPriceMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> QuoteRequestMessageCode, body |-> ZeroQuoteRequestMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> OrderBookClearMessageCode, body |-> ZeroOrderBookClearMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> CrossRequestMessageCode, body |-> ZeroCrossRequestMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> AggregateOrderBookMessageCode, body |-> ZeroAggregateOrderBookMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> MarketDataTradeMessageCode, body |-> ZeroMarketDataTradeMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> LogonMessageCode, body |-> ZeroLogonMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> LogonResponseMessageCode, body |-> ZeroLogonResponseMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> RetransmissionRequestMessageCode, body |-> ZeroRetransmissionRequestMessage]],
-      [ZeroMessages EXCEPT !.payload = [tag |-> RetransmissionResponseMessageCode, body |-> ZeroRetransmissionResponseMessage]] }
+(* One Message of each kind, for the lists that carry them *)
+OneMessage ==
+    { [ZeroMessage EXCEPT !.payload = [tag |-> SequenceResetMessageCode, body |-> ZeroSequenceResetMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> MarketStateContractMessageCode, body |-> ZeroMarketStateContractMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> MarketStateInstrumentMessageCode, body |-> ZeroMarketStateInstrumentMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> IndicativeOpeningPriceMessageCode, body |-> ZeroIndicativeOpeningPriceMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> QuoteRequestMessageCode, body |-> ZeroQuoteRequestMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OrderBookClearMessageCode, body |-> ZeroOrderBookClearMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> CrossRequestMessageCode, body |-> ZeroCrossRequestMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> AggregateOrderBookMessageCode, body |-> ZeroAggregateOrderBookMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> MarketDataTradeMessageCode, body |-> ZeroMarketDataTradeMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> LogonMessageCode, body |-> ZeroLogonMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> LogonResponseMessageCode, body |-> ZeroLogonResponseMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> RetransmissionRequestMessageCode, body |-> ZeroRetransmissionRequestMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> RetransmissionResponseMessageCode, body |-> ZeroRetransmissionResponseMessage]] }
 
 (***************************************************************************)
 (* Packet                                                                  *)
@@ -1047,15 +1047,15 @@ Packet ==
       filler   : Sample(1),
       seqNum   : Sample(4),
       sendTime : Sample(8),
-      messages : SampleLists(OneMessages) ]
+      message  : SampleLists(OneMessage) ]
 
 EncodePacket(message) ==
     message.pktSize
-        \o EncodeUIntBE(Len(message.messages), 1)
+        \o EncodeUIntBE(Len(message.message), 1)
         \o message.filler
         \o message.seqNum
         \o message.sendTime
-        \o EncodeMessagesList(message.messages)
+        \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
     LET pktSize == ReadBytes(bytes, 2) IN IF ~pktSize.ok THEN Fail ELSE
@@ -1063,19 +1063,19 @@ DecodePacket(bytes) ==
     LET filler == ReadBytes(msgCount.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET seqNum == ReadBytes(filler.rest, 4) IN IF ~seqNum.ok THEN Fail ELSE
     LET sendTime == ReadBytes(seqNum.rest, 8) IN IF ~sendTime.ok THEN Fail ELSE
-    LET messages == ReadMessagesList(sendTime.rest, msgCount.value) IN IF ~messages.ok THEN Fail ELSE
+    LET message == ReadMessageList(sendTime.rest, msgCount.value) IN IF ~message.ok THEN Fail ELSE
     Ok([ pktSize  |-> pktSize.value,
          filler   |-> filler.value,
          seqNum   |-> seqNum.value,
          sendTime |-> sendTime.value,
-         messages |-> messages.value ], messages.rest)
+         message  |-> message.value ], message.rest)
 
 ZeroPacket ==
     [ pktSize  |-> [i \in 1 .. 2 |-> 0],
       filler   |-> [i \in 1 .. 1 |-> 0],
       seqNum   |-> [i \in 1 .. 4 |-> 0],
       sendTime |-> [i \in 1 .. 8 |-> 0],
-      messages |-> << >> ]
+      message  |-> << >> ]
 
 (* Packet at zero, then each field in turn at the values it is checked at *)
 CheckedPacket ==
@@ -1084,7 +1084,7 @@ CheckedPacket ==
         \cup { [ZeroPacket EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroPacket EXCEPT !.seqNum = one] : one \in Sample(4) }
         \cup { [ZeroPacket EXCEPT !.sendTime = one] : one \in Sample(8) }
-        \cup { [ZeroPacket EXCEPT !.messages = one] : one \in SampleLists(OneMessages) }
+        \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -1222,10 +1222,10 @@ RoundTripRetransmissionResponseMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Messages decodes back to what was encoded, and leaves nothing over *)
-RoundTripMessages ==
-    \A message \in CheckedMessages :
-        LET read == DecodeMessages(EncodeMessages(message))
+(* Every Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMessage ==
+    \A message \in CheckedMessage :
+        LET read == DecodeMessage(EncodeMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

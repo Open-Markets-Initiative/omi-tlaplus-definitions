@@ -765,7 +765,7 @@ CheckedTradeFlags2 ==
         \cup { [ZeroTradeFlags2 EXCEPT !.algorithmicTrade = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Trade Short Message: 38 bytes                                           *)
+(* Trade Short Message: 36 bytes                                           *)
 (***************************************************************************)
 
 TradeShortMessage ==
@@ -773,7 +773,7 @@ TradeShortMessage ==
       orderId        : Sample(8),
       sideIndicator  : Sample(1),
       contractsShort : Sample(2),
-      symbolLong     : Sample(8),
+      symbol         : Sample(6),
       priceShort     : Sample(2),
       executionId    : Sample(8),
       tradeFlags     : TradeFlags2 ]
@@ -783,7 +783,7 @@ EncodeTradeShortMessage(message) ==
         \o message.orderId
         \o message.sideIndicator
         \o message.contractsShort
-        \o message.symbolLong
+        \o message.symbol
         \o message.priceShort
         \o message.executionId
         \o EncodeTradeFlags2(message.tradeFlags)
@@ -793,15 +793,15 @@ DecodeTradeShortMessage(bytes) ==
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
     LET contractsShort == ReadBytes(sideIndicator.rest, 2) IN IF ~contractsShort.ok THEN Fail ELSE
-    LET symbolLong == ReadBytes(contractsShort.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
-    LET priceShort == ReadBytes(symbolLong.rest, 2) IN IF ~priceShort.ok THEN Fail ELSE
+    LET symbol == ReadBytes(contractsShort.rest, 6) IN IF ~symbol.ok THEN Fail ELSE
+    LET priceShort == ReadBytes(symbol.rest, 2) IN IF ~priceShort.ok THEN Fail ELSE
     LET executionId == ReadBytes(priceShort.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
     LET tradeFlags == DecodeTradeFlags2(executionId.rest) IN IF ~tradeFlags.ok THEN Fail ELSE
     Ok([ timeOffset     |-> timeOffset.value,
          orderId        |-> orderId.value,
          sideIndicator  |-> sideIndicator.value,
          contractsShort |-> contractsShort.value,
-         symbolLong     |-> symbolLong.value,
+         symbol         |-> symbol.value,
          priceShort     |-> priceShort.value,
          executionId    |-> executionId.value,
          tradeFlags     |-> tradeFlags.value ], tradeFlags.rest)
@@ -811,7 +811,7 @@ ZeroTradeShortMessage ==
       orderId        |-> [i \in 1 .. 8 |-> 0],
       sideIndicator  |-> [i \in 1 .. 1 |-> 0],
       contractsShort |-> [i \in 1 .. 2 |-> 0],
-      symbolLong     |-> [i \in 1 .. 8 |-> 0],
+      symbol         |-> [i \in 1 .. 6 |-> 0],
       priceShort     |-> [i \in 1 .. 2 |-> 0],
       executionId    |-> [i \in 1 .. 8 |-> 0],
       tradeFlags     |-> ZeroTradeFlags2 ]
@@ -823,7 +823,7 @@ CheckedTradeShortMessage ==
         \cup { [ZeroTradeShortMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroTradeShortMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
         \cup { [ZeroTradeShortMessage EXCEPT !.contractsShort = one] : one \in Sample(2) }
-        \cup { [ZeroTradeShortMessage EXCEPT !.symbolLong = one] : one \in Sample(8) }
+        \cup { [ZeroTradeShortMessage EXCEPT !.symbol = one] : one \in Sample(6) }
         \cup { [ZeroTradeShortMessage EXCEPT !.priceShort = one] : one \in Sample(2) }
         \cup { [ZeroTradeShortMessage EXCEPT !.executionId = one] : one \in Sample(8) }
         \cup { [ZeroTradeShortMessage EXCEPT !.tradeFlags = one] : one \in CheckedTradeFlags2 }

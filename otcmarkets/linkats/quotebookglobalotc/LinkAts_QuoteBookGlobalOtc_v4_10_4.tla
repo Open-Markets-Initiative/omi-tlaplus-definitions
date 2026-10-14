@@ -17,7 +17,8 @@
 (* Note: Packet Flag is a bit field set, checked as its 1 byte rather than *)
 (* bit by bit.                                                             *)
 (*                                                                         *)
-(* Note: a Messages of 0 marks Heartbeat Packet and carries no Message.    *)
+(* Note: a Message Count of 0 marks Heartbeat Packet and carries no        *)
+(* Message.                                                                *)
 (*                                                                         *)
 (* Note: Security Flags is a bit field set, checked as its 1 byte rather   *)
 (* than bit by bit.                                                        *)
@@ -664,9 +665,9 @@ DecodePacket(bytes) ==
     LET packetSize == ReadBytes(bytes, 2) IN IF ~packetSize.ok THEN Fail ELSE
     LET seqNum == ReadBytes(packetSize.rest, 4) IN IF ~seqNum.ok THEN Fail ELSE
     LET packetFlag == ReadBytes(seqNum.rest, 1) IN IF ~packetFlag.ok THEN Fail ELSE
-    LET messages == ReadUIntBE(packetFlag.rest, 1) IN IF ~messages.ok THEN Fail ELSE
-    LET packetMilli == ReadBytes(messages.rest, 4) IN IF ~packetMilli.ok THEN Fail ELSE
-    LET message == ReadMessageList(packetMilli.rest, messages.value) IN IF ~message.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(packetFlag.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
+    LET packetMilli == ReadBytes(messageCount.rest, 4) IN IF ~packetMilli.ok THEN Fail ELSE
+    LET message == ReadMessageList(packetMilli.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
     Ok([ packetSize  |-> packetSize.value,
          seqNum      |-> seqNum.value,
          packetFlag  |-> packetFlag.value,
