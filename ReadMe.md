@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 1350 | 2783965 |
+| 1043 | 2793553 |
 
 ## Testing
 
@@ -92,9 +92,9 @@ Enjoy.
 [Omi.Encoding.Sail]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Sail.md "Sail Encoding"
 [Omi.Encoding.Fbe]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Fbe.md "Fbe Encoding"
 [Omi.Encoding.Pitch]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Pitch.md "Pitch Encoding"
+[Omi.Encoding.Boe3]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Boe3.md "Boe3 Encoding"
 [Omi.Encoding.Spin]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Spin.md "Spin Encoding"
 [Omi.Encoding.Csdp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Csdp.md "Csdp Encoding"
-[Omi.Encoding.Boe3]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Boe3.md "Boe3 Encoding"
 [Omi.Encoding.Csm]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Csm.md "Csm Encoding"
 [Omi.Encoding.Udp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Udp.md "Udp Encoding"
 [Omi.Encoding.Cgif]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Cgif.md "Cgif Encoding"
@@ -153,8 +153,10 @@ Enjoy.
 [Bse.BseIndia.Eobi]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bse/Protocols/BseIndia/Eobi.md "Enhanced Order Book Interface"
 [Bse.BseIndia.Eti]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bse/Protocols/BseIndia/Eti.md "Enhanced Trading Interface"
 [Cboe.BxeEquities.MulticastDepthOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/BxeEquities/MulticastDepthOfBook.md "Multicast Depth Of Book"
+[Cboe.ByxEquities.BinaryOrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/ByxEquities/BinaryOrderEntry.md "Binary Order Entry"
 [Cboe.ByxEquities.MulticastDepthOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/ByxEquities/MulticastDepthOfBook.md "Multicast Depth Of Book"
 [Cboe.ByxEquities.SummaryDepth]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/ByxEquities/SummaryDepth.md "Summary Depth"
+[Cboe.BzxEquities.BinaryOrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/BzxEquities/BinaryOrderEntry.md "Binary Order Entry"
 [Cboe.BzxEquities.MulticastDepthOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/BzxEquities/MulticastDepthOfBook.md "Multicast Depth Of Book"
 [Cboe.BzxEquities.SummaryDepth]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/BzxEquities/SummaryDepth.md "Summary Depth"
 [Cboe.BzxOptions.BinaryOrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/BzxOptions/BinaryOrderEntry.md "Binary Order Entry"
@@ -197,8 +199,10 @@ Enjoy.
 [Cboe.CxjEquities.BinaryOrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/CxjEquities/BinaryOrderEntry.md "Binary Order Entry"
 [Cboe.CxjEquities.MulticastDepthOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/CxjEquities/MulticastDepthOfBook.md "Multicast Depth Of Book"
 [Cboe.DxeEquities.MulticastDepthOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/DxeEquities/MulticastDepthOfBook.md "Multicast Depth Of Book"
+[Cboe.EdgaEquities.BinaryOrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/EdgaEquities/BinaryOrderEntry.md "Binary Order Entry"
 [Cboe.EdgaEquities.MulticastDepthOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/EdgaEquities/MulticastDepthOfBook.md "Multicast Depth Of Book"
 [Cboe.EdgaEquities.SummaryDepth]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/EdgaEquities/SummaryDepth.md "Summary Depth"
+[Cboe.EdgxEquities.BinaryOrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/EdgxEquities/BinaryOrderEntry.md "Binary Order Entry"
 [Cboe.EdgxEquities.MulticastDepthOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/EdgxEquities/MulticastDepthOfBook.md "Multicast Depth Of Book"
 [Cboe.EdgxEquities.SummaryDepth]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/EdgxEquities/SummaryDepth.md "Summary Depth"
 [Cboe.EdgxOptions.AuctionFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Cboe/Protocols/EdgxOptions/AuctionFeed.md "Auction Feed"

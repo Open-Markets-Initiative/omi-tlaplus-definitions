@@ -148,17 +148,17 @@ OneUnitSequence == { ZeroUnitSequence }
 (***************************************************************************)
 
 LoginRequestMessage ==
-    [ sessionId             : Sample(4),
-      sessionSubId          : Sample(4),
-      password              : Sample(10),
-      replayUnspecifiedUnit : Sample(1),
-      unitSequence          : SampleLists(OneUnitSequence) ]
+    [ sessionId         : Sample(4),
+      sessionSubId      : Sample(4),
+      password          : Sample(10),
+      replayInstruction : Sample(1),
+      unitSequence      : SampleLists(OneUnitSequence) ]
 
 EncodeLoginRequestMessage(message) ==
     message.sessionId
         \o message.sessionSubId
         \o message.password
-        \o message.replayUnspecifiedUnit
+        \o message.replayInstruction
         \o EncodeUIntLE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
@@ -166,21 +166,21 @@ DecodeLoginRequestMessage(bytes) ==
     LET sessionId == ReadBytes(bytes, 4) IN IF ~sessionId.ok THEN Fail ELSE
     LET sessionSubId == ReadBytes(sessionId.rest, 4) IN IF ~sessionSubId.ok THEN Fail ELSE
     LET password == ReadBytes(sessionSubId.rest, 10) IN IF ~password.ok THEN Fail ELSE
-    LET replayUnspecifiedUnit == ReadBytes(password.rest, 1) IN IF ~replayUnspecifiedUnit.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(replayUnspecifiedUnit.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET replayInstruction == ReadBytes(password.rest, 1) IN IF ~replayInstruction.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntLE(replayInstruction.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
-    Ok([ sessionId             |-> sessionId.value,
-         sessionSubId          |-> sessionSubId.value,
-         password              |-> password.value,
-         replayUnspecifiedUnit |-> replayUnspecifiedUnit.value,
-         unitSequence          |-> unitSequence.value ], unitSequence.rest)
+    Ok([ sessionId         |-> sessionId.value,
+         sessionSubId      |-> sessionSubId.value,
+         password          |-> password.value,
+         replayInstruction |-> replayInstruction.value,
+         unitSequence      |-> unitSequence.value ], unitSequence.rest)
 
 ZeroLoginRequestMessage ==
-    [ sessionId             |-> [i \in 1 .. 4 |-> 0],
-      sessionSubId          |-> [i \in 1 .. 4 |-> 0],
-      password              |-> [i \in 1 .. 10 |-> 0],
-      replayUnspecifiedUnit |-> [i \in 1 .. 1 |-> 0],
-      unitSequence          |-> << >> ]
+    [ sessionId         |-> [i \in 1 .. 4 |-> 0],
+      sessionSubId      |-> [i \in 1 .. 4 |-> 0],
+      password          |-> [i \in 1 .. 10 |-> 0],
+      replayInstruction |-> [i \in 1 .. 1 |-> 0],
+      unitSequence      |-> << >> ]
 
 (* Login Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedLoginRequestMessage ==
@@ -188,7 +188,7 @@ CheckedLoginRequestMessage ==
         \cup { [ZeroLoginRequestMessage EXCEPT !.sessionId = one] : one \in Sample(4) }
         \cup { [ZeroLoginRequestMessage EXCEPT !.sessionSubId = one] : one \in Sample(4) }
         \cup { [ZeroLoginRequestMessage EXCEPT !.password = one] : one \in Sample(10) }
-        \cup { [ZeroLoginRequestMessage EXCEPT !.replayUnspecifiedUnit = one] : one \in Sample(1) }
+        \cup { [ZeroLoginRequestMessage EXCEPT !.replayInstruction = one] : one \in Sample(1) }
         \cup { [ZeroLoginRequestMessage EXCEPT !.unitSequence = one] : one \in SampleLists(OneUnitSequence) }
 
 (***************************************************************************)
@@ -2267,11 +2267,11 @@ CheckedModifyOrderMessage ==
         \cup { [ZeroModifyOrderMessage EXCEPT !.scratchPad = one] : one \in Sample(2) }
 
 (***************************************************************************)
-(* Quote: 17 bytes                                                         *)
+(* Quote: 22 bytes                                                         *)
 (***************************************************************************)
 
 Quote ==
-    [ quoteSymbol : Sample(1),
+    [ quoteSymbol : Sample(6),
       side        : Sample(1),
       openClose   : Sample(1),
       price       : Sample(8),
@@ -2287,7 +2287,7 @@ EncodeQuote(message) ==
         \o message.scratchPad
 
 DecodeQuote(bytes) ==
-    LET quoteSymbol == ReadBytes(bytes, 1) IN IF ~quoteSymbol.ok THEN Fail ELSE
+    LET quoteSymbol == ReadBytes(bytes, 6) IN IF ~quoteSymbol.ok THEN Fail ELSE
     LET side == ReadBytes(quoteSymbol.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET openClose == ReadBytes(side.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET price == ReadBytes(openClose.rest, 8) IN IF ~price.ok THEN Fail ELSE
@@ -2301,7 +2301,7 @@ DecodeQuote(bytes) ==
          scratchPad  |-> scratchPad.value ], scratchPad.rest)
 
 ZeroQuote ==
-    [ quoteSymbol |-> [i \in 1 .. 1 |-> 0],
+    [ quoteSymbol |-> [i \in 1 .. 6 |-> 0],
       side        |-> [i \in 1 .. 1 |-> 0],
       openClose   |-> [i \in 1 .. 1 |-> 0],
       price       |-> [i \in 1 .. 8 |-> 0],
@@ -2311,7 +2311,7 @@ ZeroQuote ==
 (* Quote at zero, then each field in turn at the values it is checked at *)
 CheckedQuote ==
     { ZeroQuote }
-        \cup { [ZeroQuote EXCEPT !.quoteSymbol = one] : one \in Sample(1) }
+        \cup { [ZeroQuote EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
         \cup { [ZeroQuote EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroQuote EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroQuote EXCEPT !.price = one] : one \in Sample(8) }
@@ -2430,11 +2430,11 @@ CheckedQuoteUpdateMessage ==
         \cup { [ZeroQuoteUpdateMessage EXCEPT !.quote = one] : one \in SampleLists(OneQuote) }
 
 (***************************************************************************)
-(* Quote Short: 11 bytes                                                   *)
+(* Quote Short: 16 bytes                                                   *)
 (***************************************************************************)
 
 QuoteShort ==
-    [ quoteSymbol   : Sample(1),
+    [ quoteSymbol   : Sample(6),
       side          : Sample(1),
       openClose     : Sample(1),
       priceShort    : Sample(4),
@@ -2450,7 +2450,7 @@ EncodeQuoteShort(message) ==
         \o message.scratchPad
 
 DecodeQuoteShort(bytes) ==
-    LET quoteSymbol == ReadBytes(bytes, 1) IN IF ~quoteSymbol.ok THEN Fail ELSE
+    LET quoteSymbol == ReadBytes(bytes, 6) IN IF ~quoteSymbol.ok THEN Fail ELSE
     LET side == ReadBytes(quoteSymbol.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET openClose == ReadBytes(side.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET priceShort == ReadBytes(openClose.rest, 4) IN IF ~priceShort.ok THEN Fail ELSE
@@ -2464,7 +2464,7 @@ DecodeQuoteShort(bytes) ==
          scratchPad    |-> scratchPad.value ], scratchPad.rest)
 
 ZeroQuoteShort ==
-    [ quoteSymbol   |-> [i \in 1 .. 1 |-> 0],
+    [ quoteSymbol   |-> [i \in 1 .. 6 |-> 0],
       side          |-> [i \in 1 .. 1 |-> 0],
       openClose     |-> [i \in 1 .. 1 |-> 0],
       priceShort    |-> [i \in 1 .. 4 |-> 0],
@@ -2474,7 +2474,7 @@ ZeroQuoteShort ==
 (* Quote Short at zero, then each field in turn at the values it is checked at *)
 CheckedQuoteShort ==
     { ZeroQuoteShort }
-        \cup { [ZeroQuoteShort EXCEPT !.quoteSymbol = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteShort EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
         \cup { [ZeroQuoteShort EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroQuoteShort EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroQuoteShort EXCEPT !.priceShort = one] : one \in Sample(4) }

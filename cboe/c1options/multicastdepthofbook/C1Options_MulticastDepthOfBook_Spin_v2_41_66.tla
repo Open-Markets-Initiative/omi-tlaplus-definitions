@@ -321,26 +321,32 @@ CheckedInstrumentDefinitionResponseMessage ==
         \cup { [ZeroInstrumentDefinitionResponseMessage EXCEPT !.instrumentDefinitionResponseStatus = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Time Message: 4 bytes                                                   *)
+(* Time Message: 8 bytes                                                   *)
 (***************************************************************************)
 
 TimeMessage ==
-    [ time : Sample(4) ]
+    [ time      : Sample(4),
+      epochTime : Sample(4) ]
 
 EncodeTimeMessage(message) ==
     message.time
+        \o message.epochTime
 
 DecodeTimeMessage(bytes) ==
     LET time == ReadBytes(bytes, 4) IN IF ~time.ok THEN Fail ELSE
-    Ok([ time |-> time.value ], time.rest)
+    LET epochTime == ReadBytes(time.rest, 4) IN IF ~epochTime.ok THEN Fail ELSE
+    Ok([ time      |-> time.value,
+         epochTime |-> epochTime.value ], epochTime.rest)
 
 ZeroTimeMessage ==
-    [ time |-> [i \in 1 .. 4 |-> 0] ]
+    [ time      |-> [i \in 1 .. 4 |-> 0],
+      epochTime |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Time Message at zero, then each field in turn at the values it is checked at *)
 CheckedTimeMessage ==
     { ZeroTimeMessage }
         \cup { [ZeroTimeMessage EXCEPT !.time = one] : one \in Sample(4) }
+        \cup { [ZeroTimeMessage EXCEPT !.epochTime = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Unit Clear Message: 4 bytes                                             *)

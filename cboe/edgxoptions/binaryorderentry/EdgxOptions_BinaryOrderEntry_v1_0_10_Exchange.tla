@@ -320,35 +320,47 @@ CheckedOrderAcknowledgementMessage ==
         \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Acknowledgement Allocation: 9 bytes                                     *)
+(* Acknowledgement Allocation: 37 bytes                                    *)
 (***************************************************************************)
 
 AcknowledgementAllocation ==
-    [ side         : Sample(1),
+    [ clOrdId      : Sample(20),
+      orderId      : Sample(8),
+      side         : Sample(1),
       allocQty     : Sample(4),
       giveUpFirmId : Sample(4) ]
 
 EncodeAcknowledgementAllocation(message) ==
-    message.side
+    message.clOrdId
+        \o message.orderId
+        \o message.side
         \o message.allocQty
         \o message.giveUpFirmId
 
 DecodeAcknowledgementAllocation(bytes) ==
-    LET side == ReadBytes(bytes, 1) IN IF ~side.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(bytes, 20) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET orderId == ReadBytes(clOrdId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET side == ReadBytes(orderId.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET allocQty == ReadBytes(side.rest, 4) IN IF ~allocQty.ok THEN Fail ELSE
     LET giveUpFirmId == ReadBytes(allocQty.rest, 4) IN IF ~giveUpFirmId.ok THEN Fail ELSE
-    Ok([ side         |-> side.value,
+    Ok([ clOrdId      |-> clOrdId.value,
+         orderId      |-> orderId.value,
+         side         |-> side.value,
          allocQty     |-> allocQty.value,
          giveUpFirmId |-> giveUpFirmId.value ], giveUpFirmId.rest)
 
 ZeroAcknowledgementAllocation ==
-    [ side         |-> [i \in 1 .. 1 |-> 0],
+    [ clOrdId      |-> [i \in 1 .. 20 |-> 0],
+      orderId      |-> [i \in 1 .. 8 |-> 0],
+      side         |-> [i \in 1 .. 1 |-> 0],
       allocQty     |-> [i \in 1 .. 4 |-> 0],
       giveUpFirmId |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Acknowledgement Allocation at zero, then each field in turn at the values it is checked at *)
 CheckedAcknowledgementAllocation ==
     { ZeroAcknowledgementAllocation }
+        \cup { [ZeroAcknowledgementAllocation EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroAcknowledgementAllocation EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroAcknowledgementAllocation EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroAcknowledgementAllocation EXCEPT !.allocQty = one] : one \in Sample(4) }
         \cup { [ZeroAcknowledgementAllocation EXCEPT !.giveUpFirmId = one] : one \in Sample(4) }
@@ -960,7 +972,7 @@ CheckedOrderRestatedMessage ==
         \cup { [ZeroOrderRestatedMessage EXCEPT !.lastPx = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Quote Restated Message: 49 bytes                                        *)
+(* Quote Restated Message: 54 bytes                                        *)
 (***************************************************************************)
 
 QuoteRestatedMessage ==
@@ -970,7 +982,7 @@ QuoteRestatedMessage ==
       orderId           : Sample(8),
       leavesQty         : Sample(4),
       workingPrice      : Sample(8),
-      quoteSymbol       : Sample(1),
+      quoteSymbol       : Sample(6),
       side              : Sample(1),
       restatementReason : Sample(1) ]
 
@@ -992,7 +1004,7 @@ DecodeQuoteRestatedMessage(bytes) ==
     LET orderId == ReadBytes(quoteUpdateId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(orderId.rest, 4) IN IF ~leavesQty.ok THEN Fail ELSE
     LET workingPrice == ReadBytes(leavesQty.rest, 8) IN IF ~workingPrice.ok THEN Fail ELSE
-    LET quoteSymbol == ReadBytes(workingPrice.rest, 1) IN IF ~quoteSymbol.ok THEN Fail ELSE
+    LET quoteSymbol == ReadBytes(workingPrice.rest, 6) IN IF ~quoteSymbol.ok THEN Fail ELSE
     LET side == ReadBytes(quoteSymbol.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET restatementReason == ReadBytes(side.rest, 1) IN IF ~restatementReason.ok THEN Fail ELSE
     Ok([ inFlight          |-> inFlight.value,
@@ -1012,7 +1024,7 @@ ZeroQuoteRestatedMessage ==
       orderId           |-> [i \in 1 .. 8 |-> 0],
       leavesQty         |-> [i \in 1 .. 4 |-> 0],
       workingPrice      |-> [i \in 1 .. 8 |-> 0],
-      quoteSymbol       |-> [i \in 1 .. 1 |-> 0],
+      quoteSymbol       |-> [i \in 1 .. 6 |-> 0],
       side              |-> [i \in 1 .. 1 |-> 0],
       restatementReason |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -1025,7 +1037,7 @@ CheckedQuoteRestatedMessage ==
         \cup { [ZeroQuoteRestatedMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroQuoteRestatedMessage EXCEPT !.leavesQty = one] : one \in Sample(4) }
         \cup { [ZeroQuoteRestatedMessage EXCEPT !.workingPrice = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteRestatedMessage EXCEPT !.quoteSymbol = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteRestatedMessage EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
         \cup { [ZeroQuoteRestatedMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroQuoteRestatedMessage EXCEPT !.restatementReason = one] : one \in Sample(1) }
 
@@ -1164,7 +1176,7 @@ CheckedOrderCancelledMessage ==
         \cup { [ZeroOrderCancelledMessage EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Quote Cancelled Message: 38 bytes                                       *)
+(* Quote Cancelled Message: 43 bytes                                       *)
 (***************************************************************************)
 
 QuoteCancelledMessage ==
@@ -1172,7 +1184,7 @@ QuoteCancelledMessage ==
       transactionTime : Sample(8),
       quoteUpdateId   : Sample(16),
       orderId         : Sample(8),
-      quoteSymbol     : Sample(1),
+      quoteSymbol     : Sample(6),
       side            : Sample(1),
       cancelReason    : Sample(1),
       cancelSubReason : Sample(1) ]
@@ -1192,7 +1204,7 @@ DecodeQuoteCancelledMessage(bytes) ==
     LET transactionTime == ReadBytes(inFlight.rest, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET orderId == ReadBytes(quoteUpdateId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET quoteSymbol == ReadBytes(orderId.rest, 1) IN IF ~quoteSymbol.ok THEN Fail ELSE
+    LET quoteSymbol == ReadBytes(orderId.rest, 6) IN IF ~quoteSymbol.ok THEN Fail ELSE
     LET side == ReadBytes(quoteSymbol.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET cancelReason == ReadBytes(side.rest, 1) IN IF ~cancelReason.ok THEN Fail ELSE
     LET cancelSubReason == ReadBytes(cancelReason.rest, 1) IN IF ~cancelSubReason.ok THEN Fail ELSE
@@ -1210,7 +1222,7 @@ ZeroQuoteCancelledMessage ==
       transactionTime |-> [i \in 1 .. 8 |-> 0],
       quoteUpdateId   |-> [i \in 1 .. 16 |-> 0],
       orderId         |-> [i \in 1 .. 8 |-> 0],
-      quoteSymbol     |-> [i \in 1 .. 1 |-> 0],
+      quoteSymbol     |-> [i \in 1 .. 6 |-> 0],
       side            |-> [i \in 1 .. 1 |-> 0],
       cancelReason    |-> [i \in 1 .. 1 |-> 0],
       cancelSubReason |-> [i \in 1 .. 1 |-> 0] ]
@@ -1222,7 +1234,7 @@ CheckedQuoteCancelledMessage ==
         \cup { [ZeroQuoteCancelledMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
         \cup { [ZeroQuoteCancelledMessage EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
         \cup { [ZeroQuoteCancelledMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteCancelledMessage EXCEPT !.quoteSymbol = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteCancelledMessage EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
         \cup { [ZeroQuoteCancelledMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroQuoteCancelledMessage EXCEPT !.cancelReason = one] : one \in Sample(1) }
         \cup { [ZeroQuoteCancelledMessage EXCEPT !.cancelSubReason = one] : one \in Sample(1) }
@@ -1579,7 +1591,7 @@ CheckedOrderExecutionMessage ==
         \cup { [ZeroOrderExecutionMessage EXCEPT !.equityExDestination = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Quote Execution Message: 79 bytes                                       *)
+(* Quote Execution Message: 84 bytes                                       *)
 (***************************************************************************)
 
 QuoteExecutionMessage ==
@@ -1588,7 +1600,7 @@ QuoteExecutionMessage ==
       quoteUpdateId          : Sample(16),
       orderId                : Sample(8),
       execId                 : Sample(8),
-      quoteSymbol            : Sample(1),
+      quoteSymbol            : Sample(6),
       clearingFirm           : Sample(4),
       lastShares             : Sample(4),
       lastPx                 : Sample(8),
@@ -1628,7 +1640,7 @@ DecodeQuoteExecutionMessage(bytes) ==
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET orderId == ReadBytes(quoteUpdateId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET execId == ReadBytes(orderId.rest, 8) IN IF ~execId.ok THEN Fail ELSE
-    LET quoteSymbol == ReadBytes(execId.rest, 1) IN IF ~quoteSymbol.ok THEN Fail ELSE
+    LET quoteSymbol == ReadBytes(execId.rest, 6) IN IF ~quoteSymbol.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(quoteSymbol.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
     LET lastShares == ReadBytes(clearingFirm.rest, 4) IN IF ~lastShares.ok THEN Fail ELSE
     LET lastPx == ReadBytes(lastShares.rest, 8) IN IF ~lastPx.ok THEN Fail ELSE
@@ -1666,7 +1678,7 @@ ZeroQuoteExecutionMessage ==
       quoteUpdateId          |-> [i \in 1 .. 16 |-> 0],
       orderId                |-> [i \in 1 .. 8 |-> 0],
       execId                 |-> [i \in 1 .. 8 |-> 0],
-      quoteSymbol            |-> [i \in 1 .. 1 |-> 0],
+      quoteSymbol            |-> [i \in 1 .. 6 |-> 0],
       clearingFirm           |-> [i \in 1 .. 4 |-> 0],
       lastShares             |-> [i \in 1 .. 4 |-> 0],
       lastPx                 |-> [i \in 1 .. 8 |-> 0],
@@ -1688,7 +1700,7 @@ CheckedQuoteExecutionMessage ==
         \cup { [ZeroQuoteExecutionMessage EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
         \cup { [ZeroQuoteExecutionMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroQuoteExecutionMessage EXCEPT !.execId = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.quoteSymbol = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteExecutionMessage EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
         \cup { [ZeroQuoteExecutionMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
         \cup { [ZeroQuoteExecutionMessage EXCEPT !.lastShares = one] : one \in Sample(4) }
         \cup { [ZeroQuoteExecutionMessage EXCEPT !.lastPx = one] : one \in Sample(8) }

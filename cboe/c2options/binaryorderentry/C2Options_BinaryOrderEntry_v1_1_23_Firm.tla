@@ -148,17 +148,17 @@ OneUnitSequence == { ZeroUnitSequence }
 (***************************************************************************)
 
 LoginRequestMessage ==
-    [ sessionId             : Sample(4),
-      sessionSubId          : Sample(4),
-      password              : Sample(10),
-      replayUnspecifiedUnit : Sample(1),
-      unitSequence          : SampleLists(OneUnitSequence) ]
+    [ sessionId         : Sample(4),
+      sessionSubId      : Sample(4),
+      password          : Sample(10),
+      replayInstruction : Sample(1),
+      unitSequence      : SampleLists(OneUnitSequence) ]
 
 EncodeLoginRequestMessage(message) ==
     message.sessionId
         \o message.sessionSubId
         \o message.password
-        \o message.replayUnspecifiedUnit
+        \o message.replayInstruction
         \o EncodeUIntLE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
@@ -166,21 +166,21 @@ DecodeLoginRequestMessage(bytes) ==
     LET sessionId == ReadBytes(bytes, 4) IN IF ~sessionId.ok THEN Fail ELSE
     LET sessionSubId == ReadBytes(sessionId.rest, 4) IN IF ~sessionSubId.ok THEN Fail ELSE
     LET password == ReadBytes(sessionSubId.rest, 10) IN IF ~password.ok THEN Fail ELSE
-    LET replayUnspecifiedUnit == ReadBytes(password.rest, 1) IN IF ~replayUnspecifiedUnit.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(replayUnspecifiedUnit.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET replayInstruction == ReadBytes(password.rest, 1) IN IF ~replayInstruction.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntLE(replayInstruction.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
-    Ok([ sessionId             |-> sessionId.value,
-         sessionSubId          |-> sessionSubId.value,
-         password              |-> password.value,
-         replayUnspecifiedUnit |-> replayUnspecifiedUnit.value,
-         unitSequence          |-> unitSequence.value ], unitSequence.rest)
+    Ok([ sessionId         |-> sessionId.value,
+         sessionSubId      |-> sessionSubId.value,
+         password          |-> password.value,
+         replayInstruction |-> replayInstruction.value,
+         unitSequence      |-> unitSequence.value ], unitSequence.rest)
 
 ZeroLoginRequestMessage ==
-    [ sessionId             |-> [i \in 1 .. 4 |-> 0],
-      sessionSubId          |-> [i \in 1 .. 4 |-> 0],
-      password              |-> [i \in 1 .. 10 |-> 0],
-      replayUnspecifiedUnit |-> [i \in 1 .. 1 |-> 0],
-      unitSequence          |-> << >> ]
+    [ sessionId         |-> [i \in 1 .. 4 |-> 0],
+      sessionSubId      |-> [i \in 1 .. 4 |-> 0],
+      password          |-> [i \in 1 .. 10 |-> 0],
+      replayInstruction |-> [i \in 1 .. 1 |-> 0],
+      unitSequence      |-> << >> ]
 
 (* Login Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedLoginRequestMessage ==
@@ -188,7 +188,7 @@ CheckedLoginRequestMessage ==
         \cup { [ZeroLoginRequestMessage EXCEPT !.sessionId = one] : one \in Sample(4) }
         \cup { [ZeroLoginRequestMessage EXCEPT !.sessionSubId = one] : one \in Sample(4) }
         \cup { [ZeroLoginRequestMessage EXCEPT !.password = one] : one \in Sample(10) }
-        \cup { [ZeroLoginRequestMessage EXCEPT !.replayUnspecifiedUnit = one] : one \in Sample(1) }
+        \cup { [ZeroLoginRequestMessage EXCEPT !.replayInstruction = one] : one \in Sample(1) }
         \cup { [ZeroLoginRequestMessage EXCEPT !.unitSequence = one] : one \in SampleLists(OneUnitSequence) }
 
 (***************************************************************************)
