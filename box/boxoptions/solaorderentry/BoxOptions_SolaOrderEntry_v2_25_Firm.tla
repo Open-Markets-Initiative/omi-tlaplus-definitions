@@ -73,6 +73,30 @@ ReadUIntBE(bytes, width) ==
     THEN Fail
     ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
+(* The integer a text protocol writes as the characters of itself: a count of one is *)
+(* the character "1", which is the byte 49. Read by its digits, and written back *)
+(* zero filled to the width the field states, which is how such a field is filled. *)
+Digit == 48 .. 57
+
+RECURSIVE DecodeDigits(_)
+DecodeDigits(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeDigits(SubSeq(bytes, 1, Len(bytes) - 1)) * 10 + (bytes[Len(bytes)] - 48)
+
+RECURSIVE EncodeDigits(_, _)
+EncodeDigits(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeDigits(value \div 10, width - 1) \o <<48 + (value % 10)>>
+
+(* A field written as digits that holds anything else is no number, so it is not read: *)
+(* the value would not be what the bytes say, and would not write back as them. *)
+ReadDigits(bytes, width) ==
+    IF Len(bytes) < width \/ \E i \in 1 .. width : bytes[i] \notin Digit
+    THEN Fail
+    ELSE Ok(DecodeDigits(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
 (* padded with, and                                                        *)
@@ -159,7 +183,7 @@ EncodeUserConnection(message) ==
         \o message.timeHhmmss
         \o message.exchangeMessageId
         \o message.inactivityInterval
-        \o EncodeUIntBE(Len(message.userConnectionOccurrence), 2)
+        \o EncodeDigits(Len(message.userConnectionOccurrence), 2)
         \o EncodeUserConnectionOccurrenceList(message.userConnectionOccurrence)
 
 DecodeUserConnection(bytes) ==
@@ -170,7 +194,7 @@ DecodeUserConnection(bytes) ==
     LET timeHhmmss == ReadBytes(sessionId.rest, 6) IN IF ~timeHhmmss.ok THEN Fail ELSE
     LET exchangeMessageId == ReadBytes(timeHhmmss.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
     LET inactivityInterval == ReadBytes(exchangeMessageId.rest, 2) IN IF ~inactivityInterval.ok THEN Fail ELSE
-    LET numberOfMessageTypesToBeReceived == ReadUIntBE(inactivityInterval.rest, 2) IN IF ~numberOfMessageTypesToBeReceived.ok THEN Fail ELSE
+    LET numberOfMessageTypesToBeReceived == ReadDigits(inactivityInterval.rest, 2) IN IF ~numberOfMessageTypesToBeReceived.ok THEN Fail ELSE
     LET userConnectionOccurrence == ReadUserConnectionOccurrenceList(numberOfMessageTypesToBeReceived.rest, numberOfMessageTypesToBeReceived.value) IN IF ~userConnectionOccurrence.ok THEN Fail ELSE
     Ok([ protocolVersion          |-> protocolVersion.value,
          userId                   |-> userId.value,
@@ -294,11 +318,11 @@ DisconnectionInstruction ==
     [ disconnectionInstructionOccurrence : SampleLists(OneDisconnectionInstructionOccurrence) ]
 
 EncodeDisconnectionInstruction(message) ==
-    EncodeUIntBE(Len(message.disconnectionInstructionOccurrence), 2)
+    EncodeDigits(Len(message.disconnectionInstructionOccurrence), 2)
         \o EncodeDisconnectionInstructionOccurrenceList(message.disconnectionInstructionOccurrence)
 
 DecodeDisconnectionInstruction(bytes) ==
-    LET numberOfInstructionsPresentInTheMessage == ReadUIntBE(bytes, 2) IN IF ~numberOfInstructionsPresentInTheMessage.ok THEN Fail ELSE
+    LET numberOfInstructionsPresentInTheMessage == ReadDigits(bytes, 2) IN IF ~numberOfInstructionsPresentInTheMessage.ok THEN Fail ELSE
     LET disconnectionInstructionOccurrence == ReadDisconnectionInstructionOccurrenceList(numberOfInstructionsPresentInTheMessage.rest, numberOfInstructionsPresentInTheMessage.value) IN IF ~disconnectionInstructionOccurrence.ok THEN Fail ELSE
     Ok([ disconnectionInstructionOccurrence |-> disconnectionInstructionOccurrence.value ], disconnectionInstructionOccurrence.rest)
 
@@ -1833,12 +1857,12 @@ NewComplexOrderInstrument ==
 
 EncodeNewComplexOrderInstrument(message) ==
     message.enabledYYesNNo
-        \o EncodeUIntBE(Len(message.newComplexOrderInstrumentOccurrence), 2)
+        \o EncodeDigits(Len(message.newComplexOrderInstrumentOccurrence), 2)
         \o EncodeNewComplexOrderInstrumentOccurrenceList(message.newComplexOrderInstrumentOccurrence)
 
 DecodeNewComplexOrderInstrument(bytes) ==
     LET enabledYYesNNo == ReadBytes(bytes, 1) IN IF ~enabledYYesNNo.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntBE(enabledYYesNNo.rest, 2) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadDigits(enabledYYesNNo.rest, 2) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET newComplexOrderInstrumentOccurrence == ReadNewComplexOrderInstrumentOccurrenceList(numberOfLegs.rest, numberOfLegs.value) IN IF ~newComplexOrderInstrumentOccurrence.ok THEN Fail ELSE
     Ok([ enabledYYesNNo                      |-> enabledYYesNNo.value,
          newComplexOrderInstrumentOccurrence |-> newComplexOrderInstrumentOccurrence.value ], newComplexOrderInstrumentOccurrence.rest)
@@ -2126,7 +2150,7 @@ EncodeComplexOrderAuctionEntry(message) ==
         \o message.buyingAdditionalClientMemo
         \o message.sellingAdditionalClientMemo
         \o message.reserved4
-        \o EncodeUIntBE(Len(message.complexOrderAuctionEntryOccurrence), 2)
+        \o EncodeDigits(Len(message.complexOrderAuctionEntryOccurrence), 2)
         \o EncodeComplexOrderAuctionEntryOccurrenceList(message.complexOrderAuctionEntryOccurrence)
 
 DecodeComplexOrderAuctionEntry(bytes) ==
@@ -2149,7 +2173,7 @@ DecodeComplexOrderAuctionEntry(bytes) ==
     LET buyingAdditionalClientMemo == ReadBytes(sellingPostTradingInstruction.rest, 16) IN IF ~buyingAdditionalClientMemo.ok THEN Fail ELSE
     LET sellingAdditionalClientMemo == ReadBytes(buyingAdditionalClientMemo.rest, 16) IN IF ~sellingAdditionalClientMemo.ok THEN Fail ELSE
     LET reserved4 == ReadBytes(sellingAdditionalClientMemo.rest, 4) IN IF ~reserved4.ok THEN Fail ELSE
-    LET nbLegs == ReadUIntBE(reserved4.rest, 2) IN IF ~nbLegs.ok THEN Fail ELSE
+    LET nbLegs == ReadDigits(reserved4.rest, 2) IN IF ~nbLegs.ok THEN Fail ELSE
     LET complexOrderAuctionEntryOccurrence == ReadComplexOrderAuctionEntryOccurrenceList(nbLegs.rest, nbLegs.value) IN IF ~complexOrderAuctionEntryOccurrence.ok THEN Fail ELSE
     Ok([ group                              |-> group.value,
          instrumentOptional                 |-> instrumentOptional.value,
@@ -2305,14 +2329,14 @@ EncodeBulkQuote(message) ==
     message.group
         \o message.quoteId
         \o message.mmCatUserTime
-        \o EncodeUIntBE(Len(message.bulkQuoteOccurrence), 3)
+        \o EncodeDigits(Len(message.bulkQuoteOccurrence), 3)
         \o EncodeBulkQuoteOccurrenceList(message.bulkQuoteOccurrence)
 
 DecodeBulkQuote(bytes) ==
     LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
     LET quoteId == ReadBytes(group.rest, 8) IN IF ~quoteId.ok THEN Fail ELSE
     LET mmCatUserTime == ReadBytes(quoteId.rest, 8) IN IF ~mmCatUserTime.ok THEN Fail ELSE
-    LET numberOfQuotes == ReadUIntBE(mmCatUserTime.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(mmCatUserTime.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
     LET bulkQuoteOccurrence == ReadBulkQuoteOccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuoteOccurrence.ok THEN Fail ELSE
     Ok([ group               |-> group.value,
          quoteId             |-> quoteId.value,

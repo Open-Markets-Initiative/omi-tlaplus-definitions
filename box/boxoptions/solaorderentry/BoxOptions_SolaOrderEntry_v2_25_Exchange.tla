@@ -73,6 +73,30 @@ ReadUIntBE(bytes, width) ==
     THEN Fail
     ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
+(* The integer a text protocol writes as the characters of itself: a count of one is *)
+(* the character "1", which is the byte 49. Read by its digits, and written back *)
+(* zero filled to the width the field states, which is how such a field is filled. *)
+Digit == 48 .. 57
+
+RECURSIVE DecodeDigits(_)
+DecodeDigits(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeDigits(SubSeq(bytes, 1, Len(bytes) - 1)) * 10 + (bytes[Len(bytes)] - 48)
+
+RECURSIVE EncodeDigits(_, _)
+EncodeDigits(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeDigits(value \div 10, width - 1) \o <<48 + (value % 10)>>
+
+(* A field written as digits that holds anything else is no number, so it is not read: *)
+(* the value would not be what the bytes say, and would not write back as them. *)
+ReadDigits(bytes, width) ==
+    IF Len(bytes) < width \/ \E i \in 1 .. width : bytes[i] \notin Digit
+    THEN Fail
+    ELSE Ok(DecodeDigits(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
 (* padded with, and                                                        *)
@@ -1109,14 +1133,14 @@ EncodeNewComplexOrderInstrumentAcknowledgement(message) ==
     message.strategyGroup
         \o message.strategyInstrumentId
         \o message.creationStatus
-        \o EncodeUIntBE(Len(message.newComplexOrderInstrumentAcknowledgementOccurrence), 2)
+        \o EncodeDigits(Len(message.newComplexOrderInstrumentAcknowledgementOccurrence), 2)
         \o EncodeNewComplexOrderInstrumentAcknowledgementOccurrenceList(message.newComplexOrderInstrumentAcknowledgementOccurrence)
 
 DecodeNewComplexOrderInstrumentAcknowledgement(bytes) ==
     LET strategyGroup == ReadBytes(bytes, 2) IN IF ~strategyGroup.ok THEN Fail ELSE
     LET strategyInstrumentId == ReadBytes(strategyGroup.rest, 4) IN IF ~strategyInstrumentId.ok THEN Fail ELSE
     LET creationStatus == ReadBytes(strategyInstrumentId.rest, 1) IN IF ~creationStatus.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntBE(creationStatus.rest, 2) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadDigits(creationStatus.rest, 2) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET newComplexOrderInstrumentAcknowledgementOccurrence == ReadNewComplexOrderInstrumentAcknowledgementOccurrenceList(numberOfLegs.rest, numberOfLegs.value) IN IF ~newComplexOrderInstrumentAcknowledgementOccurrence.ok THEN Fail ELSE
     Ok([ strategyGroup                                      |-> strategyGroup.value,
          strategyInstrumentId                               |-> strategyInstrumentId.value,
@@ -1772,13 +1796,13 @@ BulkQuoteAcknowledgement ==
 EncodeBulkQuoteAcknowledgement(message) ==
     message.group
         \o message.quoteId
-        \o EncodeUIntBE(Len(message.bulkQuoteAcknowledgementOccurrence), 3)
+        \o EncodeDigits(Len(message.bulkQuoteAcknowledgementOccurrence), 3)
         \o EncodeBulkQuoteAcknowledgementOccurrenceList(message.bulkQuoteAcknowledgementOccurrence)
 
 DecodeBulkQuoteAcknowledgement(bytes) ==
     LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
     LET quoteId == ReadBytes(group.rest, 8) IN IF ~quoteId.ok THEN Fail ELSE
-    LET numberOfQuotesInError == ReadUIntBE(quoteId.rest, 3) IN IF ~numberOfQuotesInError.ok THEN Fail ELSE
+    LET numberOfQuotesInError == ReadDigits(quoteId.rest, 3) IN IF ~numberOfQuotesInError.ok THEN Fail ELSE
     LET bulkQuoteAcknowledgementOccurrence == ReadBulkQuoteAcknowledgementOccurrenceList(numberOfQuotesInError.rest, numberOfQuotesInError.value) IN IF ~bulkQuoteAcknowledgementOccurrence.ok THEN Fail ELSE
     Ok([ group                              |-> group.value,
          quoteId                            |-> quoteId.value,

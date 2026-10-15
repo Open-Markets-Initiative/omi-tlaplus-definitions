@@ -13,6 +13,9 @@
 (* Note: TLC evaluates integers in 32 bits, so a field wider than that has *)
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
+(*                                                                         *)
+(* Note: Packet fills its datagram with as many messages as the bytes      *)
+(* hold, so it is read as a run of them.                                   *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -625,6 +628,39 @@ CheckedPacket ==
         \cup { [ZeroPacket EXCEPT !.timestamp = one] : one \in Sample(4) }
         \cup { [ZeroPacket EXCEPT !.messageBody = one] : one \in CheckedMessageBody }
         \cup { [ZeroPacket EXCEPT !.itchEtx = one] : one \in Sample(1) }
+
+(* A run of Packet, written one after another *)
+RECURSIVE EncodePacketList(_)
+EncodePacketList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodePacket(Head(messages)) \o EncodePacketList(Tail(messages))
+
+(* As many Packet as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadPacketAll(_)
+ReadPacketAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodePacket(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadPacketAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Packet of each kind, for the lists that carry them *)
+OnePacket ==
+    { [ZeroPacket EXCEPT !.messageBody = [tag |-> LogonCode, body |-> ZeroLogon]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> LogoutCode, body |-> ZeroLogout]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> HeartbeatCode, body |-> ZeroHeartbeat]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> InstrumentInfoCode, body |-> ZeroInstrumentInfo]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> InstrumentInfoAckCode, body |-> ZeroInstrumentInfoAck]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> SubscriptionRequestCode, body |-> ZeroSubscriptionRequest]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> SubscriptionReplyCode, body |-> ZeroSubscriptionReply]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> PriceMessageCode, body |-> ZeroPriceMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> PriceCancelMessageCode, body |-> ZeroPriceCancelMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> TradeTickerMessageCode, body |-> ZeroTradeTickerMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> RejectMessageCode, body |-> ZeroRejectMessage]] }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)

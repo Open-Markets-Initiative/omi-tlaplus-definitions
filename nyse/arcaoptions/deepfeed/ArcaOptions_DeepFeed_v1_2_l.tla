@@ -16,8 +16,7 @@
 (*                                                                         *)
 (* Note: a Number Msgs of 0 marks Heartbeat and carries no Message.        *)
 (*                                                                         *)
-(* Note: a Current Refresh Pkt of any value but 1 reads Short Refresh      *)
-(* Header.                                                                 *)
+(* Note: a Current Refresh Pkt of any value but 1 carries none of them.    *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -795,62 +794,62 @@ CheckedFullRefreshHeader ==
         \cup { [ZeroFullRefreshHeader EXCEPT !.lastSymbolSeqNum = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Refresh Header Layout, selected by Current Refresh Pkt                  *)
+(* What Current Refresh Pkt decides is present                             *)
 (***************************************************************************)
 
 FullRefreshHeaderCode == 1  \* 0x01
-ShortRefreshHeaderCode == 0  \* stands for every value no other case names
+CurrentRefreshPktNoneCode == 0  \* 
 
-RefreshHeaderLayout ==
+CurrentRefreshPktChoice ==
     [ tag : {FullRefreshHeaderCode}, body : FullRefreshHeader ]
-        \cup [ tag : (0 .. 255) \ {FullRefreshHeaderCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {CurrentRefreshPktNoneCode}, body : {[empty |-> 0]} ]
 
-EncodeRefreshHeaderLayout(message) ==
+EncodeCurrentRefreshPktChoice(message) ==
     CASE message.tag = FullRefreshHeaderCode -> EncodeFullRefreshHeader(message.body)
       [] OTHER -> << >>
 
-DecodeRefreshHeaderLayout(tag, bytes) ==
+DecodeCurrentRefreshPktChoice(tag, bytes) ==
     LET read ==
             CASE tag = FullRefreshHeaderCode -> DecodeFullRefreshHeader(bytes)
               [] OTHER -> Ok([empty |-> 0], bytes)
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroRefreshHeaderLayout == [tag |-> FullRefreshHeaderCode, body |-> ZeroFullRefreshHeader]
+ZeroCurrentRefreshPktChoice == [tag |-> FullRefreshHeaderCode, body |-> ZeroFullRefreshHeader]
 
-(* Each Refresh Header Layout in turn, at the values the message it names is checked at *)
-CheckedRefreshHeaderLayout ==
+(* Each Current Refresh Pkt in turn, at the values the message it names is checked at *)
+CheckedCurrentRefreshPktChoice ==
     { [tag |-> FullRefreshHeaderCode, body |-> one] : one \in CheckedFullRefreshHeader }
-        \cup [ tag : {0, 1, 255} \ {FullRefreshHeaderCode}, body : {[empty |-> 0]} ]
+        \cup { [tag |-> CurrentRefreshPktNoneCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
 (* Refresh Header Message                                                  *)
 (***************************************************************************)
 
 RefreshHeaderMessage ==
-    [ totalRefreshPkts    : Sample(2),
-      refreshHeaderLayout : RefreshHeaderLayout ]
+    [ totalRefreshPkts        : Sample(2),
+      currentRefreshPktChoice : CurrentRefreshPktChoice ]
 
 EncodeRefreshHeaderMessage(message) ==
-    EncodeUIntLE(message.refreshHeaderLayout.tag, 2)
+    EncodeUIntLE(message.currentRefreshPktChoice.tag, 2)
         \o message.totalRefreshPkts
-        \o EncodeRefreshHeaderLayout(message.refreshHeaderLayout)
+        \o EncodeCurrentRefreshPktChoice(message.currentRefreshPktChoice)
 
 DecodeRefreshHeaderMessage(bytes) ==
     LET currentRefreshPkt == ReadUIntLE(bytes, 2) IN IF ~currentRefreshPkt.ok THEN Fail ELSE
     LET totalRefreshPkts == ReadBytes(currentRefreshPkt.rest, 2) IN IF ~totalRefreshPkts.ok THEN Fail ELSE
-    LET refreshHeaderLayout == DecodeRefreshHeaderLayout(currentRefreshPkt.value, totalRefreshPkts.rest) IN IF ~refreshHeaderLayout.ok THEN Fail ELSE
-    Ok([ totalRefreshPkts    |-> totalRefreshPkts.value,
-         refreshHeaderLayout |-> refreshHeaderLayout.value ], refreshHeaderLayout.rest)
+    LET currentRefreshPktChoice == DecodeCurrentRefreshPktChoice(currentRefreshPkt.value, totalRefreshPkts.rest) IN IF ~currentRefreshPktChoice.ok THEN Fail ELSE
+    Ok([ totalRefreshPkts        |-> totalRefreshPkts.value,
+         currentRefreshPktChoice |-> currentRefreshPktChoice.value ], currentRefreshPktChoice.rest)
 
 ZeroRefreshHeaderMessage ==
-    [ totalRefreshPkts    |-> [i \in 1 .. 2 |-> 0],
-      refreshHeaderLayout |-> ZeroRefreshHeaderLayout ]
+    [ totalRefreshPkts        |-> [i \in 1 .. 2 |-> 0],
+      currentRefreshPktChoice |-> ZeroCurrentRefreshPktChoice ]
 
 (* Refresh Header Message at zero, then each field in turn at the values it is checked at *)
 CheckedRefreshHeaderMessage ==
     { ZeroRefreshHeaderMessage }
         \cup { [ZeroRefreshHeaderMessage EXCEPT !.totalRefreshPkts = one] : one \in Sample(2) }
-        \cup { [ZeroRefreshHeaderMessage EXCEPT !.refreshHeaderLayout = one] : one \in CheckedRefreshHeaderLayout }
+        \cup { [ZeroRefreshHeaderMessage EXCEPT !.currentRefreshPktChoice = one] : one \in CheckedCurrentRefreshPktChoice }
 
 (***************************************************************************)
 (* Refresh Request Message: 16 bytes                                       *)
@@ -2501,10 +2500,10 @@ RoundTripPacket ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* A Refresh Header Layout is selected by the Current Refresh Pkt it is written under *)
-SelectsRefreshHeaderLayout ==
-    \A message \in CheckedRefreshHeaderLayout :
-        LET read == DecodeRefreshHeaderLayout(message.tag, EncodeRefreshHeaderLayout(message))
+(* A Current Refresh Pkt is selected by the Current Refresh Pkt it is written under *)
+SelectsCurrentRefreshPktChoice ==
+    \A message \in CheckedCurrentRefreshPktChoice :
+        LET read == DecodeCurrentRefreshPktChoice(message.tag, EncodeCurrentRefreshPktChoice(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Payload is selected by the Message Type it is written under *)

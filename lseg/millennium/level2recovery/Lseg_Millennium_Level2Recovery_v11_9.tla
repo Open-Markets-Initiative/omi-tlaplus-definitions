@@ -501,6 +501,7 @@ LoginResponseMessageCode == 2  \* 0x02
 SnapshotRequestMessageCode == 129  \* 0x81
 SnapshotResponseMessageCode == 130  \* 0x82
 SnapshotCompleteMessageCode == 131  \* 0x83
+LogoutRequestMessageCode == 5  \* 0x05
 SymbolStatusMessageCode == 72  \* 0x48
 AddOrderMessageCode == 65  \* 0x41
 AddAttributedOrderMessageCode == 70  \* 0x46
@@ -511,6 +512,7 @@ Payload ==
         \cup [ tag : {SnapshotRequestMessageCode}, body : SnapshotRequestMessage ]
         \cup [ tag : {SnapshotResponseMessageCode}, body : SnapshotResponseMessage ]
         \cup [ tag : {SnapshotCompleteMessageCode}, body : SnapshotCompleteMessage ]
+        \cup [ tag : {LogoutRequestMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {SymbolStatusMessageCode}, body : SymbolStatusMessage ]
         \cup [ tag : {AddOrderMessageCode}, body : AddOrderMessage ]
         \cup [ tag : {AddAttributedOrderMessageCode}, body : AddAttributedOrderMessage ]
@@ -521,6 +523,7 @@ EncodePayload(message) ==
       [] message.tag = SnapshotRequestMessageCode -> EncodeSnapshotRequestMessage(message.body)
       [] message.tag = SnapshotResponseMessageCode -> EncodeSnapshotResponseMessage(message.body)
       [] message.tag = SnapshotCompleteMessageCode -> EncodeSnapshotCompleteMessage(message.body)
+      [] message.tag = LogoutRequestMessageCode -> << >>
       [] message.tag = SymbolStatusMessageCode -> EncodeSymbolStatusMessage(message.body)
       [] message.tag = AddOrderMessageCode -> EncodeAddOrderMessage(message.body)
       [] message.tag = AddAttributedOrderMessageCode -> EncodeAddAttributedOrderMessage(message.body)
@@ -532,6 +535,7 @@ DecodePayload(tag, bytes) ==
               [] tag = SnapshotRequestMessageCode -> DecodeSnapshotRequestMessage(bytes)
               [] tag = SnapshotResponseMessageCode -> DecodeSnapshotResponseMessage(bytes)
               [] tag = SnapshotCompleteMessageCode -> DecodeSnapshotCompleteMessage(bytes)
+              [] tag = LogoutRequestMessageCode -> Ok([empty |-> 0], bytes)
               [] tag = SymbolStatusMessageCode -> DecodeSymbolStatusMessage(bytes)
               [] tag = AddOrderMessageCode -> DecodeAddOrderMessage(bytes)
               [] tag = AddAttributedOrderMessageCode -> DecodeAddAttributedOrderMessage(bytes)
@@ -547,6 +551,7 @@ CheckedPayload ==
         \cup { [tag |-> SnapshotRequestMessageCode, body |-> one] : one \in CheckedSnapshotRequestMessage }
         \cup { [tag |-> SnapshotResponseMessageCode, body |-> one] : one \in CheckedSnapshotResponseMessage }
         \cup { [tag |-> SnapshotCompleteMessageCode, body |-> one] : one \in CheckedSnapshotCompleteMessage }
+        \cup { [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> SymbolStatusMessageCode, body |-> one] : one \in CheckedSymbolStatusMessage }
         \cup { [tag |-> AddOrderMessageCode, body |-> one] : one \in CheckedAddOrderMessage }
         \cup { [tag |-> AddAttributedOrderMessageCode, body |-> one] : one \in CheckedAddAttributedOrderMessage }
@@ -615,6 +620,7 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotRequestMessageCode, body |-> ZeroSnapshotRequestMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotResponseMessageCode, body |-> ZeroSnapshotResponseMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotCompleteMessageCode, body |-> ZeroSnapshotCompleteMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SymbolStatusMessageCode, body |-> ZeroSymbolStatusMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> AddOrderMessageCode, body |-> ZeroAddOrderMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> AddAttributedOrderMessageCode, body |-> ZeroAddAttributedOrderMessage]] }

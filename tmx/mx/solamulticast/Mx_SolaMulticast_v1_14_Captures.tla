@@ -104,10 +104,10 @@ Captures == { OptionMarketDepthMessageCapture, OptionTradeMessageCapture, Strate
 (* Every recorded packet reads, reads whole, and writes back unchanged *)
 CapturesRoundTrip ==
     \A bytes \in Captures :
-        LET read == DecodePacket(bytes)
+        LET read == ReadPacketAll(bytes)
         IN  /\ read.ok
             /\ read.rest = << >>
-            /\ EncodePacket(read.value) = bytes
+            /\ EncodePacketList(read.value) = bytes
 
 (* Every recorded packet is bytes *)
 CapturesAreBytes == \A bytes \in Captures : \A i \in 1 .. Len(bytes) : bytes[i] \in Byte

@@ -13,6 +13,9 @@
 (* Note: TLC evaluates integers in 32 bits, so a field wider than that has *)
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
+(*                                                                         *)
+(* Note: Packet fills its datagram with as many messages as the bytes      *)
+(* hold, so it is read as a run of them.                                   *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -72,6 +75,30 @@ ReadUIntBE(bytes, width) ==
     IF Len(bytes) < width
     THEN Fail
     ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+(* The integer a text protocol writes as the characters of itself: a count of one is *)
+(* the character "1", which is the byte 49. Read by its digits, and written back *)
+(* zero filled to the width the field states, which is how such a field is filled. *)
+Digit == 48 .. 57
+
+RECURSIVE DecodeDigits(_)
+DecodeDigits(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeDigits(SubSeq(bytes, 1, Len(bytes) - 1)) * 10 + (bytes[Len(bytes)] - 48)
+
+RECURSIVE EncodeDigits(_, _)
+EncodeDigits(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeDigits(value \div 10, width - 1) \o <<48 + (value % 10)>>
+
+(* A field written as digits that holds anything else is no number, so it is not read: *)
+(* the value would not be what the bytes say, and would not write back as them. *)
+ReadDigits(bytes, width) ==
+    IF Len(bytes) < width \/ \E i \in 1 .. width : bytes[i] \notin Digit
+    THEN Fail
+    ELSE Ok(DecodeDigits(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
@@ -1015,14 +1042,14 @@ EncodeOptionMarketDepthMessage(message) ==
     message.exchangeId
         \o EncodeInstrumentDescription4(message.instrumentDescription)
         \o message.instrumentStatusMarker
-        \o EncodeUIntBE(Len(message.marketDepthLevel), 1)
+        \o EncodeDigits(Len(message.marketDepthLevel), 1)
         \o EncodeMarketDepthLevelList(message.marketDepthLevel)
 
 DecodeOptionMarketDepthMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
     LET instrumentDescription == DecodeInstrumentDescription4(exchangeId.rest) IN IF ~instrumentDescription.ok THEN Fail ELSE
     LET instrumentStatusMarker == ReadBytes(instrumentDescription.rest, 1) IN IF ~instrumentStatusMarker.ok THEN Fail ELSE
-    LET numberOfLevels == ReadUIntBE(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
+    LET numberOfLevels == ReadDigits(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
     LET marketDepthLevel == ReadMarketDepthLevelList(numberOfLevels.rest, numberOfLevels.value) IN IF ~marketDepthLevel.ok THEN Fail ELSE
     Ok([ exchangeId             |-> exchangeId.value,
          instrumentDescription  |-> instrumentDescription.value,
@@ -1160,14 +1187,14 @@ EncodeComplexOrderMarketDepthMessage(message) ==
     message.exchangeId
         \o message.complexOrderInstrumentSymbol
         \o message.instrumentStatusMarker
-        \o EncodeUIntBE(Len(message.complexMarketDepthLevel), 1)
+        \o EncodeDigits(Len(message.complexMarketDepthLevel), 1)
         \o EncodeComplexMarketDepthLevelList(message.complexMarketDepthLevel)
 
 DecodeComplexOrderMarketDepthMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
     LET complexOrderInstrumentSymbol == ReadBytes(exchangeId.rest, 30) IN IF ~complexOrderInstrumentSymbol.ok THEN Fail ELSE
     LET instrumentStatusMarker == ReadBytes(complexOrderInstrumentSymbol.rest, 1) IN IF ~instrumentStatusMarker.ok THEN Fail ELSE
-    LET numberOfLevels == ReadUIntBE(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
+    LET numberOfLevels == ReadDigits(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
     LET complexMarketDepthLevel == ReadComplexMarketDepthLevelList(numberOfLevels.rest, numberOfLevels.value) IN IF ~complexMarketDepthLevel.ok THEN Fail ELSE
     Ok([ exchangeId                   |-> exchangeId.value,
          complexOrderInstrumentSymbol |-> complexOrderInstrumentSymbol.value,
@@ -1739,7 +1766,7 @@ EncodeComplexOrderInstrumentKeysMessage(message) ==
         \o message.instrument
         \o message.instrumentExternalCode
         \o message.complexOrderInstrumentAllowImplied
-        \o EncodeUIntBE(Len(message.instrumentLeg), 2)
+        \o EncodeDigits(Len(message.instrumentLeg), 2)
         \o EncodeInstrumentLegList(message.instrumentLeg)
 
 DecodeComplexOrderInstrumentKeysMessage(bytes) ==
@@ -1763,7 +1790,7 @@ DecodeComplexOrderInstrumentKeysMessage(bytes) ==
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET instrumentExternalCode == ReadBytes(instrument.rest, 30) IN IF ~instrumentExternalCode.ok THEN Fail ELSE
     LET complexOrderInstrumentAllowImplied == ReadBytes(instrumentExternalCode.rest, 1) IN IF ~complexOrderInstrumentAllowImplied.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntBE(complexOrderInstrumentAllowImplied.rest, 2) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadDigits(complexOrderInstrumentAllowImplied.rest, 2) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET instrumentLeg == ReadInstrumentLegList(numberOfLegs.rest, numberOfLegs.value) IN IF ~instrumentLeg.ok THEN Fail ELSE
     Ok([ exchangeId                         |-> exchangeId.value,
          complexOrderInstrumentSymbol       |-> complexOrderInstrumentSymbol.value,
@@ -3279,6 +3306,57 @@ CheckedPacket ==
         \cup { [ZeroPacket EXCEPT !.sequenceNumber = one] : one \in Sample(9) }
         \cup { [ZeroPacket EXCEPT !.messageBody = one] : one \in CheckedMessageBody }
         \cup { [ZeroPacket EXCEPT !.hsvfEtx = one] : one \in Sample(1) }
+
+(* A run of Packet, written one after another *)
+RECURSIVE EncodePacketList(_)
+EncodePacketList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodePacket(Head(messages)) \o EncodePacketList(Tail(messages))
+
+(* As many Packet as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadPacketAll(_)
+ReadPacketAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodePacket(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadPacketAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Packet of each kind, for the lists that carry them *)
+OnePacket ==
+    { [ZeroPacket EXCEPT !.messageBody = [tag |-> EndOfTransmissionMessageCode, body |-> ZeroEndOfTransmissionMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> CircuitAssuranceMessageCode, body |-> ZeroCircuitAssuranceMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> SystemTimestampMessageCode, body |-> ZeroSystemTimestampMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionTradeMessageCode, body |-> ZeroOptionTradeMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> StrategyTradeMessageCode, body |-> ZeroStrategyTradeMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionRequestForQuoteMessageCode, body |-> ZeroOptionRequestForQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionQuoteMessageCode, body |-> ZeroOptionQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> ComplexOrderQuoteMessageCode, body |-> ZeroComplexOrderQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> GroupOpeningTimeMessageCode, body |-> ZeroGroupOpeningTimeMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> GroupStatusMessageCode, body |-> ZeroGroupStatusMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> StrategiesGroupStatusMessageCode, body |-> ZeroStrategiesGroupStatusMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionMarketDepthMessageCode, body |-> ZeroOptionMarketDepthMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> ComplexOrderMarketDepthMessageCode, body |-> ZeroComplexOrderMarketDepthMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionTradeCancellationMessageCode, body |-> ZeroOptionTradeCancellationMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> ComplexOrderTradeCancellationMessageCode, body |-> ZeroComplexOrderTradeCancellationMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionInstrumentKeysMessageCode, body |-> ZeroOptionInstrumentKeysMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> ComplexOrderInstrumentKeysMessageCode, body |-> ZeroComplexOrderInstrumentKeysMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> BulletinsMessageCode, body |-> ZeroBulletinsMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionSummaryMessageCode, body |-> ZeroOptionSummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> ComplexOrderSummaryMessageCode, body |-> ZeroComplexOrderSummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> BeginningOfOptionsSummaryMessageCode, body |-> ZeroBeginningOfOptionsSummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> BeginningOfComplexOrderSummaryMessageCode, body |-> ZeroBeginningOfComplexOrderSummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> EndOfSalesMessageCode, body |-> ZeroEndOfSalesMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionImprovementProcessBeginningMessageCode, body |-> ZeroOptionImprovementProcessBeginningMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> ComplexOrderImprovementProcessBeginningMessageMessageCode, body |-> ZeroComplexOrderImprovementProcessBeginningMessageMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> MarketSheetInitialAndImprovementOrderMessageCode, body |-> ZeroMarketSheetInitialAndImprovementOrderMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> ComplexOrderMarketSheetInitialAndImprovementOrderMessageCode, body |-> ZeroComplexOrderMarketSheetInitialAndImprovementOrderMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> InitialAndImprovementOrderMessageCode, body |-> ZeroInitialAndImprovementOrderMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> ComplexOrderInitialAndImprovementOrderMessageCode, body |-> ZeroComplexOrderInitialAndImprovementOrderMessage]] }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)

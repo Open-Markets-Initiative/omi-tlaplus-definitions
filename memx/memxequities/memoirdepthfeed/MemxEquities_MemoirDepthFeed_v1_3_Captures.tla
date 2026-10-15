@@ -10,6 +10,12 @@ HeartbeatCapture ==
     << 0, 18, 85, 83, 69, 49, 100, 228, 134, 200, 0, 0, 0, 0, 0, 21,
        232, 144 >>
 
+InstrumentDirectoryMessageCapture ==
+    << 2, 18, 85, 83, 69, 49, 100, 228, 134, 200, 0, 0, 0, 0, 0, 0,
+       2, 55, 0, 1, 0, 42, 0, 36, 1, 2, 1, 3, 23, 125, 172, 45,
+       86, 113, 70, 188, 0, 217, 65, 71, 90, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 39, 16 >>
+
 OrderAddedMessageCapture ==
     << 2, 18, 85, 83, 69, 49, 100, 228, 134, 200, 0, 0, 0, 0, 0, 20,
        238, 171, 0, 1, 0, 37, 0, 31, 10, 2, 1, 3, 23, 125, 183, 175,
@@ -44,12 +50,22 @@ SecurityTradingStatusMessageCapture ==
        182, 119, 0, 1, 0, 18, 0, 12, 3, 2, 1, 3, 23, 125, 183, 236,
        37, 7, 140, 91, 1, 100, 80, 82 >>
 
+SessionShutdownCapture ==
+    << 1, 18, 85, 83, 69, 49, 100, 227, 53, 104, 0, 0, 0, 0, 12, 220,
+       153, 245 >>
+
+TradeMessageCapture ==
+    << 2, 18, 85, 83, 69, 49, 100, 228, 134, 200, 0, 0, 0, 0, 0, 20,
+       253, 2, 0, 1, 0, 36, 0, 30, 14, 2, 1, 3, 23, 125, 183, 175,
+       167, 114, 33, 21, 0, 17, 8, 0, 0, 0, 0, 0, 1, 64, 0, 0,
+       0, 3, 0, 0, 0, 0, 10, 141, 184, 160 >>
+
 TradingSessionStatusMessageCapture ==
     << 2, 18, 85, 83, 69, 49, 100, 228, 134, 200, 0, 0, 0, 0, 0, 20,
        238, 170, 0, 1, 0, 15, 0, 9, 5, 2, 1, 3, 23, 125, 183, 175,
        166, 101, 189, 230, 50 >>
 
-Captures == { HeartbeatCapture, OrderAddedMessageCapture, OrderDeletedMessageCapture, OrderExecutedMessageCapture, OrderReducedMessageCapture, RegShoRestrictionMessageCapture, SecurityTradingStatusMessageCapture, TradingSessionStatusMessageCapture }
+Captures == { HeartbeatCapture, InstrumentDirectoryMessageCapture, OrderAddedMessageCapture, OrderDeletedMessageCapture, OrderExecutedMessageCapture, OrderReducedMessageCapture, RegShoRestrictionMessageCapture, SecurityTradingStatusMessageCapture, SessionShutdownCapture, TradeMessageCapture, TradingSessionStatusMessageCapture }
 
 (* Every recorded packet reads, reads whole, and writes back unchanged *)
 CapturesRoundTrip ==

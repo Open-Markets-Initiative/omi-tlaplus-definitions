@@ -13,6 +13,18 @@
 (* Note: TLC evaluates integers in 32 bits, so a field wider than that has *)
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
+(*                                                                         *)
+(* Note: Instrmt Leg Grp Comp is written as 20 slots, however many of them *)
+(* No Legs says are in use.                                                *)
+(*                                                                         *)
+(* Note: Md Instrument Entry Grp Comp is written as 15 slots, however many *)
+(* of them No Md Entries says are in use.                                  *)
+(*                                                                         *)
+(* Note: Sec Mass Stat Grp Comp is written as 24 slots, however many of    *)
+(* them No Related Sym says are in use.                                    *)
+(*                                                                         *)
+(* Note: Md Trade Entry Grp Comp is written as 15 slots, however many of   *)
+(* them No Md Entries says are in use.                                     *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -283,6 +295,9 @@ ReadInstrmtLegGrpCompList(bytes, count) ==
 (* One Instrmt Leg Grp Comp of each kind, for the lists that carry them *)
 OneInstrmtLegGrpComp == { ZeroInstrmtLegGrpComp }
 
+(* The 20 slots a run of Instrmt Leg Grp Comp is written as, whatever the field beside it says are in use *)
+SlotsInstrmtLegGrpComp == { [i \in 1 .. 20 |-> one] : one \in OneInstrmtLegGrpComp }
+
 (***************************************************************************)
 (* Add Complex Instrument                                                  *)
 (***************************************************************************)
@@ -295,8 +310,9 @@ AddComplexInstrument ==
       impliedMarketIndicator : Sample(1),
       pad2                   : Sample(2),
       legRatioMultiplier     : Sample(4),
+      noLegs                 : 0 .. 255,
       pad3                   : Sample(3),
-      instrmtLegGrpComp      : SampleLists(OneInstrmtLegGrpComp) ]
+      instrmtLegGrpComp      : SlotsInstrmtLegGrpComp ]
 
 EncodeAddComplexInstrument(message) ==
     message.securityId
@@ -306,7 +322,7 @@ EncodeAddComplexInstrument(message) ==
         \o message.impliedMarketIndicator
         \o message.pad2
         \o message.legRatioMultiplier
-        \o EncodeUIntBE(Len(message.instrmtLegGrpComp), 1)
+        \o EncodeUIntBE(message.noLegs, 1)
         \o message.pad3
         \o EncodeInstrmtLegGrpCompList(message.instrmtLegGrpComp)
 
@@ -320,7 +336,7 @@ DecodeAddComplexInstrument(bytes) ==
     LET legRatioMultiplier == ReadBytes(pad2.rest, 4) IN IF ~legRatioMultiplier.ok THEN Fail ELSE
     LET noLegs == ReadUIntBE(legRatioMultiplier.rest, 1) IN IF ~noLegs.ok THEN Fail ELSE
     LET pad3 == ReadBytes(noLegs.rest, 3) IN IF ~pad3.ok THEN Fail ELSE
-    LET instrmtLegGrpComp == ReadInstrmtLegGrpCompList(pad3.rest, noLegs.value) IN IF ~instrmtLegGrpComp.ok THEN Fail ELSE
+    LET instrmtLegGrpComp == ReadInstrmtLegGrpCompList(pad3.rest, 20) IN IF ~instrmtLegGrpComp.ok THEN Fail ELSE
     Ok([ securityId             |-> securityId.value,
          transactTime           |-> transactTime.value,
          securitySubType        |-> securitySubType.value,
@@ -328,6 +344,7 @@ DecodeAddComplexInstrument(bytes) ==
          impliedMarketIndicator |-> impliedMarketIndicator.value,
          pad2                   |-> pad2.value,
          legRatioMultiplier     |-> legRatioMultiplier.value,
+         noLegs                 |-> noLegs.value,
          pad3                   |-> pad3.value,
          instrmtLegGrpComp      |-> instrmtLegGrpComp.value ], instrmtLegGrpComp.rest)
 
@@ -339,8 +356,9 @@ ZeroAddComplexInstrument ==
       impliedMarketIndicator |-> [i \in 1 .. 1 |-> 0],
       pad2                   |-> [i \in 1 .. 2 |-> 0],
       legRatioMultiplier     |-> [i \in 1 .. 4 |-> 0],
+      noLegs                 |-> 0,
       pad3                   |-> [i \in 1 .. 3 |-> 0],
-      instrmtLegGrpComp      |-> << >> ]
+      instrmtLegGrpComp      |-> [i \in 1 .. 20 |-> ZeroInstrmtLegGrpComp] ]
 
 (* Add Complex Instrument at zero, then each field in turn at the values it is checked at *)
 CheckedAddComplexInstrument ==
@@ -352,8 +370,9 @@ CheckedAddComplexInstrument ==
         \cup { [ZeroAddComplexInstrument EXCEPT !.impliedMarketIndicator = one] : one \in Sample(1) }
         \cup { [ZeroAddComplexInstrument EXCEPT !.pad2 = one] : one \in Sample(2) }
         \cup { [ZeroAddComplexInstrument EXCEPT !.legRatioMultiplier = one] : one \in Sample(4) }
+        \cup { [ZeroAddComplexInstrument EXCEPT !.noLegs = one] : one \in {0, 1, 255} }
         \cup { [ZeroAddComplexInstrument EXCEPT !.pad3 = one] : one \in Sample(3) }
-        \cup { [ZeroAddComplexInstrument EXCEPT !.instrmtLegGrpComp = one] : one \in SampleLists(OneInstrmtLegGrpComp) }
+        \cup { [ZeroAddComplexInstrument EXCEPT !.instrmtLegGrpComp = one] : one \in SlotsInstrmtLegGrpComp }
 
 (***************************************************************************)
 (* Auction Bbo: 56 bytes                                                   *)
@@ -906,6 +925,9 @@ ReadMdInstrumentEntryGrpCompList(bytes, count) ==
 (* One Md Instrument Entry Grp Comp of each kind, for the lists that carry them *)
 OneMdInstrumentEntryGrpComp == { ZeroMdInstrumentEntryGrpComp }
 
+(* The 15 slots a run of Md Instrument Entry Grp Comp is written as, whatever the field beside it says are in use *)
+SlotsMdInstrumentEntryGrpComp == { [i \in 1 .. 15 |-> one] : one \in OneMdInstrumentEntryGrpComp }
+
 (***************************************************************************)
 (* Instrument Summary                                                      *)
 (***************************************************************************)
@@ -924,8 +946,9 @@ InstrumentSummary ==
       highPx                   : Sample(8),
       lowPx                    : Sample(8),
       productComplex           : Sample(1),
+      noMdEntries              : 0 .. 255,
       pad6                     : Sample(6),
-      mdInstrumentEntryGrpComp : SampleLists(OneMdInstrumentEntryGrpComp) ]
+      mdInstrumentEntryGrpComp : SlotsMdInstrumentEntryGrpComp ]
 
 EncodeInstrumentSummary(message) ==
     message.securityId
@@ -941,7 +964,7 @@ EncodeInstrumentSummary(message) ==
         \o message.highPx
         \o message.lowPx
         \o message.productComplex
-        \o EncodeUIntBE(Len(message.mdInstrumentEntryGrpComp), 1)
+        \o EncodeUIntBE(message.noMdEntries, 1)
         \o message.pad6
         \o EncodeMdInstrumentEntryGrpCompList(message.mdInstrumentEntryGrpComp)
 
@@ -961,7 +984,7 @@ DecodeInstrumentSummary(bytes) ==
     LET productComplex == ReadBytes(lowPx.rest, 1) IN IF ~productComplex.ok THEN Fail ELSE
     LET noMdEntries == ReadUIntBE(productComplex.rest, 1) IN IF ~noMdEntries.ok THEN Fail ELSE
     LET pad6 == ReadBytes(noMdEntries.rest, 6) IN IF ~pad6.ok THEN Fail ELSE
-    LET mdInstrumentEntryGrpComp == ReadMdInstrumentEntryGrpCompList(pad6.rest, noMdEntries.value) IN IF ~mdInstrumentEntryGrpComp.ok THEN Fail ELSE
+    LET mdInstrumentEntryGrpComp == ReadMdInstrumentEntryGrpCompList(pad6.rest, 15) IN IF ~mdInstrumentEntryGrpComp.ok THEN Fail ELSE
     Ok([ securityId               |-> securityId.value,
          lastUpdateTime           |-> lastUpdateTime.value,
          trdRegTsExecutionTime    |-> trdRegTsExecutionTime.value,
@@ -975,6 +998,7 @@ DecodeInstrumentSummary(bytes) ==
          highPx                   |-> highPx.value,
          lowPx                    |-> lowPx.value,
          productComplex           |-> productComplex.value,
+         noMdEntries              |-> noMdEntries.value,
          pad6                     |-> pad6.value,
          mdInstrumentEntryGrpComp |-> mdInstrumentEntryGrpComp.value ], mdInstrumentEntryGrpComp.rest)
 
@@ -992,8 +1016,9 @@ ZeroInstrumentSummary ==
       highPx                   |-> [i \in 1 .. 8 |-> 0],
       lowPx                    |-> [i \in 1 .. 8 |-> 0],
       productComplex           |-> [i \in 1 .. 1 |-> 0],
+      noMdEntries              |-> 0,
       pad6                     |-> [i \in 1 .. 6 |-> 0],
-      mdInstrumentEntryGrpComp |-> << >> ]
+      mdInstrumentEntryGrpComp |-> [i \in 1 .. 15 |-> ZeroMdInstrumentEntryGrpComp] ]
 
 (* Instrument Summary at zero, then each field in turn at the values it is checked at *)
 CheckedInstrumentSummary ==
@@ -1011,8 +1036,9 @@ CheckedInstrumentSummary ==
         \cup { [ZeroInstrumentSummary EXCEPT !.highPx = one] : one \in Sample(8) }
         \cup { [ZeroInstrumentSummary EXCEPT !.lowPx = one] : one \in Sample(8) }
         \cup { [ZeroInstrumentSummary EXCEPT !.productComplex = one] : one \in Sample(1) }
+        \cup { [ZeroInstrumentSummary EXCEPT !.noMdEntries = one] : one \in {0, 1, 255} }
         \cup { [ZeroInstrumentSummary EXCEPT !.pad6 = one] : one \in Sample(6) }
-        \cup { [ZeroInstrumentSummary EXCEPT !.mdInstrumentEntryGrpComp = one] : one \in SampleLists(OneMdInstrumentEntryGrpComp) }
+        \cup { [ZeroInstrumentSummary EXCEPT !.mdInstrumentEntryGrpComp = one] : one \in SlotsMdInstrumentEntryGrpComp }
 
 (***************************************************************************)
 (* Sec Mass Stat Grp Comp: 32 bytes                                        *)
@@ -1105,6 +1131,9 @@ ReadSecMassStatGrpCompList(bytes, count) ==
 (* One Sec Mass Stat Grp Comp of each kind, for the lists that carry them *)
 OneSecMassStatGrpComp == { ZeroSecMassStatGrpComp }
 
+(* The 24 slots a run of Sec Mass Stat Grp Comp is written as, whatever the field beside it says are in use *)
+SlotsSecMassStatGrpComp == { [i \in 1 .. 24 |-> one] : one \in OneSecMassStatGrpComp }
+
 (***************************************************************************)
 (* Mass Instrument State Change                                            *)
 (***************************************************************************)
@@ -1120,8 +1149,9 @@ MassInstrumentStateChange ==
       pad1                          : Sample(1),
       transactTime                  : Sample(8),
       lastFragment                  : Sample(1),
+      noRelatedSym                  : 0 .. 255,
       pad6                          : Sample(6),
-      secMassStatGrpComp            : SampleLists(OneSecMassStatGrpComp) ]
+      secMassStatGrpComp            : SlotsSecMassStatGrpComp ]
 
 EncodeMassInstrumentStateChange(message) ==
     message.instrumentScopeProductComplex
@@ -1134,7 +1164,7 @@ EncodeMassInstrumentStateChange(message) ==
         \o message.pad1
         \o message.transactTime
         \o message.lastFragment
-        \o EncodeUIntBE(Len(message.secMassStatGrpComp), 1)
+        \o EncodeUIntBE(message.noRelatedSym, 1)
         \o message.pad6
         \o EncodeSecMassStatGrpCompList(message.secMassStatGrpComp)
 
@@ -1151,7 +1181,7 @@ DecodeMassInstrumentStateChange(bytes) ==
     LET lastFragment == ReadBytes(transactTime.rest, 1) IN IF ~lastFragment.ok THEN Fail ELSE
     LET noRelatedSym == ReadUIntBE(lastFragment.rest, 1) IN IF ~noRelatedSym.ok THEN Fail ELSE
     LET pad6 == ReadBytes(noRelatedSym.rest, 6) IN IF ~pad6.ok THEN Fail ELSE
-    LET secMassStatGrpComp == ReadSecMassStatGrpCompList(pad6.rest, noRelatedSym.value) IN IF ~secMassStatGrpComp.ok THEN Fail ELSE
+    LET secMassStatGrpComp == ReadSecMassStatGrpCompList(pad6.rest, 24) IN IF ~secMassStatGrpComp.ok THEN Fail ELSE
     Ok([ instrumentScopeProductComplex |-> instrumentScopeProductComplex.value,
          securityMassStatus            |-> securityMassStatus.value,
          securityMassTradingStatus     |-> securityMassTradingStatus.value,
@@ -1162,6 +1192,7 @@ DecodeMassInstrumentStateChange(bytes) ==
          pad1                          |-> pad1.value,
          transactTime                  |-> transactTime.value,
          lastFragment                  |-> lastFragment.value,
+         noRelatedSym                  |-> noRelatedSym.value,
          pad6                          |-> pad6.value,
          secMassStatGrpComp            |-> secMassStatGrpComp.value ], secMassStatGrpComp.rest)
 
@@ -1176,8 +1207,9 @@ ZeroMassInstrumentStateChange ==
       pad1                          |-> [i \in 1 .. 1 |-> 0],
       transactTime                  |-> [i \in 1 .. 8 |-> 0],
       lastFragment                  |-> [i \in 1 .. 1 |-> 0],
+      noRelatedSym                  |-> 0,
       pad6                          |-> [i \in 1 .. 6 |-> 0],
-      secMassStatGrpComp            |-> << >> ]
+      secMassStatGrpComp            |-> [i \in 1 .. 24 |-> ZeroSecMassStatGrpComp] ]
 
 (* Mass Instrument State Change at zero, then each field in turn at the values it is checked at *)
 CheckedMassInstrumentStateChange ==
@@ -1192,8 +1224,9 @@ CheckedMassInstrumentStateChange ==
         \cup { [ZeroMassInstrumentStateChange EXCEPT !.pad1 = one] : one \in Sample(1) }
         \cup { [ZeroMassInstrumentStateChange EXCEPT !.transactTime = one] : one \in Sample(8) }
         \cup { [ZeroMassInstrumentStateChange EXCEPT !.lastFragment = one] : one \in Sample(1) }
+        \cup { [ZeroMassInstrumentStateChange EXCEPT !.noRelatedSym = one] : one \in {0, 1, 255} }
         \cup { [ZeroMassInstrumentStateChange EXCEPT !.pad6 = one] : one \in Sample(6) }
-        \cup { [ZeroMassInstrumentStateChange EXCEPT !.secMassStatGrpComp = one] : one \in SampleLists(OneSecMassStatGrpComp) }
+        \cup { [ZeroMassInstrumentStateChange EXCEPT !.secMassStatGrpComp = one] : one \in SlotsSecMassStatGrpComp }
 
 (***************************************************************************)
 (* Order Details Comp: 32 bytes                                            *)
@@ -2128,6 +2161,9 @@ ReadMdTradeEntryGrpCompList(bytes, count) ==
 (* One Md Trade Entry Grp Comp of each kind, for the lists that carry them *)
 OneMdTradeEntryGrpComp == { ZeroMdTradeEntryGrpComp }
 
+(* The 15 slots a run of Md Trade Entry Grp Comp is written as, whatever the field beside it says are in use *)
+SlotsMdTradeEntryGrpComp == { [i \in 1 .. 15 |-> one] : one \in OneMdTradeEntryGrpComp }
+
 (***************************************************************************)
 (* Trade Reversal                                                          *)
 (***************************************************************************)
@@ -2141,8 +2177,9 @@ TradeReversal ==
       trdMatchId            : Sample(4),
       tradeCondition        : Sample(2),
       pad2                  : Sample(2),
+      noMdEntries           : 0 .. 255,
       pad7                  : Sample(7),
-      mdTradeEntryGrpComp   : SampleLists(OneMdTradeEntryGrpComp) ]
+      mdTradeEntryGrpComp   : SlotsMdTradeEntryGrpComp ]
 
 EncodeTradeReversal(message) ==
     message.securityId
@@ -2153,7 +2190,7 @@ EncodeTradeReversal(message) ==
         \o message.trdMatchId
         \o message.tradeCondition
         \o message.pad2
-        \o EncodeUIntBE(Len(message.mdTradeEntryGrpComp), 1)
+        \o EncodeUIntBE(message.noMdEntries, 1)
         \o message.pad7
         \o EncodeMdTradeEntryGrpCompList(message.mdTradeEntryGrpComp)
 
@@ -2168,7 +2205,7 @@ DecodeTradeReversal(bytes) ==
     LET pad2 == ReadBytes(tradeCondition.rest, 2) IN IF ~pad2.ok THEN Fail ELSE
     LET noMdEntries == ReadUIntBE(pad2.rest, 1) IN IF ~noMdEntries.ok THEN Fail ELSE
     LET pad7 == ReadBytes(noMdEntries.rest, 7) IN IF ~pad7.ok THEN Fail ELSE
-    LET mdTradeEntryGrpComp == ReadMdTradeEntryGrpCompList(pad7.rest, noMdEntries.value) IN IF ~mdTradeEntryGrpComp.ok THEN Fail ELSE
+    LET mdTradeEntryGrpComp == ReadMdTradeEntryGrpCompList(pad7.rest, 15) IN IF ~mdTradeEntryGrpComp.ok THEN Fail ELSE
     Ok([ securityId            |-> securityId.value,
          transactTime          |-> transactTime.value,
          lastQty               |-> lastQty.value,
@@ -2177,6 +2214,7 @@ DecodeTradeReversal(bytes) ==
          trdMatchId            |-> trdMatchId.value,
          tradeCondition        |-> tradeCondition.value,
          pad2                  |-> pad2.value,
+         noMdEntries           |-> noMdEntries.value,
          pad7                  |-> pad7.value,
          mdTradeEntryGrpComp   |-> mdTradeEntryGrpComp.value ], mdTradeEntryGrpComp.rest)
 
@@ -2189,8 +2227,9 @@ ZeroTradeReversal ==
       trdMatchId            |-> [i \in 1 .. 4 |-> 0],
       tradeCondition        |-> [i \in 1 .. 2 |-> 0],
       pad2                  |-> [i \in 1 .. 2 |-> 0],
+      noMdEntries           |-> 0,
       pad7                  |-> [i \in 1 .. 7 |-> 0],
-      mdTradeEntryGrpComp   |-> << >> ]
+      mdTradeEntryGrpComp   |-> [i \in 1 .. 15 |-> ZeroMdTradeEntryGrpComp] ]
 
 (* Trade Reversal at zero, then each field in turn at the values it is checked at *)
 CheckedTradeReversal ==
@@ -2203,8 +2242,9 @@ CheckedTradeReversal ==
         \cup { [ZeroTradeReversal EXCEPT !.trdMatchId = one] : one \in Sample(4) }
         \cup { [ZeroTradeReversal EXCEPT !.tradeCondition = one] : one \in Sample(2) }
         \cup { [ZeroTradeReversal EXCEPT !.pad2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeReversal EXCEPT !.noMdEntries = one] : one \in {0, 1, 255} }
         \cup { [ZeroTradeReversal EXCEPT !.pad7 = one] : one \in Sample(7) }
-        \cup { [ZeroTradeReversal EXCEPT !.mdTradeEntryGrpComp = one] : one \in SampleLists(OneMdTradeEntryGrpComp) }
+        \cup { [ZeroTradeReversal EXCEPT !.mdTradeEntryGrpComp = one] : one \in SlotsMdTradeEntryGrpComp }
 
 (***************************************************************************)
 (* Payload, selected by Template Id                                        *)

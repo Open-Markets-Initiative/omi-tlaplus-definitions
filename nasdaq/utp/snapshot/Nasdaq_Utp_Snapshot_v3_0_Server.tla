@@ -26,6 +26,9 @@
 (*                                                                         *)
 (* Note: a Odd Lot Attachment Type of any value but 53 carries none of     *)
 (* them.                                                                   *)
+(*                                                                         *)
+(* Note: Server Packet fills its datagram with as many messages as the     *)
+(* bytes hold, so it is read as a run of them.                             *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -85,6 +88,30 @@ ReadUIntBE(bytes, width) ==
     IF Len(bytes) < width
     THEN Fail
     ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+(* The integer a text protocol writes as the characters of itself: a count of one is *)
+(* the character "1", which is the byte 49. Read by its digits, and written back *)
+(* zero filled to the width the field states, which is how such a field is filled. *)
+Digit == 48 .. 57
+
+RECURSIVE DecodeDigits(_)
+DecodeDigits(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeDigits(SubSeq(bytes, 1, Len(bytes) - 1)) * 10 + (bytes[Len(bytes)] - 48)
+
+RECURSIVE EncodeDigits(_, _)
+EncodeDigits(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeDigits(value \div 10, width - 1) \o <<48 + (value % 10)>>
+
+(* A field written as digits that holds anything else is no number, so it is not read: *)
+(* the value would not be what the bytes say, and would not write back as them. *)
+ReadDigits(bytes, width) ==
+    IF Len(bytes) < width \/ \E i \in 1 .. width : bytes[i] \notin Digit
+    THEN Fail
+    ELSE Ok(DecodeDigits(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
@@ -2216,6 +2243,34 @@ ZeroServerPacket ==
 CheckedServerPacket ==
     { ZeroServerPacket }
         \cup { [ZeroServerPacket EXCEPT !.serverTcpPayload = one] : one \in CheckedServerTcpPayload }
+
+(* A run of Server Packet, written one after another *)
+RECURSIVE EncodeServerPacketList(_)
+EncodeServerPacketList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeServerPacket(Head(messages)) \o EncodeServerPacketList(Tail(messages))
+
+(* As many Server Packet as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadServerPacketAll(_)
+ReadServerPacketAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeServerPacket(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadServerPacketAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Server Packet of each kind, for the lists that carry them *)
+OneServerPacket ==
+    { [ZeroServerPacket EXCEPT !.serverTcpPayload = [tag |-> SequencedDataPacketCode, body |-> ZeroSequencedDataPacket]],
+      [ZeroServerPacket EXCEPT !.serverTcpPayload = [tag |-> DebugPacketCode, body |-> ZeroDebugPacket]],
+      [ZeroServerPacket EXCEPT !.serverTcpPayload = [tag |-> LoginAcceptedPacketCode, body |-> ZeroLoginAcceptedPacket]],
+      [ZeroServerPacket EXCEPT !.serverTcpPayload = [tag |-> LoginRejectedPacketCode, body |-> ZeroLoginRejectedPacket]],
+      [ZeroServerPacket EXCEPT !.serverTcpPayload = [tag |-> ServerHeartbeatPacketCode, body |-> [empty |-> 0]]],
+      [ZeroServerPacket EXCEPT !.serverTcpPayload = [tag |-> EndOfSessionPacketCode, body |-> [empty |-> 0]]] }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)

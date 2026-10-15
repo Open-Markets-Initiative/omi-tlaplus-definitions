@@ -1184,6 +1184,7 @@ LoginRequestMessageCode == 1  \* 0x01
 LoginResponseMessageCode == 2  \* 0x02
 ReplayRequestMessageCode == 3  \* 0x03
 ReplayResponseMessageCode == 4  \* 0x04
+LogoutRequestMessageCode == 5  \* 0x05
 TimeMessageCode == 84  \* 0x54
 SystemEventMessageCode == 83  \* 0x53
 SymbolDirectoryMessageCode == 82  \* 0x52
@@ -1206,6 +1207,7 @@ Payload ==
         \cup [ tag : {LoginResponseMessageCode}, body : LoginResponseMessage ]
         \cup [ tag : {ReplayRequestMessageCode}, body : ReplayRequestMessage ]
         \cup [ tag : {ReplayResponseMessageCode}, body : ReplayResponseMessage ]
+        \cup [ tag : {LogoutRequestMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {TimeMessageCode}, body : TimeMessage ]
         \cup [ tag : {SystemEventMessageCode}, body : SystemEventMessage ]
         \cup [ tag : {SymbolDirectoryMessageCode}, body : SymbolDirectoryMessage ]
@@ -1228,6 +1230,7 @@ EncodePayload(message) ==
       [] message.tag = LoginResponseMessageCode -> EncodeLoginResponseMessage(message.body)
       [] message.tag = ReplayRequestMessageCode -> EncodeReplayRequestMessage(message.body)
       [] message.tag = ReplayResponseMessageCode -> EncodeReplayResponseMessage(message.body)
+      [] message.tag = LogoutRequestMessageCode -> << >>
       [] message.tag = TimeMessageCode -> EncodeTimeMessage(message.body)
       [] message.tag = SystemEventMessageCode -> EncodeSystemEventMessage(message.body)
       [] message.tag = SymbolDirectoryMessageCode -> EncodeSymbolDirectoryMessage(message.body)
@@ -1251,6 +1254,7 @@ DecodePayload(tag, bytes) ==
               [] tag = LoginResponseMessageCode -> DecodeLoginResponseMessage(bytes)
               [] tag = ReplayRequestMessageCode -> DecodeReplayRequestMessage(bytes)
               [] tag = ReplayResponseMessageCode -> DecodeReplayResponseMessage(bytes)
+              [] tag = LogoutRequestMessageCode -> Ok([empty |-> 0], bytes)
               [] tag = TimeMessageCode -> DecodeTimeMessage(bytes)
               [] tag = SystemEventMessageCode -> DecodeSystemEventMessage(bytes)
               [] tag = SymbolDirectoryMessageCode -> DecodeSymbolDirectoryMessage(bytes)
@@ -1278,6 +1282,7 @@ CheckedPayload ==
         \cup { [tag |-> LoginResponseMessageCode, body |-> one] : one \in CheckedLoginResponseMessage }
         \cup { [tag |-> ReplayRequestMessageCode, body |-> one] : one \in CheckedReplayRequestMessage }
         \cup { [tag |-> ReplayResponseMessageCode, body |-> one] : one \in CheckedReplayResponseMessage }
+        \cup { [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> TimeMessageCode, body |-> one] : one \in CheckedTimeMessage }
         \cup { [tag |-> SystemEventMessageCode, body |-> one] : one \in CheckedSystemEventMessage }
         \cup { [tag |-> SymbolDirectoryMessageCode, body |-> one] : one \in CheckedSymbolDirectoryMessage }
@@ -1358,6 +1363,7 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> LoginResponseMessageCode, body |-> ZeroLoginResponseMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> ReplayRequestMessageCode, body |-> ZeroReplayRequestMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> ReplayResponseMessageCode, body |-> ZeroReplayResponseMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TimeMessageCode, body |-> ZeroTimeMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SystemEventMessageCode, body |-> ZeroSystemEventMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SymbolDirectoryMessageCode, body |-> ZeroSymbolDirectoryMessage]],

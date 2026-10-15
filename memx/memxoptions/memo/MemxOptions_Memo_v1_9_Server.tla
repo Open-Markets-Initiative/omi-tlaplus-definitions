@@ -2976,6 +2976,7 @@ ServerSbeMessage ==
     [ blockLength   : Sample(2),
       schemaId      : Sample(1),
       version       : Sample(2),
+      numGroups     : Sample(1),
       serverPayload : ServerPayload ]
 
 EncodeServerSbeMessage(message) ==
@@ -2983,6 +2984,7 @@ EncodeServerSbeMessage(message) ==
         \o EncodeUIntBE(message.serverPayload.tag, 1)
         \o message.schemaId
         \o message.version
+        \o message.numGroups
         \o EncodeServerPayload(message.serverPayload)
 
 DecodeServerSbeMessage(bytes) ==
@@ -2990,16 +2992,19 @@ DecodeServerSbeMessage(bytes) ==
     LET templateId == ReadUIntBE(blockLength.rest, 1) IN IF ~templateId.ok THEN Fail ELSE
     LET schemaId == ReadBytes(templateId.rest, 1) IN IF ~schemaId.ok THEN Fail ELSE
     LET version == ReadBytes(schemaId.rest, 2) IN IF ~version.ok THEN Fail ELSE
-    LET serverPayload == DecodeServerPayload(templateId.value, version.rest) IN IF ~serverPayload.ok THEN Fail ELSE
+    LET numGroups == ReadBytes(version.rest, 1) IN IF ~numGroups.ok THEN Fail ELSE
+    LET serverPayload == DecodeServerPayload(templateId.value, numGroups.rest) IN IF ~serverPayload.ok THEN Fail ELSE
     Ok([ blockLength   |-> blockLength.value,
          schemaId      |-> schemaId.value,
          version       |-> version.value,
+         numGroups     |-> numGroups.value,
          serverPayload |-> serverPayload.value ], serverPayload.rest)
 
 ZeroServerSbeMessage ==
     [ blockLength   |-> [i \in 1 .. 2 |-> 0],
       schemaId      |-> [i \in 1 .. 1 |-> 0],
       version       |-> [i \in 1 .. 2 |-> 0],
+      numGroups     |-> [i \in 1 .. 1 |-> 0],
       serverPayload |-> ZeroServerPayload ]
 
 (* Server Sbe Message at zero, then each field in turn at the values it is checked at *)
@@ -3008,6 +3013,7 @@ CheckedServerSbeMessage ==
         \cup { [ZeroServerSbeMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroServerSbeMessage EXCEPT !.schemaId = one] : one \in Sample(1) }
         \cup { [ZeroServerSbeMessage EXCEPT !.version = one] : one \in Sample(2) }
+        \cup { [ZeroServerSbeMessage EXCEPT !.numGroups = one] : one \in Sample(1) }
         \cup { [ZeroServerSbeMessage EXCEPT !.serverPayload = one] : one \in CheckedServerPayload }
 
 (***************************************************************************)

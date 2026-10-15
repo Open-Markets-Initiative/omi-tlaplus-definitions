@@ -2258,6 +2258,7 @@ SecurityDefinitionMessageCode == 11  \* 0x0b
 LiquidityProviderMessageCode == 13  \* 0x0d
 CurrencyRateMessageCode == 14  \* 0x0e
 ReferencePriceMessageCode == 43  \* 0x2b
+RefreshRequestMessageCode == 1201  \* 0x4b1
 RefreshResponseMessageCode == 1202  \* 0x4b2
 RefreshCompleteMessageCode == 203  \* 0xcb
 SendKeyMessageCode == 1105  \* 0x451
@@ -2291,6 +2292,7 @@ Payload ==
         \cup [ tag : {LiquidityProviderMessageCode}, body : LiquidityProviderMessage ]
         \cup [ tag : {CurrencyRateMessageCode}, body : CurrencyRateMessage ]
         \cup [ tag : {ReferencePriceMessageCode}, body : ReferencePriceMessage ]
+        \cup [ tag : {RefreshRequestMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {RefreshResponseMessageCode}, body : RefreshResponseMessage ]
         \cup [ tag : {RefreshCompleteMessageCode}, body : RefreshCompleteMessage ]
         \cup [ tag : {SendKeyMessageCode}, body : SendKeyMessage ]
@@ -2324,6 +2326,7 @@ EncodePayload(message) ==
       [] message.tag = LiquidityProviderMessageCode -> EncodeLiquidityProviderMessage(message.body)
       [] message.tag = CurrencyRateMessageCode -> EncodeCurrencyRateMessage(message.body)
       [] message.tag = ReferencePriceMessageCode -> EncodeReferencePriceMessage(message.body)
+      [] message.tag = RefreshRequestMessageCode -> << >>
       [] message.tag = RefreshResponseMessageCode -> EncodeRefreshResponseMessage(message.body)
       [] message.tag = RefreshCompleteMessageCode -> EncodeRefreshCompleteMessage(message.body)
       [] message.tag = SendKeyMessageCode -> EncodeSendKeyMessage(message.body)
@@ -2358,6 +2361,7 @@ DecodePayload(tag, bytes) ==
               [] tag = LiquidityProviderMessageCode -> DecodeLiquidityProviderMessage(bytes)
               [] tag = CurrencyRateMessageCode -> DecodeCurrencyRateMessage(bytes)
               [] tag = ReferencePriceMessageCode -> DecodeReferencePriceMessage(bytes)
+              [] tag = RefreshRequestMessageCode -> Ok([empty |-> 0], bytes)
               [] tag = RefreshResponseMessageCode -> DecodeRefreshResponseMessage(bytes)
               [] tag = RefreshCompleteMessageCode -> DecodeRefreshCompleteMessage(bytes)
               [] tag = SendKeyMessageCode -> DecodeSendKeyMessage(bytes)
@@ -2396,6 +2400,7 @@ CheckedPayload ==
         \cup { [tag |-> LiquidityProviderMessageCode, body |-> one] : one \in CheckedLiquidityProviderMessage }
         \cup { [tag |-> CurrencyRateMessageCode, body |-> one] : one \in CheckedCurrencyRateMessage }
         \cup { [tag |-> ReferencePriceMessageCode, body |-> one] : one \in CheckedReferencePriceMessage }
+        \cup { [tag |-> RefreshRequestMessageCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> RefreshResponseMessageCode, body |-> one] : one \in CheckedRefreshResponseMessage }
         \cup { [tag |-> RefreshCompleteMessageCode, body |-> one] : one \in CheckedRefreshCompleteMessage }
         \cup { [tag |-> SendKeyMessageCode, body |-> one] : one \in CheckedSendKeyMessage }

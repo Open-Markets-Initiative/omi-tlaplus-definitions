@@ -13,6 +13,9 @@
 (* Note: TLC evaluates integers in 32 bits, so a field wider than that has *)
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
+(*                                                                         *)
+(* Note: Packet fills its datagram with as many messages as the bytes      *)
+(* hold, so it is read as a run of them.                                   *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -72,6 +75,30 @@ ReadUIntBE(bytes, width) ==
     IF Len(bytes) < width
     THEN Fail
     ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+(* The integer a text protocol writes as the characters of itself: a count of one is *)
+(* the character "1", which is the byte 49. Read by its digits, and written back *)
+(* zero filled to the width the field states, which is how such a field is filled. *)
+Digit == 48 .. 57
+
+RECURSIVE DecodeDigits(_)
+DecodeDigits(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeDigits(SubSeq(bytes, 1, Len(bytes) - 1)) * 10 + (bytes[Len(bytes)] - 48)
+
+RECURSIVE EncodeDigits(_, _)
+EncodeDigits(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeDigits(value \div 10, width - 1) \o <<48 + (value % 10)>>
+
+(* A field written as digits that holds anything else is no number, so it is not read: *)
+(* the value would not be what the bytes say, and would not write back as them. *)
+ReadDigits(bytes, width) ==
+    IF Len(bytes) < width \/ \E i \in 1 .. width : bytes[i] \notin Digit
+    THEN Fail
+    ELSE Ok(DecodeDigits(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
@@ -1773,14 +1800,14 @@ EncodeOptionMarketDepthMessage(message) ==
     message.exchangeId
         \o EncodeOptionSymbol5(message.optionSymbol)
         \o message.instrumentStatusMarker
-        \o EncodeUIntBE(Len(message.optionMarketDepthLevel), 1)
+        \o EncodeDigits(Len(message.optionMarketDepthLevel), 1)
         \o EncodeOptionMarketDepthLevelList(message.optionMarketDepthLevel)
 
 DecodeOptionMarketDepthMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
     LET optionSymbol == DecodeOptionSymbol5(exchangeId.rest) IN IF ~optionSymbol.ok THEN Fail ELSE
     LET instrumentStatusMarker == ReadBytes(optionSymbol.rest, 1) IN IF ~instrumentStatusMarker.ok THEN Fail ELSE
-    LET numberOfLevels == ReadUIntBE(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
+    LET numberOfLevels == ReadDigits(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
     LET optionMarketDepthLevel == ReadOptionMarketDepthLevelList(numberOfLevels.rest, numberOfLevels.value) IN IF ~optionMarketDepthLevel.ok THEN Fail ELSE
     Ok([ exchangeId             |-> exchangeId.value,
          optionSymbol           |-> optionSymbol.value,
@@ -1964,14 +1991,14 @@ EncodeFutureOptionsMarketDepthMessage(message) ==
     message.exchangeId
         \o EncodeFutureOptionSymbol5(message.futureOptionSymbol)
         \o message.instrumentStatusMarker
-        \o EncodeUIntBE(Len(message.futureOptionsMarketDepthTradingInstrument), 1)
+        \o EncodeDigits(Len(message.futureOptionsMarketDepthTradingInstrument), 1)
         \o EncodeFutureOptionsMarketDepthTradingInstrumentList(message.futureOptionsMarketDepthTradingInstrument)
 
 DecodeFutureOptionsMarketDepthMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
     LET futureOptionSymbol == DecodeFutureOptionSymbol5(exchangeId.rest) IN IF ~futureOptionSymbol.ok THEN Fail ELSE
     LET instrumentStatusMarker == ReadBytes(futureOptionSymbol.rest, 1) IN IF ~instrumentStatusMarker.ok THEN Fail ELSE
-    LET numberOfLevels == ReadUIntBE(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
+    LET numberOfLevels == ReadDigits(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
     LET futureOptionsMarketDepthTradingInstrument == ReadFutureOptionsMarketDepthTradingInstrumentList(numberOfLevels.rest, numberOfLevels.value) IN IF ~futureOptionsMarketDepthTradingInstrument.ok THEN Fail ELSE
     Ok([ exchangeId                                |-> exchangeId.value,
          futureOptionSymbol                        |-> futureOptionSymbol.value,
@@ -2137,14 +2164,14 @@ EncodeFuturesMarketDepthMessage(message) ==
     message.exchangeId
         \o EncodeFutureProduct5(message.futureProduct)
         \o message.instrumentStatusMarker
-        \o EncodeUIntBE(Len(message.futuresMarketDepthTradingInstrument), 1)
+        \o EncodeDigits(Len(message.futuresMarketDepthTradingInstrument), 1)
         \o EncodeFuturesMarketDepthTradingInstrumentList(message.futuresMarketDepthTradingInstrument)
 
 DecodeFuturesMarketDepthMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
     LET futureProduct == DecodeFutureProduct5(exchangeId.rest) IN IF ~futureProduct.ok THEN Fail ELSE
     LET instrumentStatusMarker == ReadBytes(futureProduct.rest, 1) IN IF ~instrumentStatusMarker.ok THEN Fail ELSE
-    LET numberOfLevels == ReadUIntBE(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
+    LET numberOfLevels == ReadDigits(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
     LET futuresMarketDepthTradingInstrument == ReadFuturesMarketDepthTradingInstrumentList(numberOfLevels.rest, numberOfLevels.value) IN IF ~futuresMarketDepthTradingInstrument.ok THEN Fail ELSE
     Ok([ exchangeId                          |-> exchangeId.value,
          futureProduct                       |-> futureProduct.value,
@@ -2282,14 +2309,14 @@ EncodeStrategyMarketDepthMessage(message) ==
     message.exchangeId
         \o message.symbolStrategy
         \o message.instrumentStatusMarker
-        \o EncodeUIntBE(Len(message.strategyMarketDepthTradingInstrument), 1)
+        \o EncodeDigits(Len(message.strategyMarketDepthTradingInstrument), 1)
         \o EncodeStrategyMarketDepthTradingInstrumentList(message.strategyMarketDepthTradingInstrument)
 
 DecodeStrategyMarketDepthMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
     LET symbolStrategy == ReadBytes(exchangeId.rest, 30) IN IF ~symbolStrategy.ok THEN Fail ELSE
     LET instrumentStatusMarker == ReadBytes(symbolStrategy.rest, 1) IN IF ~instrumentStatusMarker.ok THEN Fail ELSE
-    LET numberOfLevels == ReadUIntBE(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
+    LET numberOfLevels == ReadDigits(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
     LET strategyMarketDepthTradingInstrument == ReadStrategyMarketDepthTradingInstrumentList(numberOfLevels.rest, numberOfLevels.value) IN IF ~strategyMarketDepthTradingInstrument.ok THEN Fail ELSE
     Ok([ exchangeId                           |-> exchangeId.value,
          symbolStrategy                       |-> symbolStrategy.value,
@@ -3525,7 +3552,7 @@ EncodeStrategyInstrumentKeysMessage(message) ==
         \o message.strategyCode
         \o message.strategyType
         \o message.lastTradingDatetime
-        \o EncodeUIntBE(Len(message.strategyInstrumentLeg), 2)
+        \o EncodeDigits(Len(message.strategyInstrumentLeg), 2)
         \o EncodeStrategyInstrumentLegList(message.strategyInstrumentLeg)
 
 DecodeStrategyInstrumentKeysMessage(bytes) ==
@@ -3550,7 +3577,7 @@ DecodeStrategyInstrumentKeysMessage(bytes) ==
     LET strategyCode == ReadBytes(strategyAllowImplied.rest, 2) IN IF ~strategyCode.ok THEN Fail ELSE
     LET strategyType == ReadBytes(strategyCode.rest, 1) IN IF ~strategyType.ok THEN Fail ELSE
     LET lastTradingDatetime == ReadBytes(strategyType.rest, 14) IN IF ~lastTradingDatetime.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntBE(lastTradingDatetime.rest, 2) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadDigits(lastTradingDatetime.rest, 2) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET strategyInstrumentLeg == ReadStrategyInstrumentLegList(numberOfLegs.rest, numberOfLegs.value) IN IF ~strategyInstrumentLeg.ok THEN Fail ELSE
     Ok([ exchangeId                             |-> exchangeId.value,
          strategySymbol                         |-> strategySymbol.value,
@@ -4914,13 +4941,13 @@ FutureDeliverablesMessage ==
 EncodeFutureDeliverablesMessage(message) ==
     message.exchangeId
         \o EncodeFutureProduct10(message.futureProduct)
-        \o EncodeUIntBE(Len(message.bondDefinition), 2)
+        \o EncodeDigits(Len(message.bondDefinition), 2)
         \o EncodeBondDefinitionList(message.bondDefinition)
 
 DecodeFutureDeliverablesMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
     LET futureProduct == DecodeFutureProduct10(exchangeId.rest) IN IF ~futureProduct.ok THEN Fail ELSE
-    LET numberOfBonds == ReadUIntBE(futureProduct.rest, 2) IN IF ~numberOfBonds.ok THEN Fail ELSE
+    LET numberOfBonds == ReadDigits(futureProduct.rest, 2) IN IF ~numberOfBonds.ok THEN Fail ELSE
     LET bondDefinition == ReadBondDefinitionList(numberOfBonds.rest, numberOfBonds.value) IN IF ~bondDefinition.ok THEN Fail ELSE
     Ok([ exchangeId     |-> exchangeId.value,
          futureProduct  |-> futureProduct.value,
@@ -5162,14 +5189,14 @@ EncodeTickTableMessage(message) ==
     message.exchangeId
         \o message.tickTableName
         \o message.tickTableShortName
-        \o EncodeUIntBE(Len(message.tickEntry), 2)
+        \o EncodeDigits(Len(message.tickEntry), 2)
         \o EncodeTickEntryList(message.tickEntry)
 
 DecodeTickTableMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
     LET tickTableName == ReadBytes(exchangeId.rest, 50) IN IF ~tickTableName.ok THEN Fail ELSE
     LET tickTableShortName == ReadBytes(tickTableName.rest, 2) IN IF ~tickTableShortName.ok THEN Fail ELSE
-    LET numberOfEntries == ReadUIntBE(tickTableShortName.rest, 2) IN IF ~numberOfEntries.ok THEN Fail ELSE
+    LET numberOfEntries == ReadDigits(tickTableShortName.rest, 2) IN IF ~numberOfEntries.ok THEN Fail ELSE
     LET tickEntry == ReadTickEntryList(numberOfEntries.rest, numberOfEntries.value) IN IF ~tickEntry.ok THEN Fail ELSE
     Ok([ exchangeId         |-> exchangeId.value,
          tickTableName      |-> tickTableName.value,
@@ -5536,6 +5563,74 @@ CheckedPacket ==
         \cup { [ZeroPacket EXCEPT !.messageTimestamp = one] : one \in Sample(20) }
         \cup { [ZeroPacket EXCEPT !.messageBody = one] : one \in CheckedMessageBody }
         \cup { [ZeroPacket EXCEPT !.hsvfEtx = one] : one \in Sample(1) }
+
+(* A run of Packet, written one after another *)
+RECURSIVE EncodePacketList(_)
+EncodePacketList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodePacket(Head(messages)) \o EncodePacketList(Tail(messages))
+
+(* As many Packet as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadPacketAll(_)
+ReadPacketAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodePacket(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadPacketAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Packet of each kind, for the lists that carry them *)
+OnePacket ==
+    { [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionTradeMessageCode, body |-> ZeroOptionTradeMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FutureOptionsTradeMessageCode, body |-> ZeroFutureOptionsTradeMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FuturesTradeMessageCode, body |-> ZeroFuturesTradeMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> StrategyTradeMessageCode, body |-> ZeroStrategyTradeMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionRequestForQuoteMessageCode, body |-> ZeroOptionRequestForQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FutureOptionsRequestForQuoteMessageCode, body |-> ZeroFutureOptionsRequestForQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FutureRequestForQuoteMessageCode, body |-> ZeroFutureRequestForQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> StrategyRequestForQuoteMessageCode, body |-> ZeroStrategyRequestForQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> InstrumentScheduleNoticeOptionMessageCode, body |-> ZeroInstrumentScheduleNoticeOptionMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> InstrumentScheduleNoticeFuturesOptionMessageCode, body |-> ZeroInstrumentScheduleNoticeFuturesOptionMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> InstrumentScheduleNoticeFutureMessageCode, body |-> ZeroInstrumentScheduleNoticeFutureMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> InstrumentScheduleNoticeStrategyMessageCode, body |-> ZeroInstrumentScheduleNoticeStrategyMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionQuoteMessageCode, body |-> ZeroOptionQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FutureOptionsQuoteMessageCode, body |-> ZeroFutureOptionsQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FuturesQuoteMessageCode, body |-> ZeroFuturesQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> StrategyQuoteMessageCode, body |-> ZeroStrategyQuoteMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionMarketDepthMessageCode, body |-> ZeroOptionMarketDepthMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FutureOptionsMarketDepthMessageCode, body |-> ZeroFutureOptionsMarketDepthMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FuturesMarketDepthMessageCode, body |-> ZeroFuturesMarketDepthMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> StrategyMarketDepthMessageCode, body |-> ZeroStrategyMarketDepthMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionTradeCancellationMessageCode, body |-> ZeroOptionTradeCancellationMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FutureOptionsTradeCancellationMessageCode, body |-> ZeroFutureOptionsTradeCancellationMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FutureTradeCancellationMessageCode, body |-> ZeroFutureTradeCancellationMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> StrategyTradeCancellationMessageCode, body |-> ZeroStrategyTradeCancellationMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionInstrumentKeysMessageCode, body |-> ZeroOptionInstrumentKeysMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FutureOptionsInstrumentKeysMessageCode, body |-> ZeroFutureOptionsInstrumentKeysMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> UnderlyingInstrumentKeysMessageCode, body |-> ZeroUnderlyingInstrumentKeysMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FuturesInstrumentKeysMessageCode, body |-> ZeroFuturesInstrumentKeysMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> StrategyInstrumentKeysMessageCode, body |-> ZeroStrategyInstrumentKeysMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> OptionSummaryMessageCode, body |-> ZeroOptionSummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FutureOptionsSummaryMessageCode, body |-> ZeroFutureOptionsSummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FuturesSummaryMessageCode, body |-> ZeroFuturesSummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> StrategySummaryMessageCode, body |-> ZeroStrategySummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> BeginningOfOptionsSummaryMessageCode, body |-> ZeroBeginningOfOptionsSummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> BeginningOfFutureOptionsSummaryMessageCode, body |-> ZeroBeginningOfFutureOptionsSummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> BeginningOfFuturesSummaryMessageCode, body |-> ZeroBeginningOfFuturesSummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> BeginningOfStrategySummaryMessageCode, body |-> ZeroBeginningOfStrategySummaryMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FuturesTradeCorrectionMessageCode, body |-> ZeroFuturesTradeCorrectionMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> GroupStatusMessageCode, body |-> ZeroGroupStatusMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> GroupStatusStrategiesMessageCode, body |-> ZeroGroupStatusStrategiesMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> FutureDeliverablesMessageCode, body |-> ZeroFutureDeliverablesMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> BulletinsMessageCode, body |-> ZeroBulletinsMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> EndOfSalesMessageCode, body |-> ZeroEndOfSalesMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> TickTableMessageCode, body |-> ZeroTickTableMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> EndOfTransmissionMessageCode, body |-> ZeroEndOfTransmissionMessage]],
+      [ZeroPacket EXCEPT !.messageBody = [tag |-> CircuitAssuranceMessageCode, body |-> ZeroCircuitAssuranceMessage]] }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)

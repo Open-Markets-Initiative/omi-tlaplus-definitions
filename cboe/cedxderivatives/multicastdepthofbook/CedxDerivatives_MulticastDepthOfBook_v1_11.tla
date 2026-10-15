@@ -1,7 +1,7 @@
-------------- MODULE DxeDerivatives_MulticastDepthOfBook_v1_01 -------------
+------------ MODULE CedxDerivatives_MulticastDepthOfBook_v1_11 -------------
 (***************************************************************************)
 (* Chicago Board Options Exchange Europe Derivatives Multicast Depth Of    *)
-(* Book v1.01                                                              *)
+(* Book v1.11                                                              *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)
@@ -152,39 +152,39 @@ AddOrderLongMessage ==
     [ timeOffset    : Sample(4),
       orderId       : Sample(8),
       sideIndicator : Sample(1),
-      quantityLong  : Sample(4),
+      quantity      : Sample(4),
       symbolLong    : Sample(8),
-      priceLong     : Sample(8) ]
+      price         : Sample(8) ]
 
 EncodeAddOrderLongMessage(message) ==
     message.timeOffset
         \o message.orderId
         \o message.sideIndicator
-        \o message.quantityLong
+        \o message.quantity
         \o message.symbolLong
-        \o message.priceLong
+        \o message.price
 
 DecodeAddOrderLongMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
-    LET quantityLong == ReadBytes(sideIndicator.rest, 4) IN IF ~quantityLong.ok THEN Fail ELSE
-    LET symbolLong == ReadBytes(quantityLong.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
-    LET priceLong == ReadBytes(symbolLong.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
+    LET quantity == ReadBytes(sideIndicator.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
+    LET symbolLong == ReadBytes(quantity.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
+    LET price == ReadBytes(symbolLong.rest, 8) IN IF ~price.ok THEN Fail ELSE
     Ok([ timeOffset    |-> timeOffset.value,
          orderId       |-> orderId.value,
          sideIndicator |-> sideIndicator.value,
-         quantityLong  |-> quantityLong.value,
+         quantity      |-> quantity.value,
          symbolLong    |-> symbolLong.value,
-         priceLong     |-> priceLong.value ], priceLong.rest)
+         price         |-> price.value ], price.rest)
 
 ZeroAddOrderLongMessage ==
     [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
       orderId       |-> [i \in 1 .. 8 |-> 0],
       sideIndicator |-> [i \in 1 .. 1 |-> 0],
-      quantityLong  |-> [i \in 1 .. 4 |-> 0],
+      quantity      |-> [i \in 1 .. 4 |-> 0],
       symbolLong    |-> [i \in 1 .. 8 |-> 0],
-      priceLong     |-> [i \in 1 .. 8 |-> 0] ]
+      price         |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Add Order Long Message at zero, then each field in turn at the values it is checked at *)
 CheckedAddOrderLongMessage ==
@@ -192,9 +192,9 @@ CheckedAddOrderLongMessage ==
         \cup { [ZeroAddOrderLongMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroAddOrderLongMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroAddOrderLongMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroAddOrderLongMessage EXCEPT !.quantityLong = one] : one \in Sample(4) }
+        \cup { [ZeroAddOrderLongMessage EXCEPT !.quantity = one] : one \in Sample(4) }
         \cup { [ZeroAddOrderLongMessage EXCEPT !.symbolLong = one] : one \in Sample(8) }
-        \cup { [ZeroAddOrderLongMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
+        \cup { [ZeroAddOrderLongMessage EXCEPT !.price = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Add Order Short Message: 23 bytes                                       *)
@@ -205,7 +205,7 @@ AddOrderShortMessage ==
       orderId       : Sample(8),
       sideIndicator : Sample(1),
       quantityShort : Sample(2),
-      symbol        : Sample(6),
+      symbolShort   : Sample(6),
       priceShort    : Sample(2) ]
 
 EncodeAddOrderShortMessage(message) ==
@@ -213,7 +213,7 @@ EncodeAddOrderShortMessage(message) ==
         \o message.orderId
         \o message.sideIndicator
         \o message.quantityShort
-        \o message.symbol
+        \o message.symbolShort
         \o message.priceShort
 
 DecodeAddOrderShortMessage(bytes) ==
@@ -221,13 +221,13 @@ DecodeAddOrderShortMessage(bytes) ==
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
     LET quantityShort == ReadBytes(sideIndicator.rest, 2) IN IF ~quantityShort.ok THEN Fail ELSE
-    LET symbol == ReadBytes(quantityShort.rest, 6) IN IF ~symbol.ok THEN Fail ELSE
-    LET priceShort == ReadBytes(symbol.rest, 2) IN IF ~priceShort.ok THEN Fail ELSE
+    LET symbolShort == ReadBytes(quantityShort.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
+    LET priceShort == ReadBytes(symbolShort.rest, 2) IN IF ~priceShort.ok THEN Fail ELSE
     Ok([ timeOffset    |-> timeOffset.value,
          orderId       |-> orderId.value,
          sideIndicator |-> sideIndicator.value,
          quantityShort |-> quantityShort.value,
-         symbol        |-> symbol.value,
+         symbolShort   |-> symbolShort.value,
          priceShort    |-> priceShort.value ], priceShort.rest)
 
 ZeroAddOrderShortMessage ==
@@ -235,7 +235,7 @@ ZeroAddOrderShortMessage ==
       orderId       |-> [i \in 1 .. 8 |-> 0],
       sideIndicator |-> [i \in 1 .. 1 |-> 0],
       quantityShort |-> [i \in 1 .. 2 |-> 0],
-      symbol        |-> [i \in 1 .. 6 |-> 0],
+      symbolShort   |-> [i \in 1 .. 6 |-> 0],
       priceShort    |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Add Order Short Message at zero, then each field in turn at the values it is checked at *)
@@ -245,7 +245,7 @@ CheckedAddOrderShortMessage ==
         \cup { [ZeroAddOrderShortMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroAddOrderShortMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
         \cup { [ZeroAddOrderShortMessage EXCEPT !.quantityShort = one] : one \in Sample(2) }
-        \cup { [ZeroAddOrderShortMessage EXCEPT !.symbol = one] : one \in Sample(6) }
+        \cup { [ZeroAddOrderShortMessage EXCEPT !.symbolShort = one] : one \in Sample(6) }
         \cup { [ZeroAddOrderShortMessage EXCEPT !.priceShort = one] : one \in Sample(2) }
 
 (***************************************************************************)
@@ -384,7 +384,7 @@ OrderExecutedAtPriceSizeMessage ==
       executedQuantity  : Sample(4),
       remainingQuantity : Sample(4),
       executionId       : Sample(8),
-      priceLong         : Sample(8),
+      price             : Sample(8),
       executionFlags    : ExecutionFlags2 ]
 
 EncodeOrderExecutedAtPriceSizeMessage(message) ==
@@ -393,7 +393,7 @@ EncodeOrderExecutedAtPriceSizeMessage(message) ==
         \o message.executedQuantity
         \o message.remainingQuantity
         \o message.executionId
-        \o message.priceLong
+        \o message.price
         \o EncodeExecutionFlags2(message.executionFlags)
 
 DecodeOrderExecutedAtPriceSizeMessage(bytes) ==
@@ -402,14 +402,14 @@ DecodeOrderExecutedAtPriceSizeMessage(bytes) ==
     LET executedQuantity == ReadBytes(orderId.rest, 4) IN IF ~executedQuantity.ok THEN Fail ELSE
     LET remainingQuantity == ReadBytes(executedQuantity.rest, 4) IN IF ~remainingQuantity.ok THEN Fail ELSE
     LET executionId == ReadBytes(remainingQuantity.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
-    LET priceLong == ReadBytes(executionId.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
-    LET executionFlags == DecodeExecutionFlags2(priceLong.rest) IN IF ~executionFlags.ok THEN Fail ELSE
+    LET price == ReadBytes(executionId.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET executionFlags == DecodeExecutionFlags2(price.rest) IN IF ~executionFlags.ok THEN Fail ELSE
     Ok([ timeOffset        |-> timeOffset.value,
          orderId           |-> orderId.value,
          executedQuantity  |-> executedQuantity.value,
          remainingQuantity |-> remainingQuantity.value,
          executionId       |-> executionId.value,
-         priceLong         |-> priceLong.value,
+         price             |-> price.value,
          executionFlags    |-> executionFlags.value ], executionFlags.rest)
 
 ZeroOrderExecutedAtPriceSizeMessage ==
@@ -418,7 +418,7 @@ ZeroOrderExecutedAtPriceSizeMessage ==
       executedQuantity  |-> [i \in 1 .. 4 |-> 0],
       remainingQuantity |-> [i \in 1 .. 4 |-> 0],
       executionId       |-> [i \in 1 .. 8 |-> 0],
-      priceLong         |-> [i \in 1 .. 8 |-> 0],
+      price             |-> [i \in 1 .. 8 |-> 0],
       executionFlags    |-> ZeroExecutionFlags2 ]
 
 (* Order Executed At Price Size Message at zero, then each field in turn at the values it is checked at *)
@@ -429,7 +429,7 @@ CheckedOrderExecutedAtPriceSizeMessage ==
         \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.executedQuantity = one] : one \in Sample(4) }
         \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.remainingQuantity = one] : one \in Sample(4) }
         \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.executionId = one] : one \in Sample(8) }
-        \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.executionFlags = one] : one \in CheckedExecutionFlags2 }
 
 (***************************************************************************)
@@ -437,108 +437,108 @@ CheckedOrderExecutedAtPriceSizeMessage ==
 (***************************************************************************)
 
 ReduceSizeLongMessage ==
-    [ timeOffset             : Sample(4),
-      orderId                : Sample(8),
-      cancelledContractsLong : Sample(4) ]
+    [ timeOffset            : Sample(4),
+      orderId               : Sample(8),
+      canceledContractsLong : Sample(4) ]
 
 EncodeReduceSizeLongMessage(message) ==
     message.timeOffset
         \o message.orderId
-        \o message.cancelledContractsLong
+        \o message.canceledContractsLong
 
 DecodeReduceSizeLongMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET cancelledContractsLong == ReadBytes(orderId.rest, 4) IN IF ~cancelledContractsLong.ok THEN Fail ELSE
-    Ok([ timeOffset             |-> timeOffset.value,
-         orderId                |-> orderId.value,
-         cancelledContractsLong |-> cancelledContractsLong.value ], cancelledContractsLong.rest)
+    LET canceledContractsLong == ReadBytes(orderId.rest, 4) IN IF ~canceledContractsLong.ok THEN Fail ELSE
+    Ok([ timeOffset            |-> timeOffset.value,
+         orderId               |-> orderId.value,
+         canceledContractsLong |-> canceledContractsLong.value ], canceledContractsLong.rest)
 
 ZeroReduceSizeLongMessage ==
-    [ timeOffset             |-> [i \in 1 .. 4 |-> 0],
-      orderId                |-> [i \in 1 .. 8 |-> 0],
-      cancelledContractsLong |-> [i \in 1 .. 4 |-> 0] ]
+    [ timeOffset            |-> [i \in 1 .. 4 |-> 0],
+      orderId               |-> [i \in 1 .. 8 |-> 0],
+      canceledContractsLong |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Reduce Size Long Message at zero, then each field in turn at the values it is checked at *)
 CheckedReduceSizeLongMessage ==
     { ZeroReduceSizeLongMessage }
         \cup { [ZeroReduceSizeLongMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroReduceSizeLongMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroReduceSizeLongMessage EXCEPT !.cancelledContractsLong = one] : one \in Sample(4) }
+        \cup { [ZeroReduceSizeLongMessage EXCEPT !.canceledContractsLong = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Reduce Size Short Message: 14 bytes                                     *)
 (***************************************************************************)
 
 ReduceSizeShortMessage ==
-    [ timeOffset              : Sample(4),
-      orderId                 : Sample(8),
-      cancelledContractsShort : Sample(2) ]
+    [ timeOffset             : Sample(4),
+      orderId                : Sample(8),
+      canceledContractsShort : Sample(2) ]
 
 EncodeReduceSizeShortMessage(message) ==
     message.timeOffset
         \o message.orderId
-        \o message.cancelledContractsShort
+        \o message.canceledContractsShort
 
 DecodeReduceSizeShortMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET cancelledContractsShort == ReadBytes(orderId.rest, 2) IN IF ~cancelledContractsShort.ok THEN Fail ELSE
-    Ok([ timeOffset              |-> timeOffset.value,
-         orderId                 |-> orderId.value,
-         cancelledContractsShort |-> cancelledContractsShort.value ], cancelledContractsShort.rest)
+    LET canceledContractsShort == ReadBytes(orderId.rest, 2) IN IF ~canceledContractsShort.ok THEN Fail ELSE
+    Ok([ timeOffset             |-> timeOffset.value,
+         orderId                |-> orderId.value,
+         canceledContractsShort |-> canceledContractsShort.value ], canceledContractsShort.rest)
 
 ZeroReduceSizeShortMessage ==
-    [ timeOffset              |-> [i \in 1 .. 4 |-> 0],
-      orderId                 |-> [i \in 1 .. 8 |-> 0],
-      cancelledContractsShort |-> [i \in 1 .. 2 |-> 0] ]
+    [ timeOffset             |-> [i \in 1 .. 4 |-> 0],
+      orderId                |-> [i \in 1 .. 8 |-> 0],
+      canceledContractsShort |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Reduce Size Short Message at zero, then each field in turn at the values it is checked at *)
 CheckedReduceSizeShortMessage ==
     { ZeroReduceSizeShortMessage }
         \cup { [ZeroReduceSizeShortMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroReduceSizeShortMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroReduceSizeShortMessage EXCEPT !.cancelledContractsShort = one] : one \in Sample(2) }
+        \cup { [ZeroReduceSizeShortMessage EXCEPT !.canceledContractsShort = one] : one \in Sample(2) }
 
 (***************************************************************************)
-(* Modify Order Long Message: 24 bytes                                     *)
+(* Modify Order Long Message: 22 bytes                                     *)
 (***************************************************************************)
 
 ModifyOrderLongMessage ==
-    [ timeOffset    : Sample(4),
-      orderId       : Sample(8),
-      contractsLong : Sample(4),
-      priceLong     : Sample(8) ]
+    [ timeOffset     : Sample(4),
+      orderId        : Sample(8),
+      contractsShort : Sample(2),
+      price          : Sample(8) ]
 
 EncodeModifyOrderLongMessage(message) ==
     message.timeOffset
         \o message.orderId
-        \o message.contractsLong
-        \o message.priceLong
+        \o message.contractsShort
+        \o message.price
 
 DecodeModifyOrderLongMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET contractsLong == ReadBytes(orderId.rest, 4) IN IF ~contractsLong.ok THEN Fail ELSE
-    LET priceLong == ReadBytes(contractsLong.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
-    Ok([ timeOffset    |-> timeOffset.value,
-         orderId       |-> orderId.value,
-         contractsLong |-> contractsLong.value,
-         priceLong     |-> priceLong.value ], priceLong.rest)
+    LET contractsShort == ReadBytes(orderId.rest, 2) IN IF ~contractsShort.ok THEN Fail ELSE
+    LET price == ReadBytes(contractsShort.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    Ok([ timeOffset     |-> timeOffset.value,
+         orderId        |-> orderId.value,
+         contractsShort |-> contractsShort.value,
+         price          |-> price.value ], price.rest)
 
 ZeroModifyOrderLongMessage ==
-    [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
-      orderId       |-> [i \in 1 .. 8 |-> 0],
-      contractsLong |-> [i \in 1 .. 4 |-> 0],
-      priceLong     |-> [i \in 1 .. 8 |-> 0] ]
+    [ timeOffset     |-> [i \in 1 .. 4 |-> 0],
+      orderId        |-> [i \in 1 .. 8 |-> 0],
+      contractsShort |-> [i \in 1 .. 2 |-> 0],
+      price          |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Modify Order Long Message at zero, then each field in turn at the values it is checked at *)
 CheckedModifyOrderLongMessage ==
     { ZeroModifyOrderLongMessage }
         \cup { [ZeroModifyOrderLongMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroModifyOrderLongMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroModifyOrderLongMessage EXCEPT !.contractsLong = one] : one \in Sample(4) }
-        \cup { [ZeroModifyOrderLongMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
+        \cup { [ZeroModifyOrderLongMessage EXCEPT !.contractsShort = one] : one \in Sample(2) }
+        \cup { [ZeroModifyOrderLongMessage EXCEPT !.price = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Modify Order Short Message: 16 bytes                                    *)
@@ -655,26 +655,26 @@ CheckedTradeFlags ==
         \cup { [ZeroTradeFlags EXCEPT !.algorithmicTrade = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Trade Long Message: 46 bytes                                            *)
+(* Trade Long Message: 44 bytes                                            *)
 (***************************************************************************)
 
 TradeLongMessage ==
-    [ timeOffset    : Sample(4),
-      orderId       : Sample(8),
-      sideIndicator : Sample(1),
-      contractsLong : Sample(4),
-      symbolLong    : Sample(8),
-      priceLong     : Sample(8),
-      executionId   : Sample(8),
-      tradeFlags    : TradeFlags ]
+    [ timeOffset     : Sample(4),
+      orderId        : Sample(8),
+      sideIndicator  : Sample(1),
+      contractsShort : Sample(2),
+      symbolLong     : Sample(8),
+      price          : Sample(8),
+      executionId    : Sample(8),
+      tradeFlags     : TradeFlags ]
 
 EncodeTradeLongMessage(message) ==
     message.timeOffset
         \o message.orderId
         \o message.sideIndicator
-        \o message.contractsLong
+        \o message.contractsShort
         \o message.symbolLong
-        \o message.priceLong
+        \o message.price
         \o message.executionId
         \o EncodeTradeFlags(message.tradeFlags)
 
@@ -682,29 +682,29 @@ DecodeTradeLongMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
-    LET contractsLong == ReadBytes(sideIndicator.rest, 4) IN IF ~contractsLong.ok THEN Fail ELSE
-    LET symbolLong == ReadBytes(contractsLong.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
-    LET priceLong == ReadBytes(symbolLong.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
-    LET executionId == ReadBytes(priceLong.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
+    LET contractsShort == ReadBytes(sideIndicator.rest, 2) IN IF ~contractsShort.ok THEN Fail ELSE
+    LET symbolLong == ReadBytes(contractsShort.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
+    LET price == ReadBytes(symbolLong.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET executionId == ReadBytes(price.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
     LET tradeFlags == DecodeTradeFlags(executionId.rest) IN IF ~tradeFlags.ok THEN Fail ELSE
-    Ok([ timeOffset    |-> timeOffset.value,
-         orderId       |-> orderId.value,
-         sideIndicator |-> sideIndicator.value,
-         contractsLong |-> contractsLong.value,
-         symbolLong    |-> symbolLong.value,
-         priceLong     |-> priceLong.value,
-         executionId   |-> executionId.value,
-         tradeFlags    |-> tradeFlags.value ], tradeFlags.rest)
+    Ok([ timeOffset     |-> timeOffset.value,
+         orderId        |-> orderId.value,
+         sideIndicator  |-> sideIndicator.value,
+         contractsShort |-> contractsShort.value,
+         symbolLong     |-> symbolLong.value,
+         price          |-> price.value,
+         executionId    |-> executionId.value,
+         tradeFlags     |-> tradeFlags.value ], tradeFlags.rest)
 
 ZeroTradeLongMessage ==
-    [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
-      orderId       |-> [i \in 1 .. 8 |-> 0],
-      sideIndicator |-> [i \in 1 .. 1 |-> 0],
-      contractsLong |-> [i \in 1 .. 4 |-> 0],
-      symbolLong    |-> [i \in 1 .. 8 |-> 0],
-      priceLong     |-> [i \in 1 .. 8 |-> 0],
-      executionId   |-> [i \in 1 .. 8 |-> 0],
-      tradeFlags    |-> ZeroTradeFlags ]
+    [ timeOffset     |-> [i \in 1 .. 4 |-> 0],
+      orderId        |-> [i \in 1 .. 8 |-> 0],
+      sideIndicator  |-> [i \in 1 .. 1 |-> 0],
+      contractsShort |-> [i \in 1 .. 2 |-> 0],
+      symbolLong     |-> [i \in 1 .. 8 |-> 0],
+      price          |-> [i \in 1 .. 8 |-> 0],
+      executionId    |-> [i \in 1 .. 8 |-> 0],
+      tradeFlags     |-> ZeroTradeFlags ]
 
 (* Trade Long Message at zero, then each field in turn at the values it is checked at *)
 CheckedTradeLongMessage ==
@@ -712,9 +712,9 @@ CheckedTradeLongMessage ==
         \cup { [ZeroTradeLongMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroTradeLongMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroTradeLongMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroTradeLongMessage EXCEPT !.contractsLong = one] : one \in Sample(4) }
+        \cup { [ZeroTradeLongMessage EXCEPT !.contractsShort = one] : one \in Sample(2) }
         \cup { [ZeroTradeLongMessage EXCEPT !.symbolLong = one] : one \in Sample(8) }
-        \cup { [ZeroTradeLongMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
+        \cup { [ZeroTradeLongMessage EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroTradeLongMessage EXCEPT !.executionId = one] : one \in Sample(8) }
         \cup { [ZeroTradeLongMessage EXCEPT !.tradeFlags = one] : one \in CheckedTradeFlags }
 
@@ -845,7 +845,7 @@ ExtendedTradeFlags ==
       priceFormationDiscoveryProcess   : Sample(1),
       algorithmicIndicator             : Sample(1),
       publicationModeDeferralReason    : Sample(1),
-      deferralOrEnrichementType        : Sample(1),
+      deferralOrEnrichmentType         : Sample(1),
       duplicativeIndicator             : Sample(1) ]
 
 EncodeExtendedTradeFlags(message) ==
@@ -861,7 +861,7 @@ EncodeExtendedTradeFlags(message) ==
         \o message.priceFormationDiscoveryProcess
         \o message.algorithmicIndicator
         \o message.publicationModeDeferralReason
-        \o message.deferralOrEnrichementType
+        \o message.deferralOrEnrichmentType
         \o message.duplicativeIndicator
 
 DecodeExtendedTradeFlags(bytes) ==
@@ -877,8 +877,8 @@ DecodeExtendedTradeFlags(bytes) ==
     LET priceFormationDiscoveryProcess == ReadBytes(offBookAutomatedIndicator.rest, 1) IN IF ~priceFormationDiscoveryProcess.ok THEN Fail ELSE
     LET algorithmicIndicator == ReadBytes(priceFormationDiscoveryProcess.rest, 1) IN IF ~algorithmicIndicator.ok THEN Fail ELSE
     LET publicationModeDeferralReason == ReadBytes(algorithmicIndicator.rest, 1) IN IF ~publicationModeDeferralReason.ok THEN Fail ELSE
-    LET deferralOrEnrichementType == ReadBytes(publicationModeDeferralReason.rest, 1) IN IF ~deferralOrEnrichementType.ok THEN Fail ELSE
-    LET duplicativeIndicator == ReadBytes(deferralOrEnrichementType.rest, 1) IN IF ~duplicativeIndicator.ok THEN Fail ELSE
+    LET deferralOrEnrichmentType == ReadBytes(publicationModeDeferralReason.rest, 1) IN IF ~deferralOrEnrichmentType.ok THEN Fail ELSE
+    LET duplicativeIndicator == ReadBytes(deferralOrEnrichmentType.rest, 1) IN IF ~duplicativeIndicator.ok THEN Fail ELSE
     Ok([ marketMechanism                  |-> marketMechanism.value,
          tradingMode                      |-> tradingMode.value,
          transactionCategory              |-> transactionCategory.value,
@@ -891,7 +891,7 @@ DecodeExtendedTradeFlags(bytes) ==
          priceFormationDiscoveryProcess   |-> priceFormationDiscoveryProcess.value,
          algorithmicIndicator             |-> algorithmicIndicator.value,
          publicationModeDeferralReason    |-> publicationModeDeferralReason.value,
-         deferralOrEnrichementType        |-> deferralOrEnrichementType.value,
+         deferralOrEnrichmentType         |-> deferralOrEnrichmentType.value,
          duplicativeIndicator             |-> duplicativeIndicator.value ], duplicativeIndicator.rest)
 
 ZeroExtendedTradeFlags ==
@@ -907,7 +907,7 @@ ZeroExtendedTradeFlags ==
       priceFormationDiscoveryProcess   |-> [i \in 1 .. 1 |-> 0],
       algorithmicIndicator             |-> [i \in 1 .. 1 |-> 0],
       publicationModeDeferralReason    |-> [i \in 1 .. 1 |-> 0],
-      deferralOrEnrichementType        |-> [i \in 1 .. 1 |-> 0],
+      deferralOrEnrichmentType         |-> [i \in 1 .. 1 |-> 0],
       duplicativeIndicator             |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Extended Trade Flags at zero, then each field in turn at the values it is checked at *)
@@ -925,7 +925,7 @@ CheckedExtendedTradeFlags ==
         \cup { [ZeroExtendedTradeFlags EXCEPT !.priceFormationDiscoveryProcess = one] : one \in Sample(1) }
         \cup { [ZeroExtendedTradeFlags EXCEPT !.algorithmicIndicator = one] : one \in Sample(1) }
         \cup { [ZeroExtendedTradeFlags EXCEPT !.publicationModeDeferralReason = one] : one \in Sample(1) }
-        \cup { [ZeroExtendedTradeFlags EXCEPT !.deferralOrEnrichementType = one] : one \in Sample(1) }
+        \cup { [ZeroExtendedTradeFlags EXCEPT !.deferralOrEnrichmentType = one] : one \in Sample(1) }
         \cup { [ZeroExtendedTradeFlags EXCEPT !.duplicativeIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -934,9 +934,9 @@ CheckedExtendedTradeFlags ==
 
 TradeExtendedMessage ==
     [ timeOffset         : Sample(4),
-      contractsExtended  : Sample(8),
+      contractsLong      : Sample(8),
       symbolLong         : Sample(8),
-      priceLong          : Sample(8),
+      price              : Sample(8),
       tradeId            : Sample(8),
       tradeTimestamp     : Sample(8),
       executionVenue     : Sample(4),
@@ -946,9 +946,9 @@ TradeExtendedMessage ==
 
 EncodeTradeExtendedMessage(message) ==
     message.timeOffset
-        \o message.contractsExtended
+        \o message.contractsLong
         \o message.symbolLong
-        \o message.priceLong
+        \o message.price
         \o message.tradeId
         \o message.tradeTimestamp
         \o message.executionVenue
@@ -958,19 +958,19 @@ EncodeTradeExtendedMessage(message) ==
 
 DecodeTradeExtendedMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
-    LET contractsExtended == ReadBytes(timeOffset.rest, 8) IN IF ~contractsExtended.ok THEN Fail ELSE
-    LET symbolLong == ReadBytes(contractsExtended.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
-    LET priceLong == ReadBytes(symbolLong.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
-    LET tradeId == ReadBytes(priceLong.rest, 8) IN IF ~tradeId.ok THEN Fail ELSE
+    LET contractsLong == ReadBytes(timeOffset.rest, 8) IN IF ~contractsLong.ok THEN Fail ELSE
+    LET symbolLong == ReadBytes(contractsLong.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
+    LET price == ReadBytes(symbolLong.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET tradeId == ReadBytes(price.rest, 8) IN IF ~tradeId.ok THEN Fail ELSE
     LET tradeTimestamp == ReadBytes(tradeId.rest, 8) IN IF ~tradeTimestamp.ok THEN Fail ELSE
     LET executionVenue == ReadBytes(tradeTimestamp.rest, 4) IN IF ~executionVenue.ok THEN Fail ELSE
     LET currency == ReadBytes(executionVenue.rest, 3) IN IF ~currency.ok THEN Fail ELSE
     LET cboeTradeFlags == ReadBytes(currency.rest, 1) IN IF ~cboeTradeFlags.ok THEN Fail ELSE
     LET extendedTradeFlags == DecodeExtendedTradeFlags(cboeTradeFlags.rest) IN IF ~extendedTradeFlags.ok THEN Fail ELSE
     Ok([ timeOffset         |-> timeOffset.value,
-         contractsExtended  |-> contractsExtended.value,
+         contractsLong      |-> contractsLong.value,
          symbolLong         |-> symbolLong.value,
-         priceLong          |-> priceLong.value,
+         price              |-> price.value,
          tradeId            |-> tradeId.value,
          tradeTimestamp     |-> tradeTimestamp.value,
          executionVenue     |-> executionVenue.value,
@@ -980,9 +980,9 @@ DecodeTradeExtendedMessage(bytes) ==
 
 ZeroTradeExtendedMessage ==
     [ timeOffset         |-> [i \in 1 .. 4 |-> 0],
-      contractsExtended  |-> [i \in 1 .. 8 |-> 0],
+      contractsLong      |-> [i \in 1 .. 8 |-> 0],
       symbolLong         |-> [i \in 1 .. 8 |-> 0],
-      priceLong          |-> [i \in 1 .. 8 |-> 0],
+      price              |-> [i \in 1 .. 8 |-> 0],
       tradeId            |-> [i \in 1 .. 8 |-> 0],
       tradeTimestamp     |-> [i \in 1 .. 8 |-> 0],
       executionVenue     |-> [i \in 1 .. 4 |-> 0],
@@ -994,9 +994,9 @@ ZeroTradeExtendedMessage ==
 CheckedTradeExtendedMessage ==
     { ZeroTradeExtendedMessage }
         \cup { [ZeroTradeExtendedMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
-        \cup { [ZeroTradeExtendedMessage EXCEPT !.contractsExtended = one] : one \in Sample(8) }
+        \cup { [ZeroTradeExtendedMessage EXCEPT !.contractsLong = one] : one \in Sample(8) }
         \cup { [ZeroTradeExtendedMessage EXCEPT !.symbolLong = one] : one \in Sample(8) }
-        \cup { [ZeroTradeExtendedMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
+        \cup { [ZeroTradeExtendedMessage EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroTradeExtendedMessage EXCEPT !.tradeId = one] : one \in Sample(8) }
         \cup { [ZeroTradeExtendedMessage EXCEPT !.tradeTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroTradeExtendedMessage EXCEPT !.executionVenue = one] : one \in Sample(4) }
@@ -1005,26 +1005,26 @@ CheckedTradeExtendedMessage ==
         \cup { [ZeroTradeExtendedMessage EXCEPT !.extendedTradeFlags = one] : one \in CheckedExtendedTradeFlags }
 
 (***************************************************************************)
-(* End Of Session Message: 4 bytes                                         *)
+(* End Of Session: 4 bytes                                                 *)
 (***************************************************************************)
 
-EndOfSessionMessage ==
+EndOfSession ==
     [ timeOffset : Sample(4) ]
 
-EncodeEndOfSessionMessage(message) ==
+EncodeEndOfSession(message) ==
     message.timeOffset
 
-DecodeEndOfSessionMessage(bytes) ==
+DecodeEndOfSession(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     Ok([ timeOffset |-> timeOffset.value ], timeOffset.rest)
 
-ZeroEndOfSessionMessage ==
+ZeroEndOfSession ==
     [ timeOffset |-> [i \in 1 .. 4 |-> 0] ]
 
-(* End Of Session Message at zero, then each field in turn at the values it is checked at *)
-CheckedEndOfSessionMessage ==
-    { ZeroEndOfSessionMessage }
-        \cup { [ZeroEndOfSessionMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+(* End Of Session at zero, then each field in turn at the values it is checked at *)
+CheckedEndOfSession ==
+    { ZeroEndOfSession }
+        \cup { [ZeroEndOfSession EXCEPT !.timeOffset = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Transaction Begin Message: 4 bytes                                      *)
@@ -1111,50 +1111,84 @@ CheckedTradingStatusMessage ==
         \cup { [ZeroTradingStatusMessage EXCEPT !.reserved3 = one] : one \in Sample(3) }
 
 (***************************************************************************)
-(* Auction Summary Message: 25 bytes                                       *)
+(* Fast Status Message: 11 bytes                                           *)
+(***************************************************************************)
+
+FastStatusMessage ==
+    [ timeOffset       : Sample(4),
+      productCodeShort : Sample(6),
+      isFast           : Sample(1) ]
+
+EncodeFastStatusMessage(message) ==
+    message.timeOffset
+        \o message.productCodeShort
+        \o message.isFast
+
+DecodeFastStatusMessage(bytes) ==
+    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    LET productCodeShort == ReadBytes(timeOffset.rest, 6) IN IF ~productCodeShort.ok THEN Fail ELSE
+    LET isFast == ReadBytes(productCodeShort.rest, 1) IN IF ~isFast.ok THEN Fail ELSE
+    Ok([ timeOffset       |-> timeOffset.value,
+         productCodeShort |-> productCodeShort.value,
+         isFast           |-> isFast.value ], isFast.rest)
+
+ZeroFastStatusMessage ==
+    [ timeOffset       |-> [i \in 1 .. 4 |-> 0],
+      productCodeShort |-> [i \in 1 .. 6 |-> 0],
+      isFast           |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Fast Status Message at zero, then each field in turn at the values it is checked at *)
+CheckedFastStatusMessage ==
+    { ZeroFastStatusMessage }
+        \cup { [ZeroFastStatusMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+        \cup { [ZeroFastStatusMessage EXCEPT !.productCodeShort = one] : one \in Sample(6) }
+        \cup { [ZeroFastStatusMessage EXCEPT !.isFast = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Auction Summary Message: 23 bytes                                       *)
 (***************************************************************************)
 
 AuctionSummaryMessage ==
-    [ timeOffset    : Sample(4),
-      symbolLong    : Sample(8),
-      auctionType   : Sample(1),
-      priceLong     : Sample(8),
-      contractsLong : Sample(4) ]
+    [ timeOffset         : Sample(4),
+      symbolLong         : Sample(8),
+      auctionOpeningType : Sample(1),
+      price              : Sample(8),
+      contractsShort     : Sample(2) ]
 
 EncodeAuctionSummaryMessage(message) ==
     message.timeOffset
         \o message.symbolLong
-        \o message.auctionType
-        \o message.priceLong
-        \o message.contractsLong
+        \o message.auctionOpeningType
+        \o message.price
+        \o message.contractsShort
 
 DecodeAuctionSummaryMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET symbolLong == ReadBytes(timeOffset.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
-    LET auctionType == ReadBytes(symbolLong.rest, 1) IN IF ~auctionType.ok THEN Fail ELSE
-    LET priceLong == ReadBytes(auctionType.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
-    LET contractsLong == ReadBytes(priceLong.rest, 4) IN IF ~contractsLong.ok THEN Fail ELSE
-    Ok([ timeOffset    |-> timeOffset.value,
-         symbolLong    |-> symbolLong.value,
-         auctionType   |-> auctionType.value,
-         priceLong     |-> priceLong.value,
-         contractsLong |-> contractsLong.value ], contractsLong.rest)
+    LET auctionOpeningType == ReadBytes(symbolLong.rest, 1) IN IF ~auctionOpeningType.ok THEN Fail ELSE
+    LET price == ReadBytes(auctionOpeningType.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET contractsShort == ReadBytes(price.rest, 2) IN IF ~contractsShort.ok THEN Fail ELSE
+    Ok([ timeOffset         |-> timeOffset.value,
+         symbolLong         |-> symbolLong.value,
+         auctionOpeningType |-> auctionOpeningType.value,
+         price              |-> price.value,
+         contractsShort     |-> contractsShort.value ], contractsShort.rest)
 
 ZeroAuctionSummaryMessage ==
-    [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
-      symbolLong    |-> [i \in 1 .. 8 |-> 0],
-      auctionType   |-> [i \in 1 .. 1 |-> 0],
-      priceLong     |-> [i \in 1 .. 8 |-> 0],
-      contractsLong |-> [i \in 1 .. 4 |-> 0] ]
+    [ timeOffset         |-> [i \in 1 .. 4 |-> 0],
+      symbolLong         |-> [i \in 1 .. 8 |-> 0],
+      auctionOpeningType |-> [i \in 1 .. 1 |-> 0],
+      price              |-> [i \in 1 .. 8 |-> 0],
+      contractsShort     |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Auction Summary Message at zero, then each field in turn at the values it is checked at *)
 CheckedAuctionSummaryMessage ==
     { ZeroAuctionSummaryMessage }
         \cup { [ZeroAuctionSummaryMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroAuctionSummaryMessage EXCEPT !.symbolLong = one] : one \in Sample(8) }
-        \cup { [ZeroAuctionSummaryMessage EXCEPT !.auctionType = one] : one \in Sample(1) }
-        \cup { [ZeroAuctionSummaryMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
-        \cup { [ZeroAuctionSummaryMessage EXCEPT !.contractsLong = one] : one \in Sample(4) }
+        \cup { [ZeroAuctionSummaryMessage EXCEPT !.auctionOpeningType = one] : one \in Sample(1) }
+        \cup { [ZeroAuctionSummaryMessage EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroAuctionSummaryMessage EXCEPT !.contractsShort = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Opening Auction Update Message: 62 bytes                                *)
@@ -1239,7 +1273,7 @@ CheckedOpeningAuctionUpdateMessage ==
         \cup { [ZeroOpeningAuctionUpdateMessage EXCEPT !.compositeMarketOfferPrice = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Auction Notification Message: 41 bytes                                  *)
+(* Auction Notification Message: 39 bytes                                  *)
 (***************************************************************************)
 
 AuctionNotificationMessage ==
@@ -1248,8 +1282,8 @@ AuctionNotificationMessage ==
       auctionId         : Sample(8),
       auctionType       : Sample(1),
       side              : Sample(1),
-      priceLong         : Sample(8),
-      contractsLong     : Sample(4),
+      price             : Sample(8),
+      contractsShort    : Sample(2),
       customerIndicator : Sample(1),
       participantId     : Sample(4),
       auctionEndOffset  : Sample(4) ]
@@ -1260,8 +1294,8 @@ EncodeAuctionNotificationMessage(message) ==
         \o message.auctionId
         \o message.auctionType
         \o message.side
-        \o message.priceLong
-        \o message.contractsLong
+        \o message.price
+        \o message.contractsShort
         \o message.customerIndicator
         \o message.participantId
         \o message.auctionEndOffset
@@ -1272,9 +1306,9 @@ DecodeAuctionNotificationMessage(bytes) ==
     LET auctionId == ReadBytes(symbol.rest, 8) IN IF ~auctionId.ok THEN Fail ELSE
     LET auctionType == ReadBytes(auctionId.rest, 1) IN IF ~auctionType.ok THEN Fail ELSE
     LET side == ReadBytes(auctionType.rest, 1) IN IF ~side.ok THEN Fail ELSE
-    LET priceLong == ReadBytes(side.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
-    LET contractsLong == ReadBytes(priceLong.rest, 4) IN IF ~contractsLong.ok THEN Fail ELSE
-    LET customerIndicator == ReadBytes(contractsLong.rest, 1) IN IF ~customerIndicator.ok THEN Fail ELSE
+    LET price == ReadBytes(side.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET contractsShort == ReadBytes(price.rest, 2) IN IF ~contractsShort.ok THEN Fail ELSE
+    LET customerIndicator == ReadBytes(contractsShort.rest, 1) IN IF ~customerIndicator.ok THEN Fail ELSE
     LET participantId == ReadBytes(customerIndicator.rest, 4) IN IF ~participantId.ok THEN Fail ELSE
     LET auctionEndOffset == ReadBytes(participantId.rest, 4) IN IF ~auctionEndOffset.ok THEN Fail ELSE
     Ok([ timeOffset        |-> timeOffset.value,
@@ -1282,8 +1316,8 @@ DecodeAuctionNotificationMessage(bytes) ==
          auctionId         |-> auctionId.value,
          auctionType       |-> auctionType.value,
          side              |-> side.value,
-         priceLong         |-> priceLong.value,
-         contractsLong     |-> contractsLong.value,
+         price             |-> price.value,
+         contractsShort    |-> contractsShort.value,
          customerIndicator |-> customerIndicator.value,
          participantId     |-> participantId.value,
          auctionEndOffset  |-> auctionEndOffset.value ], auctionEndOffset.rest)
@@ -1294,8 +1328,8 @@ ZeroAuctionNotificationMessage ==
       auctionId         |-> [i \in 1 .. 8 |-> 0],
       auctionType       |-> [i \in 1 .. 1 |-> 0],
       side              |-> [i \in 1 .. 1 |-> 0],
-      priceLong         |-> [i \in 1 .. 8 |-> 0],
-      contractsLong     |-> [i \in 1 .. 4 |-> 0],
+      price             |-> [i \in 1 .. 8 |-> 0],
+      contractsShort    |-> [i \in 1 .. 2 |-> 0],
       customerIndicator |-> [i \in 1 .. 1 |-> 0],
       participantId     |-> [i \in 1 .. 4 |-> 0],
       auctionEndOffset  |-> [i \in 1 .. 4 |-> 0] ]
@@ -1308,8 +1342,8 @@ CheckedAuctionNotificationMessage ==
         \cup { [ZeroAuctionNotificationMessage EXCEPT !.auctionId = one] : one \in Sample(8) }
         \cup { [ZeroAuctionNotificationMessage EXCEPT !.auctionType = one] : one \in Sample(1) }
         \cup { [ZeroAuctionNotificationMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroAuctionNotificationMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
-        \cup { [ZeroAuctionNotificationMessage EXCEPT !.contractsLong = one] : one \in Sample(4) }
+        \cup { [ZeroAuctionNotificationMessage EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroAuctionNotificationMessage EXCEPT !.contractsShort = one] : one \in Sample(2) }
         \cup { [ZeroAuctionNotificationMessage EXCEPT !.customerIndicator = one] : one \in Sample(1) }
         \cup { [ZeroAuctionNotificationMessage EXCEPT !.participantId = one] : one \in Sample(4) }
         \cup { [ZeroAuctionNotificationMessage EXCEPT !.auctionEndOffset = one] : one \in Sample(4) }
@@ -1383,45 +1417,45 @@ CheckedExecutionFlags3 ==
         \cup { [ZeroExecutionFlags3 EXCEPT !.algorithmicTrade = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Auction Trade Message: 36 bytes                                         *)
+(* Auction Trade Message: 34 bytes                                         *)
 (***************************************************************************)
 
 AuctionTradeMessage ==
     [ timeOffset     : Sample(4),
       auctionId      : Sample(8),
       executionId    : Sample(8),
-      priceLong      : Sample(8),
-      contractsLong  : Sample(4),
+      price          : Sample(8),
+      contractsShort : Sample(2),
       executionFlags : ExecutionFlags3 ]
 
 EncodeAuctionTradeMessage(message) ==
     message.timeOffset
         \o message.auctionId
         \o message.executionId
-        \o message.priceLong
-        \o message.contractsLong
+        \o message.price
+        \o message.contractsShort
         \o EncodeExecutionFlags3(message.executionFlags)
 
 DecodeAuctionTradeMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET auctionId == ReadBytes(timeOffset.rest, 8) IN IF ~auctionId.ok THEN Fail ELSE
     LET executionId == ReadBytes(auctionId.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
-    LET priceLong == ReadBytes(executionId.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
-    LET contractsLong == ReadBytes(priceLong.rest, 4) IN IF ~contractsLong.ok THEN Fail ELSE
-    LET executionFlags == DecodeExecutionFlags3(contractsLong.rest) IN IF ~executionFlags.ok THEN Fail ELSE
+    LET price == ReadBytes(executionId.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET contractsShort == ReadBytes(price.rest, 2) IN IF ~contractsShort.ok THEN Fail ELSE
+    LET executionFlags == DecodeExecutionFlags3(contractsShort.rest) IN IF ~executionFlags.ok THEN Fail ELSE
     Ok([ timeOffset     |-> timeOffset.value,
          auctionId      |-> auctionId.value,
          executionId    |-> executionId.value,
-         priceLong      |-> priceLong.value,
-         contractsLong  |-> contractsLong.value,
+         price          |-> price.value,
+         contractsShort |-> contractsShort.value,
          executionFlags |-> executionFlags.value ], executionFlags.rest)
 
 ZeroAuctionTradeMessage ==
     [ timeOffset     |-> [i \in 1 .. 4 |-> 0],
       auctionId      |-> [i \in 1 .. 8 |-> 0],
       executionId    |-> [i \in 1 .. 8 |-> 0],
-      priceLong      |-> [i \in 1 .. 8 |-> 0],
-      contractsLong  |-> [i \in 1 .. 4 |-> 0],
+      price          |-> [i \in 1 .. 8 |-> 0],
+      contractsShort |-> [i \in 1 .. 2 |-> 0],
       executionFlags |-> ZeroExecutionFlags3 ]
 
 (* Auction Trade Message at zero, then each field in turn at the values it is checked at *)
@@ -1430,8 +1464,8 @@ CheckedAuctionTradeMessage ==
         \cup { [ZeroAuctionTradeMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroAuctionTradeMessage EXCEPT !.auctionId = one] : one \in Sample(8) }
         \cup { [ZeroAuctionTradeMessage EXCEPT !.executionId = one] : one \in Sample(8) }
-        \cup { [ZeroAuctionTradeMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
-        \cup { [ZeroAuctionTradeMessage EXCEPT !.contractsLong = one] : one \in Sample(4) }
+        \cup { [ZeroAuctionTradeMessage EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroAuctionTradeMessage EXCEPT !.contractsShort = one] : one \in Sample(2) }
         \cup { [ZeroAuctionTradeMessage EXCEPT !.executionFlags = one] : one \in CheckedExecutionFlags3 }
 
 (***************************************************************************)
@@ -1524,38 +1558,38 @@ CheckedAuctionLiquidityMessage ==
 (***************************************************************************)
 
 WidthUpdateMessage ==
-    [ timeOffset  : Sample(4),
-      productCode : Sample(8),
-      widthType   : Sample(1),
-      multiplier  : Sample(4) ]
+    [ timeOffset      : Sample(4),
+      productCodeLong : Sample(8),
+      widthType       : Sample(1),
+      multiplier      : Sample(4) ]
 
 EncodeWidthUpdateMessage(message) ==
     message.timeOffset
-        \o message.productCode
+        \o message.productCodeLong
         \o message.widthType
         \o message.multiplier
 
 DecodeWidthUpdateMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
-    LET productCode == ReadBytes(timeOffset.rest, 8) IN IF ~productCode.ok THEN Fail ELSE
-    LET widthType == ReadBytes(productCode.rest, 1) IN IF ~widthType.ok THEN Fail ELSE
+    LET productCodeLong == ReadBytes(timeOffset.rest, 8) IN IF ~productCodeLong.ok THEN Fail ELSE
+    LET widthType == ReadBytes(productCodeLong.rest, 1) IN IF ~widthType.ok THEN Fail ELSE
     LET multiplier == ReadBytes(widthType.rest, 4) IN IF ~multiplier.ok THEN Fail ELSE
-    Ok([ timeOffset  |-> timeOffset.value,
-         productCode |-> productCode.value,
-         widthType   |-> widthType.value,
-         multiplier  |-> multiplier.value ], multiplier.rest)
+    Ok([ timeOffset      |-> timeOffset.value,
+         productCodeLong |-> productCodeLong.value,
+         widthType       |-> widthType.value,
+         multiplier      |-> multiplier.value ], multiplier.rest)
 
 ZeroWidthUpdateMessage ==
-    [ timeOffset  |-> [i \in 1 .. 4 |-> 0],
-      productCode |-> [i \in 1 .. 8 |-> 0],
-      widthType   |-> [i \in 1 .. 1 |-> 0],
-      multiplier  |-> [i \in 1 .. 4 |-> 0] ]
+    [ timeOffset      |-> [i \in 1 .. 4 |-> 0],
+      productCodeLong |-> [i \in 1 .. 8 |-> 0],
+      widthType       |-> [i \in 1 .. 1 |-> 0],
+      multiplier      |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Width Update Message at zero, then each field in turn at the values it is checked at *)
 CheckedWidthUpdateMessage ==
     { ZeroWidthUpdateMessage }
         \cup { [ZeroWidthUpdateMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
-        \cup { [ZeroWidthUpdateMessage EXCEPT !.productCode = one] : one \in Sample(8) }
+        \cup { [ZeroWidthUpdateMessage EXCEPT !.productCodeLong = one] : one \in Sample(8) }
         \cup { [ZeroWidthUpdateMessage EXCEPT !.widthType = one] : one \in Sample(1) }
         \cup { [ZeroWidthUpdateMessage EXCEPT !.multiplier = one] : one \in Sample(4) }
 
@@ -1564,18 +1598,18 @@ CheckedWidthUpdateMessage ==
 (***************************************************************************)
 
 FuturesInstrumentDefinitionMessage ==
-    [ timeOffset     : Sample(4),
-      symbol         : Sample(6),
-      productCode    : Sample(8),
-      expirationDate : Sample(4),
-      contractSize   : Sample(2),
-      listingState   : Sample(1),
-      priceIncrement : Sample(8) ]
+    [ timeOffset      : Sample(4),
+      symbol          : Sample(6),
+      productCodeLong : Sample(8),
+      expirationDate  : Sample(4),
+      contractSize    : Sample(2),
+      listingState    : Sample(1),
+      priceIncrement  : Sample(8) ]
 
 EncodeFuturesInstrumentDefinitionMessage(message) ==
     message.timeOffset
         \o message.symbol
-        \o message.productCode
+        \o message.productCodeLong
         \o message.expirationDate
         \o message.contractSize
         \o message.listingState
@@ -1584,34 +1618,34 @@ EncodeFuturesInstrumentDefinitionMessage(message) ==
 DecodeFuturesInstrumentDefinitionMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET symbol == ReadBytes(timeOffset.rest, 6) IN IF ~symbol.ok THEN Fail ELSE
-    LET productCode == ReadBytes(symbol.rest, 8) IN IF ~productCode.ok THEN Fail ELSE
-    LET expirationDate == ReadBytes(productCode.rest, 4) IN IF ~expirationDate.ok THEN Fail ELSE
+    LET productCodeLong == ReadBytes(symbol.rest, 8) IN IF ~productCodeLong.ok THEN Fail ELSE
+    LET expirationDate == ReadBytes(productCodeLong.rest, 4) IN IF ~expirationDate.ok THEN Fail ELSE
     LET contractSize == ReadBytes(expirationDate.rest, 2) IN IF ~contractSize.ok THEN Fail ELSE
     LET listingState == ReadBytes(contractSize.rest, 1) IN IF ~listingState.ok THEN Fail ELSE
     LET priceIncrement == ReadBytes(listingState.rest, 8) IN IF ~priceIncrement.ok THEN Fail ELSE
-    Ok([ timeOffset     |-> timeOffset.value,
-         symbol         |-> symbol.value,
-         productCode    |-> productCode.value,
-         expirationDate |-> expirationDate.value,
-         contractSize   |-> contractSize.value,
-         listingState   |-> listingState.value,
-         priceIncrement |-> priceIncrement.value ], priceIncrement.rest)
+    Ok([ timeOffset      |-> timeOffset.value,
+         symbol          |-> symbol.value,
+         productCodeLong |-> productCodeLong.value,
+         expirationDate  |-> expirationDate.value,
+         contractSize    |-> contractSize.value,
+         listingState    |-> listingState.value,
+         priceIncrement  |-> priceIncrement.value ], priceIncrement.rest)
 
 ZeroFuturesInstrumentDefinitionMessage ==
-    [ timeOffset     |-> [i \in 1 .. 4 |-> 0],
-      symbol         |-> [i \in 1 .. 6 |-> 0],
-      productCode    |-> [i \in 1 .. 8 |-> 0],
-      expirationDate |-> [i \in 1 .. 4 |-> 0],
-      contractSize   |-> [i \in 1 .. 2 |-> 0],
-      listingState   |-> [i \in 1 .. 1 |-> 0],
-      priceIncrement |-> [i \in 1 .. 8 |-> 0] ]
+    [ timeOffset      |-> [i \in 1 .. 4 |-> 0],
+      symbol          |-> [i \in 1 .. 6 |-> 0],
+      productCodeLong |-> [i \in 1 .. 8 |-> 0],
+      expirationDate  |-> [i \in 1 .. 4 |-> 0],
+      contractSize    |-> [i \in 1 .. 2 |-> 0],
+      listingState    |-> [i \in 1 .. 1 |-> 0],
+      priceIncrement  |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Futures Instrument Definition Message at zero, then each field in turn at the values it is checked at *)
 CheckedFuturesInstrumentDefinitionMessage ==
     { ZeroFuturesInstrumentDefinitionMessage }
         \cup { [ZeroFuturesInstrumentDefinitionMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroFuturesInstrumentDefinitionMessage EXCEPT !.symbol = one] : one \in Sample(6) }
-        \cup { [ZeroFuturesInstrumentDefinitionMessage EXCEPT !.productCode = one] : one \in Sample(8) }
+        \cup { [ZeroFuturesInstrumentDefinitionMessage EXCEPT !.productCodeLong = one] : one \in Sample(8) }
         \cup { [ZeroFuturesInstrumentDefinitionMessage EXCEPT !.expirationDate = one] : one \in Sample(4) }
         \cup { [ZeroFuturesInstrumentDefinitionMessage EXCEPT !.contractSize = one] : one \in Sample(2) }
         \cup { [ZeroFuturesInstrumentDefinitionMessage EXCEPT !.listingState = one] : one \in Sample(1) }
@@ -1622,20 +1656,20 @@ CheckedFuturesInstrumentDefinitionMessage ==
 (***************************************************************************)
 
 OptionsInstrumentDefinitionMessage ==
-    [ timeOffset     : Sample(4),
-      symbol         : Sample(6),
-      productCode    : Sample(8),
-      callPut        : Sample(1),
-      expirationDate : Sample(4),
-      strikePrice    : Sample(8),
-      contractSize   : Sample(2),
-      listingState   : Sample(1),
-      priceIncrement : Sample(8) ]
+    [ timeOffset      : Sample(4),
+      symbol          : Sample(6),
+      productCodeLong : Sample(8),
+      callPut         : Sample(1),
+      expirationDate  : Sample(4),
+      strikePrice     : Sample(8),
+      contractSize    : Sample(2),
+      listingState    : Sample(1),
+      priceIncrement  : Sample(8) ]
 
 EncodeOptionsInstrumentDefinitionMessage(message) ==
     message.timeOffset
         \o message.symbol
-        \o message.productCode
+        \o message.productCodeLong
         \o message.callPut
         \o message.expirationDate
         \o message.strikePrice
@@ -1646,40 +1680,40 @@ EncodeOptionsInstrumentDefinitionMessage(message) ==
 DecodeOptionsInstrumentDefinitionMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET symbol == ReadBytes(timeOffset.rest, 6) IN IF ~symbol.ok THEN Fail ELSE
-    LET productCode == ReadBytes(symbol.rest, 8) IN IF ~productCode.ok THEN Fail ELSE
-    LET callPut == ReadBytes(productCode.rest, 1) IN IF ~callPut.ok THEN Fail ELSE
+    LET productCodeLong == ReadBytes(symbol.rest, 8) IN IF ~productCodeLong.ok THEN Fail ELSE
+    LET callPut == ReadBytes(productCodeLong.rest, 1) IN IF ~callPut.ok THEN Fail ELSE
     LET expirationDate == ReadBytes(callPut.rest, 4) IN IF ~expirationDate.ok THEN Fail ELSE
     LET strikePrice == ReadBytes(expirationDate.rest, 8) IN IF ~strikePrice.ok THEN Fail ELSE
     LET contractSize == ReadBytes(strikePrice.rest, 2) IN IF ~contractSize.ok THEN Fail ELSE
     LET listingState == ReadBytes(contractSize.rest, 1) IN IF ~listingState.ok THEN Fail ELSE
     LET priceIncrement == ReadBytes(listingState.rest, 8) IN IF ~priceIncrement.ok THEN Fail ELSE
-    Ok([ timeOffset     |-> timeOffset.value,
-         symbol         |-> symbol.value,
-         productCode    |-> productCode.value,
-         callPut        |-> callPut.value,
-         expirationDate |-> expirationDate.value,
-         strikePrice    |-> strikePrice.value,
-         contractSize   |-> contractSize.value,
-         listingState   |-> listingState.value,
-         priceIncrement |-> priceIncrement.value ], priceIncrement.rest)
+    Ok([ timeOffset      |-> timeOffset.value,
+         symbol          |-> symbol.value,
+         productCodeLong |-> productCodeLong.value,
+         callPut         |-> callPut.value,
+         expirationDate  |-> expirationDate.value,
+         strikePrice     |-> strikePrice.value,
+         contractSize    |-> contractSize.value,
+         listingState    |-> listingState.value,
+         priceIncrement  |-> priceIncrement.value ], priceIncrement.rest)
 
 ZeroOptionsInstrumentDefinitionMessage ==
-    [ timeOffset     |-> [i \in 1 .. 4 |-> 0],
-      symbol         |-> [i \in 1 .. 6 |-> 0],
-      productCode    |-> [i \in 1 .. 8 |-> 0],
-      callPut        |-> [i \in 1 .. 1 |-> 0],
-      expirationDate |-> [i \in 1 .. 4 |-> 0],
-      strikePrice    |-> [i \in 1 .. 8 |-> 0],
-      contractSize   |-> [i \in 1 .. 2 |-> 0],
-      listingState   |-> [i \in 1 .. 1 |-> 0],
-      priceIncrement |-> [i \in 1 .. 8 |-> 0] ]
+    [ timeOffset      |-> [i \in 1 .. 4 |-> 0],
+      symbol          |-> [i \in 1 .. 6 |-> 0],
+      productCodeLong |-> [i \in 1 .. 8 |-> 0],
+      callPut         |-> [i \in 1 .. 1 |-> 0],
+      expirationDate  |-> [i \in 1 .. 4 |-> 0],
+      strikePrice     |-> [i \in 1 .. 8 |-> 0],
+      contractSize    |-> [i \in 1 .. 2 |-> 0],
+      listingState    |-> [i \in 1 .. 1 |-> 0],
+      priceIncrement  |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Options Instrument Definition Message at zero, then each field in turn at the values it is checked at *)
 CheckedOptionsInstrumentDefinitionMessage ==
     { ZeroOptionsInstrumentDefinitionMessage }
         \cup { [ZeroOptionsInstrumentDefinitionMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroOptionsInstrumentDefinitionMessage EXCEPT !.symbol = one] : one \in Sample(6) }
-        \cup { [ZeroOptionsInstrumentDefinitionMessage EXCEPT !.productCode = one] : one \in Sample(8) }
+        \cup { [ZeroOptionsInstrumentDefinitionMessage EXCEPT !.productCodeLong = one] : one \in Sample(8) }
         \cup { [ZeroOptionsInstrumentDefinitionMessage EXCEPT !.callPut = one] : one \in Sample(1) }
         \cup { [ZeroOptionsInstrumentDefinitionMessage EXCEPT !.expirationDate = one] : one \in Sample(4) }
         \cup { [ZeroOptionsInstrumentDefinitionMessage EXCEPT !.strikePrice = one] : one \in Sample(8) }
@@ -1853,30 +1887,30 @@ CheckedSettlementMessage ==
         \cup { [ZeroSettlementMessage EXCEPT !.issue = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* End Of Day Message: 63 bytes                                            *)
+(* End Of Day Summary Message: 63 bytes                                    *)
 (***************************************************************************)
 
-EndOfDayMessage ==
-    [ timeOffset            : Sample(4),
-      symbol                : Sample(6),
-      tradeDate             : Sample(4),
-      openInterest          : Sample(4),
-      highPriceBinaryPrice8 : Sample(8),
-      lowPriceBinaryPrice8  : Sample(8),
-      openPrice             : Sample(8),
-      closePrice            : Sample(8),
-      totalVolume           : Sample(4),
-      blockVolume           : Sample(4),
-      ecrpVolume            : Sample(4),
-      summaryFlags          : Sample(1) ]
+EndOfDaySummaryMessage ==
+    [ timeOffset   : Sample(4),
+      symbol       : Sample(6),
+      tradeDate    : Sample(4),
+      openInterest : Sample(4),
+      highPrice    : Sample(8),
+      lowPrice     : Sample(8),
+      openPrice    : Sample(8),
+      closePrice   : Sample(8),
+      totalVolume  : Sample(4),
+      blockVolume  : Sample(4),
+      ecrpVolume   : Sample(4),
+      summaryFlags : Sample(1) ]
 
-EncodeEndOfDayMessage(message) ==
+EncodeEndOfDaySummaryMessage(message) ==
     message.timeOffset
         \o message.symbol
         \o message.tradeDate
         \o message.openInterest
-        \o message.highPriceBinaryPrice8
-        \o message.lowPriceBinaryPrice8
+        \o message.highPrice
+        \o message.lowPrice
         \o message.openPrice
         \o message.closePrice
         \o message.totalVolume
@@ -1884,61 +1918,61 @@ EncodeEndOfDayMessage(message) ==
         \o message.ecrpVolume
         \o message.summaryFlags
 
-DecodeEndOfDayMessage(bytes) ==
+DecodeEndOfDaySummaryMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET symbol == ReadBytes(timeOffset.rest, 6) IN IF ~symbol.ok THEN Fail ELSE
     LET tradeDate == ReadBytes(symbol.rest, 4) IN IF ~tradeDate.ok THEN Fail ELSE
     LET openInterest == ReadBytes(tradeDate.rest, 4) IN IF ~openInterest.ok THEN Fail ELSE
-    LET highPriceBinaryPrice8 == ReadBytes(openInterest.rest, 8) IN IF ~highPriceBinaryPrice8.ok THEN Fail ELSE
-    LET lowPriceBinaryPrice8 == ReadBytes(highPriceBinaryPrice8.rest, 8) IN IF ~lowPriceBinaryPrice8.ok THEN Fail ELSE
-    LET openPrice == ReadBytes(lowPriceBinaryPrice8.rest, 8) IN IF ~openPrice.ok THEN Fail ELSE
+    LET highPrice == ReadBytes(openInterest.rest, 8) IN IF ~highPrice.ok THEN Fail ELSE
+    LET lowPrice == ReadBytes(highPrice.rest, 8) IN IF ~lowPrice.ok THEN Fail ELSE
+    LET openPrice == ReadBytes(lowPrice.rest, 8) IN IF ~openPrice.ok THEN Fail ELSE
     LET closePrice == ReadBytes(openPrice.rest, 8) IN IF ~closePrice.ok THEN Fail ELSE
     LET totalVolume == ReadBytes(closePrice.rest, 4) IN IF ~totalVolume.ok THEN Fail ELSE
     LET blockVolume == ReadBytes(totalVolume.rest, 4) IN IF ~blockVolume.ok THEN Fail ELSE
     LET ecrpVolume == ReadBytes(blockVolume.rest, 4) IN IF ~ecrpVolume.ok THEN Fail ELSE
     LET summaryFlags == ReadBytes(ecrpVolume.rest, 1) IN IF ~summaryFlags.ok THEN Fail ELSE
-    Ok([ timeOffset            |-> timeOffset.value,
-         symbol                |-> symbol.value,
-         tradeDate             |-> tradeDate.value,
-         openInterest          |-> openInterest.value,
-         highPriceBinaryPrice8 |-> highPriceBinaryPrice8.value,
-         lowPriceBinaryPrice8  |-> lowPriceBinaryPrice8.value,
-         openPrice             |-> openPrice.value,
-         closePrice            |-> closePrice.value,
-         totalVolume           |-> totalVolume.value,
-         blockVolume           |-> blockVolume.value,
-         ecrpVolume            |-> ecrpVolume.value,
-         summaryFlags          |-> summaryFlags.value ], summaryFlags.rest)
+    Ok([ timeOffset   |-> timeOffset.value,
+         symbol       |-> symbol.value,
+         tradeDate    |-> tradeDate.value,
+         openInterest |-> openInterest.value,
+         highPrice    |-> highPrice.value,
+         lowPrice     |-> lowPrice.value,
+         openPrice    |-> openPrice.value,
+         closePrice   |-> closePrice.value,
+         totalVolume  |-> totalVolume.value,
+         blockVolume  |-> blockVolume.value,
+         ecrpVolume   |-> ecrpVolume.value,
+         summaryFlags |-> summaryFlags.value ], summaryFlags.rest)
 
-ZeroEndOfDayMessage ==
-    [ timeOffset            |-> [i \in 1 .. 4 |-> 0],
-      symbol                |-> [i \in 1 .. 6 |-> 0],
-      tradeDate             |-> [i \in 1 .. 4 |-> 0],
-      openInterest          |-> [i \in 1 .. 4 |-> 0],
-      highPriceBinaryPrice8 |-> [i \in 1 .. 8 |-> 0],
-      lowPriceBinaryPrice8  |-> [i \in 1 .. 8 |-> 0],
-      openPrice             |-> [i \in 1 .. 8 |-> 0],
-      closePrice            |-> [i \in 1 .. 8 |-> 0],
-      totalVolume           |-> [i \in 1 .. 4 |-> 0],
-      blockVolume           |-> [i \in 1 .. 4 |-> 0],
-      ecrpVolume            |-> [i \in 1 .. 4 |-> 0],
-      summaryFlags          |-> [i \in 1 .. 1 |-> 0] ]
+ZeroEndOfDaySummaryMessage ==
+    [ timeOffset   |-> [i \in 1 .. 4 |-> 0],
+      symbol       |-> [i \in 1 .. 6 |-> 0],
+      tradeDate    |-> [i \in 1 .. 4 |-> 0],
+      openInterest |-> [i \in 1 .. 4 |-> 0],
+      highPrice    |-> [i \in 1 .. 8 |-> 0],
+      lowPrice     |-> [i \in 1 .. 8 |-> 0],
+      openPrice    |-> [i \in 1 .. 8 |-> 0],
+      closePrice   |-> [i \in 1 .. 8 |-> 0],
+      totalVolume  |-> [i \in 1 .. 4 |-> 0],
+      blockVolume  |-> [i \in 1 .. 4 |-> 0],
+      ecrpVolume   |-> [i \in 1 .. 4 |-> 0],
+      summaryFlags |-> [i \in 1 .. 1 |-> 0] ]
 
-(* End Of Day Message at zero, then each field in turn at the values it is checked at *)
-CheckedEndOfDayMessage ==
-    { ZeroEndOfDayMessage }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.symbol = one] : one \in Sample(6) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.tradeDate = one] : one \in Sample(4) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.openInterest = one] : one \in Sample(4) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.highPriceBinaryPrice8 = one] : one \in Sample(8) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.lowPriceBinaryPrice8 = one] : one \in Sample(8) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.openPrice = one] : one \in Sample(8) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.closePrice = one] : one \in Sample(8) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.totalVolume = one] : one \in Sample(4) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.blockVolume = one] : one \in Sample(4) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.ecrpVolume = one] : one \in Sample(4) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.summaryFlags = one] : one \in Sample(1) }
+(* End Of Day Summary Message at zero, then each field in turn at the values it is checked at *)
+CheckedEndOfDaySummaryMessage ==
+    { ZeroEndOfDaySummaryMessage }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.symbol = one] : one \in Sample(6) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.tradeDate = one] : one \in Sample(4) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.openInterest = one] : one \in Sample(4) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.highPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.lowPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.openPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.closePrice = one] : one \in Sample(8) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.totalVolume = one] : one \in Sample(4) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.blockVolume = one] : one \in Sample(4) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.ecrpVolume = one] : one \in Sample(4) }
+        \cup { [ZeroEndOfDaySummaryMessage EXCEPT !.summaryFlags = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Payload, selected by Message Type                                       *)
@@ -1958,10 +1992,11 @@ DeleteOrderMessageCode == 41  \* 0x29
 TradeLongMessageCode == 65  \* 0x41
 TradeShortMessageCode == 43  \* 0x2b
 TradeExtendedMessageCode == 50  \* 0x32
-EndOfSessionMessageCode == 45  \* 0x2d
+EndOfSessionCode == 45  \* 0x2d
 TransactionBeginMessageCode == 188  \* 0xbc
 TransactionEndMessageCode == 189  \* 0xbd
 TradingStatusMessageCode == 49  \* 0x31
+FastStatusMessageCode == 226  \* 0xe2
 AuctionSummaryMessageCode == 150  \* 0x96
 OpeningAuctionUpdateMessageCode == 209  \* 0xd1
 AuctionNotificationMessageCode == 173  \* 0xad
@@ -1974,7 +2009,7 @@ OptionsInstrumentDefinitionMessageCode == 219  \* 0xdb
 ComplexInstrumentDefinitionMessageCode == 220  \* 0xdc
 TradeBreakMessageCode == 44  \* 0x2c
 SettlementMessageCode == 185  \* 0xb9
-EndOfDayMessageCode == 186  \* 0xba
+EndOfDaySummaryMessageCode == 186  \* 0xba
 
 Payload ==
     [ tag : {TimeMessageCode}, body : TimeMessage ]
@@ -1991,10 +2026,11 @@ Payload ==
         \cup [ tag : {TradeLongMessageCode}, body : TradeLongMessage ]
         \cup [ tag : {TradeShortMessageCode}, body : TradeShortMessage ]
         \cup [ tag : {TradeExtendedMessageCode}, body : TradeExtendedMessage ]
-        \cup [ tag : {EndOfSessionMessageCode}, body : EndOfSessionMessage ]
+        \cup [ tag : {EndOfSessionCode}, body : EndOfSession ]
         \cup [ tag : {TransactionBeginMessageCode}, body : TransactionBeginMessage ]
         \cup [ tag : {TransactionEndMessageCode}, body : TransactionEndMessage ]
         \cup [ tag : {TradingStatusMessageCode}, body : TradingStatusMessage ]
+        \cup [ tag : {FastStatusMessageCode}, body : FastStatusMessage ]
         \cup [ tag : {AuctionSummaryMessageCode}, body : AuctionSummaryMessage ]
         \cup [ tag : {OpeningAuctionUpdateMessageCode}, body : OpeningAuctionUpdateMessage ]
         \cup [ tag : {AuctionNotificationMessageCode}, body : AuctionNotificationMessage ]
@@ -2007,7 +2043,7 @@ Payload ==
         \cup [ tag : {ComplexInstrumentDefinitionMessageCode}, body : ComplexInstrumentDefinitionMessage ]
         \cup [ tag : {TradeBreakMessageCode}, body : TradeBreakMessage ]
         \cup [ tag : {SettlementMessageCode}, body : SettlementMessage ]
-        \cup [ tag : {EndOfDayMessageCode}, body : EndOfDayMessage ]
+        \cup [ tag : {EndOfDaySummaryMessageCode}, body : EndOfDaySummaryMessage ]
 
 EncodePayload(message) ==
     CASE message.tag = TimeMessageCode -> EncodeTimeMessage(message.body)
@@ -2024,10 +2060,11 @@ EncodePayload(message) ==
       [] message.tag = TradeLongMessageCode -> EncodeTradeLongMessage(message.body)
       [] message.tag = TradeShortMessageCode -> EncodeTradeShortMessage(message.body)
       [] message.tag = TradeExtendedMessageCode -> EncodeTradeExtendedMessage(message.body)
-      [] message.tag = EndOfSessionMessageCode -> EncodeEndOfSessionMessage(message.body)
+      [] message.tag = EndOfSessionCode -> EncodeEndOfSession(message.body)
       [] message.tag = TransactionBeginMessageCode -> EncodeTransactionBeginMessage(message.body)
       [] message.tag = TransactionEndMessageCode -> EncodeTransactionEndMessage(message.body)
       [] message.tag = TradingStatusMessageCode -> EncodeTradingStatusMessage(message.body)
+      [] message.tag = FastStatusMessageCode -> EncodeFastStatusMessage(message.body)
       [] message.tag = AuctionSummaryMessageCode -> EncodeAuctionSummaryMessage(message.body)
       [] message.tag = OpeningAuctionUpdateMessageCode -> EncodeOpeningAuctionUpdateMessage(message.body)
       [] message.tag = AuctionNotificationMessageCode -> EncodeAuctionNotificationMessage(message.body)
@@ -2040,7 +2077,7 @@ EncodePayload(message) ==
       [] message.tag = ComplexInstrumentDefinitionMessageCode -> EncodeComplexInstrumentDefinitionMessage(message.body)
       [] message.tag = TradeBreakMessageCode -> EncodeTradeBreakMessage(message.body)
       [] message.tag = SettlementMessageCode -> EncodeSettlementMessage(message.body)
-      [] message.tag = EndOfDayMessageCode -> EncodeEndOfDayMessage(message.body)
+      [] message.tag = EndOfDaySummaryMessageCode -> EncodeEndOfDaySummaryMessage(message.body)
 
 DecodePayload(tag, bytes) ==
     LET read ==
@@ -2058,10 +2095,11 @@ DecodePayload(tag, bytes) ==
               [] tag = TradeLongMessageCode -> DecodeTradeLongMessage(bytes)
               [] tag = TradeShortMessageCode -> DecodeTradeShortMessage(bytes)
               [] tag = TradeExtendedMessageCode -> DecodeTradeExtendedMessage(bytes)
-              [] tag = EndOfSessionMessageCode -> DecodeEndOfSessionMessage(bytes)
+              [] tag = EndOfSessionCode -> DecodeEndOfSession(bytes)
               [] tag = TransactionBeginMessageCode -> DecodeTransactionBeginMessage(bytes)
               [] tag = TransactionEndMessageCode -> DecodeTransactionEndMessage(bytes)
               [] tag = TradingStatusMessageCode -> DecodeTradingStatusMessage(bytes)
+              [] tag = FastStatusMessageCode -> DecodeFastStatusMessage(bytes)
               [] tag = AuctionSummaryMessageCode -> DecodeAuctionSummaryMessage(bytes)
               [] tag = OpeningAuctionUpdateMessageCode -> DecodeOpeningAuctionUpdateMessage(bytes)
               [] tag = AuctionNotificationMessageCode -> DecodeAuctionNotificationMessage(bytes)
@@ -2074,7 +2112,7 @@ DecodePayload(tag, bytes) ==
               [] tag = ComplexInstrumentDefinitionMessageCode -> DecodeComplexInstrumentDefinitionMessage(bytes)
               [] tag = TradeBreakMessageCode -> DecodeTradeBreakMessage(bytes)
               [] tag = SettlementMessageCode -> DecodeSettlementMessage(bytes)
-              [] tag = EndOfDayMessageCode -> DecodeEndOfDayMessage(bytes)
+              [] tag = EndOfDaySummaryMessageCode -> DecodeEndOfDaySummaryMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -2096,10 +2134,11 @@ CheckedPayload ==
         \cup { [tag |-> TradeLongMessageCode, body |-> one] : one \in CheckedTradeLongMessage }
         \cup { [tag |-> TradeShortMessageCode, body |-> one] : one \in CheckedTradeShortMessage }
         \cup { [tag |-> TradeExtendedMessageCode, body |-> one] : one \in CheckedTradeExtendedMessage }
-        \cup { [tag |-> EndOfSessionMessageCode, body |-> one] : one \in CheckedEndOfSessionMessage }
+        \cup { [tag |-> EndOfSessionCode, body |-> one] : one \in CheckedEndOfSession }
         \cup { [tag |-> TransactionBeginMessageCode, body |-> one] : one \in CheckedTransactionBeginMessage }
         \cup { [tag |-> TransactionEndMessageCode, body |-> one] : one \in CheckedTransactionEndMessage }
         \cup { [tag |-> TradingStatusMessageCode, body |-> one] : one \in CheckedTradingStatusMessage }
+        \cup { [tag |-> FastStatusMessageCode, body |-> one] : one \in CheckedFastStatusMessage }
         \cup { [tag |-> AuctionSummaryMessageCode, body |-> one] : one \in CheckedAuctionSummaryMessage }
         \cup { [tag |-> OpeningAuctionUpdateMessageCode, body |-> one] : one \in CheckedOpeningAuctionUpdateMessage }
         \cup { [tag |-> AuctionNotificationMessageCode, body |-> one] : one \in CheckedAuctionNotificationMessage }
@@ -2112,7 +2151,7 @@ CheckedPayload ==
         \cup { [tag |-> ComplexInstrumentDefinitionMessageCode, body |-> one] : one \in CheckedComplexInstrumentDefinitionMessage }
         \cup { [tag |-> TradeBreakMessageCode, body |-> one] : one \in CheckedTradeBreakMessage }
         \cup { [tag |-> SettlementMessageCode, body |-> one] : one \in CheckedSettlementMessage }
-        \cup { [tag |-> EndOfDayMessageCode, body |-> one] : one \in CheckedEndOfDayMessage }
+        \cup { [tag |-> EndOfDaySummaryMessageCode, body |-> one] : one \in CheckedEndOfDaySummaryMessage }
 
 (***************************************************************************)
 (* Message, framed by Message Length                                       *)
@@ -2187,10 +2226,11 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> TradeLongMessageCode, body |-> ZeroTradeLongMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TradeShortMessageCode, body |-> ZeroTradeShortMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TradeExtendedMessageCode, body |-> ZeroTradeExtendedMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> EndOfSessionMessageCode, body |-> ZeroEndOfSessionMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> EndOfSessionCode, body |-> ZeroEndOfSession]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TransactionBeginMessageCode, body |-> ZeroTransactionBeginMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TransactionEndMessageCode, body |-> ZeroTransactionEndMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TradingStatusMessageCode, body |-> ZeroTradingStatusMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> FastStatusMessageCode, body |-> ZeroFastStatusMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> AuctionSummaryMessageCode, body |-> ZeroAuctionSummaryMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> OpeningAuctionUpdateMessageCode, body |-> ZeroOpeningAuctionUpdateMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> AuctionNotificationMessageCode, body |-> ZeroAuctionNotificationMessage]],
@@ -2203,7 +2243,7 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> ComplexInstrumentDefinitionMessageCode, body |-> ZeroComplexInstrumentDefinitionMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TradeBreakMessageCode, body |-> ZeroTradeBreakMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SettlementMessageCode, body |-> ZeroSettlementMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> EndOfDayMessageCode, body |-> ZeroEndOfDayMessage]] }
+      [ZeroMessage EXCEPT !.payload = [tag |-> EndOfDaySummaryMessageCode, body |-> ZeroEndOfDaySummaryMessage]] }
 
 (***************************************************************************)
 (* Packet                                                                  *)
@@ -2415,10 +2455,10 @@ RoundTripTradeExtendedMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every End Of Session Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripEndOfSessionMessage ==
-    \A message \in CheckedEndOfSessionMessage :
-        LET read == DecodeEndOfSessionMessage(EncodeEndOfSessionMessage(message))
+(* Every End Of Session decodes back to what was encoded, and leaves nothing over *)
+RoundTripEndOfSession ==
+    \A message \in CheckedEndOfSession :
+        LET read == DecodeEndOfSession(EncodeEndOfSession(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2443,6 +2483,14 @@ RoundTripTransactionEndMessage ==
 RoundTripTradingStatusMessage ==
     \A message \in CheckedTradingStatusMessage :
         LET read == DecodeTradingStatusMessage(EncodeTradingStatusMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Fast Status Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripFastStatusMessage ==
+    \A message \in CheckedFastStatusMessage :
+        LET read == DecodeFastStatusMessage(EncodeFastStatusMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2567,10 +2615,10 @@ RoundTripSettlementMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every End Of Day Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripEndOfDayMessage ==
-    \A message \in CheckedEndOfDayMessage :
-        LET read == DecodeEndOfDayMessage(EncodeEndOfDayMessage(message))
+(* Every End Of Day Summary Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripEndOfDaySummaryMessage ==
+    \A message \in CheckedEndOfDaySummaryMessage :
+        LET read == DecodeEndOfDaySummaryMessage(EncodeEndOfDaySummaryMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
