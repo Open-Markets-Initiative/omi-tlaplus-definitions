@@ -505,7 +505,7 @@ CheckedFuturesTradeMessage ==
 
 StrategyTradeMessage ==
     [ exchangeId                  : Sample(1),
-      symbolStrategy              : Sample(30),
+      symbol                      : Sample(30),
       volume                      : Sample(8),
       tradePriceSign              : Sample(1),
       tradePrice                  : Sample(7),
@@ -518,7 +518,7 @@ StrategyTradeMessage ==
 
 EncodeStrategyTradeMessage(message) ==
     message.exchangeId
-        \o message.symbolStrategy
+        \o message.symbol
         \o message.volume
         \o message.tradePriceSign
         \o message.tradePrice
@@ -531,8 +531,8 @@ EncodeStrategyTradeMessage(message) ==
 
 DecodeStrategyTradeMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
-    LET symbolStrategy == ReadBytes(exchangeId.rest, 30) IN IF ~symbolStrategy.ok THEN Fail ELSE
-    LET volume == ReadBytes(symbolStrategy.rest, 8) IN IF ~volume.ok THEN Fail ELSE
+    LET symbol == ReadBytes(exchangeId.rest, 30) IN IF ~symbol.ok THEN Fail ELSE
+    LET volume == ReadBytes(symbol.rest, 8) IN IF ~volume.ok THEN Fail ELSE
     LET tradePriceSign == ReadBytes(volume.rest, 1) IN IF ~tradePriceSign.ok THEN Fail ELSE
     LET tradePrice == ReadBytes(tradePriceSign.rest, 7) IN IF ~tradePrice.ok THEN Fail ELSE
     LET tradePriceFractionIndicator == ReadBytes(tradePrice.rest, 1) IN IF ~tradePriceFractionIndicator.ok THEN Fail ELSE
@@ -542,7 +542,7 @@ DecodeStrategyTradeMessage(bytes) ==
     LET priceIndicatorMarker == ReadBytes(netChangeFractionIndicator.rest, 1) IN IF ~priceIndicatorMarker.ok THEN Fail ELSE
     LET tradeNumber == ReadBytes(priceIndicatorMarker.rest, 8) IN IF ~tradeNumber.ok THEN Fail ELSE
     Ok([ exchangeId                  |-> exchangeId.value,
-         symbolStrategy              |-> symbolStrategy.value,
+         symbol                      |-> symbol.value,
          volume                      |-> volume.value,
          tradePriceSign              |-> tradePriceSign.value,
          tradePrice                  |-> tradePrice.value,
@@ -555,7 +555,7 @@ DecodeStrategyTradeMessage(bytes) ==
 
 ZeroStrategyTradeMessage ==
     [ exchangeId                  |-> [i \in 1 .. 1 |-> 0],
-      symbolStrategy              |-> [i \in 1 .. 30 |-> 0],
+      symbol                      |-> [i \in 1 .. 30 |-> 0],
       volume                      |-> [i \in 1 .. 8 |-> 0],
       tradePriceSign              |-> [i \in 1 .. 1 |-> 0],
       tradePrice                  |-> [i \in 1 .. 7 |-> 0],
@@ -570,7 +570,7 @@ ZeroStrategyTradeMessage ==
 CheckedStrategyTradeMessage ==
     { ZeroStrategyTradeMessage }
         \cup { [ZeroStrategyTradeMessage EXCEPT !.exchangeId = one] : one \in Sample(1) }
-        \cup { [ZeroStrategyTradeMessage EXCEPT !.symbolStrategy = one] : one \in Sample(30) }
+        \cup { [ZeroStrategyTradeMessage EXCEPT !.symbol = one] : one \in Sample(30) }
         \cup { [ZeroStrategyTradeMessage EXCEPT !.volume = one] : one \in Sample(8) }
         \cup { [ZeroStrategyTradeMessage EXCEPT !.tradePriceSign = one] : one \in Sample(1) }
         \cup { [ZeroStrategyTradeMessage EXCEPT !.tradePrice = one] : one \in Sample(7) }
@@ -857,29 +857,29 @@ CheckedFutureRequestForQuoteMessage ==
 
 StrategyRequestForQuoteMessage ==
     [ exchangeId          : Sample(1),
-      symbolStrategy      : Sample(30),
+      symbol              : Sample(30),
       requestedSize       : Sample(8),
       requestedMarketSide : Sample(1) ]
 
 EncodeStrategyRequestForQuoteMessage(message) ==
     message.exchangeId
-        \o message.symbolStrategy
+        \o message.symbol
         \o message.requestedSize
         \o message.requestedMarketSide
 
 DecodeStrategyRequestForQuoteMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
-    LET symbolStrategy == ReadBytes(exchangeId.rest, 30) IN IF ~symbolStrategy.ok THEN Fail ELSE
-    LET requestedSize == ReadBytes(symbolStrategy.rest, 8) IN IF ~requestedSize.ok THEN Fail ELSE
+    LET symbol == ReadBytes(exchangeId.rest, 30) IN IF ~symbol.ok THEN Fail ELSE
+    LET requestedSize == ReadBytes(symbol.rest, 8) IN IF ~requestedSize.ok THEN Fail ELSE
     LET requestedMarketSide == ReadBytes(requestedSize.rest, 1) IN IF ~requestedMarketSide.ok THEN Fail ELSE
     Ok([ exchangeId          |-> exchangeId.value,
-         symbolStrategy      |-> symbolStrategy.value,
+         symbol              |-> symbol.value,
          requestedSize       |-> requestedSize.value,
          requestedMarketSide |-> requestedMarketSide.value ], requestedMarketSide.rest)
 
 ZeroStrategyRequestForQuoteMessage ==
     [ exchangeId          |-> [i \in 1 .. 1 |-> 0],
-      symbolStrategy      |-> [i \in 1 .. 30 |-> 0],
+      symbol              |-> [i \in 1 .. 30 |-> 0],
       requestedSize       |-> [i \in 1 .. 8 |-> 0],
       requestedMarketSide |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -887,7 +887,7 @@ ZeroStrategyRequestForQuoteMessage ==
 CheckedStrategyRequestForQuoteMessage ==
     { ZeroStrategyRequestForQuoteMessage }
         \cup { [ZeroStrategyRequestForQuoteMessage EXCEPT !.exchangeId = one] : one \in Sample(1) }
-        \cup { [ZeroStrategyRequestForQuoteMessage EXCEPT !.symbolStrategy = one] : one \in Sample(30) }
+        \cup { [ZeroStrategyRequestForQuoteMessage EXCEPT !.symbol = one] : one \in Sample(30) }
         \cup { [ZeroStrategyRequestForQuoteMessage EXCEPT !.requestedSize = one] : one \in Sample(8) }
         \cup { [ZeroStrategyRequestForQuoteMessage EXCEPT !.requestedMarketSide = one] : one \in Sample(1) }
 
@@ -1567,7 +1567,7 @@ CheckedFuturesQuoteMessage ==
 
 StrategyQuoteMessage ==
     [ exchangeId                : Sample(1),
-      symbolStrategy            : Sample(30),
+      symbol                    : Sample(30),
       bidPriceSign              : Sample(1),
       bidPriceQuote             : Sample(7),
       bidPriceFractionIndicator : Sample(1),
@@ -1580,7 +1580,7 @@ StrategyQuoteMessage ==
 
 EncodeStrategyQuoteMessage(message) ==
     message.exchangeId
-        \o message.symbolStrategy
+        \o message.symbol
         \o message.bidPriceSign
         \o message.bidPriceQuote
         \o message.bidPriceFractionIndicator
@@ -1593,8 +1593,8 @@ EncodeStrategyQuoteMessage(message) ==
 
 DecodeStrategyQuoteMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
-    LET symbolStrategy == ReadBytes(exchangeId.rest, 30) IN IF ~symbolStrategy.ok THEN Fail ELSE
-    LET bidPriceSign == ReadBytes(symbolStrategy.rest, 1) IN IF ~bidPriceSign.ok THEN Fail ELSE
+    LET symbol == ReadBytes(exchangeId.rest, 30) IN IF ~symbol.ok THEN Fail ELSE
+    LET bidPriceSign == ReadBytes(symbol.rest, 1) IN IF ~bidPriceSign.ok THEN Fail ELSE
     LET bidPriceQuote == ReadBytes(bidPriceSign.rest, 7) IN IF ~bidPriceQuote.ok THEN Fail ELSE
     LET bidPriceFractionIndicator == ReadBytes(bidPriceQuote.rest, 1) IN IF ~bidPriceFractionIndicator.ok THEN Fail ELSE
     LET bidSize == ReadBytes(bidPriceFractionIndicator.rest, 5) IN IF ~bidSize.ok THEN Fail ELSE
@@ -1604,7 +1604,7 @@ DecodeStrategyQuoteMessage(bytes) ==
     LET askSize == ReadBytes(askPriceFractionIndicator.rest, 5) IN IF ~askSize.ok THEN Fail ELSE
     LET instrumentStatusMarker == ReadBytes(askSize.rest, 1) IN IF ~instrumentStatusMarker.ok THEN Fail ELSE
     Ok([ exchangeId                |-> exchangeId.value,
-         symbolStrategy            |-> symbolStrategy.value,
+         symbol                    |-> symbol.value,
          bidPriceSign              |-> bidPriceSign.value,
          bidPriceQuote             |-> bidPriceQuote.value,
          bidPriceFractionIndicator |-> bidPriceFractionIndicator.value,
@@ -1617,7 +1617,7 @@ DecodeStrategyQuoteMessage(bytes) ==
 
 ZeroStrategyQuoteMessage ==
     [ exchangeId                |-> [i \in 1 .. 1 |-> 0],
-      symbolStrategy            |-> [i \in 1 .. 30 |-> 0],
+      symbol                    |-> [i \in 1 .. 30 |-> 0],
       bidPriceSign              |-> [i \in 1 .. 1 |-> 0],
       bidPriceQuote             |-> [i \in 1 .. 7 |-> 0],
       bidPriceFractionIndicator |-> [i \in 1 .. 1 |-> 0],
@@ -1632,7 +1632,7 @@ ZeroStrategyQuoteMessage ==
 CheckedStrategyQuoteMessage ==
     { ZeroStrategyQuoteMessage }
         \cup { [ZeroStrategyQuoteMessage EXCEPT !.exchangeId = one] : one \in Sample(1) }
-        \cup { [ZeroStrategyQuoteMessage EXCEPT !.symbolStrategy = one] : one \in Sample(30) }
+        \cup { [ZeroStrategyQuoteMessage EXCEPT !.symbol = one] : one \in Sample(30) }
         \cup { [ZeroStrategyQuoteMessage EXCEPT !.bidPriceSign = one] : one \in Sample(1) }
         \cup { [ZeroStrategyQuoteMessage EXCEPT !.bidPriceQuote = one] : one \in Sample(7) }
         \cup { [ZeroStrategyQuoteMessage EXCEPT !.bidPriceFractionIndicator = one] : one \in Sample(1) }
@@ -2301,31 +2301,31 @@ OneStrategyMarketDepthTradingInstrument == { ZeroStrategyMarketDepthTradingInstr
 
 StrategyMarketDepthMessage ==
     [ exchangeId                           : Sample(1),
-      symbolStrategy                       : Sample(30),
+      symbol                               : Sample(30),
       instrumentStatusMarker               : Sample(1),
       strategyMarketDepthTradingInstrument : SampleLists(OneStrategyMarketDepthTradingInstrument) ]
 
 EncodeStrategyMarketDepthMessage(message) ==
     message.exchangeId
-        \o message.symbolStrategy
+        \o message.symbol
         \o message.instrumentStatusMarker
         \o EncodeDigits(Len(message.strategyMarketDepthTradingInstrument), 1)
         \o EncodeStrategyMarketDepthTradingInstrumentList(message.strategyMarketDepthTradingInstrument)
 
 DecodeStrategyMarketDepthMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
-    LET symbolStrategy == ReadBytes(exchangeId.rest, 30) IN IF ~symbolStrategy.ok THEN Fail ELSE
-    LET instrumentStatusMarker == ReadBytes(symbolStrategy.rest, 1) IN IF ~instrumentStatusMarker.ok THEN Fail ELSE
+    LET symbol == ReadBytes(exchangeId.rest, 30) IN IF ~symbol.ok THEN Fail ELSE
+    LET instrumentStatusMarker == ReadBytes(symbol.rest, 1) IN IF ~instrumentStatusMarker.ok THEN Fail ELSE
     LET numberOfLevels == ReadDigits(instrumentStatusMarker.rest, 1) IN IF ~numberOfLevels.ok THEN Fail ELSE
     LET strategyMarketDepthTradingInstrument == ReadStrategyMarketDepthTradingInstrumentList(numberOfLevels.rest, numberOfLevels.value) IN IF ~strategyMarketDepthTradingInstrument.ok THEN Fail ELSE
     Ok([ exchangeId                           |-> exchangeId.value,
-         symbolStrategy                       |-> symbolStrategy.value,
+         symbol                               |-> symbol.value,
          instrumentStatusMarker               |-> instrumentStatusMarker.value,
          strategyMarketDepthTradingInstrument |-> strategyMarketDepthTradingInstrument.value ], strategyMarketDepthTradingInstrument.rest)
 
 ZeroStrategyMarketDepthMessage ==
     [ exchangeId                           |-> [i \in 1 .. 1 |-> 0],
-      symbolStrategy                       |-> [i \in 1 .. 30 |-> 0],
+      symbol                               |-> [i \in 1 .. 30 |-> 0],
       instrumentStatusMarker               |-> [i \in 1 .. 1 |-> 0],
       strategyMarketDepthTradingInstrument |-> << >> ]
 
@@ -2333,7 +2333,7 @@ ZeroStrategyMarketDepthMessage ==
 CheckedStrategyMarketDepthMessage ==
     { ZeroStrategyMarketDepthMessage }
         \cup { [ZeroStrategyMarketDepthMessage EXCEPT !.exchangeId = one] : one \in Sample(1) }
-        \cup { [ZeroStrategyMarketDepthMessage EXCEPT !.symbolStrategy = one] : one \in Sample(30) }
+        \cup { [ZeroStrategyMarketDepthMessage EXCEPT !.symbol = one] : one \in Sample(30) }
         \cup { [ZeroStrategyMarketDepthMessage EXCEPT !.instrumentStatusMarker = one] : one \in Sample(1) }
         \cup { [ZeroStrategyMarketDepthMessage EXCEPT !.strategyMarketDepthTradingInstrument = one] : one \in SampleLists(OneStrategyMarketDepthTradingInstrument) }
 
@@ -2667,7 +2667,7 @@ CheckedFutureTradeCancellationMessage ==
 
 StrategyTradeCancellationMessage ==
     [ exchangeId                  : Sample(1),
-      symbolStrategy              : Sample(30),
+      symbol                      : Sample(30),
       volume                      : Sample(8),
       tradePriceSign              : Sample(1),
       tradePrice                  : Sample(7),
@@ -2676,7 +2676,7 @@ StrategyTradeCancellationMessage ==
 
 EncodeStrategyTradeCancellationMessage(message) ==
     message.exchangeId
-        \o message.symbolStrategy
+        \o message.symbol
         \o message.volume
         \o message.tradePriceSign
         \o message.tradePrice
@@ -2685,14 +2685,14 @@ EncodeStrategyTradeCancellationMessage(message) ==
 
 DecodeStrategyTradeCancellationMessage(bytes) ==
     LET exchangeId == ReadBytes(bytes, 1) IN IF ~exchangeId.ok THEN Fail ELSE
-    LET symbolStrategy == ReadBytes(exchangeId.rest, 30) IN IF ~symbolStrategy.ok THEN Fail ELSE
-    LET volume == ReadBytes(symbolStrategy.rest, 8) IN IF ~volume.ok THEN Fail ELSE
+    LET symbol == ReadBytes(exchangeId.rest, 30) IN IF ~symbol.ok THEN Fail ELSE
+    LET volume == ReadBytes(symbol.rest, 8) IN IF ~volume.ok THEN Fail ELSE
     LET tradePriceSign == ReadBytes(volume.rest, 1) IN IF ~tradePriceSign.ok THEN Fail ELSE
     LET tradePrice == ReadBytes(tradePriceSign.rest, 7) IN IF ~tradePrice.ok THEN Fail ELSE
     LET tradePriceFractionIndicator == ReadBytes(tradePrice.rest, 1) IN IF ~tradePriceFractionIndicator.ok THEN Fail ELSE
     LET tradeNumber == ReadBytes(tradePriceFractionIndicator.rest, 8) IN IF ~tradeNumber.ok THEN Fail ELSE
     Ok([ exchangeId                  |-> exchangeId.value,
-         symbolStrategy              |-> symbolStrategy.value,
+         symbol                      |-> symbol.value,
          volume                      |-> volume.value,
          tradePriceSign              |-> tradePriceSign.value,
          tradePrice                  |-> tradePrice.value,
@@ -2701,7 +2701,7 @@ DecodeStrategyTradeCancellationMessage(bytes) ==
 
 ZeroStrategyTradeCancellationMessage ==
     [ exchangeId                  |-> [i \in 1 .. 1 |-> 0],
-      symbolStrategy              |-> [i \in 1 .. 30 |-> 0],
+      symbol                      |-> [i \in 1 .. 30 |-> 0],
       volume                      |-> [i \in 1 .. 8 |-> 0],
       tradePriceSign              |-> [i \in 1 .. 1 |-> 0],
       tradePrice                  |-> [i \in 1 .. 7 |-> 0],
@@ -2712,7 +2712,7 @@ ZeroStrategyTradeCancellationMessage ==
 CheckedStrategyTradeCancellationMessage ==
     { ZeroStrategyTradeCancellationMessage }
         \cup { [ZeroStrategyTradeCancellationMessage EXCEPT !.exchangeId = one] : one \in Sample(1) }
-        \cup { [ZeroStrategyTradeCancellationMessage EXCEPT !.symbolStrategy = one] : one \in Sample(30) }
+        \cup { [ZeroStrategyTradeCancellationMessage EXCEPT !.symbol = one] : one \in Sample(30) }
         \cup { [ZeroStrategyTradeCancellationMessage EXCEPT !.volume = one] : one \in Sample(8) }
         \cup { [ZeroStrategyTradeCancellationMessage EXCEPT !.tradePriceSign = one] : one \in Sample(1) }
         \cup { [ZeroStrategyTradeCancellationMessage EXCEPT !.tradePrice = one] : one \in Sample(7) }
@@ -4998,32 +4998,32 @@ CheckedRegularTextBulletin ==
 (***************************************************************************)
 
 SpecialTextBulletin ==
-    [ symbolBulletin          : Sample(30),
+    [ symbol                  : Sample(30),
       specialBulletinContents : Sample(49),
       continueMarker          : Sample(1) ]
 
 EncodeSpecialTextBulletin(message) ==
-    message.symbolBulletin
+    message.symbol
         \o message.specialBulletinContents
         \o message.continueMarker
 
 DecodeSpecialTextBulletin(bytes) ==
-    LET symbolBulletin == ReadBytes(bytes, 30) IN IF ~symbolBulletin.ok THEN Fail ELSE
-    LET specialBulletinContents == ReadBytes(symbolBulletin.rest, 49) IN IF ~specialBulletinContents.ok THEN Fail ELSE
+    LET symbol == ReadBytes(bytes, 30) IN IF ~symbol.ok THEN Fail ELSE
+    LET specialBulletinContents == ReadBytes(symbol.rest, 49) IN IF ~specialBulletinContents.ok THEN Fail ELSE
     LET continueMarker == ReadBytes(specialBulletinContents.rest, 1) IN IF ~continueMarker.ok THEN Fail ELSE
-    Ok([ symbolBulletin          |-> symbolBulletin.value,
+    Ok([ symbol                  |-> symbol.value,
          specialBulletinContents |-> specialBulletinContents.value,
          continueMarker          |-> continueMarker.value ], continueMarker.rest)
 
 ZeroSpecialTextBulletin ==
-    [ symbolBulletin          |-> [i \in 1 .. 30 |-> 0],
+    [ symbol                  |-> [i \in 1 .. 30 |-> 0],
       specialBulletinContents |-> [i \in 1 .. 49 |-> 0],
       continueMarker          |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Special Text Bulletin at zero, then each field in turn at the values it is checked at *)
 CheckedSpecialTextBulletin ==
     { ZeroSpecialTextBulletin }
-        \cup { [ZeroSpecialTextBulletin EXCEPT !.symbolBulletin = one] : one \in Sample(30) }
+        \cup { [ZeroSpecialTextBulletin EXCEPT !.symbol = one] : one \in Sample(30) }
         \cup { [ZeroSpecialTextBulletin EXCEPT !.specialBulletinContents = one] : one \in Sample(49) }
         \cup { [ZeroSpecialTextBulletin EXCEPT !.continueMarker = one] : one \in Sample(1) }
 

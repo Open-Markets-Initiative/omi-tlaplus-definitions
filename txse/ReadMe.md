@@ -35,8 +35,8 @@
 
 [Txse.TxseEquities.Framing.Tcp.v1.0.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/txse/txseequities/framing/TxseEquities_Framing_Tcp_v1_0_Client.tla "Txse TxseEquities Framing Tcp v1.0 Tla Definition"
 [Txse.TxseEquities.Framing.Tcp.v1.0.Url]: https://www.txse.com "Texas Stock Exchange 1.0 Url"
-[Txse.TxseEquities.Framing.Tcp.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Txse/Specifications/Rake/Txse.Equities.Rake.v1.0.pdf "Texas Stock Exchange 1.0 Pdf"
+[Txse.TxseEquities.Framing.Tcp.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Txse/Specifications/Common/Headers/Txse.TxseEquities.Rake.v1.0.pdf "Texas Stock Exchange 1.0 Pdf"
 [Txse.TxseEquities.Framing.Tcp.v1.0.Server.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/txse/txseequities/framing/TxseEquities_Framing_Tcp_v1_0_Server.tla "Txse TxseEquities Framing Tcp v1.0 Tla Definition"
 [Txse.TxseEquities.Framing.Udp.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/txse/txseequities/framing/TxseEquities_Framing_Udp_v1_0.tla "Txse TxseEquities Framing Udp v1.0 Tla Definition"
 [Txse.TxseEquities.Framing.Udp.v1.0.Url]: https://www.txse.com "Texas Stock Exchange 1.0 Url"
-[Txse.TxseEquities.Framing.Udp.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Txse/Specifications/Rake/Txse.Equities.Rake.v1.0.pdf "Texas Stock Exchange 1.0 Pdf"
+[Txse.TxseEquities.Framing.Udp.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Txse/Specifications/Common/Headers/Txse.TxseEquities.Rake.v1.0.pdf "Texas Stock Exchange 1.0 Pdf"

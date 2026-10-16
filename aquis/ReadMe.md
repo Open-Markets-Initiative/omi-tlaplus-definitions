@@ -40,4 +40,4 @@
 [Aquis.AquisEquities.TcpHeader.Atp.v2.0.Url]: https://www.aquis.eu/technologies "Aquis Exchange 2.0 Url"
 [Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/aquis/tradingprotocol/AquisEquities_TradingProtocol_v4_0.tla "Aquis TradingProtocol Atp v4.0 Tla Definition"
 [Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Url]: https://www.aquis.eu/markets/documents "Aquis Exchange 4.0 Url"
-[Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/Atp/Aquis.AquisEquities.TradingProtocol.Atp.v4.0.pdf "Aquis Exchange 4.0 Pdf"
+[Aquis.AquisEquities.TradingProtocol.Atp.v4.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Aquis/Specifications/TradingProtocol/Aquis.AquisEquities.TradingProtocol.Atp.v4.0.pdf "Aquis Exchange 4.0 Pdf"

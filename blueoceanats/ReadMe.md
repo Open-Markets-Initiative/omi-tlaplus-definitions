@@ -5,7 +5,7 @@
 
 | [Protocol][Omi.BlueOceanAts.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Transport | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.BlueOceanAts.Specifications] |
 | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| [Memo][BlueOceanAts.BlueEquities.Memo] | [Sbe][Omi.Encoding.Sbe] | 1.13 | [Client][BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Client.Definition] [Server][BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Server.Definition] | 1/1/2024 | 4532 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Url] - [xml][BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Xml] |
+| [Memo][BlueOceanAts.BlueEquities.Memo] | [Sbe][Omi.Encoding.Sbe] | 1.13 | [Client][BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Client.Definition] [Server][BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Server.Definition] | 1/1/2024 | 4532 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [url][BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Url] |
 | [Memo][BlueOceanAts.BlueEquities.Memo] | [Sbe][Omi.Encoding.Sbe] | 1.14 | [Client][BlueOceanAts.BlueEquities.Memo.Sbe.v1.14.Client.Definition] [Server][BlueOceanAts.BlueEquities.Memo.Sbe.v1.14.Server.Definition] | 12/8/2025 | 4532 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][BlueOceanAts.BlueEquities.Memo.Sbe.v1.14.Url] |
 
 
@@ -34,7 +34,6 @@
 
 [BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/blueoceanats/memo/BlueEquities_Memo_v1_13_Client.tla "BlueOceanAts Memo Sbe v1.13 Tla Definition"
 [BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Url]: https://blueocean-tech.io/trading-updates "Blue Ocean Technologies 1.13 Url"
-[BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Xml]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BlueOceanAts/Specifications/BlueEquities/Memo/BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.xml "Blue Ocean Technologies 1.13 Xml"
 [BlueOceanAts.BlueEquities.Memo.Sbe.v1.13.Server.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/blueoceanats/memo/BlueEquities_Memo_v1_13_Server.tla "BlueOceanAts Memo Sbe v1.13 Tla Definition"
 [BlueOceanAts.BlueEquities.Memo.Sbe.v1.14.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/blueoceanats/memo/BlueEquities_Memo_v1_14_Client.tla "BlueOceanAts Memo Sbe v1.14 Tla Definition"
 [BlueOceanAts.BlueEquities.Memo.Sbe.v1.14.Url]: https://blueocean-tech.io/trading-updates "Blue Ocean Technologies 1.14 Url"
