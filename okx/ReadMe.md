@@ -36,8 +36,8 @@
 [Okx.OkxDigital.Trade]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Okx/Protocols/OkxDigital/Trade.md "Trade"
 
 [Okx.OkxDigital.MarketData.Sbe.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/okx/okxdigital/marketdata/OkxDigital_MarketData_v1_0.tla "Okx OkxDigital MarketData Sbe v1.0 Tla Definition"
-[Okx.OkxDigital.MarketData.Sbe.v1.0.Url]: https://www.okx.com/docs-v5/en/ "OKX 1.0 Url"
+[Okx.OkxDigital.MarketData.Sbe.v1.0.Url]: https://www.okx.com/docs-v5/log_en/xml/okx_sbe_1_0.xml "OKX 1.0 Url"
 [Okx.OkxDigital.Private.Sbe.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/okx/okxdigital/private/OkxDigital_Private_v1_0.tla "Okx OkxDigital Private Sbe v1.0 Tla Definition"
-[Okx.OkxDigital.Private.Sbe.v1.0.Url]: https://www.okx.com/docs-v5/en/ "OKX 1.0 Url"
+[Okx.OkxDigital.Private.Sbe.v1.0.Url]: https://www.okx.com/docs-v5/log_en/xml/okx_sbe_private_1_0.xml "OKX 1.0 Url"
 [Okx.OkxDigital.Trade.Sbe.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/okx/okxdigital/trade/OkxDigital_Trade_v1_0.tla "Okx OkxDigital Trade Sbe v1.0 Tla Definition"
-[Okx.OkxDigital.Trade.Sbe.v1.0.Url]: https://www.okx.com/docs-v5/en/ "OKX 1.0 Url"
+[Okx.OkxDigital.Trade.Sbe.v1.0.Url]: https://www.okx.com/docs-v5/log_en/xml/okx_sbe_trade_1_0.xml "OKX 1.0 Url"

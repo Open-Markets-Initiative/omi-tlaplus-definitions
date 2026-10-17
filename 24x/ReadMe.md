@@ -33,7 +33,7 @@
 [24X.24XEquities.Memo]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/24X/Protocols/24XEquities/Memo.md "Members Orders"
 
 [24X.24XEquities.Memo.Sbe.v1.13.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/24x/memo/T_24XEquities_Memo_v1_13_Client.tla "24X Memo Sbe v1.13 Tla Definition"
-[24X.24XEquities.Memo.Sbe.v1.13.Url]: https://equities.24exchange.com/exchange "24 National Exchange 1.13 Url"
+[24X.24XEquities.Memo.Sbe.v1.13.Url]: https://equities.24exchange.com/technical-resources "24 National Exchange 1.13 Url"
 [24X.24XEquities.Memo.Sbe.v1.13.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/24X/Specifications/Memo/24X.24XEquities.Memo.Sbe.v1.13.pdf "24 National Exchange 1.13 Pdf"
 [24X.24XEquities.Memo.Sbe.v1.13.Xml]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/24X/Specifications/Memo/24X.24XEquities.Memo.Sbe.v1.13.xml "24 National Exchange 1.13 Xml"
 [24X.24XEquities.Memo.Sbe.v1.13.Server.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/24x/memo/T_24XEquities_Memo_v1_13_Server.tla "24X Memo Sbe v1.13 Tla Definition"

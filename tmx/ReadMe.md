@@ -5,12 +5,12 @@
 
 | Division | [Protocol][Omi.Tmx.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Tmx.Specifications] |
 | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.11][Tmx.Mx.SolaMulticast.Hsvf.v1.11.Definition] | 1/23/2019 | 7363 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.11.Url] |
-| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.12][Tmx.Mx.SolaMulticast.Hsvf.v1.12.Definition] | 3/23/2018 | 8102 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.12.Url] |
-| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.13][Tmx.Mx.SolaMulticast.Hsvf.v1.13.Definition] | 10/5/2022 | 6337 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.13.Url] |
-| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.14][Tmx.Mx.SolaMulticast.Hsvf.v1.14.Definition] | 2/5/2024 | 7075 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.14.Url] |
+| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.11][Tmx.Mx.SolaMulticast.Hsvf.v1.11.Definition] | 1/23/2019 | 7363 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.11.Url] - [pdf][Tmx.Mx.SolaMulticast.Hsvf.v1.11.Pdf] |
+| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.12][Tmx.Mx.SolaMulticast.Hsvf.v1.12.Definition] | 3/23/2018 | 8102 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.12.Url] - [pdf][Tmx.Mx.SolaMulticast.Hsvf.v1.12.Pdf] |
+| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.13][Tmx.Mx.SolaMulticast.Hsvf.v1.13.Definition] | 10/5/2022 | 6337 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.13.Url] - [pdf][Tmx.Mx.SolaMulticast.Hsvf.v1.13.Pdf] |
+| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.14][Tmx.Mx.SolaMulticast.Hsvf.v1.14.Definition] | 2/5/2024 | 7075 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.14.Url] - [pdf][Tmx.Mx.SolaMulticast.Hsvf.v1.14.Pdf] |
 | [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [2.1][Tmx.Mx.SolaMulticast.Hsvf.v2.1.Definition] | 1/23/2019 | 391 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [pdf][Tmx.Mx.SolaMulticast.Hsvf.v2.1.Pdf] |
-| [Tsx][Tsx.Exchange] | [GlobalFx][Tmx.Tsx.GlobalFx] | [Gfx][Omi.Encoding.Gfx] | [1.0][Tmx.Tsx.GlobalFx.Gfx.v1.0.Definition] | 5/20/2016 | 412 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.GlobalFx.Gfx.v1.0.Url] |
+| [Tsx][Tsx.Exchange] | [GlobalFx][Tmx.Tsx.GlobalFx] | [Gfx][Omi.Encoding.Gfx] | [1.0][Tmx.Tsx.GlobalFx.Gfx.v1.0.Definition] | 5/20/2016 | 412 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.GlobalFx.Gfx.v1.0.Url] - [pdf][Tmx.Tsx.GlobalFx.Gfx.v1.0.Pdf] |
 
 
 <p align="center"><a href="https://www.tmx.com/" title="TMX Group Website"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Website.png" alt="Website" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/company/tmx-group" title="TMX Group on LinkedIn"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/LinkedIn.png" alt="LinkedIn" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://en.wikipedia.org/wiki/TMX_Group" title="TMX Group on Wikipedia"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Wikipedia.png" alt="Wikipedia" width="32" height="32"></a></p>
@@ -41,13 +41,18 @@
 
 [Tmx.Mx.SolaMulticast.Hsvf.v1.11.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solamulticast/Mx_SolaMulticast_v1_11.tla "Tmx Mx SolaMulticast Hsvf v1.11 Tla Definition"
 [Tmx.Mx.SolaMulticast.Hsvf.v1.11.Url]: https://www.tmxwebstore.com/ "TMX Group 1.11 Url"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.11.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 1.11 Pdf"
 [Tmx.Mx.SolaMulticast.Hsvf.v1.12.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solamulticast/Mx_SolaMulticast_v1_12.tla "Tmx Mx SolaMulticast Hsvf v1.12 Tla Definition"
 [Tmx.Mx.SolaMulticast.Hsvf.v1.12.Url]: https://www.tmxwebstore.com "TMX Group 1.12 Url"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.12.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 1.12 Pdf"
 [Tmx.Mx.SolaMulticast.Hsvf.v1.13.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solamulticast/Mx_SolaMulticast_v1_13.tla "Tmx Mx SolaMulticast Hsvf v1.13 Tla Definition"
 [Tmx.Mx.SolaMulticast.Hsvf.v1.13.Url]: https://www.tmxwebstore.com "TMX Group 1.13 Url"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.13.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 1.13 Pdf"
 [Tmx.Mx.SolaMulticast.Hsvf.v1.14.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solamulticast/Mx_SolaMulticast_v1_14.tla "Tmx Mx SolaMulticast Hsvf v1.14 Tla Definition"
 [Tmx.Mx.SolaMulticast.Hsvf.v1.14.Url]: https://www.tmxwebstore.com "TMX Group 1.14 Url"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.14.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 1.14 Pdf"
 [Tmx.Mx.SolaMulticast.Hsvf.v2.1.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solamulticast/Mx_SolaMulticast_v2_1.tla "Tmx Mx SolaMulticast Hsvf v2.1 Tla Definition"
 [Tmx.Mx.SolaMulticast.Hsvf.v2.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/Mx.Sola.Multicast.Hsvf.v.2.1.pdf "TMX Group 2.1 Pdf"
 [Tmx.Tsx.GlobalFx.Gfx.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/tsx/globalfx/Tsx_GlobalFx_v1_0.tla "Tmx Tsx GlobalFx Gfx v1.0 Tla Definition"
 [Tmx.Tsx.GlobalFx.Gfx.v1.0.Url]: https://www.tmx.com/market-data "TMX Group 1.0 Url"
+[Tmx.Tsx.GlobalFx.Gfx.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 1.0 Pdf"
