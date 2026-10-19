@@ -2948,6 +2948,7 @@ LogoutResponseMessageCode == 11  \* 0x0b
 HeartbeatMessageCode == 48  \* 0x30
 NetworkStatusMessageCode == 10  \* 0x0a
 LogonMessageCode == 65  \* 0x41
+LogoutMessageCode == 53  \* 0x35
 RejectMessageCode == 13  \* 0x0d
 ReplayRequestMessageCode == 9  \* 0x09
 ReplayRequestAckNackMessageCode == 12  \* 0x0c
@@ -2977,6 +2978,7 @@ Payload ==
         \cup [ tag : {HeartbeatMessageCode}, body : HeartbeatMessage ]
         \cup [ tag : {NetworkStatusMessageCode}, body : NetworkStatusMessage ]
         \cup [ tag : {LogonMessageCode}, body : LogonMessage ]
+        \cup [ tag : {LogoutMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {RejectMessageCode}, body : RejectMessage ]
         \cup [ tag : {ReplayRequestMessageCode}, body : ReplayRequestMessage ]
         \cup [ tag : {ReplayRequestAckNackMessageCode}, body : ReplayRequestAckNackMessage ]
@@ -3006,6 +3008,7 @@ EncodePayload(message) ==
       [] message.tag = HeartbeatMessageCode -> EncodeHeartbeatMessage(message.body)
       [] message.tag = NetworkStatusMessageCode -> EncodeNetworkStatusMessage(message.body)
       [] message.tag = LogonMessageCode -> EncodeLogonMessage(message.body)
+      [] message.tag = LogoutMessageCode -> << >>
       [] message.tag = RejectMessageCode -> EncodeRejectMessage(message.body)
       [] message.tag = ReplayRequestMessageCode -> EncodeReplayRequestMessage(message.body)
       [] message.tag = ReplayRequestAckNackMessageCode -> EncodeReplayRequestAckNackMessage(message.body)
@@ -3036,6 +3039,7 @@ DecodePayload(tag, bytes) ==
               [] tag = HeartbeatMessageCode -> DecodeHeartbeatMessage(bytes)
               [] tag = NetworkStatusMessageCode -> DecodeNetworkStatusMessage(bytes)
               [] tag = LogonMessageCode -> DecodeLogonMessage(bytes)
+              [] tag = LogoutMessageCode -> Ok([empty |-> 0], bytes)
               [] tag = RejectMessageCode -> DecodeRejectMessage(bytes)
               [] tag = ReplayRequestMessageCode -> DecodeReplayRequestMessage(bytes)
               [] tag = ReplayRequestAckNackMessageCode -> DecodeReplayRequestAckNackMessage(bytes)
@@ -3070,6 +3074,7 @@ CheckedPayload ==
         \cup { [tag |-> HeartbeatMessageCode, body |-> one] : one \in CheckedHeartbeatMessage }
         \cup { [tag |-> NetworkStatusMessageCode, body |-> one] : one \in CheckedNetworkStatusMessage }
         \cup { [tag |-> LogonMessageCode, body |-> one] : one \in CheckedLogonMessage }
+        \cup { [tag |-> LogoutMessageCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> RejectMessageCode, body |-> one] : one \in CheckedRejectMessage }
         \cup { [tag |-> ReplayRequestMessageCode, body |-> one] : one \in CheckedReplayRequestMessage }
         \cup { [tag |-> ReplayRequestAckNackMessageCode, body |-> one] : one \in CheckedReplayRequestAckNackMessage }
@@ -3158,6 +3163,7 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> HeartbeatMessageCode, body |-> ZeroHeartbeatMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> NetworkStatusMessageCode, body |-> ZeroNetworkStatusMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> LogonMessageCode, body |-> ZeroLogonMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> LogoutMessageCode, body |-> [empty |-> 0]]],
       [ZeroMessage EXCEPT !.payload = [tag |-> RejectMessageCode, body |-> ZeroRejectMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> ReplayRequestMessageCode, body |-> ZeroReplayRequestMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> ReplayRequestAckNackMessageCode, body |-> ZeroReplayRequestAckNackMessage]],

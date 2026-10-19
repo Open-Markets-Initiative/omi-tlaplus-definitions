@@ -4966,6 +4966,7 @@ LogoutResponseMessageCode == 11  \* 0x0b
 HeartbeatMessageCode == 48  \* 0x30
 NetworkStatusMessageCode == 10  \* 0x0a
 LogonMessageCode == 65  \* 0x41
+LogoutMessageCode == 53  \* 0x35
 RejectMessageCode == 13  \* 0x0d
 TradingSessionStatusMessageCode == 104  \* 0x68
 NewsMessageCode == 66  \* 0x42
@@ -5007,6 +5008,7 @@ Payload ==
         \cup [ tag : {HeartbeatMessageCode}, body : HeartbeatMessage ]
         \cup [ tag : {NetworkStatusMessageCode}, body : NetworkStatusMessage ]
         \cup [ tag : {LogonMessageCode}, body : LogonMessage ]
+        \cup [ tag : {LogoutMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {RejectMessageCode}, body : RejectMessage ]
         \cup [ tag : {TradingSessionStatusMessageCode}, body : TradingSessionStatusMessage ]
         \cup [ tag : {NewsMessageCode}, body : NewsMessage ]
@@ -5048,6 +5050,7 @@ EncodePayload(message) ==
       [] message.tag = HeartbeatMessageCode -> EncodeHeartbeatMessage(message.body)
       [] message.tag = NetworkStatusMessageCode -> EncodeNetworkStatusMessage(message.body)
       [] message.tag = LogonMessageCode -> EncodeLogonMessage(message.body)
+      [] message.tag = LogoutMessageCode -> << >>
       [] message.tag = RejectMessageCode -> EncodeRejectMessage(message.body)
       [] message.tag = TradingSessionStatusMessageCode -> EncodeTradingSessionStatusMessage(message.body)
       [] message.tag = NewsMessageCode -> EncodeNewsMessage(message.body)
@@ -5090,6 +5093,7 @@ DecodePayload(tag, bytes) ==
               [] tag = HeartbeatMessageCode -> DecodeHeartbeatMessage(bytes)
               [] tag = NetworkStatusMessageCode -> DecodeNetworkStatusMessage(bytes)
               [] tag = LogonMessageCode -> DecodeLogonMessage(bytes)
+              [] tag = LogoutMessageCode -> Ok([empty |-> 0], bytes)
               [] tag = RejectMessageCode -> DecodeRejectMessage(bytes)
               [] tag = TradingSessionStatusMessageCode -> DecodeTradingSessionStatusMessage(bytes)
               [] tag = NewsMessageCode -> DecodeNewsMessage(bytes)
@@ -5136,6 +5140,7 @@ CheckedPayload ==
         \cup { [tag |-> HeartbeatMessageCode, body |-> one] : one \in CheckedHeartbeatMessage }
         \cup { [tag |-> NetworkStatusMessageCode, body |-> one] : one \in CheckedNetworkStatusMessage }
         \cup { [tag |-> LogonMessageCode, body |-> one] : one \in CheckedLogonMessage }
+        \cup { [tag |-> LogoutMessageCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> RejectMessageCode, body |-> one] : one \in CheckedRejectMessage }
         \cup { [tag |-> TradingSessionStatusMessageCode, body |-> one] : one \in CheckedTradingSessionStatusMessage }
         \cup { [tag |-> NewsMessageCode, body |-> one] : one \in CheckedNewsMessage }
@@ -5236,6 +5241,7 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> HeartbeatMessageCode, body |-> ZeroHeartbeatMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> NetworkStatusMessageCode, body |-> ZeroNetworkStatusMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> LogonMessageCode, body |-> ZeroLogonMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> LogoutMessageCode, body |-> [empty |-> 0]]],
       [ZeroMessage EXCEPT !.payload = [tag |-> RejectMessageCode, body |-> ZeroRejectMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TradingSessionStatusMessageCode, body |-> ZeroTradingSessionStatusMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> NewsMessageCode, body |-> ZeroNewsMessage]],
