@@ -7854,410 +7854,6 @@ CheckedQuoteCancelAck ==
         \cup { [ZeroQuoteCancelAck EXCEPT !.quoteCancelAckSetsGroups = one] : one \in CheckedQuoteCancelAckSetsGroups }
 
 (***************************************************************************)
-(* Execution Report Pending Cancel: 219 bytes                              *)
-(***************************************************************************)
-
-ExecutionReportPendingCancel ==
-    [ seqNum                : Sample(4),
-      uuid                  : Sample(8),
-      execId                : Sample(40),
-      senderId              : Sample(20),
-      clordid               : Sample(20),
-      partyDetailsListReqId : Sample(8),
-      orderId               : Sample(8),
-      price                 : Sample(8),
-      transactTime          : Sample(8),
-      sendingTimeEpoch      : Sample(8),
-      orderRequestId        : Sample(8),
-      location              : Sample(5),
-      securityId            : Sample(4),
-      orderQty              : Sample(4),
-      cumQty                : Sample(4),
-      leavesQtyOptional     : Sample(4),
-      minQty                : Sample(4),
-      displayQty            : Sample(4),
-      expireDate            : Sample(2),
-      ordTypeOptional       : Sample(1),
-      side                  : Sample(1),
-      timeInForce           : Sample(1),
-      manualOrderIndicator  : Sample(1),
-      possRetransFlag       : Sample(1),
-      splitMsg              : Sample(1),
-      liquidityFlag         : Sample(1),
-      delayToTime           : Sample(8),
-      discretionPrice       : Sample(8),
-      reservationPrice      : Sample(8),
-      priorityIndicator     : Sample(1),
-      origOrderUser         : Sample(8),
-      cancelText            : Sample(8) ]
-
-EncodeExecutionReportPendingCancel(message) ==
-    message.seqNum
-        \o message.uuid
-        \o message.execId
-        \o message.senderId
-        \o message.clordid
-        \o message.partyDetailsListReqId
-        \o message.orderId
-        \o message.price
-        \o message.transactTime
-        \o message.sendingTimeEpoch
-        \o message.orderRequestId
-        \o message.location
-        \o message.securityId
-        \o message.orderQty
-        \o message.cumQty
-        \o message.leavesQtyOptional
-        \o message.minQty
-        \o message.displayQty
-        \o message.expireDate
-        \o message.ordTypeOptional
-        \o message.side
-        \o message.timeInForce
-        \o message.manualOrderIndicator
-        \o message.possRetransFlag
-        \o message.splitMsg
-        \o message.liquidityFlag
-        \o message.delayToTime
-        \o message.discretionPrice
-        \o message.reservationPrice
-        \o message.priorityIndicator
-        \o message.origOrderUser
-        \o message.cancelText
-
-DecodeExecutionReportPendingCancel(bytes) ==
-    LET seqNum == ReadBytes(bytes, 4) IN IF ~seqNum.ok THEN Fail ELSE
-    LET uuid == ReadBytes(seqNum.rest, 8) IN IF ~uuid.ok THEN Fail ELSE
-    LET execId == ReadBytes(uuid.rest, 40) IN IF ~execId.ok THEN Fail ELSE
-    LET senderId == ReadBytes(execId.rest, 20) IN IF ~senderId.ok THEN Fail ELSE
-    LET clordid == ReadBytes(senderId.rest, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET partyDetailsListReqId == ReadBytes(clordid.rest, 8) IN IF ~partyDetailsListReqId.ok THEN Fail ELSE
-    LET orderId == ReadBytes(partyDetailsListReqId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET price == ReadBytes(orderId.rest, 8) IN IF ~price.ok THEN Fail ELSE
-    LET transactTime == ReadBytes(price.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET sendingTimeEpoch == ReadBytes(transactTime.rest, 8) IN IF ~sendingTimeEpoch.ok THEN Fail ELSE
-    LET orderRequestId == ReadBytes(sendingTimeEpoch.rest, 8) IN IF ~orderRequestId.ok THEN Fail ELSE
-    LET location == ReadBytes(orderRequestId.rest, 5) IN IF ~location.ok THEN Fail ELSE
-    LET securityId == ReadBytes(location.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET orderQty == ReadBytes(securityId.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
-    LET cumQty == ReadBytes(orderQty.rest, 4) IN IF ~cumQty.ok THEN Fail ELSE
-    LET leavesQtyOptional == ReadBytes(cumQty.rest, 4) IN IF ~leavesQtyOptional.ok THEN Fail ELSE
-    LET minQty == ReadBytes(leavesQtyOptional.rest, 4) IN IF ~minQty.ok THEN Fail ELSE
-    LET displayQty == ReadBytes(minQty.rest, 4) IN IF ~displayQty.ok THEN Fail ELSE
-    LET expireDate == ReadBytes(displayQty.rest, 2) IN IF ~expireDate.ok THEN Fail ELSE
-    LET ordTypeOptional == ReadBytes(expireDate.rest, 1) IN IF ~ordTypeOptional.ok THEN Fail ELSE
-    LET side == ReadBytes(ordTypeOptional.rest, 1) IN IF ~side.ok THEN Fail ELSE
-    LET timeInForce == ReadBytes(side.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
-    LET manualOrderIndicator == ReadBytes(timeInForce.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
-    LET possRetransFlag == ReadBytes(manualOrderIndicator.rest, 1) IN IF ~possRetransFlag.ok THEN Fail ELSE
-    LET splitMsg == ReadBytes(possRetransFlag.rest, 1) IN IF ~splitMsg.ok THEN Fail ELSE
-    LET liquidityFlag == ReadBytes(splitMsg.rest, 1) IN IF ~liquidityFlag.ok THEN Fail ELSE
-    LET delayToTime == ReadBytes(liquidityFlag.rest, 8) IN IF ~delayToTime.ok THEN Fail ELSE
-    LET discretionPrice == ReadBytes(delayToTime.rest, 8) IN IF ~discretionPrice.ok THEN Fail ELSE
-    LET reservationPrice == ReadBytes(discretionPrice.rest, 8) IN IF ~reservationPrice.ok THEN Fail ELSE
-    LET priorityIndicator == ReadBytes(reservationPrice.rest, 1) IN IF ~priorityIndicator.ok THEN Fail ELSE
-    LET origOrderUser == ReadBytes(priorityIndicator.rest, 8) IN IF ~origOrderUser.ok THEN Fail ELSE
-    LET cancelText == ReadBytes(origOrderUser.rest, 8) IN IF ~cancelText.ok THEN Fail ELSE
-    Ok([ seqNum                |-> seqNum.value,
-         uuid                  |-> uuid.value,
-         execId                |-> execId.value,
-         senderId              |-> senderId.value,
-         clordid               |-> clordid.value,
-         partyDetailsListReqId |-> partyDetailsListReqId.value,
-         orderId               |-> orderId.value,
-         price                 |-> price.value,
-         transactTime          |-> transactTime.value,
-         sendingTimeEpoch      |-> sendingTimeEpoch.value,
-         orderRequestId        |-> orderRequestId.value,
-         location              |-> location.value,
-         securityId            |-> securityId.value,
-         orderQty              |-> orderQty.value,
-         cumQty                |-> cumQty.value,
-         leavesQtyOptional     |-> leavesQtyOptional.value,
-         minQty                |-> minQty.value,
-         displayQty            |-> displayQty.value,
-         expireDate            |-> expireDate.value,
-         ordTypeOptional       |-> ordTypeOptional.value,
-         side                  |-> side.value,
-         timeInForce           |-> timeInForce.value,
-         manualOrderIndicator  |-> manualOrderIndicator.value,
-         possRetransFlag       |-> possRetransFlag.value,
-         splitMsg              |-> splitMsg.value,
-         liquidityFlag         |-> liquidityFlag.value,
-         delayToTime           |-> delayToTime.value,
-         discretionPrice       |-> discretionPrice.value,
-         reservationPrice      |-> reservationPrice.value,
-         priorityIndicator     |-> priorityIndicator.value,
-         origOrderUser         |-> origOrderUser.value,
-         cancelText            |-> cancelText.value ], cancelText.rest)
-
-ZeroExecutionReportPendingCancel ==
-    [ seqNum                |-> [i \in 1 .. 4 |-> 0],
-      uuid                  |-> [i \in 1 .. 8 |-> 0],
-      execId                |-> [i \in 1 .. 40 |-> 0],
-      senderId              |-> [i \in 1 .. 20 |-> 0],
-      clordid               |-> [i \in 1 .. 20 |-> 0],
-      partyDetailsListReqId |-> [i \in 1 .. 8 |-> 0],
-      orderId               |-> [i \in 1 .. 8 |-> 0],
-      price                 |-> [i \in 1 .. 8 |-> 0],
-      transactTime          |-> [i \in 1 .. 8 |-> 0],
-      sendingTimeEpoch      |-> [i \in 1 .. 8 |-> 0],
-      orderRequestId        |-> [i \in 1 .. 8 |-> 0],
-      location              |-> [i \in 1 .. 5 |-> 0],
-      securityId            |-> [i \in 1 .. 4 |-> 0],
-      orderQty              |-> [i \in 1 .. 4 |-> 0],
-      cumQty                |-> [i \in 1 .. 4 |-> 0],
-      leavesQtyOptional     |-> [i \in 1 .. 4 |-> 0],
-      minQty                |-> [i \in 1 .. 4 |-> 0],
-      displayQty            |-> [i \in 1 .. 4 |-> 0],
-      expireDate            |-> [i \in 1 .. 2 |-> 0],
-      ordTypeOptional       |-> [i \in 1 .. 1 |-> 0],
-      side                  |-> [i \in 1 .. 1 |-> 0],
-      timeInForce           |-> [i \in 1 .. 1 |-> 0],
-      manualOrderIndicator  |-> [i \in 1 .. 1 |-> 0],
-      possRetransFlag       |-> [i \in 1 .. 1 |-> 0],
-      splitMsg              |-> [i \in 1 .. 1 |-> 0],
-      liquidityFlag         |-> [i \in 1 .. 1 |-> 0],
-      delayToTime           |-> [i \in 1 .. 8 |-> 0],
-      discretionPrice       |-> [i \in 1 .. 8 |-> 0],
-      reservationPrice      |-> [i \in 1 .. 8 |-> 0],
-      priorityIndicator     |-> [i \in 1 .. 1 |-> 0],
-      origOrderUser         |-> [i \in 1 .. 8 |-> 0],
-      cancelText            |-> [i \in 1 .. 8 |-> 0] ]
-
-(* Execution Report Pending Cancel at zero, then each field in turn at the values it is checked at *)
-CheckedExecutionReportPendingCancel ==
-    { ZeroExecutionReportPendingCancel }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.seqNum = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.uuid = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.execId = one] : one \in Sample(40) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.senderId = one] : one \in Sample(20) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.partyDetailsListReqId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.sendingTimeEpoch = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.orderRequestId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.location = one] : one \in Sample(5) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.orderQty = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.cumQty = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.leavesQtyOptional = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.minQty = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.displayQty = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.expireDate = one] : one \in Sample(2) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.ordTypeOptional = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.timeInForce = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.possRetransFlag = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.splitMsg = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.liquidityFlag = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.delayToTime = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.discretionPrice = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.reservationPrice = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.priorityIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.origOrderUser = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingCancel EXCEPT !.cancelText = one] : one \in Sample(8) }
-
-(***************************************************************************)
-(* Execution Report Pending Replace: 196 bytes                             *)
-(***************************************************************************)
-
-ExecutionReportPendingReplace ==
-    [ seqNum                : Sample(4),
-      uuid                  : Sample(8),
-      execId                : Sample(40),
-      senderId              : Sample(20),
-      clordid               : Sample(20),
-      partyDetailsListReqId : Sample(8),
-      orderId               : Sample(8),
-      price                 : Sample(8),
-      transactTime          : Sample(8),
-      sendingTimeEpoch      : Sample(8),
-      orderRequestId        : Sample(8),
-      location              : Sample(5),
-      securityId            : Sample(4),
-      orderQty              : Sample(4),
-      cumQty                : Sample(4),
-      leaves                : Sample(4),
-      minQty                : Sample(4),
-      displayQty            : Sample(4),
-      expireDate            : Sample(2),
-      ordTypeOptional       : Sample(1),
-      side                  : Sample(1),
-      timeInForce           : Sample(1),
-      manualOrderIndicator  : Sample(1),
-      possRetransFlag       : Sample(1),
-      splitMsg              : Sample(1),
-      liquidityFlag         : Sample(1),
-      shortSaleType         : Sample(1),
-      delayToTime           : Sample(8),
-      discretionPrice       : Sample(8),
-      priorityIndicator     : Sample(1) ]
-
-EncodeExecutionReportPendingReplace(message) ==
-    message.seqNum
-        \o message.uuid
-        \o message.execId
-        \o message.senderId
-        \o message.clordid
-        \o message.partyDetailsListReqId
-        \o message.orderId
-        \o message.price
-        \o message.transactTime
-        \o message.sendingTimeEpoch
-        \o message.orderRequestId
-        \o message.location
-        \o message.securityId
-        \o message.orderQty
-        \o message.cumQty
-        \o message.leaves
-        \o message.minQty
-        \o message.displayQty
-        \o message.expireDate
-        \o message.ordTypeOptional
-        \o message.side
-        \o message.timeInForce
-        \o message.manualOrderIndicator
-        \o message.possRetransFlag
-        \o message.splitMsg
-        \o message.liquidityFlag
-        \o message.shortSaleType
-        \o message.delayToTime
-        \o message.discretionPrice
-        \o message.priorityIndicator
-
-DecodeExecutionReportPendingReplace(bytes) ==
-    LET seqNum == ReadBytes(bytes, 4) IN IF ~seqNum.ok THEN Fail ELSE
-    LET uuid == ReadBytes(seqNum.rest, 8) IN IF ~uuid.ok THEN Fail ELSE
-    LET execId == ReadBytes(uuid.rest, 40) IN IF ~execId.ok THEN Fail ELSE
-    LET senderId == ReadBytes(execId.rest, 20) IN IF ~senderId.ok THEN Fail ELSE
-    LET clordid == ReadBytes(senderId.rest, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET partyDetailsListReqId == ReadBytes(clordid.rest, 8) IN IF ~partyDetailsListReqId.ok THEN Fail ELSE
-    LET orderId == ReadBytes(partyDetailsListReqId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET price == ReadBytes(orderId.rest, 8) IN IF ~price.ok THEN Fail ELSE
-    LET transactTime == ReadBytes(price.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET sendingTimeEpoch == ReadBytes(transactTime.rest, 8) IN IF ~sendingTimeEpoch.ok THEN Fail ELSE
-    LET orderRequestId == ReadBytes(sendingTimeEpoch.rest, 8) IN IF ~orderRequestId.ok THEN Fail ELSE
-    LET location == ReadBytes(orderRequestId.rest, 5) IN IF ~location.ok THEN Fail ELSE
-    LET securityId == ReadBytes(location.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET orderQty == ReadBytes(securityId.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
-    LET cumQty == ReadBytes(orderQty.rest, 4) IN IF ~cumQty.ok THEN Fail ELSE
-    LET leaves == ReadBytes(cumQty.rest, 4) IN IF ~leaves.ok THEN Fail ELSE
-    LET minQty == ReadBytes(leaves.rest, 4) IN IF ~minQty.ok THEN Fail ELSE
-    LET displayQty == ReadBytes(minQty.rest, 4) IN IF ~displayQty.ok THEN Fail ELSE
-    LET expireDate == ReadBytes(displayQty.rest, 2) IN IF ~expireDate.ok THEN Fail ELSE
-    LET ordTypeOptional == ReadBytes(expireDate.rest, 1) IN IF ~ordTypeOptional.ok THEN Fail ELSE
-    LET side == ReadBytes(ordTypeOptional.rest, 1) IN IF ~side.ok THEN Fail ELSE
-    LET timeInForce == ReadBytes(side.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
-    LET manualOrderIndicator == ReadBytes(timeInForce.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
-    LET possRetransFlag == ReadBytes(manualOrderIndicator.rest, 1) IN IF ~possRetransFlag.ok THEN Fail ELSE
-    LET splitMsg == ReadBytes(possRetransFlag.rest, 1) IN IF ~splitMsg.ok THEN Fail ELSE
-    LET liquidityFlag == ReadBytes(splitMsg.rest, 1) IN IF ~liquidityFlag.ok THEN Fail ELSE
-    LET shortSaleType == ReadBytes(liquidityFlag.rest, 1) IN IF ~shortSaleType.ok THEN Fail ELSE
-    LET delayToTime == ReadBytes(shortSaleType.rest, 8) IN IF ~delayToTime.ok THEN Fail ELSE
-    LET discretionPrice == ReadBytes(delayToTime.rest, 8) IN IF ~discretionPrice.ok THEN Fail ELSE
-    LET priorityIndicator == ReadBytes(discretionPrice.rest, 1) IN IF ~priorityIndicator.ok THEN Fail ELSE
-    Ok([ seqNum                |-> seqNum.value,
-         uuid                  |-> uuid.value,
-         execId                |-> execId.value,
-         senderId              |-> senderId.value,
-         clordid               |-> clordid.value,
-         partyDetailsListReqId |-> partyDetailsListReqId.value,
-         orderId               |-> orderId.value,
-         price                 |-> price.value,
-         transactTime          |-> transactTime.value,
-         sendingTimeEpoch      |-> sendingTimeEpoch.value,
-         orderRequestId        |-> orderRequestId.value,
-         location              |-> location.value,
-         securityId            |-> securityId.value,
-         orderQty              |-> orderQty.value,
-         cumQty                |-> cumQty.value,
-         leaves                |-> leaves.value,
-         minQty                |-> minQty.value,
-         displayQty            |-> displayQty.value,
-         expireDate            |-> expireDate.value,
-         ordTypeOptional       |-> ordTypeOptional.value,
-         side                  |-> side.value,
-         timeInForce           |-> timeInForce.value,
-         manualOrderIndicator  |-> manualOrderIndicator.value,
-         possRetransFlag       |-> possRetransFlag.value,
-         splitMsg              |-> splitMsg.value,
-         liquidityFlag         |-> liquidityFlag.value,
-         shortSaleType         |-> shortSaleType.value,
-         delayToTime           |-> delayToTime.value,
-         discretionPrice       |-> discretionPrice.value,
-         priorityIndicator     |-> priorityIndicator.value ], priorityIndicator.rest)
-
-ZeroExecutionReportPendingReplace ==
-    [ seqNum                |-> [i \in 1 .. 4 |-> 0],
-      uuid                  |-> [i \in 1 .. 8 |-> 0],
-      execId                |-> [i \in 1 .. 40 |-> 0],
-      senderId              |-> [i \in 1 .. 20 |-> 0],
-      clordid               |-> [i \in 1 .. 20 |-> 0],
-      partyDetailsListReqId |-> [i \in 1 .. 8 |-> 0],
-      orderId               |-> [i \in 1 .. 8 |-> 0],
-      price                 |-> [i \in 1 .. 8 |-> 0],
-      transactTime          |-> [i \in 1 .. 8 |-> 0],
-      sendingTimeEpoch      |-> [i \in 1 .. 8 |-> 0],
-      orderRequestId        |-> [i \in 1 .. 8 |-> 0],
-      location              |-> [i \in 1 .. 5 |-> 0],
-      securityId            |-> [i \in 1 .. 4 |-> 0],
-      orderQty              |-> [i \in 1 .. 4 |-> 0],
-      cumQty                |-> [i \in 1 .. 4 |-> 0],
-      leaves                |-> [i \in 1 .. 4 |-> 0],
-      minQty                |-> [i \in 1 .. 4 |-> 0],
-      displayQty            |-> [i \in 1 .. 4 |-> 0],
-      expireDate            |-> [i \in 1 .. 2 |-> 0],
-      ordTypeOptional       |-> [i \in 1 .. 1 |-> 0],
-      side                  |-> [i \in 1 .. 1 |-> 0],
-      timeInForce           |-> [i \in 1 .. 1 |-> 0],
-      manualOrderIndicator  |-> [i \in 1 .. 1 |-> 0],
-      possRetransFlag       |-> [i \in 1 .. 1 |-> 0],
-      splitMsg              |-> [i \in 1 .. 1 |-> 0],
-      liquidityFlag         |-> [i \in 1 .. 1 |-> 0],
-      shortSaleType         |-> [i \in 1 .. 1 |-> 0],
-      delayToTime           |-> [i \in 1 .. 8 |-> 0],
-      discretionPrice       |-> [i \in 1 .. 8 |-> 0],
-      priorityIndicator     |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Execution Report Pending Replace at zero, then each field in turn at the values it is checked at *)
-CheckedExecutionReportPendingReplace ==
-    { ZeroExecutionReportPendingReplace }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.seqNum = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.uuid = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.execId = one] : one \in Sample(40) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.senderId = one] : one \in Sample(20) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.partyDetailsListReqId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.sendingTimeEpoch = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.orderRequestId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.location = one] : one \in Sample(5) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.orderQty = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.cumQty = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.leaves = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.minQty = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.displayQty = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.expireDate = one] : one \in Sample(2) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.ordTypeOptional = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.timeInForce = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.possRetransFlag = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.splitMsg = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.liquidityFlag = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.shortSaleType = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.delayToTime = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.discretionPrice = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportPendingReplace EXCEPT !.priorityIndicator = one] : one \in Sample(1) }
-
-(***************************************************************************)
 (* Server Payload, selected by Template Id                                 *)
 (***************************************************************************)
 
@@ -8292,8 +7888,6 @@ ExecutionReportTradeAddendumSpreadLegCode == 550  \* 0x226
 SecurityDefinitionResponseCode == 561  \* 0x231
 OrderMassActionReportCode == 562  \* 0x232
 QuoteCancelAckCode == 563  \* 0x233
-ExecutionReportPendingCancelCode == 564  \* 0x234
-ExecutionReportPendingReplaceCode == 565  \* 0x235
 
 ServerPayload ==
     [ tag : {NegotiationResponseCode}, body : NegotiationResponse ]
@@ -8327,8 +7921,6 @@ ServerPayload ==
         \cup [ tag : {SecurityDefinitionResponseCode}, body : SecurityDefinitionResponse ]
         \cup [ tag : {OrderMassActionReportCode}, body : OrderMassActionReport ]
         \cup [ tag : {QuoteCancelAckCode}, body : QuoteCancelAck ]
-        \cup [ tag : {ExecutionReportPendingCancelCode}, body : ExecutionReportPendingCancel ]
-        \cup [ tag : {ExecutionReportPendingReplaceCode}, body : ExecutionReportPendingReplace ]
 
 EncodeServerPayload(message) ==
     CASE message.tag = NegotiationResponseCode -> EncodeNegotiationResponse(message.body)
@@ -8362,8 +7954,6 @@ EncodeServerPayload(message) ==
       [] message.tag = SecurityDefinitionResponseCode -> EncodeSecurityDefinitionResponse(message.body)
       [] message.tag = OrderMassActionReportCode -> EncodeOrderMassActionReport(message.body)
       [] message.tag = QuoteCancelAckCode -> EncodeQuoteCancelAck(message.body)
-      [] message.tag = ExecutionReportPendingCancelCode -> EncodeExecutionReportPendingCancel(message.body)
-      [] message.tag = ExecutionReportPendingReplaceCode -> EncodeExecutionReportPendingReplace(message.body)
 
 DecodeServerPayload(tag, bytes) ==
     LET read ==
@@ -8398,8 +7988,6 @@ DecodeServerPayload(tag, bytes) ==
               [] tag = SecurityDefinitionResponseCode -> DecodeSecurityDefinitionResponse(bytes)
               [] tag = OrderMassActionReportCode -> DecodeOrderMassActionReport(bytes)
               [] tag = QuoteCancelAckCode -> DecodeQuoteCancelAck(bytes)
-              [] tag = ExecutionReportPendingCancelCode -> DecodeExecutionReportPendingCancel(bytes)
-              [] tag = ExecutionReportPendingReplaceCode -> DecodeExecutionReportPendingReplace(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -8438,8 +8026,6 @@ CheckedServerPayload ==
         \cup { [tag |-> SecurityDefinitionResponseCode, body |-> one] : one \in CheckedSecurityDefinitionResponse }
         \cup { [tag |-> OrderMassActionReportCode, body |-> one] : one \in CheckedOrderMassActionReport }
         \cup { [tag |-> QuoteCancelAckCode, body |-> one] : one \in CheckedQuoteCancelAck }
-        \cup { [tag |-> ExecutionReportPendingCancelCode, body |-> one] : one \in CheckedExecutionReportPendingCancel }
-        \cup { [tag |-> ExecutionReportPendingReplaceCode, body |-> one] : one \in CheckedExecutionReportPendingReplace }
 
 (***************************************************************************)
 (* Server Simple Open Frame, framed by Message Length                      *)
@@ -8555,9 +8141,7 @@ OneServerSimpleOpenFrame ==
       [ZeroServerSimpleOpenFrame EXCEPT !.serverPayload = [tag |-> ExecutionReportTradeAddendumSpreadLegCode, body |-> ZeroExecutionReportTradeAddendumSpreadLeg]],
       [ZeroServerSimpleOpenFrame EXCEPT !.serverPayload = [tag |-> SecurityDefinitionResponseCode, body |-> ZeroSecurityDefinitionResponse]],
       [ZeroServerSimpleOpenFrame EXCEPT !.serverPayload = [tag |-> OrderMassActionReportCode, body |-> ZeroOrderMassActionReport]],
-      [ZeroServerSimpleOpenFrame EXCEPT !.serverPayload = [tag |-> QuoteCancelAckCode, body |-> ZeroQuoteCancelAck]],
-      [ZeroServerSimpleOpenFrame EXCEPT !.serverPayload = [tag |-> ExecutionReportPendingCancelCode, body |-> ZeroExecutionReportPendingCancel]],
-      [ZeroServerSimpleOpenFrame EXCEPT !.serverPayload = [tag |-> ExecutionReportPendingReplaceCode, body |-> ZeroExecutionReportPendingReplace]] }
+      [ZeroServerSimpleOpenFrame EXCEPT !.serverPayload = [tag |-> QuoteCancelAckCode, body |-> ZeroQuoteCancelAck]] }
 
 (***************************************************************************)
 (* Server Packet                                                           *)
@@ -9377,22 +8961,6 @@ RoundTripQuoteCancelAckSetsGroups ==
 RoundTripQuoteCancelAck ==
     \A message \in CheckedQuoteCancelAck :
         LET read == DecodeQuoteCancelAck(EncodeQuoteCancelAck(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Execution Report Pending Cancel decodes back to what was encoded, and leaves nothing over *)
-RoundTripExecutionReportPendingCancel ==
-    \A message \in CheckedExecutionReportPendingCancel :
-        LET read == DecodeExecutionReportPendingCancel(EncodeExecutionReportPendingCancel(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Execution Report Pending Replace decodes back to what was encoded, and leaves nothing over *)
-RoundTripExecutionReportPendingReplace ==
-    \A message \in CheckedExecutionReportPendingReplace :
-        LET read == DecodeExecutionReportPendingReplace(EncodeExecutionReportPendingReplace(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

@@ -455,41 +455,87 @@ CheckedSecurityListCancellationReportMessage ==
         \cup { [ZeroSecurityListCancellationReportMessage EXCEPT !.symbolIsin = one] : one \in Sample(12) }
 
 (***************************************************************************)
-(* Statistics Message: 18 bytes                                            *)
+(* Statistics Repeating Group: 9 bytes                                     *)
+(***************************************************************************)
+
+StatisticsRepeatingGroup ==
+    [ dataCode  : Sample(1),
+      dataValue : Sample(8) ]
+
+EncodeStatisticsRepeatingGroup(message) ==
+    message.dataCode
+        \o message.dataValue
+
+DecodeStatisticsRepeatingGroup(bytes) ==
+    LET dataCode == ReadBytes(bytes, 1) IN IF ~dataCode.ok THEN Fail ELSE
+    LET dataValue == ReadBytes(dataCode.rest, 8) IN IF ~dataValue.ok THEN Fail ELSE
+    Ok([ dataCode  |-> dataCode.value,
+         dataValue |-> dataValue.value ], dataValue.rest)
+
+ZeroStatisticsRepeatingGroup ==
+    [ dataCode  |-> [i \in 1 .. 1 |-> 0],
+      dataValue |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Statistics Repeating Group at zero, then each field in turn at the values it is checked at *)
+CheckedStatisticsRepeatingGroup ==
+    { ZeroStatisticsRepeatingGroup }
+        \cup { [ZeroStatisticsRepeatingGroup EXCEPT !.dataCode = one] : one \in Sample(1) }
+        \cup { [ZeroStatisticsRepeatingGroup EXCEPT !.dataValue = one] : one \in Sample(8) }
+
+(* A run of Statistics Repeating Group, written one after another *)
+RECURSIVE EncodeStatisticsRepeatingGroupList(_)
+EncodeStatisticsRepeatingGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeStatisticsRepeatingGroup(Head(messages)) \o EncodeStatisticsRepeatingGroupList(Tail(messages))
+
+(* As many Statistics Repeating Group as the field that counts them says *)
+RECURSIVE ReadStatisticsRepeatingGroupList(_, _)
+ReadStatisticsRepeatingGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeStatisticsRepeatingGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadStatisticsRepeatingGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Statistics Repeating Group of each kind, for the lists that carry them *)
+OneStatisticsRepeatingGroup == { ZeroStatisticsRepeatingGroup }
+
+(***************************************************************************)
+(* Statistics Message                                                      *)
 (***************************************************************************)
 
 StatisticsMessage ==
-    [ sequenceNumber         : Sample(4),
-      securityCode           : Sample(4),
-      transactionDateAndTime : Sample(8),
-      dataCount              : Sample(1),
-      dataCode               : Sample(1) ]
+    [ sequenceNumber           : Sample(4),
+      securityCode             : Sample(4),
+      transactionDateAndTime   : Sample(8),
+      statisticsRepeatingGroup : SampleLists(OneStatisticsRepeatingGroup) ]
 
 EncodeStatisticsMessage(message) ==
     message.sequenceNumber
         \o message.securityCode
         \o message.transactionDateAndTime
-        \o message.dataCount
-        \o message.dataCode
+        \o EncodeUIntLE(Len(message.statisticsRepeatingGroup), 1)
+        \o EncodeStatisticsRepeatingGroupList(message.statisticsRepeatingGroup)
 
 DecodeStatisticsMessage(bytes) ==
     LET sequenceNumber == ReadBytes(bytes, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET securityCode == ReadBytes(sequenceNumber.rest, 4) IN IF ~securityCode.ok THEN Fail ELSE
     LET transactionDateAndTime == ReadBytes(securityCode.rest, 8) IN IF ~transactionDateAndTime.ok THEN Fail ELSE
-    LET dataCount == ReadBytes(transactionDateAndTime.rest, 1) IN IF ~dataCount.ok THEN Fail ELSE
-    LET dataCode == ReadBytes(dataCount.rest, 1) IN IF ~dataCode.ok THEN Fail ELSE
-    Ok([ sequenceNumber         |-> sequenceNumber.value,
-         securityCode           |-> securityCode.value,
-         transactionDateAndTime |-> transactionDateAndTime.value,
-         dataCount              |-> dataCount.value,
-         dataCode               |-> dataCode.value ], dataCode.rest)
+    LET dataCount == ReadUIntLE(transactionDateAndTime.rest, 1) IN IF ~dataCount.ok THEN Fail ELSE
+    LET statisticsRepeatingGroup == ReadStatisticsRepeatingGroupList(dataCount.rest, dataCount.value) IN IF ~statisticsRepeatingGroup.ok THEN Fail ELSE
+    Ok([ sequenceNumber           |-> sequenceNumber.value,
+         securityCode             |-> securityCode.value,
+         transactionDateAndTime   |-> transactionDateAndTime.value,
+         statisticsRepeatingGroup |-> statisticsRepeatingGroup.value ], statisticsRepeatingGroup.rest)
 
 ZeroStatisticsMessage ==
-    [ sequenceNumber         |-> [i \in 1 .. 4 |-> 0],
-      securityCode           |-> [i \in 1 .. 4 |-> 0],
-      transactionDateAndTime |-> [i \in 1 .. 8 |-> 0],
-      dataCount              |-> [i \in 1 .. 1 |-> 0],
-      dataCode               |-> [i \in 1 .. 1 |-> 0] ]
+    [ sequenceNumber           |-> [i \in 1 .. 4 |-> 0],
+      securityCode             |-> [i \in 1 .. 4 |-> 0],
+      transactionDateAndTime   |-> [i \in 1 .. 8 |-> 0],
+      statisticsRepeatingGroup |-> << >> ]
 
 (* Statistics Message at zero, then each field in turn at the values it is checked at *)
 CheckedStatisticsMessage ==
@@ -497,8 +543,7 @@ CheckedStatisticsMessage ==
         \cup { [ZeroStatisticsMessage EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
         \cup { [ZeroStatisticsMessage EXCEPT !.securityCode = one] : one \in Sample(4) }
         \cup { [ZeroStatisticsMessage EXCEPT !.transactionDateAndTime = one] : one \in Sample(8) }
-        \cup { [ZeroStatisticsMessage EXCEPT !.dataCount = one] : one \in Sample(1) }
-        \cup { [ZeroStatisticsMessage EXCEPT !.dataCode = one] : one \in Sample(1) }
+        \cup { [ZeroStatisticsMessage EXCEPT !.statisticsRepeatingGroup = one] : one \in SampleLists(OneStatisticsRepeatingGroup) }
 
 (***************************************************************************)
 (* Security List Message: 713 bytes                                        *)
@@ -2108,7 +2153,7 @@ TradeTradeAmendmentOrCancellationMessage ==
       algoFlag                    : Sample(1),
       transactionCategory         : Sample(1),
       strategyTrdMatchId          : Sample(4),
-      lastChangeFlagF1            : Sample(1),
+      lastChangeFlag              : Sample(1),
       bencrfptFlag                : Sample(1),
       tradePriceCondition         : Sample(1),
       preTradeTransparencyWaiver  : Sample(1),
@@ -2137,7 +2182,7 @@ EncodeTradeTradeAmendmentOrCancellationMessage(message) ==
         \o message.algoFlag
         \o message.transactionCategory
         \o message.strategyTrdMatchId
-        \o message.lastChangeFlagF1
+        \o message.lastChangeFlag
         \o message.bencrfptFlag
         \o message.tradePriceCondition
         \o message.preTradeTransparencyWaiver
@@ -2166,8 +2211,8 @@ DecodeTradeTradeAmendmentOrCancellationMessage(bytes) ==
     LET algoFlag == ReadBytes(marketMechanism.rest, 1) IN IF ~algoFlag.ok THEN Fail ELSE
     LET transactionCategory == ReadBytes(algoFlag.rest, 1) IN IF ~transactionCategory.ok THEN Fail ELSE
     LET strategyTrdMatchId == ReadBytes(transactionCategory.rest, 4) IN IF ~strategyTrdMatchId.ok THEN Fail ELSE
-    LET lastChangeFlagF1 == ReadBytes(strategyTrdMatchId.rest, 1) IN IF ~lastChangeFlagF1.ok THEN Fail ELSE
-    LET bencrfptFlag == ReadBytes(lastChangeFlagF1.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
+    LET lastChangeFlag == ReadBytes(strategyTrdMatchId.rest, 1) IN IF ~lastChangeFlag.ok THEN Fail ELSE
+    LET bencrfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
     LET tradePriceCondition == ReadBytes(bencrfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
     LET preTradeTransparencyWaiver == ReadBytes(tradePriceCondition.rest, 1) IN IF ~preTradeTransparencyWaiver.ok THEN Fail ELSE
     LET deferralWaiver == ReadBytes(preTradeTransparencyWaiver.rest, 1) IN IF ~deferralWaiver.ok THEN Fail ELSE
@@ -2193,7 +2238,7 @@ DecodeTradeTradeAmendmentOrCancellationMessage(bytes) ==
          algoFlag                    |-> algoFlag.value,
          transactionCategory         |-> transactionCategory.value,
          strategyTrdMatchId          |-> strategyTrdMatchId.value,
-         lastChangeFlagF1            |-> lastChangeFlagF1.value,
+         lastChangeFlag              |-> lastChangeFlag.value,
          bencrfptFlag                |-> bencrfptFlag.value,
          tradePriceCondition         |-> tradePriceCondition.value,
          preTradeTransparencyWaiver  |-> preTradeTransparencyWaiver.value,
@@ -2222,7 +2267,7 @@ ZeroTradeTradeAmendmentOrCancellationMessage ==
       algoFlag                    |-> [i \in 1 .. 1 |-> 0],
       transactionCategory         |-> [i \in 1 .. 1 |-> 0],
       strategyTrdMatchId          |-> [i \in 1 .. 4 |-> 0],
-      lastChangeFlagF1            |-> [i \in 1 .. 1 |-> 0],
+      lastChangeFlag              |-> [i \in 1 .. 1 |-> 0],
       bencrfptFlag                |-> [i \in 1 .. 1 |-> 0],
       tradePriceCondition         |-> [i \in 1 .. 1 |-> 0],
       preTradeTransparencyWaiver  |-> [i \in 1 .. 1 |-> 0],
@@ -2253,7 +2298,7 @@ CheckedTradeTradeAmendmentOrCancellationMessage ==
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.algoFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.transactionCategory = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.strategyTrdMatchId = one] : one \in Sample(4) }
-        \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.lastChangeFlagF1 = one] : one \in Sample(1) }
+        \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.lastChangeFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.bencrfptFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.tradePriceCondition = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.preTradeTransparencyWaiver = one] : one \in Sample(1) }
@@ -4144,7 +4189,7 @@ CheckedQuoteStatusMessage ==
         \cup { [ZeroQuoteStatusMessage EXCEPT !.clientDataId = one] : one \in Sample(2) }
 
 (***************************************************************************)
-(* Order Cancel Reject Message: 19 bytes                                   *)
+(* Order Cancel Reject Message: 23 bytes                                   *)
 (***************************************************************************)
 
 OrderCancelRejectMessage ==
@@ -4153,7 +4198,8 @@ OrderCancelRejectMessage ==
       orderId                : Sample(4),
       ordStatus              : Sample(1),
       cxlRejResponseTo       : Sample(1),
-      cxlRejReason           : Sample(1) ]
+      cxlRejReason           : Sample(1),
+      requestId              : Sample(4) ]
 
 EncodeOrderCancelRejectMessage(message) ==
     message.sequenceNumber
@@ -4162,6 +4208,7 @@ EncodeOrderCancelRejectMessage(message) ==
         \o message.ordStatus
         \o message.cxlRejResponseTo
         \o message.cxlRejReason
+        \o message.requestId
 
 DecodeOrderCancelRejectMessage(bytes) ==
     LET sequenceNumber == ReadBytes(bytes, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
@@ -4170,12 +4217,14 @@ DecodeOrderCancelRejectMessage(bytes) ==
     LET ordStatus == ReadBytes(orderId.rest, 1) IN IF ~ordStatus.ok THEN Fail ELSE
     LET cxlRejResponseTo == ReadBytes(ordStatus.rest, 1) IN IF ~cxlRejResponseTo.ok THEN Fail ELSE
     LET cxlRejReason == ReadBytes(cxlRejResponseTo.rest, 1) IN IF ~cxlRejReason.ok THEN Fail ELSE
+    LET requestId == ReadBytes(cxlRejReason.rest, 4) IN IF ~requestId.ok THEN Fail ELSE
     Ok([ sequenceNumber         |-> sequenceNumber.value,
          transactionDateAndTime |-> transactionDateAndTime.value,
          orderId                |-> orderId.value,
          ordStatus              |-> ordStatus.value,
          cxlRejResponseTo       |-> cxlRejResponseTo.value,
-         cxlRejReason           |-> cxlRejReason.value ], cxlRejReason.rest)
+         cxlRejReason           |-> cxlRejReason.value,
+         requestId              |-> requestId.value ], requestId.rest)
 
 ZeroOrderCancelRejectMessage ==
     [ sequenceNumber         |-> [i \in 1 .. 4 |-> 0],
@@ -4183,7 +4232,8 @@ ZeroOrderCancelRejectMessage ==
       orderId                |-> [i \in 1 .. 4 |-> 0],
       ordStatus              |-> [i \in 1 .. 1 |-> 0],
       cxlRejResponseTo       |-> [i \in 1 .. 1 |-> 0],
-      cxlRejReason           |-> [i \in 1 .. 1 |-> 0] ]
+      cxlRejReason           |-> [i \in 1 .. 1 |-> 0],
+      requestId              |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Order Cancel Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderCancelRejectMessage ==
@@ -4194,6 +4244,7 @@ CheckedOrderCancelRejectMessage ==
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.ordStatus = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.cxlRejResponseTo = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.cxlRejReason = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelRejectMessage EXCEPT !.requestId = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Mass Orderquote Cancellation Completion Message: 18 bytes               *)
@@ -4282,7 +4333,7 @@ CheckedMassOrderquoteCancellationRejectMessage ==
         \cup { [ZeroMassOrderquoteCancellationRejectMessage EXCEPT !.massCancelRejectReason = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Business Message Reject Message: 79 bytes                               *)
+(* Business Message Reject Message: 83 bytes                               *)
 (***************************************************************************)
 
 BusinessMessageRejectMessage ==
@@ -4290,7 +4341,8 @@ BusinessMessageRejectMessage ==
       transactionDateAndTime : Sample(8),
       refMsgType             : Sample(1),
       businessRejectReason   : Sample(1),
-      textC65                : Sample(65) ]
+      textC65                : Sample(65),
+      requestId              : Sample(4) ]
 
 EncodeBusinessMessageRejectMessage(message) ==
     message.sequenceNumber
@@ -4298,6 +4350,7 @@ EncodeBusinessMessageRejectMessage(message) ==
         \o message.refMsgType
         \o message.businessRejectReason
         \o message.textC65
+        \o message.requestId
 
 DecodeBusinessMessageRejectMessage(bytes) ==
     LET sequenceNumber == ReadBytes(bytes, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
@@ -4305,18 +4358,21 @@ DecodeBusinessMessageRejectMessage(bytes) ==
     LET refMsgType == ReadBytes(transactionDateAndTime.rest, 1) IN IF ~refMsgType.ok THEN Fail ELSE
     LET businessRejectReason == ReadBytes(refMsgType.rest, 1) IN IF ~businessRejectReason.ok THEN Fail ELSE
     LET textC65 == ReadBytes(businessRejectReason.rest, 65) IN IF ~textC65.ok THEN Fail ELSE
+    LET requestId == ReadBytes(textC65.rest, 4) IN IF ~requestId.ok THEN Fail ELSE
     Ok([ sequenceNumber         |-> sequenceNumber.value,
          transactionDateAndTime |-> transactionDateAndTime.value,
          refMsgType             |-> refMsgType.value,
          businessRejectReason   |-> businessRejectReason.value,
-         textC65                |-> textC65.value ], textC65.rest)
+         textC65                |-> textC65.value,
+         requestId              |-> requestId.value ], requestId.rest)
 
 ZeroBusinessMessageRejectMessage ==
     [ sequenceNumber         |-> [i \in 1 .. 4 |-> 0],
       transactionDateAndTime |-> [i \in 1 .. 8 |-> 0],
       refMsgType             |-> [i \in 1 .. 1 |-> 0],
       businessRejectReason   |-> [i \in 1 .. 1 |-> 0],
-      textC65                |-> [i \in 1 .. 65 |-> 0] ]
+      textC65                |-> [i \in 1 .. 65 |-> 0],
+      requestId              |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Business Message Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedBusinessMessageRejectMessage ==
@@ -4326,6 +4382,7 @@ CheckedBusinessMessageRejectMessage ==
         \cup { [ZeroBusinessMessageRejectMessage EXCEPT !.refMsgType = one] : one \in Sample(1) }
         \cup { [ZeroBusinessMessageRejectMessage EXCEPT !.businessRejectReason = one] : one \in Sample(1) }
         \cup { [ZeroBusinessMessageRejectMessage EXCEPT !.textC65 = one] : one \in Sample(65) }
+        \cup { [ZeroBusinessMessageRejectMessage EXCEPT !.requestId = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Execution Private Information 2 Legs Message: 144 bytes                 *)
@@ -4372,7 +4429,7 @@ ExecutionPrivateInformation2LegsMessage ==
       ccpCode2               : Sample(1),
       aggressorIndicator2    : Sample(1),
       requestId2             : Sample(4),
-      clientDataId2U2        : Sample(2) ]
+      clientDataId2          : Sample(2) ]
 
 EncodeExecutionPrivateInformation2LegsMessage(message) ==
     message.sequenceNumber
@@ -4415,7 +4472,7 @@ EncodeExecutionPrivateInformation2LegsMessage(message) ==
         \o message.ccpCode2
         \o message.aggressorIndicator2
         \o message.requestId2
-        \o message.clientDataId2U2
+        \o message.clientDataId2
 
 DecodeExecutionPrivateInformation2LegsMessage(bytes) ==
     LET sequenceNumber == ReadBytes(bytes, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
@@ -4458,7 +4515,7 @@ DecodeExecutionPrivateInformation2LegsMessage(bytes) ==
     LET ccpCode2 == ReadBytes(ordStatus2.rest, 1) IN IF ~ccpCode2.ok THEN Fail ELSE
     LET aggressorIndicator2 == ReadBytes(ccpCode2.rest, 1) IN IF ~aggressorIndicator2.ok THEN Fail ELSE
     LET requestId2 == ReadBytes(aggressorIndicator2.rest, 4) IN IF ~requestId2.ok THEN Fail ELSE
-    LET clientDataId2U2 == ReadBytes(requestId2.rest, 2) IN IF ~clientDataId2U2.ok THEN Fail ELSE
+    LET clientDataId2 == ReadBytes(requestId2.rest, 2) IN IF ~clientDataId2.ok THEN Fail ELSE
     Ok([ sequenceNumber         |-> sequenceNumber.value,
          securityCode           |-> securityCode.value,
          transactionDateAndTime |-> transactionDateAndTime.value,
@@ -4499,7 +4556,7 @@ DecodeExecutionPrivateInformation2LegsMessage(bytes) ==
          ccpCode2               |-> ccpCode2.value,
          aggressorIndicator2    |-> aggressorIndicator2.value,
          requestId2             |-> requestId2.value,
-         clientDataId2U2        |-> clientDataId2U2.value ], clientDataId2U2.rest)
+         clientDataId2          |-> clientDataId2.value ], clientDataId2.rest)
 
 ZeroExecutionPrivateInformation2LegsMessage ==
     [ sequenceNumber         |-> [i \in 1 .. 4 |-> 0],
@@ -4542,7 +4599,7 @@ ZeroExecutionPrivateInformation2LegsMessage ==
       ccpCode2               |-> [i \in 1 .. 1 |-> 0],
       aggressorIndicator2    |-> [i \in 1 .. 1 |-> 0],
       requestId2             |-> [i \in 1 .. 4 |-> 0],
-      clientDataId2U2        |-> [i \in 1 .. 2 |-> 0] ]
+      clientDataId2          |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Execution Private Information 2 Legs Message at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionPrivateInformation2LegsMessage ==
@@ -4587,7 +4644,7 @@ CheckedExecutionPrivateInformation2LegsMessage ==
         \cup { [ZeroExecutionPrivateInformation2LegsMessage EXCEPT !.ccpCode2 = one] : one \in Sample(1) }
         \cup { [ZeroExecutionPrivateInformation2LegsMessage EXCEPT !.aggressorIndicator2 = one] : one \in Sample(1) }
         \cup { [ZeroExecutionPrivateInformation2LegsMessage EXCEPT !.requestId2 = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionPrivateInformation2LegsMessage EXCEPT !.clientDataId2U2 = one] : one \in Sample(2) }
+        \cup { [ZeroExecutionPrivateInformation2LegsMessage EXCEPT !.clientDataId2 = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Trade Trade Amendment Or Cancellation 1 Leg Buy Private Information     *)
@@ -4610,7 +4667,7 @@ TradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage ==
       algoFlag                    : Sample(1),
       transactionCategory         : Sample(1),
       strategyTrdMatchId          : Sample(4),
-      lastChangeFlagB1            : Sample(1),
+      lastChangeFlag              : Sample(1),
       bencrfptFlag                : Sample(1),
       tradePriceCondition         : Sample(1),
       preTradeTransparencyWaiver  : Sample(1),
@@ -4678,7 +4735,7 @@ EncodeTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage(message)
         \o message.algoFlag
         \o message.transactionCategory
         \o message.strategyTrdMatchId
-        \o message.lastChangeFlagB1
+        \o message.lastChangeFlag
         \o message.bencrfptFlag
         \o message.tradePriceCondition
         \o message.preTradeTransparencyWaiver
@@ -4746,8 +4803,8 @@ DecodeTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage(bytes) =
     LET algoFlag == ReadBytes(marketMechanism.rest, 1) IN IF ~algoFlag.ok THEN Fail ELSE
     LET transactionCategory == ReadBytes(algoFlag.rest, 1) IN IF ~transactionCategory.ok THEN Fail ELSE
     LET strategyTrdMatchId == ReadBytes(transactionCategory.rest, 4) IN IF ~strategyTrdMatchId.ok THEN Fail ELSE
-    LET lastChangeFlagB1 == ReadBytes(strategyTrdMatchId.rest, 1) IN IF ~lastChangeFlagB1.ok THEN Fail ELSE
-    LET bencrfptFlag == ReadBytes(lastChangeFlagB1.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
+    LET lastChangeFlag == ReadBytes(strategyTrdMatchId.rest, 1) IN IF ~lastChangeFlag.ok THEN Fail ELSE
+    LET bencrfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
     LET tradePriceCondition == ReadBytes(bencrfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
     LET preTradeTransparencyWaiver == ReadBytes(tradePriceCondition.rest, 1) IN IF ~preTradeTransparencyWaiver.ok THEN Fail ELSE
     LET deferralWaiver == ReadBytes(preTradeTransparencyWaiver.rest, 1) IN IF ~deferralWaiver.ok THEN Fail ELSE
@@ -4812,7 +4869,7 @@ DecodeTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage(bytes) =
          algoFlag                    |-> algoFlag.value,
          transactionCategory         |-> transactionCategory.value,
          strategyTrdMatchId          |-> strategyTrdMatchId.value,
-         lastChangeFlagB1            |-> lastChangeFlagB1.value,
+         lastChangeFlag              |-> lastChangeFlag.value,
          bencrfptFlag                |-> bencrfptFlag.value,
          tradePriceCondition         |-> tradePriceCondition.value,
          preTradeTransparencyWaiver  |-> preTradeTransparencyWaiver.value,
@@ -4880,7 +4937,7 @@ ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage ==
       algoFlag                    |-> [i \in 1 .. 1 |-> 0],
       transactionCategory         |-> [i \in 1 .. 1 |-> 0],
       strategyTrdMatchId          |-> [i \in 1 .. 4 |-> 0],
-      lastChangeFlagB1            |-> [i \in 1 .. 1 |-> 0],
+      lastChangeFlag              |-> [i \in 1 .. 1 |-> 0],
       bencrfptFlag                |-> [i \in 1 .. 1 |-> 0],
       tradePriceCondition         |-> [i \in 1 .. 1 |-> 0],
       preTradeTransparencyWaiver  |-> [i \in 1 .. 1 |-> 0],
@@ -4950,7 +5007,7 @@ CheckedTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage ==
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.algoFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.transactionCategory = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.strategyTrdMatchId = one] : one \in Sample(4) }
-        \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.lastChangeFlagB1 = one] : one \in Sample(1) }
+        \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.lastChangeFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.bencrfptFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.tradePriceCondition = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.preTradeTransparencyWaiver = one] : one \in Sample(1) }
@@ -5023,7 +5080,7 @@ TradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage ==
       algoFlag                    : Sample(1),
       transactionCategory         : Sample(1),
       strategyTrdMatchId          : Sample(4),
-      lastChangeFlagB1            : Sample(1),
+      lastChangeFlag              : Sample(1),
       bencrfptFlag                : Sample(1),
       tradePriceCondition         : Sample(1),
       preTradeTransparencyWaiver  : Sample(1),
@@ -5091,7 +5148,7 @@ EncodeTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage(message
         \o message.algoFlag
         \o message.transactionCategory
         \o message.strategyTrdMatchId
-        \o message.lastChangeFlagB1
+        \o message.lastChangeFlag
         \o message.bencrfptFlag
         \o message.tradePriceCondition
         \o message.preTradeTransparencyWaiver
@@ -5159,8 +5216,8 @@ DecodeTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage(bytes) 
     LET algoFlag == ReadBytes(marketMechanism.rest, 1) IN IF ~algoFlag.ok THEN Fail ELSE
     LET transactionCategory == ReadBytes(algoFlag.rest, 1) IN IF ~transactionCategory.ok THEN Fail ELSE
     LET strategyTrdMatchId == ReadBytes(transactionCategory.rest, 4) IN IF ~strategyTrdMatchId.ok THEN Fail ELSE
-    LET lastChangeFlagB1 == ReadBytes(strategyTrdMatchId.rest, 1) IN IF ~lastChangeFlagB1.ok THEN Fail ELSE
-    LET bencrfptFlag == ReadBytes(lastChangeFlagB1.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
+    LET lastChangeFlag == ReadBytes(strategyTrdMatchId.rest, 1) IN IF ~lastChangeFlag.ok THEN Fail ELSE
+    LET bencrfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
     LET tradePriceCondition == ReadBytes(bencrfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
     LET preTradeTransparencyWaiver == ReadBytes(tradePriceCondition.rest, 1) IN IF ~preTradeTransparencyWaiver.ok THEN Fail ELSE
     LET deferralWaiver == ReadBytes(preTradeTransparencyWaiver.rest, 1) IN IF ~deferralWaiver.ok THEN Fail ELSE
@@ -5225,7 +5282,7 @@ DecodeTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage(bytes) 
          algoFlag                    |-> algoFlag.value,
          transactionCategory         |-> transactionCategory.value,
          strategyTrdMatchId          |-> strategyTrdMatchId.value,
-         lastChangeFlagB1            |-> lastChangeFlagB1.value,
+         lastChangeFlag              |-> lastChangeFlag.value,
          bencrfptFlag                |-> bencrfptFlag.value,
          tradePriceCondition         |-> tradePriceCondition.value,
          preTradeTransparencyWaiver  |-> preTradeTransparencyWaiver.value,
@@ -5293,7 +5350,7 @@ ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage ==
       algoFlag                    |-> [i \in 1 .. 1 |-> 0],
       transactionCategory         |-> [i \in 1 .. 1 |-> 0],
       strategyTrdMatchId          |-> [i \in 1 .. 4 |-> 0],
-      lastChangeFlagB1            |-> [i \in 1 .. 1 |-> 0],
+      lastChangeFlag              |-> [i \in 1 .. 1 |-> 0],
       bencrfptFlag                |-> [i \in 1 .. 1 |-> 0],
       tradePriceCondition         |-> [i \in 1 .. 1 |-> 0],
       preTradeTransparencyWaiver  |-> [i \in 1 .. 1 |-> 0],
@@ -5363,7 +5420,7 @@ CheckedTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage ==
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.algoFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.transactionCategory = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.strategyTrdMatchId = one] : one \in Sample(4) }
-        \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.lastChangeFlagB1 = one] : one \in Sample(1) }
+        \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.lastChangeFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.bencrfptFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.tradePriceCondition = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.preTradeTransparencyWaiver = one] : one \in Sample(1) }
@@ -5436,7 +5493,7 @@ TradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage ==
       algoFlag                    : Sample(1),
       transactionCategory         : Sample(1),
       strategyTrdMatchId          : Sample(4),
-      lastChangeFlagB1            : Sample(1),
+      lastChangeFlag              : Sample(1),
       bencrfptFlag                : Sample(1),
       tradePriceCondition         : Sample(1),
       preTradeTransparencyWaiver  : Sample(1),
@@ -5499,7 +5556,7 @@ TradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage ==
       ccpCode2                    : Sample(1),
       aggressorIndicator2         : Sample(1),
       requestId2                  : Sample(4),
-      clientDataId2U2             : Sample(2),
+      clientDataId2               : Sample(2),
       algorithmicTradeIndicator2  : Sample(1),
       clientId2                   : Sample(4),
       account2                    : Sample(5),
@@ -5539,7 +5596,7 @@ EncodeTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage(message) =
         \o message.algoFlag
         \o message.transactionCategory
         \o message.strategyTrdMatchId
-        \o message.lastChangeFlagB1
+        \o message.lastChangeFlag
         \o message.bencrfptFlag
         \o message.tradePriceCondition
         \o message.preTradeTransparencyWaiver
@@ -5602,7 +5659,7 @@ EncodeTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage(message) =
         \o message.ccpCode2
         \o message.aggressorIndicator2
         \o message.requestId2
-        \o message.clientDataId2U2
+        \o message.clientDataId2
         \o message.algorithmicTradeIndicator2
         \o message.clientId2
         \o message.account2
@@ -5642,8 +5699,8 @@ DecodeTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage(bytes) ==
     LET algoFlag == ReadBytes(marketMechanism.rest, 1) IN IF ~algoFlag.ok THEN Fail ELSE
     LET transactionCategory == ReadBytes(algoFlag.rest, 1) IN IF ~transactionCategory.ok THEN Fail ELSE
     LET strategyTrdMatchId == ReadBytes(transactionCategory.rest, 4) IN IF ~strategyTrdMatchId.ok THEN Fail ELSE
-    LET lastChangeFlagB1 == ReadBytes(strategyTrdMatchId.rest, 1) IN IF ~lastChangeFlagB1.ok THEN Fail ELSE
-    LET bencrfptFlag == ReadBytes(lastChangeFlagB1.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
+    LET lastChangeFlag == ReadBytes(strategyTrdMatchId.rest, 1) IN IF ~lastChangeFlag.ok THEN Fail ELSE
+    LET bencrfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
     LET tradePriceCondition == ReadBytes(bencrfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
     LET preTradeTransparencyWaiver == ReadBytes(tradePriceCondition.rest, 1) IN IF ~preTradeTransparencyWaiver.ok THEN Fail ELSE
     LET deferralWaiver == ReadBytes(preTradeTransparencyWaiver.rest, 1) IN IF ~deferralWaiver.ok THEN Fail ELSE
@@ -5705,8 +5762,8 @@ DecodeTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage(bytes) ==
     LET ccpCode2 == ReadBytes(ordStatus2.rest, 1) IN IF ~ccpCode2.ok THEN Fail ELSE
     LET aggressorIndicator2 == ReadBytes(ccpCode2.rest, 1) IN IF ~aggressorIndicator2.ok THEN Fail ELSE
     LET requestId2 == ReadBytes(aggressorIndicator2.rest, 4) IN IF ~requestId2.ok THEN Fail ELSE
-    LET clientDataId2U2 == ReadBytes(requestId2.rest, 2) IN IF ~clientDataId2U2.ok THEN Fail ELSE
-    LET algorithmicTradeIndicator2 == ReadBytes(clientDataId2U2.rest, 1) IN IF ~algorithmicTradeIndicator2.ok THEN Fail ELSE
+    LET clientDataId2 == ReadBytes(requestId2.rest, 2) IN IF ~clientDataId2.ok THEN Fail ELSE
+    LET algorithmicTradeIndicator2 == ReadBytes(clientDataId2.rest, 1) IN IF ~algorithmicTradeIndicator2.ok THEN Fail ELSE
     LET clientId2 == ReadBytes(algorithmicTradeIndicator2.rest, 4) IN IF ~clientId2.ok THEN Fail ELSE
     LET account2 == ReadBytes(clientId2.rest, 5) IN IF ~account2.ok THEN Fail ELSE
     LET deaFlag2 == ReadBytes(account2.rest, 1) IN IF ~deaFlag2.ok THEN Fail ELSE
@@ -5743,7 +5800,7 @@ DecodeTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage(bytes) ==
          algoFlag                    |-> algoFlag.value,
          transactionCategory         |-> transactionCategory.value,
          strategyTrdMatchId          |-> strategyTrdMatchId.value,
-         lastChangeFlagB1            |-> lastChangeFlagB1.value,
+         lastChangeFlag              |-> lastChangeFlag.value,
          bencrfptFlag                |-> bencrfptFlag.value,
          tradePriceCondition         |-> tradePriceCondition.value,
          preTradeTransparencyWaiver  |-> preTradeTransparencyWaiver.value,
@@ -5806,7 +5863,7 @@ DecodeTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage(bytes) ==
          ccpCode2                    |-> ccpCode2.value,
          aggressorIndicator2         |-> aggressorIndicator2.value,
          requestId2                  |-> requestId2.value,
-         clientDataId2U2             |-> clientDataId2U2.value,
+         clientDataId2               |-> clientDataId2.value,
          algorithmicTradeIndicator2  |-> algorithmicTradeIndicator2.value,
          clientId2                   |-> clientId2.value,
          account2                    |-> account2.value,
@@ -5846,7 +5903,7 @@ ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage ==
       algoFlag                    |-> [i \in 1 .. 1 |-> 0],
       transactionCategory         |-> [i \in 1 .. 1 |-> 0],
       strategyTrdMatchId          |-> [i \in 1 .. 4 |-> 0],
-      lastChangeFlagB1            |-> [i \in 1 .. 1 |-> 0],
+      lastChangeFlag              |-> [i \in 1 .. 1 |-> 0],
       bencrfptFlag                |-> [i \in 1 .. 1 |-> 0],
       tradePriceCondition         |-> [i \in 1 .. 1 |-> 0],
       preTradeTransparencyWaiver  |-> [i \in 1 .. 1 |-> 0],
@@ -5909,7 +5966,7 @@ ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage ==
       ccpCode2                    |-> [i \in 1 .. 1 |-> 0],
       aggressorIndicator2         |-> [i \in 1 .. 1 |-> 0],
       requestId2                  |-> [i \in 1 .. 4 |-> 0],
-      clientDataId2U2             |-> [i \in 1 .. 2 |-> 0],
+      clientDataId2               |-> [i \in 1 .. 2 |-> 0],
       algorithmicTradeIndicator2  |-> [i \in 1 .. 1 |-> 0],
       clientId2                   |-> [i \in 1 .. 4 |-> 0],
       account2                    |-> [i \in 1 .. 5 |-> 0],
@@ -5951,7 +6008,7 @@ CheckedTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage ==
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.algoFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.transactionCategory = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.strategyTrdMatchId = one] : one \in Sample(4) }
-        \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.lastChangeFlagB1 = one] : one \in Sample(1) }
+        \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.lastChangeFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.bencrfptFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.tradePriceCondition = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.preTradeTransparencyWaiver = one] : one \in Sample(1) }
@@ -6014,7 +6071,7 @@ CheckedTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage ==
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.ccpCode2 = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.aggressorIndicator2 = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.requestId2 = one] : one \in Sample(4) }
-        \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.clientDataId2U2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.clientDataId2 = one] : one \in Sample(2) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.algorithmicTradeIndicator2 = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.clientId2 = one] : one \in Sample(4) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.account2 = one] : one \in Sample(5) }
@@ -6297,7 +6354,7 @@ ExecutionPrivateInformation1LegSellMarketOrderMessage ==
       ccpCode2               : Sample(1),
       aggressorIndicator2    : Sample(1),
       requestId2             : Sample(4),
-      clientDataId2B2        : Sample(2) ]
+      clientDataId2          : Sample(2) ]
 
 EncodeExecutionPrivateInformation1LegSellMarketOrderMessage(message) ==
     message.sequenceNumber
@@ -6333,7 +6390,7 @@ EncodeExecutionPrivateInformation1LegSellMarketOrderMessage(message) ==
         \o message.ccpCode2
         \o message.aggressorIndicator2
         \o message.requestId2
-        \o message.clientDataId2B2
+        \o message.clientDataId2
 
 DecodeExecutionPrivateInformation1LegSellMarketOrderMessage(bytes) ==
     LET sequenceNumber == ReadBytes(bytes, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
@@ -6369,7 +6426,7 @@ DecodeExecutionPrivateInformation1LegSellMarketOrderMessage(bytes) ==
     LET ccpCode2 == ReadBytes(ordStatus2.rest, 1) IN IF ~ccpCode2.ok THEN Fail ELSE
     LET aggressorIndicator2 == ReadBytes(ccpCode2.rest, 1) IN IF ~aggressorIndicator2.ok THEN Fail ELSE
     LET requestId2 == ReadBytes(aggressorIndicator2.rest, 4) IN IF ~requestId2.ok THEN Fail ELSE
-    LET clientDataId2B2 == ReadBytes(requestId2.rest, 2) IN IF ~clientDataId2B2.ok THEN Fail ELSE
+    LET clientDataId2 == ReadBytes(requestId2.rest, 2) IN IF ~clientDataId2.ok THEN Fail ELSE
     Ok([ sequenceNumber         |-> sequenceNumber.value,
          securityCode           |-> securityCode.value,
          transactionDateAndTime |-> transactionDateAndTime.value,
@@ -6403,7 +6460,7 @@ DecodeExecutionPrivateInformation1LegSellMarketOrderMessage(bytes) ==
          ccpCode2               |-> ccpCode2.value,
          aggressorIndicator2    |-> aggressorIndicator2.value,
          requestId2             |-> requestId2.value,
-         clientDataId2B2        |-> clientDataId2B2.value ], clientDataId2B2.rest)
+         clientDataId2          |-> clientDataId2.value ], clientDataId2.rest)
 
 ZeroExecutionPrivateInformation1LegSellMarketOrderMessage ==
     [ sequenceNumber         |-> [i \in 1 .. 4 |-> 0],
@@ -6439,7 +6496,7 @@ ZeroExecutionPrivateInformation1LegSellMarketOrderMessage ==
       ccpCode2               |-> [i \in 1 .. 1 |-> 0],
       aggressorIndicator2    |-> [i \in 1 .. 1 |-> 0],
       requestId2             |-> [i \in 1 .. 4 |-> 0],
-      clientDataId2B2        |-> [i \in 1 .. 2 |-> 0] ]
+      clientDataId2          |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Execution Private Information 1 Leg Sell Market Order Message at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionPrivateInformation1LegSellMarketOrderMessage ==
@@ -6477,7 +6534,7 @@ CheckedExecutionPrivateInformation1LegSellMarketOrderMessage ==
         \cup { [ZeroExecutionPrivateInformation1LegSellMarketOrderMessage EXCEPT !.ccpCode2 = one] : one \in Sample(1) }
         \cup { [ZeroExecutionPrivateInformation1LegSellMarketOrderMessage EXCEPT !.aggressorIndicator2 = one] : one \in Sample(1) }
         \cup { [ZeroExecutionPrivateInformation1LegSellMarketOrderMessage EXCEPT !.requestId2 = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionPrivateInformation1LegSellMarketOrderMessage EXCEPT !.clientDataId2B2 = one] : one \in Sample(2) }
+        \cup { [ZeroExecutionPrivateInformation1LegSellMarketOrderMessage EXCEPT !.clientDataId2 = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Payload, selected by Message Type                                       *)
@@ -6971,6 +7028,14 @@ RoundTripNewsMessage ==
 RoundTripSecurityListCancellationReportMessage ==
     \A message \in CheckedSecurityListCancellationReportMessage :
         LET read == DecodeSecurityListCancellationReportMessage(EncodeSecurityListCancellationReportMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Statistics Repeating Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripStatisticsRepeatingGroup ==
+    \A message \in CheckedStatisticsRepeatingGroup :
+        LET read == DecodeStatisticsRepeatingGroup(EncodeStatisticsRepeatingGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

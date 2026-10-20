@@ -363,41 +363,87 @@ CheckedSecurityListCancellationReportMessage ==
         \cup { [ZeroSecurityListCancellationReportMessage EXCEPT !.symbolIsin = one] : one \in Sample(12) }
 
 (***************************************************************************)
-(* Statistics Message: 18 bytes                                            *)
+(* Statistics Repeating Group: 9 bytes                                     *)
+(***************************************************************************)
+
+StatisticsRepeatingGroup ==
+    [ dataCode  : Sample(1),
+      dataValue : Sample(8) ]
+
+EncodeStatisticsRepeatingGroup(message) ==
+    message.dataCode
+        \o message.dataValue
+
+DecodeStatisticsRepeatingGroup(bytes) ==
+    LET dataCode == ReadBytes(bytes, 1) IN IF ~dataCode.ok THEN Fail ELSE
+    LET dataValue == ReadBytes(dataCode.rest, 8) IN IF ~dataValue.ok THEN Fail ELSE
+    Ok([ dataCode  |-> dataCode.value,
+         dataValue |-> dataValue.value ], dataValue.rest)
+
+ZeroStatisticsRepeatingGroup ==
+    [ dataCode  |-> [i \in 1 .. 1 |-> 0],
+      dataValue |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Statistics Repeating Group at zero, then each field in turn at the values it is checked at *)
+CheckedStatisticsRepeatingGroup ==
+    { ZeroStatisticsRepeatingGroup }
+        \cup { [ZeroStatisticsRepeatingGroup EXCEPT !.dataCode = one] : one \in Sample(1) }
+        \cup { [ZeroStatisticsRepeatingGroup EXCEPT !.dataValue = one] : one \in Sample(8) }
+
+(* A run of Statistics Repeating Group, written one after another *)
+RECURSIVE EncodeStatisticsRepeatingGroupList(_)
+EncodeStatisticsRepeatingGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeStatisticsRepeatingGroup(Head(messages)) \o EncodeStatisticsRepeatingGroupList(Tail(messages))
+
+(* As many Statistics Repeating Group as the field that counts them says *)
+RECURSIVE ReadStatisticsRepeatingGroupList(_, _)
+ReadStatisticsRepeatingGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeStatisticsRepeatingGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadStatisticsRepeatingGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Statistics Repeating Group of each kind, for the lists that carry them *)
+OneStatisticsRepeatingGroup == { ZeroStatisticsRepeatingGroup }
+
+(***************************************************************************)
+(* Statistics Message                                                      *)
 (***************************************************************************)
 
 StatisticsMessage ==
-    [ sequenceNumber         : Sample(4),
-      securityCode           : Sample(4),
-      transactionDateAndTime : Sample(8),
-      dataCount              : Sample(1),
-      dataCode               : Sample(1) ]
+    [ sequenceNumber           : Sample(4),
+      securityCode             : Sample(4),
+      transactionDateAndTime   : Sample(8),
+      statisticsRepeatingGroup : SampleLists(OneStatisticsRepeatingGroup) ]
 
 EncodeStatisticsMessage(message) ==
     message.sequenceNumber
         \o message.securityCode
         \o message.transactionDateAndTime
-        \o message.dataCount
-        \o message.dataCode
+        \o EncodeUIntLE(Len(message.statisticsRepeatingGroup), 1)
+        \o EncodeStatisticsRepeatingGroupList(message.statisticsRepeatingGroup)
 
 DecodeStatisticsMessage(bytes) ==
     LET sequenceNumber == ReadBytes(bytes, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET securityCode == ReadBytes(sequenceNumber.rest, 4) IN IF ~securityCode.ok THEN Fail ELSE
     LET transactionDateAndTime == ReadBytes(securityCode.rest, 8) IN IF ~transactionDateAndTime.ok THEN Fail ELSE
-    LET dataCount == ReadBytes(transactionDateAndTime.rest, 1) IN IF ~dataCount.ok THEN Fail ELSE
-    LET dataCode == ReadBytes(dataCount.rest, 1) IN IF ~dataCode.ok THEN Fail ELSE
-    Ok([ sequenceNumber         |-> sequenceNumber.value,
-         securityCode           |-> securityCode.value,
-         transactionDateAndTime |-> transactionDateAndTime.value,
-         dataCount              |-> dataCount.value,
-         dataCode               |-> dataCode.value ], dataCode.rest)
+    LET dataCount == ReadUIntLE(transactionDateAndTime.rest, 1) IN IF ~dataCount.ok THEN Fail ELSE
+    LET statisticsRepeatingGroup == ReadStatisticsRepeatingGroupList(dataCount.rest, dataCount.value) IN IF ~statisticsRepeatingGroup.ok THEN Fail ELSE
+    Ok([ sequenceNumber           |-> sequenceNumber.value,
+         securityCode             |-> securityCode.value,
+         transactionDateAndTime   |-> transactionDateAndTime.value,
+         statisticsRepeatingGroup |-> statisticsRepeatingGroup.value ], statisticsRepeatingGroup.rest)
 
 ZeroStatisticsMessage ==
-    [ sequenceNumber         |-> [i \in 1 .. 4 |-> 0],
-      securityCode           |-> [i \in 1 .. 4 |-> 0],
-      transactionDateAndTime |-> [i \in 1 .. 8 |-> 0],
-      dataCount              |-> [i \in 1 .. 1 |-> 0],
-      dataCode               |-> [i \in 1 .. 1 |-> 0] ]
+    [ sequenceNumber           |-> [i \in 1 .. 4 |-> 0],
+      securityCode             |-> [i \in 1 .. 4 |-> 0],
+      transactionDateAndTime   |-> [i \in 1 .. 8 |-> 0],
+      statisticsRepeatingGroup |-> << >> ]
 
 (* Statistics Message at zero, then each field in turn at the values it is checked at *)
 CheckedStatisticsMessage ==
@@ -405,8 +451,7 @@ CheckedStatisticsMessage ==
         \cup { [ZeroStatisticsMessage EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
         \cup { [ZeroStatisticsMessage EXCEPT !.securityCode = one] : one \in Sample(4) }
         \cup { [ZeroStatisticsMessage EXCEPT !.transactionDateAndTime = one] : one \in Sample(8) }
-        \cup { [ZeroStatisticsMessage EXCEPT !.dataCount = one] : one \in Sample(1) }
-        \cup { [ZeroStatisticsMessage EXCEPT !.dataCode = one] : one \in Sample(1) }
+        \cup { [ZeroStatisticsMessage EXCEPT !.statisticsRepeatingGroup = one] : one \in SampleLists(OneStatisticsRepeatingGroup) }
 
 (***************************************************************************)
 (* Security List Message: 713 bytes                                        *)
@@ -2862,6 +2907,14 @@ RoundTripNewsMessage ==
 RoundTripSecurityListCancellationReportMessage ==
     \A message \in CheckedSecurityListCancellationReportMessage :
         LET read == DecodeSecurityListCancellationReportMessage(EncodeSecurityListCancellationReportMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Statistics Repeating Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripStatisticsRepeatingGroup ==
+    \A message \in CheckedStatisticsRepeatingGroup :
+        LET read == DecodeStatisticsRepeatingGroup(EncodeStatisticsRepeatingGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

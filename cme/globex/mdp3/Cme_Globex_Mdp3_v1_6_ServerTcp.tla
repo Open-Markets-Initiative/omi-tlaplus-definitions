@@ -1,0 +1,5247 @@
+------------------ MODULE Cme_Globex_Mdp3_v1_6_ServerTcp -------------------
+(***************************************************************************)
+(* CME Group Market Data Platform 3 v1.6                                   *)
+(*                                                                         *)
+(* Generated from the binary model. A field is the bytes it occupies; an   *)
+(* integer is read only where a rule depends on one - a length, a count, a *)
+(* message type - which are the dependencies the parse rules run on.       *)
+(*                                                                         *)
+(* TLC checks that every record decodes back to what was encoded, that a   *)
+(* dispatch selects the message its type names, and that a derived length  *)
+(* or count is written from what it describes.                             *)
+(*                                                                         *)
+(* Note: TLC evaluates integers in 32 bits, so a field wider than that has *)
+(* no range it can enumerate; every field is checked as its bytes, which   *)
+(* is exact at any width.                                                  *)
+(*                                                                         *)
+(* Note: Match Event Indicator is a bit field set, checked as its 1 byte   *)
+(* rather than bit by bit.                                                 *)
+(*                                                                         *)
+(* Note: Settl Price Type is a bit field set, checked as its 1 byte rather *)
+(* than bit by bit.                                                        *)
+(*                                                                         *)
+(* Note: Inst Attrib Value is a bit field set, checked as its 4 bytes      *)
+(* rather than bit by bit.                                                 *)
+(***************************************************************************)
+EXTENDS Integers, Sequences
+
+(***************************************************************************)
+(* Wire primitives                                                         *)
+(***************************************************************************)
+
+Byte == 0 .. 255
+
+(* An unsigned integer, least significant byte first. Read only where a rule *)
+(* depends on the value: a length, a count, a message type. *)
+RECURSIVE DecodeUIntLE(_)
+DecodeUIntLE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE Head(bytes) + 256 * DecodeUIntLE(Tail(bytes))
+
+RECURSIVE EncodeUIntLE(_, _)
+EncodeUIntLE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
+
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
+(***************************************************************************)
+(* A decoder yields the value it read and the bytes left, or fails         *)
+(***************************************************************************)
+
+Fail == [ok |-> FALSE]
+Ok(value, rest) == [ok |-> TRUE, value |-> value, rest |-> rest]
+
+(* The bytes a field of this width occupies, kept as they lie *)
+ReadBytes(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
+
+(* The integer a rule depends on, in the byte order the field states *)
+ReadUIntLE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+(***************************************************************************)
+(* The values a field is checked at: zero, the spaces a text field is      *)
+(* padded with, and                                                        *)
+(* every bit set, which is where an encoding goes wrong if it goes wrong   *)
+(***************************************************************************)
+
+Sample(width) ==
+    { [i \in 1 .. width |-> 0],
+      [i \in 1 .. width |-> 32],
+      [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
+
+(* The lists a record is checked over: none, one, and a run of two. What a run has *)
+(* to get right is reading one entry after another, which two of a kind already say. *)
+SampleLists(entries) ==
+    { << >> }
+        \cup { <<one>> : one \in entries }
+        \cup { <<one, one>> : one \in entries }
+
+(***************************************************************************)
+(* Channel Reset Group: 2 bytes                                            *)
+(***************************************************************************)
+
+ChannelResetGroup ==
+    [ applId : Sample(2) ]
+
+EncodeChannelResetGroup(message) ==
+    message.applId
+
+DecodeChannelResetGroup(bytes) ==
+    LET applId == ReadBytes(bytes, 2) IN IF ~applId.ok THEN Fail ELSE
+    Ok([ applId |-> applId.value ], applId.rest)
+
+ZeroChannelResetGroup ==
+    [ applId |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Channel Reset Group at zero, then each field in turn at the values it is checked at *)
+CheckedChannelResetGroup ==
+    { ZeroChannelResetGroup }
+        \cup { [ZeroChannelResetGroup EXCEPT !.applId = one] : one \in Sample(2) }
+
+(* A run of Channel Reset Group, written one after another *)
+RECURSIVE EncodeChannelResetGroupList(_)
+EncodeChannelResetGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeChannelResetGroup(Head(messages)) \o EncodeChannelResetGroupList(Tail(messages))
+
+(* As many Channel Reset Group as the field that counts them says *)
+RECURSIVE ReadChannelResetGroupList(_, _)
+ReadChannelResetGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeChannelResetGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadChannelResetGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Channel Reset Group of each kind, for the lists that carry them *)
+OneChannelResetGroup == { ZeroChannelResetGroup }
+
+(***************************************************************************)
+(* Channel Reset Groups                                                    *)
+(***************************************************************************)
+
+ChannelResetGroups ==
+    [ blockLength       : Sample(2),
+      channelResetGroup : SampleLists(OneChannelResetGroup) ]
+
+EncodeChannelResetGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.channelResetGroup), 1)
+        \o EncodeChannelResetGroupList(message.channelResetGroup)
+
+DecodeChannelResetGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET channelResetGroup == ReadChannelResetGroupList(numInGroup.rest, numInGroup.value) IN IF ~channelResetGroup.ok THEN Fail ELSE
+    Ok([ blockLength       |-> blockLength.value,
+         channelResetGroup |-> channelResetGroup.value ], channelResetGroup.rest)
+
+ZeroChannelResetGroups ==
+    [ blockLength       |-> [i \in 1 .. 2 |-> 0],
+      channelResetGroup |-> << >> ]
+
+(* Channel Reset Groups at zero, then each field in turn at the values it is checked at *)
+CheckedChannelResetGroups ==
+    { ZeroChannelResetGroups }
+        \cup { [ZeroChannelResetGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroChannelResetGroups EXCEPT !.channelResetGroup = one] : one \in SampleLists(OneChannelResetGroup) }
+
+(***************************************************************************)
+(* Channel Reset                                                           *)
+(***************************************************************************)
+
+ChannelReset ==
+    [ transactTime        : Sample(8),
+      matchEventIndicator : Sample(1),
+      channelResetGroups  : ChannelResetGroups ]
+
+EncodeChannelReset(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o EncodeChannelResetGroups(message.channelResetGroups)
+
+DecodeChannelReset(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET channelResetGroups == DecodeChannelResetGroups(matchEventIndicator.rest) IN IF ~channelResetGroups.ok THEN Fail ELSE
+    Ok([ transactTime        |-> transactTime.value,
+         matchEventIndicator |-> matchEventIndicator.value,
+         channelResetGroups  |-> channelResetGroups.value ], channelResetGroups.rest)
+
+ZeroChannelReset ==
+    [ transactTime        |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator |-> [i \in 1 .. 1 |-> 0],
+      channelResetGroups  |-> ZeroChannelResetGroups ]
+
+(* Channel Reset at zero, then each field in turn at the values it is checked at *)
+CheckedChannelReset ==
+    { ZeroChannelReset }
+        \cup { [ZeroChannelReset EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroChannelReset EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroChannelReset EXCEPT !.channelResetGroups = one] : one \in CheckedChannelResetGroups }
+
+(***************************************************************************)
+(* Admin Login: 1 bytes                                                    *)
+(***************************************************************************)
+
+AdminLogin ==
+    [ heartBtInt : Sample(1) ]
+
+EncodeAdminLogin(message) ==
+    message.heartBtInt
+
+DecodeAdminLogin(bytes) ==
+    LET heartBtInt == ReadBytes(bytes, 1) IN IF ~heartBtInt.ok THEN Fail ELSE
+    Ok([ heartBtInt |-> heartBtInt.value ], heartBtInt.rest)
+
+ZeroAdminLogin ==
+    [ heartBtInt |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Admin Login at zero, then each field in turn at the values it is checked at *)
+CheckedAdminLogin ==
+    { ZeroAdminLogin }
+        \cup { [ZeroAdminLogin EXCEPT !.heartBtInt = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Admin Logout: 100 bytes                                                 *)
+(***************************************************************************)
+
+AdminLogout ==
+    [ text : Sample(100) ]
+
+EncodeAdminLogout(message) ==
+    message.text
+
+DecodeAdminLogout(bytes) ==
+    LET text == ReadBytes(bytes, 100) IN IF ~text.ok THEN Fail ELSE
+    Ok([ text |-> text.value ], text.rest)
+
+ZeroAdminLogout ==
+    [ text |-> [i \in 1 .. 100 |-> 0] ]
+
+(* Admin Logout at zero, then each field in turn at the values it is checked at *)
+CheckedAdminLogout ==
+    { ZeroAdminLogout }
+        \cup { [ZeroAdminLogout EXCEPT !.text = one] : one \in Sample(100) }
+
+(***************************************************************************)
+(* Maturity Month Year: 5 bytes                                            *)
+(***************************************************************************)
+
+MaturityMonthYear ==
+    [ year  : Sample(2),
+      month : Sample(1),
+      day   : Sample(1),
+      week  : Sample(1) ]
+
+EncodeMaturityMonthYear(message) ==
+    message.year
+        \o message.month
+        \o message.day
+        \o message.week
+
+DecodeMaturityMonthYear(bytes) ==
+    LET year == ReadBytes(bytes, 2) IN IF ~year.ok THEN Fail ELSE
+    LET month == ReadBytes(year.rest, 1) IN IF ~month.ok THEN Fail ELSE
+    LET day == ReadBytes(month.rest, 1) IN IF ~day.ok THEN Fail ELSE
+    LET week == ReadBytes(day.rest, 1) IN IF ~week.ok THEN Fail ELSE
+    Ok([ year  |-> year.value,
+         month |-> month.value,
+         day   |-> day.value,
+         week  |-> week.value ], week.rest)
+
+ZeroMaturityMonthYear ==
+    [ year  |-> [i \in 1 .. 2 |-> 0],
+      month |-> [i \in 1 .. 1 |-> 0],
+      day   |-> [i \in 1 .. 1 |-> 0],
+      week  |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Maturity Month Year at zero, then each field in turn at the values it is checked at *)
+CheckedMaturityMonthYear ==
+    { ZeroMaturityMonthYear }
+        \cup { [ZeroMaturityMonthYear EXCEPT !.year = one] : one \in Sample(2) }
+        \cup { [ZeroMaturityMonthYear EXCEPT !.month = one] : one \in Sample(1) }
+        \cup { [ZeroMaturityMonthYear EXCEPT !.day = one] : one \in Sample(1) }
+        \cup { [ZeroMaturityMonthYear EXCEPT !.week = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Events Group: 9 bytes                                                   *)
+(***************************************************************************)
+
+EventsGroup ==
+    [ eventType : Sample(1),
+      eventTime : Sample(8) ]
+
+EncodeEventsGroup(message) ==
+    message.eventType
+        \o message.eventTime
+
+DecodeEventsGroup(bytes) ==
+    LET eventType == ReadBytes(bytes, 1) IN IF ~eventType.ok THEN Fail ELSE
+    LET eventTime == ReadBytes(eventType.rest, 8) IN IF ~eventTime.ok THEN Fail ELSE
+    Ok([ eventType |-> eventType.value,
+         eventTime |-> eventTime.value ], eventTime.rest)
+
+ZeroEventsGroup ==
+    [ eventType |-> [i \in 1 .. 1 |-> 0],
+      eventTime |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Events Group at zero, then each field in turn at the values it is checked at *)
+CheckedEventsGroup ==
+    { ZeroEventsGroup }
+        \cup { [ZeroEventsGroup EXCEPT !.eventType = one] : one \in Sample(1) }
+        \cup { [ZeroEventsGroup EXCEPT !.eventTime = one] : one \in Sample(8) }
+
+(* A run of Events Group, written one after another *)
+RECURSIVE EncodeEventsGroupList(_)
+EncodeEventsGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeEventsGroup(Head(messages)) \o EncodeEventsGroupList(Tail(messages))
+
+(* As many Events Group as the field that counts them says *)
+RECURSIVE ReadEventsGroupList(_, _)
+ReadEventsGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeEventsGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadEventsGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Events Group of each kind, for the lists that carry them *)
+OneEventsGroup == { ZeroEventsGroup }
+
+(***************************************************************************)
+(* Events Groups                                                           *)
+(***************************************************************************)
+
+EventsGroups ==
+    [ blockLength : Sample(2),
+      eventsGroup : SampleLists(OneEventsGroup) ]
+
+EncodeEventsGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.eventsGroup), 1)
+        \o EncodeEventsGroupList(message.eventsGroup)
+
+DecodeEventsGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET eventsGroup == ReadEventsGroupList(numInGroup.rest, numInGroup.value) IN IF ~eventsGroup.ok THEN Fail ELSE
+    Ok([ blockLength |-> blockLength.value,
+         eventsGroup |-> eventsGroup.value ], eventsGroup.rest)
+
+ZeroEventsGroups ==
+    [ blockLength |-> [i \in 1 .. 2 |-> 0],
+      eventsGroup |-> << >> ]
+
+(* Events Groups at zero, then each field in turn at the values it is checked at *)
+CheckedEventsGroups ==
+    { ZeroEventsGroups }
+        \cup { [ZeroEventsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroEventsGroups EXCEPT !.eventsGroup = one] : one \in SampleLists(OneEventsGroup) }
+
+(***************************************************************************)
+(* Feed Types Group: 4 bytes                                               *)
+(***************************************************************************)
+
+FeedTypesGroup ==
+    [ mdFeedType  : Sample(3),
+      marketDepth : Sample(1) ]
+
+EncodeFeedTypesGroup(message) ==
+    message.mdFeedType
+        \o message.marketDepth
+
+DecodeFeedTypesGroup(bytes) ==
+    LET mdFeedType == ReadBytes(bytes, 3) IN IF ~mdFeedType.ok THEN Fail ELSE
+    LET marketDepth == ReadBytes(mdFeedType.rest, 1) IN IF ~marketDepth.ok THEN Fail ELSE
+    Ok([ mdFeedType  |-> mdFeedType.value,
+         marketDepth |-> marketDepth.value ], marketDepth.rest)
+
+ZeroFeedTypesGroup ==
+    [ mdFeedType  |-> [i \in 1 .. 3 |-> 0],
+      marketDepth |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Feed Types Group at zero, then each field in turn at the values it is checked at *)
+CheckedFeedTypesGroup ==
+    { ZeroFeedTypesGroup }
+        \cup { [ZeroFeedTypesGroup EXCEPT !.mdFeedType = one] : one \in Sample(3) }
+        \cup { [ZeroFeedTypesGroup EXCEPT !.marketDepth = one] : one \in Sample(1) }
+
+(* A run of Feed Types Group, written one after another *)
+RECURSIVE EncodeFeedTypesGroupList(_)
+EncodeFeedTypesGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeFeedTypesGroup(Head(messages)) \o EncodeFeedTypesGroupList(Tail(messages))
+
+(* As many Feed Types Group as the field that counts them says *)
+RECURSIVE ReadFeedTypesGroupList(_, _)
+ReadFeedTypesGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeFeedTypesGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadFeedTypesGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Feed Types Group of each kind, for the lists that carry them *)
+OneFeedTypesGroup == { ZeroFeedTypesGroup }
+
+(***************************************************************************)
+(* Feed Types Groups                                                       *)
+(***************************************************************************)
+
+FeedTypesGroups ==
+    [ blockLength    : Sample(2),
+      feedTypesGroup : SampleLists(OneFeedTypesGroup) ]
+
+EncodeFeedTypesGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.feedTypesGroup), 1)
+        \o EncodeFeedTypesGroupList(message.feedTypesGroup)
+
+DecodeFeedTypesGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET feedTypesGroup == ReadFeedTypesGroupList(numInGroup.rest, numInGroup.value) IN IF ~feedTypesGroup.ok THEN Fail ELSE
+    Ok([ blockLength    |-> blockLength.value,
+         feedTypesGroup |-> feedTypesGroup.value ], feedTypesGroup.rest)
+
+ZeroFeedTypesGroups ==
+    [ blockLength    |-> [i \in 1 .. 2 |-> 0],
+      feedTypesGroup |-> << >> ]
+
+(* Feed Types Groups at zero, then each field in turn at the values it is checked at *)
+CheckedFeedTypesGroups ==
+    { ZeroFeedTypesGroups }
+        \cup { [ZeroFeedTypesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroFeedTypesGroups EXCEPT !.feedTypesGroup = one] : one \in SampleLists(OneFeedTypesGroup) }
+
+(***************************************************************************)
+(* Inst Attrib Group: 4 bytes                                              *)
+(***************************************************************************)
+
+InstAttribGroup ==
+    [ instAttribValue : Sample(4) ]
+
+EncodeInstAttribGroup(message) ==
+    message.instAttribValue
+
+DecodeInstAttribGroup(bytes) ==
+    LET instAttribValue == ReadBytes(bytes, 4) IN IF ~instAttribValue.ok THEN Fail ELSE
+    Ok([ instAttribValue |-> instAttribValue.value ], instAttribValue.rest)
+
+ZeroInstAttribGroup ==
+    [ instAttribValue |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Inst Attrib Group at zero, then each field in turn at the values it is checked at *)
+CheckedInstAttribGroup ==
+    { ZeroInstAttribGroup }
+        \cup { [ZeroInstAttribGroup EXCEPT !.instAttribValue = one] : one \in Sample(4) }
+
+(* A run of Inst Attrib Group, written one after another *)
+RECURSIVE EncodeInstAttribGroupList(_)
+EncodeInstAttribGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeInstAttribGroup(Head(messages)) \o EncodeInstAttribGroupList(Tail(messages))
+
+(* As many Inst Attrib Group as the field that counts them says *)
+RECURSIVE ReadInstAttribGroupList(_, _)
+ReadInstAttribGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeInstAttribGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadInstAttribGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Inst Attrib Group of each kind, for the lists that carry them *)
+OneInstAttribGroup == { ZeroInstAttribGroup }
+
+(***************************************************************************)
+(* Inst Attrib Groups                                                      *)
+(***************************************************************************)
+
+InstAttribGroups ==
+    [ blockLength     : Sample(2),
+      instAttribGroup : SampleLists(OneInstAttribGroup) ]
+
+EncodeInstAttribGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.instAttribGroup), 1)
+        \o EncodeInstAttribGroupList(message.instAttribGroup)
+
+DecodeInstAttribGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET instAttribGroup == ReadInstAttribGroupList(numInGroup.rest, numInGroup.value) IN IF ~instAttribGroup.ok THEN Fail ELSE
+    Ok([ blockLength     |-> blockLength.value,
+         instAttribGroup |-> instAttribGroup.value ], instAttribGroup.rest)
+
+ZeroInstAttribGroups ==
+    [ blockLength     |-> [i \in 1 .. 2 |-> 0],
+      instAttribGroup |-> << >> ]
+
+(* Inst Attrib Groups at zero, then each field in turn at the values it is checked at *)
+CheckedInstAttribGroups ==
+    { ZeroInstAttribGroups }
+        \cup { [ZeroInstAttribGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroInstAttribGroups EXCEPT !.instAttribGroup = one] : one \in SampleLists(OneInstAttribGroup) }
+
+(***************************************************************************)
+(* Lot Type Rules Group: 5 bytes                                           *)
+(***************************************************************************)
+
+LotTypeRulesGroup ==
+    [ lotType    : Sample(1),
+      minLotSize : Sample(4) ]
+
+EncodeLotTypeRulesGroup(message) ==
+    message.lotType
+        \o message.minLotSize
+
+DecodeLotTypeRulesGroup(bytes) ==
+    LET lotType == ReadBytes(bytes, 1) IN IF ~lotType.ok THEN Fail ELSE
+    LET minLotSize == ReadBytes(lotType.rest, 4) IN IF ~minLotSize.ok THEN Fail ELSE
+    Ok([ lotType    |-> lotType.value,
+         minLotSize |-> minLotSize.value ], minLotSize.rest)
+
+ZeroLotTypeRulesGroup ==
+    [ lotType    |-> [i \in 1 .. 1 |-> 0],
+      minLotSize |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Lot Type Rules Group at zero, then each field in turn at the values it is checked at *)
+CheckedLotTypeRulesGroup ==
+    { ZeroLotTypeRulesGroup }
+        \cup { [ZeroLotTypeRulesGroup EXCEPT !.lotType = one] : one \in Sample(1) }
+        \cup { [ZeroLotTypeRulesGroup EXCEPT !.minLotSize = one] : one \in Sample(4) }
+
+(* A run of Lot Type Rules Group, written one after another *)
+RECURSIVE EncodeLotTypeRulesGroupList(_)
+EncodeLotTypeRulesGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeLotTypeRulesGroup(Head(messages)) \o EncodeLotTypeRulesGroupList(Tail(messages))
+
+(* As many Lot Type Rules Group as the field that counts them says *)
+RECURSIVE ReadLotTypeRulesGroupList(_, _)
+ReadLotTypeRulesGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeLotTypeRulesGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadLotTypeRulesGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Lot Type Rules Group of each kind, for the lists that carry them *)
+OneLotTypeRulesGroup == { ZeroLotTypeRulesGroup }
+
+(***************************************************************************)
+(* Lot Type Rules Groups                                                   *)
+(***************************************************************************)
+
+LotTypeRulesGroups ==
+    [ blockLength       : Sample(2),
+      lotTypeRulesGroup : SampleLists(OneLotTypeRulesGroup) ]
+
+EncodeLotTypeRulesGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.lotTypeRulesGroup), 1)
+        \o EncodeLotTypeRulesGroupList(message.lotTypeRulesGroup)
+
+DecodeLotTypeRulesGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET lotTypeRulesGroup == ReadLotTypeRulesGroupList(numInGroup.rest, numInGroup.value) IN IF ~lotTypeRulesGroup.ok THEN Fail ELSE
+    Ok([ blockLength       |-> blockLength.value,
+         lotTypeRulesGroup |-> lotTypeRulesGroup.value ], lotTypeRulesGroup.rest)
+
+ZeroLotTypeRulesGroups ==
+    [ blockLength       |-> [i \in 1 .. 2 |-> 0],
+      lotTypeRulesGroup |-> << >> ]
+
+(* Lot Type Rules Groups at zero, then each field in turn at the values it is checked at *)
+CheckedLotTypeRulesGroups ==
+    { ZeroLotTypeRulesGroups }
+        \cup { [ZeroLotTypeRulesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroLotTypeRulesGroups EXCEPT !.lotTypeRulesGroup = one] : one \in SampleLists(OneLotTypeRulesGroup) }
+
+(***************************************************************************)
+(* Md Instrument Definition Future                                         *)
+(***************************************************************************)
+
+MdInstrumentDefinitionFuture ==
+    [ matchEventIndicator     : Sample(1),
+      totNumReportsOptional   : Sample(4),
+      securityUpdateAction    : Sample(1),
+      lastUpdateTime          : Sample(8),
+      mdSecurityTradingStatus : Sample(1),
+      applId                  : Sample(2),
+      marketSegmentId         : Sample(1),
+      underlyingProduct       : Sample(1),
+      securityExchange        : Sample(4),
+      securityGroup           : Sample(6),
+      asset                   : Sample(6),
+      symbol                  : Sample(20),
+      securityId              : Sample(4),
+      securityType            : Sample(6),
+      cfiCode                 : Sample(6),
+      maturityMonthYear       : MaturityMonthYear,
+      currency                : Sample(3),
+      settlCurrency           : Sample(3),
+      matchAlgorithm          : Sample(1),
+      minTradeVol             : Sample(4),
+      maxTradeVol             : Sample(4),
+      minPriceIncrement       : Sample(8),
+      displayFactor           : Sample(8),
+      mainFraction            : Sample(1),
+      subFraction             : Sample(1),
+      priceDisplayFormat      : Sample(1),
+      unitOfMeasure           : Sample(30),
+      unitOfMeasureQty        : Sample(8),
+      tradingReferencePrice   : Sample(8),
+      settlPriceType          : Sample(1),
+      openInterestQty         : Sample(4),
+      clearedVolume           : Sample(4),
+      highLimitPrice          : Sample(8),
+      lowLimitPrice           : Sample(8),
+      maxPriceVariation       : Sample(8),
+      decayQuantity           : Sample(4),
+      decayStartDate          : Sample(2),
+      originalContractSize    : Sample(4),
+      contractMultiplier      : Sample(4),
+      contractMultiplierUnit  : Sample(1),
+      flowScheduleType        : Sample(1),
+      minPriceIncrementAmount : Sample(8),
+      userDefinedInstrument   : Sample(1),
+      tradingReferenceDate    : Sample(2),
+      eventsGroups            : EventsGroups,
+      feedTypesGroups         : FeedTypesGroups,
+      instAttribGroups        : InstAttribGroups,
+      lotTypeRulesGroups      : LotTypeRulesGroups ]
+
+EncodeMdInstrumentDefinitionFuture(message) ==
+    message.matchEventIndicator
+        \o message.totNumReportsOptional
+        \o message.securityUpdateAction
+        \o message.lastUpdateTime
+        \o message.mdSecurityTradingStatus
+        \o message.applId
+        \o message.marketSegmentId
+        \o message.underlyingProduct
+        \o message.securityExchange
+        \o message.securityGroup
+        \o message.asset
+        \o message.symbol
+        \o message.securityId
+        \o message.securityType
+        \o message.cfiCode
+        \o EncodeMaturityMonthYear(message.maturityMonthYear)
+        \o message.currency
+        \o message.settlCurrency
+        \o message.matchAlgorithm
+        \o message.minTradeVol
+        \o message.maxTradeVol
+        \o message.minPriceIncrement
+        \o message.displayFactor
+        \o message.mainFraction
+        \o message.subFraction
+        \o message.priceDisplayFormat
+        \o message.unitOfMeasure
+        \o message.unitOfMeasureQty
+        \o message.tradingReferencePrice
+        \o message.settlPriceType
+        \o message.openInterestQty
+        \o message.clearedVolume
+        \o message.highLimitPrice
+        \o message.lowLimitPrice
+        \o message.maxPriceVariation
+        \o message.decayQuantity
+        \o message.decayStartDate
+        \o message.originalContractSize
+        \o message.contractMultiplier
+        \o message.contractMultiplierUnit
+        \o message.flowScheduleType
+        \o message.minPriceIncrementAmount
+        \o message.userDefinedInstrument
+        \o message.tradingReferenceDate
+        \o EncodeEventsGroups(message.eventsGroups)
+        \o EncodeFeedTypesGroups(message.feedTypesGroups)
+        \o EncodeInstAttribGroups(message.instAttribGroups)
+        \o EncodeLotTypeRulesGroups(message.lotTypeRulesGroups)
+
+DecodeMdInstrumentDefinitionFuture(bytes) ==
+    LET matchEventIndicator == ReadBytes(bytes, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET totNumReportsOptional == ReadBytes(matchEventIndicator.rest, 4) IN IF ~totNumReportsOptional.ok THEN Fail ELSE
+    LET securityUpdateAction == ReadBytes(totNumReportsOptional.rest, 1) IN IF ~securityUpdateAction.ok THEN Fail ELSE
+    LET lastUpdateTime == ReadBytes(securityUpdateAction.rest, 8) IN IF ~lastUpdateTime.ok THEN Fail ELSE
+    LET mdSecurityTradingStatus == ReadBytes(lastUpdateTime.rest, 1) IN IF ~mdSecurityTradingStatus.ok THEN Fail ELSE
+    LET applId == ReadBytes(mdSecurityTradingStatus.rest, 2) IN IF ~applId.ok THEN Fail ELSE
+    LET marketSegmentId == ReadBytes(applId.rest, 1) IN IF ~marketSegmentId.ok THEN Fail ELSE
+    LET underlyingProduct == ReadBytes(marketSegmentId.rest, 1) IN IF ~underlyingProduct.ok THEN Fail ELSE
+    LET securityExchange == ReadBytes(underlyingProduct.rest, 4) IN IF ~securityExchange.ok THEN Fail ELSE
+    LET securityGroup == ReadBytes(securityExchange.rest, 6) IN IF ~securityGroup.ok THEN Fail ELSE
+    LET asset == ReadBytes(securityGroup.rest, 6) IN IF ~asset.ok THEN Fail ELSE
+    LET symbol == ReadBytes(asset.rest, 20) IN IF ~symbol.ok THEN Fail ELSE
+    LET securityId == ReadBytes(symbol.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET securityType == ReadBytes(securityId.rest, 6) IN IF ~securityType.ok THEN Fail ELSE
+    LET cfiCode == ReadBytes(securityType.rest, 6) IN IF ~cfiCode.ok THEN Fail ELSE
+    LET maturityMonthYear == DecodeMaturityMonthYear(cfiCode.rest) IN IF ~maturityMonthYear.ok THEN Fail ELSE
+    LET currency == ReadBytes(maturityMonthYear.rest, 3) IN IF ~currency.ok THEN Fail ELSE
+    LET settlCurrency == ReadBytes(currency.rest, 3) IN IF ~settlCurrency.ok THEN Fail ELSE
+    LET matchAlgorithm == ReadBytes(settlCurrency.rest, 1) IN IF ~matchAlgorithm.ok THEN Fail ELSE
+    LET minTradeVol == ReadBytes(matchAlgorithm.rest, 4) IN IF ~minTradeVol.ok THEN Fail ELSE
+    LET maxTradeVol == ReadBytes(minTradeVol.rest, 4) IN IF ~maxTradeVol.ok THEN Fail ELSE
+    LET minPriceIncrement == ReadBytes(maxTradeVol.rest, 8) IN IF ~minPriceIncrement.ok THEN Fail ELSE
+    LET displayFactor == ReadBytes(minPriceIncrement.rest, 8) IN IF ~displayFactor.ok THEN Fail ELSE
+    LET mainFraction == ReadBytes(displayFactor.rest, 1) IN IF ~mainFraction.ok THEN Fail ELSE
+    LET subFraction == ReadBytes(mainFraction.rest, 1) IN IF ~subFraction.ok THEN Fail ELSE
+    LET priceDisplayFormat == ReadBytes(subFraction.rest, 1) IN IF ~priceDisplayFormat.ok THEN Fail ELSE
+    LET unitOfMeasure == ReadBytes(priceDisplayFormat.rest, 30) IN IF ~unitOfMeasure.ok THEN Fail ELSE
+    LET unitOfMeasureQty == ReadBytes(unitOfMeasure.rest, 8) IN IF ~unitOfMeasureQty.ok THEN Fail ELSE
+    LET tradingReferencePrice == ReadBytes(unitOfMeasureQty.rest, 8) IN IF ~tradingReferencePrice.ok THEN Fail ELSE
+    LET settlPriceType == ReadBytes(tradingReferencePrice.rest, 1) IN IF ~settlPriceType.ok THEN Fail ELSE
+    LET openInterestQty == ReadBytes(settlPriceType.rest, 4) IN IF ~openInterestQty.ok THEN Fail ELSE
+    LET clearedVolume == ReadBytes(openInterestQty.rest, 4) IN IF ~clearedVolume.ok THEN Fail ELSE
+    LET highLimitPrice == ReadBytes(clearedVolume.rest, 8) IN IF ~highLimitPrice.ok THEN Fail ELSE
+    LET lowLimitPrice == ReadBytes(highLimitPrice.rest, 8) IN IF ~lowLimitPrice.ok THEN Fail ELSE
+    LET maxPriceVariation == ReadBytes(lowLimitPrice.rest, 8) IN IF ~maxPriceVariation.ok THEN Fail ELSE
+    LET decayQuantity == ReadBytes(maxPriceVariation.rest, 4) IN IF ~decayQuantity.ok THEN Fail ELSE
+    LET decayStartDate == ReadBytes(decayQuantity.rest, 2) IN IF ~decayStartDate.ok THEN Fail ELSE
+    LET originalContractSize == ReadBytes(decayStartDate.rest, 4) IN IF ~originalContractSize.ok THEN Fail ELSE
+    LET contractMultiplier == ReadBytes(originalContractSize.rest, 4) IN IF ~contractMultiplier.ok THEN Fail ELSE
+    LET contractMultiplierUnit == ReadBytes(contractMultiplier.rest, 1) IN IF ~contractMultiplierUnit.ok THEN Fail ELSE
+    LET flowScheduleType == ReadBytes(contractMultiplierUnit.rest, 1) IN IF ~flowScheduleType.ok THEN Fail ELSE
+    LET minPriceIncrementAmount == ReadBytes(flowScheduleType.rest, 8) IN IF ~minPriceIncrementAmount.ok THEN Fail ELSE
+    LET userDefinedInstrument == ReadBytes(minPriceIncrementAmount.rest, 1) IN IF ~userDefinedInstrument.ok THEN Fail ELSE
+    LET tradingReferenceDate == ReadBytes(userDefinedInstrument.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
+    LET eventsGroups == DecodeEventsGroups(tradingReferenceDate.rest) IN IF ~eventsGroups.ok THEN Fail ELSE
+    LET feedTypesGroups == DecodeFeedTypesGroups(eventsGroups.rest) IN IF ~feedTypesGroups.ok THEN Fail ELSE
+    LET instAttribGroups == DecodeInstAttribGroups(feedTypesGroups.rest) IN IF ~instAttribGroups.ok THEN Fail ELSE
+    LET lotTypeRulesGroups == DecodeLotTypeRulesGroups(instAttribGroups.rest) IN IF ~lotTypeRulesGroups.ok THEN Fail ELSE
+    Ok([ matchEventIndicator     |-> matchEventIndicator.value,
+         totNumReportsOptional   |-> totNumReportsOptional.value,
+         securityUpdateAction    |-> securityUpdateAction.value,
+         lastUpdateTime          |-> lastUpdateTime.value,
+         mdSecurityTradingStatus |-> mdSecurityTradingStatus.value,
+         applId                  |-> applId.value,
+         marketSegmentId         |-> marketSegmentId.value,
+         underlyingProduct       |-> underlyingProduct.value,
+         securityExchange        |-> securityExchange.value,
+         securityGroup           |-> securityGroup.value,
+         asset                   |-> asset.value,
+         symbol                  |-> symbol.value,
+         securityId              |-> securityId.value,
+         securityType            |-> securityType.value,
+         cfiCode                 |-> cfiCode.value,
+         maturityMonthYear       |-> maturityMonthYear.value,
+         currency                |-> currency.value,
+         settlCurrency           |-> settlCurrency.value,
+         matchAlgorithm          |-> matchAlgorithm.value,
+         minTradeVol             |-> minTradeVol.value,
+         maxTradeVol             |-> maxTradeVol.value,
+         minPriceIncrement       |-> minPriceIncrement.value,
+         displayFactor           |-> displayFactor.value,
+         mainFraction            |-> mainFraction.value,
+         subFraction             |-> subFraction.value,
+         priceDisplayFormat      |-> priceDisplayFormat.value,
+         unitOfMeasure           |-> unitOfMeasure.value,
+         unitOfMeasureQty        |-> unitOfMeasureQty.value,
+         tradingReferencePrice   |-> tradingReferencePrice.value,
+         settlPriceType          |-> settlPriceType.value,
+         openInterestQty         |-> openInterestQty.value,
+         clearedVolume           |-> clearedVolume.value,
+         highLimitPrice          |-> highLimitPrice.value,
+         lowLimitPrice           |-> lowLimitPrice.value,
+         maxPriceVariation       |-> maxPriceVariation.value,
+         decayQuantity           |-> decayQuantity.value,
+         decayStartDate          |-> decayStartDate.value,
+         originalContractSize    |-> originalContractSize.value,
+         contractMultiplier      |-> contractMultiplier.value,
+         contractMultiplierUnit  |-> contractMultiplierUnit.value,
+         flowScheduleType        |-> flowScheduleType.value,
+         minPriceIncrementAmount |-> minPriceIncrementAmount.value,
+         userDefinedInstrument   |-> userDefinedInstrument.value,
+         tradingReferenceDate    |-> tradingReferenceDate.value,
+         eventsGroups            |-> eventsGroups.value,
+         feedTypesGroups         |-> feedTypesGroups.value,
+         instAttribGroups        |-> instAttribGroups.value,
+         lotTypeRulesGroups      |-> lotTypeRulesGroups.value ], lotTypeRulesGroups.rest)
+
+ZeroMdInstrumentDefinitionFuture ==
+    [ matchEventIndicator     |-> [i \in 1 .. 1 |-> 0],
+      totNumReportsOptional   |-> [i \in 1 .. 4 |-> 0],
+      securityUpdateAction    |-> [i \in 1 .. 1 |-> 0],
+      lastUpdateTime          |-> [i \in 1 .. 8 |-> 0],
+      mdSecurityTradingStatus |-> [i \in 1 .. 1 |-> 0],
+      applId                  |-> [i \in 1 .. 2 |-> 0],
+      marketSegmentId         |-> [i \in 1 .. 1 |-> 0],
+      underlyingProduct       |-> [i \in 1 .. 1 |-> 0],
+      securityExchange        |-> [i \in 1 .. 4 |-> 0],
+      securityGroup           |-> [i \in 1 .. 6 |-> 0],
+      asset                   |-> [i \in 1 .. 6 |-> 0],
+      symbol                  |-> [i \in 1 .. 20 |-> 0],
+      securityId              |-> [i \in 1 .. 4 |-> 0],
+      securityType            |-> [i \in 1 .. 6 |-> 0],
+      cfiCode                 |-> [i \in 1 .. 6 |-> 0],
+      maturityMonthYear       |-> ZeroMaturityMonthYear,
+      currency                |-> [i \in 1 .. 3 |-> 0],
+      settlCurrency           |-> [i \in 1 .. 3 |-> 0],
+      matchAlgorithm          |-> [i \in 1 .. 1 |-> 0],
+      minTradeVol             |-> [i \in 1 .. 4 |-> 0],
+      maxTradeVol             |-> [i \in 1 .. 4 |-> 0],
+      minPriceIncrement       |-> [i \in 1 .. 8 |-> 0],
+      displayFactor           |-> [i \in 1 .. 8 |-> 0],
+      mainFraction            |-> [i \in 1 .. 1 |-> 0],
+      subFraction             |-> [i \in 1 .. 1 |-> 0],
+      priceDisplayFormat      |-> [i \in 1 .. 1 |-> 0],
+      unitOfMeasure           |-> [i \in 1 .. 30 |-> 0],
+      unitOfMeasureQty        |-> [i \in 1 .. 8 |-> 0],
+      tradingReferencePrice   |-> [i \in 1 .. 8 |-> 0],
+      settlPriceType          |-> [i \in 1 .. 1 |-> 0],
+      openInterestQty         |-> [i \in 1 .. 4 |-> 0],
+      clearedVolume           |-> [i \in 1 .. 4 |-> 0],
+      highLimitPrice          |-> [i \in 1 .. 8 |-> 0],
+      lowLimitPrice           |-> [i \in 1 .. 8 |-> 0],
+      maxPriceVariation       |-> [i \in 1 .. 8 |-> 0],
+      decayQuantity           |-> [i \in 1 .. 4 |-> 0],
+      decayStartDate          |-> [i \in 1 .. 2 |-> 0],
+      originalContractSize    |-> [i \in 1 .. 4 |-> 0],
+      contractMultiplier      |-> [i \in 1 .. 4 |-> 0],
+      contractMultiplierUnit  |-> [i \in 1 .. 1 |-> 0],
+      flowScheduleType        |-> [i \in 1 .. 1 |-> 0],
+      minPriceIncrementAmount |-> [i \in 1 .. 8 |-> 0],
+      userDefinedInstrument   |-> [i \in 1 .. 1 |-> 0],
+      tradingReferenceDate    |-> [i \in 1 .. 2 |-> 0],
+      eventsGroups            |-> ZeroEventsGroups,
+      feedTypesGroups         |-> ZeroFeedTypesGroups,
+      instAttribGroups        |-> ZeroInstAttribGroups,
+      lotTypeRulesGroups      |-> ZeroLotTypeRulesGroups ]
+
+(* Md Instrument Definition Future at zero, then each field in turn at the values it is checked at *)
+CheckedMdInstrumentDefinitionFuture ==
+    { ZeroMdInstrumentDefinitionFuture }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.totNumReportsOptional = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.securityUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.lastUpdateTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.mdSecurityTradingStatus = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.applId = one] : one \in Sample(2) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.marketSegmentId = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.underlyingProduct = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.securityExchange = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.securityGroup = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.asset = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.symbol = one] : one \in Sample(20) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.securityType = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.cfiCode = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.maturityMonthYear = one] : one \in CheckedMaturityMonthYear }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.currency = one] : one \in Sample(3) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.settlCurrency = one] : one \in Sample(3) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.matchAlgorithm = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.minTradeVol = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.maxTradeVol = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.minPriceIncrement = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.displayFactor = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.mainFraction = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.subFraction = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.priceDisplayFormat = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.unitOfMeasure = one] : one \in Sample(30) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.unitOfMeasureQty = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.tradingReferencePrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.settlPriceType = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.openInterestQty = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.clearedVolume = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.highLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.lowLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.maxPriceVariation = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.decayQuantity = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.decayStartDate = one] : one \in Sample(2) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.originalContractSize = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.contractMultiplier = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.contractMultiplierUnit = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.flowScheduleType = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.minPriceIncrementAmount = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.userDefinedInstrument = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.eventsGroups = one] : one \in CheckedEventsGroups }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.feedTypesGroups = one] : one \in CheckedFeedTypesGroups }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.instAttribGroups = one] : one \in CheckedInstAttribGroups }
+        \cup { [ZeroMdInstrumentDefinitionFuture EXCEPT !.lotTypeRulesGroups = one] : one \in CheckedLotTypeRulesGroups }
+
+(***************************************************************************)
+(* Maturity Month Year: 5 bytes                                            *)
+(***************************************************************************)
+
+MaturityMonthYear2 ==
+    [ year  : Sample(2),
+      month : Sample(1),
+      day   : Sample(1),
+      week  : Sample(1) ]
+
+EncodeMaturityMonthYear2(message) ==
+    message.year
+        \o message.month
+        \o message.day
+        \o message.week
+
+DecodeMaturityMonthYear2(bytes) ==
+    LET year == ReadBytes(bytes, 2) IN IF ~year.ok THEN Fail ELSE
+    LET month == ReadBytes(year.rest, 1) IN IF ~month.ok THEN Fail ELSE
+    LET day == ReadBytes(month.rest, 1) IN IF ~day.ok THEN Fail ELSE
+    LET week == ReadBytes(day.rest, 1) IN IF ~week.ok THEN Fail ELSE
+    Ok([ year  |-> year.value,
+         month |-> month.value,
+         day   |-> day.value,
+         week  |-> week.value ], week.rest)
+
+ZeroMaturityMonthYear2 ==
+    [ year  |-> [i \in 1 .. 2 |-> 0],
+      month |-> [i \in 1 .. 1 |-> 0],
+      day   |-> [i \in 1 .. 1 |-> 0],
+      week  |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Maturity Month Year at zero, then each field in turn at the values it is checked at *)
+CheckedMaturityMonthYear2 ==
+    { ZeroMaturityMonthYear2 }
+        \cup { [ZeroMaturityMonthYear2 EXCEPT !.year = one] : one \in Sample(2) }
+        \cup { [ZeroMaturityMonthYear2 EXCEPT !.month = one] : one \in Sample(1) }
+        \cup { [ZeroMaturityMonthYear2 EXCEPT !.day = one] : one \in Sample(1) }
+        \cup { [ZeroMaturityMonthYear2 EXCEPT !.week = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Events Group: 9 bytes                                                   *)
+(***************************************************************************)
+
+EventsGroup2 ==
+    [ eventType : Sample(1),
+      eventTime : Sample(8) ]
+
+EncodeEventsGroup2(message) ==
+    message.eventType
+        \o message.eventTime
+
+DecodeEventsGroup2(bytes) ==
+    LET eventType == ReadBytes(bytes, 1) IN IF ~eventType.ok THEN Fail ELSE
+    LET eventTime == ReadBytes(eventType.rest, 8) IN IF ~eventTime.ok THEN Fail ELSE
+    Ok([ eventType |-> eventType.value,
+         eventTime |-> eventTime.value ], eventTime.rest)
+
+ZeroEventsGroup2 ==
+    [ eventType |-> [i \in 1 .. 1 |-> 0],
+      eventTime |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Events Group at zero, then each field in turn at the values it is checked at *)
+CheckedEventsGroup2 ==
+    { ZeroEventsGroup2 }
+        \cup { [ZeroEventsGroup2 EXCEPT !.eventType = one] : one \in Sample(1) }
+        \cup { [ZeroEventsGroup2 EXCEPT !.eventTime = one] : one \in Sample(8) }
+
+(* A run of Events Group, written one after another *)
+RECURSIVE EncodeEventsGroup2List(_)
+EncodeEventsGroup2List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeEventsGroup2(Head(messages)) \o EncodeEventsGroup2List(Tail(messages))
+
+(* As many Events Group as the field that counts them says *)
+RECURSIVE ReadEventsGroup2List(_, _)
+ReadEventsGroup2List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeEventsGroup2(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadEventsGroup2List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Events Group of each kind, for the lists that carry them *)
+OneEventsGroup2 == { ZeroEventsGroup2 }
+
+(***************************************************************************)
+(* Events Groups                                                           *)
+(***************************************************************************)
+
+EventsGroups2 ==
+    [ blockLength : Sample(2),
+      eventsGroup : SampleLists(OneEventsGroup2) ]
+
+EncodeEventsGroups2(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.eventsGroup), 1)
+        \o EncodeEventsGroup2List(message.eventsGroup)
+
+DecodeEventsGroups2(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET eventsGroup == ReadEventsGroup2List(numInGroup.rest, numInGroup.value) IN IF ~eventsGroup.ok THEN Fail ELSE
+    Ok([ blockLength |-> blockLength.value,
+         eventsGroup |-> eventsGroup.value ], eventsGroup.rest)
+
+ZeroEventsGroups2 ==
+    [ blockLength |-> [i \in 1 .. 2 |-> 0],
+      eventsGroup |-> << >> ]
+
+(* Events Groups at zero, then each field in turn at the values it is checked at *)
+CheckedEventsGroups2 ==
+    { ZeroEventsGroups2 }
+        \cup { [ZeroEventsGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroEventsGroups2 EXCEPT !.eventsGroup = one] : one \in SampleLists(OneEventsGroup2) }
+
+(***************************************************************************)
+(* Feed Types Group: 4 bytes                                               *)
+(***************************************************************************)
+
+FeedTypesGroup2 ==
+    [ mdFeedType  : Sample(3),
+      marketDepth : Sample(1) ]
+
+EncodeFeedTypesGroup2(message) ==
+    message.mdFeedType
+        \o message.marketDepth
+
+DecodeFeedTypesGroup2(bytes) ==
+    LET mdFeedType == ReadBytes(bytes, 3) IN IF ~mdFeedType.ok THEN Fail ELSE
+    LET marketDepth == ReadBytes(mdFeedType.rest, 1) IN IF ~marketDepth.ok THEN Fail ELSE
+    Ok([ mdFeedType  |-> mdFeedType.value,
+         marketDepth |-> marketDepth.value ], marketDepth.rest)
+
+ZeroFeedTypesGroup2 ==
+    [ mdFeedType  |-> [i \in 1 .. 3 |-> 0],
+      marketDepth |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Feed Types Group at zero, then each field in turn at the values it is checked at *)
+CheckedFeedTypesGroup2 ==
+    { ZeroFeedTypesGroup2 }
+        \cup { [ZeroFeedTypesGroup2 EXCEPT !.mdFeedType = one] : one \in Sample(3) }
+        \cup { [ZeroFeedTypesGroup2 EXCEPT !.marketDepth = one] : one \in Sample(1) }
+
+(* A run of Feed Types Group, written one after another *)
+RECURSIVE EncodeFeedTypesGroup2List(_)
+EncodeFeedTypesGroup2List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeFeedTypesGroup2(Head(messages)) \o EncodeFeedTypesGroup2List(Tail(messages))
+
+(* As many Feed Types Group as the field that counts them says *)
+RECURSIVE ReadFeedTypesGroup2List(_, _)
+ReadFeedTypesGroup2List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeFeedTypesGroup2(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadFeedTypesGroup2List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Feed Types Group of each kind, for the lists that carry them *)
+OneFeedTypesGroup2 == { ZeroFeedTypesGroup2 }
+
+(***************************************************************************)
+(* Feed Types Groups                                                       *)
+(***************************************************************************)
+
+FeedTypesGroups2 ==
+    [ blockLength    : Sample(2),
+      feedTypesGroup : SampleLists(OneFeedTypesGroup2) ]
+
+EncodeFeedTypesGroups2(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.feedTypesGroup), 1)
+        \o EncodeFeedTypesGroup2List(message.feedTypesGroup)
+
+DecodeFeedTypesGroups2(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET feedTypesGroup == ReadFeedTypesGroup2List(numInGroup.rest, numInGroup.value) IN IF ~feedTypesGroup.ok THEN Fail ELSE
+    Ok([ blockLength    |-> blockLength.value,
+         feedTypesGroup |-> feedTypesGroup.value ], feedTypesGroup.rest)
+
+ZeroFeedTypesGroups2 ==
+    [ blockLength    |-> [i \in 1 .. 2 |-> 0],
+      feedTypesGroup |-> << >> ]
+
+(* Feed Types Groups at zero, then each field in turn at the values it is checked at *)
+CheckedFeedTypesGroups2 ==
+    { ZeroFeedTypesGroups2 }
+        \cup { [ZeroFeedTypesGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroFeedTypesGroups2 EXCEPT !.feedTypesGroup = one] : one \in SampleLists(OneFeedTypesGroup2) }
+
+(***************************************************************************)
+(* Inst Attrib Group: 4 bytes                                              *)
+(***************************************************************************)
+
+InstAttribGroup2 ==
+    [ instAttribValue : Sample(4) ]
+
+EncodeInstAttribGroup2(message) ==
+    message.instAttribValue
+
+DecodeInstAttribGroup2(bytes) ==
+    LET instAttribValue == ReadBytes(bytes, 4) IN IF ~instAttribValue.ok THEN Fail ELSE
+    Ok([ instAttribValue |-> instAttribValue.value ], instAttribValue.rest)
+
+ZeroInstAttribGroup2 ==
+    [ instAttribValue |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Inst Attrib Group at zero, then each field in turn at the values it is checked at *)
+CheckedInstAttribGroup2 ==
+    { ZeroInstAttribGroup2 }
+        \cup { [ZeroInstAttribGroup2 EXCEPT !.instAttribValue = one] : one \in Sample(4) }
+
+(* A run of Inst Attrib Group, written one after another *)
+RECURSIVE EncodeInstAttribGroup2List(_)
+EncodeInstAttribGroup2List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeInstAttribGroup2(Head(messages)) \o EncodeInstAttribGroup2List(Tail(messages))
+
+(* As many Inst Attrib Group as the field that counts them says *)
+RECURSIVE ReadInstAttribGroup2List(_, _)
+ReadInstAttribGroup2List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeInstAttribGroup2(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadInstAttribGroup2List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Inst Attrib Group of each kind, for the lists that carry them *)
+OneInstAttribGroup2 == { ZeroInstAttribGroup2 }
+
+(***************************************************************************)
+(* Inst Attrib Groups                                                      *)
+(***************************************************************************)
+
+InstAttribGroups2 ==
+    [ blockLength     : Sample(2),
+      instAttribGroup : SampleLists(OneInstAttribGroup2) ]
+
+EncodeInstAttribGroups2(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.instAttribGroup), 1)
+        \o EncodeInstAttribGroup2List(message.instAttribGroup)
+
+DecodeInstAttribGroups2(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET instAttribGroup == ReadInstAttribGroup2List(numInGroup.rest, numInGroup.value) IN IF ~instAttribGroup.ok THEN Fail ELSE
+    Ok([ blockLength     |-> blockLength.value,
+         instAttribGroup |-> instAttribGroup.value ], instAttribGroup.rest)
+
+ZeroInstAttribGroups2 ==
+    [ blockLength     |-> [i \in 1 .. 2 |-> 0],
+      instAttribGroup |-> << >> ]
+
+(* Inst Attrib Groups at zero, then each field in turn at the values it is checked at *)
+CheckedInstAttribGroups2 ==
+    { ZeroInstAttribGroups2 }
+        \cup { [ZeroInstAttribGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroInstAttribGroups2 EXCEPT !.instAttribGroup = one] : one \in SampleLists(OneInstAttribGroup2) }
+
+(***************************************************************************)
+(* Lot Type Rules Group: 5 bytes                                           *)
+(***************************************************************************)
+
+LotTypeRulesGroup2 ==
+    [ lotType    : Sample(1),
+      minLotSize : Sample(4) ]
+
+EncodeLotTypeRulesGroup2(message) ==
+    message.lotType
+        \o message.minLotSize
+
+DecodeLotTypeRulesGroup2(bytes) ==
+    LET lotType == ReadBytes(bytes, 1) IN IF ~lotType.ok THEN Fail ELSE
+    LET minLotSize == ReadBytes(lotType.rest, 4) IN IF ~minLotSize.ok THEN Fail ELSE
+    Ok([ lotType    |-> lotType.value,
+         minLotSize |-> minLotSize.value ], minLotSize.rest)
+
+ZeroLotTypeRulesGroup2 ==
+    [ lotType    |-> [i \in 1 .. 1 |-> 0],
+      minLotSize |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Lot Type Rules Group at zero, then each field in turn at the values it is checked at *)
+CheckedLotTypeRulesGroup2 ==
+    { ZeroLotTypeRulesGroup2 }
+        \cup { [ZeroLotTypeRulesGroup2 EXCEPT !.lotType = one] : one \in Sample(1) }
+        \cup { [ZeroLotTypeRulesGroup2 EXCEPT !.minLotSize = one] : one \in Sample(4) }
+
+(* A run of Lot Type Rules Group, written one after another *)
+RECURSIVE EncodeLotTypeRulesGroup2List(_)
+EncodeLotTypeRulesGroup2List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeLotTypeRulesGroup2(Head(messages)) \o EncodeLotTypeRulesGroup2List(Tail(messages))
+
+(* As many Lot Type Rules Group as the field that counts them says *)
+RECURSIVE ReadLotTypeRulesGroup2List(_, _)
+ReadLotTypeRulesGroup2List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeLotTypeRulesGroup2(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadLotTypeRulesGroup2List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Lot Type Rules Group of each kind, for the lists that carry them *)
+OneLotTypeRulesGroup2 == { ZeroLotTypeRulesGroup2 }
+
+(***************************************************************************)
+(* Lot Type Rules Groups                                                   *)
+(***************************************************************************)
+
+LotTypeRulesGroups2 ==
+    [ blockLength       : Sample(2),
+      lotTypeRulesGroup : SampleLists(OneLotTypeRulesGroup2) ]
+
+EncodeLotTypeRulesGroups2(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.lotTypeRulesGroup), 1)
+        \o EncodeLotTypeRulesGroup2List(message.lotTypeRulesGroup)
+
+DecodeLotTypeRulesGroups2(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET lotTypeRulesGroup == ReadLotTypeRulesGroup2List(numInGroup.rest, numInGroup.value) IN IF ~lotTypeRulesGroup.ok THEN Fail ELSE
+    Ok([ blockLength       |-> blockLength.value,
+         lotTypeRulesGroup |-> lotTypeRulesGroup.value ], lotTypeRulesGroup.rest)
+
+ZeroLotTypeRulesGroups2 ==
+    [ blockLength       |-> [i \in 1 .. 2 |-> 0],
+      lotTypeRulesGroup |-> << >> ]
+
+(* Lot Type Rules Groups at zero, then each field in turn at the values it is checked at *)
+CheckedLotTypeRulesGroups2 ==
+    { ZeroLotTypeRulesGroups2 }
+        \cup { [ZeroLotTypeRulesGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroLotTypeRulesGroups2 EXCEPT !.lotTypeRulesGroup = one] : one \in SampleLists(OneLotTypeRulesGroup2) }
+
+(***************************************************************************)
+(* Legacy Legs Group: 18 bytes                                             *)
+(***************************************************************************)
+
+LegacyLegsGroup ==
+    [ legSecurityId  : Sample(4),
+      legSide        : Sample(1),
+      legRatioQty    : Sample(1),
+      legPrice       : Sample(8),
+      legOptionDelta : Sample(4) ]
+
+EncodeLegacyLegsGroup(message) ==
+    message.legSecurityId
+        \o message.legSide
+        \o message.legRatioQty
+        \o message.legPrice
+        \o message.legOptionDelta
+
+DecodeLegacyLegsGroup(bytes) ==
+    LET legSecurityId == ReadBytes(bytes, 4) IN IF ~legSecurityId.ok THEN Fail ELSE
+    LET legSide == ReadBytes(legSecurityId.rest, 1) IN IF ~legSide.ok THEN Fail ELSE
+    LET legRatioQty == ReadBytes(legSide.rest, 1) IN IF ~legRatioQty.ok THEN Fail ELSE
+    LET legPrice == ReadBytes(legRatioQty.rest, 8) IN IF ~legPrice.ok THEN Fail ELSE
+    LET legOptionDelta == ReadBytes(legPrice.rest, 4) IN IF ~legOptionDelta.ok THEN Fail ELSE
+    Ok([ legSecurityId  |-> legSecurityId.value,
+         legSide        |-> legSide.value,
+         legRatioQty    |-> legRatioQty.value,
+         legPrice       |-> legPrice.value,
+         legOptionDelta |-> legOptionDelta.value ], legOptionDelta.rest)
+
+ZeroLegacyLegsGroup ==
+    [ legSecurityId  |-> [i \in 1 .. 4 |-> 0],
+      legSide        |-> [i \in 1 .. 1 |-> 0],
+      legRatioQty    |-> [i \in 1 .. 1 |-> 0],
+      legPrice       |-> [i \in 1 .. 8 |-> 0],
+      legOptionDelta |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Legacy Legs Group at zero, then each field in turn at the values it is checked at *)
+CheckedLegacyLegsGroup ==
+    { ZeroLegacyLegsGroup }
+        \cup { [ZeroLegacyLegsGroup EXCEPT !.legSecurityId = one] : one \in Sample(4) }
+        \cup { [ZeroLegacyLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
+        \cup { [ZeroLegacyLegsGroup EXCEPT !.legRatioQty = one] : one \in Sample(1) }
+        \cup { [ZeroLegacyLegsGroup EXCEPT !.legPrice = one] : one \in Sample(8) }
+        \cup { [ZeroLegacyLegsGroup EXCEPT !.legOptionDelta = one] : one \in Sample(4) }
+
+(* A run of Legacy Legs Group, written one after another *)
+RECURSIVE EncodeLegacyLegsGroupList(_)
+EncodeLegacyLegsGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeLegacyLegsGroup(Head(messages)) \o EncodeLegacyLegsGroupList(Tail(messages))
+
+(* As many Legacy Legs Group as the field that counts them says *)
+RECURSIVE ReadLegacyLegsGroupList(_, _)
+ReadLegacyLegsGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeLegacyLegsGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadLegacyLegsGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Legacy Legs Group of each kind, for the lists that carry them *)
+OneLegacyLegsGroup == { ZeroLegacyLegsGroup }
+
+(***************************************************************************)
+(* Legacy Legs Groups                                                      *)
+(***************************************************************************)
+
+LegacyLegsGroups ==
+    [ blockLength     : Sample(2),
+      legacyLegsGroup : SampleLists(OneLegacyLegsGroup) ]
+
+EncodeLegacyLegsGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.legacyLegsGroup), 1)
+        \o EncodeLegacyLegsGroupList(message.legacyLegsGroup)
+
+DecodeLegacyLegsGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET legacyLegsGroup == ReadLegacyLegsGroupList(numInGroup.rest, numInGroup.value) IN IF ~legacyLegsGroup.ok THEN Fail ELSE
+    Ok([ blockLength     |-> blockLength.value,
+         legacyLegsGroup |-> legacyLegsGroup.value ], legacyLegsGroup.rest)
+
+ZeroLegacyLegsGroups ==
+    [ blockLength     |-> [i \in 1 .. 2 |-> 0],
+      legacyLegsGroup |-> << >> ]
+
+(* Legacy Legs Groups at zero, then each field in turn at the values it is checked at *)
+CheckedLegacyLegsGroups ==
+    { ZeroLegacyLegsGroups }
+        \cup { [ZeroLegacyLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroLegacyLegsGroups EXCEPT !.legacyLegsGroup = one] : one \in SampleLists(OneLegacyLegsGroup) }
+
+(***************************************************************************)
+(* Md Instrument Definition Spread                                         *)
+(***************************************************************************)
+
+MdInstrumentDefinitionSpread ==
+    [ matchEventIndicator       : Sample(1),
+      totNumReportsOptional     : Sample(4),
+      securityUpdateAction      : Sample(1),
+      lastUpdateTime            : Sample(8),
+      mdSecurityTradingStatus   : Sample(1),
+      applId                    : Sample(2),
+      marketSegmentId           : Sample(1),
+      underlyingProductOptional : Sample(1),
+      securityExchange          : Sample(4),
+      securityGroup             : Sample(6),
+      asset                     : Sample(6),
+      symbol                    : Sample(20),
+      securityId                : Sample(4),
+      securityType              : Sample(6),
+      cfiCode                   : Sample(6),
+      maturityMonthYear         : MaturityMonthYear2,
+      currency                  : Sample(3),
+      securitySubType           : Sample(5),
+      userDefinedInstrument     : Sample(1),
+      matchAlgorithm            : Sample(1),
+      minTradeVol               : Sample(4),
+      maxTradeVol               : Sample(4),
+      minPriceIncrement         : Sample(8),
+      displayFactor             : Sample(8),
+      priceDisplayFormat        : Sample(1),
+      priceRatio                : Sample(8),
+      tickRule                  : Sample(1),
+      unitOfMeasure             : Sample(30),
+      tradingReferencePrice     : Sample(8),
+      settlPriceType            : Sample(1),
+      openInterestQty           : Sample(4),
+      clearedVolume             : Sample(4),
+      highLimitPrice            : Sample(8),
+      lowLimitPrice             : Sample(8),
+      maxPriceVariation         : Sample(8),
+      mainFraction              : Sample(1),
+      subFraction               : Sample(1),
+      tradingReferenceDate      : Sample(2),
+      eventsGroups              : EventsGroups2,
+      feedTypesGroups           : FeedTypesGroups2,
+      instAttribGroups          : InstAttribGroups2,
+      lotTypeRulesGroups        : LotTypeRulesGroups2,
+      legacyLegsGroups          : LegacyLegsGroups ]
+
+EncodeMdInstrumentDefinitionSpread(message) ==
+    message.matchEventIndicator
+        \o message.totNumReportsOptional
+        \o message.securityUpdateAction
+        \o message.lastUpdateTime
+        \o message.mdSecurityTradingStatus
+        \o message.applId
+        \o message.marketSegmentId
+        \o message.underlyingProductOptional
+        \o message.securityExchange
+        \o message.securityGroup
+        \o message.asset
+        \o message.symbol
+        \o message.securityId
+        \o message.securityType
+        \o message.cfiCode
+        \o EncodeMaturityMonthYear2(message.maturityMonthYear)
+        \o message.currency
+        \o message.securitySubType
+        \o message.userDefinedInstrument
+        \o message.matchAlgorithm
+        \o message.minTradeVol
+        \o message.maxTradeVol
+        \o message.minPriceIncrement
+        \o message.displayFactor
+        \o message.priceDisplayFormat
+        \o message.priceRatio
+        \o message.tickRule
+        \o message.unitOfMeasure
+        \o message.tradingReferencePrice
+        \o message.settlPriceType
+        \o message.openInterestQty
+        \o message.clearedVolume
+        \o message.highLimitPrice
+        \o message.lowLimitPrice
+        \o message.maxPriceVariation
+        \o message.mainFraction
+        \o message.subFraction
+        \o message.tradingReferenceDate
+        \o EncodeEventsGroups2(message.eventsGroups)
+        \o EncodeFeedTypesGroups2(message.feedTypesGroups)
+        \o EncodeInstAttribGroups2(message.instAttribGroups)
+        \o EncodeLotTypeRulesGroups2(message.lotTypeRulesGroups)
+        \o EncodeLegacyLegsGroups(message.legacyLegsGroups)
+
+DecodeMdInstrumentDefinitionSpread(bytes) ==
+    LET matchEventIndicator == ReadBytes(bytes, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET totNumReportsOptional == ReadBytes(matchEventIndicator.rest, 4) IN IF ~totNumReportsOptional.ok THEN Fail ELSE
+    LET securityUpdateAction == ReadBytes(totNumReportsOptional.rest, 1) IN IF ~securityUpdateAction.ok THEN Fail ELSE
+    LET lastUpdateTime == ReadBytes(securityUpdateAction.rest, 8) IN IF ~lastUpdateTime.ok THEN Fail ELSE
+    LET mdSecurityTradingStatus == ReadBytes(lastUpdateTime.rest, 1) IN IF ~mdSecurityTradingStatus.ok THEN Fail ELSE
+    LET applId == ReadBytes(mdSecurityTradingStatus.rest, 2) IN IF ~applId.ok THEN Fail ELSE
+    LET marketSegmentId == ReadBytes(applId.rest, 1) IN IF ~marketSegmentId.ok THEN Fail ELSE
+    LET underlyingProductOptional == ReadBytes(marketSegmentId.rest, 1) IN IF ~underlyingProductOptional.ok THEN Fail ELSE
+    LET securityExchange == ReadBytes(underlyingProductOptional.rest, 4) IN IF ~securityExchange.ok THEN Fail ELSE
+    LET securityGroup == ReadBytes(securityExchange.rest, 6) IN IF ~securityGroup.ok THEN Fail ELSE
+    LET asset == ReadBytes(securityGroup.rest, 6) IN IF ~asset.ok THEN Fail ELSE
+    LET symbol == ReadBytes(asset.rest, 20) IN IF ~symbol.ok THEN Fail ELSE
+    LET securityId == ReadBytes(symbol.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET securityType == ReadBytes(securityId.rest, 6) IN IF ~securityType.ok THEN Fail ELSE
+    LET cfiCode == ReadBytes(securityType.rest, 6) IN IF ~cfiCode.ok THEN Fail ELSE
+    LET maturityMonthYear == DecodeMaturityMonthYear2(cfiCode.rest) IN IF ~maturityMonthYear.ok THEN Fail ELSE
+    LET currency == ReadBytes(maturityMonthYear.rest, 3) IN IF ~currency.ok THEN Fail ELSE
+    LET securitySubType == ReadBytes(currency.rest, 5) IN IF ~securitySubType.ok THEN Fail ELSE
+    LET userDefinedInstrument == ReadBytes(securitySubType.rest, 1) IN IF ~userDefinedInstrument.ok THEN Fail ELSE
+    LET matchAlgorithm == ReadBytes(userDefinedInstrument.rest, 1) IN IF ~matchAlgorithm.ok THEN Fail ELSE
+    LET minTradeVol == ReadBytes(matchAlgorithm.rest, 4) IN IF ~minTradeVol.ok THEN Fail ELSE
+    LET maxTradeVol == ReadBytes(minTradeVol.rest, 4) IN IF ~maxTradeVol.ok THEN Fail ELSE
+    LET minPriceIncrement == ReadBytes(maxTradeVol.rest, 8) IN IF ~minPriceIncrement.ok THEN Fail ELSE
+    LET displayFactor == ReadBytes(minPriceIncrement.rest, 8) IN IF ~displayFactor.ok THEN Fail ELSE
+    LET priceDisplayFormat == ReadBytes(displayFactor.rest, 1) IN IF ~priceDisplayFormat.ok THEN Fail ELSE
+    LET priceRatio == ReadBytes(priceDisplayFormat.rest, 8) IN IF ~priceRatio.ok THEN Fail ELSE
+    LET tickRule == ReadBytes(priceRatio.rest, 1) IN IF ~tickRule.ok THEN Fail ELSE
+    LET unitOfMeasure == ReadBytes(tickRule.rest, 30) IN IF ~unitOfMeasure.ok THEN Fail ELSE
+    LET tradingReferencePrice == ReadBytes(unitOfMeasure.rest, 8) IN IF ~tradingReferencePrice.ok THEN Fail ELSE
+    LET settlPriceType == ReadBytes(tradingReferencePrice.rest, 1) IN IF ~settlPriceType.ok THEN Fail ELSE
+    LET openInterestQty == ReadBytes(settlPriceType.rest, 4) IN IF ~openInterestQty.ok THEN Fail ELSE
+    LET clearedVolume == ReadBytes(openInterestQty.rest, 4) IN IF ~clearedVolume.ok THEN Fail ELSE
+    LET highLimitPrice == ReadBytes(clearedVolume.rest, 8) IN IF ~highLimitPrice.ok THEN Fail ELSE
+    LET lowLimitPrice == ReadBytes(highLimitPrice.rest, 8) IN IF ~lowLimitPrice.ok THEN Fail ELSE
+    LET maxPriceVariation == ReadBytes(lowLimitPrice.rest, 8) IN IF ~maxPriceVariation.ok THEN Fail ELSE
+    LET mainFraction == ReadBytes(maxPriceVariation.rest, 1) IN IF ~mainFraction.ok THEN Fail ELSE
+    LET subFraction == ReadBytes(mainFraction.rest, 1) IN IF ~subFraction.ok THEN Fail ELSE
+    LET tradingReferenceDate == ReadBytes(subFraction.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
+    LET eventsGroups == DecodeEventsGroups2(tradingReferenceDate.rest) IN IF ~eventsGroups.ok THEN Fail ELSE
+    LET feedTypesGroups == DecodeFeedTypesGroups2(eventsGroups.rest) IN IF ~feedTypesGroups.ok THEN Fail ELSE
+    LET instAttribGroups == DecodeInstAttribGroups2(feedTypesGroups.rest) IN IF ~instAttribGroups.ok THEN Fail ELSE
+    LET lotTypeRulesGroups == DecodeLotTypeRulesGroups2(instAttribGroups.rest) IN IF ~lotTypeRulesGroups.ok THEN Fail ELSE
+    LET legacyLegsGroups == DecodeLegacyLegsGroups(lotTypeRulesGroups.rest) IN IF ~legacyLegsGroups.ok THEN Fail ELSE
+    Ok([ matchEventIndicator       |-> matchEventIndicator.value,
+         totNumReportsOptional     |-> totNumReportsOptional.value,
+         securityUpdateAction      |-> securityUpdateAction.value,
+         lastUpdateTime            |-> lastUpdateTime.value,
+         mdSecurityTradingStatus   |-> mdSecurityTradingStatus.value,
+         applId                    |-> applId.value,
+         marketSegmentId           |-> marketSegmentId.value,
+         underlyingProductOptional |-> underlyingProductOptional.value,
+         securityExchange          |-> securityExchange.value,
+         securityGroup             |-> securityGroup.value,
+         asset                     |-> asset.value,
+         symbol                    |-> symbol.value,
+         securityId                |-> securityId.value,
+         securityType              |-> securityType.value,
+         cfiCode                   |-> cfiCode.value,
+         maturityMonthYear         |-> maturityMonthYear.value,
+         currency                  |-> currency.value,
+         securitySubType           |-> securitySubType.value,
+         userDefinedInstrument     |-> userDefinedInstrument.value,
+         matchAlgorithm            |-> matchAlgorithm.value,
+         minTradeVol               |-> minTradeVol.value,
+         maxTradeVol               |-> maxTradeVol.value,
+         minPriceIncrement         |-> minPriceIncrement.value,
+         displayFactor             |-> displayFactor.value,
+         priceDisplayFormat        |-> priceDisplayFormat.value,
+         priceRatio                |-> priceRatio.value,
+         tickRule                  |-> tickRule.value,
+         unitOfMeasure             |-> unitOfMeasure.value,
+         tradingReferencePrice     |-> tradingReferencePrice.value,
+         settlPriceType            |-> settlPriceType.value,
+         openInterestQty           |-> openInterestQty.value,
+         clearedVolume             |-> clearedVolume.value,
+         highLimitPrice            |-> highLimitPrice.value,
+         lowLimitPrice             |-> lowLimitPrice.value,
+         maxPriceVariation         |-> maxPriceVariation.value,
+         mainFraction              |-> mainFraction.value,
+         subFraction               |-> subFraction.value,
+         tradingReferenceDate      |-> tradingReferenceDate.value,
+         eventsGroups              |-> eventsGroups.value,
+         feedTypesGroups           |-> feedTypesGroups.value,
+         instAttribGroups          |-> instAttribGroups.value,
+         lotTypeRulesGroups        |-> lotTypeRulesGroups.value,
+         legacyLegsGroups          |-> legacyLegsGroups.value ], legacyLegsGroups.rest)
+
+ZeroMdInstrumentDefinitionSpread ==
+    [ matchEventIndicator       |-> [i \in 1 .. 1 |-> 0],
+      totNumReportsOptional     |-> [i \in 1 .. 4 |-> 0],
+      securityUpdateAction      |-> [i \in 1 .. 1 |-> 0],
+      lastUpdateTime            |-> [i \in 1 .. 8 |-> 0],
+      mdSecurityTradingStatus   |-> [i \in 1 .. 1 |-> 0],
+      applId                    |-> [i \in 1 .. 2 |-> 0],
+      marketSegmentId           |-> [i \in 1 .. 1 |-> 0],
+      underlyingProductOptional |-> [i \in 1 .. 1 |-> 0],
+      securityExchange          |-> [i \in 1 .. 4 |-> 0],
+      securityGroup             |-> [i \in 1 .. 6 |-> 0],
+      asset                     |-> [i \in 1 .. 6 |-> 0],
+      symbol                    |-> [i \in 1 .. 20 |-> 0],
+      securityId                |-> [i \in 1 .. 4 |-> 0],
+      securityType              |-> [i \in 1 .. 6 |-> 0],
+      cfiCode                   |-> [i \in 1 .. 6 |-> 0],
+      maturityMonthYear         |-> ZeroMaturityMonthYear2,
+      currency                  |-> [i \in 1 .. 3 |-> 0],
+      securitySubType           |-> [i \in 1 .. 5 |-> 0],
+      userDefinedInstrument     |-> [i \in 1 .. 1 |-> 0],
+      matchAlgorithm            |-> [i \in 1 .. 1 |-> 0],
+      minTradeVol               |-> [i \in 1 .. 4 |-> 0],
+      maxTradeVol               |-> [i \in 1 .. 4 |-> 0],
+      minPriceIncrement         |-> [i \in 1 .. 8 |-> 0],
+      displayFactor             |-> [i \in 1 .. 8 |-> 0],
+      priceDisplayFormat        |-> [i \in 1 .. 1 |-> 0],
+      priceRatio                |-> [i \in 1 .. 8 |-> 0],
+      tickRule                  |-> [i \in 1 .. 1 |-> 0],
+      unitOfMeasure             |-> [i \in 1 .. 30 |-> 0],
+      tradingReferencePrice     |-> [i \in 1 .. 8 |-> 0],
+      settlPriceType            |-> [i \in 1 .. 1 |-> 0],
+      openInterestQty           |-> [i \in 1 .. 4 |-> 0],
+      clearedVolume             |-> [i \in 1 .. 4 |-> 0],
+      highLimitPrice            |-> [i \in 1 .. 8 |-> 0],
+      lowLimitPrice             |-> [i \in 1 .. 8 |-> 0],
+      maxPriceVariation         |-> [i \in 1 .. 8 |-> 0],
+      mainFraction              |-> [i \in 1 .. 1 |-> 0],
+      subFraction               |-> [i \in 1 .. 1 |-> 0],
+      tradingReferenceDate      |-> [i \in 1 .. 2 |-> 0],
+      eventsGroups              |-> ZeroEventsGroups2,
+      feedTypesGroups           |-> ZeroFeedTypesGroups2,
+      instAttribGroups          |-> ZeroInstAttribGroups2,
+      lotTypeRulesGroups        |-> ZeroLotTypeRulesGroups2,
+      legacyLegsGroups          |-> ZeroLegacyLegsGroups ]
+
+(* Md Instrument Definition Spread at zero, then each field in turn at the values it is checked at *)
+CheckedMdInstrumentDefinitionSpread ==
+    { ZeroMdInstrumentDefinitionSpread }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.totNumReportsOptional = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.securityUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.lastUpdateTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.mdSecurityTradingStatus = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.applId = one] : one \in Sample(2) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.marketSegmentId = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.underlyingProductOptional = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.securityExchange = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.securityGroup = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.asset = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.symbol = one] : one \in Sample(20) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.securityType = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.cfiCode = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.maturityMonthYear = one] : one \in CheckedMaturityMonthYear2 }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.currency = one] : one \in Sample(3) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.securitySubType = one] : one \in Sample(5) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.userDefinedInstrument = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.matchAlgorithm = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.minTradeVol = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.maxTradeVol = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.minPriceIncrement = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.displayFactor = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.priceDisplayFormat = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.priceRatio = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.tickRule = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.unitOfMeasure = one] : one \in Sample(30) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.tradingReferencePrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.settlPriceType = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.openInterestQty = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.clearedVolume = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.highLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.lowLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.maxPriceVariation = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.mainFraction = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.subFraction = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.eventsGroups = one] : one \in CheckedEventsGroups2 }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.feedTypesGroups = one] : one \in CheckedFeedTypesGroups2 }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.instAttribGroups = one] : one \in CheckedInstAttribGroups2 }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.lotTypeRulesGroups = one] : one \in CheckedLotTypeRulesGroups2 }
+        \cup { [ZeroMdInstrumentDefinitionSpread EXCEPT !.legacyLegsGroups = one] : one \in CheckedLegacyLegsGroups }
+
+(***************************************************************************)
+(* Security Status: 30 bytes                                               *)
+(***************************************************************************)
+
+SecurityStatus ==
+    [ transactTime          : Sample(8),
+      securityGroup         : Sample(6),
+      asset                 : Sample(6),
+      securityIdOptional    : Sample(4),
+      tradeDate             : Sample(2),
+      matchEventIndicator   : Sample(1),
+      securityTradingStatus : Sample(1),
+      haltReason            : Sample(1),
+      securityTradingEvent  : Sample(1) ]
+
+EncodeSecurityStatus(message) ==
+    message.transactTime
+        \o message.securityGroup
+        \o message.asset
+        \o message.securityIdOptional
+        \o message.tradeDate
+        \o message.matchEventIndicator
+        \o message.securityTradingStatus
+        \o message.haltReason
+        \o message.securityTradingEvent
+
+DecodeSecurityStatus(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET securityGroup == ReadBytes(transactTime.rest, 6) IN IF ~securityGroup.ok THEN Fail ELSE
+    LET asset == ReadBytes(securityGroup.rest, 6) IN IF ~asset.ok THEN Fail ELSE
+    LET securityIdOptional == ReadBytes(asset.rest, 4) IN IF ~securityIdOptional.ok THEN Fail ELSE
+    LET tradeDate == ReadBytes(securityIdOptional.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(tradeDate.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET securityTradingStatus == ReadBytes(matchEventIndicator.rest, 1) IN IF ~securityTradingStatus.ok THEN Fail ELSE
+    LET haltReason == ReadBytes(securityTradingStatus.rest, 1) IN IF ~haltReason.ok THEN Fail ELSE
+    LET securityTradingEvent == ReadBytes(haltReason.rest, 1) IN IF ~securityTradingEvent.ok THEN Fail ELSE
+    Ok([ transactTime          |-> transactTime.value,
+         securityGroup         |-> securityGroup.value,
+         asset                 |-> asset.value,
+         securityIdOptional    |-> securityIdOptional.value,
+         tradeDate             |-> tradeDate.value,
+         matchEventIndicator   |-> matchEventIndicator.value,
+         securityTradingStatus |-> securityTradingStatus.value,
+         haltReason            |-> haltReason.value,
+         securityTradingEvent  |-> securityTradingEvent.value ], securityTradingEvent.rest)
+
+ZeroSecurityStatus ==
+    [ transactTime          |-> [i \in 1 .. 8 |-> 0],
+      securityGroup         |-> [i \in 1 .. 6 |-> 0],
+      asset                 |-> [i \in 1 .. 6 |-> 0],
+      securityIdOptional    |-> [i \in 1 .. 4 |-> 0],
+      tradeDate             |-> [i \in 1 .. 2 |-> 0],
+      matchEventIndicator   |-> [i \in 1 .. 1 |-> 0],
+      securityTradingStatus |-> [i \in 1 .. 1 |-> 0],
+      haltReason            |-> [i \in 1 .. 1 |-> 0],
+      securityTradingEvent  |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Security Status at zero, then each field in turn at the values it is checked at *)
+CheckedSecurityStatus ==
+    { ZeroSecurityStatus }
+        \cup { [ZeroSecurityStatus EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroSecurityStatus EXCEPT !.securityGroup = one] : one \in Sample(6) }
+        \cup { [ZeroSecurityStatus EXCEPT !.asset = one] : one \in Sample(6) }
+        \cup { [ZeroSecurityStatus EXCEPT !.securityIdOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityStatus EXCEPT !.tradeDate = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityStatus EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityStatus EXCEPT !.securityTradingStatus = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityStatus EXCEPT !.haltReason = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityStatus EXCEPT !.securityTradingEvent = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Incremental Refresh Book Group: 32 bytes                                *)
+(***************************************************************************)
+
+IncrementalRefreshBookGroup ==
+    [ mdEntryPxOptional   : Sample(8),
+      mdEntrySizeOptional : Sample(4),
+      securityId          : Sample(4),
+      rptSeq              : Sample(4),
+      numberOfOrders      : Sample(4),
+      mdPriceLevel        : Sample(1),
+      mdUpdateAction      : Sample(1),
+      mdEntryTypeBook     : Sample(1),
+      padding5            : Sample(5) ]
+
+EncodeIncrementalRefreshBookGroup(message) ==
+    message.mdEntryPxOptional
+        \o message.mdEntrySizeOptional
+        \o message.securityId
+        \o message.rptSeq
+        \o message.numberOfOrders
+        \o message.mdPriceLevel
+        \o message.mdUpdateAction
+        \o message.mdEntryTypeBook
+        \o message.padding5
+
+DecodeIncrementalRefreshBookGroup(bytes) ==
+    LET mdEntryPxOptional == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptional.ok THEN Fail ELSE
+    LET mdEntrySizeOptional == ReadBytes(mdEntryPxOptional.rest, 4) IN IF ~mdEntrySizeOptional.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntrySizeOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET numberOfOrders == ReadBytes(rptSeq.rest, 4) IN IF ~numberOfOrders.ok THEN Fail ELSE
+    LET mdPriceLevel == ReadBytes(numberOfOrders.rest, 1) IN IF ~mdPriceLevel.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(mdPriceLevel.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET mdEntryTypeBook == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeBook.ok THEN Fail ELSE
+    LET padding5 == ReadBytes(mdEntryTypeBook.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
+    Ok([ mdEntryPxOptional   |-> mdEntryPxOptional.value,
+         mdEntrySizeOptional |-> mdEntrySizeOptional.value,
+         securityId          |-> securityId.value,
+         rptSeq              |-> rptSeq.value,
+         numberOfOrders      |-> numberOfOrders.value,
+         mdPriceLevel        |-> mdPriceLevel.value,
+         mdUpdateAction      |-> mdUpdateAction.value,
+         mdEntryTypeBook     |-> mdEntryTypeBook.value,
+         padding5            |-> padding5.value ], padding5.rest)
+
+ZeroIncrementalRefreshBookGroup ==
+    [ mdEntryPxOptional   |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySizeOptional |-> [i \in 1 .. 4 |-> 0],
+      securityId          |-> [i \in 1 .. 4 |-> 0],
+      rptSeq              |-> [i \in 1 .. 4 |-> 0],
+      numberOfOrders      |-> [i \in 1 .. 4 |-> 0],
+      mdPriceLevel        |-> [i \in 1 .. 1 |-> 0],
+      mdUpdateAction      |-> [i \in 1 .. 1 |-> 0],
+      mdEntryTypeBook     |-> [i \in 1 .. 1 |-> 0],
+      padding5            |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Incremental Refresh Book Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshBookGroup ==
+    { ZeroIncrementalRefreshBookGroup }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.numberOfOrders = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdPriceLevel = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.padding5 = one] : one \in Sample(5) }
+
+(* A run of Incremental Refresh Book Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshBookGroupList(_)
+EncodeIncrementalRefreshBookGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshBookGroup(Head(messages)) \o EncodeIncrementalRefreshBookGroupList(Tail(messages))
+
+(* As many Incremental Refresh Book Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshBookGroupList(_, _)
+ReadIncrementalRefreshBookGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshBookGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshBookGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Book Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshBookGroup == { ZeroIncrementalRefreshBookGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Book Groups                                         *)
+(***************************************************************************)
+
+IncrementalRefreshBookGroups ==
+    [ blockLength                 : Sample(2),
+      incrementalRefreshBookGroup : SampleLists(OneIncrementalRefreshBookGroup) ]
+
+EncodeIncrementalRefreshBookGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshBookGroup), 1)
+        \o EncodeIncrementalRefreshBookGroupList(message.incrementalRefreshBookGroup)
+
+DecodeIncrementalRefreshBookGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshBookGroup == ReadIncrementalRefreshBookGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshBookGroup.ok THEN Fail ELSE
+    Ok([ blockLength                 |-> blockLength.value,
+         incrementalRefreshBookGroup |-> incrementalRefreshBookGroup.value ], incrementalRefreshBookGroup.rest)
+
+ZeroIncrementalRefreshBookGroups ==
+    [ blockLength                 |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshBookGroup |-> << >> ]
+
+(* Incremental Refresh Book Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshBookGroups ==
+    { ZeroIncrementalRefreshBookGroups }
+        \cup { [ZeroIncrementalRefreshBookGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshBookGroups EXCEPT !.incrementalRefreshBookGroup = one] : one \in SampleLists(OneIncrementalRefreshBookGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Book                                             *)
+(***************************************************************************)
+
+MdIncrementalRefreshBook ==
+    [ transactTime                 : Sample(8),
+      matchEventIndicator          : Sample(1),
+      padding2                     : Sample(2),
+      incrementalRefreshBookGroups : IncrementalRefreshBookGroups ]
+
+EncodeMdIncrementalRefreshBook(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshBookGroups(message.incrementalRefreshBookGroups)
+
+DecodeMdIncrementalRefreshBook(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshBookGroups == DecodeIncrementalRefreshBookGroups(padding2.rest) IN IF ~incrementalRefreshBookGroups.ok THEN Fail ELSE
+    Ok([ transactTime                 |-> transactTime.value,
+         matchEventIndicator          |-> matchEventIndicator.value,
+         padding2                     |-> padding2.value,
+         incrementalRefreshBookGroups |-> incrementalRefreshBookGroups.value ], incrementalRefreshBookGroups.rest)
+
+ZeroMdIncrementalRefreshBook ==
+    [ transactTime                 |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator          |-> [i \in 1 .. 1 |-> 0],
+      padding2                     |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshBookGroups |-> ZeroIncrementalRefreshBookGroups ]
+
+(* Md Incremental Refresh Book at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshBook ==
+    { ZeroMdIncrementalRefreshBook }
+        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.incrementalRefreshBookGroups = one] : one \in CheckedIncrementalRefreshBookGroups }
+
+(***************************************************************************)
+(* Incremental Refresh Daily Statistics Group: 32 bytes                    *)
+(***************************************************************************)
+
+IncrementalRefreshDailyStatisticsGroup ==
+    [ mdEntryPxOptional          : Sample(8),
+      mdEntrySizeOptional        : Sample(4),
+      securityId                 : Sample(4),
+      rptSeq                     : Sample(4),
+      tradingReferenceDate       : Sample(2),
+      settlPriceType             : Sample(1),
+      mdUpdateAction             : Sample(1),
+      mdEntryTypeDailyStatistics : Sample(1),
+      padding7                   : Sample(7) ]
+
+EncodeIncrementalRefreshDailyStatisticsGroup(message) ==
+    message.mdEntryPxOptional
+        \o message.mdEntrySizeOptional
+        \o message.securityId
+        \o message.rptSeq
+        \o message.tradingReferenceDate
+        \o message.settlPriceType
+        \o message.mdUpdateAction
+        \o message.mdEntryTypeDailyStatistics
+        \o message.padding7
+
+DecodeIncrementalRefreshDailyStatisticsGroup(bytes) ==
+    LET mdEntryPxOptional == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptional.ok THEN Fail ELSE
+    LET mdEntrySizeOptional == ReadBytes(mdEntryPxOptional.rest, 4) IN IF ~mdEntrySizeOptional.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntrySizeOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET tradingReferenceDate == ReadBytes(rptSeq.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
+    LET settlPriceType == ReadBytes(tradingReferenceDate.rest, 1) IN IF ~settlPriceType.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(settlPriceType.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET mdEntryTypeDailyStatistics == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeDailyStatistics.ok THEN Fail ELSE
+    LET padding7 == ReadBytes(mdEntryTypeDailyStatistics.rest, 7) IN IF ~padding7.ok THEN Fail ELSE
+    Ok([ mdEntryPxOptional          |-> mdEntryPxOptional.value,
+         mdEntrySizeOptional        |-> mdEntrySizeOptional.value,
+         securityId                 |-> securityId.value,
+         rptSeq                     |-> rptSeq.value,
+         tradingReferenceDate       |-> tradingReferenceDate.value,
+         settlPriceType             |-> settlPriceType.value,
+         mdUpdateAction             |-> mdUpdateAction.value,
+         mdEntryTypeDailyStatistics |-> mdEntryTypeDailyStatistics.value,
+         padding7                   |-> padding7.value ], padding7.rest)
+
+ZeroIncrementalRefreshDailyStatisticsGroup ==
+    [ mdEntryPxOptional          |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySizeOptional        |-> [i \in 1 .. 4 |-> 0],
+      securityId                 |-> [i \in 1 .. 4 |-> 0],
+      rptSeq                     |-> [i \in 1 .. 4 |-> 0],
+      tradingReferenceDate       |-> [i \in 1 .. 2 |-> 0],
+      settlPriceType             |-> [i \in 1 .. 1 |-> 0],
+      mdUpdateAction             |-> [i \in 1 .. 1 |-> 0],
+      mdEntryTypeDailyStatistics |-> [i \in 1 .. 1 |-> 0],
+      padding7                   |-> [i \in 1 .. 7 |-> 0] ]
+
+(* Incremental Refresh Daily Statistics Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshDailyStatisticsGroup ==
+    { ZeroIncrementalRefreshDailyStatisticsGroup }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.settlPriceType = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdEntryTypeDailyStatistics = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.padding7 = one] : one \in Sample(7) }
+
+(* A run of Incremental Refresh Daily Statistics Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshDailyStatisticsGroupList(_)
+EncodeIncrementalRefreshDailyStatisticsGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshDailyStatisticsGroup(Head(messages)) \o EncodeIncrementalRefreshDailyStatisticsGroupList(Tail(messages))
+
+(* As many Incremental Refresh Daily Statistics Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshDailyStatisticsGroupList(_, _)
+ReadIncrementalRefreshDailyStatisticsGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshDailyStatisticsGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshDailyStatisticsGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Daily Statistics Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshDailyStatisticsGroup == { ZeroIncrementalRefreshDailyStatisticsGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Daily Statistics Groups                             *)
+(***************************************************************************)
+
+IncrementalRefreshDailyStatisticsGroups ==
+    [ blockLength                            : Sample(2),
+      incrementalRefreshDailyStatisticsGroup : SampleLists(OneIncrementalRefreshDailyStatisticsGroup) ]
+
+EncodeIncrementalRefreshDailyStatisticsGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshDailyStatisticsGroup), 1)
+        \o EncodeIncrementalRefreshDailyStatisticsGroupList(message.incrementalRefreshDailyStatisticsGroup)
+
+DecodeIncrementalRefreshDailyStatisticsGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshDailyStatisticsGroup == ReadIncrementalRefreshDailyStatisticsGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshDailyStatisticsGroup.ok THEN Fail ELSE
+    Ok([ blockLength                            |-> blockLength.value,
+         incrementalRefreshDailyStatisticsGroup |-> incrementalRefreshDailyStatisticsGroup.value ], incrementalRefreshDailyStatisticsGroup.rest)
+
+ZeroIncrementalRefreshDailyStatisticsGroups ==
+    [ blockLength                            |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshDailyStatisticsGroup |-> << >> ]
+
+(* Incremental Refresh Daily Statistics Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshDailyStatisticsGroups ==
+    { ZeroIncrementalRefreshDailyStatisticsGroups }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroups EXCEPT !.incrementalRefreshDailyStatisticsGroup = one] : one \in SampleLists(OneIncrementalRefreshDailyStatisticsGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Daily Statistics                                 *)
+(***************************************************************************)
+
+MdIncrementalRefreshDailyStatistics ==
+    [ transactTime                            : Sample(8),
+      matchEventIndicator                     : Sample(1),
+      padding2                                : Sample(2),
+      incrementalRefreshDailyStatisticsGroups : IncrementalRefreshDailyStatisticsGroups ]
+
+EncodeMdIncrementalRefreshDailyStatistics(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshDailyStatisticsGroups(message.incrementalRefreshDailyStatisticsGroups)
+
+DecodeMdIncrementalRefreshDailyStatistics(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshDailyStatisticsGroups == DecodeIncrementalRefreshDailyStatisticsGroups(padding2.rest) IN IF ~incrementalRefreshDailyStatisticsGroups.ok THEN Fail ELSE
+    Ok([ transactTime                            |-> transactTime.value,
+         matchEventIndicator                     |-> matchEventIndicator.value,
+         padding2                                |-> padding2.value,
+         incrementalRefreshDailyStatisticsGroups |-> incrementalRefreshDailyStatisticsGroups.value ], incrementalRefreshDailyStatisticsGroups.rest)
+
+ZeroMdIncrementalRefreshDailyStatistics ==
+    [ transactTime                            |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                     |-> [i \in 1 .. 1 |-> 0],
+      padding2                                |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshDailyStatisticsGroups |-> ZeroIncrementalRefreshDailyStatisticsGroups ]
+
+(* Md Incremental Refresh Daily Statistics at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshDailyStatistics ==
+    { ZeroMdIncrementalRefreshDailyStatistics }
+        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.incrementalRefreshDailyStatisticsGroups = one] : one \in CheckedIncrementalRefreshDailyStatisticsGroups }
+
+(***************************************************************************)
+(* Incremental Refresh Limits Banding Group: 32 bytes                      *)
+(***************************************************************************)
+
+IncrementalRefreshLimitsBandingGroup ==
+    [ highLimitPrice    : Sample(8),
+      lowLimitPrice     : Sample(8),
+      maxPriceVariation : Sample(8),
+      securityId        : Sample(4),
+      rptSeq            : Sample(4) ]
+
+EncodeIncrementalRefreshLimitsBandingGroup(message) ==
+    message.highLimitPrice
+        \o message.lowLimitPrice
+        \o message.maxPriceVariation
+        \o message.securityId
+        \o message.rptSeq
+
+DecodeIncrementalRefreshLimitsBandingGroup(bytes) ==
+    LET highLimitPrice == ReadBytes(bytes, 8) IN IF ~highLimitPrice.ok THEN Fail ELSE
+    LET lowLimitPrice == ReadBytes(highLimitPrice.rest, 8) IN IF ~lowLimitPrice.ok THEN Fail ELSE
+    LET maxPriceVariation == ReadBytes(lowLimitPrice.rest, 8) IN IF ~maxPriceVariation.ok THEN Fail ELSE
+    LET securityId == ReadBytes(maxPriceVariation.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    Ok([ highLimitPrice    |-> highLimitPrice.value,
+         lowLimitPrice     |-> lowLimitPrice.value,
+         maxPriceVariation |-> maxPriceVariation.value,
+         securityId        |-> securityId.value,
+         rptSeq            |-> rptSeq.value ], rptSeq.rest)
+
+ZeroIncrementalRefreshLimitsBandingGroup ==
+    [ highLimitPrice    |-> [i \in 1 .. 8 |-> 0],
+      lowLimitPrice     |-> [i \in 1 .. 8 |-> 0],
+      maxPriceVariation |-> [i \in 1 .. 8 |-> 0],
+      securityId        |-> [i \in 1 .. 4 |-> 0],
+      rptSeq            |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Incremental Refresh Limits Banding Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshLimitsBandingGroup ==
+    { ZeroIncrementalRefreshLimitsBandingGroup }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.highLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.lowLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.maxPriceVariation = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+
+(* A run of Incremental Refresh Limits Banding Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshLimitsBandingGroupList(_)
+EncodeIncrementalRefreshLimitsBandingGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshLimitsBandingGroup(Head(messages)) \o EncodeIncrementalRefreshLimitsBandingGroupList(Tail(messages))
+
+(* As many Incremental Refresh Limits Banding Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshLimitsBandingGroupList(_, _)
+ReadIncrementalRefreshLimitsBandingGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshLimitsBandingGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshLimitsBandingGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Limits Banding Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshLimitsBandingGroup == { ZeroIncrementalRefreshLimitsBandingGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Limits Banding Groups                               *)
+(***************************************************************************)
+
+IncrementalRefreshLimitsBandingGroups ==
+    [ blockLength                          : Sample(2),
+      incrementalRefreshLimitsBandingGroup : SampleLists(OneIncrementalRefreshLimitsBandingGroup) ]
+
+EncodeIncrementalRefreshLimitsBandingGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshLimitsBandingGroup), 1)
+        \o EncodeIncrementalRefreshLimitsBandingGroupList(message.incrementalRefreshLimitsBandingGroup)
+
+DecodeIncrementalRefreshLimitsBandingGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshLimitsBandingGroup == ReadIncrementalRefreshLimitsBandingGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshLimitsBandingGroup.ok THEN Fail ELSE
+    Ok([ blockLength                          |-> blockLength.value,
+         incrementalRefreshLimitsBandingGroup |-> incrementalRefreshLimitsBandingGroup.value ], incrementalRefreshLimitsBandingGroup.rest)
+
+ZeroIncrementalRefreshLimitsBandingGroups ==
+    [ blockLength                          |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshLimitsBandingGroup |-> << >> ]
+
+(* Incremental Refresh Limits Banding Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshLimitsBandingGroups ==
+    { ZeroIncrementalRefreshLimitsBandingGroups }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroups EXCEPT !.incrementalRefreshLimitsBandingGroup = one] : one \in SampleLists(OneIncrementalRefreshLimitsBandingGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Limits Banding                                   *)
+(***************************************************************************)
+
+MdIncrementalRefreshLimitsBanding ==
+    [ transactTime                          : Sample(8),
+      matchEventIndicator                   : Sample(1),
+      padding2                              : Sample(2),
+      incrementalRefreshLimitsBandingGroups : IncrementalRefreshLimitsBandingGroups ]
+
+EncodeMdIncrementalRefreshLimitsBanding(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshLimitsBandingGroups(message.incrementalRefreshLimitsBandingGroups)
+
+DecodeMdIncrementalRefreshLimitsBanding(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshLimitsBandingGroups == DecodeIncrementalRefreshLimitsBandingGroups(padding2.rest) IN IF ~incrementalRefreshLimitsBandingGroups.ok THEN Fail ELSE
+    Ok([ transactTime                          |-> transactTime.value,
+         matchEventIndicator                   |-> matchEventIndicator.value,
+         padding2                              |-> padding2.value,
+         incrementalRefreshLimitsBandingGroups |-> incrementalRefreshLimitsBandingGroups.value ], incrementalRefreshLimitsBandingGroups.rest)
+
+ZeroMdIncrementalRefreshLimitsBanding ==
+    [ transactTime                          |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                   |-> [i \in 1 .. 1 |-> 0],
+      padding2                              |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshLimitsBandingGroups |-> ZeroIncrementalRefreshLimitsBandingGroups ]
+
+(* Md Incremental Refresh Limits Banding at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshLimitsBanding ==
+    { ZeroMdIncrementalRefreshLimitsBanding }
+        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.incrementalRefreshLimitsBandingGroups = one] : one \in CheckedIncrementalRefreshLimitsBandingGroups }
+
+(***************************************************************************)
+(* Incremental Refresh Session Statistics Group: 24 bytes                  *)
+(***************************************************************************)
+
+IncrementalRefreshSessionStatisticsGroup ==
+    [ mdEntryPx             : Sample(8),
+      securityId            : Sample(4),
+      rptSeq                : Sample(4),
+      openCloseSettlFlag    : Sample(1),
+      mdUpdateAction        : Sample(1),
+      mdEntryTypeStatistics : Sample(1),
+      padding5              : Sample(5) ]
+
+EncodeIncrementalRefreshSessionStatisticsGroup(message) ==
+    message.mdEntryPx
+        \o message.securityId
+        \o message.rptSeq
+        \o message.openCloseSettlFlag
+        \o message.mdUpdateAction
+        \o message.mdEntryTypeStatistics
+        \o message.padding5
+
+DecodeIncrementalRefreshSessionStatisticsGroup(bytes) ==
+    LET mdEntryPx == ReadBytes(bytes, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntryPx.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET openCloseSettlFlag == ReadBytes(rptSeq.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(openCloseSettlFlag.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET mdEntryTypeStatistics == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeStatistics.ok THEN Fail ELSE
+    LET padding5 == ReadBytes(mdEntryTypeStatistics.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
+    Ok([ mdEntryPx             |-> mdEntryPx.value,
+         securityId            |-> securityId.value,
+         rptSeq                |-> rptSeq.value,
+         openCloseSettlFlag    |-> openCloseSettlFlag.value,
+         mdUpdateAction        |-> mdUpdateAction.value,
+         mdEntryTypeStatistics |-> mdEntryTypeStatistics.value,
+         padding5              |-> padding5.value ], padding5.rest)
+
+ZeroIncrementalRefreshSessionStatisticsGroup ==
+    [ mdEntryPx             |-> [i \in 1 .. 8 |-> 0],
+      securityId            |-> [i \in 1 .. 4 |-> 0],
+      rptSeq                |-> [i \in 1 .. 4 |-> 0],
+      openCloseSettlFlag    |-> [i \in 1 .. 1 |-> 0],
+      mdUpdateAction        |-> [i \in 1 .. 1 |-> 0],
+      mdEntryTypeStatistics |-> [i \in 1 .. 1 |-> 0],
+      padding5              |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Incremental Refresh Session Statistics Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshSessionStatisticsGroup ==
+    { ZeroIncrementalRefreshSessionStatisticsGroup }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdEntryPx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdEntryTypeStatistics = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.padding5 = one] : one \in Sample(5) }
+
+(* A run of Incremental Refresh Session Statistics Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshSessionStatisticsGroupList(_)
+EncodeIncrementalRefreshSessionStatisticsGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshSessionStatisticsGroup(Head(messages)) \o EncodeIncrementalRefreshSessionStatisticsGroupList(Tail(messages))
+
+(* As many Incremental Refresh Session Statistics Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshSessionStatisticsGroupList(_, _)
+ReadIncrementalRefreshSessionStatisticsGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshSessionStatisticsGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshSessionStatisticsGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Session Statistics Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshSessionStatisticsGroup == { ZeroIncrementalRefreshSessionStatisticsGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Session Statistics Groups                           *)
+(***************************************************************************)
+
+IncrementalRefreshSessionStatisticsGroups ==
+    [ blockLength                              : Sample(2),
+      incrementalRefreshSessionStatisticsGroup : SampleLists(OneIncrementalRefreshSessionStatisticsGroup) ]
+
+EncodeIncrementalRefreshSessionStatisticsGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshSessionStatisticsGroup), 1)
+        \o EncodeIncrementalRefreshSessionStatisticsGroupList(message.incrementalRefreshSessionStatisticsGroup)
+
+DecodeIncrementalRefreshSessionStatisticsGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshSessionStatisticsGroup == ReadIncrementalRefreshSessionStatisticsGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshSessionStatisticsGroup.ok THEN Fail ELSE
+    Ok([ blockLength                              |-> blockLength.value,
+         incrementalRefreshSessionStatisticsGroup |-> incrementalRefreshSessionStatisticsGroup.value ], incrementalRefreshSessionStatisticsGroup.rest)
+
+ZeroIncrementalRefreshSessionStatisticsGroups ==
+    [ blockLength                              |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshSessionStatisticsGroup |-> << >> ]
+
+(* Incremental Refresh Session Statistics Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshSessionStatisticsGroups ==
+    { ZeroIncrementalRefreshSessionStatisticsGroups }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroups EXCEPT !.incrementalRefreshSessionStatisticsGroup = one] : one \in SampleLists(OneIncrementalRefreshSessionStatisticsGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Session Statistics                               *)
+(***************************************************************************)
+
+MdIncrementalRefreshSessionStatistics ==
+    [ transactTime                              : Sample(8),
+      matchEventIndicator                       : Sample(1),
+      padding2                                  : Sample(2),
+      incrementalRefreshSessionStatisticsGroups : IncrementalRefreshSessionStatisticsGroups ]
+
+EncodeMdIncrementalRefreshSessionStatistics(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshSessionStatisticsGroups(message.incrementalRefreshSessionStatisticsGroups)
+
+DecodeMdIncrementalRefreshSessionStatistics(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshSessionStatisticsGroups == DecodeIncrementalRefreshSessionStatisticsGroups(padding2.rest) IN IF ~incrementalRefreshSessionStatisticsGroups.ok THEN Fail ELSE
+    Ok([ transactTime                              |-> transactTime.value,
+         matchEventIndicator                       |-> matchEventIndicator.value,
+         padding2                                  |-> padding2.value,
+         incrementalRefreshSessionStatisticsGroups |-> incrementalRefreshSessionStatisticsGroups.value ], incrementalRefreshSessionStatisticsGroups.rest)
+
+ZeroMdIncrementalRefreshSessionStatistics ==
+    [ transactTime                              |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                       |-> [i \in 1 .. 1 |-> 0],
+      padding2                                  |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshSessionStatisticsGroups |-> ZeroIncrementalRefreshSessionStatisticsGroups ]
+
+(* Md Incremental Refresh Session Statistics at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshSessionStatistics ==
+    { ZeroMdIncrementalRefreshSessionStatistics }
+        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.incrementalRefreshSessionStatisticsGroups = one] : one \in CheckedIncrementalRefreshSessionStatisticsGroups }
+
+(***************************************************************************)
+(* Incremental Refresh Trade Group: 32 bytes                               *)
+(***************************************************************************)
+
+IncrementalRefreshTradeGroup ==
+    [ mdEntryPx      : Sample(8),
+      mdEntrySize    : Sample(4),
+      securityId     : Sample(4),
+      rptSeq         : Sample(4),
+      numberOfOrders : Sample(4),
+      tradeId        : Sample(4),
+      aggressorSide  : Sample(1),
+      mdUpdateAction : Sample(1),
+      padding2       : Sample(2) ]
+
+EncodeIncrementalRefreshTradeGroup(message) ==
+    message.mdEntryPx
+        \o message.mdEntrySize
+        \o message.securityId
+        \o message.rptSeq
+        \o message.numberOfOrders
+        \o message.tradeId
+        \o message.aggressorSide
+        \o message.mdUpdateAction
+        \o message.padding2
+
+DecodeIncrementalRefreshTradeGroup(bytes) ==
+    LET mdEntryPx == ReadBytes(bytes, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
+    LET mdEntrySize == ReadBytes(mdEntryPx.rest, 4) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntrySize.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET numberOfOrders == ReadBytes(rptSeq.rest, 4) IN IF ~numberOfOrders.ok THEN Fail ELSE
+    LET tradeId == ReadBytes(numberOfOrders.rest, 4) IN IF ~tradeId.ok THEN Fail ELSE
+    LET aggressorSide == ReadBytes(tradeId.rest, 1) IN IF ~aggressorSide.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(aggressorSide.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(mdUpdateAction.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    Ok([ mdEntryPx      |-> mdEntryPx.value,
+         mdEntrySize    |-> mdEntrySize.value,
+         securityId     |-> securityId.value,
+         rptSeq         |-> rptSeq.value,
+         numberOfOrders |-> numberOfOrders.value,
+         tradeId        |-> tradeId.value,
+         aggressorSide  |-> aggressorSide.value,
+         mdUpdateAction |-> mdUpdateAction.value,
+         padding2       |-> padding2.value ], padding2.rest)
+
+ZeroIncrementalRefreshTradeGroup ==
+    [ mdEntryPx      |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize    |-> [i \in 1 .. 4 |-> 0],
+      securityId     |-> [i \in 1 .. 4 |-> 0],
+      rptSeq         |-> [i \in 1 .. 4 |-> 0],
+      numberOfOrders |-> [i \in 1 .. 4 |-> 0],
+      tradeId        |-> [i \in 1 .. 4 |-> 0],
+      aggressorSide  |-> [i \in 1 .. 1 |-> 0],
+      mdUpdateAction |-> [i \in 1 .. 1 |-> 0],
+      padding2       |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Incremental Refresh Trade Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshTradeGroup ==
+    { ZeroIncrementalRefreshTradeGroup }
+        \cup { [ZeroIncrementalRefreshTradeGroup EXCEPT !.mdEntryPx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshTradeGroup EXCEPT !.mdEntrySize = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeGroup EXCEPT !.numberOfOrders = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeGroup EXCEPT !.tradeId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeGroup EXCEPT !.aggressorSide = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshTradeGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshTradeGroup EXCEPT !.padding2 = one] : one \in Sample(2) }
+
+(* A run of Incremental Refresh Trade Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshTradeGroupList(_)
+EncodeIncrementalRefreshTradeGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshTradeGroup(Head(messages)) \o EncodeIncrementalRefreshTradeGroupList(Tail(messages))
+
+(* As many Incremental Refresh Trade Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshTradeGroupList(_, _)
+ReadIncrementalRefreshTradeGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshTradeGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshTradeGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Trade Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshTradeGroup == { ZeroIncrementalRefreshTradeGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Trade Groups                                        *)
+(***************************************************************************)
+
+IncrementalRefreshTradeGroups ==
+    [ blockLength                  : Sample(2),
+      incrementalRefreshTradeGroup : SampleLists(OneIncrementalRefreshTradeGroup) ]
+
+EncodeIncrementalRefreshTradeGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshTradeGroup), 1)
+        \o EncodeIncrementalRefreshTradeGroupList(message.incrementalRefreshTradeGroup)
+
+DecodeIncrementalRefreshTradeGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshTradeGroup == ReadIncrementalRefreshTradeGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshTradeGroup.ok THEN Fail ELSE
+    Ok([ blockLength                  |-> blockLength.value,
+         incrementalRefreshTradeGroup |-> incrementalRefreshTradeGroup.value ], incrementalRefreshTradeGroup.rest)
+
+ZeroIncrementalRefreshTradeGroups ==
+    [ blockLength                  |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshTradeGroup |-> << >> ]
+
+(* Incremental Refresh Trade Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshTradeGroups ==
+    { ZeroIncrementalRefreshTradeGroups }
+        \cup { [ZeroIncrementalRefreshTradeGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshTradeGroups EXCEPT !.incrementalRefreshTradeGroup = one] : one \in SampleLists(OneIncrementalRefreshTradeGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Trade                                            *)
+(***************************************************************************)
+
+MdIncrementalRefreshTrade ==
+    [ transactTime                  : Sample(8),
+      matchEventIndicator           : Sample(1),
+      padding2                      : Sample(2),
+      incrementalRefreshTradeGroups : IncrementalRefreshTradeGroups ]
+
+EncodeMdIncrementalRefreshTrade(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshTradeGroups(message.incrementalRefreshTradeGroups)
+
+DecodeMdIncrementalRefreshTrade(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshTradeGroups == DecodeIncrementalRefreshTradeGroups(padding2.rest) IN IF ~incrementalRefreshTradeGroups.ok THEN Fail ELSE
+    Ok([ transactTime                  |-> transactTime.value,
+         matchEventIndicator           |-> matchEventIndicator.value,
+         padding2                      |-> padding2.value,
+         incrementalRefreshTradeGroups |-> incrementalRefreshTradeGroups.value ], incrementalRefreshTradeGroups.rest)
+
+ZeroMdIncrementalRefreshTrade ==
+    [ transactTime                  |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator           |-> [i \in 1 .. 1 |-> 0],
+      padding2                      |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshTradeGroups |-> ZeroIncrementalRefreshTradeGroups ]
+
+(* Md Incremental Refresh Trade at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshTrade ==
+    { ZeroMdIncrementalRefreshTrade }
+        \cup { [ZeroMdIncrementalRefreshTrade EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshTrade EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshTrade EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshTrade EXCEPT !.incrementalRefreshTradeGroups = one] : one \in CheckedIncrementalRefreshTradeGroups }
+
+(***************************************************************************)
+(* Incremental Refresh Volume Group: 16 bytes                              *)
+(***************************************************************************)
+
+IncrementalRefreshVolumeGroup ==
+    [ mdEntrySize    : Sample(4),
+      securityId     : Sample(4),
+      rptSeq         : Sample(4),
+      mdUpdateAction : Sample(1),
+      padding3       : Sample(3) ]
+
+EncodeIncrementalRefreshVolumeGroup(message) ==
+    message.mdEntrySize
+        \o message.securityId
+        \o message.rptSeq
+        \o message.mdUpdateAction
+        \o message.padding3
+
+DecodeIncrementalRefreshVolumeGroup(bytes) ==
+    LET mdEntrySize == ReadBytes(bytes, 4) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntrySize.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(rptSeq.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET padding3 == ReadBytes(mdUpdateAction.rest, 3) IN IF ~padding3.ok THEN Fail ELSE
+    Ok([ mdEntrySize    |-> mdEntrySize.value,
+         securityId     |-> securityId.value,
+         rptSeq         |-> rptSeq.value,
+         mdUpdateAction |-> mdUpdateAction.value,
+         padding3       |-> padding3.value ], padding3.rest)
+
+ZeroIncrementalRefreshVolumeGroup ==
+    [ mdEntrySize    |-> [i \in 1 .. 4 |-> 0],
+      securityId     |-> [i \in 1 .. 4 |-> 0],
+      rptSeq         |-> [i \in 1 .. 4 |-> 0],
+      mdUpdateAction |-> [i \in 1 .. 1 |-> 0],
+      padding3       |-> [i \in 1 .. 3 |-> 0] ]
+
+(* Incremental Refresh Volume Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshVolumeGroup ==
+    { ZeroIncrementalRefreshVolumeGroup }
+        \cup { [ZeroIncrementalRefreshVolumeGroup EXCEPT !.mdEntrySize = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshVolumeGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshVolumeGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshVolumeGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshVolumeGroup EXCEPT !.padding3 = one] : one \in Sample(3) }
+
+(* A run of Incremental Refresh Volume Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshVolumeGroupList(_)
+EncodeIncrementalRefreshVolumeGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshVolumeGroup(Head(messages)) \o EncodeIncrementalRefreshVolumeGroupList(Tail(messages))
+
+(* As many Incremental Refresh Volume Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshVolumeGroupList(_, _)
+ReadIncrementalRefreshVolumeGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshVolumeGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshVolumeGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Volume Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshVolumeGroup == { ZeroIncrementalRefreshVolumeGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Volume Groups                                       *)
+(***************************************************************************)
+
+IncrementalRefreshVolumeGroups ==
+    [ blockLength                   : Sample(2),
+      incrementalRefreshVolumeGroup : SampleLists(OneIncrementalRefreshVolumeGroup) ]
+
+EncodeIncrementalRefreshVolumeGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshVolumeGroup), 1)
+        \o EncodeIncrementalRefreshVolumeGroupList(message.incrementalRefreshVolumeGroup)
+
+DecodeIncrementalRefreshVolumeGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshVolumeGroup == ReadIncrementalRefreshVolumeGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshVolumeGroup.ok THEN Fail ELSE
+    Ok([ blockLength                   |-> blockLength.value,
+         incrementalRefreshVolumeGroup |-> incrementalRefreshVolumeGroup.value ], incrementalRefreshVolumeGroup.rest)
+
+ZeroIncrementalRefreshVolumeGroups ==
+    [ blockLength                   |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshVolumeGroup |-> << >> ]
+
+(* Incremental Refresh Volume Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshVolumeGroups ==
+    { ZeroIncrementalRefreshVolumeGroups }
+        \cup { [ZeroIncrementalRefreshVolumeGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshVolumeGroups EXCEPT !.incrementalRefreshVolumeGroup = one] : one \in SampleLists(OneIncrementalRefreshVolumeGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Volume                                           *)
+(***************************************************************************)
+
+MdIncrementalRefreshVolume ==
+    [ transactTime                   : Sample(8),
+      matchEventIndicator            : Sample(1),
+      padding2                       : Sample(2),
+      incrementalRefreshVolumeGroups : IncrementalRefreshVolumeGroups ]
+
+EncodeMdIncrementalRefreshVolume(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshVolumeGroups(message.incrementalRefreshVolumeGroups)
+
+DecodeMdIncrementalRefreshVolume(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshVolumeGroups == DecodeIncrementalRefreshVolumeGroups(padding2.rest) IN IF ~incrementalRefreshVolumeGroups.ok THEN Fail ELSE
+    Ok([ transactTime                   |-> transactTime.value,
+         matchEventIndicator            |-> matchEventIndicator.value,
+         padding2                       |-> padding2.value,
+         incrementalRefreshVolumeGroups |-> incrementalRefreshVolumeGroups.value ], incrementalRefreshVolumeGroups.rest)
+
+ZeroMdIncrementalRefreshVolume ==
+    [ transactTime                   |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator            |-> [i \in 1 .. 1 |-> 0],
+      padding2                       |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshVolumeGroups |-> ZeroIncrementalRefreshVolumeGroups ]
+
+(* Md Incremental Refresh Volume at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshVolume ==
+    { ZeroMdIncrementalRefreshVolume }
+        \cup { [ZeroMdIncrementalRefreshVolume EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshVolume EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshVolume EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshVolume EXCEPT !.incrementalRefreshVolumeGroups = one] : one \in CheckedIncrementalRefreshVolumeGroups }
+
+(***************************************************************************)
+(* Snapshot Full Refresh Group: 22 bytes                                   *)
+(***************************************************************************)
+
+SnapshotFullRefreshGroup ==
+    [ mdEntryPxOptional    : Sample(8),
+      mdEntrySizeOptional  : Sample(4),
+      numberOfOrders       : Sample(4),
+      mdPriceLevelOptional : Sample(1),
+      tradingReferenceDate : Sample(2),
+      openCloseSettlFlag   : Sample(1),
+      settlPriceType       : Sample(1),
+      mdEntryType          : Sample(1) ]
+
+EncodeSnapshotFullRefreshGroup(message) ==
+    message.mdEntryPxOptional
+        \o message.mdEntrySizeOptional
+        \o message.numberOfOrders
+        \o message.mdPriceLevelOptional
+        \o message.tradingReferenceDate
+        \o message.openCloseSettlFlag
+        \o message.settlPriceType
+        \o message.mdEntryType
+
+DecodeSnapshotFullRefreshGroup(bytes) ==
+    LET mdEntryPxOptional == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptional.ok THEN Fail ELSE
+    LET mdEntrySizeOptional == ReadBytes(mdEntryPxOptional.rest, 4) IN IF ~mdEntrySizeOptional.ok THEN Fail ELSE
+    LET numberOfOrders == ReadBytes(mdEntrySizeOptional.rest, 4) IN IF ~numberOfOrders.ok THEN Fail ELSE
+    LET mdPriceLevelOptional == ReadBytes(numberOfOrders.rest, 1) IN IF ~mdPriceLevelOptional.ok THEN Fail ELSE
+    LET tradingReferenceDate == ReadBytes(mdPriceLevelOptional.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
+    LET openCloseSettlFlag == ReadBytes(tradingReferenceDate.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
+    LET settlPriceType == ReadBytes(openCloseSettlFlag.rest, 1) IN IF ~settlPriceType.ok THEN Fail ELSE
+    LET mdEntryType == ReadBytes(settlPriceType.rest, 1) IN IF ~mdEntryType.ok THEN Fail ELSE
+    Ok([ mdEntryPxOptional    |-> mdEntryPxOptional.value,
+         mdEntrySizeOptional  |-> mdEntrySizeOptional.value,
+         numberOfOrders       |-> numberOfOrders.value,
+         mdPriceLevelOptional |-> mdPriceLevelOptional.value,
+         tradingReferenceDate |-> tradingReferenceDate.value,
+         openCloseSettlFlag   |-> openCloseSettlFlag.value,
+         settlPriceType       |-> settlPriceType.value,
+         mdEntryType          |-> mdEntryType.value ], mdEntryType.rest)
+
+ZeroSnapshotFullRefreshGroup ==
+    [ mdEntryPxOptional    |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySizeOptional  |-> [i \in 1 .. 4 |-> 0],
+      numberOfOrders       |-> [i \in 1 .. 4 |-> 0],
+      mdPriceLevelOptional |-> [i \in 1 .. 1 |-> 0],
+      tradingReferenceDate |-> [i \in 1 .. 2 |-> 0],
+      openCloseSettlFlag   |-> [i \in 1 .. 1 |-> 0],
+      settlPriceType       |-> [i \in 1 .. 1 |-> 0],
+      mdEntryType          |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Snapshot Full Refresh Group at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefreshGroup ==
+    { ZeroSnapshotFullRefreshGroup }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.numberOfOrders = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdPriceLevelOptional = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.settlPriceType = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdEntryType = one] : one \in Sample(1) }
+
+(* A run of Snapshot Full Refresh Group, written one after another *)
+RECURSIVE EncodeSnapshotFullRefreshGroupList(_)
+EncodeSnapshotFullRefreshGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeSnapshotFullRefreshGroup(Head(messages)) \o EncodeSnapshotFullRefreshGroupList(Tail(messages))
+
+(* As many Snapshot Full Refresh Group as the field that counts them says *)
+RECURSIVE ReadSnapshotFullRefreshGroupList(_, _)
+ReadSnapshotFullRefreshGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeSnapshotFullRefreshGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadSnapshotFullRefreshGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Snapshot Full Refresh Group of each kind, for the lists that carry them *)
+OneSnapshotFullRefreshGroup == { ZeroSnapshotFullRefreshGroup }
+
+(***************************************************************************)
+(* Snapshot Full Refresh Groups                                            *)
+(***************************************************************************)
+
+SnapshotFullRefreshGroups ==
+    [ blockLength              : Sample(2),
+      snapshotFullRefreshGroup : SampleLists(OneSnapshotFullRefreshGroup) ]
+
+EncodeSnapshotFullRefreshGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.snapshotFullRefreshGroup), 1)
+        \o EncodeSnapshotFullRefreshGroupList(message.snapshotFullRefreshGroup)
+
+DecodeSnapshotFullRefreshGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET snapshotFullRefreshGroup == ReadSnapshotFullRefreshGroupList(numInGroup.rest, numInGroup.value) IN IF ~snapshotFullRefreshGroup.ok THEN Fail ELSE
+    Ok([ blockLength              |-> blockLength.value,
+         snapshotFullRefreshGroup |-> snapshotFullRefreshGroup.value ], snapshotFullRefreshGroup.rest)
+
+ZeroSnapshotFullRefreshGroups ==
+    [ blockLength              |-> [i \in 1 .. 2 |-> 0],
+      snapshotFullRefreshGroup |-> << >> ]
+
+(* Snapshot Full Refresh Groups at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefreshGroups ==
+    { ZeroSnapshotFullRefreshGroups }
+        \cup { [ZeroSnapshotFullRefreshGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotFullRefreshGroups EXCEPT !.snapshotFullRefreshGroup = one] : one \in SampleLists(OneSnapshotFullRefreshGroup) }
+
+(***************************************************************************)
+(* Snapshot Full Refresh                                                   *)
+(***************************************************************************)
+
+SnapshotFullRefresh ==
+    [ lastMsgSeqNumProcessed    : Sample(4),
+      totNumReports             : Sample(4),
+      securityId                : Sample(4),
+      rptSeq                    : Sample(4),
+      transactTime              : Sample(8),
+      lastUpdateTime            : Sample(8),
+      tradeDate                 : Sample(2),
+      mdSecurityTradingStatus   : Sample(1),
+      highLimitPrice            : Sample(8),
+      lowLimitPrice             : Sample(8),
+      maxPriceVariation         : Sample(8),
+      snapshotFullRefreshGroups : SnapshotFullRefreshGroups ]
+
+EncodeSnapshotFullRefresh(message) ==
+    message.lastMsgSeqNumProcessed
+        \o message.totNumReports
+        \o message.securityId
+        \o message.rptSeq
+        \o message.transactTime
+        \o message.lastUpdateTime
+        \o message.tradeDate
+        \o message.mdSecurityTradingStatus
+        \o message.highLimitPrice
+        \o message.lowLimitPrice
+        \o message.maxPriceVariation
+        \o EncodeSnapshotFullRefreshGroups(message.snapshotFullRefreshGroups)
+
+DecodeSnapshotFullRefresh(bytes) ==
+    LET lastMsgSeqNumProcessed == ReadBytes(bytes, 4) IN IF ~lastMsgSeqNumProcessed.ok THEN Fail ELSE
+    LET totNumReports == ReadBytes(lastMsgSeqNumProcessed.rest, 4) IN IF ~totNumReports.ok THEN Fail ELSE
+    LET securityId == ReadBytes(totNumReports.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET transactTime == ReadBytes(rptSeq.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET lastUpdateTime == ReadBytes(transactTime.rest, 8) IN IF ~lastUpdateTime.ok THEN Fail ELSE
+    LET tradeDate == ReadBytes(lastUpdateTime.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
+    LET mdSecurityTradingStatus == ReadBytes(tradeDate.rest, 1) IN IF ~mdSecurityTradingStatus.ok THEN Fail ELSE
+    LET highLimitPrice == ReadBytes(mdSecurityTradingStatus.rest, 8) IN IF ~highLimitPrice.ok THEN Fail ELSE
+    LET lowLimitPrice == ReadBytes(highLimitPrice.rest, 8) IN IF ~lowLimitPrice.ok THEN Fail ELSE
+    LET maxPriceVariation == ReadBytes(lowLimitPrice.rest, 8) IN IF ~maxPriceVariation.ok THEN Fail ELSE
+    LET snapshotFullRefreshGroups == DecodeSnapshotFullRefreshGroups(maxPriceVariation.rest) IN IF ~snapshotFullRefreshGroups.ok THEN Fail ELSE
+    Ok([ lastMsgSeqNumProcessed    |-> lastMsgSeqNumProcessed.value,
+         totNumReports             |-> totNumReports.value,
+         securityId                |-> securityId.value,
+         rptSeq                    |-> rptSeq.value,
+         transactTime              |-> transactTime.value,
+         lastUpdateTime            |-> lastUpdateTime.value,
+         tradeDate                 |-> tradeDate.value,
+         mdSecurityTradingStatus   |-> mdSecurityTradingStatus.value,
+         highLimitPrice            |-> highLimitPrice.value,
+         lowLimitPrice             |-> lowLimitPrice.value,
+         maxPriceVariation         |-> maxPriceVariation.value,
+         snapshotFullRefreshGroups |-> snapshotFullRefreshGroups.value ], snapshotFullRefreshGroups.rest)
+
+ZeroSnapshotFullRefresh ==
+    [ lastMsgSeqNumProcessed    |-> [i \in 1 .. 4 |-> 0],
+      totNumReports             |-> [i \in 1 .. 4 |-> 0],
+      securityId                |-> [i \in 1 .. 4 |-> 0],
+      rptSeq                    |-> [i \in 1 .. 4 |-> 0],
+      transactTime              |-> [i \in 1 .. 8 |-> 0],
+      lastUpdateTime            |-> [i \in 1 .. 8 |-> 0],
+      tradeDate                 |-> [i \in 1 .. 2 |-> 0],
+      mdSecurityTradingStatus   |-> [i \in 1 .. 1 |-> 0],
+      highLimitPrice            |-> [i \in 1 .. 8 |-> 0],
+      lowLimitPrice             |-> [i \in 1 .. 8 |-> 0],
+      maxPriceVariation         |-> [i \in 1 .. 8 |-> 0],
+      snapshotFullRefreshGroups |-> ZeroSnapshotFullRefreshGroups ]
+
+(* Snapshot Full Refresh at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefresh ==
+    { ZeroSnapshotFullRefresh }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.lastMsgSeqNumProcessed = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.totNumReports = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.lastUpdateTime = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.tradeDate = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.mdSecurityTradingStatus = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.highLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.lowLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.maxPriceVariation = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.snapshotFullRefreshGroups = one] : one \in CheckedSnapshotFullRefreshGroups }
+
+(***************************************************************************)
+(* Related Sym Group: 32 bytes                                             *)
+(***************************************************************************)
+
+RelatedSymGroup ==
+    [ symbol     : Sample(20),
+      securityId : Sample(4),
+      orderQty   : Sample(4),
+      quoteType  : Sample(1),
+      side       : Sample(1),
+      padding2   : Sample(2) ]
+
+EncodeRelatedSymGroup(message) ==
+    message.symbol
+        \o message.securityId
+        \o message.orderQty
+        \o message.quoteType
+        \o message.side
+        \o message.padding2
+
+DecodeRelatedSymGroup(bytes) ==
+    LET symbol == ReadBytes(bytes, 20) IN IF ~symbol.ok THEN Fail ELSE
+    LET securityId == ReadBytes(symbol.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET orderQty == ReadBytes(securityId.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
+    LET quoteType == ReadBytes(orderQty.rest, 1) IN IF ~quoteType.ok THEN Fail ELSE
+    LET side == ReadBytes(quoteType.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(side.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    Ok([ symbol     |-> symbol.value,
+         securityId |-> securityId.value,
+         orderQty   |-> orderQty.value,
+         quoteType  |-> quoteType.value,
+         side       |-> side.value,
+         padding2   |-> padding2.value ], padding2.rest)
+
+ZeroRelatedSymGroup ==
+    [ symbol     |-> [i \in 1 .. 20 |-> 0],
+      securityId |-> [i \in 1 .. 4 |-> 0],
+      orderQty   |-> [i \in 1 .. 4 |-> 0],
+      quoteType  |-> [i \in 1 .. 1 |-> 0],
+      side       |-> [i \in 1 .. 1 |-> 0],
+      padding2   |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Related Sym Group at zero, then each field in turn at the values it is checked at *)
+CheckedRelatedSymGroup ==
+    { ZeroRelatedSymGroup }
+        \cup { [ZeroRelatedSymGroup EXCEPT !.symbol = one] : one \in Sample(20) }
+        \cup { [ZeroRelatedSymGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroRelatedSymGroup EXCEPT !.orderQty = one] : one \in Sample(4) }
+        \cup { [ZeroRelatedSymGroup EXCEPT !.quoteType = one] : one \in Sample(1) }
+        \cup { [ZeroRelatedSymGroup EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroRelatedSymGroup EXCEPT !.padding2 = one] : one \in Sample(2) }
+
+(* A run of Related Sym Group, written one after another *)
+RECURSIVE EncodeRelatedSymGroupList(_)
+EncodeRelatedSymGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeRelatedSymGroup(Head(messages)) \o EncodeRelatedSymGroupList(Tail(messages))
+
+(* As many Related Sym Group as the field that counts them says *)
+RECURSIVE ReadRelatedSymGroupList(_, _)
+ReadRelatedSymGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeRelatedSymGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadRelatedSymGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Related Sym Group of each kind, for the lists that carry them *)
+OneRelatedSymGroup == { ZeroRelatedSymGroup }
+
+(***************************************************************************)
+(* Related Sym Groups                                                      *)
+(***************************************************************************)
+
+RelatedSymGroups ==
+    [ blockLength     : Sample(2),
+      relatedSymGroup : SampleLists(OneRelatedSymGroup) ]
+
+EncodeRelatedSymGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.relatedSymGroup), 1)
+        \o EncodeRelatedSymGroupList(message.relatedSymGroup)
+
+DecodeRelatedSymGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET relatedSymGroup == ReadRelatedSymGroupList(numInGroup.rest, numInGroup.value) IN IF ~relatedSymGroup.ok THEN Fail ELSE
+    Ok([ blockLength     |-> blockLength.value,
+         relatedSymGroup |-> relatedSymGroup.value ], relatedSymGroup.rest)
+
+ZeroRelatedSymGroups ==
+    [ blockLength     |-> [i \in 1 .. 2 |-> 0],
+      relatedSymGroup |-> << >> ]
+
+(* Related Sym Groups at zero, then each field in turn at the values it is checked at *)
+CheckedRelatedSymGroups ==
+    { ZeroRelatedSymGroups }
+        \cup { [ZeroRelatedSymGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroRelatedSymGroups EXCEPT !.relatedSymGroup = one] : one \in SampleLists(OneRelatedSymGroup) }
+
+(***************************************************************************)
+(* Quote Request                                                           *)
+(***************************************************************************)
+
+QuoteRequest ==
+    [ transactTime        : Sample(8),
+      quoteReqId          : Sample(23),
+      matchEventIndicator : Sample(1),
+      padding3            : Sample(3),
+      relatedSymGroups    : RelatedSymGroups ]
+
+EncodeQuoteRequest(message) ==
+    message.transactTime
+        \o message.quoteReqId
+        \o message.matchEventIndicator
+        \o message.padding3
+        \o EncodeRelatedSymGroups(message.relatedSymGroups)
+
+DecodeQuoteRequest(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET quoteReqId == ReadBytes(transactTime.rest, 23) IN IF ~quoteReqId.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(quoteReqId.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding3 == ReadBytes(matchEventIndicator.rest, 3) IN IF ~padding3.ok THEN Fail ELSE
+    LET relatedSymGroups == DecodeRelatedSymGroups(padding3.rest) IN IF ~relatedSymGroups.ok THEN Fail ELSE
+    Ok([ transactTime        |-> transactTime.value,
+         quoteReqId          |-> quoteReqId.value,
+         matchEventIndicator |-> matchEventIndicator.value,
+         padding3            |-> padding3.value,
+         relatedSymGroups    |-> relatedSymGroups.value ], relatedSymGroups.rest)
+
+ZeroQuoteRequest ==
+    [ transactTime        |-> [i \in 1 .. 8 |-> 0],
+      quoteReqId          |-> [i \in 1 .. 23 |-> 0],
+      matchEventIndicator |-> [i \in 1 .. 1 |-> 0],
+      padding3            |-> [i \in 1 .. 3 |-> 0],
+      relatedSymGroups    |-> ZeroRelatedSymGroups ]
+
+(* Quote Request at zero, then each field in turn at the values it is checked at *)
+CheckedQuoteRequest ==
+    { ZeroQuoteRequest }
+        \cup { [ZeroQuoteRequest EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteRequest EXCEPT !.quoteReqId = one] : one \in Sample(23) }
+        \cup { [ZeroQuoteRequest EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteRequest EXCEPT !.padding3 = one] : one \in Sample(3) }
+        \cup { [ZeroQuoteRequest EXCEPT !.relatedSymGroups = one] : one \in CheckedRelatedSymGroups }
+
+(***************************************************************************)
+(* Maturity Month Year: 5 bytes                                            *)
+(***************************************************************************)
+
+MaturityMonthYear3 ==
+    [ year  : Sample(2),
+      month : Sample(1),
+      day   : Sample(1),
+      week  : Sample(1) ]
+
+EncodeMaturityMonthYear3(message) ==
+    message.year
+        \o message.month
+        \o message.day
+        \o message.week
+
+DecodeMaturityMonthYear3(bytes) ==
+    LET year == ReadBytes(bytes, 2) IN IF ~year.ok THEN Fail ELSE
+    LET month == ReadBytes(year.rest, 1) IN IF ~month.ok THEN Fail ELSE
+    LET day == ReadBytes(month.rest, 1) IN IF ~day.ok THEN Fail ELSE
+    LET week == ReadBytes(day.rest, 1) IN IF ~week.ok THEN Fail ELSE
+    Ok([ year  |-> year.value,
+         month |-> month.value,
+         day   |-> day.value,
+         week  |-> week.value ], week.rest)
+
+ZeroMaturityMonthYear3 ==
+    [ year  |-> [i \in 1 .. 2 |-> 0],
+      month |-> [i \in 1 .. 1 |-> 0],
+      day   |-> [i \in 1 .. 1 |-> 0],
+      week  |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Maturity Month Year at zero, then each field in turn at the values it is checked at *)
+CheckedMaturityMonthYear3 ==
+    { ZeroMaturityMonthYear3 }
+        \cup { [ZeroMaturityMonthYear3 EXCEPT !.year = one] : one \in Sample(2) }
+        \cup { [ZeroMaturityMonthYear3 EXCEPT !.month = one] : one \in Sample(1) }
+        \cup { [ZeroMaturityMonthYear3 EXCEPT !.day = one] : one \in Sample(1) }
+        \cup { [ZeroMaturityMonthYear3 EXCEPT !.week = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Events Group: 9 bytes                                                   *)
+(***************************************************************************)
+
+EventsGroup3 ==
+    [ eventType : Sample(1),
+      eventTime : Sample(8) ]
+
+EncodeEventsGroup3(message) ==
+    message.eventType
+        \o message.eventTime
+
+DecodeEventsGroup3(bytes) ==
+    LET eventType == ReadBytes(bytes, 1) IN IF ~eventType.ok THEN Fail ELSE
+    LET eventTime == ReadBytes(eventType.rest, 8) IN IF ~eventTime.ok THEN Fail ELSE
+    Ok([ eventType |-> eventType.value,
+         eventTime |-> eventTime.value ], eventTime.rest)
+
+ZeroEventsGroup3 ==
+    [ eventType |-> [i \in 1 .. 1 |-> 0],
+      eventTime |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Events Group at zero, then each field in turn at the values it is checked at *)
+CheckedEventsGroup3 ==
+    { ZeroEventsGroup3 }
+        \cup { [ZeroEventsGroup3 EXCEPT !.eventType = one] : one \in Sample(1) }
+        \cup { [ZeroEventsGroup3 EXCEPT !.eventTime = one] : one \in Sample(8) }
+
+(* A run of Events Group, written one after another *)
+RECURSIVE EncodeEventsGroup3List(_)
+EncodeEventsGroup3List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeEventsGroup3(Head(messages)) \o EncodeEventsGroup3List(Tail(messages))
+
+(* As many Events Group as the field that counts them says *)
+RECURSIVE ReadEventsGroup3List(_, _)
+ReadEventsGroup3List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeEventsGroup3(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadEventsGroup3List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Events Group of each kind, for the lists that carry them *)
+OneEventsGroup3 == { ZeroEventsGroup3 }
+
+(***************************************************************************)
+(* Events Groups                                                           *)
+(***************************************************************************)
+
+EventsGroups3 ==
+    [ blockLength : Sample(2),
+      eventsGroup : SampleLists(OneEventsGroup3) ]
+
+EncodeEventsGroups3(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.eventsGroup), 1)
+        \o EncodeEventsGroup3List(message.eventsGroup)
+
+DecodeEventsGroups3(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET eventsGroup == ReadEventsGroup3List(numInGroup.rest, numInGroup.value) IN IF ~eventsGroup.ok THEN Fail ELSE
+    Ok([ blockLength |-> blockLength.value,
+         eventsGroup |-> eventsGroup.value ], eventsGroup.rest)
+
+ZeroEventsGroups3 ==
+    [ blockLength |-> [i \in 1 .. 2 |-> 0],
+      eventsGroup |-> << >> ]
+
+(* Events Groups at zero, then each field in turn at the values it is checked at *)
+CheckedEventsGroups3 ==
+    { ZeroEventsGroups3 }
+        \cup { [ZeroEventsGroups3 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroEventsGroups3 EXCEPT !.eventsGroup = one] : one \in SampleLists(OneEventsGroup3) }
+
+(***************************************************************************)
+(* Feed Types Group: 4 bytes                                               *)
+(***************************************************************************)
+
+FeedTypesGroup3 ==
+    [ mdFeedType  : Sample(3),
+      marketDepth : Sample(1) ]
+
+EncodeFeedTypesGroup3(message) ==
+    message.mdFeedType
+        \o message.marketDepth
+
+DecodeFeedTypesGroup3(bytes) ==
+    LET mdFeedType == ReadBytes(bytes, 3) IN IF ~mdFeedType.ok THEN Fail ELSE
+    LET marketDepth == ReadBytes(mdFeedType.rest, 1) IN IF ~marketDepth.ok THEN Fail ELSE
+    Ok([ mdFeedType  |-> mdFeedType.value,
+         marketDepth |-> marketDepth.value ], marketDepth.rest)
+
+ZeroFeedTypesGroup3 ==
+    [ mdFeedType  |-> [i \in 1 .. 3 |-> 0],
+      marketDepth |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Feed Types Group at zero, then each field in turn at the values it is checked at *)
+CheckedFeedTypesGroup3 ==
+    { ZeroFeedTypesGroup3 }
+        \cup { [ZeroFeedTypesGroup3 EXCEPT !.mdFeedType = one] : one \in Sample(3) }
+        \cup { [ZeroFeedTypesGroup3 EXCEPT !.marketDepth = one] : one \in Sample(1) }
+
+(* A run of Feed Types Group, written one after another *)
+RECURSIVE EncodeFeedTypesGroup3List(_)
+EncodeFeedTypesGroup3List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeFeedTypesGroup3(Head(messages)) \o EncodeFeedTypesGroup3List(Tail(messages))
+
+(* As many Feed Types Group as the field that counts them says *)
+RECURSIVE ReadFeedTypesGroup3List(_, _)
+ReadFeedTypesGroup3List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeFeedTypesGroup3(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadFeedTypesGroup3List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Feed Types Group of each kind, for the lists that carry them *)
+OneFeedTypesGroup3 == { ZeroFeedTypesGroup3 }
+
+(***************************************************************************)
+(* Feed Types Groups                                                       *)
+(***************************************************************************)
+
+FeedTypesGroups3 ==
+    [ blockLength    : Sample(2),
+      feedTypesGroup : SampleLists(OneFeedTypesGroup3) ]
+
+EncodeFeedTypesGroups3(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.feedTypesGroup), 1)
+        \o EncodeFeedTypesGroup3List(message.feedTypesGroup)
+
+DecodeFeedTypesGroups3(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET feedTypesGroup == ReadFeedTypesGroup3List(numInGroup.rest, numInGroup.value) IN IF ~feedTypesGroup.ok THEN Fail ELSE
+    Ok([ blockLength    |-> blockLength.value,
+         feedTypesGroup |-> feedTypesGroup.value ], feedTypesGroup.rest)
+
+ZeroFeedTypesGroups3 ==
+    [ blockLength    |-> [i \in 1 .. 2 |-> 0],
+      feedTypesGroup |-> << >> ]
+
+(* Feed Types Groups at zero, then each field in turn at the values it is checked at *)
+CheckedFeedTypesGroups3 ==
+    { ZeroFeedTypesGroups3 }
+        \cup { [ZeroFeedTypesGroups3 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroFeedTypesGroups3 EXCEPT !.feedTypesGroup = one] : one \in SampleLists(OneFeedTypesGroup3) }
+
+(***************************************************************************)
+(* Inst Attrib Group: 4 bytes                                              *)
+(***************************************************************************)
+
+InstAttribGroup3 ==
+    [ instAttribValue : Sample(4) ]
+
+EncodeInstAttribGroup3(message) ==
+    message.instAttribValue
+
+DecodeInstAttribGroup3(bytes) ==
+    LET instAttribValue == ReadBytes(bytes, 4) IN IF ~instAttribValue.ok THEN Fail ELSE
+    Ok([ instAttribValue |-> instAttribValue.value ], instAttribValue.rest)
+
+ZeroInstAttribGroup3 ==
+    [ instAttribValue |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Inst Attrib Group at zero, then each field in turn at the values it is checked at *)
+CheckedInstAttribGroup3 ==
+    { ZeroInstAttribGroup3 }
+        \cup { [ZeroInstAttribGroup3 EXCEPT !.instAttribValue = one] : one \in Sample(4) }
+
+(* A run of Inst Attrib Group, written one after another *)
+RECURSIVE EncodeInstAttribGroup3List(_)
+EncodeInstAttribGroup3List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeInstAttribGroup3(Head(messages)) \o EncodeInstAttribGroup3List(Tail(messages))
+
+(* As many Inst Attrib Group as the field that counts them says *)
+RECURSIVE ReadInstAttribGroup3List(_, _)
+ReadInstAttribGroup3List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeInstAttribGroup3(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadInstAttribGroup3List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Inst Attrib Group of each kind, for the lists that carry them *)
+OneInstAttribGroup3 == { ZeroInstAttribGroup3 }
+
+(***************************************************************************)
+(* Inst Attrib Groups                                                      *)
+(***************************************************************************)
+
+InstAttribGroups3 ==
+    [ blockLength     : Sample(2),
+      instAttribGroup : SampleLists(OneInstAttribGroup3) ]
+
+EncodeInstAttribGroups3(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.instAttribGroup), 1)
+        \o EncodeInstAttribGroup3List(message.instAttribGroup)
+
+DecodeInstAttribGroups3(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET instAttribGroup == ReadInstAttribGroup3List(numInGroup.rest, numInGroup.value) IN IF ~instAttribGroup.ok THEN Fail ELSE
+    Ok([ blockLength     |-> blockLength.value,
+         instAttribGroup |-> instAttribGroup.value ], instAttribGroup.rest)
+
+ZeroInstAttribGroups3 ==
+    [ blockLength     |-> [i \in 1 .. 2 |-> 0],
+      instAttribGroup |-> << >> ]
+
+(* Inst Attrib Groups at zero, then each field in turn at the values it is checked at *)
+CheckedInstAttribGroups3 ==
+    { ZeroInstAttribGroups3 }
+        \cup { [ZeroInstAttribGroups3 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroInstAttribGroups3 EXCEPT !.instAttribGroup = one] : one \in SampleLists(OneInstAttribGroup3) }
+
+(***************************************************************************)
+(* Lot Type Rules Group: 5 bytes                                           *)
+(***************************************************************************)
+
+LotTypeRulesGroup3 ==
+    [ lotType    : Sample(1),
+      minLotSize : Sample(4) ]
+
+EncodeLotTypeRulesGroup3(message) ==
+    message.lotType
+        \o message.minLotSize
+
+DecodeLotTypeRulesGroup3(bytes) ==
+    LET lotType == ReadBytes(bytes, 1) IN IF ~lotType.ok THEN Fail ELSE
+    LET minLotSize == ReadBytes(lotType.rest, 4) IN IF ~minLotSize.ok THEN Fail ELSE
+    Ok([ lotType    |-> lotType.value,
+         minLotSize |-> minLotSize.value ], minLotSize.rest)
+
+ZeroLotTypeRulesGroup3 ==
+    [ lotType    |-> [i \in 1 .. 1 |-> 0],
+      minLotSize |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Lot Type Rules Group at zero, then each field in turn at the values it is checked at *)
+CheckedLotTypeRulesGroup3 ==
+    { ZeroLotTypeRulesGroup3 }
+        \cup { [ZeroLotTypeRulesGroup3 EXCEPT !.lotType = one] : one \in Sample(1) }
+        \cup { [ZeroLotTypeRulesGroup3 EXCEPT !.minLotSize = one] : one \in Sample(4) }
+
+(* A run of Lot Type Rules Group, written one after another *)
+RECURSIVE EncodeLotTypeRulesGroup3List(_)
+EncodeLotTypeRulesGroup3List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeLotTypeRulesGroup3(Head(messages)) \o EncodeLotTypeRulesGroup3List(Tail(messages))
+
+(* As many Lot Type Rules Group as the field that counts them says *)
+RECURSIVE ReadLotTypeRulesGroup3List(_, _)
+ReadLotTypeRulesGroup3List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeLotTypeRulesGroup3(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadLotTypeRulesGroup3List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Lot Type Rules Group of each kind, for the lists that carry them *)
+OneLotTypeRulesGroup3 == { ZeroLotTypeRulesGroup3 }
+
+(***************************************************************************)
+(* Lot Type Rules Groups                                                   *)
+(***************************************************************************)
+
+LotTypeRulesGroups3 ==
+    [ blockLength       : Sample(2),
+      lotTypeRulesGroup : SampleLists(OneLotTypeRulesGroup3) ]
+
+EncodeLotTypeRulesGroups3(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.lotTypeRulesGroup), 1)
+        \o EncodeLotTypeRulesGroup3List(message.lotTypeRulesGroup)
+
+DecodeLotTypeRulesGroups3(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET lotTypeRulesGroup == ReadLotTypeRulesGroup3List(numInGroup.rest, numInGroup.value) IN IF ~lotTypeRulesGroup.ok THEN Fail ELSE
+    Ok([ blockLength       |-> blockLength.value,
+         lotTypeRulesGroup |-> lotTypeRulesGroup.value ], lotTypeRulesGroup.rest)
+
+ZeroLotTypeRulesGroups3 ==
+    [ blockLength       |-> [i \in 1 .. 2 |-> 0],
+      lotTypeRulesGroup |-> << >> ]
+
+(* Lot Type Rules Groups at zero, then each field in turn at the values it is checked at *)
+CheckedLotTypeRulesGroups3 ==
+    { ZeroLotTypeRulesGroups3 }
+        \cup { [ZeroLotTypeRulesGroups3 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroLotTypeRulesGroups3 EXCEPT !.lotTypeRulesGroup = one] : one \in SampleLists(OneLotTypeRulesGroup3) }
+
+(***************************************************************************)
+(* Option Underlyings Group: 24 bytes                                      *)
+(***************************************************************************)
+
+OptionUnderlyingsGroup ==
+    [ underlyingSecurityId : Sample(4),
+      underlyingSymbol     : Sample(20) ]
+
+EncodeOptionUnderlyingsGroup(message) ==
+    message.underlyingSecurityId
+        \o message.underlyingSymbol
+
+DecodeOptionUnderlyingsGroup(bytes) ==
+    LET underlyingSecurityId == ReadBytes(bytes, 4) IN IF ~underlyingSecurityId.ok THEN Fail ELSE
+    LET underlyingSymbol == ReadBytes(underlyingSecurityId.rest, 20) IN IF ~underlyingSymbol.ok THEN Fail ELSE
+    Ok([ underlyingSecurityId |-> underlyingSecurityId.value,
+         underlyingSymbol     |-> underlyingSymbol.value ], underlyingSymbol.rest)
+
+ZeroOptionUnderlyingsGroup ==
+    [ underlyingSecurityId |-> [i \in 1 .. 4 |-> 0],
+      underlyingSymbol     |-> [i \in 1 .. 20 |-> 0] ]
+
+(* Option Underlyings Group at zero, then each field in turn at the values it is checked at *)
+CheckedOptionUnderlyingsGroup ==
+    { ZeroOptionUnderlyingsGroup }
+        \cup { [ZeroOptionUnderlyingsGroup EXCEPT !.underlyingSecurityId = one] : one \in Sample(4) }
+        \cup { [ZeroOptionUnderlyingsGroup EXCEPT !.underlyingSymbol = one] : one \in Sample(20) }
+
+(* A run of Option Underlyings Group, written one after another *)
+RECURSIVE EncodeOptionUnderlyingsGroupList(_)
+EncodeOptionUnderlyingsGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeOptionUnderlyingsGroup(Head(messages)) \o EncodeOptionUnderlyingsGroupList(Tail(messages))
+
+(* As many Option Underlyings Group as the field that counts them says *)
+RECURSIVE ReadOptionUnderlyingsGroupList(_, _)
+ReadOptionUnderlyingsGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeOptionUnderlyingsGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadOptionUnderlyingsGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Option Underlyings Group of each kind, for the lists that carry them *)
+OneOptionUnderlyingsGroup == { ZeroOptionUnderlyingsGroup }
+
+(***************************************************************************)
+(* Option Underlyings Groups                                               *)
+(***************************************************************************)
+
+OptionUnderlyingsGroups ==
+    [ blockLength            : Sample(2),
+      optionUnderlyingsGroup : SampleLists(OneOptionUnderlyingsGroup) ]
+
+EncodeOptionUnderlyingsGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.optionUnderlyingsGroup), 1)
+        \o EncodeOptionUnderlyingsGroupList(message.optionUnderlyingsGroup)
+
+DecodeOptionUnderlyingsGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET optionUnderlyingsGroup == ReadOptionUnderlyingsGroupList(numInGroup.rest, numInGroup.value) IN IF ~optionUnderlyingsGroup.ok THEN Fail ELSE
+    Ok([ blockLength            |-> blockLength.value,
+         optionUnderlyingsGroup |-> optionUnderlyingsGroup.value ], optionUnderlyingsGroup.rest)
+
+ZeroOptionUnderlyingsGroups ==
+    [ blockLength            |-> [i \in 1 .. 2 |-> 0],
+      optionUnderlyingsGroup |-> << >> ]
+
+(* Option Underlyings Groups at zero, then each field in turn at the values it is checked at *)
+CheckedOptionUnderlyingsGroups ==
+    { ZeroOptionUnderlyingsGroups }
+        \cup { [ZeroOptionUnderlyingsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroOptionUnderlyingsGroups EXCEPT !.optionUnderlyingsGroup = one] : one \in SampleLists(OneOptionUnderlyingsGroup) }
+
+(***************************************************************************)
+(* Md Instrument Definition Option                                         *)
+(***************************************************************************)
+
+MdInstrumentDefinitionOption ==
+    [ matchEventIndicator       : Sample(1),
+      totNumReportsOptional     : Sample(4),
+      securityUpdateAction      : Sample(1),
+      lastUpdateTime            : Sample(8),
+      mdSecurityTradingStatus   : Sample(1),
+      applId                    : Sample(2),
+      marketSegmentId           : Sample(1),
+      underlyingProduct         : Sample(1),
+      securityExchange          : Sample(4),
+      securityGroup             : Sample(6),
+      asset                     : Sample(6),
+      symbol                    : Sample(20),
+      securityId                : Sample(4),
+      securityType              : Sample(6),
+      cfiCode                   : Sample(6),
+      putOrCall                 : Sample(1),
+      maturityMonthYear         : MaturityMonthYear3,
+      currency                  : Sample(3),
+      strikePrice               : Sample(8),
+      strikeCurrency            : Sample(3),
+      settlCurrency             : Sample(3),
+      minCabPrice               : Sample(8),
+      matchAlgorithm            : Sample(1),
+      minTradeVol               : Sample(4),
+      maxTradeVol               : Sample(4),
+      minPriceIncrementOptional : Sample(8),
+      minPriceIncrementAmount   : Sample(8),
+      displayFactor             : Sample(8),
+      tickRule                  : Sample(1),
+      mainFraction              : Sample(1),
+      subFraction               : Sample(1),
+      priceDisplayFormat        : Sample(1),
+      unitOfMeasure             : Sample(30),
+      unitOfMeasureQty          : Sample(8),
+      tradingReferencePrice     : Sample(8),
+      settlPriceType            : Sample(1),
+      clearedVolume             : Sample(4),
+      openInterestQty           : Sample(4),
+      lowLimitPrice             : Sample(8),
+      highLimitPrice            : Sample(8),
+      userDefinedInstrument     : Sample(1),
+      tradingReferenceDate      : Sample(2),
+      eventsGroups              : EventsGroups3,
+      feedTypesGroups           : FeedTypesGroups3,
+      instAttribGroups          : InstAttribGroups3,
+      lotTypeRulesGroups        : LotTypeRulesGroups3,
+      optionUnderlyingsGroups   : OptionUnderlyingsGroups ]
+
+EncodeMdInstrumentDefinitionOption(message) ==
+    message.matchEventIndicator
+        \o message.totNumReportsOptional
+        \o message.securityUpdateAction
+        \o message.lastUpdateTime
+        \o message.mdSecurityTradingStatus
+        \o message.applId
+        \o message.marketSegmentId
+        \o message.underlyingProduct
+        \o message.securityExchange
+        \o message.securityGroup
+        \o message.asset
+        \o message.symbol
+        \o message.securityId
+        \o message.securityType
+        \o message.cfiCode
+        \o message.putOrCall
+        \o EncodeMaturityMonthYear3(message.maturityMonthYear)
+        \o message.currency
+        \o message.strikePrice
+        \o message.strikeCurrency
+        \o message.settlCurrency
+        \o message.minCabPrice
+        \o message.matchAlgorithm
+        \o message.minTradeVol
+        \o message.maxTradeVol
+        \o message.minPriceIncrementOptional
+        \o message.minPriceIncrementAmount
+        \o message.displayFactor
+        \o message.tickRule
+        \o message.mainFraction
+        \o message.subFraction
+        \o message.priceDisplayFormat
+        \o message.unitOfMeasure
+        \o message.unitOfMeasureQty
+        \o message.tradingReferencePrice
+        \o message.settlPriceType
+        \o message.clearedVolume
+        \o message.openInterestQty
+        \o message.lowLimitPrice
+        \o message.highLimitPrice
+        \o message.userDefinedInstrument
+        \o message.tradingReferenceDate
+        \o EncodeEventsGroups3(message.eventsGroups)
+        \o EncodeFeedTypesGroups3(message.feedTypesGroups)
+        \o EncodeInstAttribGroups3(message.instAttribGroups)
+        \o EncodeLotTypeRulesGroups3(message.lotTypeRulesGroups)
+        \o EncodeOptionUnderlyingsGroups(message.optionUnderlyingsGroups)
+
+DecodeMdInstrumentDefinitionOption(bytes) ==
+    LET matchEventIndicator == ReadBytes(bytes, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET totNumReportsOptional == ReadBytes(matchEventIndicator.rest, 4) IN IF ~totNumReportsOptional.ok THEN Fail ELSE
+    LET securityUpdateAction == ReadBytes(totNumReportsOptional.rest, 1) IN IF ~securityUpdateAction.ok THEN Fail ELSE
+    LET lastUpdateTime == ReadBytes(securityUpdateAction.rest, 8) IN IF ~lastUpdateTime.ok THEN Fail ELSE
+    LET mdSecurityTradingStatus == ReadBytes(lastUpdateTime.rest, 1) IN IF ~mdSecurityTradingStatus.ok THEN Fail ELSE
+    LET applId == ReadBytes(mdSecurityTradingStatus.rest, 2) IN IF ~applId.ok THEN Fail ELSE
+    LET marketSegmentId == ReadBytes(applId.rest, 1) IN IF ~marketSegmentId.ok THEN Fail ELSE
+    LET underlyingProduct == ReadBytes(marketSegmentId.rest, 1) IN IF ~underlyingProduct.ok THEN Fail ELSE
+    LET securityExchange == ReadBytes(underlyingProduct.rest, 4) IN IF ~securityExchange.ok THEN Fail ELSE
+    LET securityGroup == ReadBytes(securityExchange.rest, 6) IN IF ~securityGroup.ok THEN Fail ELSE
+    LET asset == ReadBytes(securityGroup.rest, 6) IN IF ~asset.ok THEN Fail ELSE
+    LET symbol == ReadBytes(asset.rest, 20) IN IF ~symbol.ok THEN Fail ELSE
+    LET securityId == ReadBytes(symbol.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET securityType == ReadBytes(securityId.rest, 6) IN IF ~securityType.ok THEN Fail ELSE
+    LET cfiCode == ReadBytes(securityType.rest, 6) IN IF ~cfiCode.ok THEN Fail ELSE
+    LET putOrCall == ReadBytes(cfiCode.rest, 1) IN IF ~putOrCall.ok THEN Fail ELSE
+    LET maturityMonthYear == DecodeMaturityMonthYear3(putOrCall.rest) IN IF ~maturityMonthYear.ok THEN Fail ELSE
+    LET currency == ReadBytes(maturityMonthYear.rest, 3) IN IF ~currency.ok THEN Fail ELSE
+    LET strikePrice == ReadBytes(currency.rest, 8) IN IF ~strikePrice.ok THEN Fail ELSE
+    LET strikeCurrency == ReadBytes(strikePrice.rest, 3) IN IF ~strikeCurrency.ok THEN Fail ELSE
+    LET settlCurrency == ReadBytes(strikeCurrency.rest, 3) IN IF ~settlCurrency.ok THEN Fail ELSE
+    LET minCabPrice == ReadBytes(settlCurrency.rest, 8) IN IF ~minCabPrice.ok THEN Fail ELSE
+    LET matchAlgorithm == ReadBytes(minCabPrice.rest, 1) IN IF ~matchAlgorithm.ok THEN Fail ELSE
+    LET minTradeVol == ReadBytes(matchAlgorithm.rest, 4) IN IF ~minTradeVol.ok THEN Fail ELSE
+    LET maxTradeVol == ReadBytes(minTradeVol.rest, 4) IN IF ~maxTradeVol.ok THEN Fail ELSE
+    LET minPriceIncrementOptional == ReadBytes(maxTradeVol.rest, 8) IN IF ~minPriceIncrementOptional.ok THEN Fail ELSE
+    LET minPriceIncrementAmount == ReadBytes(minPriceIncrementOptional.rest, 8) IN IF ~minPriceIncrementAmount.ok THEN Fail ELSE
+    LET displayFactor == ReadBytes(minPriceIncrementAmount.rest, 8) IN IF ~displayFactor.ok THEN Fail ELSE
+    LET tickRule == ReadBytes(displayFactor.rest, 1) IN IF ~tickRule.ok THEN Fail ELSE
+    LET mainFraction == ReadBytes(tickRule.rest, 1) IN IF ~mainFraction.ok THEN Fail ELSE
+    LET subFraction == ReadBytes(mainFraction.rest, 1) IN IF ~subFraction.ok THEN Fail ELSE
+    LET priceDisplayFormat == ReadBytes(subFraction.rest, 1) IN IF ~priceDisplayFormat.ok THEN Fail ELSE
+    LET unitOfMeasure == ReadBytes(priceDisplayFormat.rest, 30) IN IF ~unitOfMeasure.ok THEN Fail ELSE
+    LET unitOfMeasureQty == ReadBytes(unitOfMeasure.rest, 8) IN IF ~unitOfMeasureQty.ok THEN Fail ELSE
+    LET tradingReferencePrice == ReadBytes(unitOfMeasureQty.rest, 8) IN IF ~tradingReferencePrice.ok THEN Fail ELSE
+    LET settlPriceType == ReadBytes(tradingReferencePrice.rest, 1) IN IF ~settlPriceType.ok THEN Fail ELSE
+    LET clearedVolume == ReadBytes(settlPriceType.rest, 4) IN IF ~clearedVolume.ok THEN Fail ELSE
+    LET openInterestQty == ReadBytes(clearedVolume.rest, 4) IN IF ~openInterestQty.ok THEN Fail ELSE
+    LET lowLimitPrice == ReadBytes(openInterestQty.rest, 8) IN IF ~lowLimitPrice.ok THEN Fail ELSE
+    LET highLimitPrice == ReadBytes(lowLimitPrice.rest, 8) IN IF ~highLimitPrice.ok THEN Fail ELSE
+    LET userDefinedInstrument == ReadBytes(highLimitPrice.rest, 1) IN IF ~userDefinedInstrument.ok THEN Fail ELSE
+    LET tradingReferenceDate == ReadBytes(userDefinedInstrument.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
+    LET eventsGroups == DecodeEventsGroups3(tradingReferenceDate.rest) IN IF ~eventsGroups.ok THEN Fail ELSE
+    LET feedTypesGroups == DecodeFeedTypesGroups3(eventsGroups.rest) IN IF ~feedTypesGroups.ok THEN Fail ELSE
+    LET instAttribGroups == DecodeInstAttribGroups3(feedTypesGroups.rest) IN IF ~instAttribGroups.ok THEN Fail ELSE
+    LET lotTypeRulesGroups == DecodeLotTypeRulesGroups3(instAttribGroups.rest) IN IF ~lotTypeRulesGroups.ok THEN Fail ELSE
+    LET optionUnderlyingsGroups == DecodeOptionUnderlyingsGroups(lotTypeRulesGroups.rest) IN IF ~optionUnderlyingsGroups.ok THEN Fail ELSE
+    Ok([ matchEventIndicator       |-> matchEventIndicator.value,
+         totNumReportsOptional     |-> totNumReportsOptional.value,
+         securityUpdateAction      |-> securityUpdateAction.value,
+         lastUpdateTime            |-> lastUpdateTime.value,
+         mdSecurityTradingStatus   |-> mdSecurityTradingStatus.value,
+         applId                    |-> applId.value,
+         marketSegmentId           |-> marketSegmentId.value,
+         underlyingProduct         |-> underlyingProduct.value,
+         securityExchange          |-> securityExchange.value,
+         securityGroup             |-> securityGroup.value,
+         asset                     |-> asset.value,
+         symbol                    |-> symbol.value,
+         securityId                |-> securityId.value,
+         securityType              |-> securityType.value,
+         cfiCode                   |-> cfiCode.value,
+         putOrCall                 |-> putOrCall.value,
+         maturityMonthYear         |-> maturityMonthYear.value,
+         currency                  |-> currency.value,
+         strikePrice               |-> strikePrice.value,
+         strikeCurrency            |-> strikeCurrency.value,
+         settlCurrency             |-> settlCurrency.value,
+         minCabPrice               |-> minCabPrice.value,
+         matchAlgorithm            |-> matchAlgorithm.value,
+         minTradeVol               |-> minTradeVol.value,
+         maxTradeVol               |-> maxTradeVol.value,
+         minPriceIncrementOptional |-> minPriceIncrementOptional.value,
+         minPriceIncrementAmount   |-> minPriceIncrementAmount.value,
+         displayFactor             |-> displayFactor.value,
+         tickRule                  |-> tickRule.value,
+         mainFraction              |-> mainFraction.value,
+         subFraction               |-> subFraction.value,
+         priceDisplayFormat        |-> priceDisplayFormat.value,
+         unitOfMeasure             |-> unitOfMeasure.value,
+         unitOfMeasureQty          |-> unitOfMeasureQty.value,
+         tradingReferencePrice     |-> tradingReferencePrice.value,
+         settlPriceType            |-> settlPriceType.value,
+         clearedVolume             |-> clearedVolume.value,
+         openInterestQty           |-> openInterestQty.value,
+         lowLimitPrice             |-> lowLimitPrice.value,
+         highLimitPrice            |-> highLimitPrice.value,
+         userDefinedInstrument     |-> userDefinedInstrument.value,
+         tradingReferenceDate      |-> tradingReferenceDate.value,
+         eventsGroups              |-> eventsGroups.value,
+         feedTypesGroups           |-> feedTypesGroups.value,
+         instAttribGroups          |-> instAttribGroups.value,
+         lotTypeRulesGroups        |-> lotTypeRulesGroups.value,
+         optionUnderlyingsGroups   |-> optionUnderlyingsGroups.value ], optionUnderlyingsGroups.rest)
+
+ZeroMdInstrumentDefinitionOption ==
+    [ matchEventIndicator       |-> [i \in 1 .. 1 |-> 0],
+      totNumReportsOptional     |-> [i \in 1 .. 4 |-> 0],
+      securityUpdateAction      |-> [i \in 1 .. 1 |-> 0],
+      lastUpdateTime            |-> [i \in 1 .. 8 |-> 0],
+      mdSecurityTradingStatus   |-> [i \in 1 .. 1 |-> 0],
+      applId                    |-> [i \in 1 .. 2 |-> 0],
+      marketSegmentId           |-> [i \in 1 .. 1 |-> 0],
+      underlyingProduct         |-> [i \in 1 .. 1 |-> 0],
+      securityExchange          |-> [i \in 1 .. 4 |-> 0],
+      securityGroup             |-> [i \in 1 .. 6 |-> 0],
+      asset                     |-> [i \in 1 .. 6 |-> 0],
+      symbol                    |-> [i \in 1 .. 20 |-> 0],
+      securityId                |-> [i \in 1 .. 4 |-> 0],
+      securityType              |-> [i \in 1 .. 6 |-> 0],
+      cfiCode                   |-> [i \in 1 .. 6 |-> 0],
+      putOrCall                 |-> [i \in 1 .. 1 |-> 0],
+      maturityMonthYear         |-> ZeroMaturityMonthYear3,
+      currency                  |-> [i \in 1 .. 3 |-> 0],
+      strikePrice               |-> [i \in 1 .. 8 |-> 0],
+      strikeCurrency            |-> [i \in 1 .. 3 |-> 0],
+      settlCurrency             |-> [i \in 1 .. 3 |-> 0],
+      minCabPrice               |-> [i \in 1 .. 8 |-> 0],
+      matchAlgorithm            |-> [i \in 1 .. 1 |-> 0],
+      minTradeVol               |-> [i \in 1 .. 4 |-> 0],
+      maxTradeVol               |-> [i \in 1 .. 4 |-> 0],
+      minPriceIncrementOptional |-> [i \in 1 .. 8 |-> 0],
+      minPriceIncrementAmount   |-> [i \in 1 .. 8 |-> 0],
+      displayFactor             |-> [i \in 1 .. 8 |-> 0],
+      tickRule                  |-> [i \in 1 .. 1 |-> 0],
+      mainFraction              |-> [i \in 1 .. 1 |-> 0],
+      subFraction               |-> [i \in 1 .. 1 |-> 0],
+      priceDisplayFormat        |-> [i \in 1 .. 1 |-> 0],
+      unitOfMeasure             |-> [i \in 1 .. 30 |-> 0],
+      unitOfMeasureQty          |-> [i \in 1 .. 8 |-> 0],
+      tradingReferencePrice     |-> [i \in 1 .. 8 |-> 0],
+      settlPriceType            |-> [i \in 1 .. 1 |-> 0],
+      clearedVolume             |-> [i \in 1 .. 4 |-> 0],
+      openInterestQty           |-> [i \in 1 .. 4 |-> 0],
+      lowLimitPrice             |-> [i \in 1 .. 8 |-> 0],
+      highLimitPrice            |-> [i \in 1 .. 8 |-> 0],
+      userDefinedInstrument     |-> [i \in 1 .. 1 |-> 0],
+      tradingReferenceDate      |-> [i \in 1 .. 2 |-> 0],
+      eventsGroups              |-> ZeroEventsGroups3,
+      feedTypesGroups           |-> ZeroFeedTypesGroups3,
+      instAttribGroups          |-> ZeroInstAttribGroups3,
+      lotTypeRulesGroups        |-> ZeroLotTypeRulesGroups3,
+      optionUnderlyingsGroups   |-> ZeroOptionUnderlyingsGroups ]
+
+(* Md Instrument Definition Option at zero, then each field in turn at the values it is checked at *)
+CheckedMdInstrumentDefinitionOption ==
+    { ZeroMdInstrumentDefinitionOption }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.totNumReportsOptional = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.securityUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.lastUpdateTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.mdSecurityTradingStatus = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.applId = one] : one \in Sample(2) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.marketSegmentId = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.underlyingProduct = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.securityExchange = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.securityGroup = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.asset = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.symbol = one] : one \in Sample(20) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.securityType = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.cfiCode = one] : one \in Sample(6) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.putOrCall = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.maturityMonthYear = one] : one \in CheckedMaturityMonthYear3 }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.currency = one] : one \in Sample(3) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.strikePrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.strikeCurrency = one] : one \in Sample(3) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.settlCurrency = one] : one \in Sample(3) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.minCabPrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.matchAlgorithm = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.minTradeVol = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.maxTradeVol = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.minPriceIncrementOptional = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.minPriceIncrementAmount = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.displayFactor = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.tickRule = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.mainFraction = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.subFraction = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.priceDisplayFormat = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.unitOfMeasure = one] : one \in Sample(30) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.unitOfMeasureQty = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.tradingReferencePrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.settlPriceType = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.clearedVolume = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.openInterestQty = one] : one \in Sample(4) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.lowLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.highLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.userDefinedInstrument = one] : one \in Sample(1) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.eventsGroups = one] : one \in CheckedEventsGroups3 }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.feedTypesGroups = one] : one \in CheckedFeedTypesGroups3 }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.instAttribGroups = one] : one \in CheckedInstAttribGroups3 }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.lotTypeRulesGroups = one] : one \in CheckedLotTypeRulesGroups3 }
+        \cup { [ZeroMdInstrumentDefinitionOption EXCEPT !.optionUnderlyingsGroups = one] : one \in CheckedOptionUnderlyingsGroups }
+
+(***************************************************************************)
+(* Incremental Refresh Trade Summary Group: 32 bytes                       *)
+(***************************************************************************)
+
+IncrementalRefreshTradeSummaryGroup ==
+    [ mdEntryPx      : Sample(8),
+      mdEntrySize    : Sample(4),
+      securityId     : Sample(4),
+      rptSeq         : Sample(4),
+      numberOfOrders : Sample(4),
+      aggressorSide  : Sample(1),
+      mdUpdateAction : Sample(1),
+      padding6       : Sample(6) ]
+
+EncodeIncrementalRefreshTradeSummaryGroup(message) ==
+    message.mdEntryPx
+        \o message.mdEntrySize
+        \o message.securityId
+        \o message.rptSeq
+        \o message.numberOfOrders
+        \o message.aggressorSide
+        \o message.mdUpdateAction
+        \o message.padding6
+
+DecodeIncrementalRefreshTradeSummaryGroup(bytes) ==
+    LET mdEntryPx == ReadBytes(bytes, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
+    LET mdEntrySize == ReadBytes(mdEntryPx.rest, 4) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntrySize.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET numberOfOrders == ReadBytes(rptSeq.rest, 4) IN IF ~numberOfOrders.ok THEN Fail ELSE
+    LET aggressorSide == ReadBytes(numberOfOrders.rest, 1) IN IF ~aggressorSide.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(aggressorSide.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET padding6 == ReadBytes(mdUpdateAction.rest, 6) IN IF ~padding6.ok THEN Fail ELSE
+    Ok([ mdEntryPx      |-> mdEntryPx.value,
+         mdEntrySize    |-> mdEntrySize.value,
+         securityId     |-> securityId.value,
+         rptSeq         |-> rptSeq.value,
+         numberOfOrders |-> numberOfOrders.value,
+         aggressorSide  |-> aggressorSide.value,
+         mdUpdateAction |-> mdUpdateAction.value,
+         padding6       |-> padding6.value ], padding6.rest)
+
+ZeroIncrementalRefreshTradeSummaryGroup ==
+    [ mdEntryPx      |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize    |-> [i \in 1 .. 4 |-> 0],
+      securityId     |-> [i \in 1 .. 4 |-> 0],
+      rptSeq         |-> [i \in 1 .. 4 |-> 0],
+      numberOfOrders |-> [i \in 1 .. 4 |-> 0],
+      aggressorSide  |-> [i \in 1 .. 1 |-> 0],
+      mdUpdateAction |-> [i \in 1 .. 1 |-> 0],
+      padding6       |-> [i \in 1 .. 6 |-> 0] ]
+
+(* Incremental Refresh Trade Summary Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshTradeSummaryGroup ==
+    { ZeroIncrementalRefreshTradeSummaryGroup }
+        \cup { [ZeroIncrementalRefreshTradeSummaryGroup EXCEPT !.mdEntryPx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryGroup EXCEPT !.mdEntrySize = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryGroup EXCEPT !.numberOfOrders = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryGroup EXCEPT !.aggressorSide = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryGroup EXCEPT !.padding6 = one] : one \in Sample(6) }
+
+(* A run of Incremental Refresh Trade Summary Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshTradeSummaryGroupList(_)
+EncodeIncrementalRefreshTradeSummaryGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshTradeSummaryGroup(Head(messages)) \o EncodeIncrementalRefreshTradeSummaryGroupList(Tail(messages))
+
+(* As many Incremental Refresh Trade Summary Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshTradeSummaryGroupList(_, _)
+ReadIncrementalRefreshTradeSummaryGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshTradeSummaryGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshTradeSummaryGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Trade Summary Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshTradeSummaryGroup == { ZeroIncrementalRefreshTradeSummaryGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Trade Summary Groups                                *)
+(***************************************************************************)
+
+IncrementalRefreshTradeSummaryGroups ==
+    [ blockLength                         : Sample(2),
+      incrementalRefreshTradeSummaryGroup : SampleLists(OneIncrementalRefreshTradeSummaryGroup) ]
+
+EncodeIncrementalRefreshTradeSummaryGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshTradeSummaryGroup), 1)
+        \o EncodeIncrementalRefreshTradeSummaryGroupList(message.incrementalRefreshTradeSummaryGroup)
+
+DecodeIncrementalRefreshTradeSummaryGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshTradeSummaryGroup == ReadIncrementalRefreshTradeSummaryGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshTradeSummaryGroup.ok THEN Fail ELSE
+    Ok([ blockLength                         |-> blockLength.value,
+         incrementalRefreshTradeSummaryGroup |-> incrementalRefreshTradeSummaryGroup.value ], incrementalRefreshTradeSummaryGroup.rest)
+
+ZeroIncrementalRefreshTradeSummaryGroups ==
+    [ blockLength                         |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshTradeSummaryGroup |-> << >> ]
+
+(* Incremental Refresh Trade Summary Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshTradeSummaryGroups ==
+    { ZeroIncrementalRefreshTradeSummaryGroups }
+        \cup { [ZeroIncrementalRefreshTradeSummaryGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryGroups EXCEPT !.incrementalRefreshTradeSummaryGroup = one] : one \in SampleLists(OneIncrementalRefreshTradeSummaryGroup) }
+
+(***************************************************************************)
+(* Incremental Refresh Trade Summary Order Id Group: 16 bytes              *)
+(***************************************************************************)
+
+IncrementalRefreshTradeSummaryOrderIdGroup ==
+    [ orderId  : Sample(8),
+      lastQty  : Sample(4),
+      padding4 : Sample(4) ]
+
+EncodeIncrementalRefreshTradeSummaryOrderIdGroup(message) ==
+    message.orderId
+        \o message.lastQty
+        \o message.padding4
+
+DecodeIncrementalRefreshTradeSummaryOrderIdGroup(bytes) ==
+    LET orderId == ReadBytes(bytes, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET lastQty == ReadBytes(orderId.rest, 4) IN IF ~lastQty.ok THEN Fail ELSE
+    LET padding4 == ReadBytes(lastQty.rest, 4) IN IF ~padding4.ok THEN Fail ELSE
+    Ok([ orderId  |-> orderId.value,
+         lastQty  |-> lastQty.value,
+         padding4 |-> padding4.value ], padding4.rest)
+
+ZeroIncrementalRefreshTradeSummaryOrderIdGroup ==
+    [ orderId  |-> [i \in 1 .. 8 |-> 0],
+      lastQty  |-> [i \in 1 .. 4 |-> 0],
+      padding4 |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Incremental Refresh Trade Summary Order Id Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshTradeSummaryOrderIdGroup ==
+    { ZeroIncrementalRefreshTradeSummaryOrderIdGroup }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup EXCEPT !.lastQty = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup EXCEPT !.padding4 = one] : one \in Sample(4) }
+
+(* A run of Incremental Refresh Trade Summary Order Id Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(_)
+EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshTradeSummaryOrderIdGroup(Head(messages)) \o EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(Tail(messages))
+
+(* As many Incremental Refresh Trade Summary Order Id Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshTradeSummaryOrderIdGroupList(_, _)
+ReadIncrementalRefreshTradeSummaryOrderIdGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshTradeSummaryOrderIdGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshTradeSummaryOrderIdGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Trade Summary Order Id Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshTradeSummaryOrderIdGroup == { ZeroIncrementalRefreshTradeSummaryOrderIdGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Trade Summary Order Id Groups                       *)
+(***************************************************************************)
+
+IncrementalRefreshTradeSummaryOrderIdGroups ==
+    [ blockLength                                : Sample(2),
+      padding5                                   : Sample(5),
+      incrementalRefreshTradeSummaryOrderIdGroup : SampleLists(OneIncrementalRefreshTradeSummaryOrderIdGroup) ]
+
+EncodeIncrementalRefreshTradeSummaryOrderIdGroups(message) ==
+    message.blockLength
+        \o message.padding5
+        \o EncodeUIntBE(Len(message.incrementalRefreshTradeSummaryOrderIdGroup), 1)
+        \o EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(message.incrementalRefreshTradeSummaryOrderIdGroup)
+
+DecodeIncrementalRefreshTradeSummaryOrderIdGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET padding5 == ReadBytes(blockLength.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(padding5.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshTradeSummaryOrderIdGroup == ReadIncrementalRefreshTradeSummaryOrderIdGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshTradeSummaryOrderIdGroup.ok THEN Fail ELSE
+    Ok([ blockLength                                |-> blockLength.value,
+         padding5                                   |-> padding5.value,
+         incrementalRefreshTradeSummaryOrderIdGroup |-> incrementalRefreshTradeSummaryOrderIdGroup.value ], incrementalRefreshTradeSummaryOrderIdGroup.rest)
+
+ZeroIncrementalRefreshTradeSummaryOrderIdGroups ==
+    [ blockLength                                |-> [i \in 1 .. 2 |-> 0],
+      padding5                                   |-> [i \in 1 .. 5 |-> 0],
+      incrementalRefreshTradeSummaryOrderIdGroup |-> << >> ]
+
+(* Incremental Refresh Trade Summary Order Id Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshTradeSummaryOrderIdGroups ==
+    { ZeroIncrementalRefreshTradeSummaryOrderIdGroups }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups EXCEPT !.padding5 = one] : one \in Sample(5) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups EXCEPT !.incrementalRefreshTradeSummaryOrderIdGroup = one] : one \in SampleLists(OneIncrementalRefreshTradeSummaryOrderIdGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Trade Summary                                    *)
+(***************************************************************************)
+
+MdIncrementalRefreshTradeSummary ==
+    [ transactTime                                : Sample(8),
+      matchEventIndicator                         : Sample(1),
+      padding2                                    : Sample(2),
+      incrementalRefreshTradeSummaryGroups        : IncrementalRefreshTradeSummaryGroups,
+      incrementalRefreshTradeSummaryOrderIdGroups : IncrementalRefreshTradeSummaryOrderIdGroups ]
+
+EncodeMdIncrementalRefreshTradeSummary(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshTradeSummaryGroups(message.incrementalRefreshTradeSummaryGroups)
+        \o EncodeIncrementalRefreshTradeSummaryOrderIdGroups(message.incrementalRefreshTradeSummaryOrderIdGroups)
+
+DecodeMdIncrementalRefreshTradeSummary(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshTradeSummaryGroups == DecodeIncrementalRefreshTradeSummaryGroups(padding2.rest) IN IF ~incrementalRefreshTradeSummaryGroups.ok THEN Fail ELSE
+    LET incrementalRefreshTradeSummaryOrderIdGroups == DecodeIncrementalRefreshTradeSummaryOrderIdGroups(incrementalRefreshTradeSummaryGroups.rest) IN IF ~incrementalRefreshTradeSummaryOrderIdGroups.ok THEN Fail ELSE
+    Ok([ transactTime                                |-> transactTime.value,
+         matchEventIndicator                         |-> matchEventIndicator.value,
+         padding2                                    |-> padding2.value,
+         incrementalRefreshTradeSummaryGroups        |-> incrementalRefreshTradeSummaryGroups.value,
+         incrementalRefreshTradeSummaryOrderIdGroups |-> incrementalRefreshTradeSummaryOrderIdGroups.value ], incrementalRefreshTradeSummaryOrderIdGroups.rest)
+
+ZeroMdIncrementalRefreshTradeSummary ==
+    [ transactTime                                |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                         |-> [i \in 1 .. 1 |-> 0],
+      padding2                                    |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshTradeSummaryGroups        |-> ZeroIncrementalRefreshTradeSummaryGroups,
+      incrementalRefreshTradeSummaryOrderIdGroups |-> ZeroIncrementalRefreshTradeSummaryOrderIdGroups ]
+
+(* Md Incremental Refresh Trade Summary at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshTradeSummary ==
+    { ZeroMdIncrementalRefreshTradeSummary }
+        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.incrementalRefreshTradeSummaryGroups = one] : one \in CheckedIncrementalRefreshTradeSummaryGroups }
+        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.incrementalRefreshTradeSummaryOrderIdGroups = one] : one \in CheckedIncrementalRefreshTradeSummaryOrderIdGroups }
+
+(***************************************************************************)
+(* Negotiation Reject: 70 bytes                                            *)
+(***************************************************************************)
+
+NegotiationReject ==
+    [ reason           : Sample(48),
+      uuid             : Sample(8),
+      requestTimestamp : Sample(8),
+      errorCodes       : Sample(1),
+      padding5         : Sample(5) ]
+
+EncodeNegotiationReject(message) ==
+    message.reason
+        \o message.uuid
+        \o message.requestTimestamp
+        \o message.errorCodes
+        \o message.padding5
+
+DecodeNegotiationReject(bytes) ==
+    LET reason == ReadBytes(bytes, 48) IN IF ~reason.ok THEN Fail ELSE
+    LET uuid == ReadBytes(reason.rest, 8) IN IF ~uuid.ok THEN Fail ELSE
+    LET requestTimestamp == ReadBytes(uuid.rest, 8) IN IF ~requestTimestamp.ok THEN Fail ELSE
+    LET errorCodes == ReadBytes(requestTimestamp.rest, 1) IN IF ~errorCodes.ok THEN Fail ELSE
+    LET padding5 == ReadBytes(errorCodes.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
+    Ok([ reason           |-> reason.value,
+         uuid             |-> uuid.value,
+         requestTimestamp |-> requestTimestamp.value,
+         errorCodes       |-> errorCodes.value,
+         padding5         |-> padding5.value ], padding5.rest)
+
+ZeroNegotiationReject ==
+    [ reason           |-> [i \in 1 .. 48 |-> 0],
+      uuid             |-> [i \in 1 .. 8 |-> 0],
+      requestTimestamp |-> [i \in 1 .. 8 |-> 0],
+      errorCodes       |-> [i \in 1 .. 1 |-> 0],
+      padding5         |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Negotiation Reject at zero, then each field in turn at the values it is checked at *)
+CheckedNegotiationReject ==
+    { ZeroNegotiationReject }
+        \cup { [ZeroNegotiationReject EXCEPT !.reason = one] : one \in Sample(48) }
+        \cup { [ZeroNegotiationReject EXCEPT !.uuid = one] : one \in Sample(8) }
+        \cup { [ZeroNegotiationReject EXCEPT !.requestTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroNegotiationReject EXCEPT !.errorCodes = one] : one \in Sample(1) }
+        \cup { [ZeroNegotiationReject EXCEPT !.padding5 = one] : one \in Sample(5) }
+
+(***************************************************************************)
+(* Negotiation Response: 22 bytes                                          *)
+(***************************************************************************)
+
+NegotiationResponse ==
+    [ uuid                        : Sample(8),
+      requestTimestamp            : Sample(8),
+      secretKeySecureIdExpiration : Sample(2),
+      padding4                    : Sample(4) ]
+
+EncodeNegotiationResponse(message) ==
+    message.uuid
+        \o message.requestTimestamp
+        \o message.secretKeySecureIdExpiration
+        \o message.padding4
+
+DecodeNegotiationResponse(bytes) ==
+    LET uuid == ReadBytes(bytes, 8) IN IF ~uuid.ok THEN Fail ELSE
+    LET requestTimestamp == ReadBytes(uuid.rest, 8) IN IF ~requestTimestamp.ok THEN Fail ELSE
+    LET secretKeySecureIdExpiration == ReadBytes(requestTimestamp.rest, 2) IN IF ~secretKeySecureIdExpiration.ok THEN Fail ELSE
+    LET padding4 == ReadBytes(secretKeySecureIdExpiration.rest, 4) IN IF ~padding4.ok THEN Fail ELSE
+    Ok([ uuid                        |-> uuid.value,
+         requestTimestamp            |-> requestTimestamp.value,
+         secretKeySecureIdExpiration |-> secretKeySecureIdExpiration.value,
+         padding4                    |-> padding4.value ], padding4.rest)
+
+ZeroNegotiationResponse ==
+    [ uuid                        |-> [i \in 1 .. 8 |-> 0],
+      requestTimestamp            |-> [i \in 1 .. 8 |-> 0],
+      secretKeySecureIdExpiration |-> [i \in 1 .. 2 |-> 0],
+      padding4                    |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Negotiation Response at zero, then each field in turn at the values it is checked at *)
+CheckedNegotiationResponse ==
+    { ZeroNegotiationResponse }
+        \cup { [ZeroNegotiationResponse EXCEPT !.uuid = one] : one \in Sample(8) }
+        \cup { [ZeroNegotiationResponse EXCEPT !.requestTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroNegotiationResponse EXCEPT !.secretKeySecureIdExpiration = one] : one \in Sample(2) }
+        \cup { [ZeroNegotiationResponse EXCEPT !.padding4 = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Terminate: 70 bytes                                                     *)
+(***************************************************************************)
+
+Terminate ==
+    [ reason           : Sample(48),
+      uuid             : Sample(8),
+      requestTimestamp : Sample(8),
+      errorCodes       : Sample(1),
+      padding5         : Sample(5) ]
+
+EncodeTerminate(message) ==
+    message.reason
+        \o message.uuid
+        \o message.requestTimestamp
+        \o message.errorCodes
+        \o message.padding5
+
+DecodeTerminate(bytes) ==
+    LET reason == ReadBytes(bytes, 48) IN IF ~reason.ok THEN Fail ELSE
+    LET uuid == ReadBytes(reason.rest, 8) IN IF ~uuid.ok THEN Fail ELSE
+    LET requestTimestamp == ReadBytes(uuid.rest, 8) IN IF ~requestTimestamp.ok THEN Fail ELSE
+    LET errorCodes == ReadBytes(requestTimestamp.rest, 1) IN IF ~errorCodes.ok THEN Fail ELSE
+    LET padding5 == ReadBytes(errorCodes.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
+    Ok([ reason           |-> reason.value,
+         uuid             |-> uuid.value,
+         requestTimestamp |-> requestTimestamp.value,
+         errorCodes       |-> errorCodes.value,
+         padding5         |-> padding5.value ], padding5.rest)
+
+ZeroTerminate ==
+    [ reason           |-> [i \in 1 .. 48 |-> 0],
+      uuid             |-> [i \in 1 .. 8 |-> 0],
+      requestTimestamp |-> [i \in 1 .. 8 |-> 0],
+      errorCodes       |-> [i \in 1 .. 1 |-> 0],
+      padding5         |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Terminate at zero, then each field in turn at the values it is checked at *)
+CheckedTerminate ==
+    { ZeroTerminate }
+        \cup { [ZeroTerminate EXCEPT !.reason = one] : one \in Sample(48) }
+        \cup { [ZeroTerminate EXCEPT !.uuid = one] : one \in Sample(8) }
+        \cup { [ZeroTerminate EXCEPT !.requestTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroTerminate EXCEPT !.errorCodes = one] : one \in Sample(1) }
+        \cup { [ZeroTerminate EXCEPT !.padding5 = one] : one \in Sample(5) }
+
+(***************************************************************************)
+(* Request Ack Security Group: 6 bytes                                     *)
+(***************************************************************************)
+
+RequestAckSecurityGroup ==
+    [ securityGroup : Sample(6) ]
+
+EncodeRequestAckSecurityGroup(message) ==
+    message.securityGroup
+
+DecodeRequestAckSecurityGroup(bytes) ==
+    LET securityGroup == ReadBytes(bytes, 6) IN IF ~securityGroup.ok THEN Fail ELSE
+    Ok([ securityGroup |-> securityGroup.value ], securityGroup.rest)
+
+ZeroRequestAckSecurityGroup ==
+    [ securityGroup |-> [i \in 1 .. 6 |-> 0] ]
+
+(* Request Ack Security Group at zero, then each field in turn at the values it is checked at *)
+CheckedRequestAckSecurityGroup ==
+    { ZeroRequestAckSecurityGroup }
+        \cup { [ZeroRequestAckSecurityGroup EXCEPT !.securityGroup = one] : one \in Sample(6) }
+
+(* A run of Request Ack Security Group, written one after another *)
+RECURSIVE EncodeRequestAckSecurityGroupList(_)
+EncodeRequestAckSecurityGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeRequestAckSecurityGroup(Head(messages)) \o EncodeRequestAckSecurityGroupList(Tail(messages))
+
+(* As many Request Ack Security Group as the field that counts them says *)
+RECURSIVE ReadRequestAckSecurityGroupList(_, _)
+ReadRequestAckSecurityGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeRequestAckSecurityGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadRequestAckSecurityGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Request Ack Security Group of each kind, for the lists that carry them *)
+OneRequestAckSecurityGroup == { ZeroRequestAckSecurityGroup }
+
+(***************************************************************************)
+(* Request Ack Security Groups                                             *)
+(***************************************************************************)
+
+RequestAckSecurityGroups ==
+    [ blockLength             : Sample(2),
+      requestAckSecurityGroup : SampleLists(OneRequestAckSecurityGroup) ]
+
+EncodeRequestAckSecurityGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.requestAckSecurityGroup), 1)
+        \o EncodeRequestAckSecurityGroupList(message.requestAckSecurityGroup)
+
+DecodeRequestAckSecurityGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET requestAckSecurityGroup == ReadRequestAckSecurityGroupList(numInGroup.rest, numInGroup.value) IN IF ~requestAckSecurityGroup.ok THEN Fail ELSE
+    Ok([ blockLength             |-> blockLength.value,
+         requestAckSecurityGroup |-> requestAckSecurityGroup.value ], requestAckSecurityGroup.rest)
+
+ZeroRequestAckSecurityGroups ==
+    [ blockLength             |-> [i \in 1 .. 2 |-> 0],
+      requestAckSecurityGroup |-> << >> ]
+
+(* Request Ack Security Groups at zero, then each field in turn at the values it is checked at *)
+CheckedRequestAckSecurityGroups ==
+    { ZeroRequestAckSecurityGroups }
+        \cup { [ZeroRequestAckSecurityGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroRequestAckSecurityGroups EXCEPT !.requestAckSecurityGroup = one] : one \in SampleLists(OneRequestAckSecurityGroup) }
+
+(***************************************************************************)
+(* Request Ack Related Symbol Group: 4 bytes                               *)
+(***************************************************************************)
+
+RequestAckRelatedSymbolGroup ==
+    [ securityId : Sample(4) ]
+
+EncodeRequestAckRelatedSymbolGroup(message) ==
+    message.securityId
+
+DecodeRequestAckRelatedSymbolGroup(bytes) ==
+    LET securityId == ReadBytes(bytes, 4) IN IF ~securityId.ok THEN Fail ELSE
+    Ok([ securityId |-> securityId.value ], securityId.rest)
+
+ZeroRequestAckRelatedSymbolGroup ==
+    [ securityId |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Request Ack Related Symbol Group at zero, then each field in turn at the values it is checked at *)
+CheckedRequestAckRelatedSymbolGroup ==
+    { ZeroRequestAckRelatedSymbolGroup }
+        \cup { [ZeroRequestAckRelatedSymbolGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+
+(* A run of Request Ack Related Symbol Group, written one after another *)
+RECURSIVE EncodeRequestAckRelatedSymbolGroupList(_)
+EncodeRequestAckRelatedSymbolGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeRequestAckRelatedSymbolGroup(Head(messages)) \o EncodeRequestAckRelatedSymbolGroupList(Tail(messages))
+
+(* As many Request Ack Related Symbol Group as the field that counts them says *)
+RECURSIVE ReadRequestAckRelatedSymbolGroupList(_, _)
+ReadRequestAckRelatedSymbolGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeRequestAckRelatedSymbolGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadRequestAckRelatedSymbolGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Request Ack Related Symbol Group of each kind, for the lists that carry them *)
+OneRequestAckRelatedSymbolGroup == { ZeroRequestAckRelatedSymbolGroup }
+
+(***************************************************************************)
+(* Request Ack Related Symbol Groups                                       *)
+(***************************************************************************)
+
+RequestAckRelatedSymbolGroups ==
+    [ blockLength                  : Sample(2),
+      requestAckRelatedSymbolGroup : SampleLists(OneRequestAckRelatedSymbolGroup) ]
+
+EncodeRequestAckRelatedSymbolGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.requestAckRelatedSymbolGroup), 1)
+        \o EncodeRequestAckRelatedSymbolGroupList(message.requestAckRelatedSymbolGroup)
+
+DecodeRequestAckRelatedSymbolGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET requestAckRelatedSymbolGroup == ReadRequestAckRelatedSymbolGroupList(numInGroup.rest, numInGroup.value) IN IF ~requestAckRelatedSymbolGroup.ok THEN Fail ELSE
+    Ok([ blockLength                  |-> blockLength.value,
+         requestAckRelatedSymbolGroup |-> requestAckRelatedSymbolGroup.value ], requestAckRelatedSymbolGroup.rest)
+
+ZeroRequestAckRelatedSymbolGroups ==
+    [ blockLength                  |-> [i \in 1 .. 2 |-> 0],
+      requestAckRelatedSymbolGroup |-> << >> ]
+
+(* Request Ack Related Symbol Groups at zero, then each field in turn at the values it is checked at *)
+CheckedRequestAckRelatedSymbolGroups ==
+    { ZeroRequestAckRelatedSymbolGroups }
+        \cup { [ZeroRequestAckRelatedSymbolGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroRequestAckRelatedSymbolGroups EXCEPT !.requestAckRelatedSymbolGroup = one] : one \in SampleLists(OneRequestAckRelatedSymbolGroup) }
+
+(***************************************************************************)
+(* Request Ack                                                             *)
+(***************************************************************************)
+
+RequestAck ==
+    [ mdReqId                       : Sample(4),
+      subscriptionReqType           : Sample(1),
+      mdReqIdStatus                 : Sample(1),
+      requestAckSecurityGroups      : RequestAckSecurityGroups,
+      requestAckRelatedSymbolGroups : RequestAckRelatedSymbolGroups ]
+
+EncodeRequestAck(message) ==
+    message.mdReqId
+        \o message.subscriptionReqType
+        \o message.mdReqIdStatus
+        \o EncodeRequestAckSecurityGroups(message.requestAckSecurityGroups)
+        \o EncodeRequestAckRelatedSymbolGroups(message.requestAckRelatedSymbolGroups)
+
+DecodeRequestAck(bytes) ==
+    LET mdReqId == ReadBytes(bytes, 4) IN IF ~mdReqId.ok THEN Fail ELSE
+    LET subscriptionReqType == ReadBytes(mdReqId.rest, 1) IN IF ~subscriptionReqType.ok THEN Fail ELSE
+    LET mdReqIdStatus == ReadBytes(subscriptionReqType.rest, 1) IN IF ~mdReqIdStatus.ok THEN Fail ELSE
+    LET requestAckSecurityGroups == DecodeRequestAckSecurityGroups(mdReqIdStatus.rest) IN IF ~requestAckSecurityGroups.ok THEN Fail ELSE
+    LET requestAckRelatedSymbolGroups == DecodeRequestAckRelatedSymbolGroups(requestAckSecurityGroups.rest) IN IF ~requestAckRelatedSymbolGroups.ok THEN Fail ELSE
+    Ok([ mdReqId                       |-> mdReqId.value,
+         subscriptionReqType           |-> subscriptionReqType.value,
+         mdReqIdStatus                 |-> mdReqIdStatus.value,
+         requestAckSecurityGroups      |-> requestAckSecurityGroups.value,
+         requestAckRelatedSymbolGroups |-> requestAckRelatedSymbolGroups.value ], requestAckRelatedSymbolGroups.rest)
+
+ZeroRequestAck ==
+    [ mdReqId                       |-> [i \in 1 .. 4 |-> 0],
+      subscriptionReqType           |-> [i \in 1 .. 1 |-> 0],
+      mdReqIdStatus                 |-> [i \in 1 .. 1 |-> 0],
+      requestAckSecurityGroups      |-> ZeroRequestAckSecurityGroups,
+      requestAckRelatedSymbolGroups |-> ZeroRequestAckRelatedSymbolGroups ]
+
+(* Request Ack at zero, then each field in turn at the values it is checked at *)
+CheckedRequestAck ==
+    { ZeroRequestAck }
+        \cup { [ZeroRequestAck EXCEPT !.mdReqId = one] : one \in Sample(4) }
+        \cup { [ZeroRequestAck EXCEPT !.subscriptionReqType = one] : one \in Sample(1) }
+        \cup { [ZeroRequestAck EXCEPT !.mdReqIdStatus = one] : one \in Sample(1) }
+        \cup { [ZeroRequestAck EXCEPT !.requestAckSecurityGroups = one] : one \in CheckedRequestAckSecurityGroups }
+        \cup { [ZeroRequestAck EXCEPT !.requestAckRelatedSymbolGroups = one] : one \in CheckedRequestAckRelatedSymbolGroups }
+
+(***************************************************************************)
+(* Request Reject: 105 bytes                                               *)
+(***************************************************************************)
+
+RequestReject ==
+    [ mdReqIdOptional : Sample(4),
+      mdReqRejReason  : Sample(1),
+      text            : Sample(100) ]
+
+EncodeRequestReject(message) ==
+    message.mdReqIdOptional
+        \o message.mdReqRejReason
+        \o message.text
+
+DecodeRequestReject(bytes) ==
+    LET mdReqIdOptional == ReadBytes(bytes, 4) IN IF ~mdReqIdOptional.ok THEN Fail ELSE
+    LET mdReqRejReason == ReadBytes(mdReqIdOptional.rest, 1) IN IF ~mdReqRejReason.ok THEN Fail ELSE
+    LET text == ReadBytes(mdReqRejReason.rest, 100) IN IF ~text.ok THEN Fail ELSE
+    Ok([ mdReqIdOptional |-> mdReqIdOptional.value,
+         mdReqRejReason  |-> mdReqRejReason.value,
+         text            |-> text.value ], text.rest)
+
+ZeroRequestReject ==
+    [ mdReqIdOptional |-> [i \in 1 .. 4 |-> 0],
+      mdReqRejReason  |-> [i \in 1 .. 1 |-> 0],
+      text            |-> [i \in 1 .. 100 |-> 0] ]
+
+(* Request Reject at zero, then each field in turn at the values it is checked at *)
+CheckedRequestReject ==
+    { ZeroRequestReject }
+        \cup { [ZeroRequestReject EXCEPT !.mdReqIdOptional = one] : one \in Sample(4) }
+        \cup { [ZeroRequestReject EXCEPT !.mdReqRejReason = one] : one \in Sample(1) }
+        \cup { [ZeroRequestReject EXCEPT !.text = one] : one \in Sample(100) }
+
+(***************************************************************************)
+(* Server Payload, selected by Template Id                                 *)
+(***************************************************************************)
+
+ChannelResetCode == 4  \* 0x04
+AdminHeartbeatCode == 12  \* 0x0c
+AdminLoginCode == 15  \* 0x0f
+AdminLogoutCode == 16  \* 0x10
+MdInstrumentDefinitionFutureCode == 27  \* 0x1b
+MdInstrumentDefinitionSpreadCode == 29  \* 0x1d
+SecurityStatusCode == 30  \* 0x1e
+MdIncrementalRefreshBookCode == 32  \* 0x20
+MdIncrementalRefreshDailyStatisticsCode == 33  \* 0x21
+MdIncrementalRefreshLimitsBandingCode == 34  \* 0x22
+MdIncrementalRefreshSessionStatisticsCode == 35  \* 0x23
+MdIncrementalRefreshTradeCode == 36  \* 0x24
+MdIncrementalRefreshVolumeCode == 37  \* 0x25
+SnapshotFullRefreshCode == 38  \* 0x26
+QuoteRequestCode == 39  \* 0x27
+MdInstrumentDefinitionOptionCode == 41  \* 0x29
+MdIncrementalRefreshTradeSummaryCode == 42  \* 0x2a
+NegotiationRejectCode == 201  \* 0xc9
+NegotiationResponseCode == 202  \* 0xca
+TerminateCode == 203  \* 0xcb
+RequestAckCode == 206  \* 0xce
+RequestRejectCode == 207  \* 0xcf
+
+ServerPayload ==
+    [ tag : {ChannelResetCode}, body : ChannelReset ]
+        \cup [ tag : {AdminHeartbeatCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {AdminLoginCode}, body : AdminLogin ]
+        \cup [ tag : {AdminLogoutCode}, body : AdminLogout ]
+        \cup [ tag : {MdInstrumentDefinitionFutureCode}, body : MdInstrumentDefinitionFuture ]
+        \cup [ tag : {MdInstrumentDefinitionSpreadCode}, body : MdInstrumentDefinitionSpread ]
+        \cup [ tag : {SecurityStatusCode}, body : SecurityStatus ]
+        \cup [ tag : {MdIncrementalRefreshBookCode}, body : MdIncrementalRefreshBook ]
+        \cup [ tag : {MdIncrementalRefreshDailyStatisticsCode}, body : MdIncrementalRefreshDailyStatistics ]
+        \cup [ tag : {MdIncrementalRefreshLimitsBandingCode}, body : MdIncrementalRefreshLimitsBanding ]
+        \cup [ tag : {MdIncrementalRefreshSessionStatisticsCode}, body : MdIncrementalRefreshSessionStatistics ]
+        \cup [ tag : {MdIncrementalRefreshTradeCode}, body : MdIncrementalRefreshTrade ]
+        \cup [ tag : {MdIncrementalRefreshVolumeCode}, body : MdIncrementalRefreshVolume ]
+        \cup [ tag : {SnapshotFullRefreshCode}, body : SnapshotFullRefresh ]
+        \cup [ tag : {QuoteRequestCode}, body : QuoteRequest ]
+        \cup [ tag : {MdInstrumentDefinitionOptionCode}, body : MdInstrumentDefinitionOption ]
+        \cup [ tag : {MdIncrementalRefreshTradeSummaryCode}, body : MdIncrementalRefreshTradeSummary ]
+        \cup [ tag : {NegotiationRejectCode}, body : NegotiationReject ]
+        \cup [ tag : {NegotiationResponseCode}, body : NegotiationResponse ]
+        \cup [ tag : {TerminateCode}, body : Terminate ]
+        \cup [ tag : {RequestAckCode}, body : RequestAck ]
+        \cup [ tag : {RequestRejectCode}, body : RequestReject ]
+
+EncodeServerPayload(message) ==
+    CASE message.tag = ChannelResetCode -> EncodeChannelReset(message.body)
+      [] message.tag = AdminHeartbeatCode -> << >>
+      [] message.tag = AdminLoginCode -> EncodeAdminLogin(message.body)
+      [] message.tag = AdminLogoutCode -> EncodeAdminLogout(message.body)
+      [] message.tag = MdInstrumentDefinitionFutureCode -> EncodeMdInstrumentDefinitionFuture(message.body)
+      [] message.tag = MdInstrumentDefinitionSpreadCode -> EncodeMdInstrumentDefinitionSpread(message.body)
+      [] message.tag = SecurityStatusCode -> EncodeSecurityStatus(message.body)
+      [] message.tag = MdIncrementalRefreshBookCode -> EncodeMdIncrementalRefreshBook(message.body)
+      [] message.tag = MdIncrementalRefreshDailyStatisticsCode -> EncodeMdIncrementalRefreshDailyStatistics(message.body)
+      [] message.tag = MdIncrementalRefreshLimitsBandingCode -> EncodeMdIncrementalRefreshLimitsBanding(message.body)
+      [] message.tag = MdIncrementalRefreshSessionStatisticsCode -> EncodeMdIncrementalRefreshSessionStatistics(message.body)
+      [] message.tag = MdIncrementalRefreshTradeCode -> EncodeMdIncrementalRefreshTrade(message.body)
+      [] message.tag = MdIncrementalRefreshVolumeCode -> EncodeMdIncrementalRefreshVolume(message.body)
+      [] message.tag = SnapshotFullRefreshCode -> EncodeSnapshotFullRefresh(message.body)
+      [] message.tag = QuoteRequestCode -> EncodeQuoteRequest(message.body)
+      [] message.tag = MdInstrumentDefinitionOptionCode -> EncodeMdInstrumentDefinitionOption(message.body)
+      [] message.tag = MdIncrementalRefreshTradeSummaryCode -> EncodeMdIncrementalRefreshTradeSummary(message.body)
+      [] message.tag = NegotiationRejectCode -> EncodeNegotiationReject(message.body)
+      [] message.tag = NegotiationResponseCode -> EncodeNegotiationResponse(message.body)
+      [] message.tag = TerminateCode -> EncodeTerminate(message.body)
+      [] message.tag = RequestAckCode -> EncodeRequestAck(message.body)
+      [] message.tag = RequestRejectCode -> EncodeRequestReject(message.body)
+
+DecodeServerPayload(tag, bytes) ==
+    LET read ==
+            CASE tag = ChannelResetCode -> DecodeChannelReset(bytes)
+              [] tag = AdminHeartbeatCode -> Ok([empty |-> 0], bytes)
+              [] tag = AdminLoginCode -> DecodeAdminLogin(bytes)
+              [] tag = AdminLogoutCode -> DecodeAdminLogout(bytes)
+              [] tag = MdInstrumentDefinitionFutureCode -> DecodeMdInstrumentDefinitionFuture(bytes)
+              [] tag = MdInstrumentDefinitionSpreadCode -> DecodeMdInstrumentDefinitionSpread(bytes)
+              [] tag = SecurityStatusCode -> DecodeSecurityStatus(bytes)
+              [] tag = MdIncrementalRefreshBookCode -> DecodeMdIncrementalRefreshBook(bytes)
+              [] tag = MdIncrementalRefreshDailyStatisticsCode -> DecodeMdIncrementalRefreshDailyStatistics(bytes)
+              [] tag = MdIncrementalRefreshLimitsBandingCode -> DecodeMdIncrementalRefreshLimitsBanding(bytes)
+              [] tag = MdIncrementalRefreshSessionStatisticsCode -> DecodeMdIncrementalRefreshSessionStatistics(bytes)
+              [] tag = MdIncrementalRefreshTradeCode -> DecodeMdIncrementalRefreshTrade(bytes)
+              [] tag = MdIncrementalRefreshVolumeCode -> DecodeMdIncrementalRefreshVolume(bytes)
+              [] tag = SnapshotFullRefreshCode -> DecodeSnapshotFullRefresh(bytes)
+              [] tag = QuoteRequestCode -> DecodeQuoteRequest(bytes)
+              [] tag = MdInstrumentDefinitionOptionCode -> DecodeMdInstrumentDefinitionOption(bytes)
+              [] tag = MdIncrementalRefreshTradeSummaryCode -> DecodeMdIncrementalRefreshTradeSummary(bytes)
+              [] tag = NegotiationRejectCode -> DecodeNegotiationReject(bytes)
+              [] tag = NegotiationResponseCode -> DecodeNegotiationResponse(bytes)
+              [] tag = TerminateCode -> DecodeTerminate(bytes)
+              [] tag = RequestAckCode -> DecodeRequestAck(bytes)
+              [] tag = RequestRejectCode -> DecodeRequestReject(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroServerPayload == [tag |-> ChannelResetCode, body |-> ZeroChannelReset]
+
+(* Each Server Payload in turn, at the values the message it names is checked at *)
+CheckedServerPayload ==
+    { [tag |-> ChannelResetCode, body |-> one] : one \in CheckedChannelReset }
+        \cup { [tag |-> AdminHeartbeatCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> AdminLoginCode, body |-> one] : one \in CheckedAdminLogin }
+        \cup { [tag |-> AdminLogoutCode, body |-> one] : one \in CheckedAdminLogout }
+        \cup { [tag |-> MdInstrumentDefinitionFutureCode, body |-> one] : one \in CheckedMdInstrumentDefinitionFuture }
+        \cup { [tag |-> MdInstrumentDefinitionSpreadCode, body |-> one] : one \in CheckedMdInstrumentDefinitionSpread }
+        \cup { [tag |-> SecurityStatusCode, body |-> one] : one \in CheckedSecurityStatus }
+        \cup { [tag |-> MdIncrementalRefreshBookCode, body |-> one] : one \in CheckedMdIncrementalRefreshBook }
+        \cup { [tag |-> MdIncrementalRefreshDailyStatisticsCode, body |-> one] : one \in CheckedMdIncrementalRefreshDailyStatistics }
+        \cup { [tag |-> MdIncrementalRefreshLimitsBandingCode, body |-> one] : one \in CheckedMdIncrementalRefreshLimitsBanding }
+        \cup { [tag |-> MdIncrementalRefreshSessionStatisticsCode, body |-> one] : one \in CheckedMdIncrementalRefreshSessionStatistics }
+        \cup { [tag |-> MdIncrementalRefreshTradeCode, body |-> one] : one \in CheckedMdIncrementalRefreshTrade }
+        \cup { [tag |-> MdIncrementalRefreshVolumeCode, body |-> one] : one \in CheckedMdIncrementalRefreshVolume }
+        \cup { [tag |-> SnapshotFullRefreshCode, body |-> one] : one \in CheckedSnapshotFullRefresh }
+        \cup { [tag |-> QuoteRequestCode, body |-> one] : one \in CheckedQuoteRequest }
+        \cup { [tag |-> MdInstrumentDefinitionOptionCode, body |-> one] : one \in CheckedMdInstrumentDefinitionOption }
+        \cup { [tag |-> MdIncrementalRefreshTradeSummaryCode, body |-> one] : one \in CheckedMdIncrementalRefreshTradeSummary }
+        \cup { [tag |-> NegotiationRejectCode, body |-> one] : one \in CheckedNegotiationReject }
+        \cup { [tag |-> NegotiationResponseCode, body |-> one] : one \in CheckedNegotiationResponse }
+        \cup { [tag |-> TerminateCode, body |-> one] : one \in CheckedTerminate }
+        \cup { [tag |-> RequestAckCode, body |-> one] : one \in CheckedRequestAck }
+        \cup { [tag |-> RequestRejectCode, body |-> one] : one \in CheckedRequestReject }
+
+(***************************************************************************)
+(* Server Tcp Message                                                      *)
+(***************************************************************************)
+
+ServerTcpMessage ==
+    [ blockLength   : Sample(2),
+      schemaId      : Sample(2),
+      version       : Sample(2),
+      serverPayload : ServerPayload ]
+
+EncodeServerTcpMessage(message) ==
+    message.blockLength
+        \o EncodeUIntLE(message.serverPayload.tag, 2)
+        \o message.schemaId
+        \o message.version
+        \o EncodeServerPayload(message.serverPayload)
+
+DecodeServerTcpMessage(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET templateId == ReadUIntLE(blockLength.rest, 2) IN IF ~templateId.ok THEN Fail ELSE
+    LET schemaId == ReadBytes(templateId.rest, 2) IN IF ~schemaId.ok THEN Fail ELSE
+    LET version == ReadBytes(schemaId.rest, 2) IN IF ~version.ok THEN Fail ELSE
+    LET serverPayload == DecodeServerPayload(templateId.value, version.rest) IN IF ~serverPayload.ok THEN Fail ELSE
+    Ok([ blockLength   |-> blockLength.value,
+         schemaId      |-> schemaId.value,
+         version       |-> version.value,
+         serverPayload |-> serverPayload.value ], serverPayload.rest)
+
+ZeroServerTcpMessage ==
+    [ blockLength   |-> [i \in 1 .. 2 |-> 0],
+      schemaId      |-> [i \in 1 .. 2 |-> 0],
+      version       |-> [i \in 1 .. 2 |-> 0],
+      serverPayload |-> ZeroServerPayload ]
+
+(* Server Tcp Message at zero, then each field in turn at the values it is checked at *)
+CheckedServerTcpMessage ==
+    { ZeroServerTcpMessage }
+        \cup { [ZeroServerTcpMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroServerTcpMessage EXCEPT !.schemaId = one] : one \in Sample(2) }
+        \cup { [ZeroServerTcpMessage EXCEPT !.version = one] : one \in Sample(2) }
+        \cup { [ZeroServerTcpMessage EXCEPT !.serverPayload = one] : one \in CheckedServerPayload }
+
+(***************************************************************************)
+(* Server Tcp Frame, framed by Tcp Message Size                            *)
+(***************************************************************************)
+
+ServerTcpFrame ==
+    [ encodingType          : Sample(2),
+      messageSequenceNumber : Sample(4),
+      tcpSendingTime        : Sample(8),
+      serverTcpMessage      : ServerTcpMessage ]
+
+EncodeServerTcpFrameBody(message) ==
+    EncodeServerTcpMessage(message.serverTcpMessage)
+
+(* Tcp Message Size counts the bytes it frames, so it is written from them *)
+EncodeServerTcpFrame(message) ==
+    LET body == EncodeServerTcpFrameBody(message)
+    IN  message.encodingType \o message.messageSequenceNumber \o message.tcpSendingTime \o EncodeUIntLE(Len(body) + 2, 2) \o body
+
+DecodeServerTcpFrame(bytes) ==
+    LET encodingType == ReadBytes(bytes, 2) IN IF ~encodingType.ok THEN Fail ELSE
+    LET messageSequenceNumber == ReadBytes(encodingType.rest, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET tcpSendingTime == ReadBytes(messageSequenceNumber.rest, 8) IN IF ~tcpSendingTime.ok THEN Fail ELSE
+    LET length == ReadUIntLE(tcpSendingTime.rest, 2) IN IF ~length.ok THEN Fail ELSE
+    LET size == length.value - 2 IN
+    IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, size)
+        beyond == SubSeq(length.rest, size + 1, Len(length.rest))
+    IN
+    LET serverTcpMessage == DecodeServerTcpMessage(framed) IN IF ~serverTcpMessage.ok THEN Fail ELSE
+    IF serverTcpMessage.rest # << >> THEN Fail ELSE
+    Ok([ encodingType          |-> encodingType.value,
+         messageSequenceNumber |-> messageSequenceNumber.value,
+         tcpSendingTime        |-> tcpSendingTime.value,
+         serverTcpMessage      |-> serverTcpMessage.value ], beyond)
+
+ZeroServerTcpFrame ==
+    [ encodingType          |-> [i \in 1 .. 2 |-> 0],
+      messageSequenceNumber |-> [i \in 1 .. 4 |-> 0],
+      tcpSendingTime        |-> [i \in 1 .. 8 |-> 0],
+      serverTcpMessage      |-> ZeroServerTcpMessage ]
+
+(* Server Tcp Frame at zero, then each field in turn at the values it is checked at *)
+CheckedServerTcpFrame ==
+    { ZeroServerTcpFrame }
+        \cup { [ZeroServerTcpFrame EXCEPT !.encodingType = one] : one \in Sample(2) }
+        \cup { [ZeroServerTcpFrame EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroServerTcpFrame EXCEPT !.tcpSendingTime = one] : one \in Sample(8) }
+        \cup { [ZeroServerTcpFrame EXCEPT !.serverTcpMessage = one] : one \in CheckedServerTcpMessage }
+
+(* A run of Server Tcp Frame, written one after another *)
+RECURSIVE EncodeServerTcpFrameList(_)
+EncodeServerTcpFrameList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeServerTcpFrame(Head(messages)) \o EncodeServerTcpFrameList(Tail(messages))
+
+(* As many Server Tcp Frame as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadServerTcpFrameAll(_)
+ReadServerTcpFrameAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodeServerTcpFrame(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadServerTcpFrameAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Server Tcp Frame of each kind, for the lists that carry them *)
+OneServerTcpFrame == { ZeroServerTcpFrame }
+
+(***************************************************************************)
+(* Server Tcp Packet                                                       *)
+(***************************************************************************)
+
+ServerTcpPacket ==
+    [ serverTcpFrame : SampleLists(OneServerTcpFrame) ]
+
+EncodeServerTcpPacket(message) ==
+    EncodeServerTcpFrameList(message.serverTcpFrame)
+
+DecodeServerTcpPacket(bytes) ==
+    LET serverTcpFrame == ReadServerTcpFrameAll(bytes) IN IF ~serverTcpFrame.ok THEN Fail ELSE
+    Ok([ serverTcpFrame |-> serverTcpFrame.value ], serverTcpFrame.rest)
+
+ZeroServerTcpPacket ==
+    [ serverTcpFrame |-> << >> ]
+
+(* Server Tcp Packet at zero, then each field in turn at the values it is checked at *)
+CheckedServerTcpPacket ==
+    { ZeroServerTcpPacket }
+        \cup { [ZeroServerTcpPacket EXCEPT !.serverTcpFrame = one] : one \in SampleLists(OneServerTcpFrame) }
+
+(***************************************************************************)
+(* What TLC checks                                                         *)
+(***************************************************************************)
+
+(* An integer a rule depends on writes its width and reads back what was written *)
+RoundTripUIntLE ==
+    \A width \in 1 .. 3 :
+        \A value \in {0, 1, 255, 256, 65535} :
+            (value < 256 ^ width) =>
+                /\ Len(EncodeUIntLE(value, width)) = width
+                /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
+                /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
+
+(* Every Channel Reset Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripChannelResetGroup ==
+    \A message \in CheckedChannelResetGroup :
+        LET read == DecodeChannelResetGroup(EncodeChannelResetGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Channel Reset Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripChannelResetGroups ==
+    \A message \in CheckedChannelResetGroups :
+        LET read == DecodeChannelResetGroups(EncodeChannelResetGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Channel Reset decodes back to what was encoded, and leaves nothing over *)
+RoundTripChannelReset ==
+    \A message \in CheckedChannelReset :
+        LET read == DecodeChannelReset(EncodeChannelReset(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Admin Login decodes back to what was encoded, and leaves nothing over *)
+RoundTripAdminLogin ==
+    \A message \in CheckedAdminLogin :
+        LET read == DecodeAdminLogin(EncodeAdminLogin(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Admin Logout decodes back to what was encoded, and leaves nothing over *)
+RoundTripAdminLogout ==
+    \A message \in CheckedAdminLogout :
+        LET read == DecodeAdminLogout(EncodeAdminLogout(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Maturity Month Year decodes back to what was encoded, and leaves nothing over *)
+RoundTripMaturityMonthYear ==
+    \A message \in CheckedMaturityMonthYear :
+        LET read == DecodeMaturityMonthYear(EncodeMaturityMonthYear(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Events Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripEventsGroup ==
+    \A message \in CheckedEventsGroup :
+        LET read == DecodeEventsGroup(EncodeEventsGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Events Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripEventsGroups ==
+    \A message \in CheckedEventsGroups :
+        LET read == DecodeEventsGroups(EncodeEventsGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Feed Types Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripFeedTypesGroup ==
+    \A message \in CheckedFeedTypesGroup :
+        LET read == DecodeFeedTypesGroup(EncodeFeedTypesGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Feed Types Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripFeedTypesGroups ==
+    \A message \in CheckedFeedTypesGroups :
+        LET read == DecodeFeedTypesGroups(EncodeFeedTypesGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Inst Attrib Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripInstAttribGroup ==
+    \A message \in CheckedInstAttribGroup :
+        LET read == DecodeInstAttribGroup(EncodeInstAttribGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Inst Attrib Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripInstAttribGroups ==
+    \A message \in CheckedInstAttribGroups :
+        LET read == DecodeInstAttribGroups(EncodeInstAttribGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Lot Type Rules Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripLotTypeRulesGroup ==
+    \A message \in CheckedLotTypeRulesGroup :
+        LET read == DecodeLotTypeRulesGroup(EncodeLotTypeRulesGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Lot Type Rules Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripLotTypeRulesGroups ==
+    \A message \in CheckedLotTypeRulesGroups :
+        LET read == DecodeLotTypeRulesGroups(EncodeLotTypeRulesGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Md Instrument Definition Future decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdInstrumentDefinitionFuture ==
+    \A message \in CheckedMdInstrumentDefinitionFuture :
+        LET read == DecodeMdInstrumentDefinitionFuture(EncodeMdInstrumentDefinitionFuture(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Maturity Month Year decodes back to what was encoded, and leaves nothing over *)
+RoundTripMaturityMonthYear2 ==
+    \A message \in CheckedMaturityMonthYear2 :
+        LET read == DecodeMaturityMonthYear2(EncodeMaturityMonthYear2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Events Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripEventsGroup2 ==
+    \A message \in CheckedEventsGroup2 :
+        LET read == DecodeEventsGroup2(EncodeEventsGroup2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Events Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripEventsGroups2 ==
+    \A message \in CheckedEventsGroups2 :
+        LET read == DecodeEventsGroups2(EncodeEventsGroups2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Feed Types Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripFeedTypesGroup2 ==
+    \A message \in CheckedFeedTypesGroup2 :
+        LET read == DecodeFeedTypesGroup2(EncodeFeedTypesGroup2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Feed Types Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripFeedTypesGroups2 ==
+    \A message \in CheckedFeedTypesGroups2 :
+        LET read == DecodeFeedTypesGroups2(EncodeFeedTypesGroups2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Inst Attrib Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripInstAttribGroup2 ==
+    \A message \in CheckedInstAttribGroup2 :
+        LET read == DecodeInstAttribGroup2(EncodeInstAttribGroup2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Inst Attrib Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripInstAttribGroups2 ==
+    \A message \in CheckedInstAttribGroups2 :
+        LET read == DecodeInstAttribGroups2(EncodeInstAttribGroups2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Lot Type Rules Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripLotTypeRulesGroup2 ==
+    \A message \in CheckedLotTypeRulesGroup2 :
+        LET read == DecodeLotTypeRulesGroup2(EncodeLotTypeRulesGroup2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Lot Type Rules Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripLotTypeRulesGroups2 ==
+    \A message \in CheckedLotTypeRulesGroups2 :
+        LET read == DecodeLotTypeRulesGroups2(EncodeLotTypeRulesGroups2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Legacy Legs Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripLegacyLegsGroup ==
+    \A message \in CheckedLegacyLegsGroup :
+        LET read == DecodeLegacyLegsGroup(EncodeLegacyLegsGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Legacy Legs Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripLegacyLegsGroups ==
+    \A message \in CheckedLegacyLegsGroups :
+        LET read == DecodeLegacyLegsGroups(EncodeLegacyLegsGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Md Instrument Definition Spread decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdInstrumentDefinitionSpread ==
+    \A message \in CheckedMdInstrumentDefinitionSpread :
+        LET read == DecodeMdInstrumentDefinitionSpread(EncodeMdInstrumentDefinitionSpread(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Security Status decodes back to what was encoded, and leaves nothing over *)
+RoundTripSecurityStatus ==
+    \A message \in CheckedSecurityStatus :
+        LET read == DecodeSecurityStatus(EncodeSecurityStatus(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Book Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshBookGroup ==
+    \A message \in CheckedIncrementalRefreshBookGroup :
+        LET read == DecodeIncrementalRefreshBookGroup(EncodeIncrementalRefreshBookGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Book Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshBookGroups ==
+    \A message \in CheckedIncrementalRefreshBookGroups :
+        LET read == DecodeIncrementalRefreshBookGroups(EncodeIncrementalRefreshBookGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Md Incremental Refresh Book decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdIncrementalRefreshBook ==
+    \A message \in CheckedMdIncrementalRefreshBook :
+        LET read == DecodeMdIncrementalRefreshBook(EncodeMdIncrementalRefreshBook(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Daily Statistics Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshDailyStatisticsGroup ==
+    \A message \in CheckedIncrementalRefreshDailyStatisticsGroup :
+        LET read == DecodeIncrementalRefreshDailyStatisticsGroup(EncodeIncrementalRefreshDailyStatisticsGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Daily Statistics Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshDailyStatisticsGroups ==
+    \A message \in CheckedIncrementalRefreshDailyStatisticsGroups :
+        LET read == DecodeIncrementalRefreshDailyStatisticsGroups(EncodeIncrementalRefreshDailyStatisticsGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Md Incremental Refresh Daily Statistics decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdIncrementalRefreshDailyStatistics ==
+    \A message \in CheckedMdIncrementalRefreshDailyStatistics :
+        LET read == DecodeMdIncrementalRefreshDailyStatistics(EncodeMdIncrementalRefreshDailyStatistics(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Limits Banding Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshLimitsBandingGroup ==
+    \A message \in CheckedIncrementalRefreshLimitsBandingGroup :
+        LET read == DecodeIncrementalRefreshLimitsBandingGroup(EncodeIncrementalRefreshLimitsBandingGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Limits Banding Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshLimitsBandingGroups ==
+    \A message \in CheckedIncrementalRefreshLimitsBandingGroups :
+        LET read == DecodeIncrementalRefreshLimitsBandingGroups(EncodeIncrementalRefreshLimitsBandingGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Md Incremental Refresh Limits Banding decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdIncrementalRefreshLimitsBanding ==
+    \A message \in CheckedMdIncrementalRefreshLimitsBanding :
+        LET read == DecodeMdIncrementalRefreshLimitsBanding(EncodeMdIncrementalRefreshLimitsBanding(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Session Statistics Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshSessionStatisticsGroup ==
+    \A message \in CheckedIncrementalRefreshSessionStatisticsGroup :
+        LET read == DecodeIncrementalRefreshSessionStatisticsGroup(EncodeIncrementalRefreshSessionStatisticsGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Session Statistics Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshSessionStatisticsGroups ==
+    \A message \in CheckedIncrementalRefreshSessionStatisticsGroups :
+        LET read == DecodeIncrementalRefreshSessionStatisticsGroups(EncodeIncrementalRefreshSessionStatisticsGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Md Incremental Refresh Session Statistics decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdIncrementalRefreshSessionStatistics ==
+    \A message \in CheckedMdIncrementalRefreshSessionStatistics :
+        LET read == DecodeMdIncrementalRefreshSessionStatistics(EncodeMdIncrementalRefreshSessionStatistics(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Trade Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshTradeGroup ==
+    \A message \in CheckedIncrementalRefreshTradeGroup :
+        LET read == DecodeIncrementalRefreshTradeGroup(EncodeIncrementalRefreshTradeGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Trade Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshTradeGroups ==
+    \A message \in CheckedIncrementalRefreshTradeGroups :
+        LET read == DecodeIncrementalRefreshTradeGroups(EncodeIncrementalRefreshTradeGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Md Incremental Refresh Trade decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdIncrementalRefreshTrade ==
+    \A message \in CheckedMdIncrementalRefreshTrade :
+        LET read == DecodeMdIncrementalRefreshTrade(EncodeMdIncrementalRefreshTrade(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Volume Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshVolumeGroup ==
+    \A message \in CheckedIncrementalRefreshVolumeGroup :
+        LET read == DecodeIncrementalRefreshVolumeGroup(EncodeIncrementalRefreshVolumeGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Volume Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshVolumeGroups ==
+    \A message \in CheckedIncrementalRefreshVolumeGroups :
+        LET read == DecodeIncrementalRefreshVolumeGroups(EncodeIncrementalRefreshVolumeGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Md Incremental Refresh Volume decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdIncrementalRefreshVolume ==
+    \A message \in CheckedMdIncrementalRefreshVolume :
+        LET read == DecodeMdIncrementalRefreshVolume(EncodeMdIncrementalRefreshVolume(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Snapshot Full Refresh Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripSnapshotFullRefreshGroup ==
+    \A message \in CheckedSnapshotFullRefreshGroup :
+        LET read == DecodeSnapshotFullRefreshGroup(EncodeSnapshotFullRefreshGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Snapshot Full Refresh Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripSnapshotFullRefreshGroups ==
+    \A message \in CheckedSnapshotFullRefreshGroups :
+        LET read == DecodeSnapshotFullRefreshGroups(EncodeSnapshotFullRefreshGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Snapshot Full Refresh decodes back to what was encoded, and leaves nothing over *)
+RoundTripSnapshotFullRefresh ==
+    \A message \in CheckedSnapshotFullRefresh :
+        LET read == DecodeSnapshotFullRefresh(EncodeSnapshotFullRefresh(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Related Sym Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripRelatedSymGroup ==
+    \A message \in CheckedRelatedSymGroup :
+        LET read == DecodeRelatedSymGroup(EncodeRelatedSymGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Related Sym Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripRelatedSymGroups ==
+    \A message \in CheckedRelatedSymGroups :
+        LET read == DecodeRelatedSymGroups(EncodeRelatedSymGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Quote Request decodes back to what was encoded, and leaves nothing over *)
+RoundTripQuoteRequest ==
+    \A message \in CheckedQuoteRequest :
+        LET read == DecodeQuoteRequest(EncodeQuoteRequest(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Maturity Month Year decodes back to what was encoded, and leaves nothing over *)
+RoundTripMaturityMonthYear3 ==
+    \A message \in CheckedMaturityMonthYear3 :
+        LET read == DecodeMaturityMonthYear3(EncodeMaturityMonthYear3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Events Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripEventsGroup3 ==
+    \A message \in CheckedEventsGroup3 :
+        LET read == DecodeEventsGroup3(EncodeEventsGroup3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Events Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripEventsGroups3 ==
+    \A message \in CheckedEventsGroups3 :
+        LET read == DecodeEventsGroups3(EncodeEventsGroups3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Feed Types Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripFeedTypesGroup3 ==
+    \A message \in CheckedFeedTypesGroup3 :
+        LET read == DecodeFeedTypesGroup3(EncodeFeedTypesGroup3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Feed Types Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripFeedTypesGroups3 ==
+    \A message \in CheckedFeedTypesGroups3 :
+        LET read == DecodeFeedTypesGroups3(EncodeFeedTypesGroups3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Inst Attrib Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripInstAttribGroup3 ==
+    \A message \in CheckedInstAttribGroup3 :
+        LET read == DecodeInstAttribGroup3(EncodeInstAttribGroup3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Inst Attrib Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripInstAttribGroups3 ==
+    \A message \in CheckedInstAttribGroups3 :
+        LET read == DecodeInstAttribGroups3(EncodeInstAttribGroups3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Lot Type Rules Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripLotTypeRulesGroup3 ==
+    \A message \in CheckedLotTypeRulesGroup3 :
+        LET read == DecodeLotTypeRulesGroup3(EncodeLotTypeRulesGroup3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Lot Type Rules Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripLotTypeRulesGroups3 ==
+    \A message \in CheckedLotTypeRulesGroups3 :
+        LET read == DecodeLotTypeRulesGroups3(EncodeLotTypeRulesGroups3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Option Underlyings Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripOptionUnderlyingsGroup ==
+    \A message \in CheckedOptionUnderlyingsGroup :
+        LET read == DecodeOptionUnderlyingsGroup(EncodeOptionUnderlyingsGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Option Underlyings Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripOptionUnderlyingsGroups ==
+    \A message \in CheckedOptionUnderlyingsGroups :
+        LET read == DecodeOptionUnderlyingsGroups(EncodeOptionUnderlyingsGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Md Instrument Definition Option decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdInstrumentDefinitionOption ==
+    \A message \in CheckedMdInstrumentDefinitionOption :
+        LET read == DecodeMdInstrumentDefinitionOption(EncodeMdInstrumentDefinitionOption(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Trade Summary Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshTradeSummaryGroup ==
+    \A message \in CheckedIncrementalRefreshTradeSummaryGroup :
+        LET read == DecodeIncrementalRefreshTradeSummaryGroup(EncodeIncrementalRefreshTradeSummaryGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Trade Summary Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshTradeSummaryGroups ==
+    \A message \in CheckedIncrementalRefreshTradeSummaryGroups :
+        LET read == DecodeIncrementalRefreshTradeSummaryGroups(EncodeIncrementalRefreshTradeSummaryGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Trade Summary Order Id Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshTradeSummaryOrderIdGroup ==
+    \A message \in CheckedIncrementalRefreshTradeSummaryOrderIdGroup :
+        LET read == DecodeIncrementalRefreshTradeSummaryOrderIdGroup(EncodeIncrementalRefreshTradeSummaryOrderIdGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incremental Refresh Trade Summary Order Id Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshTradeSummaryOrderIdGroups ==
+    \A message \in CheckedIncrementalRefreshTradeSummaryOrderIdGroups :
+        LET read == DecodeIncrementalRefreshTradeSummaryOrderIdGroups(EncodeIncrementalRefreshTradeSummaryOrderIdGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Md Incremental Refresh Trade Summary decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdIncrementalRefreshTradeSummary ==
+    \A message \in CheckedMdIncrementalRefreshTradeSummary :
+        LET read == DecodeMdIncrementalRefreshTradeSummary(EncodeMdIncrementalRefreshTradeSummary(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Negotiation Reject decodes back to what was encoded, and leaves nothing over *)
+RoundTripNegotiationReject ==
+    \A message \in CheckedNegotiationReject :
+        LET read == DecodeNegotiationReject(EncodeNegotiationReject(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Negotiation Response decodes back to what was encoded, and leaves nothing over *)
+RoundTripNegotiationResponse ==
+    \A message \in CheckedNegotiationResponse :
+        LET read == DecodeNegotiationResponse(EncodeNegotiationResponse(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Terminate decodes back to what was encoded, and leaves nothing over *)
+RoundTripTerminate ==
+    \A message \in CheckedTerminate :
+        LET read == DecodeTerminate(EncodeTerminate(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Request Ack Security Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripRequestAckSecurityGroup ==
+    \A message \in CheckedRequestAckSecurityGroup :
+        LET read == DecodeRequestAckSecurityGroup(EncodeRequestAckSecurityGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Request Ack Security Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripRequestAckSecurityGroups ==
+    \A message \in CheckedRequestAckSecurityGroups :
+        LET read == DecodeRequestAckSecurityGroups(EncodeRequestAckSecurityGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Request Ack Related Symbol Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripRequestAckRelatedSymbolGroup ==
+    \A message \in CheckedRequestAckRelatedSymbolGroup :
+        LET read == DecodeRequestAckRelatedSymbolGroup(EncodeRequestAckRelatedSymbolGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Request Ack Related Symbol Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripRequestAckRelatedSymbolGroups ==
+    \A message \in CheckedRequestAckRelatedSymbolGroups :
+        LET read == DecodeRequestAckRelatedSymbolGroups(EncodeRequestAckRelatedSymbolGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Request Ack decodes back to what was encoded, and leaves nothing over *)
+RoundTripRequestAck ==
+    \A message \in CheckedRequestAck :
+        LET read == DecodeRequestAck(EncodeRequestAck(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Request Reject decodes back to what was encoded, and leaves nothing over *)
+RoundTripRequestReject ==
+    \A message \in CheckedRequestReject :
+        LET read == DecodeRequestReject(EncodeRequestReject(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Server Tcp Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripServerTcpMessage ==
+    \A message \in CheckedServerTcpMessage :
+        LET read == DecodeServerTcpMessage(EncodeServerTcpMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Server Tcp Frame decodes back to what was encoded, and leaves nothing over *)
+RoundTripServerTcpFrame ==
+    \A message \in CheckedServerTcpFrame :
+        LET read == DecodeServerTcpFrame(EncodeServerTcpFrame(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Server Tcp Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripServerTcpPacket ==
+    \A message \in CheckedServerTcpPacket :
+        LET read == DecodeServerTcpPacket(EncodeServerTcpPacket(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* A Server Payload is selected by the Template Id it is written under *)
+SelectsServerPayload ==
+    \A message \in CheckedServerPayload :
+        LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
+        IN  read.ok /\ read.value.tag = message.tag
+
+(* Tcp Message Size is written from the bytes it frames *)
+FramesServerTcpFrame ==
+    \A message \in CheckedServerTcpFrame :
+        LET bytes == EncodeServerTcpFrame(message)
+        IN  DecodeUIntLE(SubSeq(bytes, 15, 16)) = Len(bytes) - 14
+
+-----------------------------------------------------------------------------
+(* The state the session machine will run over. It stands still until there are *)
+(* transitions to take. *)
+
+VARIABLE parsed
+
+Init == parsed = << >>
+Next == UNCHANGED parsed
+Spec == Init /\ [][Next]_parsed
+
+=============================================================================
