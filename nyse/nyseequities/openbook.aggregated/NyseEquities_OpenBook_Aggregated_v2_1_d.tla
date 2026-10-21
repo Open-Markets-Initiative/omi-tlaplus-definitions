@@ -715,47 +715,37 @@ CheckedRefreshHeaderMessage ==
         \cup { [ZeroRefreshHeaderMessage EXCEPT !.currentRefreshPktChoice = one] : one \in CheckedCurrentRefreshPktChoice }
 
 (***************************************************************************)
-(* Request Response Message: 21 bytes                                      *)
+(* Request Response Message: 17 bytes                                      *)
 (***************************************************************************)
 
 RequestResponseMessage ==
-    [ msgSize       : Sample(2),
-      msgType       : Sample(2),
-      requestSeqNum : Sample(4),
+    [ requestSeqNum : Sample(4),
       sourceId      : Sample(10),
       productId     : Sample(1),
       channelId     : Sample(1),
       status        : Sample(1) ]
 
 EncodeRequestResponseMessage(message) ==
-    message.msgSize
-        \o message.msgType
-        \o message.requestSeqNum
+    message.requestSeqNum
         \o message.sourceId
         \o message.productId
         \o message.channelId
         \o message.status
 
 DecodeRequestResponseMessage(bytes) ==
-    LET msgSize == ReadBytes(bytes, 2) IN IF ~msgSize.ok THEN Fail ELSE
-    LET msgType == ReadBytes(msgSize.rest, 2) IN IF ~msgType.ok THEN Fail ELSE
-    LET requestSeqNum == ReadBytes(msgType.rest, 4) IN IF ~requestSeqNum.ok THEN Fail ELSE
+    LET requestSeqNum == ReadBytes(bytes, 4) IN IF ~requestSeqNum.ok THEN Fail ELSE
     LET sourceId == ReadBytes(requestSeqNum.rest, 10) IN IF ~sourceId.ok THEN Fail ELSE
     LET productId == ReadBytes(sourceId.rest, 1) IN IF ~productId.ok THEN Fail ELSE
     LET channelId == ReadBytes(productId.rest, 1) IN IF ~channelId.ok THEN Fail ELSE
     LET status == ReadBytes(channelId.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    Ok([ msgSize       |-> msgSize.value,
-         msgType       |-> msgType.value,
-         requestSeqNum |-> requestSeqNum.value,
+    Ok([ requestSeqNum |-> requestSeqNum.value,
          sourceId      |-> sourceId.value,
          productId     |-> productId.value,
          channelId     |-> channelId.value,
          status        |-> status.value ], status.rest)
 
 ZeroRequestResponseMessage ==
-    [ msgSize       |-> [i \in 1 .. 2 |-> 0],
-      msgType       |-> [i \in 1 .. 2 |-> 0],
-      requestSeqNum |-> [i \in 1 .. 4 |-> 0],
+    [ requestSeqNum |-> [i \in 1 .. 4 |-> 0],
       sourceId      |-> [i \in 1 .. 10 |-> 0],
       productId     |-> [i \in 1 .. 1 |-> 0],
       channelId     |-> [i \in 1 .. 1 |-> 0],
@@ -764,8 +754,6 @@ ZeroRequestResponseMessage ==
 (* Request Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedRequestResponseMessage ==
     { ZeroRequestResponseMessage }
-        \cup { [ZeroRequestResponseMessage EXCEPT !.msgSize = one] : one \in Sample(2) }
-        \cup { [ZeroRequestResponseMessage EXCEPT !.msgType = one] : one \in Sample(2) }
         \cup { [ZeroRequestResponseMessage EXCEPT !.requestSeqNum = one] : one \in Sample(4) }
         \cup { [ZeroRequestResponseMessage EXCEPT !.sourceId = one] : one \in Sample(10) }
         \cup { [ZeroRequestResponseMessage EXCEPT !.productId = one] : one \in Sample(1) }
@@ -834,14 +822,33 @@ CheckedSnapshotPricePoint ==
         \cup { [ZeroSnapshotPricePoint EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroSnapshotPricePoint EXCEPT !.numOrders = one] : one \in Sample(2) }
 
+(* A run of Snapshot Price Point, written one after another *)
+RECURSIVE EncodeSnapshotPricePointList(_)
+EncodeSnapshotPricePointList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeSnapshotPricePoint(Head(messages)) \o EncodeSnapshotPricePointList(Tail(messages))
+
+(* As many Snapshot Price Point as the field that counts them says *)
+RECURSIVE ReadSnapshotPricePointList(_, _)
+ReadSnapshotPricePointList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeSnapshotPricePoint(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadSnapshotPricePointList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Snapshot Price Point of each kind, for the lists that carry them *)
+OneSnapshotPricePoint == { ZeroSnapshotPricePoint }
+
 (***************************************************************************)
-(* Orderbook Snapshot Message: 49 bytes                                    *)
+(* Orderbook Snapshot Message                                              *)
 (***************************************************************************)
 
 OrderbookSnapshotMessage ==
-    [ msgSize            : Sample(2),
-      msgType            : Sample(2),
-      sourceTime         : Sample(4),
+    [ sourceTime         : Sample(4),
       sourceTimeNs       : Sample(4),
       symbolIndex        : Sample(4),
       ultraLastSeqNum    : Sample(4),
@@ -850,13 +857,10 @@ OrderbookSnapshotMessage ==
       tradingStatus      : Sample(1),
       remainingCount     : Sample(2),
       mpv                : Sample(2),
-      updateCount        : Sample(1),
-      snapshotPricePoint : SnapshotPricePoint ]
+      snapshotPricePoint : SampleLists(OneSnapshotPricePoint) ]
 
 EncodeOrderbookSnapshotMessage(message) ==
-    message.msgSize
-        \o message.msgType
-        \o message.sourceTime
+    message.sourceTime
         \o message.sourceTimeNs
         \o message.symbolIndex
         \o message.ultraLastSeqNum
@@ -865,13 +869,11 @@ EncodeOrderbookSnapshotMessage(message) ==
         \o message.tradingStatus
         \o message.remainingCount
         \o message.mpv
-        \o message.updateCount
-        \o EncodeSnapshotPricePoint(message.snapshotPricePoint)
+        \o EncodeUIntLE(Len(message.snapshotPricePoint), 1)
+        \o EncodeSnapshotPricePointList(message.snapshotPricePoint)
 
 DecodeOrderbookSnapshotMessage(bytes) ==
-    LET msgSize == ReadBytes(bytes, 2) IN IF ~msgSize.ok THEN Fail ELSE
-    LET msgType == ReadBytes(msgSize.rest, 2) IN IF ~msgType.ok THEN Fail ELSE
-    LET sourceTime == ReadBytes(msgType.rest, 4) IN IF ~sourceTime.ok THEN Fail ELSE
+    LET sourceTime == ReadBytes(bytes, 4) IN IF ~sourceTime.ok THEN Fail ELSE
     LET sourceTimeNs == ReadBytes(sourceTime.rest, 4) IN IF ~sourceTimeNs.ok THEN Fail ELSE
     LET symbolIndex == ReadBytes(sourceTimeNs.rest, 4) IN IF ~symbolIndex.ok THEN Fail ELSE
     LET ultraLastSeqNum == ReadBytes(symbolIndex.rest, 4) IN IF ~ultraLastSeqNum.ok THEN Fail ELSE
@@ -880,11 +882,9 @@ DecodeOrderbookSnapshotMessage(bytes) ==
     LET tradingStatus == ReadBytes(priceScaleCode.rest, 1) IN IF ~tradingStatus.ok THEN Fail ELSE
     LET remainingCount == ReadBytes(tradingStatus.rest, 2) IN IF ~remainingCount.ok THEN Fail ELSE
     LET mpv == ReadBytes(remainingCount.rest, 2) IN IF ~mpv.ok THEN Fail ELSE
-    LET updateCount == ReadBytes(mpv.rest, 1) IN IF ~updateCount.ok THEN Fail ELSE
-    LET snapshotPricePoint == DecodeSnapshotPricePoint(updateCount.rest) IN IF ~snapshotPricePoint.ok THEN Fail ELSE
-    Ok([ msgSize            |-> msgSize.value,
-         msgType            |-> msgType.value,
-         sourceTime         |-> sourceTime.value,
+    LET updateCount == ReadUIntLE(mpv.rest, 1) IN IF ~updateCount.ok THEN Fail ELSE
+    LET snapshotPricePoint == ReadSnapshotPricePointList(updateCount.rest, updateCount.value) IN IF ~snapshotPricePoint.ok THEN Fail ELSE
+    Ok([ sourceTime         |-> sourceTime.value,
          sourceTimeNs       |-> sourceTimeNs.value,
          symbolIndex        |-> symbolIndex.value,
          ultraLastSeqNum    |-> ultraLastSeqNum.value,
@@ -893,13 +893,10 @@ DecodeOrderbookSnapshotMessage(bytes) ==
          tradingStatus      |-> tradingStatus.value,
          remainingCount     |-> remainingCount.value,
          mpv                |-> mpv.value,
-         updateCount        |-> updateCount.value,
          snapshotPricePoint |-> snapshotPricePoint.value ], snapshotPricePoint.rest)
 
 ZeroOrderbookSnapshotMessage ==
-    [ msgSize            |-> [i \in 1 .. 2 |-> 0],
-      msgType            |-> [i \in 1 .. 2 |-> 0],
-      sourceTime         |-> [i \in 1 .. 4 |-> 0],
+    [ sourceTime         |-> [i \in 1 .. 4 |-> 0],
       sourceTimeNs       |-> [i \in 1 .. 4 |-> 0],
       symbolIndex        |-> [i \in 1 .. 4 |-> 0],
       ultraLastSeqNum    |-> [i \in 1 .. 4 |-> 0],
@@ -908,14 +905,11 @@ ZeroOrderbookSnapshotMessage ==
       tradingStatus      |-> [i \in 1 .. 1 |-> 0],
       remainingCount     |-> [i \in 1 .. 2 |-> 0],
       mpv                |-> [i \in 1 .. 2 |-> 0],
-      updateCount        |-> [i \in 1 .. 1 |-> 0],
-      snapshotPricePoint |-> ZeroSnapshotPricePoint ]
+      snapshotPricePoint |-> << >> ]
 
 (* Orderbook Snapshot Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderbookSnapshotMessage ==
     { ZeroOrderbookSnapshotMessage }
-        \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.msgSize = one] : one \in Sample(2) }
-        \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.msgType = one] : one \in Sample(2) }
         \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.sourceTime = one] : one \in Sample(4) }
         \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.sourceTimeNs = one] : one \in Sample(4) }
         \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.symbolIndex = one] : one \in Sample(4) }
@@ -925,8 +919,7 @@ CheckedOrderbookSnapshotMessage ==
         \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.tradingStatus = one] : one \in Sample(1) }
         \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.remainingCount = one] : one \in Sample(2) }
         \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.mpv = one] : one \in Sample(2) }
-        \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.updateCount = one] : one \in Sample(1) }
-        \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.snapshotPricePoint = one] : one \in CheckedSnapshotPricePoint }
+        \cup { [ZeroOrderbookSnapshotMessage EXCEPT !.snapshotPricePoint = one] : one \in SampleLists(OneSnapshotPricePoint) }
 
 (***************************************************************************)
 (* Delta Price Point: 11 bytes                                             *)
@@ -968,81 +961,86 @@ CheckedDeltaPricePoint ==
         \cup { [ZeroDeltaPricePoint EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroDeltaPricePoint EXCEPT !.numOrders = one] : one \in Sample(2) }
 
+(* A run of Delta Price Point, written one after another *)
+RECURSIVE EncodeDeltaPricePointList(_)
+EncodeDeltaPricePointList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeDeltaPricePoint(Head(messages)) \o EncodeDeltaPricePointList(Tail(messages))
+
+(* As many Delta Price Point as the field that counts them says *)
+RECURSIVE ReadDeltaPricePointList(_, _)
+ReadDeltaPricePointList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeDeltaPricePoint(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadDeltaPricePointList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Delta Price Point of each kind, for the lists that carry them *)
+OneDeltaPricePoint == { ZeroDeltaPricePoint }
+
 (***************************************************************************)
-(* Orderbook Delta Update Message: 35 bytes                                *)
+(* Orderbook Delta Update Message                                          *)
 (***************************************************************************)
 
 OrderbookDeltaUpdateMessage ==
-    [ msgSize         : Sample(2),
-      msgType         : Sample(2),
-      sourceTime      : Sample(4),
+    [ sourceTime      : Sample(4),
       sourceTimeNs    : Sample(4),
       symbolIndex     : Sample(4),
       ultraLastSeqNum : Sample(4),
       tradingStatus   : Sample(1),
       remainingCount  : Sample(2),
-      updateCount     : Sample(1),
-      deltaPricePoint : DeltaPricePoint ]
+      deltaPricePoint : SampleLists(OneDeltaPricePoint) ]
 
 EncodeOrderbookDeltaUpdateMessage(message) ==
-    message.msgSize
-        \o message.msgType
-        \o message.sourceTime
+    message.sourceTime
         \o message.sourceTimeNs
         \o message.symbolIndex
         \o message.ultraLastSeqNum
         \o message.tradingStatus
         \o message.remainingCount
-        \o message.updateCount
-        \o EncodeDeltaPricePoint(message.deltaPricePoint)
+        \o EncodeUIntLE(Len(message.deltaPricePoint), 1)
+        \o EncodeDeltaPricePointList(message.deltaPricePoint)
 
 DecodeOrderbookDeltaUpdateMessage(bytes) ==
-    LET msgSize == ReadBytes(bytes, 2) IN IF ~msgSize.ok THEN Fail ELSE
-    LET msgType == ReadBytes(msgSize.rest, 2) IN IF ~msgType.ok THEN Fail ELSE
-    LET sourceTime == ReadBytes(msgType.rest, 4) IN IF ~sourceTime.ok THEN Fail ELSE
+    LET sourceTime == ReadBytes(bytes, 4) IN IF ~sourceTime.ok THEN Fail ELSE
     LET sourceTimeNs == ReadBytes(sourceTime.rest, 4) IN IF ~sourceTimeNs.ok THEN Fail ELSE
     LET symbolIndex == ReadBytes(sourceTimeNs.rest, 4) IN IF ~symbolIndex.ok THEN Fail ELSE
     LET ultraLastSeqNum == ReadBytes(symbolIndex.rest, 4) IN IF ~ultraLastSeqNum.ok THEN Fail ELSE
     LET tradingStatus == ReadBytes(ultraLastSeqNum.rest, 1) IN IF ~tradingStatus.ok THEN Fail ELSE
     LET remainingCount == ReadBytes(tradingStatus.rest, 2) IN IF ~remainingCount.ok THEN Fail ELSE
-    LET updateCount == ReadBytes(remainingCount.rest, 1) IN IF ~updateCount.ok THEN Fail ELSE
-    LET deltaPricePoint == DecodeDeltaPricePoint(updateCount.rest) IN IF ~deltaPricePoint.ok THEN Fail ELSE
-    Ok([ msgSize         |-> msgSize.value,
-         msgType         |-> msgType.value,
-         sourceTime      |-> sourceTime.value,
+    LET updateCount == ReadUIntLE(remainingCount.rest, 1) IN IF ~updateCount.ok THEN Fail ELSE
+    LET deltaPricePoint == ReadDeltaPricePointList(updateCount.rest, updateCount.value) IN IF ~deltaPricePoint.ok THEN Fail ELSE
+    Ok([ sourceTime      |-> sourceTime.value,
          sourceTimeNs    |-> sourceTimeNs.value,
          symbolIndex     |-> symbolIndex.value,
          ultraLastSeqNum |-> ultraLastSeqNum.value,
          tradingStatus   |-> tradingStatus.value,
          remainingCount  |-> remainingCount.value,
-         updateCount     |-> updateCount.value,
          deltaPricePoint |-> deltaPricePoint.value ], deltaPricePoint.rest)
 
 ZeroOrderbookDeltaUpdateMessage ==
-    [ msgSize         |-> [i \in 1 .. 2 |-> 0],
-      msgType         |-> [i \in 1 .. 2 |-> 0],
-      sourceTime      |-> [i \in 1 .. 4 |-> 0],
+    [ sourceTime      |-> [i \in 1 .. 4 |-> 0],
       sourceTimeNs    |-> [i \in 1 .. 4 |-> 0],
       symbolIndex     |-> [i \in 1 .. 4 |-> 0],
       ultraLastSeqNum |-> [i \in 1 .. 4 |-> 0],
       tradingStatus   |-> [i \in 1 .. 1 |-> 0],
       remainingCount  |-> [i \in 1 .. 2 |-> 0],
-      updateCount     |-> [i \in 1 .. 1 |-> 0],
-      deltaPricePoint |-> ZeroDeltaPricePoint ]
+      deltaPricePoint |-> << >> ]
 
 (* Orderbook Delta Update Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderbookDeltaUpdateMessage ==
     { ZeroOrderbookDeltaUpdateMessage }
-        \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.msgSize = one] : one \in Sample(2) }
-        \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.msgType = one] : one \in Sample(2) }
         \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.sourceTime = one] : one \in Sample(4) }
         \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.sourceTimeNs = one] : one \in Sample(4) }
         \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.symbolIndex = one] : one \in Sample(4) }
         \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.ultraLastSeqNum = one] : one \in Sample(4) }
         \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.tradingStatus = one] : one \in Sample(1) }
         \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.remainingCount = one] : one \in Sample(2) }
-        \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.updateCount = one] : one \in Sample(1) }
-        \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.deltaPricePoint = one] : one \in CheckedDeltaPricePoint }
+        \cup { [ZeroOrderbookDeltaUpdateMessage EXCEPT !.deltaPricePoint = one] : one \in SampleLists(OneDeltaPricePoint) }
 
 (***************************************************************************)
 (* Payload, selected by Message Type                                       *)

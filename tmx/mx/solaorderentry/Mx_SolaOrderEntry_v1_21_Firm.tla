@@ -2197,6 +2197,2241 @@ CheckedIncomingMessagesHeader12 ==
         \cup { [ZeroIncomingMessagesHeader12 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
 
 (***************************************************************************)
+(* Bulk Quote Price 4 Quantity 2 Occurrence: 14 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice4Quantity2Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity2      : Sample(2),
+      price4         : Sample(4) ]
+
+EncodeBulkQuotePrice4Quantity2Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity2
+        \o message.price4
+
+DecodeBulkQuotePrice4Quantity2Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity2 == ReadBytes(quantitySignOr.rest, 2) IN IF ~quantity2.ok THEN Fail ELSE
+    LET price4 == ReadBytes(quantity2.rest, 4) IN IF ~price4.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity2      |-> quantity2.value,
+         price4         |-> price4.value ], price4.rest)
+
+ZeroBulkQuotePrice4Quantity2Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity2      |-> [i \in 1 .. 2 |-> 0],
+      price4         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Bulk Quote Price 4 Quantity 2 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice4Quantity2Occurrence ==
+    { ZeroBulkQuotePrice4Quantity2Occurrence }
+        \cup { [ZeroBulkQuotePrice4Quantity2Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice4Quantity2Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice4Quantity2Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice4Quantity2Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice4Quantity2Occurrence EXCEPT !.quantity2 = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice4Quantity2Occurrence EXCEPT !.price4 = one] : one \in Sample(4) }
+
+(* A run of Bulk Quote Price 4 Quantity 2 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice4Quantity2OccurrenceList(_)
+EncodeBulkQuotePrice4Quantity2OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice4Quantity2Occurrence(Head(messages)) \o EncodeBulkQuotePrice4Quantity2OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 4 Quantity 2 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice4Quantity2OccurrenceList(_, _)
+ReadBulkQuotePrice4Quantity2OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice4Quantity2Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice4Quantity2OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 4 Quantity 2 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice4Quantity2Occurrence == { ZeroBulkQuotePrice4Quantity2Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 4 Quantity 2                                           *)
+(***************************************************************************)
+
+BulkQuotePrice4Quantity2 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader12,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice4Quantity2Occurrence : SampleLists(OneBulkQuotePrice4Quantity2Occurrence) ]
+
+EncodeBulkQuotePrice4Quantity2(message) ==
+    EncodeIncomingMessagesHeader12(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice4Quantity2Occurrence), 3)
+        \o EncodeBulkQuotePrice4Quantity2OccurrenceList(message.bulkQuotePrice4Quantity2Occurrence)
+
+DecodeBulkQuotePrice4Quantity2(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader12(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice4Quantity2Occurrence == ReadBulkQuotePrice4Quantity2OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice4Quantity2Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice4Quantity2Occurrence |-> bulkQuotePrice4Quantity2Occurrence.value ], bulkQuotePrice4Quantity2Occurrence.rest)
+
+ZeroBulkQuotePrice4Quantity2 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader12,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice4Quantity2Occurrence |-> << >> ]
+
+(* Bulk Quote Price 4 Quantity 2 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice4Quantity2 ==
+    { ZeroBulkQuotePrice4Quantity2 }
+        \cup { [ZeroBulkQuotePrice4Quantity2 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader12 }
+        \cup { [ZeroBulkQuotePrice4Quantity2 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice4Quantity2 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice4Quantity2 EXCEPT !.bulkQuotePrice4Quantity2Occurrence = one] : one \in SampleLists(OneBulkQuotePrice4Quantity2Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader13 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader13(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader13(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader13 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader13 ==
+    { ZeroIncomingMessagesHeader13 }
+        \cup { [ZeroIncomingMessagesHeader13 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader13 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader13 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 6 Quantity 2 Occurrence: 16 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice6Quantity2Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity2      : Sample(2),
+      price6         : Sample(6) ]
+
+EncodeBulkQuotePrice6Quantity2Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity2
+        \o message.price6
+
+DecodeBulkQuotePrice6Quantity2Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity2 == ReadBytes(quantitySignOr.rest, 2) IN IF ~quantity2.ok THEN Fail ELSE
+    LET price6 == ReadBytes(quantity2.rest, 6) IN IF ~price6.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity2      |-> quantity2.value,
+         price6         |-> price6.value ], price6.rest)
+
+ZeroBulkQuotePrice6Quantity2Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity2      |-> [i \in 1 .. 2 |-> 0],
+      price6         |-> [i \in 1 .. 6 |-> 0] ]
+
+(* Bulk Quote Price 6 Quantity 2 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice6Quantity2Occurrence ==
+    { ZeroBulkQuotePrice6Quantity2Occurrence }
+        \cup { [ZeroBulkQuotePrice6Quantity2Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice6Quantity2Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice6Quantity2Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice6Quantity2Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice6Quantity2Occurrence EXCEPT !.quantity2 = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice6Quantity2Occurrence EXCEPT !.price6 = one] : one \in Sample(6) }
+
+(* A run of Bulk Quote Price 6 Quantity 2 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice6Quantity2OccurrenceList(_)
+EncodeBulkQuotePrice6Quantity2OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice6Quantity2Occurrence(Head(messages)) \o EncodeBulkQuotePrice6Quantity2OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 6 Quantity 2 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice6Quantity2OccurrenceList(_, _)
+ReadBulkQuotePrice6Quantity2OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice6Quantity2Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice6Quantity2OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 6 Quantity 2 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice6Quantity2Occurrence == { ZeroBulkQuotePrice6Quantity2Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 6 Quantity 2                                           *)
+(***************************************************************************)
+
+BulkQuotePrice6Quantity2 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader13,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice6Quantity2Occurrence : SampleLists(OneBulkQuotePrice6Quantity2Occurrence) ]
+
+EncodeBulkQuotePrice6Quantity2(message) ==
+    EncodeIncomingMessagesHeader13(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice6Quantity2Occurrence), 3)
+        \o EncodeBulkQuotePrice6Quantity2OccurrenceList(message.bulkQuotePrice6Quantity2Occurrence)
+
+DecodeBulkQuotePrice6Quantity2(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader13(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice6Quantity2Occurrence == ReadBulkQuotePrice6Quantity2OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice6Quantity2Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice6Quantity2Occurrence |-> bulkQuotePrice6Quantity2Occurrence.value ], bulkQuotePrice6Quantity2Occurrence.rest)
+
+ZeroBulkQuotePrice6Quantity2 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader13,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice6Quantity2Occurrence |-> << >> ]
+
+(* Bulk Quote Price 6 Quantity 2 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice6Quantity2 ==
+    { ZeroBulkQuotePrice6Quantity2 }
+        \cup { [ZeroBulkQuotePrice6Quantity2 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader13 }
+        \cup { [ZeroBulkQuotePrice6Quantity2 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice6Quantity2 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice6Quantity2 EXCEPT !.bulkQuotePrice6Quantity2Occurrence = one] : one \in SampleLists(OneBulkQuotePrice6Quantity2Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader14 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader14(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader14(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader14 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader14 ==
+    { ZeroIncomingMessagesHeader14 }
+        \cup { [ZeroIncomingMessagesHeader14 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader14 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader14 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 8 Quantity 2 Occurrence: 18 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice8Quantity2Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity2      : Sample(2),
+      price8         : Sample(8) ]
+
+EncodeBulkQuotePrice8Quantity2Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity2
+        \o message.price8
+
+DecodeBulkQuotePrice8Quantity2Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity2 == ReadBytes(quantitySignOr.rest, 2) IN IF ~quantity2.ok THEN Fail ELSE
+    LET price8 == ReadBytes(quantity2.rest, 8) IN IF ~price8.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity2      |-> quantity2.value,
+         price8         |-> price8.value ], price8.rest)
+
+ZeroBulkQuotePrice8Quantity2Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity2      |-> [i \in 1 .. 2 |-> 0],
+      price8         |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Bulk Quote Price 8 Quantity 2 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice8Quantity2Occurrence ==
+    { ZeroBulkQuotePrice8Quantity2Occurrence }
+        \cup { [ZeroBulkQuotePrice8Quantity2Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice8Quantity2Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice8Quantity2Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice8Quantity2Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice8Quantity2Occurrence EXCEPT !.quantity2 = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice8Quantity2Occurrence EXCEPT !.price8 = one] : one \in Sample(8) }
+
+(* A run of Bulk Quote Price 8 Quantity 2 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice8Quantity2OccurrenceList(_)
+EncodeBulkQuotePrice8Quantity2OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice8Quantity2Occurrence(Head(messages)) \o EncodeBulkQuotePrice8Quantity2OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 8 Quantity 2 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice8Quantity2OccurrenceList(_, _)
+ReadBulkQuotePrice8Quantity2OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice8Quantity2Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice8Quantity2OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 8 Quantity 2 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice8Quantity2Occurrence == { ZeroBulkQuotePrice8Quantity2Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 8 Quantity 2                                           *)
+(***************************************************************************)
+
+BulkQuotePrice8Quantity2 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader14,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice8Quantity2Occurrence : SampleLists(OneBulkQuotePrice8Quantity2Occurrence) ]
+
+EncodeBulkQuotePrice8Quantity2(message) ==
+    EncodeIncomingMessagesHeader14(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice8Quantity2Occurrence), 3)
+        \o EncodeBulkQuotePrice8Quantity2OccurrenceList(message.bulkQuotePrice8Quantity2Occurrence)
+
+DecodeBulkQuotePrice8Quantity2(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader14(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice8Quantity2Occurrence == ReadBulkQuotePrice8Quantity2OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice8Quantity2Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice8Quantity2Occurrence |-> bulkQuotePrice8Quantity2Occurrence.value ], bulkQuotePrice8Quantity2Occurrence.rest)
+
+ZeroBulkQuotePrice8Quantity2 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader14,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice8Quantity2Occurrence |-> << >> ]
+
+(* Bulk Quote Price 8 Quantity 2 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice8Quantity2 ==
+    { ZeroBulkQuotePrice8Quantity2 }
+        \cup { [ZeroBulkQuotePrice8Quantity2 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader14 }
+        \cup { [ZeroBulkQuotePrice8Quantity2 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice8Quantity2 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice8Quantity2 EXCEPT !.bulkQuotePrice8Quantity2Occurrence = one] : one \in SampleLists(OneBulkQuotePrice8Quantity2Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader15 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader15(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader15(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader15 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader15 ==
+    { ZeroIncomingMessagesHeader15 }
+        \cup { [ZeroIncomingMessagesHeader15 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader15 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader15 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 10 Quantity 2 Occurrence: 20 bytes                     *)
+(***************************************************************************)
+
+BulkQuotePrice10Quantity2Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity2      : Sample(2),
+      price          : Sample(10) ]
+
+EncodeBulkQuotePrice10Quantity2Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity2
+        \o message.price
+
+DecodeBulkQuotePrice10Quantity2Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity2 == ReadBytes(quantitySignOr.rest, 2) IN IF ~quantity2.ok THEN Fail ELSE
+    LET price == ReadBytes(quantity2.rest, 10) IN IF ~price.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity2      |-> quantity2.value,
+         price          |-> price.value ], price.rest)
+
+ZeroBulkQuotePrice10Quantity2Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity2      |-> [i \in 1 .. 2 |-> 0],
+      price          |-> [i \in 1 .. 10 |-> 0] ]
+
+(* Bulk Quote Price 10 Quantity 2 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice10Quantity2Occurrence ==
+    { ZeroBulkQuotePrice10Quantity2Occurrence }
+        \cup { [ZeroBulkQuotePrice10Quantity2Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice10Quantity2Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice10Quantity2Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice10Quantity2Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice10Quantity2Occurrence EXCEPT !.quantity2 = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice10Quantity2Occurrence EXCEPT !.price = one] : one \in Sample(10) }
+
+(* A run of Bulk Quote Price 10 Quantity 2 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice10Quantity2OccurrenceList(_)
+EncodeBulkQuotePrice10Quantity2OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice10Quantity2Occurrence(Head(messages)) \o EncodeBulkQuotePrice10Quantity2OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 10 Quantity 2 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice10Quantity2OccurrenceList(_, _)
+ReadBulkQuotePrice10Quantity2OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice10Quantity2Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice10Quantity2OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 10 Quantity 2 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice10Quantity2Occurrence == { ZeroBulkQuotePrice10Quantity2Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 10 Quantity 2                                          *)
+(***************************************************************************)
+
+BulkQuotePrice10Quantity2 ==
+    [ incomingMessagesHeader              : IncomingMessagesHeader15,
+      group                               : Sample(2),
+      quoteIdentifierOnThisGroup          : Sample(8),
+      bulkQuotePrice10Quantity2Occurrence : SampleLists(OneBulkQuotePrice10Quantity2Occurrence) ]
+
+EncodeBulkQuotePrice10Quantity2(message) ==
+    EncodeIncomingMessagesHeader15(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice10Quantity2Occurrence), 3)
+        \o EncodeBulkQuotePrice10Quantity2OccurrenceList(message.bulkQuotePrice10Quantity2Occurrence)
+
+DecodeBulkQuotePrice10Quantity2(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader15(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice10Quantity2Occurrence == ReadBulkQuotePrice10Quantity2OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice10Quantity2Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader              |-> incomingMessagesHeader.value,
+         group                               |-> group.value,
+         quoteIdentifierOnThisGroup          |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice10Quantity2Occurrence |-> bulkQuotePrice10Quantity2Occurrence.value ], bulkQuotePrice10Quantity2Occurrence.rest)
+
+ZeroBulkQuotePrice10Quantity2 ==
+    [ incomingMessagesHeader              |-> ZeroIncomingMessagesHeader15,
+      group                               |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup          |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice10Quantity2Occurrence |-> << >> ]
+
+(* Bulk Quote Price 10 Quantity 2 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice10Quantity2 ==
+    { ZeroBulkQuotePrice10Quantity2 }
+        \cup { [ZeroBulkQuotePrice10Quantity2 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader15 }
+        \cup { [ZeroBulkQuotePrice10Quantity2 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice10Quantity2 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice10Quantity2 EXCEPT !.bulkQuotePrice10Quantity2Occurrence = one] : one \in SampleLists(OneBulkQuotePrice10Quantity2Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader16 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader16(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader16(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader16 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader16 ==
+    { ZeroIncomingMessagesHeader16 }
+        \cup { [ZeroIncomingMessagesHeader16 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader16 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader16 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 4 Quantity 4 Occurrence: 16 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice4Quantity4Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity4      : Sample(4),
+      price4         : Sample(4) ]
+
+EncodeBulkQuotePrice4Quantity4Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity4
+        \o message.price4
+
+DecodeBulkQuotePrice4Quantity4Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity4 == ReadBytes(quantitySignOr.rest, 4) IN IF ~quantity4.ok THEN Fail ELSE
+    LET price4 == ReadBytes(quantity4.rest, 4) IN IF ~price4.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity4      |-> quantity4.value,
+         price4         |-> price4.value ], price4.rest)
+
+ZeroBulkQuotePrice4Quantity4Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity4      |-> [i \in 1 .. 4 |-> 0],
+      price4         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Bulk Quote Price 4 Quantity 4 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice4Quantity4Occurrence ==
+    { ZeroBulkQuotePrice4Quantity4Occurrence }
+        \cup { [ZeroBulkQuotePrice4Quantity4Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice4Quantity4Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice4Quantity4Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice4Quantity4Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice4Quantity4Occurrence EXCEPT !.quantity4 = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice4Quantity4Occurrence EXCEPT !.price4 = one] : one \in Sample(4) }
+
+(* A run of Bulk Quote Price 4 Quantity 4 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice4Quantity4OccurrenceList(_)
+EncodeBulkQuotePrice4Quantity4OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice4Quantity4Occurrence(Head(messages)) \o EncodeBulkQuotePrice4Quantity4OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 4 Quantity 4 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice4Quantity4OccurrenceList(_, _)
+ReadBulkQuotePrice4Quantity4OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice4Quantity4Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice4Quantity4OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 4 Quantity 4 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice4Quantity4Occurrence == { ZeroBulkQuotePrice4Quantity4Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 4 Quantity 4                                           *)
+(***************************************************************************)
+
+BulkQuotePrice4Quantity4 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader16,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice4Quantity4Occurrence : SampleLists(OneBulkQuotePrice4Quantity4Occurrence) ]
+
+EncodeBulkQuotePrice4Quantity4(message) ==
+    EncodeIncomingMessagesHeader16(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice4Quantity4Occurrence), 3)
+        \o EncodeBulkQuotePrice4Quantity4OccurrenceList(message.bulkQuotePrice4Quantity4Occurrence)
+
+DecodeBulkQuotePrice4Quantity4(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader16(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice4Quantity4Occurrence == ReadBulkQuotePrice4Quantity4OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice4Quantity4Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice4Quantity4Occurrence |-> bulkQuotePrice4Quantity4Occurrence.value ], bulkQuotePrice4Quantity4Occurrence.rest)
+
+ZeroBulkQuotePrice4Quantity4 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader16,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice4Quantity4Occurrence |-> << >> ]
+
+(* Bulk Quote Price 4 Quantity 4 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice4Quantity4 ==
+    { ZeroBulkQuotePrice4Quantity4 }
+        \cup { [ZeroBulkQuotePrice4Quantity4 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader16 }
+        \cup { [ZeroBulkQuotePrice4Quantity4 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice4Quantity4 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice4Quantity4 EXCEPT !.bulkQuotePrice4Quantity4Occurrence = one] : one \in SampleLists(OneBulkQuotePrice4Quantity4Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader17 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader17(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader17(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader17 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader17 ==
+    { ZeroIncomingMessagesHeader17 }
+        \cup { [ZeroIncomingMessagesHeader17 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader17 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader17 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 6 Quantity 4 Occurrence: 18 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice6Quantity4Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity4      : Sample(4),
+      price6         : Sample(6) ]
+
+EncodeBulkQuotePrice6Quantity4Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity4
+        \o message.price6
+
+DecodeBulkQuotePrice6Quantity4Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity4 == ReadBytes(quantitySignOr.rest, 4) IN IF ~quantity4.ok THEN Fail ELSE
+    LET price6 == ReadBytes(quantity4.rest, 6) IN IF ~price6.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity4      |-> quantity4.value,
+         price6         |-> price6.value ], price6.rest)
+
+ZeroBulkQuotePrice6Quantity4Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity4      |-> [i \in 1 .. 4 |-> 0],
+      price6         |-> [i \in 1 .. 6 |-> 0] ]
+
+(* Bulk Quote Price 6 Quantity 4 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice6Quantity4Occurrence ==
+    { ZeroBulkQuotePrice6Quantity4Occurrence }
+        \cup { [ZeroBulkQuotePrice6Quantity4Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice6Quantity4Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice6Quantity4Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice6Quantity4Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice6Quantity4Occurrence EXCEPT !.quantity4 = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice6Quantity4Occurrence EXCEPT !.price6 = one] : one \in Sample(6) }
+
+(* A run of Bulk Quote Price 6 Quantity 4 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice6Quantity4OccurrenceList(_)
+EncodeBulkQuotePrice6Quantity4OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice6Quantity4Occurrence(Head(messages)) \o EncodeBulkQuotePrice6Quantity4OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 6 Quantity 4 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice6Quantity4OccurrenceList(_, _)
+ReadBulkQuotePrice6Quantity4OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice6Quantity4Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice6Quantity4OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 6 Quantity 4 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice6Quantity4Occurrence == { ZeroBulkQuotePrice6Quantity4Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 6 Quantity 4                                           *)
+(***************************************************************************)
+
+BulkQuotePrice6Quantity4 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader17,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice6Quantity4Occurrence : SampleLists(OneBulkQuotePrice6Quantity4Occurrence) ]
+
+EncodeBulkQuotePrice6Quantity4(message) ==
+    EncodeIncomingMessagesHeader17(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice6Quantity4Occurrence), 3)
+        \o EncodeBulkQuotePrice6Quantity4OccurrenceList(message.bulkQuotePrice6Quantity4Occurrence)
+
+DecodeBulkQuotePrice6Quantity4(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader17(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice6Quantity4Occurrence == ReadBulkQuotePrice6Quantity4OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice6Quantity4Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice6Quantity4Occurrence |-> bulkQuotePrice6Quantity4Occurrence.value ], bulkQuotePrice6Quantity4Occurrence.rest)
+
+ZeroBulkQuotePrice6Quantity4 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader17,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice6Quantity4Occurrence |-> << >> ]
+
+(* Bulk Quote Price 6 Quantity 4 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice6Quantity4 ==
+    { ZeroBulkQuotePrice6Quantity4 }
+        \cup { [ZeroBulkQuotePrice6Quantity4 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader17 }
+        \cup { [ZeroBulkQuotePrice6Quantity4 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice6Quantity4 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice6Quantity4 EXCEPT !.bulkQuotePrice6Quantity4Occurrence = one] : one \in SampleLists(OneBulkQuotePrice6Quantity4Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader18 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader18(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader18(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader18 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader18 ==
+    { ZeroIncomingMessagesHeader18 }
+        \cup { [ZeroIncomingMessagesHeader18 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader18 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader18 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 8 Quantity 4 Occurrence: 20 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice8Quantity4Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity4      : Sample(4),
+      price8         : Sample(8) ]
+
+EncodeBulkQuotePrice8Quantity4Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity4
+        \o message.price8
+
+DecodeBulkQuotePrice8Quantity4Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity4 == ReadBytes(quantitySignOr.rest, 4) IN IF ~quantity4.ok THEN Fail ELSE
+    LET price8 == ReadBytes(quantity4.rest, 8) IN IF ~price8.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity4      |-> quantity4.value,
+         price8         |-> price8.value ], price8.rest)
+
+ZeroBulkQuotePrice8Quantity4Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity4      |-> [i \in 1 .. 4 |-> 0],
+      price8         |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Bulk Quote Price 8 Quantity 4 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice8Quantity4Occurrence ==
+    { ZeroBulkQuotePrice8Quantity4Occurrence }
+        \cup { [ZeroBulkQuotePrice8Quantity4Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice8Quantity4Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice8Quantity4Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice8Quantity4Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice8Quantity4Occurrence EXCEPT !.quantity4 = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice8Quantity4Occurrence EXCEPT !.price8 = one] : one \in Sample(8) }
+
+(* A run of Bulk Quote Price 8 Quantity 4 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice8Quantity4OccurrenceList(_)
+EncodeBulkQuotePrice8Quantity4OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice8Quantity4Occurrence(Head(messages)) \o EncodeBulkQuotePrice8Quantity4OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 8 Quantity 4 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice8Quantity4OccurrenceList(_, _)
+ReadBulkQuotePrice8Quantity4OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice8Quantity4Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice8Quantity4OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 8 Quantity 4 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice8Quantity4Occurrence == { ZeroBulkQuotePrice8Quantity4Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 8 Quantity 4                                           *)
+(***************************************************************************)
+
+BulkQuotePrice8Quantity4 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader18,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice8Quantity4Occurrence : SampleLists(OneBulkQuotePrice8Quantity4Occurrence) ]
+
+EncodeBulkQuotePrice8Quantity4(message) ==
+    EncodeIncomingMessagesHeader18(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice8Quantity4Occurrence), 3)
+        \o EncodeBulkQuotePrice8Quantity4OccurrenceList(message.bulkQuotePrice8Quantity4Occurrence)
+
+DecodeBulkQuotePrice8Quantity4(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader18(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice8Quantity4Occurrence == ReadBulkQuotePrice8Quantity4OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice8Quantity4Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice8Quantity4Occurrence |-> bulkQuotePrice8Quantity4Occurrence.value ], bulkQuotePrice8Quantity4Occurrence.rest)
+
+ZeroBulkQuotePrice8Quantity4 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader18,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice8Quantity4Occurrence |-> << >> ]
+
+(* Bulk Quote Price 8 Quantity 4 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice8Quantity4 ==
+    { ZeroBulkQuotePrice8Quantity4 }
+        \cup { [ZeroBulkQuotePrice8Quantity4 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader18 }
+        \cup { [ZeroBulkQuotePrice8Quantity4 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice8Quantity4 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice8Quantity4 EXCEPT !.bulkQuotePrice8Quantity4Occurrence = one] : one \in SampleLists(OneBulkQuotePrice8Quantity4Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader19 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader19(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader19(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader19 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader19 ==
+    { ZeroIncomingMessagesHeader19 }
+        \cup { [ZeroIncomingMessagesHeader19 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader19 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader19 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 10 Quantity 4 Occurrence: 22 bytes                     *)
+(***************************************************************************)
+
+BulkQuotePrice10Quantity4Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity4      : Sample(4),
+      price          : Sample(10) ]
+
+EncodeBulkQuotePrice10Quantity4Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity4
+        \o message.price
+
+DecodeBulkQuotePrice10Quantity4Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity4 == ReadBytes(quantitySignOr.rest, 4) IN IF ~quantity4.ok THEN Fail ELSE
+    LET price == ReadBytes(quantity4.rest, 10) IN IF ~price.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity4      |-> quantity4.value,
+         price          |-> price.value ], price.rest)
+
+ZeroBulkQuotePrice10Quantity4Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity4      |-> [i \in 1 .. 4 |-> 0],
+      price          |-> [i \in 1 .. 10 |-> 0] ]
+
+(* Bulk Quote Price 10 Quantity 4 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice10Quantity4Occurrence ==
+    { ZeroBulkQuotePrice10Quantity4Occurrence }
+        \cup { [ZeroBulkQuotePrice10Quantity4Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice10Quantity4Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice10Quantity4Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice10Quantity4Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice10Quantity4Occurrence EXCEPT !.quantity4 = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice10Quantity4Occurrence EXCEPT !.price = one] : one \in Sample(10) }
+
+(* A run of Bulk Quote Price 10 Quantity 4 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice10Quantity4OccurrenceList(_)
+EncodeBulkQuotePrice10Quantity4OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice10Quantity4Occurrence(Head(messages)) \o EncodeBulkQuotePrice10Quantity4OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 10 Quantity 4 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice10Quantity4OccurrenceList(_, _)
+ReadBulkQuotePrice10Quantity4OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice10Quantity4Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice10Quantity4OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 10 Quantity 4 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice10Quantity4Occurrence == { ZeroBulkQuotePrice10Quantity4Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 10 Quantity 4                                          *)
+(***************************************************************************)
+
+BulkQuotePrice10Quantity4 ==
+    [ incomingMessagesHeader              : IncomingMessagesHeader19,
+      group                               : Sample(2),
+      quoteIdentifierOnThisGroup          : Sample(8),
+      bulkQuotePrice10Quantity4Occurrence : SampleLists(OneBulkQuotePrice10Quantity4Occurrence) ]
+
+EncodeBulkQuotePrice10Quantity4(message) ==
+    EncodeIncomingMessagesHeader19(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice10Quantity4Occurrence), 3)
+        \o EncodeBulkQuotePrice10Quantity4OccurrenceList(message.bulkQuotePrice10Quantity4Occurrence)
+
+DecodeBulkQuotePrice10Quantity4(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader19(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice10Quantity4Occurrence == ReadBulkQuotePrice10Quantity4OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice10Quantity4Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader              |-> incomingMessagesHeader.value,
+         group                               |-> group.value,
+         quoteIdentifierOnThisGroup          |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice10Quantity4Occurrence |-> bulkQuotePrice10Quantity4Occurrence.value ], bulkQuotePrice10Quantity4Occurrence.rest)
+
+ZeroBulkQuotePrice10Quantity4 ==
+    [ incomingMessagesHeader              |-> ZeroIncomingMessagesHeader19,
+      group                               |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup          |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice10Quantity4Occurrence |-> << >> ]
+
+(* Bulk Quote Price 10 Quantity 4 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice10Quantity4 ==
+    { ZeroBulkQuotePrice10Quantity4 }
+        \cup { [ZeroBulkQuotePrice10Quantity4 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader19 }
+        \cup { [ZeroBulkQuotePrice10Quantity4 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice10Quantity4 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice10Quantity4 EXCEPT !.bulkQuotePrice10Quantity4Occurrence = one] : one \in SampleLists(OneBulkQuotePrice10Quantity4Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader20 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader20(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader20(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader20 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader20 ==
+    { ZeroIncomingMessagesHeader20 }
+        \cup { [ZeroIncomingMessagesHeader20 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader20 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader20 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 4 Quantity 6 Occurrence: 18 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice4Quantity6Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity6      : Sample(6),
+      price4         : Sample(4) ]
+
+EncodeBulkQuotePrice4Quantity6Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity6
+        \o message.price4
+
+DecodeBulkQuotePrice4Quantity6Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity6 == ReadBytes(quantitySignOr.rest, 6) IN IF ~quantity6.ok THEN Fail ELSE
+    LET price4 == ReadBytes(quantity6.rest, 4) IN IF ~price4.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity6      |-> quantity6.value,
+         price4         |-> price4.value ], price4.rest)
+
+ZeroBulkQuotePrice4Quantity6Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity6      |-> [i \in 1 .. 6 |-> 0],
+      price4         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Bulk Quote Price 4 Quantity 6 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice4Quantity6Occurrence ==
+    { ZeroBulkQuotePrice4Quantity6Occurrence }
+        \cup { [ZeroBulkQuotePrice4Quantity6Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice4Quantity6Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice4Quantity6Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice4Quantity6Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice4Quantity6Occurrence EXCEPT !.quantity6 = one] : one \in Sample(6) }
+        \cup { [ZeroBulkQuotePrice4Quantity6Occurrence EXCEPT !.price4 = one] : one \in Sample(4) }
+
+(* A run of Bulk Quote Price 4 Quantity 6 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice4Quantity6OccurrenceList(_)
+EncodeBulkQuotePrice4Quantity6OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice4Quantity6Occurrence(Head(messages)) \o EncodeBulkQuotePrice4Quantity6OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 4 Quantity 6 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice4Quantity6OccurrenceList(_, _)
+ReadBulkQuotePrice4Quantity6OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice4Quantity6Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice4Quantity6OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 4 Quantity 6 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice4Quantity6Occurrence == { ZeroBulkQuotePrice4Quantity6Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 4 Quantity 6                                           *)
+(***************************************************************************)
+
+BulkQuotePrice4Quantity6 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader20,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice4Quantity6Occurrence : SampleLists(OneBulkQuotePrice4Quantity6Occurrence) ]
+
+EncodeBulkQuotePrice4Quantity6(message) ==
+    EncodeIncomingMessagesHeader20(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice4Quantity6Occurrence), 3)
+        \o EncodeBulkQuotePrice4Quantity6OccurrenceList(message.bulkQuotePrice4Quantity6Occurrence)
+
+DecodeBulkQuotePrice4Quantity6(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader20(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice4Quantity6Occurrence == ReadBulkQuotePrice4Quantity6OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice4Quantity6Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice4Quantity6Occurrence |-> bulkQuotePrice4Quantity6Occurrence.value ], bulkQuotePrice4Quantity6Occurrence.rest)
+
+ZeroBulkQuotePrice4Quantity6 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader20,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice4Quantity6Occurrence |-> << >> ]
+
+(* Bulk Quote Price 4 Quantity 6 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice4Quantity6 ==
+    { ZeroBulkQuotePrice4Quantity6 }
+        \cup { [ZeroBulkQuotePrice4Quantity6 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader20 }
+        \cup { [ZeroBulkQuotePrice4Quantity6 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice4Quantity6 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice4Quantity6 EXCEPT !.bulkQuotePrice4Quantity6Occurrence = one] : one \in SampleLists(OneBulkQuotePrice4Quantity6Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader21 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader21(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader21(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader21 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader21 ==
+    { ZeroIncomingMessagesHeader21 }
+        \cup { [ZeroIncomingMessagesHeader21 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader21 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader21 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 6 Quantity 6 Occurrence: 20 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice6Quantity6Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity6      : Sample(6),
+      price6         : Sample(6) ]
+
+EncodeBulkQuotePrice6Quantity6Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity6
+        \o message.price6
+
+DecodeBulkQuotePrice6Quantity6Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity6 == ReadBytes(quantitySignOr.rest, 6) IN IF ~quantity6.ok THEN Fail ELSE
+    LET price6 == ReadBytes(quantity6.rest, 6) IN IF ~price6.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity6      |-> quantity6.value,
+         price6         |-> price6.value ], price6.rest)
+
+ZeroBulkQuotePrice6Quantity6Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity6      |-> [i \in 1 .. 6 |-> 0],
+      price6         |-> [i \in 1 .. 6 |-> 0] ]
+
+(* Bulk Quote Price 6 Quantity 6 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice6Quantity6Occurrence ==
+    { ZeroBulkQuotePrice6Quantity6Occurrence }
+        \cup { [ZeroBulkQuotePrice6Quantity6Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice6Quantity6Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice6Quantity6Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice6Quantity6Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice6Quantity6Occurrence EXCEPT !.quantity6 = one] : one \in Sample(6) }
+        \cup { [ZeroBulkQuotePrice6Quantity6Occurrence EXCEPT !.price6 = one] : one \in Sample(6) }
+
+(* A run of Bulk Quote Price 6 Quantity 6 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice6Quantity6OccurrenceList(_)
+EncodeBulkQuotePrice6Quantity6OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice6Quantity6Occurrence(Head(messages)) \o EncodeBulkQuotePrice6Quantity6OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 6 Quantity 6 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice6Quantity6OccurrenceList(_, _)
+ReadBulkQuotePrice6Quantity6OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice6Quantity6Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice6Quantity6OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 6 Quantity 6 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice6Quantity6Occurrence == { ZeroBulkQuotePrice6Quantity6Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 6 Quantity 6                                           *)
+(***************************************************************************)
+
+BulkQuotePrice6Quantity6 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader21,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice6Quantity6Occurrence : SampleLists(OneBulkQuotePrice6Quantity6Occurrence) ]
+
+EncodeBulkQuotePrice6Quantity6(message) ==
+    EncodeIncomingMessagesHeader21(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice6Quantity6Occurrence), 3)
+        \o EncodeBulkQuotePrice6Quantity6OccurrenceList(message.bulkQuotePrice6Quantity6Occurrence)
+
+DecodeBulkQuotePrice6Quantity6(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader21(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice6Quantity6Occurrence == ReadBulkQuotePrice6Quantity6OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice6Quantity6Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice6Quantity6Occurrence |-> bulkQuotePrice6Quantity6Occurrence.value ], bulkQuotePrice6Quantity6Occurrence.rest)
+
+ZeroBulkQuotePrice6Quantity6 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader21,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice6Quantity6Occurrence |-> << >> ]
+
+(* Bulk Quote Price 6 Quantity 6 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice6Quantity6 ==
+    { ZeroBulkQuotePrice6Quantity6 }
+        \cup { [ZeroBulkQuotePrice6Quantity6 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader21 }
+        \cup { [ZeroBulkQuotePrice6Quantity6 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice6Quantity6 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice6Quantity6 EXCEPT !.bulkQuotePrice6Quantity6Occurrence = one] : one \in SampleLists(OneBulkQuotePrice6Quantity6Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader22 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader22(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader22(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader22 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader22 ==
+    { ZeroIncomingMessagesHeader22 }
+        \cup { [ZeroIncomingMessagesHeader22 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader22 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader22 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 8 Quantity 6 Occurrence: 22 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice8Quantity6Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity6      : Sample(6),
+      price8         : Sample(8) ]
+
+EncodeBulkQuotePrice8Quantity6Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity6
+        \o message.price8
+
+DecodeBulkQuotePrice8Quantity6Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity6 == ReadBytes(quantitySignOr.rest, 6) IN IF ~quantity6.ok THEN Fail ELSE
+    LET price8 == ReadBytes(quantity6.rest, 8) IN IF ~price8.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity6      |-> quantity6.value,
+         price8         |-> price8.value ], price8.rest)
+
+ZeroBulkQuotePrice8Quantity6Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity6      |-> [i \in 1 .. 6 |-> 0],
+      price8         |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Bulk Quote Price 8 Quantity 6 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice8Quantity6Occurrence ==
+    { ZeroBulkQuotePrice8Quantity6Occurrence }
+        \cup { [ZeroBulkQuotePrice8Quantity6Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice8Quantity6Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice8Quantity6Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice8Quantity6Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice8Quantity6Occurrence EXCEPT !.quantity6 = one] : one \in Sample(6) }
+        \cup { [ZeroBulkQuotePrice8Quantity6Occurrence EXCEPT !.price8 = one] : one \in Sample(8) }
+
+(* A run of Bulk Quote Price 8 Quantity 6 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice8Quantity6OccurrenceList(_)
+EncodeBulkQuotePrice8Quantity6OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice8Quantity6Occurrence(Head(messages)) \o EncodeBulkQuotePrice8Quantity6OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 8 Quantity 6 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice8Quantity6OccurrenceList(_, _)
+ReadBulkQuotePrice8Quantity6OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice8Quantity6Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice8Quantity6OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 8 Quantity 6 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice8Quantity6Occurrence == { ZeroBulkQuotePrice8Quantity6Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 8 Quantity 6                                           *)
+(***************************************************************************)
+
+BulkQuotePrice8Quantity6 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader22,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice8Quantity6Occurrence : SampleLists(OneBulkQuotePrice8Quantity6Occurrence) ]
+
+EncodeBulkQuotePrice8Quantity6(message) ==
+    EncodeIncomingMessagesHeader22(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice8Quantity6Occurrence), 3)
+        \o EncodeBulkQuotePrice8Quantity6OccurrenceList(message.bulkQuotePrice8Quantity6Occurrence)
+
+DecodeBulkQuotePrice8Quantity6(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader22(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice8Quantity6Occurrence == ReadBulkQuotePrice8Quantity6OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice8Quantity6Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice8Quantity6Occurrence |-> bulkQuotePrice8Quantity6Occurrence.value ], bulkQuotePrice8Quantity6Occurrence.rest)
+
+ZeroBulkQuotePrice8Quantity6 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader22,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice8Quantity6Occurrence |-> << >> ]
+
+(* Bulk Quote Price 8 Quantity 6 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice8Quantity6 ==
+    { ZeroBulkQuotePrice8Quantity6 }
+        \cup { [ZeroBulkQuotePrice8Quantity6 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader22 }
+        \cup { [ZeroBulkQuotePrice8Quantity6 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice8Quantity6 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice8Quantity6 EXCEPT !.bulkQuotePrice8Quantity6Occurrence = one] : one \in SampleLists(OneBulkQuotePrice8Quantity6Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader23 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader23(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader23(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader23 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader23 ==
+    { ZeroIncomingMessagesHeader23 }
+        \cup { [ZeroIncomingMessagesHeader23 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader23 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader23 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 10 Quantity 6 Occurrence: 24 bytes                     *)
+(***************************************************************************)
+
+BulkQuotePrice10Quantity6Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity6      : Sample(6),
+      price          : Sample(10) ]
+
+EncodeBulkQuotePrice10Quantity6Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity6
+        \o message.price
+
+DecodeBulkQuotePrice10Quantity6Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity6 == ReadBytes(quantitySignOr.rest, 6) IN IF ~quantity6.ok THEN Fail ELSE
+    LET price == ReadBytes(quantity6.rest, 10) IN IF ~price.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity6      |-> quantity6.value,
+         price          |-> price.value ], price.rest)
+
+ZeroBulkQuotePrice10Quantity6Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity6      |-> [i \in 1 .. 6 |-> 0],
+      price          |-> [i \in 1 .. 10 |-> 0] ]
+
+(* Bulk Quote Price 10 Quantity 6 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice10Quantity6Occurrence ==
+    { ZeroBulkQuotePrice10Quantity6Occurrence }
+        \cup { [ZeroBulkQuotePrice10Quantity6Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice10Quantity6Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice10Quantity6Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice10Quantity6Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice10Quantity6Occurrence EXCEPT !.quantity6 = one] : one \in Sample(6) }
+        \cup { [ZeroBulkQuotePrice10Quantity6Occurrence EXCEPT !.price = one] : one \in Sample(10) }
+
+(* A run of Bulk Quote Price 10 Quantity 6 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice10Quantity6OccurrenceList(_)
+EncodeBulkQuotePrice10Quantity6OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice10Quantity6Occurrence(Head(messages)) \o EncodeBulkQuotePrice10Quantity6OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 10 Quantity 6 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice10Quantity6OccurrenceList(_, _)
+ReadBulkQuotePrice10Quantity6OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice10Quantity6Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice10Quantity6OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 10 Quantity 6 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice10Quantity6Occurrence == { ZeroBulkQuotePrice10Quantity6Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 10 Quantity 6                                          *)
+(***************************************************************************)
+
+BulkQuotePrice10Quantity6 ==
+    [ incomingMessagesHeader              : IncomingMessagesHeader23,
+      group                               : Sample(2),
+      quoteIdentifierOnThisGroup          : Sample(8),
+      bulkQuotePrice10Quantity6Occurrence : SampleLists(OneBulkQuotePrice10Quantity6Occurrence) ]
+
+EncodeBulkQuotePrice10Quantity6(message) ==
+    EncodeIncomingMessagesHeader23(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice10Quantity6Occurrence), 3)
+        \o EncodeBulkQuotePrice10Quantity6OccurrenceList(message.bulkQuotePrice10Quantity6Occurrence)
+
+DecodeBulkQuotePrice10Quantity6(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader23(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice10Quantity6Occurrence == ReadBulkQuotePrice10Quantity6OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice10Quantity6Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader              |-> incomingMessagesHeader.value,
+         group                               |-> group.value,
+         quoteIdentifierOnThisGroup          |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice10Quantity6Occurrence |-> bulkQuotePrice10Quantity6Occurrence.value ], bulkQuotePrice10Quantity6Occurrence.rest)
+
+ZeroBulkQuotePrice10Quantity6 ==
+    [ incomingMessagesHeader              |-> ZeroIncomingMessagesHeader23,
+      group                               |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup          |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice10Quantity6Occurrence |-> << >> ]
+
+(* Bulk Quote Price 10 Quantity 6 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice10Quantity6 ==
+    { ZeroBulkQuotePrice10Quantity6 }
+        \cup { [ZeroBulkQuotePrice10Quantity6 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader23 }
+        \cup { [ZeroBulkQuotePrice10Quantity6 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice10Quantity6 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice10Quantity6 EXCEPT !.bulkQuotePrice10Quantity6Occurrence = one] : one \in SampleLists(OneBulkQuotePrice10Quantity6Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader24 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader24(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader24(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader24 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader24 ==
+    { ZeroIncomingMessagesHeader24 }
+        \cup { [ZeroIncomingMessagesHeader24 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader24 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader24 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 4 Quantity 8 Occurrence: 20 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice4Quantity8Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity       : Sample(8),
+      price4         : Sample(4) ]
+
+EncodeBulkQuotePrice4Quantity8Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity
+        \o message.price4
+
+DecodeBulkQuotePrice4Quantity8Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity == ReadBytes(quantitySignOr.rest, 8) IN IF ~quantity.ok THEN Fail ELSE
+    LET price4 == ReadBytes(quantity.rest, 4) IN IF ~price4.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity       |-> quantity.value,
+         price4         |-> price4.value ], price4.rest)
+
+ZeroBulkQuotePrice4Quantity8Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity       |-> [i \in 1 .. 8 |-> 0],
+      price4         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Bulk Quote Price 4 Quantity 8 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice4Quantity8Occurrence ==
+    { ZeroBulkQuotePrice4Quantity8Occurrence }
+        \cup { [ZeroBulkQuotePrice4Quantity8Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice4Quantity8Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice4Quantity8Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice4Quantity8Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice4Quantity8Occurrence EXCEPT !.quantity = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice4Quantity8Occurrence EXCEPT !.price4 = one] : one \in Sample(4) }
+
+(* A run of Bulk Quote Price 4 Quantity 8 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice4Quantity8OccurrenceList(_)
+EncodeBulkQuotePrice4Quantity8OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice4Quantity8Occurrence(Head(messages)) \o EncodeBulkQuotePrice4Quantity8OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 4 Quantity 8 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice4Quantity8OccurrenceList(_, _)
+ReadBulkQuotePrice4Quantity8OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice4Quantity8Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice4Quantity8OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 4 Quantity 8 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice4Quantity8Occurrence == { ZeroBulkQuotePrice4Quantity8Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 4 Quantity 8                                           *)
+(***************************************************************************)
+
+BulkQuotePrice4Quantity8 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader24,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice4Quantity8Occurrence : SampleLists(OneBulkQuotePrice4Quantity8Occurrence) ]
+
+EncodeBulkQuotePrice4Quantity8(message) ==
+    EncodeIncomingMessagesHeader24(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice4Quantity8Occurrence), 3)
+        \o EncodeBulkQuotePrice4Quantity8OccurrenceList(message.bulkQuotePrice4Quantity8Occurrence)
+
+DecodeBulkQuotePrice4Quantity8(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader24(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice4Quantity8Occurrence == ReadBulkQuotePrice4Quantity8OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice4Quantity8Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice4Quantity8Occurrence |-> bulkQuotePrice4Quantity8Occurrence.value ], bulkQuotePrice4Quantity8Occurrence.rest)
+
+ZeroBulkQuotePrice4Quantity8 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader24,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice4Quantity8Occurrence |-> << >> ]
+
+(* Bulk Quote Price 4 Quantity 8 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice4Quantity8 ==
+    { ZeroBulkQuotePrice4Quantity8 }
+        \cup { [ZeroBulkQuotePrice4Quantity8 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader24 }
+        \cup { [ZeroBulkQuotePrice4Quantity8 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice4Quantity8 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice4Quantity8 EXCEPT !.bulkQuotePrice4Quantity8Occurrence = one] : one \in SampleLists(OneBulkQuotePrice4Quantity8Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader25 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader25(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader25(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader25 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader25 ==
+    { ZeroIncomingMessagesHeader25 }
+        \cup { [ZeroIncomingMessagesHeader25 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader25 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader25 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 6 Quantity 8 Occurrence: 22 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice6Quantity8Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity       : Sample(8),
+      price6         : Sample(6) ]
+
+EncodeBulkQuotePrice6Quantity8Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity
+        \o message.price6
+
+DecodeBulkQuotePrice6Quantity8Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity == ReadBytes(quantitySignOr.rest, 8) IN IF ~quantity.ok THEN Fail ELSE
+    LET price6 == ReadBytes(quantity.rest, 6) IN IF ~price6.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity       |-> quantity.value,
+         price6         |-> price6.value ], price6.rest)
+
+ZeroBulkQuotePrice6Quantity8Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity       |-> [i \in 1 .. 8 |-> 0],
+      price6         |-> [i \in 1 .. 6 |-> 0] ]
+
+(* Bulk Quote Price 6 Quantity 8 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice6Quantity8Occurrence ==
+    { ZeroBulkQuotePrice6Quantity8Occurrence }
+        \cup { [ZeroBulkQuotePrice6Quantity8Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice6Quantity8Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice6Quantity8Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice6Quantity8Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice6Quantity8Occurrence EXCEPT !.quantity = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice6Quantity8Occurrence EXCEPT !.price6 = one] : one \in Sample(6) }
+
+(* A run of Bulk Quote Price 6 Quantity 8 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice6Quantity8OccurrenceList(_)
+EncodeBulkQuotePrice6Quantity8OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice6Quantity8Occurrence(Head(messages)) \o EncodeBulkQuotePrice6Quantity8OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 6 Quantity 8 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice6Quantity8OccurrenceList(_, _)
+ReadBulkQuotePrice6Quantity8OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice6Quantity8Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice6Quantity8OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 6 Quantity 8 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice6Quantity8Occurrence == { ZeroBulkQuotePrice6Quantity8Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 6 Quantity 8                                           *)
+(***************************************************************************)
+
+BulkQuotePrice6Quantity8 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader25,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice6Quantity8Occurrence : SampleLists(OneBulkQuotePrice6Quantity8Occurrence) ]
+
+EncodeBulkQuotePrice6Quantity8(message) ==
+    EncodeIncomingMessagesHeader25(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice6Quantity8Occurrence), 3)
+        \o EncodeBulkQuotePrice6Quantity8OccurrenceList(message.bulkQuotePrice6Quantity8Occurrence)
+
+DecodeBulkQuotePrice6Quantity8(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader25(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice6Quantity8Occurrence == ReadBulkQuotePrice6Quantity8OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice6Quantity8Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice6Quantity8Occurrence |-> bulkQuotePrice6Quantity8Occurrence.value ], bulkQuotePrice6Quantity8Occurrence.rest)
+
+ZeroBulkQuotePrice6Quantity8 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader25,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice6Quantity8Occurrence |-> << >> ]
+
+(* Bulk Quote Price 6 Quantity 8 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice6Quantity8 ==
+    { ZeroBulkQuotePrice6Quantity8 }
+        \cup { [ZeroBulkQuotePrice6Quantity8 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader25 }
+        \cup { [ZeroBulkQuotePrice6Quantity8 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice6Quantity8 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice6Quantity8 EXCEPT !.bulkQuotePrice6Quantity8Occurrence = one] : one \in SampleLists(OneBulkQuotePrice6Quantity8Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader26 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader26(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader26(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader26 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader26 ==
+    { ZeroIncomingMessagesHeader26 }
+        \cup { [ZeroIncomingMessagesHeader26 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader26 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader26 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Bulk Quote Price 8 Quantity 8 Occurrence: 24 bytes                      *)
+(***************************************************************************)
+
+BulkQuotePrice8Quantity8Occurrence ==
+    [ group          : Sample(2),
+      instrument     : Sample(4),
+      verbSide       : Sample(1),
+      quantitySignOr : Sample(1),
+      quantity       : Sample(8),
+      price8         : Sample(8) ]
+
+EncodeBulkQuotePrice8Quantity8Occurrence(message) ==
+    message.group
+        \o message.instrument
+        \o message.verbSide
+        \o message.quantitySignOr
+        \o message.quantity
+        \o message.price8
+
+DecodeBulkQuotePrice8Quantity8Occurrence(bytes) ==
+    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verbSide == ReadBytes(instrument.rest, 1) IN IF ~verbSide.ok THEN Fail ELSE
+    LET quantitySignOr == ReadBytes(verbSide.rest, 1) IN IF ~quantitySignOr.ok THEN Fail ELSE
+    LET quantity == ReadBytes(quantitySignOr.rest, 8) IN IF ~quantity.ok THEN Fail ELSE
+    LET price8 == ReadBytes(quantity.rest, 8) IN IF ~price8.ok THEN Fail ELSE
+    Ok([ group          |-> group.value,
+         instrument     |-> instrument.value,
+         verbSide       |-> verbSide.value,
+         quantitySignOr |-> quantitySignOr.value,
+         quantity       |-> quantity.value,
+         price8         |-> price8.value ], price8.rest)
+
+ZeroBulkQuotePrice8Quantity8Occurrence ==
+    [ group          |-> [i \in 1 .. 2 |-> 0],
+      instrument     |-> [i \in 1 .. 4 |-> 0],
+      verbSide       |-> [i \in 1 .. 1 |-> 0],
+      quantitySignOr |-> [i \in 1 .. 1 |-> 0],
+      quantity       |-> [i \in 1 .. 8 |-> 0],
+      price8         |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Bulk Quote Price 8 Quantity 8 Occurrence at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice8Quantity8Occurrence ==
+    { ZeroBulkQuotePrice8Quantity8Occurrence }
+        \cup { [ZeroBulkQuotePrice8Quantity8Occurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice8Quantity8Occurrence EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuotePrice8Quantity8Occurrence EXCEPT !.verbSide = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice8Quantity8Occurrence EXCEPT !.quantitySignOr = one] : one \in Sample(1) }
+        \cup { [ZeroBulkQuotePrice8Quantity8Occurrence EXCEPT !.quantity = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice8Quantity8Occurrence EXCEPT !.price8 = one] : one \in Sample(8) }
+
+(* A run of Bulk Quote Price 8 Quantity 8 Occurrence, written one after another *)
+RECURSIVE EncodeBulkQuotePrice8Quantity8OccurrenceList(_)
+EncodeBulkQuotePrice8Quantity8OccurrenceList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeBulkQuotePrice8Quantity8Occurrence(Head(messages)) \o EncodeBulkQuotePrice8Quantity8OccurrenceList(Tail(messages))
+
+(* As many Bulk Quote Price 8 Quantity 8 Occurrence as the field that counts them says *)
+RECURSIVE ReadBulkQuotePrice8Quantity8OccurrenceList(_, _)
+ReadBulkQuotePrice8Quantity8OccurrenceList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeBulkQuotePrice8Quantity8Occurrence(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadBulkQuotePrice8Quantity8OccurrenceList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Bulk Quote Price 8 Quantity 8 Occurrence of each kind, for the lists that carry them *)
+OneBulkQuotePrice8Quantity8Occurrence == { ZeroBulkQuotePrice8Quantity8Occurrence }
+
+(***************************************************************************)
+(* Bulk Quote Price 8 Quantity 8                                           *)
+(***************************************************************************)
+
+BulkQuotePrice8Quantity8 ==
+    [ incomingMessagesHeader             : IncomingMessagesHeader26,
+      group                              : Sample(2),
+      quoteIdentifierOnThisGroup         : Sample(8),
+      bulkQuotePrice8Quantity8Occurrence : SampleLists(OneBulkQuotePrice8Quantity8Occurrence) ]
+
+EncodeBulkQuotePrice8Quantity8(message) ==
+    EncodeIncomingMessagesHeader26(message.incomingMessagesHeader)
+        \o message.group
+        \o message.quoteIdentifierOnThisGroup
+        \o EncodeDigits(Len(message.bulkQuotePrice8Quantity8Occurrence), 3)
+        \o EncodeBulkQuotePrice8Quantity8OccurrenceList(message.bulkQuotePrice8Quantity8Occurrence)
+
+DecodeBulkQuotePrice8Quantity8(bytes) ==
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader26(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
+    LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
+    LET bulkQuotePrice8Quantity8Occurrence == ReadBulkQuotePrice8Quantity8OccurrenceList(numberOfQuotes.rest, numberOfQuotes.value) IN IF ~bulkQuotePrice8Quantity8Occurrence.ok THEN Fail ELSE
+    Ok([ incomingMessagesHeader             |-> incomingMessagesHeader.value,
+         group                              |-> group.value,
+         quoteIdentifierOnThisGroup         |-> quoteIdentifierOnThisGroup.value,
+         bulkQuotePrice8Quantity8Occurrence |-> bulkQuotePrice8Quantity8Occurrence.value ], bulkQuotePrice8Quantity8Occurrence.rest)
+
+ZeroBulkQuotePrice8Quantity8 ==
+    [ incomingMessagesHeader             |-> ZeroIncomingMessagesHeader26,
+      group                              |-> [i \in 1 .. 2 |-> 0],
+      quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
+      bulkQuotePrice8Quantity8Occurrence |-> << >> ]
+
+(* Bulk Quote Price 8 Quantity 8 at zero, then each field in turn at the values it is checked at *)
+CheckedBulkQuotePrice8Quantity8 ==
+    { ZeroBulkQuotePrice8Quantity8 }
+        \cup { [ZeroBulkQuotePrice8Quantity8 EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader26 }
+        \cup { [ZeroBulkQuotePrice8Quantity8 EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroBulkQuotePrice8Quantity8 EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
+        \cup { [ZeroBulkQuotePrice8Quantity8 EXCEPT !.bulkQuotePrice8Quantity8Occurrence = one] : one \in SampleLists(OneBulkQuotePrice8Quantity8Occurrence) }
+
+(***************************************************************************)
+(* Incoming Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+IncomingMessagesHeader27 ==
+    [ userTimestampLocalHhmmss : Sample(6),
+      traderId                 : Sample(8),
+      userSequenceId           : Sample(8) ]
+
+EncodeIncomingMessagesHeader27(message) ==
+    message.userTimestampLocalHhmmss
+        \o message.traderId
+        \o message.userSequenceId
+
+DecodeIncomingMessagesHeader27(bytes) ==
+    LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    Ok([ userTimestampLocalHhmmss |-> userTimestampLocalHhmmss.value,
+         traderId                 |-> traderId.value,
+         userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
+
+ZeroIncomingMessagesHeader27 ==
+    [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      traderId                 |-> [i \in 1 .. 8 |-> 0],
+      userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedIncomingMessagesHeader27 ==
+    { ZeroIncomingMessagesHeader27 }
+        \cup { [ZeroIncomingMessagesHeader27 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader27 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader27 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+
+(***************************************************************************)
 (* Bulk Quote Occurrence: 26 bytes                                         *)
 (***************************************************************************)
 
@@ -2274,20 +4509,20 @@ OneBulkQuoteOccurrence == { ZeroBulkQuoteOccurrence }
 (***************************************************************************)
 
 BulkQuote ==
-    [ incomingMessagesHeader     : IncomingMessagesHeader12,
+    [ incomingMessagesHeader     : IncomingMessagesHeader27,
       group                      : Sample(2),
       quoteIdentifierOnThisGroup : Sample(8),
       bulkQuoteOccurrence        : SampleLists(OneBulkQuoteOccurrence) ]
 
 EncodeBulkQuote(message) ==
-    EncodeIncomingMessagesHeader12(message.incomingMessagesHeader)
+    EncodeIncomingMessagesHeader27(message.incomingMessagesHeader)
         \o message.group
         \o message.quoteIdentifierOnThisGroup
         \o EncodeDigits(Len(message.bulkQuoteOccurrence), 3)
         \o EncodeBulkQuoteOccurrenceList(message.bulkQuoteOccurrence)
 
 DecodeBulkQuote(bytes) ==
-    LET incomingMessagesHeader == DecodeIncomingMessagesHeader12(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader27(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
     LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
     LET numberOfQuotes == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotes.ok THEN Fail ELSE
@@ -2298,7 +4533,7 @@ DecodeBulkQuote(bytes) ==
          bulkQuoteOccurrence        |-> bulkQuoteOccurrence.value ], bulkQuoteOccurrence.rest)
 
 ZeroBulkQuote ==
-    [ incomingMessagesHeader     |-> ZeroIncomingMessagesHeader12,
+    [ incomingMessagesHeader     |-> ZeroIncomingMessagesHeader27,
       group                      |-> [i \in 1 .. 2 |-> 0],
       quoteIdentifierOnThisGroup |-> [i \in 1 .. 8 |-> 0],
       bulkQuoteOccurrence        |-> << >> ]
@@ -2306,7 +4541,7 @@ ZeroBulkQuote ==
 (* Bulk Quote at zero, then each field in turn at the values it is checked at *)
 CheckedBulkQuote ==
     { ZeroBulkQuote }
-        \cup { [ZeroBulkQuote EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader12 }
+        \cup { [ZeroBulkQuote EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader27 }
         \cup { [ZeroBulkQuote EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroBulkQuote EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
         \cup { [ZeroBulkQuote EXCEPT !.bulkQuoteOccurrence = one] : one \in SampleLists(OneBulkQuoteOccurrence) }
@@ -2315,17 +4550,17 @@ CheckedBulkQuote ==
 (* Incoming Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-IncomingMessagesHeader13 ==
+IncomingMessagesHeader28 ==
     [ userTimestampLocalHhmmss : Sample(6),
       traderId                 : Sample(8),
       userSequenceId           : Sample(8) ]
 
-EncodeIncomingMessagesHeader13(message) ==
+EncodeIncomingMessagesHeader28(message) ==
     message.userTimestampLocalHhmmss
         \o message.traderId
         \o message.userSequenceId
 
-DecodeIncomingMessagesHeader13(bytes) ==
+DecodeIncomingMessagesHeader28(bytes) ==
     LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
     LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
@@ -2333,38 +4568,38 @@ DecodeIncomingMessagesHeader13(bytes) ==
          traderId                 |-> traderId.value,
          userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
 
-ZeroIncomingMessagesHeader13 ==
+ZeroIncomingMessagesHeader28 ==
     [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       traderId                 |-> [i \in 1 .. 8 |-> 0],
       userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedIncomingMessagesHeader13 ==
-    { ZeroIncomingMessagesHeader13 }
-        \cup { [ZeroIncomingMessagesHeader13 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroIncomingMessagesHeader13 EXCEPT !.traderId = one] : one \in Sample(8) }
-        \cup { [ZeroIncomingMessagesHeader13 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+CheckedIncomingMessagesHeader28 ==
+    { ZeroIncomingMessagesHeader28 }
+        \cup { [ZeroIncomingMessagesHeader28 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader28 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader28 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Sail Request For Quote With Side: 37 bytes                              *)
 (***************************************************************************)
 
 SailRequestForQuoteWithSide ==
-    [ incomingMessagesHeader : IncomingMessagesHeader13,
+    [ incomingMessagesHeader : IncomingMessagesHeader28,
       group                  : Sample(2),
       instrument             : Sample(4),
       quantity               : Sample(8),
       marketSide             : Sample(1) ]
 
 EncodeSailRequestForQuoteWithSide(message) ==
-    EncodeIncomingMessagesHeader13(message.incomingMessagesHeader)
+    EncodeIncomingMessagesHeader28(message.incomingMessagesHeader)
         \o message.group
         \o message.instrument
         \o message.quantity
         \o message.marketSide
 
 DecodeSailRequestForQuoteWithSide(bytes) ==
-    LET incomingMessagesHeader == DecodeIncomingMessagesHeader13(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader28(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
     LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET quantity == ReadBytes(instrument.rest, 8) IN IF ~quantity.ok THEN Fail ELSE
@@ -2376,7 +4611,7 @@ DecodeSailRequestForQuoteWithSide(bytes) ==
          marketSide             |-> marketSide.value ], marketSide.rest)
 
 ZeroSailRequestForQuoteWithSide ==
-    [ incomingMessagesHeader |-> ZeroIncomingMessagesHeader13,
+    [ incomingMessagesHeader |-> ZeroIncomingMessagesHeader28,
       group                  |-> [i \in 1 .. 2 |-> 0],
       instrument             |-> [i \in 1 .. 4 |-> 0],
       quantity               |-> [i \in 1 .. 8 |-> 0],
@@ -2385,7 +4620,7 @@ ZeroSailRequestForQuoteWithSide ==
 (* Sail Request For Quote With Side at zero, then each field in turn at the values it is checked at *)
 CheckedSailRequestForQuoteWithSide ==
     { ZeroSailRequestForQuoteWithSide }
-        \cup { [ZeroSailRequestForQuoteWithSide EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader13 }
+        \cup { [ZeroSailRequestForQuoteWithSide EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader28 }
         \cup { [ZeroSailRequestForQuoteWithSide EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroSailRequestForQuoteWithSide EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroSailRequestForQuoteWithSide EXCEPT !.quantity = one] : one \in Sample(8) }
@@ -2395,17 +4630,17 @@ CheckedSailRequestForQuoteWithSide ==
 (* Incoming Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-IncomingMessagesHeader14 ==
+IncomingMessagesHeader29 ==
     [ userTimestampLocalHhmmss : Sample(6),
       traderId                 : Sample(8),
       userSequenceId           : Sample(8) ]
 
-EncodeIncomingMessagesHeader14(message) ==
+EncodeIncomingMessagesHeader29(message) ==
     message.userTimestampLocalHhmmss
         \o message.traderId
         \o message.userSequenceId
 
-DecodeIncomingMessagesHeader14(bytes) ==
+DecodeIncomingMessagesHeader29(bytes) ==
     LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
     LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
@@ -2413,34 +4648,34 @@ DecodeIncomingMessagesHeader14(bytes) ==
          traderId                 |-> traderId.value,
          userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
 
-ZeroIncomingMessagesHeader14 ==
+ZeroIncomingMessagesHeader29 ==
     [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       traderId                 |-> [i \in 1 .. 8 |-> 0],
       userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedIncomingMessagesHeader14 ==
-    { ZeroIncomingMessagesHeader14 }
-        \cup { [ZeroIncomingMessagesHeader14 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroIncomingMessagesHeader14 EXCEPT !.traderId = one] : one \in Sample(8) }
-        \cup { [ZeroIncomingMessagesHeader14 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+CheckedIncomingMessagesHeader29 ==
+    { ZeroIncomingMessagesHeader29 }
+        \cup { [ZeroIncomingMessagesHeader29 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader29 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader29 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Bulk Quote Participant Bqp Protection Subscription: 25 bytes            *)
 (***************************************************************************)
 
 BulkQuoteParticipantBqpProtectionSubscription ==
-    [ incomingMessagesHeader                                     : IncomingMessagesHeader14,
+    [ incomingMessagesHeader                                     : IncomingMessagesHeader29,
       group                                                      : Sample(2),
       protectionTypeAdvancedProtectionAdvancedProtectionDisabled : Sample(1) ]
 
 EncodeBulkQuoteParticipantBqpProtectionSubscription(message) ==
-    EncodeIncomingMessagesHeader14(message.incomingMessagesHeader)
+    EncodeIncomingMessagesHeader29(message.incomingMessagesHeader)
         \o message.group
         \o message.protectionTypeAdvancedProtectionAdvancedProtectionDisabled
 
 DecodeBulkQuoteParticipantBqpProtectionSubscription(bytes) ==
-    LET incomingMessagesHeader == DecodeIncomingMessagesHeader14(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader29(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
     LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET protectionTypeAdvancedProtectionAdvancedProtectionDisabled == ReadBytes(group.rest, 1) IN IF ~protectionTypeAdvancedProtectionAdvancedProtectionDisabled.ok THEN Fail ELSE
     Ok([ incomingMessagesHeader                                     |-> incomingMessagesHeader.value,
@@ -2448,14 +4683,14 @@ DecodeBulkQuoteParticipantBqpProtectionSubscription(bytes) ==
          protectionTypeAdvancedProtectionAdvancedProtectionDisabled |-> protectionTypeAdvancedProtectionAdvancedProtectionDisabled.value ], protectionTypeAdvancedProtectionAdvancedProtectionDisabled.rest)
 
 ZeroBulkQuoteParticipantBqpProtectionSubscription ==
-    [ incomingMessagesHeader                                     |-> ZeroIncomingMessagesHeader14,
+    [ incomingMessagesHeader                                     |-> ZeroIncomingMessagesHeader29,
       group                                                      |-> [i \in 1 .. 2 |-> 0],
       protectionTypeAdvancedProtectionAdvancedProtectionDisabled |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Bulk Quote Participant Bqp Protection Subscription at zero, then each field in turn at the values it is checked at *)
 CheckedBulkQuoteParticipantBqpProtectionSubscription ==
     { ZeroBulkQuoteParticipantBqpProtectionSubscription }
-        \cup { [ZeroBulkQuoteParticipantBqpProtectionSubscription EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader14 }
+        \cup { [ZeroBulkQuoteParticipantBqpProtectionSubscription EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader29 }
         \cup { [ZeroBulkQuoteParticipantBqpProtectionSubscription EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroBulkQuoteParticipantBqpProtectionSubscription EXCEPT !.protectionTypeAdvancedProtectionAdvancedProtectionDisabled = one] : one \in Sample(1) }
 
@@ -2463,17 +4698,17 @@ CheckedBulkQuoteParticipantBqpProtectionSubscription ==
 (* Incoming Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-IncomingMessagesHeader15 ==
+IncomingMessagesHeader30 ==
     [ userTimestampLocalHhmmss : Sample(6),
       traderId                 : Sample(8),
       userSequenceId           : Sample(8) ]
 
-EncodeIncomingMessagesHeader15(message) ==
+EncodeIncomingMessagesHeader30(message) ==
     message.userTimestampLocalHhmmss
         \o message.traderId
         \o message.userSequenceId
 
-DecodeIncomingMessagesHeader15(bytes) ==
+DecodeIncomingMessagesHeader30(bytes) ==
     LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
     LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
@@ -2481,36 +4716,36 @@ DecodeIncomingMessagesHeader15(bytes) ==
          traderId                 |-> traderId.value,
          userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
 
-ZeroIncomingMessagesHeader15 ==
+ZeroIncomingMessagesHeader30 ==
     [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       traderId                 |-> [i \in 1 .. 8 |-> 0],
       userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedIncomingMessagesHeader15 ==
-    { ZeroIncomingMessagesHeader15 }
-        \cup { [ZeroIncomingMessagesHeader15 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroIncomingMessagesHeader15 EXCEPT !.traderId = one] : one \in Sample(8) }
-        \cup { [ZeroIncomingMessagesHeader15 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+CheckedIncomingMessagesHeader30 ==
+    { ZeroIncomingMessagesHeader30 }
+        \cup { [ZeroIncomingMessagesHeader30 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader30 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader30 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Request For Quote: 36 bytes                                             *)
 (***************************************************************************)
 
 RequestForQuote ==
-    [ incomingMessagesHeader : IncomingMessagesHeader15,
+    [ incomingMessagesHeader : IncomingMessagesHeader30,
       group                  : Sample(2),
       instrument             : Sample(4),
       quantity               : Sample(8) ]
 
 EncodeRequestForQuote(message) ==
-    EncodeIncomingMessagesHeader15(message.incomingMessagesHeader)
+    EncodeIncomingMessagesHeader30(message.incomingMessagesHeader)
         \o message.group
         \o message.instrument
         \o message.quantity
 
 DecodeRequestForQuote(bytes) ==
-    LET incomingMessagesHeader == DecodeIncomingMessagesHeader15(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader30(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
     LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET quantity == ReadBytes(instrument.rest, 8) IN IF ~quantity.ok THEN Fail ELSE
@@ -2520,7 +4755,7 @@ DecodeRequestForQuote(bytes) ==
          quantity               |-> quantity.value ], quantity.rest)
 
 ZeroRequestForQuote ==
-    [ incomingMessagesHeader |-> ZeroIncomingMessagesHeader15,
+    [ incomingMessagesHeader |-> ZeroIncomingMessagesHeader30,
       group                  |-> [i \in 1 .. 2 |-> 0],
       instrument             |-> [i \in 1 .. 4 |-> 0],
       quantity               |-> [i \in 1 .. 8 |-> 0] ]
@@ -2528,7 +4763,7 @@ ZeroRequestForQuote ==
 (* Request For Quote at zero, then each field in turn at the values it is checked at *)
 CheckedRequestForQuote ==
     { ZeroRequestForQuote }
-        \cup { [ZeroRequestForQuote EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader15 }
+        \cup { [ZeroRequestForQuote EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader30 }
         \cup { [ZeroRequestForQuote EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroRequestForQuote EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroRequestForQuote EXCEPT !.quantity = one] : one \in Sample(8) }
@@ -2537,17 +4772,17 @@ CheckedRequestForQuote ==
 (* Incoming Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-IncomingMessagesHeader16 ==
+IncomingMessagesHeader31 ==
     [ userTimestampLocalHhmmss : Sample(6),
       traderId                 : Sample(8),
       userSequenceId           : Sample(8) ]
 
-EncodeIncomingMessagesHeader16(message) ==
+EncodeIncomingMessagesHeader31(message) ==
     message.userTimestampLocalHhmmss
         \o message.traderId
         \o message.userSequenceId
 
-DecodeIncomingMessagesHeader16(bytes) ==
+DecodeIncomingMessagesHeader31(bytes) ==
     LET userTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~userTimestampLocalHhmmss.ok THEN Fail ELSE
     LET traderId == ReadBytes(userTimestampLocalHhmmss.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(traderId.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
@@ -2555,36 +4790,36 @@ DecodeIncomingMessagesHeader16(bytes) ==
          traderId                 |-> traderId.value,
          userSequenceId           |-> userSequenceId.value ], userSequenceId.rest)
 
-ZeroIncomingMessagesHeader16 ==
+ZeroIncomingMessagesHeader31 ==
     [ userTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       traderId                 |-> [i \in 1 .. 8 |-> 0],
       userSequenceId           |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Incoming Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedIncomingMessagesHeader16 ==
-    { ZeroIncomingMessagesHeader16 }
-        \cup { [ZeroIncomingMessagesHeader16 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroIncomingMessagesHeader16 EXCEPT !.traderId = one] : one \in Sample(8) }
-        \cup { [ZeroIncomingMessagesHeader16 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+CheckedIncomingMessagesHeader31 ==
+    { ZeroIncomingMessagesHeader31 }
+        \cup { [ZeroIncomingMessagesHeader31 EXCEPT !.userTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroIncomingMessagesHeader31 EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncomingMessagesHeader31 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Order Cancellation: 36 bytes                                            *)
 (***************************************************************************)
 
 OrderCancellation ==
-    [ incomingMessagesHeader : IncomingMessagesHeader16,
+    [ incomingMessagesHeader : IncomingMessagesHeader31,
       group                  : Sample(2),
       instrument             : Sample(4),
       cancelledOrderId       : Sample(8) ]
 
 EncodeOrderCancellation(message) ==
-    EncodeIncomingMessagesHeader16(message.incomingMessagesHeader)
+    EncodeIncomingMessagesHeader31(message.incomingMessagesHeader)
         \o message.group
         \o message.instrument
         \o message.cancelledOrderId
 
 DecodeOrderCancellation(bytes) ==
-    LET incomingMessagesHeader == DecodeIncomingMessagesHeader16(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
+    LET incomingMessagesHeader == DecodeIncomingMessagesHeader31(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
     LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET cancelledOrderId == ReadBytes(instrument.rest, 8) IN IF ~cancelledOrderId.ok THEN Fail ELSE
@@ -2594,7 +4829,7 @@ DecodeOrderCancellation(bytes) ==
          cancelledOrderId       |-> cancelledOrderId.value ], cancelledOrderId.rest)
 
 ZeroOrderCancellation ==
-    [ incomingMessagesHeader |-> ZeroIncomingMessagesHeader16,
+    [ incomingMessagesHeader |-> ZeroIncomingMessagesHeader31,
       group                  |-> [i \in 1 .. 2 |-> 0],
       instrument             |-> [i \in 1 .. 4 |-> 0],
       cancelledOrderId       |-> [i \in 1 .. 8 |-> 0] ]
@@ -2602,7 +4837,7 @@ ZeroOrderCancellation ==
 (* Order Cancellation at zero, then each field in turn at the values it is checked at *)
 CheckedOrderCancellation ==
     { ZeroOrderCancellation }
-        \cup { [ZeroOrderCancellation EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader16 }
+        \cup { [ZeroOrderCancellation EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader31 }
         \cup { [ZeroOrderCancellation EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroOrderCancellation EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroOrderCancellation EXCEPT !.cancelledOrderId = one] : one \in Sample(8) }
@@ -2626,6 +4861,21 @@ OrderEntryCode == 20293  \* "OE"
 OrderModificationCode == 20301  \* "OM"
 NewStrategyInstrumentCode == 20302  \* "ON"
 CrossEntryCode == 20312  \* "OX"
+BulkQuotePrice4Quantity2Code == 20801  \* "QA"
+BulkQuotePrice6Quantity2Code == 20802  \* "QB"
+BulkQuotePrice8Quantity2Code == 20803  \* "QC"
+BulkQuotePrice10Quantity2Code == 20804  \* "QD"
+BulkQuotePrice4Quantity4Code == 20805  \* "QE"
+BulkQuotePrice6Quantity4Code == 20806  \* "QF"
+BulkQuotePrice8Quantity4Code == 20807  \* "QG"
+BulkQuotePrice10Quantity4Code == 20808  \* "QH"
+BulkQuotePrice4Quantity6Code == 20809  \* "QI"
+BulkQuotePrice6Quantity6Code == 20810  \* "QJ"
+BulkQuotePrice8Quantity6Code == 20811  \* "QK"
+BulkQuotePrice10Quantity6Code == 20812  \* "QL"
+BulkQuotePrice4Quantity8Code == 20813  \* "QM"
+BulkQuotePrice6Quantity8Code == 20814  \* "QN"
+BulkQuotePrice8Quantity8Code == 20815  \* "QO"
 BulkQuoteCode == 20816  \* "QP"
 SailRequestForQuoteWithSideCode == 20819  \* "QS"
 BulkQuoteParticipantBqpProtectionSubscriptionCode == 21072  \* "RP"
@@ -2648,6 +4898,21 @@ FirmMessage ==
         \cup [ tag : {OrderModificationCode}, body : OrderModification ]
         \cup [ tag : {NewStrategyInstrumentCode}, body : NewStrategyInstrument ]
         \cup [ tag : {CrossEntryCode}, body : CrossEntry ]
+        \cup [ tag : {BulkQuotePrice4Quantity2Code}, body : BulkQuotePrice4Quantity2 ]
+        \cup [ tag : {BulkQuotePrice6Quantity2Code}, body : BulkQuotePrice6Quantity2 ]
+        \cup [ tag : {BulkQuotePrice8Quantity2Code}, body : BulkQuotePrice8Quantity2 ]
+        \cup [ tag : {BulkQuotePrice10Quantity2Code}, body : BulkQuotePrice10Quantity2 ]
+        \cup [ tag : {BulkQuotePrice4Quantity4Code}, body : BulkQuotePrice4Quantity4 ]
+        \cup [ tag : {BulkQuotePrice6Quantity4Code}, body : BulkQuotePrice6Quantity4 ]
+        \cup [ tag : {BulkQuotePrice8Quantity4Code}, body : BulkQuotePrice8Quantity4 ]
+        \cup [ tag : {BulkQuotePrice10Quantity4Code}, body : BulkQuotePrice10Quantity4 ]
+        \cup [ tag : {BulkQuotePrice4Quantity6Code}, body : BulkQuotePrice4Quantity6 ]
+        \cup [ tag : {BulkQuotePrice6Quantity6Code}, body : BulkQuotePrice6Quantity6 ]
+        \cup [ tag : {BulkQuotePrice8Quantity6Code}, body : BulkQuotePrice8Quantity6 ]
+        \cup [ tag : {BulkQuotePrice10Quantity6Code}, body : BulkQuotePrice10Quantity6 ]
+        \cup [ tag : {BulkQuotePrice4Quantity8Code}, body : BulkQuotePrice4Quantity8 ]
+        \cup [ tag : {BulkQuotePrice6Quantity8Code}, body : BulkQuotePrice6Quantity8 ]
+        \cup [ tag : {BulkQuotePrice8Quantity8Code}, body : BulkQuotePrice8Quantity8 ]
         \cup [ tag : {BulkQuoteCode}, body : BulkQuote ]
         \cup [ tag : {SailRequestForQuoteWithSideCode}, body : SailRequestForQuoteWithSide ]
         \cup [ tag : {BulkQuoteParticipantBqpProtectionSubscriptionCode}, body : BulkQuoteParticipantBqpProtectionSubscription ]
@@ -2670,6 +4935,21 @@ EncodeFirmMessage(message) ==
       [] message.tag = OrderModificationCode -> EncodeOrderModification(message.body)
       [] message.tag = NewStrategyInstrumentCode -> EncodeNewStrategyInstrument(message.body)
       [] message.tag = CrossEntryCode -> EncodeCrossEntry(message.body)
+      [] message.tag = BulkQuotePrice4Quantity2Code -> EncodeBulkQuotePrice4Quantity2(message.body)
+      [] message.tag = BulkQuotePrice6Quantity2Code -> EncodeBulkQuotePrice6Quantity2(message.body)
+      [] message.tag = BulkQuotePrice8Quantity2Code -> EncodeBulkQuotePrice8Quantity2(message.body)
+      [] message.tag = BulkQuotePrice10Quantity2Code -> EncodeBulkQuotePrice10Quantity2(message.body)
+      [] message.tag = BulkQuotePrice4Quantity4Code -> EncodeBulkQuotePrice4Quantity4(message.body)
+      [] message.tag = BulkQuotePrice6Quantity4Code -> EncodeBulkQuotePrice6Quantity4(message.body)
+      [] message.tag = BulkQuotePrice8Quantity4Code -> EncodeBulkQuotePrice8Quantity4(message.body)
+      [] message.tag = BulkQuotePrice10Quantity4Code -> EncodeBulkQuotePrice10Quantity4(message.body)
+      [] message.tag = BulkQuotePrice4Quantity6Code -> EncodeBulkQuotePrice4Quantity6(message.body)
+      [] message.tag = BulkQuotePrice6Quantity6Code -> EncodeBulkQuotePrice6Quantity6(message.body)
+      [] message.tag = BulkQuotePrice8Quantity6Code -> EncodeBulkQuotePrice8Quantity6(message.body)
+      [] message.tag = BulkQuotePrice10Quantity6Code -> EncodeBulkQuotePrice10Quantity6(message.body)
+      [] message.tag = BulkQuotePrice4Quantity8Code -> EncodeBulkQuotePrice4Quantity8(message.body)
+      [] message.tag = BulkQuotePrice6Quantity8Code -> EncodeBulkQuotePrice6Quantity8(message.body)
+      [] message.tag = BulkQuotePrice8Quantity8Code -> EncodeBulkQuotePrice8Quantity8(message.body)
       [] message.tag = BulkQuoteCode -> EncodeBulkQuote(message.body)
       [] message.tag = SailRequestForQuoteWithSideCode -> EncodeSailRequestForQuoteWithSide(message.body)
       [] message.tag = BulkQuoteParticipantBqpProtectionSubscriptionCode -> EncodeBulkQuoteParticipantBqpProtectionSubscription(message.body)
@@ -2693,6 +4973,21 @@ DecodeFirmMessage(tag, bytes) ==
               [] tag = OrderModificationCode -> DecodeOrderModification(bytes)
               [] tag = NewStrategyInstrumentCode -> DecodeNewStrategyInstrument(bytes)
               [] tag = CrossEntryCode -> DecodeCrossEntry(bytes)
+              [] tag = BulkQuotePrice4Quantity2Code -> DecodeBulkQuotePrice4Quantity2(bytes)
+              [] tag = BulkQuotePrice6Quantity2Code -> DecodeBulkQuotePrice6Quantity2(bytes)
+              [] tag = BulkQuotePrice8Quantity2Code -> DecodeBulkQuotePrice8Quantity2(bytes)
+              [] tag = BulkQuotePrice10Quantity2Code -> DecodeBulkQuotePrice10Quantity2(bytes)
+              [] tag = BulkQuotePrice4Quantity4Code -> DecodeBulkQuotePrice4Quantity4(bytes)
+              [] tag = BulkQuotePrice6Quantity4Code -> DecodeBulkQuotePrice6Quantity4(bytes)
+              [] tag = BulkQuotePrice8Quantity4Code -> DecodeBulkQuotePrice8Quantity4(bytes)
+              [] tag = BulkQuotePrice10Quantity4Code -> DecodeBulkQuotePrice10Quantity4(bytes)
+              [] tag = BulkQuotePrice4Quantity6Code -> DecodeBulkQuotePrice4Quantity6(bytes)
+              [] tag = BulkQuotePrice6Quantity6Code -> DecodeBulkQuotePrice6Quantity6(bytes)
+              [] tag = BulkQuotePrice8Quantity6Code -> DecodeBulkQuotePrice8Quantity6(bytes)
+              [] tag = BulkQuotePrice10Quantity6Code -> DecodeBulkQuotePrice10Quantity6(bytes)
+              [] tag = BulkQuotePrice4Quantity8Code -> DecodeBulkQuotePrice4Quantity8(bytes)
+              [] tag = BulkQuotePrice6Quantity8Code -> DecodeBulkQuotePrice6Quantity8(bytes)
+              [] tag = BulkQuotePrice8Quantity8Code -> DecodeBulkQuotePrice8Quantity8(bytes)
               [] tag = BulkQuoteCode -> DecodeBulkQuote(bytes)
               [] tag = SailRequestForQuoteWithSideCode -> DecodeSailRequestForQuoteWithSide(bytes)
               [] tag = BulkQuoteParticipantBqpProtectionSubscriptionCode -> DecodeBulkQuoteParticipantBqpProtectionSubscription(bytes)
@@ -2720,6 +5015,21 @@ CheckedFirmMessage ==
         \cup { [tag |-> OrderModificationCode, body |-> one] : one \in CheckedOrderModification }
         \cup { [tag |-> NewStrategyInstrumentCode, body |-> one] : one \in CheckedNewStrategyInstrument }
         \cup { [tag |-> CrossEntryCode, body |-> one] : one \in CheckedCrossEntry }
+        \cup { [tag |-> BulkQuotePrice4Quantity2Code, body |-> one] : one \in CheckedBulkQuotePrice4Quantity2 }
+        \cup { [tag |-> BulkQuotePrice6Quantity2Code, body |-> one] : one \in CheckedBulkQuotePrice6Quantity2 }
+        \cup { [tag |-> BulkQuotePrice8Quantity2Code, body |-> one] : one \in CheckedBulkQuotePrice8Quantity2 }
+        \cup { [tag |-> BulkQuotePrice10Quantity2Code, body |-> one] : one \in CheckedBulkQuotePrice10Quantity2 }
+        \cup { [tag |-> BulkQuotePrice4Quantity4Code, body |-> one] : one \in CheckedBulkQuotePrice4Quantity4 }
+        \cup { [tag |-> BulkQuotePrice6Quantity4Code, body |-> one] : one \in CheckedBulkQuotePrice6Quantity4 }
+        \cup { [tag |-> BulkQuotePrice8Quantity4Code, body |-> one] : one \in CheckedBulkQuotePrice8Quantity4 }
+        \cup { [tag |-> BulkQuotePrice10Quantity4Code, body |-> one] : one \in CheckedBulkQuotePrice10Quantity4 }
+        \cup { [tag |-> BulkQuotePrice4Quantity6Code, body |-> one] : one \in CheckedBulkQuotePrice4Quantity6 }
+        \cup { [tag |-> BulkQuotePrice6Quantity6Code, body |-> one] : one \in CheckedBulkQuotePrice6Quantity6 }
+        \cup { [tag |-> BulkQuotePrice8Quantity6Code, body |-> one] : one \in CheckedBulkQuotePrice8Quantity6 }
+        \cup { [tag |-> BulkQuotePrice10Quantity6Code, body |-> one] : one \in CheckedBulkQuotePrice10Quantity6 }
+        \cup { [tag |-> BulkQuotePrice4Quantity8Code, body |-> one] : one \in CheckedBulkQuotePrice4Quantity8 }
+        \cup { [tag |-> BulkQuotePrice6Quantity8Code, body |-> one] : one \in CheckedBulkQuotePrice6Quantity8 }
+        \cup { [tag |-> BulkQuotePrice8Quantity8Code, body |-> one] : one \in CheckedBulkQuotePrice8Quantity8 }
         \cup { [tag |-> BulkQuoteCode, body |-> one] : one \in CheckedBulkQuote }
         \cup { [tag |-> SailRequestForQuoteWithSideCode, body |-> one] : one \in CheckedSailRequestForQuoteWithSide }
         \cup { [tag |-> BulkQuoteParticipantBqpProtectionSubscriptionCode, body |-> one] : one \in CheckedBulkQuoteParticipantBqpProtectionSubscription }
@@ -3128,6 +5438,366 @@ RoundTripIncomingMessagesHeader12 ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Bulk Quote Price 4 Quantity 2 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice4Quantity2Occurrence ==
+    \A message \in CheckedBulkQuotePrice4Quantity2Occurrence :
+        LET read == DecodeBulkQuotePrice4Quantity2Occurrence(EncodeBulkQuotePrice4Quantity2Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 4 Quantity 2 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice4Quantity2 ==
+    \A message \in CheckedBulkQuotePrice4Quantity2 :
+        LET read == DecodeBulkQuotePrice4Quantity2(EncodeBulkQuotePrice4Quantity2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader13 ==
+    \A message \in CheckedIncomingMessagesHeader13 :
+        LET read == DecodeIncomingMessagesHeader13(EncodeIncomingMessagesHeader13(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 6 Quantity 2 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice6Quantity2Occurrence ==
+    \A message \in CheckedBulkQuotePrice6Quantity2Occurrence :
+        LET read == DecodeBulkQuotePrice6Quantity2Occurrence(EncodeBulkQuotePrice6Quantity2Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 6 Quantity 2 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice6Quantity2 ==
+    \A message \in CheckedBulkQuotePrice6Quantity2 :
+        LET read == DecodeBulkQuotePrice6Quantity2(EncodeBulkQuotePrice6Quantity2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader14 ==
+    \A message \in CheckedIncomingMessagesHeader14 :
+        LET read == DecodeIncomingMessagesHeader14(EncodeIncomingMessagesHeader14(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 8 Quantity 2 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice8Quantity2Occurrence ==
+    \A message \in CheckedBulkQuotePrice8Quantity2Occurrence :
+        LET read == DecodeBulkQuotePrice8Quantity2Occurrence(EncodeBulkQuotePrice8Quantity2Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 8 Quantity 2 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice8Quantity2 ==
+    \A message \in CheckedBulkQuotePrice8Quantity2 :
+        LET read == DecodeBulkQuotePrice8Quantity2(EncodeBulkQuotePrice8Quantity2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader15 ==
+    \A message \in CheckedIncomingMessagesHeader15 :
+        LET read == DecodeIncomingMessagesHeader15(EncodeIncomingMessagesHeader15(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 10 Quantity 2 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice10Quantity2Occurrence ==
+    \A message \in CheckedBulkQuotePrice10Quantity2Occurrence :
+        LET read == DecodeBulkQuotePrice10Quantity2Occurrence(EncodeBulkQuotePrice10Quantity2Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 10 Quantity 2 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice10Quantity2 ==
+    \A message \in CheckedBulkQuotePrice10Quantity2 :
+        LET read == DecodeBulkQuotePrice10Quantity2(EncodeBulkQuotePrice10Quantity2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader16 ==
+    \A message \in CheckedIncomingMessagesHeader16 :
+        LET read == DecodeIncomingMessagesHeader16(EncodeIncomingMessagesHeader16(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 4 Quantity 4 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice4Quantity4Occurrence ==
+    \A message \in CheckedBulkQuotePrice4Quantity4Occurrence :
+        LET read == DecodeBulkQuotePrice4Quantity4Occurrence(EncodeBulkQuotePrice4Quantity4Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 4 Quantity 4 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice4Quantity4 ==
+    \A message \in CheckedBulkQuotePrice4Quantity4 :
+        LET read == DecodeBulkQuotePrice4Quantity4(EncodeBulkQuotePrice4Quantity4(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader17 ==
+    \A message \in CheckedIncomingMessagesHeader17 :
+        LET read == DecodeIncomingMessagesHeader17(EncodeIncomingMessagesHeader17(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 6 Quantity 4 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice6Quantity4Occurrence ==
+    \A message \in CheckedBulkQuotePrice6Quantity4Occurrence :
+        LET read == DecodeBulkQuotePrice6Quantity4Occurrence(EncodeBulkQuotePrice6Quantity4Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 6 Quantity 4 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice6Quantity4 ==
+    \A message \in CheckedBulkQuotePrice6Quantity4 :
+        LET read == DecodeBulkQuotePrice6Quantity4(EncodeBulkQuotePrice6Quantity4(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader18 ==
+    \A message \in CheckedIncomingMessagesHeader18 :
+        LET read == DecodeIncomingMessagesHeader18(EncodeIncomingMessagesHeader18(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 8 Quantity 4 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice8Quantity4Occurrence ==
+    \A message \in CheckedBulkQuotePrice8Quantity4Occurrence :
+        LET read == DecodeBulkQuotePrice8Quantity4Occurrence(EncodeBulkQuotePrice8Quantity4Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 8 Quantity 4 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice8Quantity4 ==
+    \A message \in CheckedBulkQuotePrice8Quantity4 :
+        LET read == DecodeBulkQuotePrice8Quantity4(EncodeBulkQuotePrice8Quantity4(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader19 ==
+    \A message \in CheckedIncomingMessagesHeader19 :
+        LET read == DecodeIncomingMessagesHeader19(EncodeIncomingMessagesHeader19(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 10 Quantity 4 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice10Quantity4Occurrence ==
+    \A message \in CheckedBulkQuotePrice10Quantity4Occurrence :
+        LET read == DecodeBulkQuotePrice10Quantity4Occurrence(EncodeBulkQuotePrice10Quantity4Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 10 Quantity 4 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice10Quantity4 ==
+    \A message \in CheckedBulkQuotePrice10Quantity4 :
+        LET read == DecodeBulkQuotePrice10Quantity4(EncodeBulkQuotePrice10Quantity4(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader20 ==
+    \A message \in CheckedIncomingMessagesHeader20 :
+        LET read == DecodeIncomingMessagesHeader20(EncodeIncomingMessagesHeader20(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 4 Quantity 6 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice4Quantity6Occurrence ==
+    \A message \in CheckedBulkQuotePrice4Quantity6Occurrence :
+        LET read == DecodeBulkQuotePrice4Quantity6Occurrence(EncodeBulkQuotePrice4Quantity6Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 4 Quantity 6 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice4Quantity6 ==
+    \A message \in CheckedBulkQuotePrice4Quantity6 :
+        LET read == DecodeBulkQuotePrice4Quantity6(EncodeBulkQuotePrice4Quantity6(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader21 ==
+    \A message \in CheckedIncomingMessagesHeader21 :
+        LET read == DecodeIncomingMessagesHeader21(EncodeIncomingMessagesHeader21(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 6 Quantity 6 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice6Quantity6Occurrence ==
+    \A message \in CheckedBulkQuotePrice6Quantity6Occurrence :
+        LET read == DecodeBulkQuotePrice6Quantity6Occurrence(EncodeBulkQuotePrice6Quantity6Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 6 Quantity 6 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice6Quantity6 ==
+    \A message \in CheckedBulkQuotePrice6Quantity6 :
+        LET read == DecodeBulkQuotePrice6Quantity6(EncodeBulkQuotePrice6Quantity6(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader22 ==
+    \A message \in CheckedIncomingMessagesHeader22 :
+        LET read == DecodeIncomingMessagesHeader22(EncodeIncomingMessagesHeader22(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 8 Quantity 6 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice8Quantity6Occurrence ==
+    \A message \in CheckedBulkQuotePrice8Quantity6Occurrence :
+        LET read == DecodeBulkQuotePrice8Quantity6Occurrence(EncodeBulkQuotePrice8Quantity6Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 8 Quantity 6 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice8Quantity6 ==
+    \A message \in CheckedBulkQuotePrice8Quantity6 :
+        LET read == DecodeBulkQuotePrice8Quantity6(EncodeBulkQuotePrice8Quantity6(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader23 ==
+    \A message \in CheckedIncomingMessagesHeader23 :
+        LET read == DecodeIncomingMessagesHeader23(EncodeIncomingMessagesHeader23(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 10 Quantity 6 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice10Quantity6Occurrence ==
+    \A message \in CheckedBulkQuotePrice10Quantity6Occurrence :
+        LET read == DecodeBulkQuotePrice10Quantity6Occurrence(EncodeBulkQuotePrice10Quantity6Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 10 Quantity 6 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice10Quantity6 ==
+    \A message \in CheckedBulkQuotePrice10Quantity6 :
+        LET read == DecodeBulkQuotePrice10Quantity6(EncodeBulkQuotePrice10Quantity6(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader24 ==
+    \A message \in CheckedIncomingMessagesHeader24 :
+        LET read == DecodeIncomingMessagesHeader24(EncodeIncomingMessagesHeader24(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 4 Quantity 8 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice4Quantity8Occurrence ==
+    \A message \in CheckedBulkQuotePrice4Quantity8Occurrence :
+        LET read == DecodeBulkQuotePrice4Quantity8Occurrence(EncodeBulkQuotePrice4Quantity8Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 4 Quantity 8 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice4Quantity8 ==
+    \A message \in CheckedBulkQuotePrice4Quantity8 :
+        LET read == DecodeBulkQuotePrice4Quantity8(EncodeBulkQuotePrice4Quantity8(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader25 ==
+    \A message \in CheckedIncomingMessagesHeader25 :
+        LET read == DecodeIncomingMessagesHeader25(EncodeIncomingMessagesHeader25(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 6 Quantity 8 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice6Quantity8Occurrence ==
+    \A message \in CheckedBulkQuotePrice6Quantity8Occurrence :
+        LET read == DecodeBulkQuotePrice6Quantity8Occurrence(EncodeBulkQuotePrice6Quantity8Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 6 Quantity 8 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice6Quantity8 ==
+    \A message \in CheckedBulkQuotePrice6Quantity8 :
+        LET read == DecodeBulkQuotePrice6Quantity8(EncodeBulkQuotePrice6Quantity8(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader26 ==
+    \A message \in CheckedIncomingMessagesHeader26 :
+        LET read == DecodeIncomingMessagesHeader26(EncodeIncomingMessagesHeader26(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 8 Quantity 8 Occurrence decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice8Quantity8Occurrence ==
+    \A message \in CheckedBulkQuotePrice8Quantity8Occurrence :
+        LET read == DecodeBulkQuotePrice8Quantity8Occurrence(EncodeBulkQuotePrice8Quantity8Occurrence(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Bulk Quote Price 8 Quantity 8 decodes back to what was encoded, and leaves nothing over *)
+RoundTripBulkQuotePrice8Quantity8 ==
+    \A message \in CheckedBulkQuotePrice8Quantity8 :
+        LET read == DecodeBulkQuotePrice8Quantity8(EncodeBulkQuotePrice8Quantity8(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncomingMessagesHeader27 ==
+    \A message \in CheckedIncomingMessagesHeader27 :
+        LET read == DecodeIncomingMessagesHeader27(EncodeIncomingMessagesHeader27(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Bulk Quote Occurrence decodes back to what was encoded, and leaves nothing over *)
 RoundTripBulkQuoteOccurrence ==
     \A message \in CheckedBulkQuoteOccurrence :
@@ -3145,9 +5815,9 @@ RoundTripBulkQuote ==
             /\ read.rest = << >>
 
 (* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncomingMessagesHeader13 ==
-    \A message \in CheckedIncomingMessagesHeader13 :
-        LET read == DecodeIncomingMessagesHeader13(EncodeIncomingMessagesHeader13(message))
+RoundTripIncomingMessagesHeader28 ==
+    \A message \in CheckedIncomingMessagesHeader28 :
+        LET read == DecodeIncomingMessagesHeader28(EncodeIncomingMessagesHeader28(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3161,9 +5831,9 @@ RoundTripSailRequestForQuoteWithSide ==
             /\ read.rest = << >>
 
 (* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncomingMessagesHeader14 ==
-    \A message \in CheckedIncomingMessagesHeader14 :
-        LET read == DecodeIncomingMessagesHeader14(EncodeIncomingMessagesHeader14(message))
+RoundTripIncomingMessagesHeader29 ==
+    \A message \in CheckedIncomingMessagesHeader29 :
+        LET read == DecodeIncomingMessagesHeader29(EncodeIncomingMessagesHeader29(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3177,9 +5847,9 @@ RoundTripBulkQuoteParticipantBqpProtectionSubscription ==
             /\ read.rest = << >>
 
 (* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncomingMessagesHeader15 ==
-    \A message \in CheckedIncomingMessagesHeader15 :
-        LET read == DecodeIncomingMessagesHeader15(EncodeIncomingMessagesHeader15(message))
+RoundTripIncomingMessagesHeader30 ==
+    \A message \in CheckedIncomingMessagesHeader30 :
+        LET read == DecodeIncomingMessagesHeader30(EncodeIncomingMessagesHeader30(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3193,9 +5863,9 @@ RoundTripRequestForQuote ==
             /\ read.rest = << >>
 
 (* Every Incoming Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncomingMessagesHeader16 ==
-    \A message \in CheckedIncomingMessagesHeader16 :
-        LET read == DecodeIncomingMessagesHeader16(EncodeIncomingMessagesHeader16(message))
+RoundTripIncomingMessagesHeader31 ==
+    \A message \in CheckedIncomingMessagesHeader31 :
+        LET read == DecodeIncomingMessagesHeader31(EncodeIncomingMessagesHeader31(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

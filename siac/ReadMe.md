@@ -19,6 +19,8 @@
 | [Opra][Opra.Consolidator] | [Headers][Siac.Opra.Headers] | [Udp][Omi.Encoding.Udp] | [1][Siac.Opra.Headers.Udp.v1.Definition] | 8/3/2022 | 449 | [Header][Omi.Glossary.Deployment.Header] | [Verified][Omi.Glossary.Testing.Verified] | [url][Siac.Opra.Headers.Udp.v1.Url] |
 | [Opra][Opra.Consolidator] | [Input][Siac.Opra.Input] | [Obi][Omi.Encoding.Obi] | [5.0.i][Siac.Opra.Input.Obi.v5.0.i.Definition] | 2/20/2026 | 1894 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Siac.Opra.Input.Obi.v5.0.i.Url] - [pdf][Siac.Opra.Input.Obi.v5.0.i.Pdf] |
 | [Opra][Opra.Consolidator] | [Output][Siac.Opra.Output] | [Obi][Omi.Encoding.Obi] | [4.0][Siac.Opra.Output.Obi.v4.0.Definition] | 1/17/2020 | 2153 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Siac.Opra.Output.Obi.v4.0.Url] - [pdf][Siac.Opra.Output.Obi.v4.0.Pdf] |
+| [Opra][Opra.Consolidator] | [Output][Siac.Opra.Output] | [Obi][Omi.Encoding.Obi] | [6.1][Siac.Opra.Output.Obi.v6.1.Definition] | 3/25/2022 | 2223 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Siac.Opra.Output.Obi.v6.1.Url] - [pdf][Siac.Opra.Output.Obi.v6.1.Pdf] |
+| [Opra][Opra.Consolidator] | [Output][Siac.Opra.Output] | [Obi][Omi.Encoding.Obi] | [6.2][Siac.Opra.Output.Obi.v6.2.Definition] | 12/6/2024 | 2290 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Verified][Omi.Glossary.Testing.Verified] | [url][Siac.Opra.Output.Obi.v6.2.Url] - [pdf][Siac.Opra.Output.Obi.v6.2.Pdf] |
 | [Opra][Opra.Consolidator] | [Output][Siac.Opra.Output] | [Obi][Omi.Encoding.Obi] | [6.3.a][Siac.Opra.Output.Obi.v6.3.a.Definition] | 2/20/2026 | 2478 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [pdf][Siac.Opra.Output.Obi.v6.3.a.Pdf] - [url][Siac.Opra.Output.Obi.v6.3.a.Url] |
 
 
@@ -97,6 +99,12 @@
 [Siac.Opra.Output.Obi.v4.0.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/siac/opra/output/Siac_Opra_Output_v4_0.tla "Siac Opra Output Obi v4.0 Tla Definition"
 [Siac.Opra.Output.Obi.v4.0.Url]: https://www.opraplan.com/document-library "The Securities Industry Automation Corporation 4.0 Url"
 [Siac.Opra.Output.Obi.v4.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Siac/Specifications/Opra/Output/Siac.Opra.Output.Obi.v4.0.pdf "The Securities Industry Automation Corporation 4.0 Pdf"
+[Siac.Opra.Output.Obi.v6.1.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/siac/opra/output/Siac_Opra_Output_v6_1.tla "Siac Opra Output Obi v6.1 Tla Definition"
+[Siac.Opra.Output.Obi.v6.1.Url]: https://www.opraplan.com/document-library "The Securities Industry Automation Corporation 6.1 Url"
+[Siac.Opra.Output.Obi.v6.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Siac/Specifications/Opra/Output/Siac.Opra.Output.Obi.v6.1.c.pdf "The Securities Industry Automation Corporation 6.1 Pdf"
+[Siac.Opra.Output.Obi.v6.2.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/siac/opra/output/Siac_Opra_Output_v6_2.tla "Siac Opra Output Obi v6.2 Tla Definition"
+[Siac.Opra.Output.Obi.v6.2.Url]: https://www.opraplan.com/document-library "The Securities Industry Automation Corporation 6.2 Url"
+[Siac.Opra.Output.Obi.v6.2.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Siac/Specifications/Opra/Output/Siac.Opra.Output.Obi.v6.2.pdf "The Securities Industry Automation Corporation 6.2 Pdf"
 [Siac.Opra.Output.Obi.v6.3.a.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/siac/opra/output/Siac_Opra_Output_v6_3_a.tla "Siac Opra Output Obi v6.3.a Tla Definition"
 [Siac.Opra.Output.Obi.v6.3.a.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Siac/Specifications/Opra/Output/Siac.Opra.Output.Obi.v6.3.a.pdf "The Securities Industry Automation Corporation 6.3.a Pdf"
 [Siac.Opra.Output.Obi.v6.3.a.Url]: https://www.opraplan.com/document-library "The Securities Industry Automation Corporation 6.3.a Url"

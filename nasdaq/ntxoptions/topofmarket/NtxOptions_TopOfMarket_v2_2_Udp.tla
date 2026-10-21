@@ -784,6 +784,8 @@ BestBidOrAskUpdateShortFormMessageCode == 98  \* "b"
 BestBidOrAskUpdateLongFormMessageCode == 66  \* "B"
 TradeReportMessageCode == 84  \* "T"
 BrokenTradeReportMessageCode == 88  \* "X"
+BestBidOrAskUpdateShortFormMessageCode2 == 97  \* "a"
+BestBidOrAskUpdateLongFormMessageCode2 == 65  \* "A"
 
 UdpPayload ==
     [ tag : {SystemEventMessageCode}, body : SystemEventMessage ]
@@ -795,6 +797,8 @@ UdpPayload ==
         \cup [ tag : {BestBidOrAskUpdateLongFormMessageCode}, body : BestBidOrAskUpdateLongFormMessage ]
         \cup [ tag : {TradeReportMessageCode}, body : TradeReportMessage ]
         \cup [ tag : {BrokenTradeReportMessageCode}, body : BrokenTradeReportMessage ]
+        \cup [ tag : {BestBidOrAskUpdateShortFormMessageCode2}, body : BestBidOrAskUpdateShortFormMessage ]
+        \cup [ tag : {BestBidOrAskUpdateLongFormMessageCode2}, body : BestBidOrAskUpdateLongFormMessage ]
 
 EncodeUdpPayload(message) ==
     CASE message.tag = SystemEventMessageCode -> EncodeSystemEventMessage(message.body)
@@ -806,6 +810,8 @@ EncodeUdpPayload(message) ==
       [] message.tag = BestBidOrAskUpdateLongFormMessageCode -> EncodeBestBidOrAskUpdateLongFormMessage(message.body)
       [] message.tag = TradeReportMessageCode -> EncodeTradeReportMessage(message.body)
       [] message.tag = BrokenTradeReportMessageCode -> EncodeBrokenTradeReportMessage(message.body)
+      [] message.tag = BestBidOrAskUpdateShortFormMessageCode2 -> EncodeBestBidOrAskUpdateShortFormMessage(message.body)
+      [] message.tag = BestBidOrAskUpdateLongFormMessageCode2 -> EncodeBestBidOrAskUpdateLongFormMessage(message.body)
 
 DecodeUdpPayload(tag, bytes) ==
     LET read ==
@@ -818,6 +824,8 @@ DecodeUdpPayload(tag, bytes) ==
               [] tag = BestBidOrAskUpdateLongFormMessageCode -> DecodeBestBidOrAskUpdateLongFormMessage(bytes)
               [] tag = TradeReportMessageCode -> DecodeTradeReportMessage(bytes)
               [] tag = BrokenTradeReportMessageCode -> DecodeBrokenTradeReportMessage(bytes)
+              [] tag = BestBidOrAskUpdateShortFormMessageCode2 -> DecodeBestBidOrAskUpdateShortFormMessage(bytes)
+              [] tag = BestBidOrAskUpdateLongFormMessageCode2 -> DecodeBestBidOrAskUpdateLongFormMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -834,6 +842,8 @@ CheckedUdpPayload ==
         \cup { [tag |-> BestBidOrAskUpdateLongFormMessageCode, body |-> one] : one \in CheckedBestBidOrAskUpdateLongFormMessage }
         \cup { [tag |-> TradeReportMessageCode, body |-> one] : one \in CheckedTradeReportMessage }
         \cup { [tag |-> BrokenTradeReportMessageCode, body |-> one] : one \in CheckedBrokenTradeReportMessage }
+        \cup { [tag |-> BestBidOrAskUpdateShortFormMessageCode2, body |-> one] : one \in CheckedBestBidOrAskUpdateShortFormMessage }
+        \cup { [tag |-> BestBidOrAskUpdateLongFormMessageCode2, body |-> one] : one \in CheckedBestBidOrAskUpdateLongFormMessage }
 
 (***************************************************************************)
 (* Message, framed by Message Length                                       *)
@@ -901,7 +911,9 @@ OneMessage ==
       [ZeroMessage EXCEPT !.udpPayload = [tag |-> BestBidOrAskUpdateShortFormMessageCode, body |-> ZeroBestBidOrAskUpdateShortFormMessage]],
       [ZeroMessage EXCEPT !.udpPayload = [tag |-> BestBidOrAskUpdateLongFormMessageCode, body |-> ZeroBestBidOrAskUpdateLongFormMessage]],
       [ZeroMessage EXCEPT !.udpPayload = [tag |-> TradeReportMessageCode, body |-> ZeroTradeReportMessage]],
-      [ZeroMessage EXCEPT !.udpPayload = [tag |-> BrokenTradeReportMessageCode, body |-> ZeroBrokenTradeReportMessage]] }
+      [ZeroMessage EXCEPT !.udpPayload = [tag |-> BrokenTradeReportMessageCode, body |-> ZeroBrokenTradeReportMessage]],
+      [ZeroMessage EXCEPT !.udpPayload = [tag |-> BestBidOrAskUpdateShortFormMessageCode2, body |-> ZeroBestBidOrAskUpdateShortFormMessage]],
+      [ZeroMessage EXCEPT !.udpPayload = [tag |-> BestBidOrAskUpdateLongFormMessageCode2, body |-> ZeroBestBidOrAskUpdateLongFormMessage]] }
 
 (***************************************************************************)
 (* Packet                                                                  *)

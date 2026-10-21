@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 1148 | 4119766 |
+| 1171 | 4131947 |
 
 ## Testing
 
@@ -37,11 +37,11 @@ Please report any checking errors as an [issue](https://github.com/Open-Markets-
 Other generated code can be found at [Omi Repositories](https://github.com/Open-Markets-Initiative/Directory/tree/main/Repositories "Open Markets Initiative Repositories"); for Omi rules and regulations, see [Omi Directory](https://github.com/Open-Markets-Initiative/Directory "Open Markets Initiative Directory").
 ## Organizations
 
-> [24X][24X.Directory] · [A2X][A2X.Directory] · [Aquis][Aquis.Directory] · [Asx][Asx.Directory] · [B3][B3.Directory] · [Binance][Binance.Directory] · [Bist][Bist.Directory] · [Biva][Biva.Directory] · [BlueOceanAts][BlueOceanAts.Directory] · [Bme][Bme.Directory] · [Box][Box.Directory] · [BruceAts][BruceAts.Directory] · [Bse][Bse.Directory] · [Cboe][Cboe.Directory] · [CixAts][CixAts.Directory] · [Cme][Cme.Directory] · [Coinbase][Coinbase.Directory] · [Currenex][Currenex.Directory] · [Eurex][Eurex.Directory] · [Euronext][Euronext.Directory] · [Finra][Finra.Directory] · [Hkex][Hkex.Directory] · [Ice][Ice.Directory] · [Iex][Iex.Directory] · [Imperative][Imperative.Directory] · [Jnx][Jnx.Directory] · [Jpx][Jpx.Directory] · [Jse][Jse.Directory] · [Lme][Lme.Directory] · [Lseg][Lseg.Directory] · [Ltse][Ltse.Directory] · [Memx][Memx.Directory] · [Miax][Miax.Directory] · [Nasdaq][Nasdaq.Directory] · [Nse][Nse.Directory] · [NsxAustralia][NsxAustralia.Directory] · [Nyse][Nyse.Directory] · [Odx][Odx.Directory] · [Okx][Okx.Directory] · [OtcMarkets][OtcMarkets.Directory] · [Sgx][Sgx.Directory] · [Siac][Siac.Directory] · [SmallX][SmallX.Directory] · [Szse][Szse.Directory] · [Tmx][Tmx.Directory] · [Tradelogiq][Tradelogiq.Directory] · [Txse][Txse.Directory]
+> [24X][24X.Directory] · [A2X][A2X.Directory] · [Aquis][Aquis.Directory] · [Asx][Asx.Directory] · [Athex][Athex.Directory] · [B3][B3.Directory] · [Binance][Binance.Directory] · [Bist][Bist.Directory] · [Biva][Biva.Directory] · [BlueOceanAts][BlueOceanAts.Directory] · [Bme][Bme.Directory] · [Box][Box.Directory] · [BruceAts][BruceAts.Directory] · [Bse][Bse.Directory] · [Cboe][Cboe.Directory] · [CixAts][CixAts.Directory] · [Cme][Cme.Directory] · [Coinbase][Coinbase.Directory] · [Currenex][Currenex.Directory] · [Eurex][Eurex.Directory] · [Euronext][Euronext.Directory] · [Finra][Finra.Directory] · [Hkex][Hkex.Directory] · [Ice][Ice.Directory] · [Iex][Iex.Directory] · [Imperative][Imperative.Directory] · [Jnx][Jnx.Directory] · [Jpx][Jpx.Directory] · [Jse][Jse.Directory] · [Lme][Lme.Directory] · [Lseg][Lseg.Directory] · [Ltse][Ltse.Directory] · [Memx][Memx.Directory] · [Miax][Miax.Directory] · [Nasdaq][Nasdaq.Directory] · [Nse][Nse.Directory] · [NsxAustralia][NsxAustralia.Directory] · [Nyse][Nyse.Directory] · [Odx][Odx.Directory] · [Okx][Okx.Directory] · [OtcMarkets][OtcMarkets.Directory] · [Sgx][Sgx.Directory] · [Siac][Siac.Directory] · [SmallX][SmallX.Directory] · [Szse][Szse.Directory] · [Taifex][Taifex.Directory] · [Tmx][Tmx.Directory] · [Tradelogiq][Tradelogiq.Directory] · [Txse][Txse.Directory]
 
 ## Exchanges
 
-> [24XEquities][24XEquities.Exchange] · [A2XEquities][A2XEquities.Exchange] · [AmexEquities][AmexEquities.Exchange] · [AmexOptions][AmexOptions.Exchange] · [AquisEquities][AquisEquities.Exchange] · [ArcaEquities][ArcaEquities.Exchange] · [ArcaOptions][ArcaOptions.Exchange] · [AsxDerivatives][AsxDerivatives.Exchange] · [AsxSecurities][AsxSecurities.Exchange] · [B3Derivatives][B3Derivatives.Exchange] · [BinanceSpot][BinanceSpot.Exchange] · [BivaEquities][BivaEquities.Exchange] · [BlueEquities][BlueEquities.Ats] · [BmeEquities][BmeEquities.Exchange] · [BmeFixedIncome][BmeFixedIncome.Exchange] · [BorsaIstanbul][BorsaIstanbul.Exchange] · [BoxOptions][BoxOptions.Exchange] · [BrokerTec][BrokerTec.Exchange] · [BruceEquities][BruceEquities.Ats] · [BseIndia][BseIndia.Exchange] · [BxeEquities][BxeEquities.Exchange] · [ByxEquities][ByxEquities.Exchange] · [BzxEquities][BzxEquities.Exchange] · [BzxOptions][BzxOptions.Exchange] · [C1Options][C1Options.Exchange] · [C2Options][C2Options.Exchange] · [CboeEurope][CboeEurope.Exchange] · [CedxDerivatives][CedxDerivatives.Exchange] · [CfeFutures][CfeFutures.Exchange] · [CoinbaseDerivatives][CoinbaseDerivatives.Exchange] · [CurrenexForex][CurrenexForex.Exchange] · [CxaEquities][CxaEquities.Exchange] · [CxeEquities][CxeEquities.Exchange] · [CxjEquities][CxjEquities.Exchange] · [Deribit][Deribit.Exchange] · [DxeEquities][DxeEquities.Exchange] · [Ebs][Ebs.Exchange] · [EdgaEquities][EdgaEquities.Exchange] · [EdgxEquities][EdgxEquities.Exchange] · [EdgxOptions][EdgxOptions.Exchange] · [FinraOrf][FinraOrf.Exchange] · [FseEquities][FseEquities.Exchange] · [GemxOptions][GemxOptions.Exchange] · [HkexSecurities][HkexSecurities.Exchange] · [IceFutures][IceFutures.Exchange] · [IexEquities][IexEquities.Exchange] · [IexOptions][IexOptions.Exchange] · [IntelligentCross][IntelligentCross.Ats] · [IseOptions][IseOptions.Exchange] · [JnxBonds][JnxBonds.Exchange] · [JnxEquities][JnxEquities.Exchange] · [LinkAts][LinkAts.Ats] · [LinkNqb][LinkNqb.Ats] · [LmeSelect][LmeSelect.Exchange] · [Lse][Lse.Exchange] · [LtseEquities][LtseEquities.Exchange] · [LynxAts][LynxAts.Ats] · [MatchNow][MatchNow.Exchange] · [Meff][Meff.Exchange] · [MemxEquities][MemxEquities.Exchange] · [MemxOptions][MemxOptions.Exchange] · [MoonAts][MoonAts.Ats] · [MrxOptions][MrxOptions.Exchange] · [Mx][Mx.Exchange] · [NasdaqCanada][NasdaqCanada.Exchange] · [NationalEquities][NationalEquities.Exchange] · [NeoEquities][NeoEquities.Exchange] · [NfxFutures][NfxFutures.Exchange] · [NomOptions][NomOptions.Exchange] · [NordicDerivatives][NordicDerivatives.Exchange] · [NordicEquities][NordicEquities.Exchange] · [NseCd][NseCd.Exchange] · [NseCm][NseCm.Exchange] · [NseCom][NseCom.Exchange] · [NseEquities][NseEquities.Exchange] · [NseFo][NseFo.Exchange] · [NsmEquities][NsmEquities.Exchange] · [NtxEquities][NtxEquities.Exchange] · [NtxOptions][NtxOptions.Exchange] · [NyseBonds][NyseBonds.Exchange] · [NyseEquities][NyseEquities.Exchange] · [NyseOptions][NyseOptions.Exchange] · [OdxEquities][OdxEquities.Exchange] · [OdxSecurityToken][OdxSecurityToken.Exchange] · [OkxDigital][OkxDigital.Exchange] · [OmegaAts][OmegaAts.Ats] · [OnyxFutures][OnyxFutures.Exchange] · [OseDerivatives][OseDerivatives.Exchange] · [Overnight][Overnight.Ats] · [PearlEquities][PearlEquities.Exchange] · [PhlxOptions][PhlxOptions.Exchange] · [PsxEquities][PsxEquities.Exchange] · [SmallFutures][SmallFutures.Exchange] · [Sse][Sse.Exchange] · [SseEquities][SseEquities.Exchange] · [Szse][Szse.Exchange] · [SzseSecurities][SzseSecurities.Exchange] · [TexasEquities][TexasEquities.Exchange] · [Trace][Trace.Exchange] · [TradeEcho][TradeEcho.Exchange] · [TseEquities][TseEquities.Exchange] · [Tsx][Tsx.Exchange] · [Turquoise][Turquoise.Exchange] · [TxseEquities][TxseEquities.Exchange]
+> [24XEquities][24XEquities.Exchange] · [A2XEquities][A2XEquities.Exchange] · [AmexEquities][AmexEquities.Exchange] · [AmexOptions][AmexOptions.Exchange] · [AquisEquities][AquisEquities.Exchange] · [ArcaEquities][ArcaEquities.Exchange] · [ArcaOptions][ArcaOptions.Exchange] · [AsxDerivatives][AsxDerivatives.Exchange] · [AsxSecurities][AsxSecurities.Exchange] · [AthexDerivatives][AthexDerivatives.Exchange] · [AthexSecurities][AthexSecurities.Exchange] · [B3Derivatives][B3Derivatives.Exchange] · [BinanceSpot][BinanceSpot.Exchange] · [BivaEquities][BivaEquities.Exchange] · [BlueEquities][BlueEquities.Ats] · [BmeEquities][BmeEquities.Exchange] · [BmeFixedIncome][BmeFixedIncome.Exchange] · [BorsaIstanbul][BorsaIstanbul.Exchange] · [BoxOptions][BoxOptions.Exchange] · [BrokerTec][BrokerTec.Exchange] · [BruceEquities][BruceEquities.Ats] · [BseIndia][BseIndia.Exchange] · [BxeEquities][BxeEquities.Exchange] · [ByxEquities][ByxEquities.Exchange] · [BzxEquities][BzxEquities.Exchange] · [BzxOptions][BzxOptions.Exchange] · [C1Options][C1Options.Exchange] · [C2Options][C2Options.Exchange] · [CboeEurope][CboeEurope.Exchange] · [CedxDerivatives][CedxDerivatives.Exchange] · [CfeFutures][CfeFutures.Exchange] · [CoinbaseDerivatives][CoinbaseDerivatives.Exchange] · [CurrenexForex][CurrenexForex.Exchange] · [CxaEquities][CxaEquities.Exchange] · [CxeEquities][CxeEquities.Exchange] · [CxjEquities][CxjEquities.Exchange] · [Deribit][Deribit.Exchange] · [DxeEquities][DxeEquities.Exchange] · [Ebs][Ebs.Exchange] · [EdgaEquities][EdgaEquities.Exchange] · [EdgxEquities][EdgxEquities.Exchange] · [EdgxOptions][EdgxOptions.Exchange] · [FinraOrf][FinraOrf.Exchange] · [FseEquities][FseEquities.Exchange] · [GemxOptions][GemxOptions.Exchange] · [HkexSecurities][HkexSecurities.Exchange] · [IceFutures][IceFutures.Exchange] · [IexEquities][IexEquities.Exchange] · [IexOptions][IexOptions.Exchange] · [IntelligentCross][IntelligentCross.Ats] · [IseOptions][IseOptions.Exchange] · [JnxBonds][JnxBonds.Exchange] · [JnxEquities][JnxEquities.Exchange] · [LinkAts][LinkAts.Ats] · [LinkNqb][LinkNqb.Ats] · [LmeSelect][LmeSelect.Exchange] · [Lse][Lse.Exchange] · [LtseEquities][LtseEquities.Exchange] · [LynxAts][LynxAts.Ats] · [MatchNow][MatchNow.Exchange] · [Meff][Meff.Exchange] · [MemxEquities][MemxEquities.Exchange] · [MemxOptions][MemxOptions.Exchange] · [MoonAts][MoonAts.Ats] · [MrxOptions][MrxOptions.Exchange] · [Mx][Mx.Exchange] · [NasdaqCanada][NasdaqCanada.Exchange] · [NationalEquities][NationalEquities.Exchange] · [NeoEquities][NeoEquities.Exchange] · [NfxFutures][NfxFutures.Exchange] · [NomOptions][NomOptions.Exchange] · [NordicDerivatives][NordicDerivatives.Exchange] · [NordicEquities][NordicEquities.Exchange] · [NseCd][NseCd.Exchange] · [NseCm][NseCm.Exchange] · [NseCom][NseCom.Exchange] · [NseEquities][NseEquities.Exchange] · [NseFo][NseFo.Exchange] · [NsmEquities][NsmEquities.Exchange] · [NtxEquities][NtxEquities.Exchange] · [NtxOptions][NtxOptions.Exchange] · [NyseBonds][NyseBonds.Exchange] · [NyseEquities][NyseEquities.Exchange] · [NyseOptions][NyseOptions.Exchange] · [OdxEquities][OdxEquities.Exchange] · [OdxSecurityToken][OdxSecurityToken.Exchange] · [OkxDigital][OkxDigital.Exchange] · [OmegaAts][OmegaAts.Ats] · [OnyxFutures][OnyxFutures.Exchange] · [OseDerivatives][OseDerivatives.Exchange] · [Overnight][Overnight.Ats] · [PearlEquities][PearlEquities.Exchange] · [PhlxOptions][PhlxOptions.Exchange] · [PsxEquities][PsxEquities.Exchange] · [SmallFutures][SmallFutures.Exchange] · [Sse][Sse.Exchange] · [SseEquities][SseEquities.Exchange] · [Szse][Szse.Exchange] · [SzseSecurities][SzseSecurities.Exchange] · [TaifexDerivatives][TaifexDerivatives.Exchange] · [TexasEquities][TexasEquities.Exchange] · [Trace][Trace.Exchange] · [TradeEcho][TradeEcho.Exchange] · [TseEquities][TseEquities.Exchange] · [Tsx][Tsx.Exchange] · [TsxAlpha][TsxAlpha.Exchange] · [Turquoise][Turquoise.Exchange] · [TxseEquities][TxseEquities.Exchange]
 
 ## Platforms
 
@@ -55,13 +55,13 @@ Other generated code can be found at [Omi Repositories](https://github.com/Open-
 
 The Open Markets Initiative provides protocol definitions in several formats:
 
-- [Kaitai Struct Definitions][Kaitai.Definitions.Repository] — cross language binary parsers with the kaitai struct compiler
-- [DFDL Definitions][Dfdl.Definitions.Repository] — declarative DFDL schemas for cross language parsing
+- [Kaitai Struct Definitions][Kaitai.Definitions.Repository] — Cross language binary parsers with the kaitai struct compiler
+- [DFDL Definitions][Dfdl.Definitions.Repository] — Declarative DFDL schemas for cross language parsing
 - [P4 Definitions][P4.Definitions.Repository] — P4 programs for software and hardware data planes
-- [Spicy Definitions][Spicy.Definitions.Repository] — declarative Spicy grammars for the spicy toolchain and the zeek network security monitor
+- [Spicy Definitions][Spicy.Definitions.Repository] — Declarative Spicy grammars for the spicy toolchain and the zeek network security monitor
 - [Lean Definitions][Lean.Definitions.Repository] — Lean 4 definitions with machine checked encode and decode proofs
 - [FIX Dictionaries][Fix.Dictionaries.Repository] — QuickFIX format xml data dictionaries, one per FIX version
-- [Xml Specifications][Xml.Specifications.Repository] — the exchange protocol specification xmls, matching the original files
+- [Xml Specifications][Xml.Specifications.Repository] — Formatted exchange specification xmls
 ## License
 
 Omi definitions are free software with the least restrictive licensing possible; see the [License](License.md "Omi TLA+ Definitions License") for the Omi license terms and the TLA+ logo attribution.
@@ -88,6 +88,7 @@ Enjoy.
 [Omi.Encoding.Atp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Atp.md "Atp Encoding"
 [Omi.Encoding.Itch]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Itch.md "Itch Encoding"
 [Omi.Encoding.Ouch]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Ouch.md "Ouch Encoding"
+[Omi.Encoding.Ids]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Ids.md "Ids Encoding"
 [Omi.Encoding.Glimpse]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Glimpse.md "Glimpse Encoding"
 [Omi.Encoding.BmeGate]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/BmeGate.md "BmeGate Encoding"
 [Omi.Encoding.Hsvf]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Hsvf.md "Hsvf Encoding"
@@ -134,9 +135,14 @@ Enjoy.
 [Omi.Encoding.Cta]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Cta.md "Cta Encoding"
 [Omi.Encoding.Obi]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Obi.md "Obi Encoding"
 [Omi.Encoding.SzseBinary]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/SzseBinary.md "SzseBinary Encoding"
+[Omi.Encoding.Tmp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Tmp.md "Tmp Encoding"
 [Omi.Encoding.Gfx]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Gfx.md "Gfx Encoding"
+[Omi.Encoding.Qrtmd]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Qrtmd.md "Qrtmd Encoding"
 
 [24X.24XEquities.Memo]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/24X/Protocols/24XEquities/Memo.md "Members Orders"
+[24X.24XEquities.MemoirDepthFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/24X/Protocols/24XEquities/MemoirDepthFeed.md "Member Order Information Record Depth Feed"
+[24X.24XEquities.MemoirLastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/24X/Protocols/24XEquities/MemoirLastSale.md "Member Order Information Record Last Sale"
+[24X.24XEquities.MemoirTopOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/24X/Protocols/24XEquities/MemoirTopOfBook.md "Member Order Information Record Top Of Book"
 [A2X.A2XEquities.Rtmdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/A2X/Protocols/A2XEquities/Rtmdf.md "Real Time Market Data Feed"
 [A2X.A2XEquities.Snapshot]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/A2X/Protocols/A2XEquities/Snapshot.md "Snapshot Feed"
 [A2X.A2XEquities.UdpHeader]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/A2X/Protocols/A2XEquities/UdpHeader.md "Udp Headers"
@@ -149,6 +155,8 @@ Enjoy.
 [Asx.AsxDerivatives.Ntp]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Asx/Protocols/AsxDerivatives/Ntp.md "New Trading Platform"
 [Asx.AsxDerivatives.T24]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Asx/Protocols/AsxDerivatives/T24.md "24 Itch"
 [Asx.AsxSecurities.Trade]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Asx/Protocols/AsxSecurities/Trade.md "Asx Trade"
+[Athex.AthexDerivatives.Relaxed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Athex/Protocols/AthexDerivatives/Relaxed.md "Athens Exchange Derivatives Market Relaxed Channel"
+[Athex.AthexSecurities.Relaxed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Athex/Protocols/AthexSecurities/Relaxed.md "Athens Exchange Securities Market Relaxed Channel"
 [B3.B3Derivatives.BinaryEntryPoint]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/B3/Protocols/B3Derivatives/BinaryEntryPoint.md "Binary Entry Point"
 [B3.B3Derivatives.BinaryUmdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/B3/Protocols/B3Derivatives/BinaryUmdf.md "Binary Unified Market Data Feed"
 [Binance.BinanceSpot.MarketData]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Binance/Protocols/BinanceSpot/MarketData.md "Market Data"
@@ -159,6 +167,9 @@ Enjoy.
 [Biva.BivaEquities.OrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Biva/Protocols/BivaEquities/OrderEntry.md "Order Entry"
 [Biva.BivaEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Biva/Protocols/BivaEquities/TotalView.md "Total View"
 [BlueOceanAts.BlueEquities.Memo]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BlueOceanAts/Protocols/BlueEquities/Memo.md "Members Orders"
+[BlueOceanAts.BlueEquities.MemoirDepthFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BlueOceanAts/Protocols/BlueEquities/MemoirDepthFeed.md "Member Order Information Record Depth Feed"
+[BlueOceanAts.BlueEquities.MemoirLastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BlueOceanAts/Protocols/BlueEquities/MemoirLastSale.md "Member Order Information Record Last Sale"
+[BlueOceanAts.BlueEquities.MemoirTopOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/BlueOceanAts/Protocols/BlueEquities/MemoirTopOfBook.md "Member Order Information Record Top Of Book"
 [Bme.BmeEquities.FullDepth]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bme/Protocols/BmeEquities/FullDepth.md "BME Equities Full Depth"
 [Bme.BmeEquities.MarketAndOrder]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bme/Protocols/BmeEquities/MarketAndOrder.md "BME Equities Market And Order"
 [Bme.BmeEquities.OrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Bme/Protocols/BmeEquities/OrderEntry.md "BME Equities Order Entry"
@@ -403,6 +414,9 @@ Enjoy.
 [Lseg.Turquoise.Recovery]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Lseg/Protocols/Turquoise/Recovery.md "Recovery"
 [Lseg.Turquoise.Replay]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Lseg/Protocols/Turquoise/Replay.md "Replay"
 [Ltse.LtseEquities.Memo]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Protocols/LtseEquities/Memo.md "Members Orders"
+[Ltse.LtseEquities.MemoirDepthFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Protocols/LtseEquities/MemoirDepthFeed.md "Member Order Information Record Depth Feed"
+[Ltse.LtseEquities.MemoirLastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Protocols/LtseEquities/MemoirLastSale.md "Member Order Information Record Last Sale"
+[Ltse.LtseEquities.MemoirTopOfBook]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Ltse/Protocols/LtseEquities/MemoirTopOfBook.md "Member Order Information Record Top Of Book"
 [Memx.MemxEquities.Memo]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Memx/Protocols/MemxEquities/Memo.md "Members Orders"
 [Memx.MemxEquities.MemoirDepthFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Memx/Protocols/MemxEquities/MemoirDepthFeed.md "Memoir Depth Feed"
 [Memx.MemxEquities.MemoirLastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Memx/Protocols/MemxEquities/MemoirLastSale.md "Member Order Information Record Last Sale"
@@ -514,6 +528,7 @@ Enjoy.
 [Nse.NseCd.Snapshot]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nse/Protocols/NseCd/Snapshot.md "Mtbt Order Book Snapshot Recovery"
 [Nse.NseCm.Mtbt]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nse/Protocols/NseCm/Mtbt.md "Multicast Tick By Tick"
 [Nse.NseCm.MtbtNdal]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nse/Protocols/NseCm/MtbtNdal.md "Multicast Tick By Tick Data Feed"
+[Nse.NseCm.OrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nse/Protocols/NseCm/OrderEntry.md "Order Entry"
 [Nse.NseCm.Recovery]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nse/Protocols/NseCm/Recovery.md "Mtbt Tick Data Recovery"
 [Nse.NseCm.Snapshot]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nse/Protocols/NseCm/Snapshot.md "Mtbt Order Book Snapshot Recovery"
 [Nse.NseCom.Mtbt]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Nse/Protocols/NseCom/Mtbt.md "Multicast Tick By Tick"
@@ -640,9 +655,14 @@ Enjoy.
 [Siac.Opra.Output]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Siac/Protocols/Opra/Output.md "Output"
 [SmallX.SmallFutures.OrderBookFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/SmallX/Protocols/SmallFutures/OrderBookFeed.md "Order Book Feed"
 [Szse.SzseSecurities.TcpMarketData]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Szse/Protocols/SzseSecurities/TcpMarketData.md "Szse Tcp Market Data"
+[Taifex.TaifexDerivatives.ClearingMember]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Taifex/Protocols/TaifexDerivatives/ClearingMember.md "Clearing Member Order And Execution Report"
+[Taifex.TaifexDerivatives.DropCopy]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Taifex/Protocols/TaifexDerivatives/DropCopy.md "Drop Copy Service"
 [Tmx.Mx.SolaMulticast]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Mx/SolaMulticast.md "Sola Multicast"
 [Tmx.Mx.SolaOrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Mx/SolaOrderEntry.md "Sola Order Entry"
 [Tmx.Tsx.GlobalFx]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Tsx/GlobalFx.md "Global Fx Feed"
+[Tmx.Tsx.IndexFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Tsx/IndexFeed.md "Index Feed"
+[Tmx.Tsx.Level1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Tsx/Level1.md "Level 1"
+[Tmx.TsxAlpha.Level1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/TsxAlpha/Level1.md "Level 1"
 [Tradelogiq.LynxAts.MulticastLevel1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/LynxAts/MulticastLevel1.md "Lynx Multicast Level 1"
 [Tradelogiq.LynxAts.MulticastLevel2]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/LynxAts/MulticastLevel2.md "Lynx Multicast Level 2"
 [Tradelogiq.LynxAts.SnapshotRecovery]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tradelogiq/Protocols/LynxAts/SnapshotRecovery.md "Lynx Snapshot Recovery"
@@ -659,6 +679,7 @@ Enjoy.
 [A2X.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/a2x "A2X Markets"
 [Aquis.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/aquis "Aquis Exchange"
 [Asx.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/asx "Australian Securities Exchange"
+[Athex.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/athex "Athens Exchange Group"
 [B3.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/b3 "Brasil, Bolsa, Balcão"
 [Binance.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/binance "Binance"
 [Bist.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/bist "Borsa İstanbul A.Ş."
@@ -699,6 +720,7 @@ Enjoy.
 [Siac.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/siac "The Securities Industry Automation Corporation"
 [SmallX.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/smallx "The Small Exchange"
 [Szse.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/szse "Shenzhen Stock Exchange"
+[Taifex.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/taifex "Taiwan Futures Exchange"
 [Tmx.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/tmx "TMX Group"
 [Tradelogiq.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/tradelogiq "Tradelogiq Markets Inc."
 [Txse.Directory]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/txse "Texas Stock Exchange"
@@ -712,6 +734,8 @@ Enjoy.
 [ArcaOptions.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nyse/arcaoptions "Nyse Arca Options"
 [AsxDerivatives.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/asx/asxderivatives "Asx Derivatives"
 [AsxSecurities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/asx/asxsecurities "Asx Securities"
+[AthexDerivatives.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/athex/athexderivatives "Athens Exchange Derivatives Market"
+[AthexSecurities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/athex/athexsecurities "Athens Exchange Securities Market"
 [B3Derivatives.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/b3/b3derivatives "B3 Derivatives"
 [BinanceSpot.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/binance/binancespot "Binance Spot"
 [BivaEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/biva/bivaequities "Biva Equities"
@@ -811,6 +835,7 @@ Enjoy.
 [Szse.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/hkex/szse "Shenzhen Stock Exchange"
 [SzseSecurities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/szse/szsesecurities "Shenzhen Stock Exchange"
 [T7.Platform]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/eurex/t7 "T7"
+[TaifexDerivatives.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/taifex/taifexderivatives "Taifex Derivatives"
 [TexasEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nyse/texasequities "Nyse Texas Equities"
 [TitanDt.Platform]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/sgx/titandt "SGX Titan"
 [TitaniumConsolidated.Consolidator]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/cboe/titaniumconsolidated "Cboe Titanium Consolidated"
@@ -818,6 +843,7 @@ Enjoy.
 [TradeEcho.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/lseg/tradeecho "TRADEcho"
 [TseEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/jpx/tseequities "Tokyo Stock Exchange Equities"
 [Tsx.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/tmx/tsx "Toronto Stock Exchange"
+[TsxAlpha.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/tmx/tsxalpha "TSX Alpha Exchange"
 [Turquoise.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/lseg/turquoise "Turquoise"
 [TxseEquities.Exchange]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/txse/txseequities "Txse Equities"
 [Uqdf.Consolidator]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/tree/main/nasdaq/uqdf "Nasdaq UTP Quote Data Feed"

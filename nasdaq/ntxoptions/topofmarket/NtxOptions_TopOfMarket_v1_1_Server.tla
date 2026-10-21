@@ -793,6 +793,8 @@ BestBidAndAskUpdateLongFormMessageCode == 81  \* "Q"
 BestBidOrAskUpdateShortFormMessageCode == 98  \* "b"
 BestBidOrAskUpdateLongFormMessageCode == 66  \* "B"
 SnapshotMessageCode == 77  \* "M"
+BestBidOrAskUpdateShortFormMessageCode2 == 97  \* "a"
+BestBidOrAskUpdateLongFormMessageCode2 == 65  \* "A"
 
 SequencedMessage ==
     [ tag : {SystemEventMessageCode}, body : SystemEventMessage ]
@@ -803,6 +805,8 @@ SequencedMessage ==
         \cup [ tag : {BestBidOrAskUpdateShortFormMessageCode}, body : BestBidOrAskUpdateShortFormMessage ]
         \cup [ tag : {BestBidOrAskUpdateLongFormMessageCode}, body : BestBidOrAskUpdateLongFormMessage ]
         \cup [ tag : {SnapshotMessageCode}, body : SnapshotMessage ]
+        \cup [ tag : {BestBidOrAskUpdateShortFormMessageCode2}, body : BestBidOrAskUpdateShortFormMessage ]
+        \cup [ tag : {BestBidOrAskUpdateLongFormMessageCode2}, body : BestBidOrAskUpdateLongFormMessage ]
 
 EncodeSequencedMessage(message) ==
     CASE message.tag = SystemEventMessageCode -> EncodeSystemEventMessage(message.body)
@@ -813,6 +817,8 @@ EncodeSequencedMessage(message) ==
       [] message.tag = BestBidOrAskUpdateShortFormMessageCode -> EncodeBestBidOrAskUpdateShortFormMessage(message.body)
       [] message.tag = BestBidOrAskUpdateLongFormMessageCode -> EncodeBestBidOrAskUpdateLongFormMessage(message.body)
       [] message.tag = SnapshotMessageCode -> EncodeSnapshotMessage(message.body)
+      [] message.tag = BestBidOrAskUpdateShortFormMessageCode2 -> EncodeBestBidOrAskUpdateShortFormMessage(message.body)
+      [] message.tag = BestBidOrAskUpdateLongFormMessageCode2 -> EncodeBestBidOrAskUpdateLongFormMessage(message.body)
 
 DecodeSequencedMessage(tag, bytes) ==
     LET read ==
@@ -824,6 +830,8 @@ DecodeSequencedMessage(tag, bytes) ==
               [] tag = BestBidOrAskUpdateShortFormMessageCode -> DecodeBestBidOrAskUpdateShortFormMessage(bytes)
               [] tag = BestBidOrAskUpdateLongFormMessageCode -> DecodeBestBidOrAskUpdateLongFormMessage(bytes)
               [] tag = SnapshotMessageCode -> DecodeSnapshotMessage(bytes)
+              [] tag = BestBidOrAskUpdateShortFormMessageCode2 -> DecodeBestBidOrAskUpdateShortFormMessage(bytes)
+              [] tag = BestBidOrAskUpdateLongFormMessageCode2 -> DecodeBestBidOrAskUpdateLongFormMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -839,6 +847,8 @@ CheckedSequencedMessage ==
         \cup { [tag |-> BestBidOrAskUpdateShortFormMessageCode, body |-> one] : one \in CheckedBestBidOrAskUpdateShortFormMessage }
         \cup { [tag |-> BestBidOrAskUpdateLongFormMessageCode, body |-> one] : one \in CheckedBestBidOrAskUpdateLongFormMessage }
         \cup { [tag |-> SnapshotMessageCode, body |-> one] : one \in CheckedSnapshotMessage }
+        \cup { [tag |-> BestBidOrAskUpdateShortFormMessageCode2, body |-> one] : one \in CheckedBestBidOrAskUpdateShortFormMessage }
+        \cup { [tag |-> BestBidOrAskUpdateLongFormMessageCode2, body |-> one] : one \in CheckedBestBidOrAskUpdateLongFormMessage }
 
 (***************************************************************************)
 (* Sequenced Data Packet                                                   *)

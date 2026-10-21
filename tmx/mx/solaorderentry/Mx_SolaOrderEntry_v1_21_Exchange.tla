@@ -987,6 +987,46 @@ CheckedGlobalCancellationConfirmation ==
         \cup { [ZeroGlobalCancellationConfirmation EXCEPT !.typeOfCancellationOnlyQQuotesOnlyCanBeReturned = one] : one \in Sample(1) }
 
 (***************************************************************************)
+(* Outgoing Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+OutgoingMessagesHeader6 ==
+    [ tradingEngineTimestampLocalHhmmss : Sample(6),
+      userSequenceId                    : Sample(8),
+      exchangeMessageId                 : Sample(6),
+      gapSequenceId                     : Sample(2) ]
+
+EncodeOutgoingMessagesHeader6(message) ==
+    message.tradingEngineTimestampLocalHhmmss
+        \o message.userSequenceId
+        \o message.exchangeMessageId
+        \o message.gapSequenceId
+
+DecodeOutgoingMessagesHeader6(bytes) ==
+    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
+    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
+    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
+         userSequenceId                    |-> userSequenceId.value,
+         exchangeMessageId                 |-> exchangeMessageId.value,
+         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
+
+ZeroOutgoingMessagesHeader6 ==
+    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
+      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
+      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedOutgoingMessagesHeader6 ==
+    { ZeroOutgoingMessagesHeader6 }
+        \cup { [ZeroOutgoingMessagesHeader6 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader6 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader6 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader6 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+
+(***************************************************************************)
 (* Clearing Data: 20 bytes                                                 *)
 (***************************************************************************)
 
@@ -1055,25 +1095,27 @@ CheckedOwnerData3 ==
         \cup { [ZeroOwnerData3 EXCEPT !.memo = one] : one \in Sample(50) }
 
 (***************************************************************************)
-(* Order Modification Acknowledgement: 126 bytes                           *)
+(* Order Modification Acknowledgement: 148 bytes                           *)
 (***************************************************************************)
 
 OrderModificationAcknowledgement ==
-    [ group           : Sample(2),
-      instrument      : Sample(4),
-      traderId        : Sample(8),
-      orderId         : Sample(8),
-      status          : Sample(1),
-      verbSide        : Sample(1),
-      quantity        : Sample(8),
-      assignedPrice   : Sample(10),
-      clearingData    : ClearingData3,
-      ownerData       : OwnerData3,
-      originalOrderId : Sample(8),
-      filler6         : Sample(6) ]
+    [ outgoingMessagesHeader : OutgoingMessagesHeader6,
+      group                  : Sample(2),
+      instrument             : Sample(4),
+      traderId               : Sample(8),
+      orderId                : Sample(8),
+      status                 : Sample(1),
+      verbSide               : Sample(1),
+      quantity               : Sample(8),
+      assignedPrice          : Sample(10),
+      clearingData           : ClearingData3,
+      ownerData              : OwnerData3,
+      originalOrderId        : Sample(8),
+      filler6                : Sample(6) ]
 
 EncodeOrderModificationAcknowledgement(message) ==
-    message.group
+    EncodeOutgoingMessagesHeader6(message.outgoingMessagesHeader)
+        \o message.group
         \o message.instrument
         \o message.traderId
         \o message.orderId
@@ -1087,7 +1129,8 @@ EncodeOrderModificationAcknowledgement(message) ==
         \o message.filler6
 
 DecodeOrderModificationAcknowledgement(bytes) ==
-    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader6(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET traderId == ReadBytes(instrument.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
     LET orderId == ReadBytes(traderId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
@@ -1099,36 +1142,39 @@ DecodeOrderModificationAcknowledgement(bytes) ==
     LET ownerData == DecodeOwnerData3(clearingData.rest) IN IF ~ownerData.ok THEN Fail ELSE
     LET originalOrderId == ReadBytes(ownerData.rest, 8) IN IF ~originalOrderId.ok THEN Fail ELSE
     LET filler6 == ReadBytes(originalOrderId.rest, 6) IN IF ~filler6.ok THEN Fail ELSE
-    Ok([ group           |-> group.value,
-         instrument      |-> instrument.value,
-         traderId        |-> traderId.value,
-         orderId         |-> orderId.value,
-         status          |-> status.value,
-         verbSide        |-> verbSide.value,
-         quantity        |-> quantity.value,
-         assignedPrice   |-> assignedPrice.value,
-         clearingData    |-> clearingData.value,
-         ownerData       |-> ownerData.value,
-         originalOrderId |-> originalOrderId.value,
-         filler6         |-> filler6.value ], filler6.rest)
+    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
+         group                  |-> group.value,
+         instrument             |-> instrument.value,
+         traderId               |-> traderId.value,
+         orderId                |-> orderId.value,
+         status                 |-> status.value,
+         verbSide               |-> verbSide.value,
+         quantity               |-> quantity.value,
+         assignedPrice          |-> assignedPrice.value,
+         clearingData           |-> clearingData.value,
+         ownerData              |-> ownerData.value,
+         originalOrderId        |-> originalOrderId.value,
+         filler6                |-> filler6.value ], filler6.rest)
 
 ZeroOrderModificationAcknowledgement ==
-    [ group           |-> [i \in 1 .. 2 |-> 0],
-      instrument      |-> [i \in 1 .. 4 |-> 0],
-      traderId        |-> [i \in 1 .. 8 |-> 0],
-      orderId         |-> [i \in 1 .. 8 |-> 0],
-      status          |-> [i \in 1 .. 1 |-> 0],
-      verbSide        |-> [i \in 1 .. 1 |-> 0],
-      quantity        |-> [i \in 1 .. 8 |-> 0],
-      assignedPrice   |-> [i \in 1 .. 10 |-> 0],
-      clearingData    |-> ZeroClearingData3,
-      ownerData       |-> ZeroOwnerData3,
-      originalOrderId |-> [i \in 1 .. 8 |-> 0],
-      filler6         |-> [i \in 1 .. 6 |-> 0] ]
+    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader6,
+      group                  |-> [i \in 1 .. 2 |-> 0],
+      instrument             |-> [i \in 1 .. 4 |-> 0],
+      traderId               |-> [i \in 1 .. 8 |-> 0],
+      orderId                |-> [i \in 1 .. 8 |-> 0],
+      status                 |-> [i \in 1 .. 1 |-> 0],
+      verbSide               |-> [i \in 1 .. 1 |-> 0],
+      quantity               |-> [i \in 1 .. 8 |-> 0],
+      assignedPrice          |-> [i \in 1 .. 10 |-> 0],
+      clearingData           |-> ZeroClearingData3,
+      ownerData              |-> ZeroOwnerData3,
+      originalOrderId        |-> [i \in 1 .. 8 |-> 0],
+      filler6                |-> [i \in 1 .. 6 |-> 0] ]
 
 (* Order Modification Acknowledgement at zero, then each field in turn at the values it is checked at *)
 CheckedOrderModificationAcknowledgement ==
     { ZeroOrderModificationAcknowledgement }
+        \cup { [ZeroOrderModificationAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader6 }
         \cup { [ZeroOrderModificationAcknowledgement EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroOrderModificationAcknowledgement EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroOrderModificationAcknowledgement EXCEPT !.traderId = one] : one \in Sample(8) }
@@ -1146,19 +1192,19 @@ CheckedOrderModificationAcknowledgement ==
 (* Outgoing Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-OutgoingMessagesHeader6 ==
+OutgoingMessagesHeader7 ==
     [ tradingEngineTimestampLocalHhmmss : Sample(6),
       userSequenceId                    : Sample(8),
       exchangeMessageId                 : Sample(6),
       gapSequenceId                     : Sample(2) ]
 
-EncodeOutgoingMessagesHeader6(message) ==
+EncodeOutgoingMessagesHeader7(message) ==
     message.tradingEngineTimestampLocalHhmmss
         \o message.userSequenceId
         \o message.exchangeMessageId
         \o message.gapSequenceId
 
-DecodeOutgoingMessagesHeader6(bytes) ==
+DecodeOutgoingMessagesHeader7(bytes) ==
     LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
     LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
@@ -1168,19 +1214,19 @@ DecodeOutgoingMessagesHeader6(bytes) ==
          exchangeMessageId                 |-> exchangeMessageId.value,
          gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
 
-ZeroOutgoingMessagesHeader6 ==
+ZeroOutgoingMessagesHeader7 ==
     [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
       exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
       gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader6 ==
-    { ZeroOutgoingMessagesHeader6 }
-        \cup { [ZeroOutgoingMessagesHeader6 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader6 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader6 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader6 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+CheckedOutgoingMessagesHeader7 ==
+    { ZeroOutgoingMessagesHeader7 }
+        \cup { [ZeroOutgoingMessagesHeader7 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader7 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader7 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader7 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* New Strategy Instrument Acknowledgement Leg Definition Repeating Block: *)
@@ -1255,14 +1301,14 @@ OneNewStrategyInstrumentAcknowledgementLegDefinitionRepeatingBlock == { ZeroNewS
 (***************************************************************************)
 
 NewStrategyInstrumentAcknowledgement ==
-    [ outgoingMessagesHeader                                          : OutgoingMessagesHeader6,
+    [ outgoingMessagesHeader                                          : OutgoingMessagesHeader7,
       strategyGroup                                                   : Sample(2),
       strategyInstrument                                              : Sample(4),
       creationStatus                                                  : Sample(1),
       newStrategyInstrumentAcknowledgementLegDefinitionRepeatingBlock : SampleLists(OneNewStrategyInstrumentAcknowledgementLegDefinitionRepeatingBlock) ]
 
 EncodeNewStrategyInstrumentAcknowledgement(message) ==
-    EncodeOutgoingMessagesHeader6(message.outgoingMessagesHeader)
+    EncodeOutgoingMessagesHeader7(message.outgoingMessagesHeader)
         \o message.strategyGroup
         \o message.strategyInstrument
         \o message.creationStatus
@@ -1270,7 +1316,7 @@ EncodeNewStrategyInstrumentAcknowledgement(message) ==
         \o EncodeNewStrategyInstrumentAcknowledgementLegDefinitionRepeatingBlockList(message.newStrategyInstrumentAcknowledgementLegDefinitionRepeatingBlock)
 
 DecodeNewStrategyInstrumentAcknowledgement(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader6(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader7(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
     LET strategyGroup == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~strategyGroup.ok THEN Fail ELSE
     LET strategyInstrument == ReadBytes(strategyGroup.rest, 4) IN IF ~strategyInstrument.ok THEN Fail ELSE
     LET creationStatus == ReadBytes(strategyInstrument.rest, 1) IN IF ~creationStatus.ok THEN Fail ELSE
@@ -1283,7 +1329,7 @@ DecodeNewStrategyInstrumentAcknowledgement(bytes) ==
          newStrategyInstrumentAcknowledgementLegDefinitionRepeatingBlock |-> newStrategyInstrumentAcknowledgementLegDefinitionRepeatingBlock.value ], newStrategyInstrumentAcknowledgementLegDefinitionRepeatingBlock.rest)
 
 ZeroNewStrategyInstrumentAcknowledgement ==
-    [ outgoingMessagesHeader                                          |-> ZeroOutgoingMessagesHeader6,
+    [ outgoingMessagesHeader                                          |-> ZeroOutgoingMessagesHeader7,
       strategyGroup                                                   |-> [i \in 1 .. 2 |-> 0],
       strategyInstrument                                              |-> [i \in 1 .. 4 |-> 0],
       creationStatus                                                  |-> [i \in 1 .. 1 |-> 0],
@@ -1292,7 +1338,7 @@ ZeroNewStrategyInstrumentAcknowledgement ==
 (* New Strategy Instrument Acknowledgement at zero, then each field in turn at the values it is checked at *)
 CheckedNewStrategyInstrumentAcknowledgement ==
     { ZeroNewStrategyInstrumentAcknowledgement }
-        \cup { [ZeroNewStrategyInstrumentAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader6 }
+        \cup { [ZeroNewStrategyInstrumentAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader7 }
         \cup { [ZeroNewStrategyInstrumentAcknowledgement EXCEPT !.strategyGroup = one] : one \in Sample(2) }
         \cup { [ZeroNewStrategyInstrumentAcknowledgement EXCEPT !.strategyInstrument = one] : one \in Sample(4) }
         \cup { [ZeroNewStrategyInstrumentAcknowledgement EXCEPT !.creationStatus = one] : one \in Sample(1) }
@@ -1302,19 +1348,19 @@ CheckedNewStrategyInstrumentAcknowledgement ==
 (* Outgoing Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-OutgoingMessagesHeader7 ==
+OutgoingMessagesHeader8 ==
     [ tradingEngineTimestampLocalHhmmss : Sample(6),
       userSequenceId                    : Sample(8),
       exchangeMessageId                 : Sample(6),
       gapSequenceId                     : Sample(2) ]
 
-EncodeOutgoingMessagesHeader7(message) ==
+EncodeOutgoingMessagesHeader8(message) ==
     message.tradingEngineTimestampLocalHhmmss
         \o message.userSequenceId
         \o message.exchangeMessageId
         \o message.gapSequenceId
 
-DecodeOutgoingMessagesHeader7(bytes) ==
+DecodeOutgoingMessagesHeader8(bytes) ==
     LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
     LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
@@ -1324,36 +1370,36 @@ DecodeOutgoingMessagesHeader7(bytes) ==
          exchangeMessageId                 |-> exchangeMessageId.value,
          gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
 
-ZeroOutgoingMessagesHeader7 ==
+ZeroOutgoingMessagesHeader8 ==
     [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
       exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
       gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader7 ==
-    { ZeroOutgoingMessagesHeader7 }
-        \cup { [ZeroOutgoingMessagesHeader7 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader7 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader7 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader7 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+CheckedOutgoingMessagesHeader8 ==
+    { ZeroOutgoingMessagesHeader8 }
+        \cup { [ZeroOutgoingMessagesHeader8 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader8 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader8 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader8 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Standard Acknowledgement: 32 bytes                                      *)
 (***************************************************************************)
 
 StandardAcknowledgement ==
-    [ outgoingMessagesHeader          : OutgoingMessagesHeader7,
+    [ outgoingMessagesHeader          : OutgoingMessagesHeader8,
       traderId                        : Sample(8),
       originalMessageTypeAfGzMlOxOrRq : Sample(2) ]
 
 EncodeStandardAcknowledgement(message) ==
-    EncodeOutgoingMessagesHeader7(message.outgoingMessagesHeader)
+    EncodeOutgoingMessagesHeader8(message.outgoingMessagesHeader)
         \o message.traderId
         \o message.originalMessageTypeAfGzMlOxOrRq
 
 DecodeStandardAcknowledgement(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader7(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader8(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
     LET traderId == ReadBytes(outgoingMessagesHeader.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
     LET originalMessageTypeAfGzMlOxOrRq == ReadBytes(traderId.rest, 2) IN IF ~originalMessageTypeAfGzMlOxOrRq.ok THEN Fail ELSE
     Ok([ outgoingMessagesHeader          |-> outgoingMessagesHeader.value,
@@ -1361,16 +1407,56 @@ DecodeStandardAcknowledgement(bytes) ==
          originalMessageTypeAfGzMlOxOrRq |-> originalMessageTypeAfGzMlOxOrRq.value ], originalMessageTypeAfGzMlOxOrRq.rest)
 
 ZeroStandardAcknowledgement ==
-    [ outgoingMessagesHeader          |-> ZeroOutgoingMessagesHeader7,
+    [ outgoingMessagesHeader          |-> ZeroOutgoingMessagesHeader8,
       traderId                        |-> [i \in 1 .. 8 |-> 0],
       originalMessageTypeAfGzMlOxOrRq |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Standard Acknowledgement at zero, then each field in turn at the values it is checked at *)
 CheckedStandardAcknowledgement ==
     { ZeroStandardAcknowledgement }
-        \cup { [ZeroStandardAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader7 }
+        \cup { [ZeroStandardAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader8 }
         \cup { [ZeroStandardAcknowledgement EXCEPT !.traderId = one] : one \in Sample(8) }
         \cup { [ZeroStandardAcknowledgement EXCEPT !.originalMessageTypeAfGzMlOxOrRq = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Outgoing Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+OutgoingMessagesHeader9 ==
+    [ tradingEngineTimestampLocalHhmmss : Sample(6),
+      userSequenceId                    : Sample(8),
+      exchangeMessageId                 : Sample(6),
+      gapSequenceId                     : Sample(2) ]
+
+EncodeOutgoingMessagesHeader9(message) ==
+    message.tradingEngineTimestampLocalHhmmss
+        \o message.userSequenceId
+        \o message.exchangeMessageId
+        \o message.gapSequenceId
+
+DecodeOutgoingMessagesHeader9(bytes) ==
+    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
+    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
+    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
+         userSequenceId                    |-> userSequenceId.value,
+         exchangeMessageId                 |-> exchangeMessageId.value,
+         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
+
+ZeroOutgoingMessagesHeader9 ==
+    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
+      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
+      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedOutgoingMessagesHeader9 ==
+    { ZeroOutgoingMessagesHeader9 }
+        \cup { [ZeroOutgoingMessagesHeader9 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader9 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader9 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader9 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Clearing Data: 20 bytes                                                 *)
@@ -1441,25 +1527,27 @@ CheckedOwnerData4 ==
         \cup { [ZeroOwnerData4 EXCEPT !.memo = one] : one \in Sample(50) }
 
 (***************************************************************************)
-(* Order Cancellation Acknowledgement: 126 bytes                           *)
+(* Order Cancellation Acknowledgement: 148 bytes                           *)
 (***************************************************************************)
 
 OrderCancellationAcknowledgement ==
-    [ group           : Sample(2),
-      instrument      : Sample(4),
-      traderId        : Sample(8),
-      orderId         : Sample(8),
-      status          : Sample(1),
-      verbSide        : Sample(1),
-      quantity        : Sample(8),
-      assignedPrice   : Sample(10),
-      clearingData    : ClearingData4,
-      ownerData       : OwnerData4,
-      originalOrderId : Sample(8),
-      filler6         : Sample(6) ]
+    [ outgoingMessagesHeader : OutgoingMessagesHeader9,
+      group                  : Sample(2),
+      instrument             : Sample(4),
+      traderId               : Sample(8),
+      orderId                : Sample(8),
+      status                 : Sample(1),
+      verbSide               : Sample(1),
+      quantity               : Sample(8),
+      assignedPrice          : Sample(10),
+      clearingData           : ClearingData4,
+      ownerData              : OwnerData4,
+      originalOrderId        : Sample(8),
+      filler6                : Sample(6) ]
 
 EncodeOrderCancellationAcknowledgement(message) ==
-    message.group
+    EncodeOutgoingMessagesHeader9(message.outgoingMessagesHeader)
+        \o message.group
         \o message.instrument
         \o message.traderId
         \o message.orderId
@@ -1473,7 +1561,8 @@ EncodeOrderCancellationAcknowledgement(message) ==
         \o message.filler6
 
 DecodeOrderCancellationAcknowledgement(bytes) ==
-    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader9(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET traderId == ReadBytes(instrument.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
     LET orderId == ReadBytes(traderId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
@@ -1485,36 +1574,39 @@ DecodeOrderCancellationAcknowledgement(bytes) ==
     LET ownerData == DecodeOwnerData4(clearingData.rest) IN IF ~ownerData.ok THEN Fail ELSE
     LET originalOrderId == ReadBytes(ownerData.rest, 8) IN IF ~originalOrderId.ok THEN Fail ELSE
     LET filler6 == ReadBytes(originalOrderId.rest, 6) IN IF ~filler6.ok THEN Fail ELSE
-    Ok([ group           |-> group.value,
-         instrument      |-> instrument.value,
-         traderId        |-> traderId.value,
-         orderId         |-> orderId.value,
-         status          |-> status.value,
-         verbSide        |-> verbSide.value,
-         quantity        |-> quantity.value,
-         assignedPrice   |-> assignedPrice.value,
-         clearingData    |-> clearingData.value,
-         ownerData       |-> ownerData.value,
-         originalOrderId |-> originalOrderId.value,
-         filler6         |-> filler6.value ], filler6.rest)
+    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
+         group                  |-> group.value,
+         instrument             |-> instrument.value,
+         traderId               |-> traderId.value,
+         orderId                |-> orderId.value,
+         status                 |-> status.value,
+         verbSide               |-> verbSide.value,
+         quantity               |-> quantity.value,
+         assignedPrice          |-> assignedPrice.value,
+         clearingData           |-> clearingData.value,
+         ownerData              |-> ownerData.value,
+         originalOrderId        |-> originalOrderId.value,
+         filler6                |-> filler6.value ], filler6.rest)
 
 ZeroOrderCancellationAcknowledgement ==
-    [ group           |-> [i \in 1 .. 2 |-> 0],
-      instrument      |-> [i \in 1 .. 4 |-> 0],
-      traderId        |-> [i \in 1 .. 8 |-> 0],
-      orderId         |-> [i \in 1 .. 8 |-> 0],
-      status          |-> [i \in 1 .. 1 |-> 0],
-      verbSide        |-> [i \in 1 .. 1 |-> 0],
-      quantity        |-> [i \in 1 .. 8 |-> 0],
-      assignedPrice   |-> [i \in 1 .. 10 |-> 0],
-      clearingData    |-> ZeroClearingData4,
-      ownerData       |-> ZeroOwnerData4,
-      originalOrderId |-> [i \in 1 .. 8 |-> 0],
-      filler6         |-> [i \in 1 .. 6 |-> 0] ]
+    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader9,
+      group                  |-> [i \in 1 .. 2 |-> 0],
+      instrument             |-> [i \in 1 .. 4 |-> 0],
+      traderId               |-> [i \in 1 .. 8 |-> 0],
+      orderId                |-> [i \in 1 .. 8 |-> 0],
+      status                 |-> [i \in 1 .. 1 |-> 0],
+      verbSide               |-> [i \in 1 .. 1 |-> 0],
+      quantity               |-> [i \in 1 .. 8 |-> 0],
+      assignedPrice          |-> [i \in 1 .. 10 |-> 0],
+      clearingData           |-> ZeroClearingData4,
+      ownerData              |-> ZeroOwnerData4,
+      originalOrderId        |-> [i \in 1 .. 8 |-> 0],
+      filler6                |-> [i \in 1 .. 6 |-> 0] ]
 
 (* Order Cancellation Acknowledgement at zero, then each field in turn at the values it is checked at *)
 CheckedOrderCancellationAcknowledgement ==
     { ZeroOrderCancellationAcknowledgement }
+        \cup { [ZeroOrderCancellationAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader9 }
         \cup { [ZeroOrderCancellationAcknowledgement EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroOrderCancellationAcknowledgement EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroOrderCancellationAcknowledgement EXCEPT !.traderId = one] : one \in Sample(8) }
@@ -1532,19 +1624,19 @@ CheckedOrderCancellationAcknowledgement ==
 (* Outgoing Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-OutgoingMessagesHeader8 ==
+OutgoingMessagesHeader10 ==
     [ tradingEngineTimestampLocalHhmmss : Sample(6),
       userSequenceId                    : Sample(8),
       exchangeMessageId                 : Sample(6),
       gapSequenceId                     : Sample(2) ]
 
-EncodeOutgoingMessagesHeader8(message) ==
+EncodeOutgoingMessagesHeader10(message) ==
     message.tradingEngineTimestampLocalHhmmss
         \o message.userSequenceId
         \o message.exchangeMessageId
         \o message.gapSequenceId
 
-DecodeOutgoingMessagesHeader8(bytes) ==
+DecodeOutgoingMessagesHeader10(bytes) ==
     LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
     LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
@@ -1554,19 +1646,19 @@ DecodeOutgoingMessagesHeader8(bytes) ==
          exchangeMessageId                 |-> exchangeMessageId.value,
          gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
 
-ZeroOutgoingMessagesHeader8 ==
+ZeroOutgoingMessagesHeader10 ==
     [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
       exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
       gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader8 ==
-    { ZeroOutgoingMessagesHeader8 }
-        \cup { [ZeroOutgoingMessagesHeader8 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader8 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader8 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader8 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+CheckedOutgoingMessagesHeader10 ==
+    { ZeroOutgoingMessagesHeader10 }
+        \cup { [ZeroOutgoingMessagesHeader10 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader10 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader10 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader10 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Bulk Quote Acknowledgement Occurrence: 7 bytes                          *)
@@ -1622,20 +1714,20 @@ OneBulkQuoteAcknowledgementOccurrence == { ZeroBulkQuoteAcknowledgementOccurrenc
 (***************************************************************************)
 
 BulkQuoteAcknowledgement ==
-    [ outgoingMessagesHeader             : OutgoingMessagesHeader8,
+    [ outgoingMessagesHeader             : OutgoingMessagesHeader10,
       group                              : Sample(2),
       quoteIdentifierOnThisGroup         : Sample(8),
       bulkQuoteAcknowledgementOccurrence : SampleLists(OneBulkQuoteAcknowledgementOccurrence) ]
 
 EncodeBulkQuoteAcknowledgement(message) ==
-    EncodeOutgoingMessagesHeader8(message.outgoingMessagesHeader)
+    EncodeOutgoingMessagesHeader10(message.outgoingMessagesHeader)
         \o message.group
         \o message.quoteIdentifierOnThisGroup
         \o EncodeDigits(Len(message.bulkQuoteAcknowledgementOccurrence), 3)
         \o EncodeBulkQuoteAcknowledgementOccurrenceList(message.bulkQuoteAcknowledgementOccurrence)
 
 DecodeBulkQuoteAcknowledgement(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader8(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader10(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
     LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET quoteIdentifierOnThisGroup == ReadBytes(group.rest, 8) IN IF ~quoteIdentifierOnThisGroup.ok THEN Fail ELSE
     LET numberOfQuotesInError == ReadDigits(quoteIdentifierOnThisGroup.rest, 3) IN IF ~numberOfQuotesInError.ok THEN Fail ELSE
@@ -1646,7 +1738,7 @@ DecodeBulkQuoteAcknowledgement(bytes) ==
          bulkQuoteAcknowledgementOccurrence |-> bulkQuoteAcknowledgementOccurrence.value ], bulkQuoteAcknowledgementOccurrence.rest)
 
 ZeroBulkQuoteAcknowledgement ==
-    [ outgoingMessagesHeader             |-> ZeroOutgoingMessagesHeader8,
+    [ outgoingMessagesHeader             |-> ZeroOutgoingMessagesHeader10,
       group                              |-> [i \in 1 .. 2 |-> 0],
       quoteIdentifierOnThisGroup         |-> [i \in 1 .. 8 |-> 0],
       bulkQuoteAcknowledgementOccurrence |-> << >> ]
@@ -1654,7 +1746,7 @@ ZeroBulkQuoteAcknowledgement ==
 (* Bulk Quote Acknowledgement at zero, then each field in turn at the values it is checked at *)
 CheckedBulkQuoteAcknowledgement ==
     { ZeroBulkQuoteAcknowledgement }
-        \cup { [ZeroBulkQuoteAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader8 }
+        \cup { [ZeroBulkQuoteAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader10 }
         \cup { [ZeroBulkQuoteAcknowledgement EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroBulkQuoteAcknowledgement EXCEPT !.quoteIdentifierOnThisGroup = one] : one \in Sample(8) }
         \cup { [ZeroBulkQuoteAcknowledgement EXCEPT !.bulkQuoteAcknowledgementOccurrence = one] : one \in SampleLists(OneBulkQuoteAcknowledgementOccurrence) }
@@ -1663,19 +1755,19 @@ CheckedBulkQuoteAcknowledgement ==
 (* Outgoing Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-OutgoingMessagesHeader9 ==
+OutgoingMessagesHeader11 ==
     [ tradingEngineTimestampLocalHhmmss : Sample(6),
       userSequenceId                    : Sample(8),
       exchangeMessageId                 : Sample(6),
       gapSequenceId                     : Sample(2) ]
 
-EncodeOutgoingMessagesHeader9(message) ==
+EncodeOutgoingMessagesHeader11(message) ==
     message.tradingEngineTimestampLocalHhmmss
         \o message.userSequenceId
         \o message.exchangeMessageId
         \o message.gapSequenceId
 
-DecodeOutgoingMessagesHeader9(bytes) ==
+DecodeOutgoingMessagesHeader11(bytes) ==
     LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
     LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
@@ -1685,19 +1777,19 @@ DecodeOutgoingMessagesHeader9(bytes) ==
          exchangeMessageId                 |-> exchangeMessageId.value,
          gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
 
-ZeroOutgoingMessagesHeader9 ==
+ZeroOutgoingMessagesHeader11 ==
     [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
       exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
       gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader9 ==
-    { ZeroOutgoingMessagesHeader9 }
-        \cup { [ZeroOutgoingMessagesHeader9 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader9 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader9 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader9 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+CheckedOutgoingMessagesHeader11 ==
+    { ZeroOutgoingMessagesHeader11 }
+        \cup { [ZeroOutgoingMessagesHeader11 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader11 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader11 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader11 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Bulk Command Acknowledgement Occurrence: 8 bytes                        *)
@@ -1753,48 +1845,48 @@ OneBulkCommandAcknowledgementOccurrence == { ZeroBulkCommandAcknowledgementOccur
 (***************************************************************************)
 
 BulkCommandAcknowledgement ==
-    [ outgoingMessagesHeader               : OutgoingMessagesHeader9,
+    [ outgoingMessagesHeader               : OutgoingMessagesHeader11,
       bulkCommandAcknowledgementOccurrence : SampleLists(OneBulkCommandAcknowledgementOccurrence) ]
 
 EncodeBulkCommandAcknowledgement(message) ==
-    EncodeOutgoingMessagesHeader9(message.outgoingMessagesHeader)
+    EncodeOutgoingMessagesHeader11(message.outgoingMessagesHeader)
         \o EncodeDigits(Len(message.bulkCommandAcknowledgementOccurrence), 4)
         \o EncodeBulkCommandAcknowledgementOccurrenceList(message.bulkCommandAcknowledgementOccurrence)
 
 DecodeBulkCommandAcknowledgement(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader9(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader11(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
     LET numberOfCommands == ReadDigits(outgoingMessagesHeader.rest, 4) IN IF ~numberOfCommands.ok THEN Fail ELSE
     LET bulkCommandAcknowledgementOccurrence == ReadBulkCommandAcknowledgementOccurrenceList(numberOfCommands.rest, numberOfCommands.value) IN IF ~bulkCommandAcknowledgementOccurrence.ok THEN Fail ELSE
     Ok([ outgoingMessagesHeader               |-> outgoingMessagesHeader.value,
          bulkCommandAcknowledgementOccurrence |-> bulkCommandAcknowledgementOccurrence.value ], bulkCommandAcknowledgementOccurrence.rest)
 
 ZeroBulkCommandAcknowledgement ==
-    [ outgoingMessagesHeader               |-> ZeroOutgoingMessagesHeader9,
+    [ outgoingMessagesHeader               |-> ZeroOutgoingMessagesHeader11,
       bulkCommandAcknowledgementOccurrence |-> << >> ]
 
 (* Bulk Command Acknowledgement at zero, then each field in turn at the values it is checked at *)
 CheckedBulkCommandAcknowledgement ==
     { ZeroBulkCommandAcknowledgement }
-        \cup { [ZeroBulkCommandAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader9 }
+        \cup { [ZeroBulkCommandAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader11 }
         \cup { [ZeroBulkCommandAcknowledgement EXCEPT !.bulkCommandAcknowledgementOccurrence = one] : one \in SampleLists(OneBulkCommandAcknowledgementOccurrence) }
 
 (***************************************************************************)
 (* Outgoing Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-OutgoingMessagesHeader10 ==
+OutgoingMessagesHeader12 ==
     [ tradingEngineTimestampLocalHhmmss : Sample(6),
       userSequenceId                    : Sample(8),
       exchangeMessageId                 : Sample(6),
       gapSequenceId                     : Sample(2) ]
 
-EncodeOutgoingMessagesHeader10(message) ==
+EncodeOutgoingMessagesHeader12(message) ==
     message.tradingEngineTimestampLocalHhmmss
         \o message.userSequenceId
         \o message.exchangeMessageId
         \o message.gapSequenceId
 
-DecodeOutgoingMessagesHeader10(bytes) ==
+DecodeOutgoingMessagesHeader12(bytes) ==
     LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
     LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
@@ -1804,19 +1896,19 @@ DecodeOutgoingMessagesHeader10(bytes) ==
          exchangeMessageId                 |-> exchangeMessageId.value,
          gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
 
-ZeroOutgoingMessagesHeader10 ==
+ZeroOutgoingMessagesHeader12 ==
     [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
       exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
       gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader10 ==
-    { ZeroOutgoingMessagesHeader10 }
-        \cup { [ZeroOutgoingMessagesHeader10 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader10 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader10 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader10 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+CheckedOutgoingMessagesHeader12 ==
+    { ZeroOutgoingMessagesHeader12 }
+        \cup { [ZeroOutgoingMessagesHeader12 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader12 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader12 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader12 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Risk Limits Usage Occurrence: 28 bytes                                  *)
@@ -1896,48 +1988,48 @@ OneRiskLimitsUsageOccurrence == { ZeroRiskLimitsUsageOccurrence }
 (***************************************************************************)
 
 RiskLimitsUsage ==
-    [ outgoingMessagesHeader    : OutgoingMessagesHeader10,
+    [ outgoingMessagesHeader    : OutgoingMessagesHeader12,
       riskLimitsUsageOccurrence : SampleLists(OneRiskLimitsUsageOccurrence) ]
 
 EncodeRiskLimitsUsage(message) ==
-    EncodeOutgoingMessagesHeader10(message.outgoingMessagesHeader)
+    EncodeOutgoingMessagesHeader12(message.outgoingMessagesHeader)
         \o EncodeDigits(Len(message.riskLimitsUsageOccurrence), 4)
         \o EncodeRiskLimitsUsageOccurrenceList(message.riskLimitsUsageOccurrence)
 
 DecodeRiskLimitsUsage(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader10(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader12(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
     LET numberOfUsageBlocks == ReadDigits(outgoingMessagesHeader.rest, 4) IN IF ~numberOfUsageBlocks.ok THEN Fail ELSE
     LET riskLimitsUsageOccurrence == ReadRiskLimitsUsageOccurrenceList(numberOfUsageBlocks.rest, numberOfUsageBlocks.value) IN IF ~riskLimitsUsageOccurrence.ok THEN Fail ELSE
     Ok([ outgoingMessagesHeader    |-> outgoingMessagesHeader.value,
          riskLimitsUsageOccurrence |-> riskLimitsUsageOccurrence.value ], riskLimitsUsageOccurrence.rest)
 
 ZeroRiskLimitsUsage ==
-    [ outgoingMessagesHeader    |-> ZeroOutgoingMessagesHeader10,
+    [ outgoingMessagesHeader    |-> ZeroOutgoingMessagesHeader12,
       riskLimitsUsageOccurrence |-> << >> ]
 
 (* Risk Limits Usage at zero, then each field in turn at the values it is checked at *)
 CheckedRiskLimitsUsage ==
     { ZeroRiskLimitsUsage }
-        \cup { [ZeroRiskLimitsUsage EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader10 }
+        \cup { [ZeroRiskLimitsUsage EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader12 }
         \cup { [ZeroRiskLimitsUsage EXCEPT !.riskLimitsUsageOccurrence = one] : one \in SampleLists(OneRiskLimitsUsageOccurrence) }
 
 (***************************************************************************)
 (* Outgoing Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-OutgoingMessagesHeader11 ==
+OutgoingMessagesHeader13 ==
     [ tradingEngineTimestampLocalHhmmss : Sample(6),
       userSequenceId                    : Sample(8),
       exchangeMessageId                 : Sample(6),
       gapSequenceId                     : Sample(2) ]
 
-EncodeOutgoingMessagesHeader11(message) ==
+EncodeOutgoingMessagesHeader13(message) ==
     message.tradingEngineTimestampLocalHhmmss
         \o message.userSequenceId
         \o message.exchangeMessageId
         \o message.gapSequenceId
 
-DecodeOutgoingMessagesHeader11(bytes) ==
+DecodeOutgoingMessagesHeader13(bytes) ==
     LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
     LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
@@ -1947,19 +2039,19 @@ DecodeOutgoingMessagesHeader11(bytes) ==
          exchangeMessageId                 |-> exchangeMessageId.value,
          gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
 
-ZeroOutgoingMessagesHeader11 ==
+ZeroOutgoingMessagesHeader13 ==
     [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
       exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
       gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader11 ==
-    { ZeroOutgoingMessagesHeader11 }
-        \cup { [ZeroOutgoingMessagesHeader11 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader11 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader11 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader11 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+CheckedOutgoingMessagesHeader13 ==
+    { ZeroOutgoingMessagesHeader13 }
+        \cup { [ZeroOutgoingMessagesHeader13 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader13 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader13 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader13 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Excluded Instrument Notice Occurrence: 4 bytes                          *)
@@ -2009,7 +2101,7 @@ OneExcludedInstrumentNoticeOccurrence == { ZeroExcludedInstrumentNoticeOccurrenc
 (***************************************************************************)
 
 ExcludedInstrumentNotice ==
-    [ outgoingMessagesHeader             : OutgoingMessagesHeader11,
+    [ outgoingMessagesHeader             : OutgoingMessagesHeader13,
       group                              : Sample(2),
       filler2                            : Sample(2),
       traderId                           : Sample(8),
@@ -2017,7 +2109,7 @@ ExcludedInstrumentNotice ==
       excludedInstrumentNoticeOccurrence : SampleLists(OneExcludedInstrumentNoticeOccurrence) ]
 
 EncodeExcludedInstrumentNotice(message) ==
-    EncodeOutgoingMessagesHeader11(message.outgoingMessagesHeader)
+    EncodeOutgoingMessagesHeader13(message.outgoingMessagesHeader)
         \o message.group
         \o message.filler2
         \o message.traderId
@@ -2026,7 +2118,7 @@ EncodeExcludedInstrumentNotice(message) ==
         \o EncodeExcludedInstrumentNoticeOccurrenceList(message.excludedInstrumentNoticeOccurrence)
 
 DecodeExcludedInstrumentNotice(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader11(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader13(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
     LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET filler2 == ReadBytes(group.rest, 2) IN IF ~filler2.ok THEN Fail ELSE
     LET traderId == ReadBytes(filler2.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
@@ -2041,7 +2133,7 @@ DecodeExcludedInstrumentNotice(bytes) ==
          excludedInstrumentNoticeOccurrence |-> excludedInstrumentNoticeOccurrence.value ], excludedInstrumentNoticeOccurrence.rest)
 
 ZeroExcludedInstrumentNotice ==
-    [ outgoingMessagesHeader             |-> ZeroOutgoingMessagesHeader11,
+    [ outgoingMessagesHeader             |-> ZeroOutgoingMessagesHeader13,
       group                              |-> [i \in 1 .. 2 |-> 0],
       filler2                            |-> [i \in 1 .. 2 |-> 0],
       traderId                           |-> [i \in 1 .. 8 |-> 0],
@@ -2051,166 +2143,12 @@ ZeroExcludedInstrumentNotice ==
 (* Excluded Instrument Notice at zero, then each field in turn at the values it is checked at *)
 CheckedExcludedInstrumentNotice ==
     { ZeroExcludedInstrumentNotice }
-        \cup { [ZeroExcludedInstrumentNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader11 }
+        \cup { [ZeroExcludedInstrumentNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader13 }
         \cup { [ZeroExcludedInstrumentNotice EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroExcludedInstrumentNotice EXCEPT !.filler2 = one] : one \in Sample(2) }
         \cup { [ZeroExcludedInstrumentNotice EXCEPT !.traderId = one] : one \in Sample(8) }
         \cup { [ZeroExcludedInstrumentNotice EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroExcludedInstrumentNotice EXCEPT !.excludedInstrumentNoticeOccurrence = one] : one \in SampleLists(OneExcludedInstrumentNoticeOccurrence) }
-
-(***************************************************************************)
-(* Outgoing Messages Header: 22 bytes                                      *)
-(***************************************************************************)
-
-OutgoingMessagesHeader12 ==
-    [ tradingEngineTimestampLocalHhmmss : Sample(6),
-      userSequenceId                    : Sample(8),
-      exchangeMessageId                 : Sample(6),
-      gapSequenceId                     : Sample(2) ]
-
-EncodeOutgoingMessagesHeader12(message) ==
-    message.tradingEngineTimestampLocalHhmmss
-        \o message.userSequenceId
-        \o message.exchangeMessageId
-        \o message.gapSequenceId
-
-DecodeOutgoingMessagesHeader12(bytes) ==
-    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
-    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
-    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
-    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
-    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
-         userSequenceId                    |-> userSequenceId.value,
-         exchangeMessageId                 |-> exchangeMessageId.value,
-         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
-
-ZeroOutgoingMessagesHeader12 ==
-    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
-      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
-      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
-      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
-
-(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader12 ==
-    { ZeroOutgoingMessagesHeader12 }
-        \cup { [ZeroOutgoingMessagesHeader12 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader12 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader12 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader12 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
-
-(***************************************************************************)
-(* Group State Change: 25 bytes                                            *)
-(***************************************************************************)
-
-GroupStateChange ==
-    [ outgoingMessagesHeader : OutgoingMessagesHeader12,
-      group                  : Sample(2),
-      groupState             : Sample(1) ]
-
-EncodeGroupStateChange(message) ==
-    EncodeOutgoingMessagesHeader12(message.outgoingMessagesHeader)
-        \o message.group
-        \o message.groupState
-
-DecodeGroupStateChange(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader12(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
-    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
-    LET groupState == ReadBytes(group.rest, 1) IN IF ~groupState.ok THEN Fail ELSE
-    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
-         group                  |-> group.value,
-         groupState             |-> groupState.value ], groupState.rest)
-
-ZeroGroupStateChange ==
-    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader12,
-      group                  |-> [i \in 1 .. 2 |-> 0],
-      groupState             |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Group State Change at zero, then each field in turn at the values it is checked at *)
-CheckedGroupStateChange ==
-    { ZeroGroupStateChange }
-        \cup { [ZeroGroupStateChange EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader12 }
-        \cup { [ZeroGroupStateChange EXCEPT !.group = one] : one \in Sample(2) }
-        \cup { [ZeroGroupStateChange EXCEPT !.groupState = one] : one \in Sample(1) }
-
-(***************************************************************************)
-(* Outgoing Messages Header: 22 bytes                                      *)
-(***************************************************************************)
-
-OutgoingMessagesHeader13 ==
-    [ tradingEngineTimestampLocalHhmmss : Sample(6),
-      userSequenceId                    : Sample(8),
-      exchangeMessageId                 : Sample(6),
-      gapSequenceId                     : Sample(2) ]
-
-EncodeOutgoingMessagesHeader13(message) ==
-    message.tradingEngineTimestampLocalHhmmss
-        \o message.userSequenceId
-        \o message.exchangeMessageId
-        \o message.gapSequenceId
-
-DecodeOutgoingMessagesHeader13(bytes) ==
-    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
-    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
-    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
-    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
-    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
-         userSequenceId                    |-> userSequenceId.value,
-         exchangeMessageId                 |-> exchangeMessageId.value,
-         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
-
-ZeroOutgoingMessagesHeader13 ==
-    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
-      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
-      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
-      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
-
-(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader13 ==
-    { ZeroOutgoingMessagesHeader13 }
-        \cup { [ZeroOutgoingMessagesHeader13 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader13 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader13 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader13 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
-
-(***************************************************************************)
-(* Instrument State Change: 29 bytes                                       *)
-(***************************************************************************)
-
-InstrumentStateChange ==
-    [ outgoingMessagesHeader : OutgoingMessagesHeader13,
-      group                  : Sample(2),
-      instrument             : Sample(4),
-      instrumentState        : Sample(1) ]
-
-EncodeInstrumentStateChange(message) ==
-    EncodeOutgoingMessagesHeader13(message.outgoingMessagesHeader)
-        \o message.group
-        \o message.instrument
-        \o message.instrumentState
-
-DecodeInstrumentStateChange(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader13(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
-    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
-    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
-    LET instrumentState == ReadBytes(instrument.rest, 1) IN IF ~instrumentState.ok THEN Fail ELSE
-    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
-         group                  |-> group.value,
-         instrument             |-> instrument.value,
-         instrumentState        |-> instrumentState.value ], instrumentState.rest)
-
-ZeroInstrumentStateChange ==
-    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader13,
-      group                  |-> [i \in 1 .. 2 |-> 0],
-      instrument             |-> [i \in 1 .. 4 |-> 0],
-      instrumentState        |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Instrument State Change at zero, then each field in turn at the values it is checked at *)
-CheckedInstrumentStateChange ==
-    { ZeroInstrumentStateChange }
-        \cup { [ZeroInstrumentStateChange EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader13 }
-        \cup { [ZeroInstrumentStateChange EXCEPT !.group = one] : one \in Sample(2) }
-        \cup { [ZeroInstrumentStateChange EXCEPT !.instrument = one] : one \in Sample(4) }
-        \cup { [ZeroInstrumentStateChange EXCEPT !.instrumentState = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Outgoing Messages Header: 22 bytes                                      *)
@@ -2251,6 +2189,160 @@ CheckedOutgoingMessagesHeader14 ==
         \cup { [ZeroOutgoingMessagesHeader14 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
         \cup { [ZeroOutgoingMessagesHeader14 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
         \cup { [ZeroOutgoingMessagesHeader14 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Group State Change: 25 bytes                                            *)
+(***************************************************************************)
+
+GroupStateChange ==
+    [ outgoingMessagesHeader : OutgoingMessagesHeader14,
+      group                  : Sample(2),
+      groupState             : Sample(1) ]
+
+EncodeGroupStateChange(message) ==
+    EncodeOutgoingMessagesHeader14(message.outgoingMessagesHeader)
+        \o message.group
+        \o message.groupState
+
+DecodeGroupStateChange(bytes) ==
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader14(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET groupState == ReadBytes(group.rest, 1) IN IF ~groupState.ok THEN Fail ELSE
+    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
+         group                  |-> group.value,
+         groupState             |-> groupState.value ], groupState.rest)
+
+ZeroGroupStateChange ==
+    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader14,
+      group                  |-> [i \in 1 .. 2 |-> 0],
+      groupState             |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Group State Change at zero, then each field in turn at the values it is checked at *)
+CheckedGroupStateChange ==
+    { ZeroGroupStateChange }
+        \cup { [ZeroGroupStateChange EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader14 }
+        \cup { [ZeroGroupStateChange EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroGroupStateChange EXCEPT !.groupState = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Outgoing Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+OutgoingMessagesHeader15 ==
+    [ tradingEngineTimestampLocalHhmmss : Sample(6),
+      userSequenceId                    : Sample(8),
+      exchangeMessageId                 : Sample(6),
+      gapSequenceId                     : Sample(2) ]
+
+EncodeOutgoingMessagesHeader15(message) ==
+    message.tradingEngineTimestampLocalHhmmss
+        \o message.userSequenceId
+        \o message.exchangeMessageId
+        \o message.gapSequenceId
+
+DecodeOutgoingMessagesHeader15(bytes) ==
+    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
+    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
+    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
+         userSequenceId                    |-> userSequenceId.value,
+         exchangeMessageId                 |-> exchangeMessageId.value,
+         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
+
+ZeroOutgoingMessagesHeader15 ==
+    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
+      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
+      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedOutgoingMessagesHeader15 ==
+    { ZeroOutgoingMessagesHeader15 }
+        \cup { [ZeroOutgoingMessagesHeader15 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader15 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader15 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader15 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Instrument State Change: 29 bytes                                       *)
+(***************************************************************************)
+
+InstrumentStateChange ==
+    [ outgoingMessagesHeader : OutgoingMessagesHeader15,
+      group                  : Sample(2),
+      instrument             : Sample(4),
+      instrumentState        : Sample(1) ]
+
+EncodeInstrumentStateChange(message) ==
+    EncodeOutgoingMessagesHeader15(message.outgoingMessagesHeader)
+        \o message.group
+        \o message.instrument
+        \o message.instrumentState
+
+DecodeInstrumentStateChange(bytes) ==
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader15(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET instrumentState == ReadBytes(instrument.rest, 1) IN IF ~instrumentState.ok THEN Fail ELSE
+    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
+         group                  |-> group.value,
+         instrument             |-> instrument.value,
+         instrumentState        |-> instrumentState.value ], instrumentState.rest)
+
+ZeroInstrumentStateChange ==
+    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader15,
+      group                  |-> [i \in 1 .. 2 |-> 0],
+      instrument             |-> [i \in 1 .. 4 |-> 0],
+      instrumentState        |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Instrument State Change at zero, then each field in turn at the values it is checked at *)
+CheckedInstrumentStateChange ==
+    { ZeroInstrumentStateChange }
+        \cup { [ZeroInstrumentStateChange EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader15 }
+        \cup { [ZeroInstrumentStateChange EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroInstrumentStateChange EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroInstrumentStateChange EXCEPT !.instrumentState = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Outgoing Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+OutgoingMessagesHeader16 ==
+    [ tradingEngineTimestampLocalHhmmss : Sample(6),
+      userSequenceId                    : Sample(8),
+      exchangeMessageId                 : Sample(6),
+      gapSequenceId                     : Sample(2) ]
+
+EncodeOutgoingMessagesHeader16(message) ==
+    message.tradingEngineTimestampLocalHhmmss
+        \o message.userSequenceId
+        \o message.exchangeMessageId
+        \o message.gapSequenceId
+
+DecodeOutgoingMessagesHeader16(bytes) ==
+    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
+    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
+    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
+         userSequenceId                    |-> userSequenceId.value,
+         exchangeMessageId                 |-> exchangeMessageId.value,
+         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
+
+ZeroOutgoingMessagesHeader16 ==
+    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
+      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
+      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedOutgoingMessagesHeader16 ==
+    { ZeroOutgoingMessagesHeader16 }
+        \cup { [ZeroOutgoingMessagesHeader16 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader16 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader16 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader16 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Clearing Data: 20 bytes                                                 *)
@@ -2325,7 +2417,7 @@ CheckedOwnerData5 ==
 (***************************************************************************)
 
 LegExecutionNotice ==
-    [ outgoingMessagesHeader                      : OutgoingMessagesHeader14,
+    [ outgoingMessagesHeader                      : OutgoingMessagesHeader16,
       group                                       : Sample(2),
       instrument                                  : Sample(4),
       traderId                                    : Sample(8),
@@ -2351,7 +2443,7 @@ LegExecutionNotice ==
       legNumber                                   : Sample(2) ]
 
 EncodeLegExecutionNotice(message) ==
-    EncodeOutgoingMessagesHeader14(message.outgoingMessagesHeader)
+    EncodeOutgoingMessagesHeader16(message.outgoingMessagesHeader)
         \o message.group
         \o message.instrument
         \o message.traderId
@@ -2377,7 +2469,7 @@ EncodeLegExecutionNotice(message) ==
         \o message.legNumber
 
 DecodeLegExecutionNotice(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader14(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader16(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
     LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET traderId == ReadBytes(instrument.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
@@ -2427,7 +2519,7 @@ DecodeLegExecutionNotice(bytes) ==
          legNumber                                   |-> legNumber.value ], legNumber.rest)
 
 ZeroLegExecutionNotice ==
-    [ outgoingMessagesHeader                      |-> ZeroOutgoingMessagesHeader14,
+    [ outgoingMessagesHeader                      |-> ZeroOutgoingMessagesHeader16,
       group                                       |-> [i \in 1 .. 2 |-> 0],
       instrument                                  |-> [i \in 1 .. 4 |-> 0],
       traderId                                    |-> [i \in 1 .. 8 |-> 0],
@@ -2455,7 +2547,7 @@ ZeroLegExecutionNotice ==
 (* Leg Execution Notice at zero, then each field in turn at the values it is checked at *)
 CheckedLegExecutionNotice ==
     { ZeroLegExecutionNotice }
-        \cup { [ZeroLegExecutionNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader14 }
+        \cup { [ZeroLegExecutionNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader16 }
         \cup { [ZeroLegExecutionNotice EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroLegExecutionNotice EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroLegExecutionNotice EXCEPT !.traderId = one] : one \in Sample(8) }
@@ -2479,230 +2571,6 @@ CheckedLegExecutionNotice ==
         \cup { [ZeroLegExecutionNotice EXCEPT !.strategyVerbSide = one] : one \in Sample(1) }
         \cup { [ZeroLegExecutionNotice EXCEPT !.strategyTradeNumber = one] : one \in Sample(8) }
         \cup { [ZeroLegExecutionNotice EXCEPT !.legNumber = one] : one \in Sample(2) }
-
-(***************************************************************************)
-(* Outgoing Messages Header: 22 bytes                                      *)
-(***************************************************************************)
-
-OutgoingMessagesHeader15 ==
-    [ tradingEngineTimestampLocalHhmmss : Sample(6),
-      userSequenceId                    : Sample(8),
-      exchangeMessageId                 : Sample(6),
-      gapSequenceId                     : Sample(2) ]
-
-EncodeOutgoingMessagesHeader15(message) ==
-    message.tradingEngineTimestampLocalHhmmss
-        \o message.userSequenceId
-        \o message.exchangeMessageId
-        \o message.gapSequenceId
-
-DecodeOutgoingMessagesHeader15(bytes) ==
-    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
-    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
-    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
-    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
-    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
-         userSequenceId                    |-> userSequenceId.value,
-         exchangeMessageId                 |-> exchangeMessageId.value,
-         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
-
-ZeroOutgoingMessagesHeader15 ==
-    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
-      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
-      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
-      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
-
-(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader15 ==
-    { ZeroOutgoingMessagesHeader15 }
-        \cup { [ZeroOutgoingMessagesHeader15 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader15 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader15 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader15 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
-
-(***************************************************************************)
-(* Counterpart Owner Data: 50 bytes                                        *)
-(***************************************************************************)
-
-CounterpartOwnerData ==
-    [ memo : Sample(50) ]
-
-EncodeCounterpartOwnerData(message) ==
-    message.memo
-
-DecodeCounterpartOwnerData(bytes) ==
-    LET memo == ReadBytes(bytes, 50) IN IF ~memo.ok THEN Fail ELSE
-    Ok([ memo |-> memo.value ], memo.rest)
-
-ZeroCounterpartOwnerData ==
-    [ memo |-> [i \in 1 .. 50 |-> 0] ]
-
-(* Counterpart Owner Data at zero, then each field in turn at the values it is checked at *)
-CheckedCounterpartOwnerData ==
-    { ZeroCounterpartOwnerData }
-        \cup { [ZeroCounterpartOwnerData EXCEPT !.memo = one] : one \in Sample(50) }
-
-(***************************************************************************)
-(* Overstepped Order Or Quote Notice: 112 bytes                            *)
-(***************************************************************************)
-
-OversteppedOrderOrQuoteNotice ==
-    [ outgoingMessagesHeader : OutgoingMessagesHeader15,
-      group                  : Sample(2),
-      instrument             : Sample(4),
-      verb                   : Sample(1),
-      orderType              : Sample(1),
-      traderId               : Sample(8),
-      orderId                : Sample(8),
-      counterpartTraderId    : Sample(8),
-      counterpartOrderId     : Sample(8),
-      counterpartOwnerData   : CounterpartOwnerData ]
-
-EncodeOversteppedOrderOrQuoteNotice(message) ==
-    EncodeOutgoingMessagesHeader15(message.outgoingMessagesHeader)
-        \o message.group
-        \o message.instrument
-        \o message.verb
-        \o message.orderType
-        \o message.traderId
-        \o message.orderId
-        \o message.counterpartTraderId
-        \o message.counterpartOrderId
-        \o EncodeCounterpartOwnerData(message.counterpartOwnerData)
-
-DecodeOversteppedOrderOrQuoteNotice(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader15(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
-    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
-    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
-    LET verb == ReadBytes(instrument.rest, 1) IN IF ~verb.ok THEN Fail ELSE
-    LET orderType == ReadBytes(verb.rest, 1) IN IF ~orderType.ok THEN Fail ELSE
-    LET traderId == ReadBytes(orderType.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
-    LET orderId == ReadBytes(traderId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET counterpartTraderId == ReadBytes(orderId.rest, 8) IN IF ~counterpartTraderId.ok THEN Fail ELSE
-    LET counterpartOrderId == ReadBytes(counterpartTraderId.rest, 8) IN IF ~counterpartOrderId.ok THEN Fail ELSE
-    LET counterpartOwnerData == DecodeCounterpartOwnerData(counterpartOrderId.rest) IN IF ~counterpartOwnerData.ok THEN Fail ELSE
-    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
-         group                  |-> group.value,
-         instrument             |-> instrument.value,
-         verb                   |-> verb.value,
-         orderType              |-> orderType.value,
-         traderId               |-> traderId.value,
-         orderId                |-> orderId.value,
-         counterpartTraderId    |-> counterpartTraderId.value,
-         counterpartOrderId     |-> counterpartOrderId.value,
-         counterpartOwnerData   |-> counterpartOwnerData.value ], counterpartOwnerData.rest)
-
-ZeroOversteppedOrderOrQuoteNotice ==
-    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader15,
-      group                  |-> [i \in 1 .. 2 |-> 0],
-      instrument             |-> [i \in 1 .. 4 |-> 0],
-      verb                   |-> [i \in 1 .. 1 |-> 0],
-      orderType              |-> [i \in 1 .. 1 |-> 0],
-      traderId               |-> [i \in 1 .. 8 |-> 0],
-      orderId                |-> [i \in 1 .. 8 |-> 0],
-      counterpartTraderId    |-> [i \in 1 .. 8 |-> 0],
-      counterpartOrderId     |-> [i \in 1 .. 8 |-> 0],
-      counterpartOwnerData   |-> ZeroCounterpartOwnerData ]
-
-(* Overstepped Order Or Quote Notice at zero, then each field in turn at the values it is checked at *)
-CheckedOversteppedOrderOrQuoteNotice ==
-    { ZeroOversteppedOrderOrQuoteNotice }
-        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader15 }
-        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.group = one] : one \in Sample(2) }
-        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.instrument = one] : one \in Sample(4) }
-        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.verb = one] : one \in Sample(1) }
-        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.orderType = one] : one \in Sample(1) }
-        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.traderId = one] : one \in Sample(8) }
-        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.counterpartTraderId = one] : one \in Sample(8) }
-        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.counterpartOrderId = one] : one \in Sample(8) }
-        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.counterpartOwnerData = one] : one \in CheckedCounterpartOwnerData }
-
-(***************************************************************************)
-(* Outgoing Messages Header: 22 bytes                                      *)
-(***************************************************************************)
-
-OutgoingMessagesHeader16 ==
-    [ tradingEngineTimestampLocalHhmmss : Sample(6),
-      userSequenceId                    : Sample(8),
-      exchangeMessageId                 : Sample(6),
-      gapSequenceId                     : Sample(2) ]
-
-EncodeOutgoingMessagesHeader16(message) ==
-    message.tradingEngineTimestampLocalHhmmss
-        \o message.userSequenceId
-        \o message.exchangeMessageId
-        \o message.gapSequenceId
-
-DecodeOutgoingMessagesHeader16(bytes) ==
-    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
-    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
-    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
-    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
-    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
-         userSequenceId                    |-> userSequenceId.value,
-         exchangeMessageId                 |-> exchangeMessageId.value,
-         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
-
-ZeroOutgoingMessagesHeader16 ==
-    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
-      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
-      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
-      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
-
-(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader16 ==
-    { ZeroOutgoingMessagesHeader16 }
-        \cup { [ZeroOutgoingMessagesHeader16 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader16 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader16 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader16 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
-
-(***************************************************************************)
-(* Cancellation Of All Quotes Notice: 37 bytes                             *)
-(***************************************************************************)
-
-CancellationOfAllQuotesNotice ==
-    [ outgoingMessagesHeader : OutgoingMessagesHeader16,
-      group                  : Sample(2),
-      instrument             : Sample(4),
-      traderId               : Sample(8),
-      cancelReason           : Sample(1) ]
-
-EncodeCancellationOfAllQuotesNotice(message) ==
-    EncodeOutgoingMessagesHeader16(message.outgoingMessagesHeader)
-        \o message.group
-        \o message.instrument
-        \o message.traderId
-        \o message.cancelReason
-
-DecodeCancellationOfAllQuotesNotice(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader16(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
-    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
-    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
-    LET traderId == ReadBytes(instrument.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
-    LET cancelReason == ReadBytes(traderId.rest, 1) IN IF ~cancelReason.ok THEN Fail ELSE
-    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
-         group                  |-> group.value,
-         instrument             |-> instrument.value,
-         traderId               |-> traderId.value,
-         cancelReason           |-> cancelReason.value ], cancelReason.rest)
-
-ZeroCancellationOfAllQuotesNotice ==
-    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader16,
-      group                  |-> [i \in 1 .. 2 |-> 0],
-      instrument             |-> [i \in 1 .. 4 |-> 0],
-      traderId               |-> [i \in 1 .. 8 |-> 0],
-      cancelReason           |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Cancellation Of All Quotes Notice at zero, then each field in turn at the values it is checked at *)
-CheckedCancellationOfAllQuotesNotice ==
-    { ZeroCancellationOfAllQuotesNotice }
-        \cup { [ZeroCancellationOfAllQuotesNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader16 }
-        \cup { [ZeroCancellationOfAllQuotesNotice EXCEPT !.group = one] : one \in Sample(2) }
-        \cup { [ZeroCancellationOfAllQuotesNotice EXCEPT !.instrument = one] : one \in Sample(4) }
-        \cup { [ZeroCancellationOfAllQuotesNotice EXCEPT !.traderId = one] : one \in Sample(8) }
-        \cup { [ZeroCancellationOfAllQuotesNotice EXCEPT !.cancelReason = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Outgoing Messages Header: 22 bytes                                      *)
@@ -2743,6 +2611,230 @@ CheckedOutgoingMessagesHeader17 ==
         \cup { [ZeroOutgoingMessagesHeader17 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
         \cup { [ZeroOutgoingMessagesHeader17 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
         \cup { [ZeroOutgoingMessagesHeader17 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Counterpart Owner Data: 50 bytes                                        *)
+(***************************************************************************)
+
+CounterpartOwnerData ==
+    [ memo : Sample(50) ]
+
+EncodeCounterpartOwnerData(message) ==
+    message.memo
+
+DecodeCounterpartOwnerData(bytes) ==
+    LET memo == ReadBytes(bytes, 50) IN IF ~memo.ok THEN Fail ELSE
+    Ok([ memo |-> memo.value ], memo.rest)
+
+ZeroCounterpartOwnerData ==
+    [ memo |-> [i \in 1 .. 50 |-> 0] ]
+
+(* Counterpart Owner Data at zero, then each field in turn at the values it is checked at *)
+CheckedCounterpartOwnerData ==
+    { ZeroCounterpartOwnerData }
+        \cup { [ZeroCounterpartOwnerData EXCEPT !.memo = one] : one \in Sample(50) }
+
+(***************************************************************************)
+(* Overstepped Order Or Quote Notice: 112 bytes                            *)
+(***************************************************************************)
+
+OversteppedOrderOrQuoteNotice ==
+    [ outgoingMessagesHeader : OutgoingMessagesHeader17,
+      group                  : Sample(2),
+      instrument             : Sample(4),
+      verb                   : Sample(1),
+      orderType              : Sample(1),
+      traderId               : Sample(8),
+      orderId                : Sample(8),
+      counterpartTraderId    : Sample(8),
+      counterpartOrderId     : Sample(8),
+      counterpartOwnerData   : CounterpartOwnerData ]
+
+EncodeOversteppedOrderOrQuoteNotice(message) ==
+    EncodeOutgoingMessagesHeader17(message.outgoingMessagesHeader)
+        \o message.group
+        \o message.instrument
+        \o message.verb
+        \o message.orderType
+        \o message.traderId
+        \o message.orderId
+        \o message.counterpartTraderId
+        \o message.counterpartOrderId
+        \o EncodeCounterpartOwnerData(message.counterpartOwnerData)
+
+DecodeOversteppedOrderOrQuoteNotice(bytes) ==
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader17(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET verb == ReadBytes(instrument.rest, 1) IN IF ~verb.ok THEN Fail ELSE
+    LET orderType == ReadBytes(verb.rest, 1) IN IF ~orderType.ok THEN Fail ELSE
+    LET traderId == ReadBytes(orderType.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET orderId == ReadBytes(traderId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET counterpartTraderId == ReadBytes(orderId.rest, 8) IN IF ~counterpartTraderId.ok THEN Fail ELSE
+    LET counterpartOrderId == ReadBytes(counterpartTraderId.rest, 8) IN IF ~counterpartOrderId.ok THEN Fail ELSE
+    LET counterpartOwnerData == DecodeCounterpartOwnerData(counterpartOrderId.rest) IN IF ~counterpartOwnerData.ok THEN Fail ELSE
+    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
+         group                  |-> group.value,
+         instrument             |-> instrument.value,
+         verb                   |-> verb.value,
+         orderType              |-> orderType.value,
+         traderId               |-> traderId.value,
+         orderId                |-> orderId.value,
+         counterpartTraderId    |-> counterpartTraderId.value,
+         counterpartOrderId     |-> counterpartOrderId.value,
+         counterpartOwnerData   |-> counterpartOwnerData.value ], counterpartOwnerData.rest)
+
+ZeroOversteppedOrderOrQuoteNotice ==
+    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader17,
+      group                  |-> [i \in 1 .. 2 |-> 0],
+      instrument             |-> [i \in 1 .. 4 |-> 0],
+      verb                   |-> [i \in 1 .. 1 |-> 0],
+      orderType              |-> [i \in 1 .. 1 |-> 0],
+      traderId               |-> [i \in 1 .. 8 |-> 0],
+      orderId                |-> [i \in 1 .. 8 |-> 0],
+      counterpartTraderId    |-> [i \in 1 .. 8 |-> 0],
+      counterpartOrderId     |-> [i \in 1 .. 8 |-> 0],
+      counterpartOwnerData   |-> ZeroCounterpartOwnerData ]
+
+(* Overstepped Order Or Quote Notice at zero, then each field in turn at the values it is checked at *)
+CheckedOversteppedOrderOrQuoteNotice ==
+    { ZeroOversteppedOrderOrQuoteNotice }
+        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader17 }
+        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.verb = one] : one \in Sample(1) }
+        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.orderType = one] : one \in Sample(1) }
+        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.counterpartTraderId = one] : one \in Sample(8) }
+        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.counterpartOrderId = one] : one \in Sample(8) }
+        \cup { [ZeroOversteppedOrderOrQuoteNotice EXCEPT !.counterpartOwnerData = one] : one \in CheckedCounterpartOwnerData }
+
+(***************************************************************************)
+(* Outgoing Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+OutgoingMessagesHeader18 ==
+    [ tradingEngineTimestampLocalHhmmss : Sample(6),
+      userSequenceId                    : Sample(8),
+      exchangeMessageId                 : Sample(6),
+      gapSequenceId                     : Sample(2) ]
+
+EncodeOutgoingMessagesHeader18(message) ==
+    message.tradingEngineTimestampLocalHhmmss
+        \o message.userSequenceId
+        \o message.exchangeMessageId
+        \o message.gapSequenceId
+
+DecodeOutgoingMessagesHeader18(bytes) ==
+    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
+    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
+    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
+         userSequenceId                    |-> userSequenceId.value,
+         exchangeMessageId                 |-> exchangeMessageId.value,
+         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
+
+ZeroOutgoingMessagesHeader18 ==
+    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
+      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
+      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedOutgoingMessagesHeader18 ==
+    { ZeroOutgoingMessagesHeader18 }
+        \cup { [ZeroOutgoingMessagesHeader18 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader18 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader18 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader18 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Cancellation Of All Quotes Notice: 37 bytes                             *)
+(***************************************************************************)
+
+CancellationOfAllQuotesNotice ==
+    [ outgoingMessagesHeader : OutgoingMessagesHeader18,
+      group                  : Sample(2),
+      instrument             : Sample(4),
+      traderId               : Sample(8),
+      cancelReason           : Sample(1) ]
+
+EncodeCancellationOfAllQuotesNotice(message) ==
+    EncodeOutgoingMessagesHeader18(message.outgoingMessagesHeader)
+        \o message.group
+        \o message.instrument
+        \o message.traderId
+        \o message.cancelReason
+
+DecodeCancellationOfAllQuotesNotice(bytes) ==
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader18(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
+    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
+    LET traderId == ReadBytes(instrument.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
+    LET cancelReason == ReadBytes(traderId.rest, 1) IN IF ~cancelReason.ok THEN Fail ELSE
+    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
+         group                  |-> group.value,
+         instrument             |-> instrument.value,
+         traderId               |-> traderId.value,
+         cancelReason           |-> cancelReason.value ], cancelReason.rest)
+
+ZeroCancellationOfAllQuotesNotice ==
+    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader18,
+      group                  |-> [i \in 1 .. 2 |-> 0],
+      instrument             |-> [i \in 1 .. 4 |-> 0],
+      traderId               |-> [i \in 1 .. 8 |-> 0],
+      cancelReason           |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Cancellation Of All Quotes Notice at zero, then each field in turn at the values it is checked at *)
+CheckedCancellationOfAllQuotesNotice ==
+    { ZeroCancellationOfAllQuotesNotice }
+        \cup { [ZeroCancellationOfAllQuotesNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader18 }
+        \cup { [ZeroCancellationOfAllQuotesNotice EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroCancellationOfAllQuotesNotice EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroCancellationOfAllQuotesNotice EXCEPT !.traderId = one] : one \in Sample(8) }
+        \cup { [ZeroCancellationOfAllQuotesNotice EXCEPT !.cancelReason = one] : one \in Sample(1) }
+
+(***************************************************************************)
+(* Outgoing Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+OutgoingMessagesHeader19 ==
+    [ tradingEngineTimestampLocalHhmmss : Sample(6),
+      userSequenceId                    : Sample(8),
+      exchangeMessageId                 : Sample(6),
+      gapSequenceId                     : Sample(2) ]
+
+EncodeOutgoingMessagesHeader19(message) ==
+    message.tradingEngineTimestampLocalHhmmss
+        \o message.userSequenceId
+        \o message.exchangeMessageId
+        \o message.gapSequenceId
+
+DecodeOutgoingMessagesHeader19(bytes) ==
+    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
+    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
+    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
+         userSequenceId                    |-> userSequenceId.value,
+         exchangeMessageId                 |-> exchangeMessageId.value,
+         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
+
+ZeroOutgoingMessagesHeader19 ==
+    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
+      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
+      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedOutgoingMessagesHeader19 ==
+    { ZeroOutgoingMessagesHeader19 }
+        \cup { [ZeroOutgoingMessagesHeader19 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader19 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader19 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader19 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Clearing Data: 20 bytes                                                 *)
@@ -2817,7 +2909,7 @@ CheckedOwnerData6 ==
 (***************************************************************************)
 
 ExecutionNotice ==
-    [ outgoingMessagesHeader                      : OutgoingMessagesHeader17,
+    [ outgoingMessagesHeader                      : OutgoingMessagesHeader19,
       group                                       : Sample(2),
       instrument                                  : Sample(4),
       traderId                                    : Sample(8),
@@ -2838,7 +2930,7 @@ ExecutionNotice ==
       idCodeForTheCounterpartParticipant          : Sample(4) ]
 
 EncodeExecutionNotice(message) ==
-    EncodeOutgoingMessagesHeader17(message.outgoingMessagesHeader)
+    EncodeOutgoingMessagesHeader19(message.outgoingMessagesHeader)
         \o message.group
         \o message.instrument
         \o message.traderId
@@ -2859,7 +2951,7 @@ EncodeExecutionNotice(message) ==
         \o message.idCodeForTheCounterpartParticipant
 
 DecodeExecutionNotice(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader17(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader19(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
     LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET traderId == ReadBytes(instrument.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
@@ -2899,7 +2991,7 @@ DecodeExecutionNotice(bytes) ==
          idCodeForTheCounterpartParticipant          |-> idCodeForTheCounterpartParticipant.value ], idCodeForTheCounterpartParticipant.rest)
 
 ZeroExecutionNotice ==
-    [ outgoingMessagesHeader                      |-> ZeroOutgoingMessagesHeader17,
+    [ outgoingMessagesHeader                      |-> ZeroOutgoingMessagesHeader19,
       group                                       |-> [i \in 1 .. 2 |-> 0],
       instrument                                  |-> [i \in 1 .. 4 |-> 0],
       traderId                                    |-> [i \in 1 .. 8 |-> 0],
@@ -2922,7 +3014,7 @@ ZeroExecutionNotice ==
 (* Execution Notice at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionNotice ==
     { ZeroExecutionNotice }
-        \cup { [ZeroExecutionNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader17 }
+        \cup { [ZeroExecutionNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader19 }
         \cup { [ZeroExecutionNotice EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroExecutionNotice EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroExecutionNotice EXCEPT !.traderId = one] : one \in Sample(8) }
@@ -2941,6 +3033,46 @@ CheckedExecutionNotice ==
         \cup { [ZeroExecutionNotice EXCEPT !.tradeMemo = one] : one \in Sample(50) }
         \cup { [ZeroExecutionNotice EXCEPT !.originalReferenceId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionNotice EXCEPT !.idCodeForTheCounterpartParticipant = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Outgoing Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+OutgoingMessagesHeader20 ==
+    [ tradingEngineTimestampLocalHhmmss : Sample(6),
+      userSequenceId                    : Sample(8),
+      exchangeMessageId                 : Sample(6),
+      gapSequenceId                     : Sample(2) ]
+
+EncodeOutgoingMessagesHeader20(message) ==
+    message.tradingEngineTimestampLocalHhmmss
+        \o message.userSequenceId
+        \o message.exchangeMessageId
+        \o message.gapSequenceId
+
+DecodeOutgoingMessagesHeader20(bytes) ==
+    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
+    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
+    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
+         userSequenceId                    |-> userSequenceId.value,
+         exchangeMessageId                 |-> exchangeMessageId.value,
+         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
+
+ZeroOutgoingMessagesHeader20 ==
+    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
+      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
+      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedOutgoingMessagesHeader20 ==
+    { ZeroOutgoingMessagesHeader20 }
+        \cup { [ZeroOutgoingMessagesHeader20 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader20 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader20 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader20 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Clearing Data: 20 bytes                                                 *)
@@ -3011,11 +3143,12 @@ CheckedOwnerData7 ==
         \cup { [ZeroOwnerData7 EXCEPT !.memo = one] : one \in Sample(50) }
 
 (***************************************************************************)
-(* Execution Cancellation Notice: 196 bytes                                *)
+(* Execution Cancellation Notice: 218 bytes                                *)
 (***************************************************************************)
 
 ExecutionCancellationNotice ==
-    [ group                                       : Sample(2),
+    [ outgoingMessagesHeader                      : OutgoingMessagesHeader20,
+      group                                       : Sample(2),
       instrument                                  : Sample(4),
       traderId                                    : Sample(8),
       referenceIdOrderIdOrQuoteId                 : Sample(8),
@@ -3035,7 +3168,8 @@ ExecutionCancellationNotice ==
       idCodeForTheCounterpartParticipant          : Sample(4) ]
 
 EncodeExecutionCancellationNotice(message) ==
-    message.group
+    EncodeOutgoingMessagesHeader20(message.outgoingMessagesHeader)
+        \o message.group
         \o message.instrument
         \o message.traderId
         \o message.referenceIdOrderIdOrQuoteId
@@ -3055,7 +3189,8 @@ EncodeExecutionCancellationNotice(message) ==
         \o message.idCodeForTheCounterpartParticipant
 
 DecodeExecutionCancellationNotice(bytes) ==
-    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader20(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET traderId == ReadBytes(instrument.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
     LET referenceIdOrderIdOrQuoteId == ReadBytes(traderId.rest, 8) IN IF ~referenceIdOrderIdOrQuoteId.ok THEN Fail ELSE
@@ -3073,7 +3208,8 @@ DecodeExecutionCancellationNotice(bytes) ==
     LET tradeMemo == ReadBytes(tradeNumber.rest, 50) IN IF ~tradeMemo.ok THEN Fail ELSE
     LET originalReferenceId == ReadBytes(tradeMemo.rest, 8) IN IF ~originalReferenceId.ok THEN Fail ELSE
     LET idCodeForTheCounterpartParticipant == ReadBytes(originalReferenceId.rest, 4) IN IF ~idCodeForTheCounterpartParticipant.ok THEN Fail ELSE
-    Ok([ group                                       |-> group.value,
+    Ok([ outgoingMessagesHeader                      |-> outgoingMessagesHeader.value,
+         group                                       |-> group.value,
          instrument                                  |-> instrument.value,
          traderId                                    |-> traderId.value,
          referenceIdOrderIdOrQuoteId                 |-> referenceIdOrderIdOrQuoteId.value,
@@ -3093,7 +3229,8 @@ DecodeExecutionCancellationNotice(bytes) ==
          idCodeForTheCounterpartParticipant          |-> idCodeForTheCounterpartParticipant.value ], idCodeForTheCounterpartParticipant.rest)
 
 ZeroExecutionCancellationNotice ==
-    [ group                                       |-> [i \in 1 .. 2 |-> 0],
+    [ outgoingMessagesHeader                      |-> ZeroOutgoingMessagesHeader20,
+      group                                       |-> [i \in 1 .. 2 |-> 0],
       instrument                                  |-> [i \in 1 .. 4 |-> 0],
       traderId                                    |-> [i \in 1 .. 8 |-> 0],
       referenceIdOrderIdOrQuoteId                 |-> [i \in 1 .. 8 |-> 0],
@@ -3115,6 +3252,7 @@ ZeroExecutionCancellationNotice ==
 (* Execution Cancellation Notice at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionCancellationNotice ==
     { ZeroExecutionCancellationNotice }
+        \cup { [ZeroExecutionCancellationNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader20 }
         \cup { [ZeroExecutionCancellationNotice EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroExecutionCancellationNotice EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroExecutionCancellationNotice EXCEPT !.traderId = one] : one \in Sample(8) }
@@ -3133,6 +3271,46 @@ CheckedExecutionCancellationNotice ==
         \cup { [ZeroExecutionCancellationNotice EXCEPT !.tradeMemo = one] : one \in Sample(50) }
         \cup { [ZeroExecutionCancellationNotice EXCEPT !.originalReferenceId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionCancellationNotice EXCEPT !.idCodeForTheCounterpartParticipant = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Outgoing Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+OutgoingMessagesHeader21 ==
+    [ tradingEngineTimestampLocalHhmmss : Sample(6),
+      userSequenceId                    : Sample(8),
+      exchangeMessageId                 : Sample(6),
+      gapSequenceId                     : Sample(2) ]
+
+EncodeOutgoingMessagesHeader21(message) ==
+    message.tradingEngineTimestampLocalHhmmss
+        \o message.userSequenceId
+        \o message.exchangeMessageId
+        \o message.gapSequenceId
+
+DecodeOutgoingMessagesHeader21(bytes) ==
+    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
+    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
+    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
+         userSequenceId                    |-> userSequenceId.value,
+         exchangeMessageId                 |-> exchangeMessageId.value,
+         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
+
+ZeroOutgoingMessagesHeader21 ==
+    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
+      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
+      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedOutgoingMessagesHeader21 ==
+    { ZeroOutgoingMessagesHeader21 }
+        \cup { [ZeroOutgoingMessagesHeader21 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader21 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader21 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader21 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Clearing Data: 20 bytes                                                 *)
@@ -3203,11 +3381,12 @@ CheckedOwnerData8 ==
         \cup { [ZeroOwnerData8 EXCEPT !.memo = one] : one \in Sample(50) }
 
 (***************************************************************************)
-(* Leg Execution Cancellation Notice: 213 bytes                            *)
+(* Leg Execution Cancellation Notice: 235 bytes                            *)
 (***************************************************************************)
 
 LegExecutionCancellationNotice ==
-    [ group                                       : Sample(2),
+    [ outgoingMessagesHeader                      : OutgoingMessagesHeader21,
+      group                                       : Sample(2),
       instrument                                  : Sample(4),
       traderId                                    : Sample(8),
       referenceIdOrderIdOrQuoteId                 : Sample(8),
@@ -3232,7 +3411,8 @@ LegExecutionCancellationNotice ==
       legNumber                                   : Sample(2) ]
 
 EncodeLegExecutionCancellationNotice(message) ==
-    message.group
+    EncodeOutgoingMessagesHeader21(message.outgoingMessagesHeader)
+        \o message.group
         \o message.instrument
         \o message.traderId
         \o message.referenceIdOrderIdOrQuoteId
@@ -3257,7 +3437,8 @@ EncodeLegExecutionCancellationNotice(message) ==
         \o message.legNumber
 
 DecodeLegExecutionCancellationNotice(bytes) ==
-    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader21(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET traderId == ReadBytes(instrument.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
     LET referenceIdOrderIdOrQuoteId == ReadBytes(traderId.rest, 8) IN IF ~referenceIdOrderIdOrQuoteId.ok THEN Fail ELSE
@@ -3280,7 +3461,8 @@ DecodeLegExecutionCancellationNotice(bytes) ==
     LET strategyVerbSide == ReadBytes(strategyInstrumentId.rest, 1) IN IF ~strategyVerbSide.ok THEN Fail ELSE
     LET strategyTradeNumber == ReadBytes(strategyVerbSide.rest, 8) IN IF ~strategyTradeNumber.ok THEN Fail ELSE
     LET legNumber == ReadBytes(strategyTradeNumber.rest, 2) IN IF ~legNumber.ok THEN Fail ELSE
-    Ok([ group                                       |-> group.value,
+    Ok([ outgoingMessagesHeader                      |-> outgoingMessagesHeader.value,
+         group                                       |-> group.value,
          instrument                                  |-> instrument.value,
          traderId                                    |-> traderId.value,
          referenceIdOrderIdOrQuoteId                 |-> referenceIdOrderIdOrQuoteId.value,
@@ -3305,7 +3487,8 @@ DecodeLegExecutionCancellationNotice(bytes) ==
          legNumber                                   |-> legNumber.value ], legNumber.rest)
 
 ZeroLegExecutionCancellationNotice ==
-    [ group                                       |-> [i \in 1 .. 2 |-> 0],
+    [ outgoingMessagesHeader                      |-> ZeroOutgoingMessagesHeader21,
+      group                                       |-> [i \in 1 .. 2 |-> 0],
       instrument                                  |-> [i \in 1 .. 4 |-> 0],
       traderId                                    |-> [i \in 1 .. 8 |-> 0],
       referenceIdOrderIdOrQuoteId                 |-> [i \in 1 .. 8 |-> 0],
@@ -3332,6 +3515,7 @@ ZeroLegExecutionCancellationNotice ==
 (* Leg Execution Cancellation Notice at zero, then each field in turn at the values it is checked at *)
 CheckedLegExecutionCancellationNotice ==
     { ZeroLegExecutionCancellationNotice }
+        \cup { [ZeroLegExecutionCancellationNotice EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader21 }
         \cup { [ZeroLegExecutionCancellationNotice EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroLegExecutionCancellationNotice EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroLegExecutionCancellationNotice EXCEPT !.traderId = one] : one \in Sample(8) }
@@ -3355,6 +3539,46 @@ CheckedLegExecutionCancellationNotice ==
         \cup { [ZeroLegExecutionCancellationNotice EXCEPT !.strategyVerbSide = one] : one \in Sample(1) }
         \cup { [ZeroLegExecutionCancellationNotice EXCEPT !.strategyTradeNumber = one] : one \in Sample(8) }
         \cup { [ZeroLegExecutionCancellationNotice EXCEPT !.legNumber = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Outgoing Messages Header: 22 bytes                                      *)
+(***************************************************************************)
+
+OutgoingMessagesHeader22 ==
+    [ tradingEngineTimestampLocalHhmmss : Sample(6),
+      userSequenceId                    : Sample(8),
+      exchangeMessageId                 : Sample(6),
+      gapSequenceId                     : Sample(2) ]
+
+EncodeOutgoingMessagesHeader22(message) ==
+    message.tradingEngineTimestampLocalHhmmss
+        \o message.userSequenceId
+        \o message.exchangeMessageId
+        \o message.gapSequenceId
+
+DecodeOutgoingMessagesHeader22(bytes) ==
+    LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
+    LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
+    LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
+    LET gapSequenceId == ReadBytes(exchangeMessageId.rest, 2) IN IF ~gapSequenceId.ok THEN Fail ELSE
+    Ok([ tradingEngineTimestampLocalHhmmss |-> tradingEngineTimestampLocalHhmmss.value,
+         userSequenceId                    |-> userSequenceId.value,
+         exchangeMessageId                 |-> exchangeMessageId.value,
+         gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
+
+ZeroOutgoingMessagesHeader22 ==
+    [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
+      userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
+      exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
+      gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
+CheckedOutgoingMessagesHeader22 ==
+    { ZeroOutgoingMessagesHeader22 }
+        \cup { [ZeroOutgoingMessagesHeader22 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader22 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader22 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader22 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Clearing Data: 20 bytes                                                 *)
@@ -3425,25 +3649,27 @@ CheckedOwnerData9 ==
         \cup { [ZeroOwnerData9 EXCEPT !.memo = one] : one \in Sample(50) }
 
 (***************************************************************************)
-(* Order Cancellation Notice By Mod Or System: 126 bytes                   *)
+(* Order Cancellation Notice By Mod Or System: 148 bytes                   *)
 (***************************************************************************)
 
 OrderCancellationNoticeByModOrSystem ==
-    [ group           : Sample(2),
-      instrument      : Sample(4),
-      traderId        : Sample(8),
-      orderId         : Sample(8),
-      status          : Sample(1),
-      verbSide        : Sample(1),
-      quantity        : Sample(8),
-      assignedPrice   : Sample(10),
-      clearingData    : ClearingData9,
-      ownerData       : OwnerData9,
-      originalOrderId : Sample(8),
-      filler6         : Sample(6) ]
+    [ outgoingMessagesHeader : OutgoingMessagesHeader22,
+      group                  : Sample(2),
+      instrument             : Sample(4),
+      traderId               : Sample(8),
+      orderId                : Sample(8),
+      status                 : Sample(1),
+      verbSide               : Sample(1),
+      quantity               : Sample(8),
+      assignedPrice          : Sample(10),
+      clearingData           : ClearingData9,
+      ownerData              : OwnerData9,
+      originalOrderId        : Sample(8),
+      filler6                : Sample(6) ]
 
 EncodeOrderCancellationNoticeByModOrSystem(message) ==
-    message.group
+    EncodeOutgoingMessagesHeader22(message.outgoingMessagesHeader)
+        \o message.group
         \o message.instrument
         \o message.traderId
         \o message.orderId
@@ -3457,7 +3683,8 @@ EncodeOrderCancellationNoticeByModOrSystem(message) ==
         \o message.filler6
 
 DecodeOrderCancellationNoticeByModOrSystem(bytes) ==
-    LET group == ReadBytes(bytes, 2) IN IF ~group.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader22(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET traderId == ReadBytes(instrument.rest, 8) IN IF ~traderId.ok THEN Fail ELSE
     LET orderId == ReadBytes(traderId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
@@ -3469,36 +3696,39 @@ DecodeOrderCancellationNoticeByModOrSystem(bytes) ==
     LET ownerData == DecodeOwnerData9(clearingData.rest) IN IF ~ownerData.ok THEN Fail ELSE
     LET originalOrderId == ReadBytes(ownerData.rest, 8) IN IF ~originalOrderId.ok THEN Fail ELSE
     LET filler6 == ReadBytes(originalOrderId.rest, 6) IN IF ~filler6.ok THEN Fail ELSE
-    Ok([ group           |-> group.value,
-         instrument      |-> instrument.value,
-         traderId        |-> traderId.value,
-         orderId         |-> orderId.value,
-         status          |-> status.value,
-         verbSide        |-> verbSide.value,
-         quantity        |-> quantity.value,
-         assignedPrice   |-> assignedPrice.value,
-         clearingData    |-> clearingData.value,
-         ownerData       |-> ownerData.value,
-         originalOrderId |-> originalOrderId.value,
-         filler6         |-> filler6.value ], filler6.rest)
+    Ok([ outgoingMessagesHeader |-> outgoingMessagesHeader.value,
+         group                  |-> group.value,
+         instrument             |-> instrument.value,
+         traderId               |-> traderId.value,
+         orderId                |-> orderId.value,
+         status                 |-> status.value,
+         verbSide               |-> verbSide.value,
+         quantity               |-> quantity.value,
+         assignedPrice          |-> assignedPrice.value,
+         clearingData           |-> clearingData.value,
+         ownerData              |-> ownerData.value,
+         originalOrderId        |-> originalOrderId.value,
+         filler6                |-> filler6.value ], filler6.rest)
 
 ZeroOrderCancellationNoticeByModOrSystem ==
-    [ group           |-> [i \in 1 .. 2 |-> 0],
-      instrument      |-> [i \in 1 .. 4 |-> 0],
-      traderId        |-> [i \in 1 .. 8 |-> 0],
-      orderId         |-> [i \in 1 .. 8 |-> 0],
-      status          |-> [i \in 1 .. 1 |-> 0],
-      verbSide        |-> [i \in 1 .. 1 |-> 0],
-      quantity        |-> [i \in 1 .. 8 |-> 0],
-      assignedPrice   |-> [i \in 1 .. 10 |-> 0],
-      clearingData    |-> ZeroClearingData9,
-      ownerData       |-> ZeroOwnerData9,
-      originalOrderId |-> [i \in 1 .. 8 |-> 0],
-      filler6         |-> [i \in 1 .. 6 |-> 0] ]
+    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader22,
+      group                  |-> [i \in 1 .. 2 |-> 0],
+      instrument             |-> [i \in 1 .. 4 |-> 0],
+      traderId               |-> [i \in 1 .. 8 |-> 0],
+      orderId                |-> [i \in 1 .. 8 |-> 0],
+      status                 |-> [i \in 1 .. 1 |-> 0],
+      verbSide               |-> [i \in 1 .. 1 |-> 0],
+      quantity               |-> [i \in 1 .. 8 |-> 0],
+      assignedPrice          |-> [i \in 1 .. 10 |-> 0],
+      clearingData           |-> ZeroClearingData9,
+      ownerData              |-> ZeroOwnerData9,
+      originalOrderId        |-> [i \in 1 .. 8 |-> 0],
+      filler6                |-> [i \in 1 .. 6 |-> 0] ]
 
 (* Order Cancellation Notice By Mod Or System at zero, then each field in turn at the values it is checked at *)
 CheckedOrderCancellationNoticeByModOrSystem ==
     { ZeroOrderCancellationNoticeByModOrSystem }
+        \cup { [ZeroOrderCancellationNoticeByModOrSystem EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader22 }
         \cup { [ZeroOrderCancellationNoticeByModOrSystem EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroOrderCancellationNoticeByModOrSystem EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroOrderCancellationNoticeByModOrSystem EXCEPT !.traderId = one] : one \in Sample(8) }
@@ -3516,19 +3746,19 @@ CheckedOrderCancellationNoticeByModOrSystem ==
 (* Outgoing Messages Header: 22 bytes                                      *)
 (***************************************************************************)
 
-OutgoingMessagesHeader18 ==
+OutgoingMessagesHeader23 ==
     [ tradingEngineTimestampLocalHhmmss : Sample(6),
       userSequenceId                    : Sample(8),
       exchangeMessageId                 : Sample(6),
       gapSequenceId                     : Sample(2) ]
 
-EncodeOutgoingMessagesHeader18(message) ==
+EncodeOutgoingMessagesHeader23(message) ==
     message.tradingEngineTimestampLocalHhmmss
         \o message.userSequenceId
         \o message.exchangeMessageId
         \o message.gapSequenceId
 
-DecodeOutgoingMessagesHeader18(bytes) ==
+DecodeOutgoingMessagesHeader23(bytes) ==
     LET tradingEngineTimestampLocalHhmmss == ReadBytes(bytes, 6) IN IF ~tradingEngineTimestampLocalHhmmss.ok THEN Fail ELSE
     LET userSequenceId == ReadBytes(tradingEngineTimestampLocalHhmmss.rest, 8) IN IF ~userSequenceId.ok THEN Fail ELSE
     LET exchangeMessageId == ReadBytes(userSequenceId.rest, 6) IN IF ~exchangeMessageId.ok THEN Fail ELSE
@@ -3538,40 +3768,40 @@ DecodeOutgoingMessagesHeader18(bytes) ==
          exchangeMessageId                 |-> exchangeMessageId.value,
          gapSequenceId                     |-> gapSequenceId.value ], gapSequenceId.rest)
 
-ZeroOutgoingMessagesHeader18 ==
+ZeroOutgoingMessagesHeader23 ==
     [ tradingEngineTimestampLocalHhmmss |-> [i \in 1 .. 6 |-> 0],
       userSequenceId                    |-> [i \in 1 .. 8 |-> 0],
       exchangeMessageId                 |-> [i \in 1 .. 6 |-> 0],
       gapSequenceId                     |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Outgoing Messages Header at zero, then each field in turn at the values it is checked at *)
-CheckedOutgoingMessagesHeader18 ==
-    { ZeroOutgoingMessagesHeader18 }
-        \cup { [ZeroOutgoingMessagesHeader18 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader18 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
-        \cup { [ZeroOutgoingMessagesHeader18 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
-        \cup { [ZeroOutgoingMessagesHeader18 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
+CheckedOutgoingMessagesHeader23 ==
+    { ZeroOutgoingMessagesHeader23 }
+        \cup { [ZeroOutgoingMessagesHeader23 EXCEPT !.tradingEngineTimestampLocalHhmmss = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader23 EXCEPT !.userSequenceId = one] : one \in Sample(8) }
+        \cup { [ZeroOutgoingMessagesHeader23 EXCEPT !.exchangeMessageId = one] : one \in Sample(6) }
+        \cup { [ZeroOutgoingMessagesHeader23 EXCEPT !.gapSequenceId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Request For Quote With Side Acknowledgement: 37 bytes                   *)
 (***************************************************************************)
 
 RequestForQuoteWithSideAcknowledgement ==
-    [ outgoingMessagesHeader : OutgoingMessagesHeader18,
+    [ outgoingMessagesHeader : OutgoingMessagesHeader23,
       group                  : Sample(2),
       instrument             : Sample(4),
       quantity               : Sample(8),
       marketSide             : Sample(1) ]
 
 EncodeRequestForQuoteWithSideAcknowledgement(message) ==
-    EncodeOutgoingMessagesHeader18(message.outgoingMessagesHeader)
+    EncodeOutgoingMessagesHeader23(message.outgoingMessagesHeader)
         \o message.group
         \o message.instrument
         \o message.quantity
         \o message.marketSide
 
 DecodeRequestForQuoteWithSideAcknowledgement(bytes) ==
-    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader18(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
+    LET outgoingMessagesHeader == DecodeOutgoingMessagesHeader23(bytes) IN IF ~outgoingMessagesHeader.ok THEN Fail ELSE
     LET group == ReadBytes(outgoingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
     LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
     LET quantity == ReadBytes(instrument.rest, 8) IN IF ~quantity.ok THEN Fail ELSE
@@ -3583,7 +3813,7 @@ DecodeRequestForQuoteWithSideAcknowledgement(bytes) ==
          marketSide             |-> marketSide.value ], marketSide.rest)
 
 ZeroRequestForQuoteWithSideAcknowledgement ==
-    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader18,
+    [ outgoingMessagesHeader |-> ZeroOutgoingMessagesHeader23,
       group                  |-> [i \in 1 .. 2 |-> 0],
       instrument             |-> [i \in 1 .. 4 |-> 0],
       quantity               |-> [i \in 1 .. 8 |-> 0],
@@ -3592,7 +3822,7 @@ ZeroRequestForQuoteWithSideAcknowledgement ==
 (* Request For Quote With Side Acknowledgement at zero, then each field in turn at the values it is checked at *)
 CheckedRequestForQuoteWithSideAcknowledgement ==
     { ZeroRequestForQuoteWithSideAcknowledgement }
-        \cup { [ZeroRequestForQuoteWithSideAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader18 }
+        \cup { [ZeroRequestForQuoteWithSideAcknowledgement EXCEPT !.outgoingMessagesHeader = one] : one \in CheckedOutgoingMessagesHeader23 }
         \cup { [ZeroRequestForQuoteWithSideAcknowledgement EXCEPT !.group = one] : one \in Sample(2) }
         \cup { [ZeroRequestForQuoteWithSideAcknowledgement EXCEPT !.instrument = one] : one \in Sample(4) }
         \cup { [ZeroRequestForQuoteWithSideAcknowledgement EXCEPT !.quantity = one] : one \in Sample(8) }
@@ -3993,6 +4223,14 @@ RoundTripGlobalCancellationConfirmation ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripOutgoingMessagesHeader6 ==
+    \A message \in CheckedOutgoingMessagesHeader6 :
+        LET read == DecodeOutgoingMessagesHeader6(EncodeOutgoingMessagesHeader6(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Clearing Data decodes back to what was encoded, and leaves nothing over *)
 RoundTripClearingData3 ==
     \A message \in CheckedClearingData3 :
@@ -4018,9 +4256,9 @@ RoundTripOrderModificationAcknowledgement ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader6 ==
-    \A message \in CheckedOutgoingMessagesHeader6 :
-        LET read == DecodeOutgoingMessagesHeader6(EncodeOutgoingMessagesHeader6(message))
+RoundTripOutgoingMessagesHeader7 ==
+    \A message \in CheckedOutgoingMessagesHeader7 :
+        LET read == DecodeOutgoingMessagesHeader7(EncodeOutgoingMessagesHeader7(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4042,9 +4280,9 @@ RoundTripNewStrategyInstrumentAcknowledgement ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader7 ==
-    \A message \in CheckedOutgoingMessagesHeader7 :
-        LET read == DecodeOutgoingMessagesHeader7(EncodeOutgoingMessagesHeader7(message))
+RoundTripOutgoingMessagesHeader8 ==
+    \A message \in CheckedOutgoingMessagesHeader8 :
+        LET read == DecodeOutgoingMessagesHeader8(EncodeOutgoingMessagesHeader8(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4053,6 +4291,14 @@ RoundTripOutgoingMessagesHeader7 ==
 RoundTripStandardAcknowledgement ==
     \A message \in CheckedStandardAcknowledgement :
         LET read == DecodeStandardAcknowledgement(EncodeStandardAcknowledgement(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripOutgoingMessagesHeader9 ==
+    \A message \in CheckedOutgoingMessagesHeader9 :
+        LET read == DecodeOutgoingMessagesHeader9(EncodeOutgoingMessagesHeader9(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4082,9 +4328,9 @@ RoundTripOrderCancellationAcknowledgement ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader8 ==
-    \A message \in CheckedOutgoingMessagesHeader8 :
-        LET read == DecodeOutgoingMessagesHeader8(EncodeOutgoingMessagesHeader8(message))
+RoundTripOutgoingMessagesHeader10 ==
+    \A message \in CheckedOutgoingMessagesHeader10 :
+        LET read == DecodeOutgoingMessagesHeader10(EncodeOutgoingMessagesHeader10(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4106,9 +4352,9 @@ RoundTripBulkQuoteAcknowledgement ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader9 ==
-    \A message \in CheckedOutgoingMessagesHeader9 :
-        LET read == DecodeOutgoingMessagesHeader9(EncodeOutgoingMessagesHeader9(message))
+RoundTripOutgoingMessagesHeader11 ==
+    \A message \in CheckedOutgoingMessagesHeader11 :
+        LET read == DecodeOutgoingMessagesHeader11(EncodeOutgoingMessagesHeader11(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4130,9 +4376,9 @@ RoundTripBulkCommandAcknowledgement ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader10 ==
-    \A message \in CheckedOutgoingMessagesHeader10 :
-        LET read == DecodeOutgoingMessagesHeader10(EncodeOutgoingMessagesHeader10(message))
+RoundTripOutgoingMessagesHeader12 ==
+    \A message \in CheckedOutgoingMessagesHeader12 :
+        LET read == DecodeOutgoingMessagesHeader12(EncodeOutgoingMessagesHeader12(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4154,9 +4400,9 @@ RoundTripRiskLimitsUsage ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader11 ==
-    \A message \in CheckedOutgoingMessagesHeader11 :
-        LET read == DecodeOutgoingMessagesHeader11(EncodeOutgoingMessagesHeader11(message))
+RoundTripOutgoingMessagesHeader13 ==
+    \A message \in CheckedOutgoingMessagesHeader13 :
+        LET read == DecodeOutgoingMessagesHeader13(EncodeOutgoingMessagesHeader13(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4178,9 +4424,9 @@ RoundTripExcludedInstrumentNotice ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader12 ==
-    \A message \in CheckedOutgoingMessagesHeader12 :
-        LET read == DecodeOutgoingMessagesHeader12(EncodeOutgoingMessagesHeader12(message))
+RoundTripOutgoingMessagesHeader14 ==
+    \A message \in CheckedOutgoingMessagesHeader14 :
+        LET read == DecodeOutgoingMessagesHeader14(EncodeOutgoingMessagesHeader14(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4194,9 +4440,9 @@ RoundTripGroupStateChange ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader13 ==
-    \A message \in CheckedOutgoingMessagesHeader13 :
-        LET read == DecodeOutgoingMessagesHeader13(EncodeOutgoingMessagesHeader13(message))
+RoundTripOutgoingMessagesHeader15 ==
+    \A message \in CheckedOutgoingMessagesHeader15 :
+        LET read == DecodeOutgoingMessagesHeader15(EncodeOutgoingMessagesHeader15(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4210,9 +4456,9 @@ RoundTripInstrumentStateChange ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader14 ==
-    \A message \in CheckedOutgoingMessagesHeader14 :
-        LET read == DecodeOutgoingMessagesHeader14(EncodeOutgoingMessagesHeader14(message))
+RoundTripOutgoingMessagesHeader16 ==
+    \A message \in CheckedOutgoingMessagesHeader16 :
+        LET read == DecodeOutgoingMessagesHeader16(EncodeOutgoingMessagesHeader16(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4242,9 +4488,9 @@ RoundTripLegExecutionNotice ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader15 ==
-    \A message \in CheckedOutgoingMessagesHeader15 :
-        LET read == DecodeOutgoingMessagesHeader15(EncodeOutgoingMessagesHeader15(message))
+RoundTripOutgoingMessagesHeader17 ==
+    \A message \in CheckedOutgoingMessagesHeader17 :
+        LET read == DecodeOutgoingMessagesHeader17(EncodeOutgoingMessagesHeader17(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4266,9 +4512,9 @@ RoundTripOversteppedOrderOrQuoteNotice ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader16 ==
-    \A message \in CheckedOutgoingMessagesHeader16 :
-        LET read == DecodeOutgoingMessagesHeader16(EncodeOutgoingMessagesHeader16(message))
+RoundTripOutgoingMessagesHeader18 ==
+    \A message \in CheckedOutgoingMessagesHeader18 :
+        LET read == DecodeOutgoingMessagesHeader18(EncodeOutgoingMessagesHeader18(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4282,9 +4528,9 @@ RoundTripCancellationOfAllQuotesNotice ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader17 ==
-    \A message \in CheckedOutgoingMessagesHeader17 :
-        LET read == DecodeOutgoingMessagesHeader17(EncodeOutgoingMessagesHeader17(message))
+RoundTripOutgoingMessagesHeader19 ==
+    \A message \in CheckedOutgoingMessagesHeader19 :
+        LET read == DecodeOutgoingMessagesHeader19(EncodeOutgoingMessagesHeader19(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4313,6 +4559,14 @@ RoundTripExecutionNotice ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripOutgoingMessagesHeader20 ==
+    \A message \in CheckedOutgoingMessagesHeader20 :
+        LET read == DecodeOutgoingMessagesHeader20(EncodeOutgoingMessagesHeader20(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Clearing Data decodes back to what was encoded, and leaves nothing over *)
 RoundTripClearingData7 ==
     \A message \in CheckedClearingData7 :
@@ -4337,6 +4591,14 @@ RoundTripExecutionCancellationNotice ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripOutgoingMessagesHeader21 ==
+    \A message \in CheckedOutgoingMessagesHeader21 :
+        LET read == DecodeOutgoingMessagesHeader21(EncodeOutgoingMessagesHeader21(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Clearing Data decodes back to what was encoded, and leaves nothing over *)
 RoundTripClearingData8 ==
     \A message \in CheckedClearingData8 :
@@ -4357,6 +4619,14 @@ RoundTripOwnerData8 ==
 RoundTripLegExecutionCancellationNotice ==
     \A message \in CheckedLegExecutionCancellationNotice :
         LET read == DecodeLegExecutionCancellationNotice(EncodeLegExecutionCancellationNotice(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripOutgoingMessagesHeader22 ==
+    \A message \in CheckedOutgoingMessagesHeader22 :
+        LET read == DecodeOutgoingMessagesHeader22(EncodeOutgoingMessagesHeader22(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -4386,9 +4656,9 @@ RoundTripOrderCancellationNoticeByModOrSystem ==
             /\ read.rest = << >>
 
 (* Every Outgoing Messages Header decodes back to what was encoded, and leaves nothing over *)
-RoundTripOutgoingMessagesHeader18 ==
-    \A message \in CheckedOutgoingMessagesHeader18 :
-        LET read == DecodeOutgoingMessagesHeader18(EncodeOutgoingMessagesHeader18(message))
+RoundTripOutgoingMessagesHeader23 ==
+    \A message \in CheckedOutgoingMessagesHeader23 :
+        LET read == DecodeOutgoingMessagesHeader23(EncodeOutgoingMessagesHeader23(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

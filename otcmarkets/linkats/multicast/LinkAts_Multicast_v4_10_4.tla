@@ -1330,7 +1330,7 @@ ExtendedTradeMessage ==
       tradeStatus               : Sample(1),
       venue                     : Sample(3),
       deprecatedUtf85           : Sample(5),
-      tradePrice                : Sample(8),
+      extendedTradePrice        : Sample(8),
       tradeSizeUnsignedInteger8 : Sample(8),
       tradeTimeMilli            : Sample(8) ]
 
@@ -1343,7 +1343,7 @@ EncodeExtendedTradeMessage(message) ==
         \o message.tradeStatus
         \o message.venue
         \o message.deprecatedUtf85
-        \o message.tradePrice
+        \o message.extendedTradePrice
         \o message.tradeSizeUnsignedInteger8
         \o message.tradeTimeMilli
 
@@ -1356,8 +1356,8 @@ DecodeExtendedTradeMessage(bytes) ==
     LET tradeStatus == ReadBytes(securityId.rest, 1) IN IF ~tradeStatus.ok THEN Fail ELSE
     LET venue == ReadBytes(tradeStatus.rest, 3) IN IF ~venue.ok THEN Fail ELSE
     LET deprecatedUtf85 == ReadBytes(venue.rest, 5) IN IF ~deprecatedUtf85.ok THEN Fail ELSE
-    LET tradePrice == ReadBytes(deprecatedUtf85.rest, 8) IN IF ~tradePrice.ok THEN Fail ELSE
-    LET tradeSizeUnsignedInteger8 == ReadBytes(tradePrice.rest, 8) IN IF ~tradeSizeUnsignedInteger8.ok THEN Fail ELSE
+    LET extendedTradePrice == ReadBytes(deprecatedUtf85.rest, 8) IN IF ~extendedTradePrice.ok THEN Fail ELSE
+    LET tradeSizeUnsignedInteger8 == ReadBytes(extendedTradePrice.rest, 8) IN IF ~tradeSizeUnsignedInteger8.ok THEN Fail ELSE
     LET tradeTimeMilli == ReadBytes(tradeSizeUnsignedInteger8.rest, 8) IN IF ~tradeTimeMilli.ok THEN Fail ELSE
     Ok([ channelSeqNum             |-> channelSeqNum.value,
          tradeIdUnsignedInteger8   |-> tradeIdUnsignedInteger8.value,
@@ -1367,7 +1367,7 @@ DecodeExtendedTradeMessage(bytes) ==
          tradeStatus               |-> tradeStatus.value,
          venue                     |-> venue.value,
          deprecatedUtf85           |-> deprecatedUtf85.value,
-         tradePrice                |-> tradePrice.value,
+         extendedTradePrice        |-> extendedTradePrice.value,
          tradeSizeUnsignedInteger8 |-> tradeSizeUnsignedInteger8.value,
          tradeTimeMilli            |-> tradeTimeMilli.value ], tradeTimeMilli.rest)
 
@@ -1380,7 +1380,7 @@ ZeroExtendedTradeMessage ==
       tradeStatus               |-> [i \in 1 .. 1 |-> 0],
       venue                     |-> [i \in 1 .. 3 |-> 0],
       deprecatedUtf85           |-> [i \in 1 .. 5 |-> 0],
-      tradePrice                |-> [i \in 1 .. 8 |-> 0],
+      extendedTradePrice        |-> [i \in 1 .. 8 |-> 0],
       tradeSizeUnsignedInteger8 |-> [i \in 1 .. 8 |-> 0],
       tradeTimeMilli            |-> [i \in 1 .. 8 |-> 0] ]
 
@@ -1395,7 +1395,7 @@ CheckedExtendedTradeMessage ==
         \cup { [ZeroExtendedTradeMessage EXCEPT !.tradeStatus = one] : one \in Sample(1) }
         \cup { [ZeroExtendedTradeMessage EXCEPT !.venue = one] : one \in Sample(3) }
         \cup { [ZeroExtendedTradeMessage EXCEPT !.deprecatedUtf85 = one] : one \in Sample(5) }
-        \cup { [ZeroExtendedTradeMessage EXCEPT !.tradePrice = one] : one \in Sample(8) }
+        \cup { [ZeroExtendedTradeMessage EXCEPT !.extendedTradePrice = one] : one \in Sample(8) }
         \cup { [ZeroExtendedTradeMessage EXCEPT !.tradeSizeUnsignedInteger8 = one] : one \in Sample(8) }
         \cup { [ZeroExtendedTradeMessage EXCEPT !.tradeTimeMilli = one] : one \in Sample(8) }
 

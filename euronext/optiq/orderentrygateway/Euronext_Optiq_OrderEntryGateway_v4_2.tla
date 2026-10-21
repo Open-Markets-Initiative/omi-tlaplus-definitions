@@ -47,6 +47,9 @@
 (* Note: Mmp Execution Type is a bit field set, checked as its 1 byte      *)
 (* rather than bit by bit.                                                 *)
 (*                                                                         *)
+(* Note: Dark Execution Instruction Optional is a bit field set, checked   *)
+(* as its 1 byte rather than bit by bit.                                   *)
+(*                                                                         *)
 (* Note: Waiver Indicator is a bit field set, checked as its 1 byte rather *)
 (* than bit by bit.                                                        *)
 (***************************************************************************)
@@ -1344,32 +1347,44 @@ CheckedMifidFieldsGroups2 ==
         \cup { [ZeroMifidFieldsGroups2 EXCEPT !.mifidFieldsGroup = one] : one \in SampleLists(OneMifidFieldsGroup2) }
 
 (***************************************************************************)
-(* Fill Derivatives Field Group: 9 bytes                                   *)
+(* Fill Derivatives Field Group: 17 bytes                                  *)
 (***************************************************************************)
 
 FillDerivativesFieldGroup ==
     [ evaluatedPrice       : Sample(8),
-      messagePriceNotation : Sample(1) ]
+      messagePriceNotation : Sample(1),
+      finalSymbolIndex     : Sample(4),
+      finalExecutionId     : Sample(4) ]
 
 EncodeFillDerivativesFieldGroup(message) ==
     message.evaluatedPrice
         \o message.messagePriceNotation
+        \o message.finalSymbolIndex
+        \o message.finalExecutionId
 
 DecodeFillDerivativesFieldGroup(bytes) ==
     LET evaluatedPrice == ReadBytes(bytes, 8) IN IF ~evaluatedPrice.ok THEN Fail ELSE
     LET messagePriceNotation == ReadBytes(evaluatedPrice.rest, 1) IN IF ~messagePriceNotation.ok THEN Fail ELSE
+    LET finalSymbolIndex == ReadBytes(messagePriceNotation.rest, 4) IN IF ~finalSymbolIndex.ok THEN Fail ELSE
+    LET finalExecutionId == ReadBytes(finalSymbolIndex.rest, 4) IN IF ~finalExecutionId.ok THEN Fail ELSE
     Ok([ evaluatedPrice       |-> evaluatedPrice.value,
-         messagePriceNotation |-> messagePriceNotation.value ], messagePriceNotation.rest)
+         messagePriceNotation |-> messagePriceNotation.value,
+         finalSymbolIndex     |-> finalSymbolIndex.value,
+         finalExecutionId     |-> finalExecutionId.value ], finalExecutionId.rest)
 
 ZeroFillDerivativesFieldGroup ==
     [ evaluatedPrice       |-> [i \in 1 .. 8 |-> 0],
-      messagePriceNotation |-> [i \in 1 .. 1 |-> 0] ]
+      messagePriceNotation |-> [i \in 1 .. 1 |-> 0],
+      finalSymbolIndex     |-> [i \in 1 .. 4 |-> 0],
+      finalExecutionId     |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Fill Derivatives Field Group at zero, then each field in turn at the values it is checked at *)
 CheckedFillDerivativesFieldGroup ==
     { ZeroFillDerivativesFieldGroup }
         \cup { [ZeroFillDerivativesFieldGroup EXCEPT !.evaluatedPrice = one] : one \in Sample(8) }
         \cup { [ZeroFillDerivativesFieldGroup EXCEPT !.messagePriceNotation = one] : one \in Sample(1) }
+        \cup { [ZeroFillDerivativesFieldGroup EXCEPT !.finalSymbolIndex = one] : one \in Sample(4) }
+        \cup { [ZeroFillDerivativesFieldGroup EXCEPT !.finalExecutionId = one] : one \in Sample(4) }
 
 (* A run of Fill Derivatives Field Group, written one after another *)
 RECURSIVE EncodeFillDerivativesFieldGroupList(_)
@@ -3302,7 +3317,7 @@ CheckedQuoteAckMessage ==
         \cup { [ZeroQuoteAckMessage EXCEPT !.quoteAcksGroups = one] : one \in CheckedQuoteAcksGroups }
 
 (***************************************************************************)
-(* Quote Request Message: 71 bytes                                         *)
+(* Quote Request Message: 72 bytes                                         *)
 (***************************************************************************)
 
 QuoteRequestMessage ==
@@ -3319,7 +3334,8 @@ QuoteRequestMessage ==
       firmIdPublication             : Sample(1),
       endClient                     : Sample(11),
       darkExecutionInstruction      : Sample(1),
-      minOrderQty                   : Sample(8) ]
+      minOrderQty                   : Sample(8),
+      accountTypeOptional           : Sample(1) ]
 
 EncodeQuoteRequestMessage(message) ==
     message.clMsgSeqNum
@@ -3336,6 +3352,7 @@ EncodeQuoteRequestMessage(message) ==
         \o message.endClient
         \o message.darkExecutionInstruction
         \o message.minOrderQty
+        \o message.accountTypeOptional
 
 DecodeQuoteRequestMessage(bytes) ==
     LET clMsgSeqNum == ReadBytes(bytes, 4) IN IF ~clMsgSeqNum.ok THEN Fail ELSE
@@ -3352,6 +3369,7 @@ DecodeQuoteRequestMessage(bytes) ==
     LET endClient == ReadBytes(firmIdPublication.rest, 11) IN IF ~endClient.ok THEN Fail ELSE
     LET darkExecutionInstruction == ReadBytes(endClient.rest, 1) IN IF ~darkExecutionInstruction.ok THEN Fail ELSE
     LET minOrderQty == ReadBytes(darkExecutionInstruction.rest, 8) IN IF ~minOrderQty.ok THEN Fail ELSE
+    LET accountTypeOptional == ReadBytes(minOrderQty.rest, 1) IN IF ~accountTypeOptional.ok THEN Fail ELSE
     Ok([ clMsgSeqNum                   |-> clMsgSeqNum.value,
          firmId                        |-> firmId.value,
          sendingTime                   |-> sendingTime.value,
@@ -3365,7 +3383,8 @@ DecodeQuoteRequestMessage(bytes) ==
          firmIdPublication             |-> firmIdPublication.value,
          endClient                     |-> endClient.value,
          darkExecutionInstruction      |-> darkExecutionInstruction.value,
-         minOrderQty                   |-> minOrderQty.value ], minOrderQty.rest)
+         minOrderQty                   |-> minOrderQty.value,
+         accountTypeOptional           |-> accountTypeOptional.value ], accountTypeOptional.rest)
 
 ZeroQuoteRequestMessage ==
     [ clMsgSeqNum                   |-> [i \in 1 .. 4 |-> 0],
@@ -3381,7 +3400,8 @@ ZeroQuoteRequestMessage ==
       firmIdPublication             |-> [i \in 1 .. 1 |-> 0],
       endClient                     |-> [i \in 1 .. 11 |-> 0],
       darkExecutionInstruction      |-> [i \in 1 .. 1 |-> 0],
-      minOrderQty                   |-> [i \in 1 .. 8 |-> 0] ]
+      minOrderQty                   |-> [i \in 1 .. 8 |-> 0],
+      accountTypeOptional           |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Quote Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedQuoteRequestMessage ==
@@ -3400,6 +3420,7 @@ CheckedQuoteRequestMessage ==
         \cup { [ZeroQuoteRequestMessage EXCEPT !.endClient = one] : one \in Sample(11) }
         \cup { [ZeroQuoteRequestMessage EXCEPT !.darkExecutionInstruction = one] : one \in Sample(1) }
         \cup { [ZeroQuoteRequestMessage EXCEPT !.minOrderQty = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteRequestMessage EXCEPT !.accountTypeOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Not Used Groups: 2 bytes                                                *)
@@ -4661,7 +4682,7 @@ CheckedRequestForExecutionMessage ==
         \cup { [ZeroRequestForExecutionMessage EXCEPT !.emm = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Rfq Notification Message: 95 bytes                                      *)
+(* Rfq Notification Message: 96 bytes                                      *)
 (***************************************************************************)
 
 RfqNotificationMessage ==
@@ -4680,7 +4701,8 @@ RfqNotificationMessage ==
       sideOptional             : Sample(1),
       endClient                : Sample(11),
       darkExecutionInstruction : Sample(1),
-      minOrderQty              : Sample(8) ]
+      minOrderQty              : Sample(8),
+      accountTypeOptional      : Sample(1) ]
 
 EncodeRfqNotificationMessage(message) ==
     message.msgSeqNum
@@ -4699,6 +4721,7 @@ EncodeRfqNotificationMessage(message) ==
         \o message.endClient
         \o message.darkExecutionInstruction
         \o message.minOrderQty
+        \o message.accountTypeOptional
 
 DecodeRfqNotificationMessage(bytes) ==
     LET msgSeqNum == ReadBytes(bytes, 4) IN IF ~msgSeqNum.ok THEN Fail ELSE
@@ -4717,6 +4740,7 @@ DecodeRfqNotificationMessage(bytes) ==
     LET endClient == ReadBytes(sideOptional.rest, 11) IN IF ~endClient.ok THEN Fail ELSE
     LET darkExecutionInstruction == ReadBytes(endClient.rest, 1) IN IF ~darkExecutionInstruction.ok THEN Fail ELSE
     LET minOrderQty == ReadBytes(darkExecutionInstruction.rest, 8) IN IF ~minOrderQty.ok THEN Fail ELSE
+    LET accountTypeOptional == ReadBytes(minOrderQty.rest, 1) IN IF ~accountTypeOptional.ok THEN Fail ELSE
     Ok([ msgSeqNum                |-> msgSeqNum.value,
          firmId                   |-> firmId.value,
          bookIn                   |-> bookIn.value,
@@ -4732,7 +4756,8 @@ DecodeRfqNotificationMessage(bytes) ==
          sideOptional             |-> sideOptional.value,
          endClient                |-> endClient.value,
          darkExecutionInstruction |-> darkExecutionInstruction.value,
-         minOrderQty              |-> minOrderQty.value ], minOrderQty.rest)
+         minOrderQty              |-> minOrderQty.value,
+         accountTypeOptional      |-> accountTypeOptional.value ], accountTypeOptional.rest)
 
 ZeroRfqNotificationMessage ==
     [ msgSeqNum                |-> [i \in 1 .. 4 |-> 0],
@@ -4750,7 +4775,8 @@ ZeroRfqNotificationMessage ==
       sideOptional             |-> [i \in 1 .. 1 |-> 0],
       endClient                |-> [i \in 1 .. 11 |-> 0],
       darkExecutionInstruction |-> [i \in 1 .. 1 |-> 0],
-      minOrderQty              |-> [i \in 1 .. 8 |-> 0] ]
+      minOrderQty              |-> [i \in 1 .. 8 |-> 0],
+      accountTypeOptional      |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Rfq Notification Message at zero, then each field in turn at the values it is checked at *)
 CheckedRfqNotificationMessage ==
@@ -4771,6 +4797,7 @@ CheckedRfqNotificationMessage ==
         \cup { [ZeroRfqNotificationMessage EXCEPT !.endClient = one] : one \in Sample(11) }
         \cup { [ZeroRfqNotificationMessage EXCEPT !.darkExecutionInstruction = one] : one \in Sample(1) }
         \cup { [ZeroRfqNotificationMessage EXCEPT !.minOrderQty = one] : one \in Sample(8) }
+        \cup { [ZeroRfqNotificationMessage EXCEPT !.accountTypeOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Rfq Matching Status Message: 76 bytes                                   *)
@@ -7423,6 +7450,179 @@ CheckedCrossOrderMessage ==
         \cup { [ZeroCrossOrderMessage EXCEPT !.crossStrategyFieldsGroups = one] : one \in CheckedCrossStrategyFieldsGroups }
 
 (***************************************************************************)
+(* Rfq Counterparts Group: 26 bytes                                        *)
+(***************************************************************************)
+
+RfqCounterpartsGroup ==
+    [ orderOrigin                      : Sample(1),
+      orderPrice                       : Sample(8),
+      lastTradedQuantity               : Sample(8),
+      darkExecutionInstructionOptional : Sample(1),
+      minimumOrderQuantity             : Sample(8) ]
+
+EncodeRfqCounterpartsGroup(message) ==
+    message.orderOrigin
+        \o message.orderPrice
+        \o message.lastTradedQuantity
+        \o message.darkExecutionInstructionOptional
+        \o message.minimumOrderQuantity
+
+DecodeRfqCounterpartsGroup(bytes) ==
+    LET orderOrigin == ReadBytes(bytes, 1) IN IF ~orderOrigin.ok THEN Fail ELSE
+    LET orderPrice == ReadBytes(orderOrigin.rest, 8) IN IF ~orderPrice.ok THEN Fail ELSE
+    LET lastTradedQuantity == ReadBytes(orderPrice.rest, 8) IN IF ~lastTradedQuantity.ok THEN Fail ELSE
+    LET darkExecutionInstructionOptional == ReadBytes(lastTradedQuantity.rest, 1) IN IF ~darkExecutionInstructionOptional.ok THEN Fail ELSE
+    LET minimumOrderQuantity == ReadBytes(darkExecutionInstructionOptional.rest, 8) IN IF ~minimumOrderQuantity.ok THEN Fail ELSE
+    Ok([ orderOrigin                      |-> orderOrigin.value,
+         orderPrice                       |-> orderPrice.value,
+         lastTradedQuantity               |-> lastTradedQuantity.value,
+         darkExecutionInstructionOptional |-> darkExecutionInstructionOptional.value,
+         minimumOrderQuantity             |-> minimumOrderQuantity.value ], minimumOrderQuantity.rest)
+
+ZeroRfqCounterpartsGroup ==
+    [ orderOrigin                      |-> [i \in 1 .. 1 |-> 0],
+      orderPrice                       |-> [i \in 1 .. 8 |-> 0],
+      lastTradedQuantity               |-> [i \in 1 .. 8 |-> 0],
+      darkExecutionInstructionOptional |-> [i \in 1 .. 1 |-> 0],
+      minimumOrderQuantity             |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Rfq Counterparts Group at zero, then each field in turn at the values it is checked at *)
+CheckedRfqCounterpartsGroup ==
+    { ZeroRfqCounterpartsGroup }
+        \cup { [ZeroRfqCounterpartsGroup EXCEPT !.orderOrigin = one] : one \in Sample(1) }
+        \cup { [ZeroRfqCounterpartsGroup EXCEPT !.orderPrice = one] : one \in Sample(8) }
+        \cup { [ZeroRfqCounterpartsGroup EXCEPT !.lastTradedQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroRfqCounterpartsGroup EXCEPT !.darkExecutionInstructionOptional = one] : one \in Sample(1) }
+        \cup { [ZeroRfqCounterpartsGroup EXCEPT !.minimumOrderQuantity = one] : one \in Sample(8) }
+
+(* A run of Rfq Counterparts Group, written one after another *)
+RECURSIVE EncodeRfqCounterpartsGroupList(_)
+EncodeRfqCounterpartsGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeRfqCounterpartsGroup(Head(messages)) \o EncodeRfqCounterpartsGroupList(Tail(messages))
+
+(* As many Rfq Counterparts Group as the field that counts them says *)
+RECURSIVE ReadRfqCounterpartsGroupList(_, _)
+ReadRfqCounterpartsGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeRfqCounterpartsGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadRfqCounterpartsGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Rfq Counterparts Group of each kind, for the lists that carry them *)
+OneRfqCounterpartsGroup == { ZeroRfqCounterpartsGroup }
+
+(***************************************************************************)
+(* Rfq Counterparts Groups                                                 *)
+(***************************************************************************)
+
+RfqCounterpartsGroups ==
+    [ blockLengthShort     : Sample(1),
+      rfqCounterpartsGroup : SampleLists(OneRfqCounterpartsGroup) ]
+
+EncodeRfqCounterpartsGroups(message) ==
+    message.blockLengthShort
+        \o EncodeUIntBE(Len(message.rfqCounterpartsGroup), 1)
+        \o EncodeRfqCounterpartsGroupList(message.rfqCounterpartsGroup)
+
+DecodeRfqCounterpartsGroups(bytes) ==
+    LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET rfqCounterpartsGroup == ReadRfqCounterpartsGroupList(numInGroup.rest, numInGroup.value) IN IF ~rfqCounterpartsGroup.ok THEN Fail ELSE
+    Ok([ blockLengthShort     |-> blockLengthShort.value,
+         rfqCounterpartsGroup |-> rfqCounterpartsGroup.value ], rfqCounterpartsGroup.rest)
+
+ZeroRfqCounterpartsGroups ==
+    [ blockLengthShort     |-> [i \in 1 .. 1 |-> 0],
+      rfqCounterpartsGroup |-> << >> ]
+
+(* Rfq Counterparts Groups at zero, then each field in turn at the values it is checked at *)
+CheckedRfqCounterpartsGroups ==
+    { ZeroRfqCounterpartsGroups }
+        \cup { [ZeroRfqCounterpartsGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroRfqCounterpartsGroups EXCEPT !.rfqCounterpartsGroup = one] : one \in SampleLists(OneRfqCounterpartsGroup) }
+
+(***************************************************************************)
+(* Rfq Audit Message                                                       *)
+(***************************************************************************)
+
+RfqAuditMessage ==
+    [ msgSeqNum             : Sample(4),
+      firmId                : Sample(8),
+      bookIn                : Sample(8),
+      bookOutTime           : Sample(8),
+      oegInFromMe           : Sample(8),
+      oegOutToMember        : Sample(8),
+      quoteReqId            : Sample(8),
+      symbolIndex           : Sample(4),
+      emm                   : Sample(1),
+      rfqCounterpartsGroups : RfqCounterpartsGroups ]
+
+EncodeRfqAuditMessage(message) ==
+    message.msgSeqNum
+        \o message.firmId
+        \o message.bookIn
+        \o message.bookOutTime
+        \o message.oegInFromMe
+        \o message.oegOutToMember
+        \o message.quoteReqId
+        \o message.symbolIndex
+        \o message.emm
+        \o EncodeRfqCounterpartsGroups(message.rfqCounterpartsGroups)
+
+DecodeRfqAuditMessage(bytes) ==
+    LET msgSeqNum == ReadBytes(bytes, 4) IN IF ~msgSeqNum.ok THEN Fail ELSE
+    LET firmId == ReadBytes(msgSeqNum.rest, 8) IN IF ~firmId.ok THEN Fail ELSE
+    LET bookIn == ReadBytes(firmId.rest, 8) IN IF ~bookIn.ok THEN Fail ELSE
+    LET bookOutTime == ReadBytes(bookIn.rest, 8) IN IF ~bookOutTime.ok THEN Fail ELSE
+    LET oegInFromMe == ReadBytes(bookOutTime.rest, 8) IN IF ~oegInFromMe.ok THEN Fail ELSE
+    LET oegOutToMember == ReadBytes(oegInFromMe.rest, 8) IN IF ~oegOutToMember.ok THEN Fail ELSE
+    LET quoteReqId == ReadBytes(oegOutToMember.rest, 8) IN IF ~quoteReqId.ok THEN Fail ELSE
+    LET symbolIndex == ReadBytes(quoteReqId.rest, 4) IN IF ~symbolIndex.ok THEN Fail ELSE
+    LET emm == ReadBytes(symbolIndex.rest, 1) IN IF ~emm.ok THEN Fail ELSE
+    LET rfqCounterpartsGroups == DecodeRfqCounterpartsGroups(emm.rest) IN IF ~rfqCounterpartsGroups.ok THEN Fail ELSE
+    Ok([ msgSeqNum             |-> msgSeqNum.value,
+         firmId                |-> firmId.value,
+         bookIn                |-> bookIn.value,
+         bookOutTime           |-> bookOutTime.value,
+         oegInFromMe           |-> oegInFromMe.value,
+         oegOutToMember        |-> oegOutToMember.value,
+         quoteReqId            |-> quoteReqId.value,
+         symbolIndex           |-> symbolIndex.value,
+         emm                   |-> emm.value,
+         rfqCounterpartsGroups |-> rfqCounterpartsGroups.value ], rfqCounterpartsGroups.rest)
+
+ZeroRfqAuditMessage ==
+    [ msgSeqNum             |-> [i \in 1 .. 4 |-> 0],
+      firmId                |-> [i \in 1 .. 8 |-> 0],
+      bookIn                |-> [i \in 1 .. 8 |-> 0],
+      bookOutTime           |-> [i \in 1 .. 8 |-> 0],
+      oegInFromMe           |-> [i \in 1 .. 8 |-> 0],
+      oegOutToMember        |-> [i \in 1 .. 8 |-> 0],
+      quoteReqId            |-> [i \in 1 .. 8 |-> 0],
+      symbolIndex           |-> [i \in 1 .. 4 |-> 0],
+      emm                   |-> [i \in 1 .. 1 |-> 0],
+      rfqCounterpartsGroups |-> ZeroRfqCounterpartsGroups ]
+
+(* Rfq Audit Message at zero, then each field in turn at the values it is checked at *)
+CheckedRfqAuditMessage ==
+    { ZeroRfqAuditMessage }
+        \cup { [ZeroRfqAuditMessage EXCEPT !.msgSeqNum = one] : one \in Sample(4) }
+        \cup { [ZeroRfqAuditMessage EXCEPT !.firmId = one] : one \in Sample(8) }
+        \cup { [ZeroRfqAuditMessage EXCEPT !.bookIn = one] : one \in Sample(8) }
+        \cup { [ZeroRfqAuditMessage EXCEPT !.bookOutTime = one] : one \in Sample(8) }
+        \cup { [ZeroRfqAuditMessage EXCEPT !.oegInFromMe = one] : one \in Sample(8) }
+        \cup { [ZeroRfqAuditMessage EXCEPT !.oegOutToMember = one] : one \in Sample(8) }
+        \cup { [ZeroRfqAuditMessage EXCEPT !.quoteReqId = one] : one \in Sample(8) }
+        \cup { [ZeroRfqAuditMessage EXCEPT !.symbolIndex = one] : one \in Sample(4) }
+        \cup { [ZeroRfqAuditMessage EXCEPT !.emm = one] : one \in Sample(1) }
+        \cup { [ZeroRfqAuditMessage EXCEPT !.rfqCounterpartsGroups = one] : one \in CheckedRfqCounterpartsGroups }
+
+(***************************************************************************)
 (* Logon Message: 19 bytes                                                 *)
 (***************************************************************************)
 
@@ -8629,6 +8829,7 @@ NewWholesaleOrderMessageCode == 64  \* 0x40
 WholesaleOrderAckMessageCode == 65  \* 0x41
 RequestForImpliedExecutionMessageCode == 66  \* 0x42
 CrossOrderMessageCode == 67  \* 0x43
+RfqAuditMessageCode == 72  \* 0x48
 LogonMessageCode == 100  \* 0x64
 LogonAckMessageCode == 101  \* 0x65
 LogonRejectMessageCode == 102  \* 0x66
@@ -8682,6 +8883,7 @@ Payload ==
         \cup [ tag : {WholesaleOrderAckMessageCode}, body : WholesaleOrderAckMessage ]
         \cup [ tag : {RequestForImpliedExecutionMessageCode}, body : RequestForImpliedExecutionMessage ]
         \cup [ tag : {CrossOrderMessageCode}, body : CrossOrderMessage ]
+        \cup [ tag : {RfqAuditMessageCode}, body : RfqAuditMessage ]
         \cup [ tag : {LogonMessageCode}, body : LogonMessage ]
         \cup [ tag : {LogonAckMessageCode}, body : LogonAckMessage ]
         \cup [ tag : {LogonRejectMessageCode}, body : LogonRejectMessage ]
@@ -8735,6 +8937,7 @@ EncodePayload(message) ==
       [] message.tag = WholesaleOrderAckMessageCode -> EncodeWholesaleOrderAckMessage(message.body)
       [] message.tag = RequestForImpliedExecutionMessageCode -> EncodeRequestForImpliedExecutionMessage(message.body)
       [] message.tag = CrossOrderMessageCode -> EncodeCrossOrderMessage(message.body)
+      [] message.tag = RfqAuditMessageCode -> EncodeRfqAuditMessage(message.body)
       [] message.tag = LogonMessageCode -> EncodeLogonMessage(message.body)
       [] message.tag = LogonAckMessageCode -> EncodeLogonAckMessage(message.body)
       [] message.tag = LogonRejectMessageCode -> EncodeLogonRejectMessage(message.body)
@@ -8789,6 +8992,7 @@ DecodePayload(tag, bytes) ==
               [] tag = WholesaleOrderAckMessageCode -> DecodeWholesaleOrderAckMessage(bytes)
               [] tag = RequestForImpliedExecutionMessageCode -> DecodeRequestForImpliedExecutionMessage(bytes)
               [] tag = CrossOrderMessageCode -> DecodeCrossOrderMessage(bytes)
+              [] tag = RfqAuditMessageCode -> DecodeRfqAuditMessage(bytes)
               [] tag = LogonMessageCode -> DecodeLogonMessage(bytes)
               [] tag = LogonAckMessageCode -> DecodeLogonAckMessage(bytes)
               [] tag = LogonRejectMessageCode -> DecodeLogonRejectMessage(bytes)
@@ -8847,6 +9051,7 @@ CheckedPayload ==
         \cup { [tag |-> WholesaleOrderAckMessageCode, body |-> one] : one \in CheckedWholesaleOrderAckMessage }
         \cup { [tag |-> RequestForImpliedExecutionMessageCode, body |-> one] : one \in CheckedRequestForImpliedExecutionMessage }
         \cup { [tag |-> CrossOrderMessageCode, body |-> one] : one \in CheckedCrossOrderMessage }
+        \cup { [tag |-> RfqAuditMessageCode, body |-> one] : one \in CheckedRfqAuditMessage }
         \cup { [tag |-> LogonMessageCode, body |-> one] : one \in CheckedLogonMessage }
         \cup { [tag |-> LogonAckMessageCode, body |-> one] : one \in CheckedLogonAckMessage }
         \cup { [tag |-> LogonRejectMessageCode, body |-> one] : one \in CheckedLogonRejectMessage }
@@ -8977,6 +9182,7 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> WholesaleOrderAckMessageCode, body |-> ZeroWholesaleOrderAckMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> RequestForImpliedExecutionMessageCode, body |-> ZeroRequestForImpliedExecutionMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> CrossOrderMessageCode, body |-> ZeroCrossOrderMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> RfqAuditMessageCode, body |-> ZeroRfqAuditMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> LogonMessageCode, body |-> ZeroLogonMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> LogonAckMessageCode, body |-> ZeroLogonAckMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> LogonRejectMessageCode, body |-> ZeroLogonRejectMessage]],
@@ -9938,6 +10144,30 @@ RoundTripCrossStrategyFieldsGroups ==
 RoundTripCrossOrderMessage ==
     \A message \in CheckedCrossOrderMessage :
         LET read == DecodeCrossOrderMessage(EncodeCrossOrderMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Rfq Counterparts Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripRfqCounterpartsGroup ==
+    \A message \in CheckedRfqCounterpartsGroup :
+        LET read == DecodeRfqCounterpartsGroup(EncodeRfqCounterpartsGroup(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Rfq Counterparts Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripRfqCounterpartsGroups ==
+    \A message \in CheckedRfqCounterpartsGroups :
+        LET read == DecodeRfqCounterpartsGroups(EncodeRfqCounterpartsGroups(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Rfq Audit Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripRfqAuditMessage ==
+    \A message \in CheckedRfqAuditMessage :
+        LET read == DecodeRfqAuditMessage(EncodeRfqAuditMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

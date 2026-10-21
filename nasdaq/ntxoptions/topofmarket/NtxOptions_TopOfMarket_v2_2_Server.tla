@@ -905,6 +905,8 @@ BestBidOrAskUpdateLongFormMessageCode == 66  \* "B"
 TradeReportMessageCode == 84  \* "T"
 BrokenTradeReportMessageCode == 88  \* "X"
 EndOfReplaySequenceMessageCode == 77  \* "M"
+BestBidOrAskUpdateShortFormMessageCode2 == 97  \* "a"
+BestBidOrAskUpdateLongFormMessageCode2 == 65  \* "A"
 
 SequencedMessage ==
     [ tag : {SystemEventMessageCode}, body : SystemEventMessage ]
@@ -917,6 +919,8 @@ SequencedMessage ==
         \cup [ tag : {TradeReportMessageCode}, body : TradeReportMessage ]
         \cup [ tag : {BrokenTradeReportMessageCode}, body : BrokenTradeReportMessage ]
         \cup [ tag : {EndOfReplaySequenceMessageCode}, body : EndOfReplaySequenceMessage ]
+        \cup [ tag : {BestBidOrAskUpdateShortFormMessageCode2}, body : BestBidOrAskUpdateShortFormMessage ]
+        \cup [ tag : {BestBidOrAskUpdateLongFormMessageCode2}, body : BestBidOrAskUpdateLongFormMessage ]
 
 EncodeSequencedMessage(message) ==
     CASE message.tag = SystemEventMessageCode -> EncodeSystemEventMessage(message.body)
@@ -929,6 +933,8 @@ EncodeSequencedMessage(message) ==
       [] message.tag = TradeReportMessageCode -> EncodeTradeReportMessage(message.body)
       [] message.tag = BrokenTradeReportMessageCode -> EncodeBrokenTradeReportMessage(message.body)
       [] message.tag = EndOfReplaySequenceMessageCode -> EncodeEndOfReplaySequenceMessage(message.body)
+      [] message.tag = BestBidOrAskUpdateShortFormMessageCode2 -> EncodeBestBidOrAskUpdateShortFormMessage(message.body)
+      [] message.tag = BestBidOrAskUpdateLongFormMessageCode2 -> EncodeBestBidOrAskUpdateLongFormMessage(message.body)
 
 DecodeSequencedMessage(tag, bytes) ==
     LET read ==
@@ -942,6 +948,8 @@ DecodeSequencedMessage(tag, bytes) ==
               [] tag = TradeReportMessageCode -> DecodeTradeReportMessage(bytes)
               [] tag = BrokenTradeReportMessageCode -> DecodeBrokenTradeReportMessage(bytes)
               [] tag = EndOfReplaySequenceMessageCode -> DecodeEndOfReplaySequenceMessage(bytes)
+              [] tag = BestBidOrAskUpdateShortFormMessageCode2 -> DecodeBestBidOrAskUpdateShortFormMessage(bytes)
+              [] tag = BestBidOrAskUpdateLongFormMessageCode2 -> DecodeBestBidOrAskUpdateLongFormMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -959,6 +967,8 @@ CheckedSequencedMessage ==
         \cup { [tag |-> TradeReportMessageCode, body |-> one] : one \in CheckedTradeReportMessage }
         \cup { [tag |-> BrokenTradeReportMessageCode, body |-> one] : one \in CheckedBrokenTradeReportMessage }
         \cup { [tag |-> EndOfReplaySequenceMessageCode, body |-> one] : one \in CheckedEndOfReplaySequenceMessage }
+        \cup { [tag |-> BestBidOrAskUpdateShortFormMessageCode2, body |-> one] : one \in CheckedBestBidOrAskUpdateShortFormMessage }
+        \cup { [tag |-> BestBidOrAskUpdateLongFormMessageCode2, body |-> one] : one \in CheckedBestBidOrAskUpdateLongFormMessage }
 
 (***************************************************************************)
 (* Sequenced Data Packet                                                   *)
