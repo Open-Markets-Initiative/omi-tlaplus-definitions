@@ -5,7 +5,6 @@
 
 | Division | [Protocol][Omi.Tmx.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Transport | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Tmx.Specifications] |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [2.1][Tmx.Mx.SolaMulticast.Hsvf.v2.1.Definition] |  | 1/23/2019 | 391 | [Active][Omi.Glossary.Deployment.Active] | [Beta][Omi.Glossary.Testing.Beta] | [pdf][Tmx.Mx.SolaMulticast.Hsvf.v2.1.Pdf] |
 | [Mx][Mx.Exchange] | [SolaOrderEntry][Tmx.Mx.SolaOrderEntry] | [Sail][Omi.Encoding.Sail] | 1.21 | [Firm][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Firm.Definition] [Exchange][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Exchange.Definition] | 6/18/2020 | 10603 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Url] - [pdf][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Pdf] |
 | [Tsx][Tsx.Exchange] | [GlobalFx][Tmx.Tsx.GlobalFx] | [Gfx][Omi.Encoding.Gfx] | [1.0][Tmx.Tsx.GlobalFx.Gfx.v1.0.Definition] |  | 5/20/2016 | 412 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.GlobalFx.Gfx.v1.0.Url] - [pdf][Tmx.Tsx.GlobalFx.Gfx.v1.0.Pdf] |
 | [Tsx][Tsx.Exchange] | [IndexFeed][Tmx.Tsx.IndexFeed] | [Qrtmd][Omi.Encoding.Qrtmd] | [1.19][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Definition] |  | 10/12/2021 | 388 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Url] - [pdf][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Pdf] |
@@ -32,22 +31,18 @@
 [Omi.Encoding.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Protocols/ReadMe.md "Encoding Directory"
 [Omi.Tmx.Protocol.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Tmx/Protocols "Tmx Protocol Directory"
 [Omi.Tmx.Specifications]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Tmx/Specifications "Tmx Specifications Directory"
-[Omi.Encoding.Hsvf]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Hsvf.md "Hsvf Encoding"
 [Omi.Encoding.Sail]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Sail.md "Sail Encoding"
 [Omi.Encoding.Gfx]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Gfx.md "Gfx Encoding"
 [Omi.Encoding.Qrtmd]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Qrtmd.md "Qrtmd Encoding"
 [Mx.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Tmx/Protocols/Mx "Tmx Mx"
 [Tsx.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Tmx/Protocols/Tsx "Tmx Tsx"
 [TsxAlpha.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Tmx/Protocols/TsxAlpha "Tmx TsxAlpha"
-[Tmx.Mx.SolaMulticast]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Mx/SolaMulticast.md "Sola Multicast"
 [Tmx.Mx.SolaOrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Mx/SolaOrderEntry.md "Sola Order Entry"
 [Tmx.Tsx.GlobalFx]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Tsx/GlobalFx.md "Global Fx Feed"
 [Tmx.Tsx.IndexFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Tsx/IndexFeed.md "Index Feed"
 [Tmx.Tsx.Level1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Tsx/Level1.md "Level 1"
 [Tmx.TsxAlpha.Level1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/TsxAlpha/Level1.md "Level 1"
 
-[Tmx.Mx.SolaMulticast.Hsvf.v2.1.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solamulticast/Mx_SolaMulticast_v2_1.tla "Tmx Mx SolaMulticast Hsvf v2.1 Tla Definition"
-[Tmx.Mx.SolaMulticast.Hsvf.v2.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/Mx.Sola.Multicast.Hsvf.v.2.1.pdf "TMX Group 2.1 Pdf"
 [Tmx.Mx.SolaOrderEntry.Sail.v1.21.Firm.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solaorderentry/Mx_SolaOrderEntry_v1_21_Firm.tla "Tmx Mx SolaOrderEntry Sail v1.21 Tla Definition"
 [Tmx.Mx.SolaOrderEntry.Sail.v1.21.Url]: https://www.tmxwebstore.com "TMX Group 1.21 Url"
 [Tmx.Mx.SolaOrderEntry.Sail.v1.21.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 1.21 Pdf"

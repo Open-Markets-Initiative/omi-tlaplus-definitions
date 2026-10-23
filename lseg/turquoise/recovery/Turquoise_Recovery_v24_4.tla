@@ -82,30 +82,6 @@ ReadUIntBE(bytes, width) ==
     THEN Fail
     ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
 
-(* The integer a text protocol writes as the characters of itself: a count of one is *)
-(* the character "1", which is the byte 49. Read by its digits, and written back *)
-(* zero filled to the width the field states, which is how such a field is filled. *)
-Digit == 48 .. 57
-
-RECURSIVE DecodeDigits(_)
-DecodeDigits(bytes) ==
-    IF bytes = << >>
-    THEN 0
-    ELSE DecodeDigits(SubSeq(bytes, 1, Len(bytes) - 1)) * 10 + (bytes[Len(bytes)] - 48)
-
-RECURSIVE EncodeDigits(_, _)
-EncodeDigits(value, width) ==
-    IF width = 0
-    THEN << >>
-    ELSE EncodeDigits(value \div 10, width - 1) \o <<48 + (value % 10)>>
-
-(* A field written as digits that holds anything else is no number, so it is not read: *)
-(* the value would not be what the bytes say, and would not write back as them. *)
-ReadDigits(bytes, width) ==
-    IF Len(bytes) < width \/ \E i \in 1 .. width : bytes[i] \notin Digit
-    THEN Fail
-    ELSE Ok(DecodeDigits(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
-
 (***************************************************************************)
 (* The values a field is checked at: zero, the spaces a text field is      *)
 (* padded with, and                                                        *)

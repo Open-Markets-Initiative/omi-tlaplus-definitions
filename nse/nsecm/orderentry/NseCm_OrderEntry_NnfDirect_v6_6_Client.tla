@@ -1331,6 +1331,7 @@ UpdateLocalDatabaseRequestMessageCode == 7300  \* 0x1c84
 TradeModificationCancellationStatusRequestMessageCode == 5792  \* 0x16a0
 UserUnlockRequestMessageCode == 5424  \* 0x1530
 UserOrderValueLimitUpdateInMessageCode == 5719  \* 0x1657
+SystemInformationRequestMessageCode == 1600  \* 0x640
 
 ClientMessagePayload ==
     [ tag : {BranchOrderValueLimitUpdateInMessageCode}, body : BranchOrderValueLimitUpdateInMessage ]
@@ -1354,6 +1355,7 @@ ClientMessagePayload ==
         \cup [ tag : {TradeModificationCancellationStatusRequestMessageCode}, body : TradeModificationCancellationStatusRequestMessage ]
         \cup [ tag : {UserUnlockRequestMessageCode}, body : UserUnlockRequestMessage ]
         \cup [ tag : {UserOrderValueLimitUpdateInMessageCode}, body : UserOrderValueLimitUpdateInMessage ]
+        \cup [ tag : {SystemInformationRequestMessageCode}, body : {[empty |-> 0]} ]
 
 EncodeClientMessagePayload(message) ==
     CASE message.tag = BranchOrderValueLimitUpdateInMessageCode -> EncodeBranchOrderValueLimitUpdateInMessage(message.body)
@@ -1377,6 +1379,7 @@ EncodeClientMessagePayload(message) ==
       [] message.tag = TradeModificationCancellationStatusRequestMessageCode -> EncodeTradeModificationCancellationStatusRequestMessage(message.body)
       [] message.tag = UserUnlockRequestMessageCode -> EncodeUserUnlockRequestMessage(message.body)
       [] message.tag = UserOrderValueLimitUpdateInMessageCode -> EncodeUserOrderValueLimitUpdateInMessage(message.body)
+      [] message.tag = SystemInformationRequestMessageCode -> << >>
 
 DecodeClientMessagePayload(tag, bytes) ==
     LET read ==
@@ -1401,6 +1404,7 @@ DecodeClientMessagePayload(tag, bytes) ==
               [] tag = TradeModificationCancellationStatusRequestMessageCode -> DecodeTradeModificationCancellationStatusRequestMessage(bytes)
               [] tag = UserUnlockRequestMessageCode -> DecodeUserUnlockRequestMessage(bytes)
               [] tag = UserOrderValueLimitUpdateInMessageCode -> DecodeUserOrderValueLimitUpdateInMessage(bytes)
+              [] tag = SystemInformationRequestMessageCode -> Ok([empty |-> 0], bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -1429,6 +1433,7 @@ CheckedClientMessagePayload ==
         \cup { [tag |-> TradeModificationCancellationStatusRequestMessageCode, body |-> one] : one \in CheckedTradeModificationCancellationStatusRequestMessage }
         \cup { [tag |-> UserUnlockRequestMessageCode, body |-> one] : one \in CheckedUserUnlockRequestMessage }
         \cup { [tag |-> UserOrderValueLimitUpdateInMessageCode, body |-> one] : one \in CheckedUserOrderValueLimitUpdateInMessage }
+        \cup { [tag |-> SystemInformationRequestMessageCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
 (* Client Direct Packet, framed by Packet Length                           *)
@@ -1570,7 +1575,8 @@ OneClientDirectPacket ==
       [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> UpdateLocalDatabaseRequestMessageCode, body |-> ZeroUpdateLocalDatabaseRequestMessage]],
       [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> TradeModificationCancellationStatusRequestMessageCode, body |-> ZeroTradeModificationCancellationStatusRequestMessage]],
       [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> UserUnlockRequestMessageCode, body |-> ZeroUserUnlockRequestMessage]],
-      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> UserOrderValueLimitUpdateInMessageCode, body |-> ZeroUserOrderValueLimitUpdateInMessage]] }
+      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> UserOrderValueLimitUpdateInMessageCode, body |-> ZeroUserOrderValueLimitUpdateInMessage]],
+      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> SystemInformationRequestMessageCode, body |-> [empty |-> 0]]] }
 
 (***************************************************************************)
 (* Client Packet                                                           *)
