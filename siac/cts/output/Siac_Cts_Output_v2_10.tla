@@ -1719,14 +1719,14 @@ CheckedTimestamp117 ==
 (***************************************************************************)
 
 CrossingSessionSummaryMessage ==
-    [ participantId                     : Sample(1),
-      timestamp1                        : Timestamp117,
-      messageId                         : Sample(1),
-      transactionId                     : Sample(4),
-      participantReferenceNumber        : Sample(8),
-      crossingSession1TotalTradesVolume : Sample(8),
-      crossingSession2DollarValue       : Sample(8),
-      crossingSession2TotalTradesVolume : Sample(8) ]
+    [ participantId                      : Sample(1),
+      timestamp1                         : Timestamp117,
+      messageId                          : Sample(1),
+      transactionId                      : Sample(4),
+      participantReferenceNumber         : Sample(8),
+      crossingSessionITotalTradesVolume  : Sample(8),
+      crossingSessionIiDollarValue       : Sample(8),
+      crossingSessionIiTotalTradesVolume : Sample(8) ]
 
 EncodeCrossingSessionSummaryMessage(message) ==
     message.participantId
@@ -1734,9 +1734,9 @@ EncodeCrossingSessionSummaryMessage(message) ==
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
-        \o message.crossingSession1TotalTradesVolume
-        \o message.crossingSession2DollarValue
-        \o message.crossingSession2TotalTradesVolume
+        \o message.crossingSessionITotalTradesVolume
+        \o message.crossingSessionIiDollarValue
+        \o message.crossingSessionIiTotalTradesVolume
 
 DecodeCrossingSessionSummaryMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
@@ -1744,27 +1744,27 @@ DecodeCrossingSessionSummaryMessage(bytes) ==
     LET messageId == ReadBytes(timestamp1.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
     LET transactionId == ReadBytes(messageId.rest, 4) IN IF ~transactionId.ok THEN Fail ELSE
     LET participantReferenceNumber == ReadBytes(transactionId.rest, 8) IN IF ~participantReferenceNumber.ok THEN Fail ELSE
-    LET crossingSession1TotalTradesVolume == ReadBytes(participantReferenceNumber.rest, 8) IN IF ~crossingSession1TotalTradesVolume.ok THEN Fail ELSE
-    LET crossingSession2DollarValue == ReadBytes(crossingSession1TotalTradesVolume.rest, 8) IN IF ~crossingSession2DollarValue.ok THEN Fail ELSE
-    LET crossingSession2TotalTradesVolume == ReadBytes(crossingSession2DollarValue.rest, 8) IN IF ~crossingSession2TotalTradesVolume.ok THEN Fail ELSE
-    Ok([ participantId                     |-> participantId.value,
-         timestamp1                        |-> timestamp1.value,
-         messageId                         |-> messageId.value,
-         transactionId                     |-> transactionId.value,
-         participantReferenceNumber        |-> participantReferenceNumber.value,
-         crossingSession1TotalTradesVolume |-> crossingSession1TotalTradesVolume.value,
-         crossingSession2DollarValue       |-> crossingSession2DollarValue.value,
-         crossingSession2TotalTradesVolume |-> crossingSession2TotalTradesVolume.value ], crossingSession2TotalTradesVolume.rest)
+    LET crossingSessionITotalTradesVolume == ReadBytes(participantReferenceNumber.rest, 8) IN IF ~crossingSessionITotalTradesVolume.ok THEN Fail ELSE
+    LET crossingSessionIiDollarValue == ReadBytes(crossingSessionITotalTradesVolume.rest, 8) IN IF ~crossingSessionIiDollarValue.ok THEN Fail ELSE
+    LET crossingSessionIiTotalTradesVolume == ReadBytes(crossingSessionIiDollarValue.rest, 8) IN IF ~crossingSessionIiTotalTradesVolume.ok THEN Fail ELSE
+    Ok([ participantId                      |-> participantId.value,
+         timestamp1                         |-> timestamp1.value,
+         messageId                          |-> messageId.value,
+         transactionId                      |-> transactionId.value,
+         participantReferenceNumber         |-> participantReferenceNumber.value,
+         crossingSessionITotalTradesVolume  |-> crossingSessionITotalTradesVolume.value,
+         crossingSessionIiDollarValue       |-> crossingSessionIiDollarValue.value,
+         crossingSessionIiTotalTradesVolume |-> crossingSessionIiTotalTradesVolume.value ], crossingSessionIiTotalTradesVolume.rest)
 
 ZeroCrossingSessionSummaryMessage ==
-    [ participantId                     |-> [i \in 1 .. 1 |-> 0],
-      timestamp1                        |-> ZeroTimestamp117,
-      messageId                         |-> [i \in 1 .. 1 |-> 0],
-      transactionId                     |-> [i \in 1 .. 4 |-> 0],
-      participantReferenceNumber        |-> [i \in 1 .. 8 |-> 0],
-      crossingSession1TotalTradesVolume |-> [i \in 1 .. 8 |-> 0],
-      crossingSession2DollarValue       |-> [i \in 1 .. 8 |-> 0],
-      crossingSession2TotalTradesVolume |-> [i \in 1 .. 8 |-> 0] ]
+    [ participantId                      |-> [i \in 1 .. 1 |-> 0],
+      timestamp1                         |-> ZeroTimestamp117,
+      messageId                          |-> [i \in 1 .. 1 |-> 0],
+      transactionId                      |-> [i \in 1 .. 4 |-> 0],
+      participantReferenceNumber         |-> [i \in 1 .. 8 |-> 0],
+      crossingSessionITotalTradesVolume  |-> [i \in 1 .. 8 |-> 0],
+      crossingSessionIiDollarValue       |-> [i \in 1 .. 8 |-> 0],
+      crossingSessionIiTotalTradesVolume |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Crossing Session Summary Message at zero, then each field in turn at the values it is checked at *)
 CheckedCrossingSessionSummaryMessage ==
@@ -1774,15 +1774,15 @@ CheckedCrossingSessionSummaryMessage ==
         \cup { [ZeroCrossingSessionSummaryMessage EXCEPT !.messageId = one] : one \in Sample(1) }
         \cup { [ZeroCrossingSessionSummaryMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
         \cup { [ZeroCrossingSessionSummaryMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
-        \cup { [ZeroCrossingSessionSummaryMessage EXCEPT !.crossingSession1TotalTradesVolume = one] : one \in Sample(8) }
-        \cup { [ZeroCrossingSessionSummaryMessage EXCEPT !.crossingSession2DollarValue = one] : one \in Sample(8) }
-        \cup { [ZeroCrossingSessionSummaryMessage EXCEPT !.crossingSession2TotalTradesVolume = one] : one \in Sample(8) }
+        \cup { [ZeroCrossingSessionSummaryMessage EXCEPT !.crossingSessionITotalTradesVolume = one] : one \in Sample(8) }
+        \cup { [ZeroCrossingSessionSummaryMessage EXCEPT !.crossingSessionIiDollarValue = one] : one \in Sample(8) }
+        \cup { [ZeroCrossingSessionSummaryMessage EXCEPT !.crossingSessionIiTotalTradesVolume = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Market Status Message Payload, selected by Market Status Message Type   *)
 (***************************************************************************)
 
-MarketWideCircuitBreakerDeclineLevelStatusMessageCode == 77  \* "M"
+MarketWideCircuitBreakerDeclineLevelStatusMessageCode == 75  \* "K"
 MarketWideCircuitBreakerStatusMessageCode == 76  \* "L"
 ApproximateAdjustedVolumeMarketCenterMessageCode == 78  \* "N"
 FractionalApproximateAdjustedVolumeMarketCenterMessageCode == 86  \* "V"

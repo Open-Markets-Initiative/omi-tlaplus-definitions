@@ -5,11 +5,11 @@
 
 | Division | [Protocol][Omi.Tmx.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Transport | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Tmx.Specifications] |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| [Mx][Mx.Exchange] | [SolaOrderEntry][Tmx.Mx.SolaOrderEntry] | [Sail][Omi.Encoding.Sail] | 1.21 | [Firm][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Firm.Definition] [Exchange][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Exchange.Definition] | 6/18/2020 | 10603 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Url] - [pdf][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Pdf] |
-| [Tsx][Tsx.Exchange] | [GlobalFx][Tmx.Tsx.GlobalFx] | [Gfx][Omi.Encoding.Gfx] | [1.0][Tmx.Tsx.GlobalFx.Gfx.v1.0.Definition] |  | 5/20/2016 | 412 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.GlobalFx.Gfx.v1.0.Url] - [pdf][Tmx.Tsx.GlobalFx.Gfx.v1.0.Pdf] |
-| [Tsx][Tsx.Exchange] | [IndexFeed][Tmx.Tsx.IndexFeed] | [Qrtmd][Omi.Encoding.Qrtmd] | [1.19][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Definition] |  | 10/12/2021 | 388 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Url] - [pdf][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Pdf] |
-| [Tsx][Tsx.Exchange] | [Level1][Tmx.Tsx.Level1] | [Qrtmd][Omi.Encoding.Qrtmd] | [2.8][Tmx.Tsx.Level1.Qrtmd.v2.8.Definition] |  | 8/10/2021 | 1426 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.Level1.Qrtmd.v2.8.Url] - [pdf][Tmx.Tsx.Level1.Qrtmd.v2.8.Pdf] |
-| [TsxAlpha][TsxAlpha.Exchange] | [Level1][Tmx.TsxAlpha.Level1] | [Qrtmd][Omi.Encoding.Qrtmd] | [2.1][Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Definition] |  | 10/20/2020 | 963 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Url] - [pdf][Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Pdf] |
+| [Mx][Mx.Exchange] | [SolaOrderEntry][Tmx.Mx.SolaOrderEntry] | [Sail][Omi.Encoding.Sail] | 1.21 | [Firm][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Firm.Definition] [Exchange][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Exchange.Definition] | 6/18/2020 | 10603 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Url] |
+| [Tsx][Tsx.Exchange] | [GlobalFx][Tmx.Tsx.GlobalFx] | [Gfx][Omi.Encoding.Gfx] | [1.0][Tmx.Tsx.GlobalFx.Gfx.v1.0.Definition] |  | 5/20/2016 | 412 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.GlobalFx.Gfx.v1.0.Url] |
+| [Tsx][Tsx.Exchange] | [IndexFeed][Tmx.Tsx.IndexFeed] | [Qrtmd][Omi.Encoding.Qrtmd] | [1.19][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Definition] |  | 10/12/2021 | 388 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Url] |
+| [Tsx][Tsx.Exchange] | [Level1][Tmx.Tsx.Level1] | [Qrtmd][Omi.Encoding.Qrtmd] | [2.8][Tmx.Tsx.Level1.Qrtmd.v2.8.Definition] |  | 8/10/2021 | 1426 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.Level1.Qrtmd.v2.8.Url] |
+| [TsxAlpha][TsxAlpha.Exchange] | [Level1][Tmx.TsxAlpha.Level1] | [Qrtmd][Omi.Encoding.Qrtmd] | [2.1][Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Definition] |  | 10/20/2020 | 963 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Url] |
 
 
 <p align="center"><a href="https://www.tmx.com/" title="TMX Group Website"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Website.png" alt="Website" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/company/tmx-group" title="TMX Group on LinkedIn"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/LinkedIn.png" alt="LinkedIn" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://en.wikipedia.org/wiki/TMX_Group" title="TMX Group on Wikipedia"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Wikipedia.png" alt="Wikipedia" width="32" height="32"></a></p>
@@ -44,18 +44,13 @@
 [Tmx.TsxAlpha.Level1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/TsxAlpha/Level1.md "Level 1"
 
 [Tmx.Mx.SolaOrderEntry.Sail.v1.21.Firm.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solaorderentry/Mx_SolaOrderEntry_v1_21_Firm.tla "Tmx Mx SolaOrderEntry Sail v1.21 Tla Definition"
-[Tmx.Mx.SolaOrderEntry.Sail.v1.21.Url]: https://www.tmxwebstore.com "TMX Group 1.21 Url"
-[Tmx.Mx.SolaOrderEntry.Sail.v1.21.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 1.21 Pdf"
+[Tmx.Mx.SolaOrderEntry.Sail.v1.21.Url]: https://www.tmxwebstore.com/products/mx-order-entry "TMX Group 1.21 Url"
 [Tmx.Mx.SolaOrderEntry.Sail.v1.21.Exchange.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solaorderentry/Mx_SolaOrderEntry_v1_21_Exchange.tla "Tmx Mx SolaOrderEntry Sail v1.21 Tla Definition"
 [Tmx.Tsx.GlobalFx.Gfx.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/tsx/globalfx/Tsx_GlobalFx_v1_0.tla "Tmx Tsx GlobalFx Gfx v1.0 Tla Definition"
-[Tmx.Tsx.GlobalFx.Gfx.v1.0.Url]: https://www.tmx.com/market-data "TMX Group 1.0 Url"
-[Tmx.Tsx.GlobalFx.Gfx.v1.0.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 1.0 Pdf"
+[Tmx.Tsx.GlobalFx.Gfx.v1.0.Url]: https://www.tmxwebstore.com/products/global-fx "TMX Group 1.0 Url"
 [Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/tsx/indexfeed/Tsx_IndexFeed_v1_19.tla "Tmx Tsx IndexFeed Qrtmd v1.19 Tla Definition"
-[Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Url]: https://www.tmxwebstore.com/ "TMX Group 1.19 Url"
-[Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 1.19 Pdf"
+[Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Url]: https://www.tmxwebstore.com/products/qrtmd "TMX Group 1.19 Url"
 [Tmx.Tsx.Level1.Qrtmd.v2.8.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/tsx/level1/Tsx_Level1_v2_8.tla "Tmx Tsx Level1 Qrtmd v2.8 Tla Definition"
-[Tmx.Tsx.Level1.Qrtmd.v2.8.Url]: https://www.tmxwebstore.com/ "TMX Group 2.8 Url"
-[Tmx.Tsx.Level1.Qrtmd.v2.8.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 2.8 Pdf"
+[Tmx.Tsx.Level1.Qrtmd.v2.8.Url]: https://www.tmxwebstore.com/products/qrtmd "TMX Group 2.8 Url"
 [Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/tsxalpha/level1/TsxAlpha_Level1_v2_1.tla "Tmx TsxAlpha Level1 Qrtmd v2.1 Tla Definition"
-[Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Url]: https://www.tmxwebstore.com/ "TMX Group 2.1 Url"
-[Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Specifications/ "TMX Group 2.1 Pdf"
+[Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Url]: https://www.tmxwebstore.com/products/qrtmd "TMX Group 2.1 Url"

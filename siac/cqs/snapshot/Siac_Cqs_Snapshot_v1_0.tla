@@ -633,7 +633,7 @@ CheckedSnapshotMessage ==
 (* Category Payload, selected by Message Category                          *)
 (***************************************************************************)
 
-SnapshotMessageCode == 75  \* "K"
+SnapshotMessageCode == 82  \* "R"
 
 CategoryPayload ==
     [ tag : {SnapshotMessageCode}, body : SnapshotMessage ]

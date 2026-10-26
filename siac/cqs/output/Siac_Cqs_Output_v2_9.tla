@@ -380,24 +380,24 @@ CheckedParticipantTimestamp4 ==
         \cup { [ZeroParticipantTimestamp4 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Start Of Test Cycle Message: 22 bytes                                   *)
+(* Finra Open Message: 22 bytes                                            *)
 (***************************************************************************)
 
-StartOfTestCycleMessage ==
+FinraOpenMessage ==
     [ participantId              : Sample(1),
       participantTimestamp       : ParticipantTimestamp4,
       messageId                  : Sample(1),
       transactionId              : Sample(4),
       participantReferenceNumber : Sample(8) ]
 
-EncodeStartOfTestCycleMessage(message) ==
+EncodeFinraOpenMessage(message) ==
     message.participantId
         \o EncodeParticipantTimestamp4(message.participantTimestamp)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
 
-DecodeStartOfTestCycleMessage(bytes) ==
+DecodeFinraOpenMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
     LET participantTimestamp == DecodeParticipantTimestamp4(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
     LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
@@ -409,21 +409,21 @@ DecodeStartOfTestCycleMessage(bytes) ==
          transactionId              |-> transactionId.value,
          participantReferenceNumber |-> participantReferenceNumber.value ], participantReferenceNumber.rest)
 
-ZeroStartOfTestCycleMessage ==
+ZeroFinraOpenMessage ==
     [ participantId              |-> [i \in 1 .. 1 |-> 0],
       participantTimestamp       |-> ZeroParticipantTimestamp4,
       messageId                  |-> [i \in 1 .. 1 |-> 0],
       transactionId              |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Start Of Test Cycle Message at zero, then each field in turn at the values it is checked at *)
-CheckedStartOfTestCycleMessage ==
-    { ZeroStartOfTestCycleMessage }
-        \cup { [ZeroStartOfTestCycleMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroStartOfTestCycleMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp4 }
-        \cup { [ZeroStartOfTestCycleMessage EXCEPT !.messageId = one] : one \in Sample(1) }
-        \cup { [ZeroStartOfTestCycleMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
-        \cup { [ZeroStartOfTestCycleMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
+(* Finra Open Message at zero, then each field in turn at the values it is checked at *)
+CheckedFinraOpenMessage ==
+    { ZeroFinraOpenMessage }
+        \cup { [ZeroFinraOpenMessage EXCEPT !.participantId = one] : one \in Sample(1) }
+        \cup { [ZeroFinraOpenMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp4 }
+        \cup { [ZeroFinraOpenMessage EXCEPT !.messageId = one] : one \in Sample(1) }
+        \cup { [ZeroFinraOpenMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
+        \cup { [ZeroFinraOpenMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Participant Timestamp: 8 bytes                                          *)
@@ -454,24 +454,24 @@ CheckedParticipantTimestamp5 ==
         \cup { [ZeroParticipantTimestamp5 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* End Of Test Cycle Message: 22 bytes                                     *)
+(* Disaster Recovery Data Center Activation Message: 22 bytes              *)
 (***************************************************************************)
 
-EndOfTestCycleMessage ==
+DisasterRecoveryDataCenterActivationMessage ==
     [ participantId              : Sample(1),
       participantTimestamp       : ParticipantTimestamp5,
       messageId                  : Sample(1),
       transactionId              : Sample(4),
       participantReferenceNumber : Sample(8) ]
 
-EncodeEndOfTestCycleMessage(message) ==
+EncodeDisasterRecoveryDataCenterActivationMessage(message) ==
     message.participantId
         \o EncodeParticipantTimestamp5(message.participantTimestamp)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
 
-DecodeEndOfTestCycleMessage(bytes) ==
+DecodeDisasterRecoveryDataCenterActivationMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
     LET participantTimestamp == DecodeParticipantTimestamp5(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
     LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
@@ -483,21 +483,21 @@ DecodeEndOfTestCycleMessage(bytes) ==
          transactionId              |-> transactionId.value,
          participantReferenceNumber |-> participantReferenceNumber.value ], participantReferenceNumber.rest)
 
-ZeroEndOfTestCycleMessage ==
+ZeroDisasterRecoveryDataCenterActivationMessage ==
     [ participantId              |-> [i \in 1 .. 1 |-> 0],
       participantTimestamp       |-> ZeroParticipantTimestamp5,
       messageId                  |-> [i \in 1 .. 1 |-> 0],
       transactionId              |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
 
-(* End Of Test Cycle Message at zero, then each field in turn at the values it is checked at *)
-CheckedEndOfTestCycleMessage ==
-    { ZeroEndOfTestCycleMessage }
-        \cup { [ZeroEndOfTestCycleMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroEndOfTestCycleMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp5 }
-        \cup { [ZeroEndOfTestCycleMessage EXCEPT !.messageId = one] : one \in Sample(1) }
-        \cup { [ZeroEndOfTestCycleMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
-        \cup { [ZeroEndOfTestCycleMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
+(* Disaster Recovery Data Center Activation Message at zero, then each field in turn at the values it is checked at *)
+CheckedDisasterRecoveryDataCenterActivationMessage ==
+    { ZeroDisasterRecoveryDataCenterActivationMessage }
+        \cup { [ZeroDisasterRecoveryDataCenterActivationMessage EXCEPT !.participantId = one] : one \in Sample(1) }
+        \cup { [ZeroDisasterRecoveryDataCenterActivationMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp5 }
+        \cup { [ZeroDisasterRecoveryDataCenterActivationMessage EXCEPT !.messageId = one] : one \in Sample(1) }
+        \cup { [ZeroDisasterRecoveryDataCenterActivationMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
+        \cup { [ZeroDisasterRecoveryDataCenterActivationMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Participant Timestamp: 8 bytes                                          *)
@@ -528,24 +528,24 @@ CheckedParticipantTimestamp6 ==
         \cup { [ZeroParticipantTimestamp6 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Finra Open Message: 22 bytes                                            *)
+(* Line Integrity Message: 22 bytes                                        *)
 (***************************************************************************)
 
-FinraOpenMessage ==
+LineIntegrityMessage ==
     [ participantId              : Sample(1),
       participantTimestamp       : ParticipantTimestamp6,
       messageId                  : Sample(1),
       transactionId              : Sample(4),
       participantReferenceNumber : Sample(8) ]
 
-EncodeFinraOpenMessage(message) ==
+EncodeLineIntegrityMessage(message) ==
     message.participantId
         \o EncodeParticipantTimestamp6(message.participantTimestamp)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
 
-DecodeFinraOpenMessage(bytes) ==
+DecodeLineIntegrityMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
     LET participantTimestamp == DecodeParticipantTimestamp6(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
     LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
@@ -557,21 +557,21 @@ DecodeFinraOpenMessage(bytes) ==
          transactionId              |-> transactionId.value,
          participantReferenceNumber |-> participantReferenceNumber.value ], participantReferenceNumber.rest)
 
-ZeroFinraOpenMessage ==
+ZeroLineIntegrityMessage ==
     [ participantId              |-> [i \in 1 .. 1 |-> 0],
       participantTimestamp       |-> ZeroParticipantTimestamp6,
       messageId                  |-> [i \in 1 .. 1 |-> 0],
       transactionId              |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Finra Open Message at zero, then each field in turn at the values it is checked at *)
-CheckedFinraOpenMessage ==
-    { ZeroFinraOpenMessage }
-        \cup { [ZeroFinraOpenMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroFinraOpenMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp6 }
-        \cup { [ZeroFinraOpenMessage EXCEPT !.messageId = one] : one \in Sample(1) }
-        \cup { [ZeroFinraOpenMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
-        \cup { [ZeroFinraOpenMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
+(* Line Integrity Message at zero, then each field in turn at the values it is checked at *)
+CheckedLineIntegrityMessage ==
+    { ZeroLineIntegrityMessage }
+        \cup { [ZeroLineIntegrityMessage EXCEPT !.participantId = one] : one \in Sample(1) }
+        \cup { [ZeroLineIntegrityMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp6 }
+        \cup { [ZeroLineIntegrityMessage EXCEPT !.messageId = one] : one \in Sample(1) }
+        \cup { [ZeroLineIntegrityMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
+        \cup { [ZeroLineIntegrityMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Participant Timestamp: 8 bytes                                          *)
@@ -602,24 +602,24 @@ CheckedParticipantTimestamp7 ==
         \cup { [ZeroParticipantTimestamp7 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Disaster Recovery Data Center Activation Message: 22 bytes              *)
+(* End Of Day Message: 22 bytes                                            *)
 (***************************************************************************)
 
-DisasterRecoveryDataCenterActivationMessage ==
+EndOfDayMessage ==
     [ participantId              : Sample(1),
       participantTimestamp       : ParticipantTimestamp7,
       messageId                  : Sample(1),
       transactionId              : Sample(4),
       participantReferenceNumber : Sample(8) ]
 
-EncodeDisasterRecoveryDataCenterActivationMessage(message) ==
+EncodeEndOfDayMessage(message) ==
     message.participantId
         \o EncodeParticipantTimestamp7(message.participantTimestamp)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
 
-DecodeDisasterRecoveryDataCenterActivationMessage(bytes) ==
+DecodeEndOfDayMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
     LET participantTimestamp == DecodeParticipantTimestamp7(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
     LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
@@ -631,157 +631,9 @@ DecodeDisasterRecoveryDataCenterActivationMessage(bytes) ==
          transactionId              |-> transactionId.value,
          participantReferenceNumber |-> participantReferenceNumber.value ], participantReferenceNumber.rest)
 
-ZeroDisasterRecoveryDataCenterActivationMessage ==
-    [ participantId              |-> [i \in 1 .. 1 |-> 0],
-      participantTimestamp       |-> ZeroParticipantTimestamp7,
-      messageId                  |-> [i \in 1 .. 1 |-> 0],
-      transactionId              |-> [i \in 1 .. 4 |-> 0],
-      participantReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
-
-(* Disaster Recovery Data Center Activation Message at zero, then each field in turn at the values it is checked at *)
-CheckedDisasterRecoveryDataCenterActivationMessage ==
-    { ZeroDisasterRecoveryDataCenterActivationMessage }
-        \cup { [ZeroDisasterRecoveryDataCenterActivationMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroDisasterRecoveryDataCenterActivationMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp7 }
-        \cup { [ZeroDisasterRecoveryDataCenterActivationMessage EXCEPT !.messageId = one] : one \in Sample(1) }
-        \cup { [ZeroDisasterRecoveryDataCenterActivationMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
-        \cup { [ZeroDisasterRecoveryDataCenterActivationMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
-
-(***************************************************************************)
-(* Participant Timestamp: 8 bytes                                          *)
-(***************************************************************************)
-
-ParticipantTimestamp8 ==
-    [ seconds     : Sample(4),
-      nanoseconds : Sample(4) ]
-
-EncodeParticipantTimestamp8(message) ==
-    message.seconds
-        \o message.nanoseconds
-
-DecodeParticipantTimestamp8(bytes) ==
-    LET seconds == ReadBytes(bytes, 4) IN IF ~seconds.ok THEN Fail ELSE
-    LET nanoseconds == ReadBytes(seconds.rest, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
-    Ok([ seconds     |-> seconds.value,
-         nanoseconds |-> nanoseconds.value ], nanoseconds.rest)
-
-ZeroParticipantTimestamp8 ==
-    [ seconds     |-> [i \in 1 .. 4 |-> 0],
-      nanoseconds |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Participant Timestamp at zero, then each field in turn at the values it is checked at *)
-CheckedParticipantTimestamp8 ==
-    { ZeroParticipantTimestamp8 }
-        \cup { [ZeroParticipantTimestamp8 EXCEPT !.seconds = one] : one \in Sample(4) }
-        \cup { [ZeroParticipantTimestamp8 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* Line Integrity Message: 22 bytes                                        *)
-(***************************************************************************)
-
-LineIntegrityMessage ==
-    [ participantId              : Sample(1),
-      participantTimestamp       : ParticipantTimestamp8,
-      messageId                  : Sample(1),
-      transactionId              : Sample(4),
-      participantReferenceNumber : Sample(8) ]
-
-EncodeLineIntegrityMessage(message) ==
-    message.participantId
-        \o EncodeParticipantTimestamp8(message.participantTimestamp)
-        \o message.messageId
-        \o message.transactionId
-        \o message.participantReferenceNumber
-
-DecodeLineIntegrityMessage(bytes) ==
-    LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
-    LET participantTimestamp == DecodeParticipantTimestamp8(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
-    LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
-    LET transactionId == ReadBytes(messageId.rest, 4) IN IF ~transactionId.ok THEN Fail ELSE
-    LET participantReferenceNumber == ReadBytes(transactionId.rest, 8) IN IF ~participantReferenceNumber.ok THEN Fail ELSE
-    Ok([ participantId              |-> participantId.value,
-         participantTimestamp       |-> participantTimestamp.value,
-         messageId                  |-> messageId.value,
-         transactionId              |-> transactionId.value,
-         participantReferenceNumber |-> participantReferenceNumber.value ], participantReferenceNumber.rest)
-
-ZeroLineIntegrityMessage ==
-    [ participantId              |-> [i \in 1 .. 1 |-> 0],
-      participantTimestamp       |-> ZeroParticipantTimestamp8,
-      messageId                  |-> [i \in 1 .. 1 |-> 0],
-      transactionId              |-> [i \in 1 .. 4 |-> 0],
-      participantReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
-
-(* Line Integrity Message at zero, then each field in turn at the values it is checked at *)
-CheckedLineIntegrityMessage ==
-    { ZeroLineIntegrityMessage }
-        \cup { [ZeroLineIntegrityMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroLineIntegrityMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp8 }
-        \cup { [ZeroLineIntegrityMessage EXCEPT !.messageId = one] : one \in Sample(1) }
-        \cup { [ZeroLineIntegrityMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
-        \cup { [ZeroLineIntegrityMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
-
-(***************************************************************************)
-(* Participant Timestamp: 8 bytes                                          *)
-(***************************************************************************)
-
-ParticipantTimestamp9 ==
-    [ seconds     : Sample(4),
-      nanoseconds : Sample(4) ]
-
-EncodeParticipantTimestamp9(message) ==
-    message.seconds
-        \o message.nanoseconds
-
-DecodeParticipantTimestamp9(bytes) ==
-    LET seconds == ReadBytes(bytes, 4) IN IF ~seconds.ok THEN Fail ELSE
-    LET nanoseconds == ReadBytes(seconds.rest, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
-    Ok([ seconds     |-> seconds.value,
-         nanoseconds |-> nanoseconds.value ], nanoseconds.rest)
-
-ZeroParticipantTimestamp9 ==
-    [ seconds     |-> [i \in 1 .. 4 |-> 0],
-      nanoseconds |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Participant Timestamp at zero, then each field in turn at the values it is checked at *)
-CheckedParticipantTimestamp9 ==
-    { ZeroParticipantTimestamp9 }
-        \cup { [ZeroParticipantTimestamp9 EXCEPT !.seconds = one] : one \in Sample(4) }
-        \cup { [ZeroParticipantTimestamp9 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
-
-(***************************************************************************)
-(* End Of Day Message: 22 bytes                                            *)
-(***************************************************************************)
-
-EndOfDayMessage ==
-    [ participantId              : Sample(1),
-      participantTimestamp       : ParticipantTimestamp9,
-      messageId                  : Sample(1),
-      transactionId              : Sample(4),
-      participantReferenceNumber : Sample(8) ]
-
-EncodeEndOfDayMessage(message) ==
-    message.participantId
-        \o EncodeParticipantTimestamp9(message.participantTimestamp)
-        \o message.messageId
-        \o message.transactionId
-        \o message.participantReferenceNumber
-
-DecodeEndOfDayMessage(bytes) ==
-    LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
-    LET participantTimestamp == DecodeParticipantTimestamp9(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
-    LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
-    LET transactionId == ReadBytes(messageId.rest, 4) IN IF ~transactionId.ok THEN Fail ELSE
-    LET participantReferenceNumber == ReadBytes(transactionId.rest, 8) IN IF ~participantReferenceNumber.ok THEN Fail ELSE
-    Ok([ participantId              |-> participantId.value,
-         participantTimestamp       |-> participantTimestamp.value,
-         messageId                  |-> messageId.value,
-         transactionId              |-> transactionId.value,
-         participantReferenceNumber |-> participantReferenceNumber.value ], participantReferenceNumber.rest)
-
 ZeroEndOfDayMessage ==
     [ participantId              |-> [i \in 1 .. 1 |-> 0],
-      participantTimestamp       |-> ZeroParticipantTimestamp9,
+      participantTimestamp       |-> ZeroParticipantTimestamp7,
       messageId                  |-> [i \in 1 .. 1 |-> 0],
       transactionId              |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
@@ -790,7 +642,7 @@ ZeroEndOfDayMessage ==
 CheckedEndOfDayMessage ==
     { ZeroEndOfDayMessage }
         \cup { [ZeroEndOfDayMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp9 }
+        \cup { [ZeroEndOfDayMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp7 }
         \cup { [ZeroEndOfDayMessage EXCEPT !.messageId = one] : one \in Sample(1) }
         \cup { [ZeroEndOfDayMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
         \cup { [ZeroEndOfDayMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
@@ -802,8 +654,6 @@ CheckedEndOfDayMessage ==
 StartOfDayMessageCode == 65  \* "A"
 FinraCloseMessageCode == 67  \* "C"
 ResetBlockSequenceNumberMessageCode == 76  \* "L"
-StartOfTestCycleMessageCode == 77  \* "M"
-EndOfTestCycleMessageCode == 78  \* "N"
 FinraOpenMessageCode == 79  \* "O"
 DisasterRecoveryDataCenterActivationMessageCode == 80  \* "P"
 LineIntegrityMessageCode == 84  \* "T"
@@ -813,8 +663,6 @@ ControlMessagePayload ==
     [ tag : {StartOfDayMessageCode}, body : StartOfDayMessage ]
         \cup [ tag : {FinraCloseMessageCode}, body : FinraCloseMessage ]
         \cup [ tag : {ResetBlockSequenceNumberMessageCode}, body : ResetBlockSequenceNumberMessage ]
-        \cup [ tag : {StartOfTestCycleMessageCode}, body : StartOfTestCycleMessage ]
-        \cup [ tag : {EndOfTestCycleMessageCode}, body : EndOfTestCycleMessage ]
         \cup [ tag : {FinraOpenMessageCode}, body : FinraOpenMessage ]
         \cup [ tag : {DisasterRecoveryDataCenterActivationMessageCode}, body : DisasterRecoveryDataCenterActivationMessage ]
         \cup [ tag : {LineIntegrityMessageCode}, body : LineIntegrityMessage ]
@@ -824,8 +672,6 @@ EncodeControlMessagePayload(message) ==
     CASE message.tag = StartOfDayMessageCode -> EncodeStartOfDayMessage(message.body)
       [] message.tag = FinraCloseMessageCode -> EncodeFinraCloseMessage(message.body)
       [] message.tag = ResetBlockSequenceNumberMessageCode -> EncodeResetBlockSequenceNumberMessage(message.body)
-      [] message.tag = StartOfTestCycleMessageCode -> EncodeStartOfTestCycleMessage(message.body)
-      [] message.tag = EndOfTestCycleMessageCode -> EncodeEndOfTestCycleMessage(message.body)
       [] message.tag = FinraOpenMessageCode -> EncodeFinraOpenMessage(message.body)
       [] message.tag = DisasterRecoveryDataCenterActivationMessageCode -> EncodeDisasterRecoveryDataCenterActivationMessage(message.body)
       [] message.tag = LineIntegrityMessageCode -> EncodeLineIntegrityMessage(message.body)
@@ -836,8 +682,6 @@ DecodeControlMessagePayload(tag, bytes) ==
             CASE tag = StartOfDayMessageCode -> DecodeStartOfDayMessage(bytes)
               [] tag = FinraCloseMessageCode -> DecodeFinraCloseMessage(bytes)
               [] tag = ResetBlockSequenceNumberMessageCode -> DecodeResetBlockSequenceNumberMessage(bytes)
-              [] tag = StartOfTestCycleMessageCode -> DecodeStartOfTestCycleMessage(bytes)
-              [] tag = EndOfTestCycleMessageCode -> DecodeEndOfTestCycleMessage(bytes)
               [] tag = FinraOpenMessageCode -> DecodeFinraOpenMessage(bytes)
               [] tag = DisasterRecoveryDataCenterActivationMessageCode -> DecodeDisasterRecoveryDataCenterActivationMessage(bytes)
               [] tag = LineIntegrityMessageCode -> DecodeLineIntegrityMessage(bytes)
@@ -852,8 +696,6 @@ CheckedControlMessagePayload ==
     { [tag |-> StartOfDayMessageCode, body |-> one] : one \in CheckedStartOfDayMessage }
         \cup { [tag |-> FinraCloseMessageCode, body |-> one] : one \in CheckedFinraCloseMessage }
         \cup { [tag |-> ResetBlockSequenceNumberMessageCode, body |-> one] : one \in CheckedResetBlockSequenceNumberMessage }
-        \cup { [tag |-> StartOfTestCycleMessageCode, body |-> one] : one \in CheckedStartOfTestCycleMessage }
-        \cup { [tag |-> EndOfTestCycleMessageCode, body |-> one] : one \in CheckedEndOfTestCycleMessage }
         \cup { [tag |-> FinraOpenMessageCode, body |-> one] : one \in CheckedFinraOpenMessage }
         \cup { [tag |-> DisasterRecoveryDataCenterActivationMessageCode, body |-> one] : one \in CheckedDisasterRecoveryDataCenterActivationMessage }
         \cup { [tag |-> LineIntegrityMessageCode, body |-> one] : one \in CheckedLineIntegrityMessage }
@@ -887,29 +729,29 @@ CheckedControlMessage ==
 (* Participant Timestamp: 8 bytes                                          *)
 (***************************************************************************)
 
-ParticipantTimestamp10 ==
+ParticipantTimestamp8 ==
     [ seconds     : Sample(4),
       nanoseconds : Sample(4) ]
 
-EncodeParticipantTimestamp10(message) ==
+EncodeParticipantTimestamp8(message) ==
     message.seconds
         \o message.nanoseconds
 
-DecodeParticipantTimestamp10(bytes) ==
+DecodeParticipantTimestamp8(bytes) ==
     LET seconds == ReadBytes(bytes, 4) IN IF ~seconds.ok THEN Fail ELSE
     LET nanoseconds == ReadBytes(seconds.rest, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
     Ok([ seconds     |-> seconds.value,
          nanoseconds |-> nanoseconds.value ], nanoseconds.rest)
 
-ZeroParticipantTimestamp10 ==
+ZeroParticipantTimestamp8 ==
     [ seconds     |-> [i \in 1 .. 4 |-> 0],
       nanoseconds |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Participant Timestamp at zero, then each field in turn at the values it is checked at *)
-CheckedParticipantTimestamp10 ==
-    { ZeroParticipantTimestamp10 }
-        \cup { [ZeroParticipantTimestamp10 EXCEPT !.seconds = one] : one \in Sample(4) }
-        \cup { [ZeroParticipantTimestamp10 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+CheckedParticipantTimestamp8 ==
+    { ZeroParticipantTimestamp8 }
+        \cup { [ZeroParticipantTimestamp8 EXCEPT !.seconds = one] : one \in Sample(4) }
+        \cup { [ZeroParticipantTimestamp8 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Market Wide Circuit Breaker Decline Level Status Message: 47 bytes      *)
@@ -917,7 +759,7 @@ CheckedParticipantTimestamp10 ==
 
 MarketWideCircuitBreakerDeclineLevelStatusMessage ==
     [ participantId              : Sample(1),
-      participantTimestamp       : ParticipantTimestamp10,
+      participantTimestamp       : ParticipantTimestamp8,
       messageId                  : Sample(1),
       transactionId              : Sample(4),
       participantReferenceNumber : Sample(8),
@@ -928,7 +770,7 @@ MarketWideCircuitBreakerDeclineLevelStatusMessage ==
 
 EncodeMarketWideCircuitBreakerDeclineLevelStatusMessage(message) ==
     message.participantId
-        \o EncodeParticipantTimestamp10(message.participantTimestamp)
+        \o EncodeParticipantTimestamp8(message.participantTimestamp)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
@@ -939,7 +781,7 @@ EncodeMarketWideCircuitBreakerDeclineLevelStatusMessage(message) ==
 
 DecodeMarketWideCircuitBreakerDeclineLevelStatusMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
-    LET participantTimestamp == DecodeParticipantTimestamp10(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
+    LET participantTimestamp == DecodeParticipantTimestamp8(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
     LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
     LET transactionId == ReadBytes(messageId.rest, 4) IN IF ~transactionId.ok THEN Fail ELSE
     LET participantReferenceNumber == ReadBytes(transactionId.rest, 8) IN IF ~participantReferenceNumber.ok THEN Fail ELSE
@@ -959,7 +801,7 @@ DecodeMarketWideCircuitBreakerDeclineLevelStatusMessage(bytes) ==
 
 ZeroMarketWideCircuitBreakerDeclineLevelStatusMessage ==
     [ participantId              |-> [i \in 1 .. 1 |-> 0],
-      participantTimestamp       |-> ZeroParticipantTimestamp10,
+      participantTimestamp       |-> ZeroParticipantTimestamp8,
       messageId                  |-> [i \in 1 .. 1 |-> 0],
       transactionId              |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber |-> [i \in 1 .. 8 |-> 0],
@@ -972,7 +814,7 @@ ZeroMarketWideCircuitBreakerDeclineLevelStatusMessage ==
 CheckedMarketWideCircuitBreakerDeclineLevelStatusMessage ==
     { ZeroMarketWideCircuitBreakerDeclineLevelStatusMessage }
         \cup { [ZeroMarketWideCircuitBreakerDeclineLevelStatusMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroMarketWideCircuitBreakerDeclineLevelStatusMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp10 }
+        \cup { [ZeroMarketWideCircuitBreakerDeclineLevelStatusMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp8 }
         \cup { [ZeroMarketWideCircuitBreakerDeclineLevelStatusMessage EXCEPT !.messageId = one] : one \in Sample(1) }
         \cup { [ZeroMarketWideCircuitBreakerDeclineLevelStatusMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
         \cup { [ZeroMarketWideCircuitBreakerDeclineLevelStatusMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
@@ -985,29 +827,29 @@ CheckedMarketWideCircuitBreakerDeclineLevelStatusMessage ==
 (* Participant Timestamp: 8 bytes                                          *)
 (***************************************************************************)
 
-ParticipantTimestamp11 ==
+ParticipantTimestamp9 ==
     [ seconds     : Sample(4),
       nanoseconds : Sample(4) ]
 
-EncodeParticipantTimestamp11(message) ==
+EncodeParticipantTimestamp9(message) ==
     message.seconds
         \o message.nanoseconds
 
-DecodeParticipantTimestamp11(bytes) ==
+DecodeParticipantTimestamp9(bytes) ==
     LET seconds == ReadBytes(bytes, 4) IN IF ~seconds.ok THEN Fail ELSE
     LET nanoseconds == ReadBytes(seconds.rest, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
     Ok([ seconds     |-> seconds.value,
          nanoseconds |-> nanoseconds.value ], nanoseconds.rest)
 
-ZeroParticipantTimestamp11 ==
+ZeroParticipantTimestamp9 ==
     [ seconds     |-> [i \in 1 .. 4 |-> 0],
       nanoseconds |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Participant Timestamp at zero, then each field in turn at the values it is checked at *)
-CheckedParticipantTimestamp11 ==
-    { ZeroParticipantTimestamp11 }
-        \cup { [ZeroParticipantTimestamp11 EXCEPT !.seconds = one] : one \in Sample(4) }
-        \cup { [ZeroParticipantTimestamp11 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+CheckedParticipantTimestamp9 ==
+    { ZeroParticipantTimestamp9 }
+        \cup { [ZeroParticipantTimestamp9 EXCEPT !.seconds = one] : one \in Sample(4) }
+        \cup { [ZeroParticipantTimestamp9 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Market Wide Circuit Breaker Status Message: 24 bytes                    *)
@@ -1015,7 +857,7 @@ CheckedParticipantTimestamp11 ==
 
 MarketWideCircuitBreakerStatusMessage ==
     [ participantId              : Sample(1),
-      participantTimestamp       : ParticipantTimestamp11,
+      participantTimestamp       : ParticipantTimestamp9,
       messageId                  : Sample(1),
       transactionId              : Sample(4),
       participantReferenceNumber : Sample(8),
@@ -1024,7 +866,7 @@ MarketWideCircuitBreakerStatusMessage ==
 
 EncodeMarketWideCircuitBreakerStatusMessage(message) ==
     message.participantId
-        \o EncodeParticipantTimestamp11(message.participantTimestamp)
+        \o EncodeParticipantTimestamp9(message.participantTimestamp)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
@@ -1033,7 +875,7 @@ EncodeMarketWideCircuitBreakerStatusMessage(message) ==
 
 DecodeMarketWideCircuitBreakerStatusMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
-    LET participantTimestamp == DecodeParticipantTimestamp11(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
+    LET participantTimestamp == DecodeParticipantTimestamp9(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
     LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
     LET transactionId == ReadBytes(messageId.rest, 4) IN IF ~transactionId.ok THEN Fail ELSE
     LET participantReferenceNumber == ReadBytes(transactionId.rest, 8) IN IF ~participantReferenceNumber.ok THEN Fail ELSE
@@ -1049,7 +891,7 @@ DecodeMarketWideCircuitBreakerStatusMessage(bytes) ==
 
 ZeroMarketWideCircuitBreakerStatusMessage ==
     [ participantId              |-> [i \in 1 .. 1 |-> 0],
-      participantTimestamp       |-> ZeroParticipantTimestamp11,
+      participantTimestamp       |-> ZeroParticipantTimestamp9,
       messageId                  |-> [i \in 1 .. 1 |-> 0],
       transactionId              |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber |-> [i \in 1 .. 8 |-> 0],
@@ -1060,7 +902,7 @@ ZeroMarketWideCircuitBreakerStatusMessage ==
 CheckedMarketWideCircuitBreakerStatusMessage ==
     { ZeroMarketWideCircuitBreakerStatusMessage }
         \cup { [ZeroMarketWideCircuitBreakerStatusMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroMarketWideCircuitBreakerStatusMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp11 }
+        \cup { [ZeroMarketWideCircuitBreakerStatusMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp9 }
         \cup { [ZeroMarketWideCircuitBreakerStatusMessage EXCEPT !.messageId = one] : one \in Sample(1) }
         \cup { [ZeroMarketWideCircuitBreakerStatusMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
         \cup { [ZeroMarketWideCircuitBreakerStatusMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
@@ -1071,7 +913,7 @@ CheckedMarketWideCircuitBreakerStatusMessage ==
 (* Market Status Message Payload, selected by Market Status Message Type   *)
 (***************************************************************************)
 
-MarketWideCircuitBreakerDeclineLevelStatusMessageCode == 77  \* "M"
+MarketWideCircuitBreakerDeclineLevelStatusMessageCode == 75  \* "K"
 MarketWideCircuitBreakerStatusMessageCode == 76  \* "L"
 
 MarketStatusMessagePayload ==
@@ -1124,29 +966,29 @@ CheckedMarketStatusMessage ==
 (* Participant Timestamp: 8 bytes                                          *)
 (***************************************************************************)
 
-ParticipantTimestamp12 ==
+ParticipantTimestamp10 ==
     [ seconds     : Sample(4),
       nanoseconds : Sample(4) ]
 
-EncodeParticipantTimestamp12(message) ==
+EncodeParticipantTimestamp10(message) ==
     message.seconds
         \o message.nanoseconds
 
-DecodeParticipantTimestamp12(bytes) ==
+DecodeParticipantTimestamp10(bytes) ==
     LET seconds == ReadBytes(bytes, 4) IN IF ~seconds.ok THEN Fail ELSE
     LET nanoseconds == ReadBytes(seconds.rest, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
     Ok([ seconds     |-> seconds.value,
          nanoseconds |-> nanoseconds.value ], nanoseconds.rest)
 
-ZeroParticipantTimestamp12 ==
+ZeroParticipantTimestamp10 ==
     [ seconds     |-> [i \in 1 .. 4 |-> 0],
       nanoseconds |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Participant Timestamp at zero, then each field in turn at the values it is checked at *)
-CheckedParticipantTimestamp12 ==
-    { ZeroParticipantTimestamp12 }
-        \cup { [ZeroParticipantTimestamp12 EXCEPT !.seconds = one] : one \in Sample(4) }
-        \cup { [ZeroParticipantTimestamp12 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+CheckedParticipantTimestamp10 ==
+    { ZeroParticipantTimestamp10 }
+        \cup { [ZeroParticipantTimestamp10 EXCEPT !.seconds = one] : one \in Sample(4) }
+        \cup { [ZeroParticipantTimestamp10 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Auction Status Message: 63 bytes                                        *)
@@ -1154,7 +996,7 @@ CheckedParticipantTimestamp12 ==
 
 AuctionStatusMessage ==
     [ participantId                     : Sample(1),
-      participantTimestamp              : ParticipantTimestamp12,
+      participantTimestamp              : ParticipantTimestamp10,
       messageId                         : Sample(1),
       transactionId                     : Sample(4),
       participantReferenceNumber        : Sample(8),
@@ -1171,7 +1013,7 @@ AuctionStatusMessage ==
 
 EncodeAuctionStatusMessage(message) ==
     message.participantId
-        \o EncodeParticipantTimestamp12(message.participantTimestamp)
+        \o EncodeParticipantTimestamp10(message.participantTimestamp)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
@@ -1188,7 +1030,7 @@ EncodeAuctionStatusMessage(message) ==
 
 DecodeAuctionStatusMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
-    LET participantTimestamp == DecodeParticipantTimestamp12(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
+    LET participantTimestamp == DecodeParticipantTimestamp10(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
     LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
     LET transactionId == ReadBytes(messageId.rest, 4) IN IF ~transactionId.ok THEN Fail ELSE
     LET participantReferenceNumber == ReadBytes(transactionId.rest, 8) IN IF ~participantReferenceNumber.ok THEN Fail ELSE
@@ -1220,7 +1062,7 @@ DecodeAuctionStatusMessage(bytes) ==
 
 ZeroAuctionStatusMessage ==
     [ participantId                     |-> [i \in 1 .. 1 |-> 0],
-      participantTimestamp              |-> ZeroParticipantTimestamp12,
+      participantTimestamp              |-> ZeroParticipantTimestamp10,
       messageId                         |-> [i \in 1 .. 1 |-> 0],
       transactionId                     |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber        |-> [i \in 1 .. 8 |-> 0],
@@ -1239,7 +1081,7 @@ ZeroAuctionStatusMessage ==
 CheckedAuctionStatusMessage ==
     { ZeroAuctionStatusMessage }
         \cup { [ZeroAuctionStatusMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroAuctionStatusMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp12 }
+        \cup { [ZeroAuctionStatusMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp10 }
         \cup { [ZeroAuctionStatusMessage EXCEPT !.messageId = one] : one \in Sample(1) }
         \cup { [ZeroAuctionStatusMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
         \cup { [ZeroAuctionStatusMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
@@ -1258,29 +1100,29 @@ CheckedAuctionStatusMessage ==
 (* Participant Timestamp: 8 bytes                                          *)
 (***************************************************************************)
 
-ParticipantTimestamp13 ==
+ParticipantTimestamp11 ==
     [ seconds     : Sample(4),
       nanoseconds : Sample(4) ]
 
-EncodeParticipantTimestamp13(message) ==
+EncodeParticipantTimestamp11(message) ==
     message.seconds
         \o message.nanoseconds
 
-DecodeParticipantTimestamp13(bytes) ==
+DecodeParticipantTimestamp11(bytes) ==
     LET seconds == ReadBytes(bytes, 4) IN IF ~seconds.ok THEN Fail ELSE
     LET nanoseconds == ReadBytes(seconds.rest, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
     Ok([ seconds     |-> seconds.value,
          nanoseconds |-> nanoseconds.value ], nanoseconds.rest)
 
-ZeroParticipantTimestamp13 ==
+ZeroParticipantTimestamp11 ==
     [ seconds     |-> [i \in 1 .. 4 |-> 0],
       nanoseconds |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Participant Timestamp at zero, then each field in turn at the values it is checked at *)
-CheckedParticipantTimestamp13 ==
-    { ZeroParticipantTimestamp13 }
-        \cup { [ZeroParticipantTimestamp13 EXCEPT !.seconds = one] : one \in Sample(4) }
-        \cup { [ZeroParticipantTimestamp13 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+CheckedParticipantTimestamp11 ==
+    { ZeroParticipantTimestamp11 }
+        \cup { [ZeroParticipantTimestamp11 EXCEPT !.seconds = one] : one \in Sample(4) }
+        \cup { [ZeroParticipantTimestamp11 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Adf Timestamp: 8 bytes                                                  *)
@@ -1565,7 +1407,7 @@ CheckedNationalBboIndicatorChoice ==
 
 LongQuoteMessage ==
     [ participantId                     : Sample(1),
-      participantTimestamp              : ParticipantTimestamp13,
+      participantTimestamp              : ParticipantTimestamp11,
       messageId                         : Sample(1),
       transactionId                     : Sample(4),
       participantReferenceNumber        : Sample(8),
@@ -1593,7 +1435,7 @@ LongQuoteMessage ==
 
 EncodeLongQuoteMessage(message) ==
     message.participantId
-        \o EncodeParticipantTimestamp13(message.participantTimestamp)
+        \o EncodeParticipantTimestamp11(message.participantTimestamp)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
@@ -1622,7 +1464,7 @@ EncodeLongQuoteMessage(message) ==
 
 DecodeLongQuoteMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
-    LET participantTimestamp == DecodeParticipantTimestamp13(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
+    LET participantTimestamp == DecodeParticipantTimestamp11(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
     LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
     LET transactionId == ReadBytes(messageId.rest, 4) IN IF ~transactionId.ok THEN Fail ELSE
     LET participantReferenceNumber == ReadBytes(transactionId.rest, 8) IN IF ~participantReferenceNumber.ok THEN Fail ELSE
@@ -1677,7 +1519,7 @@ DecodeLongQuoteMessage(bytes) ==
 
 ZeroLongQuoteMessage ==
     [ participantId                     |-> [i \in 1 .. 1 |-> 0],
-      participantTimestamp              |-> ZeroParticipantTimestamp13,
+      participantTimestamp              |-> ZeroParticipantTimestamp11,
       messageId                         |-> [i \in 1 .. 1 |-> 0],
       transactionId                     |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber        |-> [i \in 1 .. 8 |-> 0],
@@ -1707,7 +1549,7 @@ ZeroLongQuoteMessage ==
 CheckedLongQuoteMessage ==
     { ZeroLongQuoteMessage }
         \cup { [ZeroLongQuoteMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroLongQuoteMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp13 }
+        \cup { [ZeroLongQuoteMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp11 }
         \cup { [ZeroLongQuoteMessage EXCEPT !.messageId = one] : one \in Sample(1) }
         \cup { [ZeroLongQuoteMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
         \cup { [ZeroLongQuoteMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
@@ -1737,29 +1579,29 @@ CheckedLongQuoteMessage ==
 (* Participant Timestamp: 8 bytes                                          *)
 (***************************************************************************)
 
-ParticipantTimestamp14 ==
+ParticipantTimestamp12 ==
     [ seconds     : Sample(4),
       nanoseconds : Sample(4) ]
 
-EncodeParticipantTimestamp14(message) ==
+EncodeParticipantTimestamp12(message) ==
     message.seconds
         \o message.nanoseconds
 
-DecodeParticipantTimestamp14(bytes) ==
+DecodeParticipantTimestamp12(bytes) ==
     LET seconds == ReadBytes(bytes, 4) IN IF ~seconds.ok THEN Fail ELSE
     LET nanoseconds == ReadBytes(seconds.rest, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
     Ok([ seconds     |-> seconds.value,
          nanoseconds |-> nanoseconds.value ], nanoseconds.rest)
 
-ZeroParticipantTimestamp14 ==
+ZeroParticipantTimestamp12 ==
     [ seconds     |-> [i \in 1 .. 4 |-> 0],
       nanoseconds |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Participant Timestamp at zero, then each field in turn at the values it is checked at *)
-CheckedParticipantTimestamp14 ==
-    { ZeroParticipantTimestamp14 }
-        \cup { [ZeroParticipantTimestamp14 EXCEPT !.seconds = one] : one \in Sample(4) }
-        \cup { [ZeroParticipantTimestamp14 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+CheckedParticipantTimestamp12 ==
+    { ZeroParticipantTimestamp12 }
+        \cup { [ZeroParticipantTimestamp12 EXCEPT !.seconds = one] : one \in Sample(4) }
+        \cup { [ZeroParticipantTimestamp12 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* National Best Bid Long Appendage: 18 bytes                              *)
@@ -2016,7 +1858,7 @@ CheckedNationalBboIndicatorChoice2 ==
 
 ShortQuoteMessage ==
     [ participantId                     : Sample(1),
-      participantTimestamp              : ParticipantTimestamp14,
+      participantTimestamp              : ParticipantTimestamp12,
       messageId                         : Sample(1),
       transactionId                     : Sample(4),
       participantReferenceNumber        : Sample(8),
@@ -2030,7 +1872,7 @@ ShortQuoteMessage ==
 
 EncodeShortQuoteMessage(message) ==
     message.participantId
-        \o EncodeParticipantTimestamp14(message.participantTimestamp)
+        \o EncodeParticipantTimestamp12(message.participantTimestamp)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
@@ -2045,7 +1887,7 @@ EncodeShortQuoteMessage(message) ==
 
 DecodeShortQuoteMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
-    LET participantTimestamp == DecodeParticipantTimestamp14(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
+    LET participantTimestamp == DecodeParticipantTimestamp12(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
     LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
     LET transactionId == ReadBytes(messageId.rest, 4) IN IF ~transactionId.ok THEN Fail ELSE
     LET participantReferenceNumber == ReadBytes(transactionId.rest, 8) IN IF ~participantReferenceNumber.ok THEN Fail ELSE
@@ -2072,7 +1914,7 @@ DecodeShortQuoteMessage(bytes) ==
 
 ZeroShortQuoteMessage ==
     [ participantId                     |-> [i \in 1 .. 1 |-> 0],
-      participantTimestamp              |-> ZeroParticipantTimestamp14,
+      participantTimestamp              |-> ZeroParticipantTimestamp12,
       messageId                         |-> [i \in 1 .. 1 |-> 0],
       transactionId                     |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber        |-> [i \in 1 .. 8 |-> 0],
@@ -2088,7 +1930,7 @@ ZeroShortQuoteMessage ==
 CheckedShortQuoteMessage ==
     { ZeroShortQuoteMessage }
         \cup { [ZeroShortQuoteMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroShortQuoteMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp14 }
+        \cup { [ZeroShortQuoteMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp12 }
         \cup { [ZeroShortQuoteMessage EXCEPT !.messageId = one] : one \in Sample(1) }
         \cup { [ZeroShortQuoteMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
         \cup { [ZeroShortQuoteMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
@@ -2104,29 +1946,29 @@ CheckedShortQuoteMessage ==
 (* Participant Timestamp: 8 bytes                                          *)
 (***************************************************************************)
 
-ParticipantTimestamp15 ==
+ParticipantTimestamp13 ==
     [ seconds     : Sample(4),
       nanoseconds : Sample(4) ]
 
-EncodeParticipantTimestamp15(message) ==
+EncodeParticipantTimestamp13(message) ==
     message.seconds
         \o message.nanoseconds
 
-DecodeParticipantTimestamp15(bytes) ==
+DecodeParticipantTimestamp13(bytes) ==
     LET seconds == ReadBytes(bytes, 4) IN IF ~seconds.ok THEN Fail ELSE
     LET nanoseconds == ReadBytes(seconds.rest, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
     Ok([ seconds     |-> seconds.value,
          nanoseconds |-> nanoseconds.value ], nanoseconds.rest)
 
-ZeroParticipantTimestamp15 ==
+ZeroParticipantTimestamp13 ==
     [ seconds     |-> [i \in 1 .. 4 |-> 0],
       nanoseconds |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Participant Timestamp at zero, then each field in turn at the values it is checked at *)
-CheckedParticipantTimestamp15 ==
-    { ZeroParticipantTimestamp15 }
-        \cup { [ZeroParticipantTimestamp15 EXCEPT !.seconds = one] : one \in Sample(4) }
-        \cup { [ZeroParticipantTimestamp15 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
+CheckedParticipantTimestamp13 ==
+    { ZeroParticipantTimestamp13 }
+        \cup { [ZeroParticipantTimestamp13 EXCEPT !.seconds = one] : one \in Sample(4) }
+        \cup { [ZeroParticipantTimestamp13 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Adf Timestamp: 8 bytes                                                  *)
@@ -2411,7 +2253,7 @@ CheckedNationalBboIndicatorChoice3 ==
 
 SpecialLongQuoteMessage ==
     [ participantId                     : Sample(1),
-      participantTimestamp              : ParticipantTimestamp15,
+      participantTimestamp              : ParticipantTimestamp13,
       messageId                         : Sample(1),
       transactionId                     : Sample(4),
       participantReferenceNumber        : Sample(8),
@@ -2446,7 +2288,7 @@ SpecialLongQuoteMessage ==
 
 EncodeSpecialLongQuoteMessage(message) ==
     message.participantId
-        \o EncodeParticipantTimestamp15(message.participantTimestamp)
+        \o EncodeParticipantTimestamp13(message.participantTimestamp)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
@@ -2482,7 +2324,7 @@ EncodeSpecialLongQuoteMessage(message) ==
 
 DecodeSpecialLongQuoteMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
-    LET participantTimestamp == DecodeParticipantTimestamp15(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
+    LET participantTimestamp == DecodeParticipantTimestamp13(participantId.rest) IN IF ~participantTimestamp.ok THEN Fail ELSE
     LET messageId == ReadBytes(participantTimestamp.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
     LET transactionId == ReadBytes(messageId.rest, 4) IN IF ~transactionId.ok THEN Fail ELSE
     LET participantReferenceNumber == ReadBytes(transactionId.rest, 8) IN IF ~participantReferenceNumber.ok THEN Fail ELSE
@@ -2551,7 +2393,7 @@ DecodeSpecialLongQuoteMessage(bytes) ==
 
 ZeroSpecialLongQuoteMessage ==
     [ participantId                     |-> [i \in 1 .. 1 |-> 0],
-      participantTimestamp              |-> ZeroParticipantTimestamp15,
+      participantTimestamp              |-> ZeroParticipantTimestamp13,
       messageId                         |-> [i \in 1 .. 1 |-> 0],
       transactionId                     |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber        |-> [i \in 1 .. 8 |-> 0],
@@ -2588,7 +2430,7 @@ ZeroSpecialLongQuoteMessage ==
 CheckedSpecialLongQuoteMessage ==
     { ZeroSpecialLongQuoteMessage }
         \cup { [ZeroSpecialLongQuoteMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroSpecialLongQuoteMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp15 }
+        \cup { [ZeroSpecialLongQuoteMessage EXCEPT !.participantTimestamp = one] : one \in CheckedParticipantTimestamp13 }
         \cup { [ZeroSpecialLongQuoteMessage EXCEPT !.messageId = one] : one \in Sample(1) }
         \cup { [ZeroSpecialLongQuoteMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
         \cup { [ZeroSpecialLongQuoteMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
@@ -2933,38 +2775,6 @@ RoundTripParticipantTimestamp4 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Start Of Test Cycle Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripStartOfTestCycleMessage ==
-    \A message \in CheckedStartOfTestCycleMessage :
-        LET read == DecodeStartOfTestCycleMessage(EncodeStartOfTestCycleMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp5 ==
-    \A message \in CheckedParticipantTimestamp5 :
-        LET read == DecodeParticipantTimestamp5(EncodeParticipantTimestamp5(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every End Of Test Cycle Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripEndOfTestCycleMessage ==
-    \A message \in CheckedEndOfTestCycleMessage :
-        LET read == DecodeEndOfTestCycleMessage(EncodeEndOfTestCycleMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp6 ==
-    \A message \in CheckedParticipantTimestamp6 :
-        LET read == DecodeParticipantTimestamp6(EncodeParticipantTimestamp6(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
 (* Every Finra Open Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripFinraOpenMessage ==
     \A message \in CheckedFinraOpenMessage :
@@ -2974,9 +2784,9 @@ RoundTripFinraOpenMessage ==
             /\ read.rest = << >>
 
 (* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp7 ==
-    \A message \in CheckedParticipantTimestamp7 :
-        LET read == DecodeParticipantTimestamp7(EncodeParticipantTimestamp7(message))
+RoundTripParticipantTimestamp5 ==
+    \A message \in CheckedParticipantTimestamp5 :
+        LET read == DecodeParticipantTimestamp5(EncodeParticipantTimestamp5(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2990,9 +2800,9 @@ RoundTripDisasterRecoveryDataCenterActivationMessage ==
             /\ read.rest = << >>
 
 (* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp8 ==
-    \A message \in CheckedParticipantTimestamp8 :
-        LET read == DecodeParticipantTimestamp8(EncodeParticipantTimestamp8(message))
+RoundTripParticipantTimestamp6 ==
+    \A message \in CheckedParticipantTimestamp6 :
+        LET read == DecodeParticipantTimestamp6(EncodeParticipantTimestamp6(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3006,9 +2816,9 @@ RoundTripLineIntegrityMessage ==
             /\ read.rest = << >>
 
 (* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp9 ==
-    \A message \in CheckedParticipantTimestamp9 :
-        LET read == DecodeParticipantTimestamp9(EncodeParticipantTimestamp9(message))
+RoundTripParticipantTimestamp7 ==
+    \A message \in CheckedParticipantTimestamp7 :
+        LET read == DecodeParticipantTimestamp7(EncodeParticipantTimestamp7(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3030,9 +2840,9 @@ RoundTripControlMessage ==
             /\ read.rest = << >>
 
 (* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp10 ==
-    \A message \in CheckedParticipantTimestamp10 :
-        LET read == DecodeParticipantTimestamp10(EncodeParticipantTimestamp10(message))
+RoundTripParticipantTimestamp8 ==
+    \A message \in CheckedParticipantTimestamp8 :
+        LET read == DecodeParticipantTimestamp8(EncodeParticipantTimestamp8(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3046,9 +2856,9 @@ RoundTripMarketWideCircuitBreakerDeclineLevelStatusMessage ==
             /\ read.rest = << >>
 
 (* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp11 ==
-    \A message \in CheckedParticipantTimestamp11 :
-        LET read == DecodeParticipantTimestamp11(EncodeParticipantTimestamp11(message))
+RoundTripParticipantTimestamp9 ==
+    \A message \in CheckedParticipantTimestamp9 :
+        LET read == DecodeParticipantTimestamp9(EncodeParticipantTimestamp9(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3070,9 +2880,9 @@ RoundTripMarketStatusMessage ==
             /\ read.rest = << >>
 
 (* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp12 ==
-    \A message \in CheckedParticipantTimestamp12 :
-        LET read == DecodeParticipantTimestamp12(EncodeParticipantTimestamp12(message))
+RoundTripParticipantTimestamp10 ==
+    \A message \in CheckedParticipantTimestamp10 :
+        LET read == DecodeParticipantTimestamp10(EncodeParticipantTimestamp10(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3086,9 +2896,9 @@ RoundTripAuctionStatusMessage ==
             /\ read.rest = << >>
 
 (* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp13 ==
-    \A message \in CheckedParticipantTimestamp13 :
-        LET read == DecodeParticipantTimestamp13(EncodeParticipantTimestamp13(message))
+RoundTripParticipantTimestamp11 ==
+    \A message \in CheckedParticipantTimestamp11 :
+        LET read == DecodeParticipantTimestamp11(EncodeParticipantTimestamp11(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3158,9 +2968,9 @@ RoundTripLongQuoteMessage ==
             /\ read.rest = << >>
 
 (* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp14 ==
-    \A message \in CheckedParticipantTimestamp14 :
-        LET read == DecodeParticipantTimestamp14(EncodeParticipantTimestamp14(message))
+RoundTripParticipantTimestamp12 ==
+    \A message \in CheckedParticipantTimestamp12 :
+        LET read == DecodeParticipantTimestamp12(EncodeParticipantTimestamp12(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3222,9 +3032,9 @@ RoundTripShortQuoteMessage ==
             /\ read.rest = << >>
 
 (* Every Participant Timestamp decodes back to what was encoded, and leaves nothing over *)
-RoundTripParticipantTimestamp15 ==
-    \A message \in CheckedParticipantTimestamp15 :
-        LET read == DecodeParticipantTimestamp15(EncodeParticipantTimestamp15(message))
+RoundTripParticipantTimestamp13 ==
+    \A message \in CheckedParticipantTimestamp13 :
+        LET read == DecodeParticipantTimestamp13(EncodeParticipantTimestamp13(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

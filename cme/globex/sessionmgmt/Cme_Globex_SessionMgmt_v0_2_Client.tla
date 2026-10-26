@@ -95,6 +95,40 @@ SampleLists(entries) ==
         \cup { <<one, one>> : one \in entries }
 
 (***************************************************************************)
+(* Client Technical Header: 14 bytes                                       *)
+(***************************************************************************)
+
+ClientTechnicalHeader ==
+    [ encodingType          : Sample(2),
+      messageSequenceNumber : Sample(4),
+      sendingTime           : Sample(8) ]
+
+EncodeClientTechnicalHeader(message) ==
+    message.encodingType
+        \o message.messageSequenceNumber
+        \o message.sendingTime
+
+DecodeClientTechnicalHeader(bytes) ==
+    LET encodingType == ReadBytes(bytes, 2) IN IF ~encodingType.ok THEN Fail ELSE
+    LET messageSequenceNumber == ReadBytes(encodingType.rest, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET sendingTime == ReadBytes(messageSequenceNumber.rest, 8) IN IF ~sendingTime.ok THEN Fail ELSE
+    Ok([ encodingType          |-> encodingType.value,
+         messageSequenceNumber |-> messageSequenceNumber.value,
+         sendingTime           |-> sendingTime.value ], sendingTime.rest)
+
+ZeroClientTechnicalHeader ==
+    [ encodingType          |-> [i \in 1 .. 2 |-> 0],
+      messageSequenceNumber |-> [i \in 1 .. 4 |-> 0],
+      sendingTime           |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Client Technical Header at zero, then each field in turn at the values it is checked at *)
+CheckedClientTechnicalHeader ==
+    { ZeroClientTechnicalHeader }
+        \cup { [ZeroClientTechnicalHeader EXCEPT !.encodingType = one] : one \in Sample(2) }
+        \cup { [ZeroClientTechnicalHeader EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroClientTechnicalHeader EXCEPT !.sendingTime = one] : one \in Sample(8) }
+
+(***************************************************************************)
 (* Negotiate: 78 bytes                                                     *)
 (***************************************************************************)
 
@@ -800,95 +834,63 @@ CheckedClientPayload ==
         \cup { [tag |-> SubscriberHeartbeatCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
-(* Client Message                                                          *)
+(* Client Tcp Frame, framed by Message Size                                *)
 (***************************************************************************)
 
-ClientMessage ==
-    [ blockLength   : Sample(2),
-      schemaId      : Sample(2),
-      version       : Sample(2),
-      clientPayload : ClientPayload ]
+ClientTcpFrame ==
+    [ clientTechnicalHeader : ClientTechnicalHeader,
+      blockLength           : Sample(2),
+      schemaId              : Sample(2),
+      version               : Sample(2),
+      clientPayload         : ClientPayload ]
 
-EncodeClientMessage(message) ==
+EncodeClientTcpFrameBody(message) ==
     message.blockLength
         \o EncodeUIntLE(message.clientPayload.tag, 2)
         \o message.schemaId
         \o message.version
         \o EncodeClientPayload(message.clientPayload)
 
-DecodeClientMessage(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET templateId == ReadUIntLE(blockLength.rest, 2) IN IF ~templateId.ok THEN Fail ELSE
-    LET schemaId == ReadBytes(templateId.rest, 2) IN IF ~schemaId.ok THEN Fail ELSE
-    LET version == ReadBytes(schemaId.rest, 2) IN IF ~version.ok THEN Fail ELSE
-    LET clientPayload == DecodeClientPayload(templateId.value, version.rest) IN IF ~clientPayload.ok THEN Fail ELSE
-    Ok([ blockLength   |-> blockLength.value,
-         schemaId      |-> schemaId.value,
-         version       |-> version.value,
-         clientPayload |-> clientPayload.value ], clientPayload.rest)
-
-ZeroClientMessage ==
-    [ blockLength   |-> [i \in 1 .. 2 |-> 0],
-      schemaId      |-> [i \in 1 .. 2 |-> 0],
-      version       |-> [i \in 1 .. 2 |-> 0],
-      clientPayload |-> ZeroClientPayload ]
-
-(* Client Message at zero, then each field in turn at the values it is checked at *)
-CheckedClientMessage ==
-    { ZeroClientMessage }
-        \cup { [ZeroClientMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroClientMessage EXCEPT !.schemaId = one] : one \in Sample(2) }
-        \cup { [ZeroClientMessage EXCEPT !.version = one] : one \in Sample(2) }
-        \cup { [ZeroClientMessage EXCEPT !.clientPayload = one] : one \in CheckedClientPayload }
-
-(***************************************************************************)
-(* Client Tcp Frame, framed by Message Size                                *)
-(***************************************************************************)
-
-ClientTcpFrame ==
-    [ encodingType          : Sample(2),
-      messageSequenceNumber : Sample(4),
-      sendingTime           : Sample(8),
-      clientMessage         : ClientMessage ]
-
-EncodeClientTcpFrameBody(message) ==
-    EncodeClientMessage(message.clientMessage)
-
 (* Message Size counts the bytes it frames, so it is written from them *)
 EncodeClientTcpFrame(message) ==
     LET body == EncodeClientTcpFrameBody(message)
-    IN  message.encodingType \o message.messageSequenceNumber \o message.sendingTime \o EncodeUIntLE(Len(body) + 2, 2) \o body
+    IN  EncodeClientTechnicalHeader(message.clientTechnicalHeader) \o EncodeUIntLE(Len(body) + 2, 2) \o body
 
 DecodeClientTcpFrame(bytes) ==
-    LET encodingType == ReadBytes(bytes, 2) IN IF ~encodingType.ok THEN Fail ELSE
-    LET messageSequenceNumber == ReadBytes(encodingType.rest, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
-    LET sendingTime == ReadBytes(messageSequenceNumber.rest, 8) IN IF ~sendingTime.ok THEN Fail ELSE
-    LET length == ReadUIntLE(sendingTime.rest, 2) IN IF ~length.ok THEN Fail ELSE
+    LET clientTechnicalHeader == DecodeClientTechnicalHeader(bytes) IN IF ~clientTechnicalHeader.ok THEN Fail ELSE
+    LET length == ReadUIntLE(clientTechnicalHeader.rest, 2) IN IF ~length.ok THEN Fail ELSE
     LET size == length.value - 2 IN
     IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, size)
         beyond == SubSeq(length.rest, size + 1, Len(length.rest))
     IN
-    LET clientMessage == DecodeClientMessage(framed) IN IF ~clientMessage.ok THEN Fail ELSE
-    IF clientMessage.rest # << >> THEN Fail ELSE
-    Ok([ encodingType          |-> encodingType.value,
-         messageSequenceNumber |-> messageSequenceNumber.value,
-         sendingTime           |-> sendingTime.value,
-         clientMessage         |-> clientMessage.value ], beyond)
+    LET blockLength == ReadBytes(framed, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET templateId == ReadUIntLE(blockLength.rest, 2) IN IF ~templateId.ok THEN Fail ELSE
+    LET schemaId == ReadBytes(templateId.rest, 2) IN IF ~schemaId.ok THEN Fail ELSE
+    LET version == ReadBytes(schemaId.rest, 2) IN IF ~version.ok THEN Fail ELSE
+    LET clientPayload == DecodeClientPayload(templateId.value, version.rest) IN IF ~clientPayload.ok THEN Fail ELSE
+    IF clientPayload.rest # << >> THEN Fail ELSE
+    Ok([ clientTechnicalHeader |-> clientTechnicalHeader.value,
+         blockLength           |-> blockLength.value,
+         schemaId              |-> schemaId.value,
+         version               |-> version.value,
+         clientPayload         |-> clientPayload.value ], beyond)
 
 ZeroClientTcpFrame ==
-    [ encodingType          |-> [i \in 1 .. 2 |-> 0],
-      messageSequenceNumber |-> [i \in 1 .. 4 |-> 0],
-      sendingTime           |-> [i \in 1 .. 8 |-> 0],
-      clientMessage         |-> ZeroClientMessage ]
+    [ clientTechnicalHeader |-> ZeroClientTechnicalHeader,
+      blockLength           |-> [i \in 1 .. 2 |-> 0],
+      schemaId              |-> [i \in 1 .. 2 |-> 0],
+      version               |-> [i \in 1 .. 2 |-> 0],
+      clientPayload         |-> ZeroClientPayload ]
 
 (* Client Tcp Frame at zero, then each field in turn at the values it is checked at *)
 CheckedClientTcpFrame ==
     { ZeroClientTcpFrame }
-        \cup { [ZeroClientTcpFrame EXCEPT !.encodingType = one] : one \in Sample(2) }
-        \cup { [ZeroClientTcpFrame EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
-        \cup { [ZeroClientTcpFrame EXCEPT !.sendingTime = one] : one \in Sample(8) }
-        \cup { [ZeroClientTcpFrame EXCEPT !.clientMessage = one] : one \in CheckedClientMessage }
+        \cup { [ZeroClientTcpFrame EXCEPT !.clientTechnicalHeader = one] : one \in CheckedClientTechnicalHeader }
+        \cup { [ZeroClientTcpFrame EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroClientTcpFrame EXCEPT !.schemaId = one] : one \in Sample(2) }
+        \cup { [ZeroClientTcpFrame EXCEPT !.version = one] : one \in Sample(2) }
+        \cup { [ZeroClientTcpFrame EXCEPT !.clientPayload = one] : one \in CheckedClientPayload }
 
 (* A run of Client Tcp Frame, written one after another *)
 RECURSIVE EncodeClientTcpFrameList(_)
@@ -910,7 +912,13 @@ ReadClientTcpFrameAll(bytes) ==
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
 (* One Client Tcp Frame of each kind, for the lists that carry them *)
-OneClientTcpFrame == { ZeroClientTcpFrame }
+OneClientTcpFrame ==
+    { [ZeroClientTcpFrame EXCEPT !.clientPayload = [tag |-> NegotiateCode, body |-> ZeroNegotiate]],
+      [ZeroClientTcpFrame EXCEPT !.clientPayload = [tag |-> TerminateCode, body |-> ZeroTerminate]],
+      [ZeroClientTcpFrame EXCEPT !.clientPayload = [tag |-> MarketDataRequestCode, body |-> ZeroMarketDataRequest]],
+      [ZeroClientTcpFrame EXCEPT !.clientPayload = [tag |-> SecurityListRequestCode, body |-> ZeroSecurityListRequest]],
+      [ZeroClientTcpFrame EXCEPT !.clientPayload = [tag |-> SecurityStatusRequestCode, body |-> ZeroSecurityStatusRequest]],
+      [ZeroClientTcpFrame EXCEPT !.clientPayload = [tag |-> SubscriberHeartbeatCode, body |-> [empty |-> 0]]] }
 
 (***************************************************************************)
 (* Client Packet                                                           *)
@@ -949,6 +957,14 @@ RoundTripUIntLE ==
                 /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
                 /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
+
+(* Every Client Technical Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripClientTechnicalHeader ==
+    \A message \in CheckedClientTechnicalHeader :
+        LET read == DecodeClientTechnicalHeader(EncodeClientTechnicalHeader(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
 
 (* Every Negotiate decodes back to what was encoded, and leaves nothing over *)
 RoundTripNegotiate ==
@@ -1082,14 +1098,6 @@ RoundTripSecurityStatusRequestRelatedSymbolGroups ==
 RoundTripSecurityStatusRequest ==
     \A message \in CheckedSecurityStatusRequest :
         LET read == DecodeSecurityStatusRequest(EncodeSecurityStatusRequest(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Client Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripClientMessage ==
-    \A message \in CheckedClientMessage :
-        LET read == DecodeClientMessage(EncodeClientMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

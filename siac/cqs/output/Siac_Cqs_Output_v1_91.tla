@@ -1199,7 +1199,7 @@ CheckedMarketWideCircuitBreakerStatusMessage ==
 (* Market Status Message Payload, selected by Market Status Message Type   *)
 (***************************************************************************)
 
-MarketWideCircuitBreakerDeclineLevelStatusMessageCode == 77  \* "M"
+MarketWideCircuitBreakerDeclineLevelStatusMessageCode == 75  \* "K"
 MarketWideCircuitBreakerStatusMessageCode == 76  \* "L"
 
 MarketStatusMessagePayload ==

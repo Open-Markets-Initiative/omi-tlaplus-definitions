@@ -104,6 +104,40 @@ SampleLists(entries) ==
         \cup { <<one, one>> : one \in entries }
 
 (***************************************************************************)
+(* Server Technical Header: 14 bytes                                       *)
+(***************************************************************************)
+
+ServerTechnicalHeader ==
+    [ encodingType          : Sample(2),
+      messageSequenceNumber : Sample(4),
+      tcpSendingTime        : Sample(8) ]
+
+EncodeServerTechnicalHeader(message) ==
+    message.encodingType
+        \o message.messageSequenceNumber
+        \o message.tcpSendingTime
+
+DecodeServerTechnicalHeader(bytes) ==
+    LET encodingType == ReadBytes(bytes, 2) IN IF ~encodingType.ok THEN Fail ELSE
+    LET messageSequenceNumber == ReadBytes(encodingType.rest, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET tcpSendingTime == ReadBytes(messageSequenceNumber.rest, 8) IN IF ~tcpSendingTime.ok THEN Fail ELSE
+    Ok([ encodingType          |-> encodingType.value,
+         messageSequenceNumber |-> messageSequenceNumber.value,
+         tcpSendingTime        |-> tcpSendingTime.value ], tcpSendingTime.rest)
+
+ZeroServerTechnicalHeader ==
+    [ encodingType          |-> [i \in 1 .. 2 |-> 0],
+      messageSequenceNumber |-> [i \in 1 .. 4 |-> 0],
+      tcpSendingTime        |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Server Technical Header at zero, then each field in turn at the values it is checked at *)
+CheckedServerTechnicalHeader ==
+    { ZeroServerTechnicalHeader }
+        \cup { [ZeroServerTechnicalHeader EXCEPT !.encodingType = one] : one \in Sample(2) }
+        \cup { [ZeroServerTechnicalHeader EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroServerTechnicalHeader EXCEPT !.tcpSendingTime = one] : one \in Sample(8) }
+
+(***************************************************************************)
 (* Channel Reset Group: 2 bytes                                            *)
 (***************************************************************************)
 
@@ -4956,95 +4990,63 @@ CheckedServerPayload ==
         \cup { [tag |-> RequestRejectCode, body |-> one] : one \in CheckedRequestReject }
 
 (***************************************************************************)
-(* Server Tcp Message                                                      *)
+(* Server Tcp Frame, framed by Message Size                                *)
 (***************************************************************************)
 
-ServerTcpMessage ==
-    [ blockLength   : Sample(2),
-      schemaId      : Sample(2),
-      version       : Sample(2),
-      serverPayload : ServerPayload ]
+ServerTcpFrame ==
+    [ serverTechnicalHeader : ServerTechnicalHeader,
+      blockLength           : Sample(2),
+      schemaId              : Sample(2),
+      version               : Sample(2),
+      serverPayload         : ServerPayload ]
 
-EncodeServerTcpMessage(message) ==
+EncodeServerTcpFrameBody(message) ==
     message.blockLength
         \o EncodeUIntLE(message.serverPayload.tag, 2)
         \o message.schemaId
         \o message.version
         \o EncodeServerPayload(message.serverPayload)
 
-DecodeServerTcpMessage(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET templateId == ReadUIntLE(blockLength.rest, 2) IN IF ~templateId.ok THEN Fail ELSE
-    LET schemaId == ReadBytes(templateId.rest, 2) IN IF ~schemaId.ok THEN Fail ELSE
-    LET version == ReadBytes(schemaId.rest, 2) IN IF ~version.ok THEN Fail ELSE
-    LET serverPayload == DecodeServerPayload(templateId.value, version.rest) IN IF ~serverPayload.ok THEN Fail ELSE
-    Ok([ blockLength   |-> blockLength.value,
-         schemaId      |-> schemaId.value,
-         version       |-> version.value,
-         serverPayload |-> serverPayload.value ], serverPayload.rest)
-
-ZeroServerTcpMessage ==
-    [ blockLength   |-> [i \in 1 .. 2 |-> 0],
-      schemaId      |-> [i \in 1 .. 2 |-> 0],
-      version       |-> [i \in 1 .. 2 |-> 0],
-      serverPayload |-> ZeroServerPayload ]
-
-(* Server Tcp Message at zero, then each field in turn at the values it is checked at *)
-CheckedServerTcpMessage ==
-    { ZeroServerTcpMessage }
-        \cup { [ZeroServerTcpMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroServerTcpMessage EXCEPT !.schemaId = one] : one \in Sample(2) }
-        \cup { [ZeroServerTcpMessage EXCEPT !.version = one] : one \in Sample(2) }
-        \cup { [ZeroServerTcpMessage EXCEPT !.serverPayload = one] : one \in CheckedServerPayload }
-
-(***************************************************************************)
-(* Server Tcp Frame, framed by Tcp Message Size                            *)
-(***************************************************************************)
-
-ServerTcpFrame ==
-    [ encodingType          : Sample(2),
-      messageSequenceNumber : Sample(4),
-      tcpSendingTime        : Sample(8),
-      serverTcpMessage      : ServerTcpMessage ]
-
-EncodeServerTcpFrameBody(message) ==
-    EncodeServerTcpMessage(message.serverTcpMessage)
-
-(* Tcp Message Size counts the bytes it frames, so it is written from them *)
+(* Message Size counts the bytes it frames, so it is written from them *)
 EncodeServerTcpFrame(message) ==
     LET body == EncodeServerTcpFrameBody(message)
-    IN  message.encodingType \o message.messageSequenceNumber \o message.tcpSendingTime \o EncodeUIntLE(Len(body) + 2, 2) \o body
+    IN  EncodeServerTechnicalHeader(message.serverTechnicalHeader) \o EncodeUIntLE(Len(body) + 2, 2) \o body
 
 DecodeServerTcpFrame(bytes) ==
-    LET encodingType == ReadBytes(bytes, 2) IN IF ~encodingType.ok THEN Fail ELSE
-    LET messageSequenceNumber == ReadBytes(encodingType.rest, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
-    LET tcpSendingTime == ReadBytes(messageSequenceNumber.rest, 8) IN IF ~tcpSendingTime.ok THEN Fail ELSE
-    LET length == ReadUIntLE(tcpSendingTime.rest, 2) IN IF ~length.ok THEN Fail ELSE
+    LET serverTechnicalHeader == DecodeServerTechnicalHeader(bytes) IN IF ~serverTechnicalHeader.ok THEN Fail ELSE
+    LET length == ReadUIntLE(serverTechnicalHeader.rest, 2) IN IF ~length.ok THEN Fail ELSE
     LET size == length.value - 2 IN
     IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, size)
         beyond == SubSeq(length.rest, size + 1, Len(length.rest))
     IN
-    LET serverTcpMessage == DecodeServerTcpMessage(framed) IN IF ~serverTcpMessage.ok THEN Fail ELSE
-    IF serverTcpMessage.rest # << >> THEN Fail ELSE
-    Ok([ encodingType          |-> encodingType.value,
-         messageSequenceNumber |-> messageSequenceNumber.value,
-         tcpSendingTime        |-> tcpSendingTime.value,
-         serverTcpMessage      |-> serverTcpMessage.value ], beyond)
+    LET blockLength == ReadBytes(framed, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET templateId == ReadUIntLE(blockLength.rest, 2) IN IF ~templateId.ok THEN Fail ELSE
+    LET schemaId == ReadBytes(templateId.rest, 2) IN IF ~schemaId.ok THEN Fail ELSE
+    LET version == ReadBytes(schemaId.rest, 2) IN IF ~version.ok THEN Fail ELSE
+    LET serverPayload == DecodeServerPayload(templateId.value, version.rest) IN IF ~serverPayload.ok THEN Fail ELSE
+    IF serverPayload.rest # << >> THEN Fail ELSE
+    Ok([ serverTechnicalHeader |-> serverTechnicalHeader.value,
+         blockLength           |-> blockLength.value,
+         schemaId              |-> schemaId.value,
+         version               |-> version.value,
+         serverPayload         |-> serverPayload.value ], beyond)
 
 ZeroServerTcpFrame ==
-    [ encodingType          |-> [i \in 1 .. 2 |-> 0],
-      messageSequenceNumber |-> [i \in 1 .. 4 |-> 0],
-      tcpSendingTime        |-> [i \in 1 .. 8 |-> 0],
-      serverTcpMessage      |-> ZeroServerTcpMessage ]
+    [ serverTechnicalHeader |-> ZeroServerTechnicalHeader,
+      blockLength           |-> [i \in 1 .. 2 |-> 0],
+      schemaId              |-> [i \in 1 .. 2 |-> 0],
+      version               |-> [i \in 1 .. 2 |-> 0],
+      serverPayload         |-> ZeroServerPayload ]
 
 (* Server Tcp Frame at zero, then each field in turn at the values it is checked at *)
 CheckedServerTcpFrame ==
     { ZeroServerTcpFrame }
-        \cup { [ZeroServerTcpFrame EXCEPT !.encodingType = one] : one \in Sample(2) }
-        \cup { [ZeroServerTcpFrame EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
-        \cup { [ZeroServerTcpFrame EXCEPT !.tcpSendingTime = one] : one \in Sample(8) }
-        \cup { [ZeroServerTcpFrame EXCEPT !.serverTcpMessage = one] : one \in CheckedServerTcpMessage }
+        \cup { [ZeroServerTcpFrame EXCEPT !.serverTechnicalHeader = one] : one \in CheckedServerTechnicalHeader }
+        \cup { [ZeroServerTcpFrame EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroServerTcpFrame EXCEPT !.schemaId = one] : one \in Sample(2) }
+        \cup { [ZeroServerTcpFrame EXCEPT !.version = one] : one \in Sample(2) }
+        \cup { [ZeroServerTcpFrame EXCEPT !.serverPayload = one] : one \in CheckedServerPayload }
 
 (* A run of Server Tcp Frame, written one after another *)
 RECURSIVE EncodeServerTcpFrameList(_)
@@ -5066,7 +5068,31 @@ ReadServerTcpFrameAll(bytes) ==
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
 (* One Server Tcp Frame of each kind, for the lists that carry them *)
-OneServerTcpFrame == { ZeroServerTcpFrame }
+OneServerTcpFrame ==
+    { [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> ChannelResetCode, body |-> ZeroChannelReset]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> AdminHeartbeatCode, body |-> [empty |-> 0]]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> AdminLoginCode, body |-> ZeroAdminLogin]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> AdminLogoutCode, body |-> ZeroAdminLogout]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdInstrumentDefinitionFutureCode, body |-> ZeroMdInstrumentDefinitionFuture]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdInstrumentDefinitionSpreadCode, body |-> ZeroMdInstrumentDefinitionSpread]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> SecurityStatusCode, body |-> ZeroSecurityStatus]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdIncrementalRefreshBookCode, body |-> ZeroMdIncrementalRefreshBook]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdIncrementalRefreshDailyStatisticsCode, body |-> ZeroMdIncrementalRefreshDailyStatistics]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdIncrementalRefreshLimitsBandingCode, body |-> ZeroMdIncrementalRefreshLimitsBanding]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdIncrementalRefreshSessionStatisticsCode, body |-> ZeroMdIncrementalRefreshSessionStatistics]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdIncrementalRefreshTradeCode, body |-> ZeroMdIncrementalRefreshTrade]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdIncrementalRefreshVolumeCode, body |-> ZeroMdIncrementalRefreshVolume]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> SnapshotFullRefreshCode, body |-> ZeroSnapshotFullRefresh]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> QuoteRequestCode, body |-> ZeroQuoteRequest]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdInstrumentDefinitionOptionCode, body |-> ZeroMdInstrumentDefinitionOption]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdIncrementalRefreshTradeSummaryCode, body |-> ZeroMdIncrementalRefreshTradeSummary]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> MdIncrementalRefreshOrderBookCode, body |-> ZeroMdIncrementalRefreshOrderBook]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> SnapshotFullRefreshOrderBookCode, body |-> ZeroSnapshotFullRefreshOrderBook]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> NegotiationRejectCode, body |-> ZeroNegotiationReject]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> NegotiationResponseCode, body |-> ZeroNegotiationResponse]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> TerminateCode, body |-> ZeroTerminate]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> RequestAckCode, body |-> ZeroRequestAck]],
+      [ZeroServerTcpFrame EXCEPT !.serverPayload = [tag |-> RequestRejectCode, body |-> ZeroRequestReject]] }
 
 (***************************************************************************)
 (* Server Tcp Packet                                                       *)
@@ -5105,6 +5131,14 @@ RoundTripUIntLE ==
                 /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
                 /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
+
+(* Every Server Technical Header decodes back to what was encoded, and leaves nothing over *)
+RoundTripServerTechnicalHeader ==
+    \A message \in CheckedServerTechnicalHeader :
+        LET read == DecodeServerTechnicalHeader(EncodeServerTechnicalHeader(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
 
 (* Every Channel Reset Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripChannelResetGroup ==
@@ -5810,14 +5844,6 @@ RoundTripRequestReject ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Server Tcp Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripServerTcpMessage ==
-    \A message \in CheckedServerTcpMessage :
-        LET read == DecodeServerTcpMessage(EncodeServerTcpMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
 (* Every Server Tcp Frame decodes back to what was encoded, and leaves nothing over *)
 RoundTripServerTcpFrame ==
     \A message \in CheckedServerTcpFrame :
@@ -5840,7 +5866,7 @@ SelectsServerPayload ==
         LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
         IN  read.ok /\ read.value.tag = message.tag
 
-(* Tcp Message Size is written from the bytes it frames *)
+(* Message Size is written from the bytes it frames *)
 FramesServerTcpFrame ==
     \A message \in CheckedServerTcpFrame :
         LET bytes == EncodeServerTcpFrame(message)

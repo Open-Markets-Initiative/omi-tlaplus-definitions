@@ -902,34 +902,34 @@ CheckedIncomingMessagesHeader5 ==
 
 UserGlobalCancellation ==
     [ incomingMessagesHeader : IncomingMessagesHeader5,
-      group                  : Sample(2),
-      instrument             : Sample(4),
+      groupFilter            : Sample(2),
+      instrumentFilter       : Sample(4),
       typeOfCancellation     : Sample(1),
       accountTypeFilter      : Sample(8) ]
 
 EncodeUserGlobalCancellation(message) ==
     EncodeIncomingMessagesHeader5(message.incomingMessagesHeader)
-        \o message.group
-        \o message.instrument
+        \o message.groupFilter
+        \o message.instrumentFilter
         \o message.typeOfCancellation
         \o message.accountTypeFilter
 
 DecodeUserGlobalCancellation(bytes) ==
     LET incomingMessagesHeader == DecodeIncomingMessagesHeader5(bytes) IN IF ~incomingMessagesHeader.ok THEN Fail ELSE
-    LET group == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~group.ok THEN Fail ELSE
-    LET instrument == ReadBytes(group.rest, 4) IN IF ~instrument.ok THEN Fail ELSE
-    LET typeOfCancellation == ReadBytes(instrument.rest, 1) IN IF ~typeOfCancellation.ok THEN Fail ELSE
+    LET groupFilter == ReadBytes(incomingMessagesHeader.rest, 2) IN IF ~groupFilter.ok THEN Fail ELSE
+    LET instrumentFilter == ReadBytes(groupFilter.rest, 4) IN IF ~instrumentFilter.ok THEN Fail ELSE
+    LET typeOfCancellation == ReadBytes(instrumentFilter.rest, 1) IN IF ~typeOfCancellation.ok THEN Fail ELSE
     LET accountTypeFilter == ReadBytes(typeOfCancellation.rest, 8) IN IF ~accountTypeFilter.ok THEN Fail ELSE
     Ok([ incomingMessagesHeader |-> incomingMessagesHeader.value,
-         group                  |-> group.value,
-         instrument             |-> instrument.value,
+         groupFilter            |-> groupFilter.value,
+         instrumentFilter       |-> instrumentFilter.value,
          typeOfCancellation     |-> typeOfCancellation.value,
          accountTypeFilter      |-> accountTypeFilter.value ], accountTypeFilter.rest)
 
 ZeroUserGlobalCancellation ==
     [ incomingMessagesHeader |-> ZeroIncomingMessagesHeader5,
-      group                  |-> [i \in 1 .. 2 |-> 0],
-      instrument             |-> [i \in 1 .. 4 |-> 0],
+      groupFilter            |-> [i \in 1 .. 2 |-> 0],
+      instrumentFilter       |-> [i \in 1 .. 4 |-> 0],
       typeOfCancellation     |-> [i \in 1 .. 1 |-> 0],
       accountTypeFilter      |-> [i \in 1 .. 8 |-> 0] ]
 
@@ -937,8 +937,8 @@ ZeroUserGlobalCancellation ==
 CheckedUserGlobalCancellation ==
     { ZeroUserGlobalCancellation }
         \cup { [ZeroUserGlobalCancellation EXCEPT !.incomingMessagesHeader = one] : one \in CheckedIncomingMessagesHeader5 }
-        \cup { [ZeroUserGlobalCancellation EXCEPT !.group = one] : one \in Sample(2) }
-        \cup { [ZeroUserGlobalCancellation EXCEPT !.instrument = one] : one \in Sample(4) }
+        \cup { [ZeroUserGlobalCancellation EXCEPT !.groupFilter = one] : one \in Sample(2) }
+        \cup { [ZeroUserGlobalCancellation EXCEPT !.instrumentFilter = one] : one \in Sample(4) }
         \cup { [ZeroUserGlobalCancellation EXCEPT !.typeOfCancellation = one] : one \in Sample(1) }
         \cup { [ZeroUserGlobalCancellation EXCEPT !.accountTypeFilter = one] : one \in Sample(8) }
 

@@ -1915,38 +1915,38 @@ CheckedOutgoingMessagesHeader12 ==
 (***************************************************************************)
 
 RiskLimitsUsageOccurrence ==
-    [ trader       : Sample(4),
-      group        : Sample(2),
+    [ usageTrader  : Sample(4),
+      usageGroup   : Sample(2),
       usageStatus  : Sample(1),
       limitType    : Sample(1),
       currentUsage : Sample(10),
       limitValue   : Sample(10) ]
 
 EncodeRiskLimitsUsageOccurrence(message) ==
-    message.trader
-        \o message.group
+    message.usageTrader
+        \o message.usageGroup
         \o message.usageStatus
         \o message.limitType
         \o message.currentUsage
         \o message.limitValue
 
 DecodeRiskLimitsUsageOccurrence(bytes) ==
-    LET trader == ReadBytes(bytes, 4) IN IF ~trader.ok THEN Fail ELSE
-    LET group == ReadBytes(trader.rest, 2) IN IF ~group.ok THEN Fail ELSE
-    LET usageStatus == ReadBytes(group.rest, 1) IN IF ~usageStatus.ok THEN Fail ELSE
+    LET usageTrader == ReadBytes(bytes, 4) IN IF ~usageTrader.ok THEN Fail ELSE
+    LET usageGroup == ReadBytes(usageTrader.rest, 2) IN IF ~usageGroup.ok THEN Fail ELSE
+    LET usageStatus == ReadBytes(usageGroup.rest, 1) IN IF ~usageStatus.ok THEN Fail ELSE
     LET limitType == ReadBytes(usageStatus.rest, 1) IN IF ~limitType.ok THEN Fail ELSE
     LET currentUsage == ReadBytes(limitType.rest, 10) IN IF ~currentUsage.ok THEN Fail ELSE
     LET limitValue == ReadBytes(currentUsage.rest, 10) IN IF ~limitValue.ok THEN Fail ELSE
-    Ok([ trader       |-> trader.value,
-         group        |-> group.value,
+    Ok([ usageTrader  |-> usageTrader.value,
+         usageGroup   |-> usageGroup.value,
          usageStatus  |-> usageStatus.value,
          limitType    |-> limitType.value,
          currentUsage |-> currentUsage.value,
          limitValue   |-> limitValue.value ], limitValue.rest)
 
 ZeroRiskLimitsUsageOccurrence ==
-    [ trader       |-> [i \in 1 .. 4 |-> 0],
-      group        |-> [i \in 1 .. 2 |-> 0],
+    [ usageTrader  |-> [i \in 1 .. 4 |-> 0],
+      usageGroup   |-> [i \in 1 .. 2 |-> 0],
       usageStatus  |-> [i \in 1 .. 1 |-> 0],
       limitType    |-> [i \in 1 .. 1 |-> 0],
       currentUsage |-> [i \in 1 .. 10 |-> 0],
@@ -1955,8 +1955,8 @@ ZeroRiskLimitsUsageOccurrence ==
 (* Risk Limits Usage Occurrence at zero, then each field in turn at the values it is checked at *)
 CheckedRiskLimitsUsageOccurrence ==
     { ZeroRiskLimitsUsageOccurrence }
-        \cup { [ZeroRiskLimitsUsageOccurrence EXCEPT !.trader = one] : one \in Sample(4) }
-        \cup { [ZeroRiskLimitsUsageOccurrence EXCEPT !.group = one] : one \in Sample(2) }
+        \cup { [ZeroRiskLimitsUsageOccurrence EXCEPT !.usageTrader = one] : one \in Sample(4) }
+        \cup { [ZeroRiskLimitsUsageOccurrence EXCEPT !.usageGroup = one] : one \in Sample(2) }
         \cup { [ZeroRiskLimitsUsageOccurrence EXCEPT !.usageStatus = one] : one \in Sample(1) }
         \cup { [ZeroRiskLimitsUsageOccurrence EXCEPT !.limitType = one] : one \in Sample(1) }
         \cup { [ZeroRiskLimitsUsageOccurrence EXCEPT !.currentUsage = one] : one \in Sample(10) }
