@@ -516,17 +516,17 @@ StatisticsSnapshotMessage ==
       instrument               : Sample(8),
       sourceVenue              : Sample(2),
       volume                   : Sample(8),
-      volumeOnbookOnly         : Sample(8),
+      volumeOnBookOnly         : Sample(8),
       vwap                     : Sample(8),
-      vwapOnbookOnly           : Sample(8),
+      vwapOnBookOnly           : Sample(8),
       numberOfTrades           : Sample(4),
-      numberOfTradesOnbookOnly : Sample(4),
+      numberOfTradesOnBookOnly : Sample(4),
       turnover                 : Sample(8),
-      turnoverOnbookOnly       : Sample(8),
+      turnoverOnBookOnly       : Sample(8),
       officialOpeningPrice     : Sample(8),
       officialClosingPrice     : Sample(8),
-      tradeHighOnbookOnly      : Sample(8),
-      tradeLowOnbookOnly       : Sample(8),
+      tradeHighOnBookOnly      : Sample(8),
+      tradeLowOnBookOnly       : Sample(8),
       tradeHigh                : Sample(8),
       tradeLow                 : Sample(8),
       fiftyTwoWeekTradeHigh    : Sample(8),
@@ -557,17 +557,17 @@ EncodeStatisticsSnapshotMessage(message) ==
         \o message.instrument
         \o message.sourceVenue
         \o message.volume
-        \o message.volumeOnbookOnly
+        \o message.volumeOnBookOnly
         \o message.vwap
-        \o message.vwapOnbookOnly
+        \o message.vwapOnBookOnly
         \o message.numberOfTrades
-        \o message.numberOfTradesOnbookOnly
+        \o message.numberOfTradesOnBookOnly
         \o message.turnover
-        \o message.turnoverOnbookOnly
+        \o message.turnoverOnBookOnly
         \o message.officialOpeningPrice
         \o message.officialClosingPrice
-        \o message.tradeHighOnbookOnly
-        \o message.tradeLowOnbookOnly
+        \o message.tradeHighOnBookOnly
+        \o message.tradeLowOnBookOnly
         \o message.tradeHigh
         \o message.tradeLow
         \o message.fiftyTwoWeekTradeHigh
@@ -598,18 +598,18 @@ DecodeStatisticsSnapshotMessage(bytes) ==
     LET instrument == ReadBytes(timestamp.rest, 8) IN IF ~instrument.ok THEN Fail ELSE
     LET sourceVenue == ReadBytes(instrument.rest, 2) IN IF ~sourceVenue.ok THEN Fail ELSE
     LET volume == ReadBytes(sourceVenue.rest, 8) IN IF ~volume.ok THEN Fail ELSE
-    LET volumeOnbookOnly == ReadBytes(volume.rest, 8) IN IF ~volumeOnbookOnly.ok THEN Fail ELSE
-    LET vwap == ReadBytes(volumeOnbookOnly.rest, 8) IN IF ~vwap.ok THEN Fail ELSE
-    LET vwapOnbookOnly == ReadBytes(vwap.rest, 8) IN IF ~vwapOnbookOnly.ok THEN Fail ELSE
-    LET numberOfTrades == ReadBytes(vwapOnbookOnly.rest, 4) IN IF ~numberOfTrades.ok THEN Fail ELSE
-    LET numberOfTradesOnbookOnly == ReadBytes(numberOfTrades.rest, 4) IN IF ~numberOfTradesOnbookOnly.ok THEN Fail ELSE
-    LET turnover == ReadBytes(numberOfTradesOnbookOnly.rest, 8) IN IF ~turnover.ok THEN Fail ELSE
-    LET turnoverOnbookOnly == ReadBytes(turnover.rest, 8) IN IF ~turnoverOnbookOnly.ok THEN Fail ELSE
-    LET officialOpeningPrice == ReadBytes(turnoverOnbookOnly.rest, 8) IN IF ~officialOpeningPrice.ok THEN Fail ELSE
+    LET volumeOnBookOnly == ReadBytes(volume.rest, 8) IN IF ~volumeOnBookOnly.ok THEN Fail ELSE
+    LET vwap == ReadBytes(volumeOnBookOnly.rest, 8) IN IF ~vwap.ok THEN Fail ELSE
+    LET vwapOnBookOnly == ReadBytes(vwap.rest, 8) IN IF ~vwapOnBookOnly.ok THEN Fail ELSE
+    LET numberOfTrades == ReadBytes(vwapOnBookOnly.rest, 4) IN IF ~numberOfTrades.ok THEN Fail ELSE
+    LET numberOfTradesOnBookOnly == ReadBytes(numberOfTrades.rest, 4) IN IF ~numberOfTradesOnBookOnly.ok THEN Fail ELSE
+    LET turnover == ReadBytes(numberOfTradesOnBookOnly.rest, 8) IN IF ~turnover.ok THEN Fail ELSE
+    LET turnoverOnBookOnly == ReadBytes(turnover.rest, 8) IN IF ~turnoverOnBookOnly.ok THEN Fail ELSE
+    LET officialOpeningPrice == ReadBytes(turnoverOnBookOnly.rest, 8) IN IF ~officialOpeningPrice.ok THEN Fail ELSE
     LET officialClosingPrice == ReadBytes(officialOpeningPrice.rest, 8) IN IF ~officialClosingPrice.ok THEN Fail ELSE
-    LET tradeHighOnbookOnly == ReadBytes(officialClosingPrice.rest, 8) IN IF ~tradeHighOnbookOnly.ok THEN Fail ELSE
-    LET tradeLowOnbookOnly == ReadBytes(tradeHighOnbookOnly.rest, 8) IN IF ~tradeLowOnbookOnly.ok THEN Fail ELSE
-    LET tradeHigh == ReadBytes(tradeLowOnbookOnly.rest, 8) IN IF ~tradeHigh.ok THEN Fail ELSE
+    LET tradeHighOnBookOnly == ReadBytes(officialClosingPrice.rest, 8) IN IF ~tradeHighOnBookOnly.ok THEN Fail ELSE
+    LET tradeLowOnBookOnly == ReadBytes(tradeHighOnBookOnly.rest, 8) IN IF ~tradeLowOnBookOnly.ok THEN Fail ELSE
+    LET tradeHigh == ReadBytes(tradeLowOnBookOnly.rest, 8) IN IF ~tradeHigh.ok THEN Fail ELSE
     LET tradeLow == ReadBytes(tradeHigh.rest, 8) IN IF ~tradeLow.ok THEN Fail ELSE
     LET fiftyTwoWeekTradeHigh == ReadBytes(tradeLow.rest, 8) IN IF ~fiftyTwoWeekTradeHigh.ok THEN Fail ELSE
     LET fiftyTwoWeekTradeLow == ReadBytes(fiftyTwoWeekTradeHigh.rest, 8) IN IF ~fiftyTwoWeekTradeLow.ok THEN Fail ELSE
@@ -637,17 +637,17 @@ DecodeStatisticsSnapshotMessage(bytes) ==
          instrument               |-> instrument.value,
          sourceVenue              |-> sourceVenue.value,
          volume                   |-> volume.value,
-         volumeOnbookOnly         |-> volumeOnbookOnly.value,
+         volumeOnBookOnly         |-> volumeOnBookOnly.value,
          vwap                     |-> vwap.value,
-         vwapOnbookOnly           |-> vwapOnbookOnly.value,
+         vwapOnBookOnly           |-> vwapOnBookOnly.value,
          numberOfTrades           |-> numberOfTrades.value,
-         numberOfTradesOnbookOnly |-> numberOfTradesOnbookOnly.value,
+         numberOfTradesOnBookOnly |-> numberOfTradesOnBookOnly.value,
          turnover                 |-> turnover.value,
-         turnoverOnbookOnly       |-> turnoverOnbookOnly.value,
+         turnoverOnBookOnly       |-> turnoverOnBookOnly.value,
          officialOpeningPrice     |-> officialOpeningPrice.value,
          officialClosingPrice     |-> officialClosingPrice.value,
-         tradeHighOnbookOnly      |-> tradeHighOnbookOnly.value,
-         tradeLowOnbookOnly       |-> tradeLowOnbookOnly.value,
+         tradeHighOnBookOnly      |-> tradeHighOnBookOnly.value,
+         tradeLowOnBookOnly       |-> tradeLowOnBookOnly.value,
          tradeHigh                |-> tradeHigh.value,
          tradeLow                 |-> tradeLow.value,
          fiftyTwoWeekTradeHigh    |-> fiftyTwoWeekTradeHigh.value,
@@ -678,17 +678,17 @@ ZeroStatisticsSnapshotMessage ==
       instrument               |-> [i \in 1 .. 8 |-> 0],
       sourceVenue              |-> [i \in 1 .. 2 |-> 0],
       volume                   |-> [i \in 1 .. 8 |-> 0],
-      volumeOnbookOnly         |-> [i \in 1 .. 8 |-> 0],
+      volumeOnBookOnly         |-> [i \in 1 .. 8 |-> 0],
       vwap                     |-> [i \in 1 .. 8 |-> 0],
-      vwapOnbookOnly           |-> [i \in 1 .. 8 |-> 0],
+      vwapOnBookOnly           |-> [i \in 1 .. 8 |-> 0],
       numberOfTrades           |-> [i \in 1 .. 4 |-> 0],
-      numberOfTradesOnbookOnly |-> [i \in 1 .. 4 |-> 0],
+      numberOfTradesOnBookOnly |-> [i \in 1 .. 4 |-> 0],
       turnover                 |-> [i \in 1 .. 8 |-> 0],
-      turnoverOnbookOnly       |-> [i \in 1 .. 8 |-> 0],
+      turnoverOnBookOnly       |-> [i \in 1 .. 8 |-> 0],
       officialOpeningPrice     |-> [i \in 1 .. 8 |-> 0],
       officialClosingPrice     |-> [i \in 1 .. 8 |-> 0],
-      tradeHighOnbookOnly      |-> [i \in 1 .. 8 |-> 0],
-      tradeLowOnbookOnly       |-> [i \in 1 .. 8 |-> 0],
+      tradeHighOnBookOnly      |-> [i \in 1 .. 8 |-> 0],
+      tradeLowOnBookOnly       |-> [i \in 1 .. 8 |-> 0],
       tradeHigh                |-> [i \in 1 .. 8 |-> 0],
       tradeLow                 |-> [i \in 1 .. 8 |-> 0],
       fiftyTwoWeekTradeHigh    |-> [i \in 1 .. 8 |-> 0],
@@ -721,17 +721,17 @@ CheckedStatisticsSnapshotMessage ==
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.instrument = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.sourceVenue = one] : one \in Sample(2) }
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.volume = one] : one \in Sample(8) }
-        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.volumeOnbookOnly = one] : one \in Sample(8) }
+        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.volumeOnBookOnly = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.vwap = one] : one \in Sample(8) }
-        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.vwapOnbookOnly = one] : one \in Sample(8) }
+        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.vwapOnBookOnly = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.numberOfTrades = one] : one \in Sample(4) }
-        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.numberOfTradesOnbookOnly = one] : one \in Sample(4) }
+        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.numberOfTradesOnBookOnly = one] : one \in Sample(4) }
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.turnover = one] : one \in Sample(8) }
-        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.turnoverOnbookOnly = one] : one \in Sample(8) }
+        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.turnoverOnBookOnly = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.officialOpeningPrice = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.officialClosingPrice = one] : one \in Sample(8) }
-        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.tradeHighOnbookOnly = one] : one \in Sample(8) }
-        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.tradeLowOnbookOnly = one] : one \in Sample(8) }
+        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.tradeHighOnBookOnly = one] : one \in Sample(8) }
+        \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.tradeLowOnBookOnly = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.tradeHigh = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.tradeLow = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsSnapshotMessage EXCEPT !.fiftyTwoWeekTradeHigh = one] : one \in Sample(8) }
@@ -828,7 +828,7 @@ MifidIiTradeReportMessage ==
       postTradeDeferralReason                : Sample(1),
       deferralEnrichmentType                 : Sample(1),
       duplicativeIndicator                   : Sample(1),
-      thirdcountryTradingVenueOfExecution    : Sample(4),
+      thirdCountryTradingVenueOfExecution    : Sample(4),
       portfolioTransactionFlag               : Sample(4),
       contingentTransactionFlag              : Sample(4),
       missingPricePriceConditions            : Sample(4),
@@ -913,7 +913,7 @@ EncodeMifidIiTradeReportMessage(message) ==
         \o message.postTradeDeferralReason
         \o message.deferralEnrichmentType
         \o message.duplicativeIndicator
-        \o message.thirdcountryTradingVenueOfExecution
+        \o message.thirdCountryTradingVenueOfExecution
         \o message.portfolioTransactionFlag
         \o message.contingentTransactionFlag
         \o message.missingPricePriceConditions
@@ -998,8 +998,8 @@ DecodeMifidIiTradeReportMessage(bytes) ==
     LET postTradeDeferralReason == ReadBytes(algorithmicIndicator.rest, 1) IN IF ~postTradeDeferralReason.ok THEN Fail ELSE
     LET deferralEnrichmentType == ReadBytes(postTradeDeferralReason.rest, 1) IN IF ~deferralEnrichmentType.ok THEN Fail ELSE
     LET duplicativeIndicator == ReadBytes(deferralEnrichmentType.rest, 1) IN IF ~duplicativeIndicator.ok THEN Fail ELSE
-    LET thirdcountryTradingVenueOfExecution == ReadBytes(duplicativeIndicator.rest, 4) IN IF ~thirdcountryTradingVenueOfExecution.ok THEN Fail ELSE
-    LET portfolioTransactionFlag == ReadBytes(thirdcountryTradingVenueOfExecution.rest, 4) IN IF ~portfolioTransactionFlag.ok THEN Fail ELSE
+    LET thirdCountryTradingVenueOfExecution == ReadBytes(duplicativeIndicator.rest, 4) IN IF ~thirdCountryTradingVenueOfExecution.ok THEN Fail ELSE
+    LET portfolioTransactionFlag == ReadBytes(thirdCountryTradingVenueOfExecution.rest, 4) IN IF ~portfolioTransactionFlag.ok THEN Fail ELSE
     LET contingentTransactionFlag == ReadBytes(portfolioTransactionFlag.rest, 4) IN IF ~contingentTransactionFlag.ok THEN Fail ELSE
     LET missingPricePriceConditions == ReadBytes(contingentTransactionFlag.rest, 4) IN IF ~missingPricePriceConditions.ok THEN Fail ELSE
     LET marketClosingPriceFlag == ReadBytes(missingPricePriceConditions.rest, 4) IN IF ~marketClosingPriceFlag.ok THEN Fail ELSE
@@ -1081,7 +1081,7 @@ DecodeMifidIiTradeReportMessage(bytes) ==
          postTradeDeferralReason                |-> postTradeDeferralReason.value,
          deferralEnrichmentType                 |-> deferralEnrichmentType.value,
          duplicativeIndicator                   |-> duplicativeIndicator.value,
-         thirdcountryTradingVenueOfExecution    |-> thirdcountryTradingVenueOfExecution.value,
+         thirdCountryTradingVenueOfExecution    |-> thirdCountryTradingVenueOfExecution.value,
          portfolioTransactionFlag               |-> portfolioTransactionFlag.value,
          contingentTransactionFlag              |-> contingentTransactionFlag.value,
          missingPricePriceConditions            |-> missingPricePriceConditions.value,
@@ -1166,7 +1166,7 @@ ZeroMifidIiTradeReportMessage ==
       postTradeDeferralReason                |-> [i \in 1 .. 1 |-> 0],
       deferralEnrichmentType                 |-> [i \in 1 .. 1 |-> 0],
       duplicativeIndicator                   |-> [i \in 1 .. 1 |-> 0],
-      thirdcountryTradingVenueOfExecution    |-> [i \in 1 .. 4 |-> 0],
+      thirdCountryTradingVenueOfExecution    |-> [i \in 1 .. 4 |-> 0],
       portfolioTransactionFlag               |-> [i \in 1 .. 4 |-> 0],
       contingentTransactionFlag              |-> [i \in 1 .. 4 |-> 0],
       missingPricePriceConditions            |-> [i \in 1 .. 4 |-> 0],
@@ -1253,7 +1253,7 @@ CheckedMifidIiTradeReportMessage ==
         \cup { [ZeroMifidIiTradeReportMessage EXCEPT !.postTradeDeferralReason = one] : one \in Sample(1) }
         \cup { [ZeroMifidIiTradeReportMessage EXCEPT !.deferralEnrichmentType = one] : one \in Sample(1) }
         \cup { [ZeroMifidIiTradeReportMessage EXCEPT !.duplicativeIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroMifidIiTradeReportMessage EXCEPT !.thirdcountryTradingVenueOfExecution = one] : one \in Sample(4) }
+        \cup { [ZeroMifidIiTradeReportMessage EXCEPT !.thirdCountryTradingVenueOfExecution = one] : one \in Sample(4) }
         \cup { [ZeroMifidIiTradeReportMessage EXCEPT !.portfolioTransactionFlag = one] : one \in Sample(4) }
         \cup { [ZeroMifidIiTradeReportMessage EXCEPT !.contingentTransactionFlag = one] : one \in Sample(4) }
         \cup { [ZeroMifidIiTradeReportMessage EXCEPT !.missingPricePriceConditions = one] : one \in Sample(4) }

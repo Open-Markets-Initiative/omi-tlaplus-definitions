@@ -1078,63 +1078,63 @@ StatisticsMessage ==
       instrument               : Sample(8),
       sourceVenue              : Sample(2),
       volume                   : Sample(8),
-      volumeOnbookOnly         : Sample(8),
+      volumeOnBookOnly         : Sample(8),
       vwap                     : Sample(8),
-      vwapOnbookOnly           : Sample(8),
+      vwapOnBookOnly           : Sample(8),
       numberOfTrades           : Sample(4),
-      numberOfTradesOnbookOnly : Sample(4),
+      numberOfTradesOnBookOnly : Sample(4),
       turnover                 : Sample(8),
-      turnoverOnbookOnly       : Sample(8) ]
+      turnoverOnBookOnly       : Sample(8) ]
 
 EncodeStatisticsMessage(message) ==
     message.timestamp
         \o message.instrument
         \o message.sourceVenue
         \o message.volume
-        \o message.volumeOnbookOnly
+        \o message.volumeOnBookOnly
         \o message.vwap
-        \o message.vwapOnbookOnly
+        \o message.vwapOnBookOnly
         \o message.numberOfTrades
-        \o message.numberOfTradesOnbookOnly
+        \o message.numberOfTradesOnBookOnly
         \o message.turnover
-        \o message.turnoverOnbookOnly
+        \o message.turnoverOnBookOnly
 
 DecodeStatisticsMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET instrument == ReadBytes(timestamp.rest, 8) IN IF ~instrument.ok THEN Fail ELSE
     LET sourceVenue == ReadBytes(instrument.rest, 2) IN IF ~sourceVenue.ok THEN Fail ELSE
     LET volume == ReadBytes(sourceVenue.rest, 8) IN IF ~volume.ok THEN Fail ELSE
-    LET volumeOnbookOnly == ReadBytes(volume.rest, 8) IN IF ~volumeOnbookOnly.ok THEN Fail ELSE
-    LET vwap == ReadBytes(volumeOnbookOnly.rest, 8) IN IF ~vwap.ok THEN Fail ELSE
-    LET vwapOnbookOnly == ReadBytes(vwap.rest, 8) IN IF ~vwapOnbookOnly.ok THEN Fail ELSE
-    LET numberOfTrades == ReadBytes(vwapOnbookOnly.rest, 4) IN IF ~numberOfTrades.ok THEN Fail ELSE
-    LET numberOfTradesOnbookOnly == ReadBytes(numberOfTrades.rest, 4) IN IF ~numberOfTradesOnbookOnly.ok THEN Fail ELSE
-    LET turnover == ReadBytes(numberOfTradesOnbookOnly.rest, 8) IN IF ~turnover.ok THEN Fail ELSE
-    LET turnoverOnbookOnly == ReadBytes(turnover.rest, 8) IN IF ~turnoverOnbookOnly.ok THEN Fail ELSE
+    LET volumeOnBookOnly == ReadBytes(volume.rest, 8) IN IF ~volumeOnBookOnly.ok THEN Fail ELSE
+    LET vwap == ReadBytes(volumeOnBookOnly.rest, 8) IN IF ~vwap.ok THEN Fail ELSE
+    LET vwapOnBookOnly == ReadBytes(vwap.rest, 8) IN IF ~vwapOnBookOnly.ok THEN Fail ELSE
+    LET numberOfTrades == ReadBytes(vwapOnBookOnly.rest, 4) IN IF ~numberOfTrades.ok THEN Fail ELSE
+    LET numberOfTradesOnBookOnly == ReadBytes(numberOfTrades.rest, 4) IN IF ~numberOfTradesOnBookOnly.ok THEN Fail ELSE
+    LET turnover == ReadBytes(numberOfTradesOnBookOnly.rest, 8) IN IF ~turnover.ok THEN Fail ELSE
+    LET turnoverOnBookOnly == ReadBytes(turnover.rest, 8) IN IF ~turnoverOnBookOnly.ok THEN Fail ELSE
     Ok([ timestamp                |-> timestamp.value,
          instrument               |-> instrument.value,
          sourceVenue              |-> sourceVenue.value,
          volume                   |-> volume.value,
-         volumeOnbookOnly         |-> volumeOnbookOnly.value,
+         volumeOnBookOnly         |-> volumeOnBookOnly.value,
          vwap                     |-> vwap.value,
-         vwapOnbookOnly           |-> vwapOnbookOnly.value,
+         vwapOnBookOnly           |-> vwapOnBookOnly.value,
          numberOfTrades           |-> numberOfTrades.value,
-         numberOfTradesOnbookOnly |-> numberOfTradesOnbookOnly.value,
+         numberOfTradesOnBookOnly |-> numberOfTradesOnBookOnly.value,
          turnover                 |-> turnover.value,
-         turnoverOnbookOnly       |-> turnoverOnbookOnly.value ], turnoverOnbookOnly.rest)
+         turnoverOnBookOnly       |-> turnoverOnBookOnly.value ], turnoverOnBookOnly.rest)
 
 ZeroStatisticsMessage ==
     [ timestamp                |-> [i \in 1 .. 8 |-> 0],
       instrument               |-> [i \in 1 .. 8 |-> 0],
       sourceVenue              |-> [i \in 1 .. 2 |-> 0],
       volume                   |-> [i \in 1 .. 8 |-> 0],
-      volumeOnbookOnly         |-> [i \in 1 .. 8 |-> 0],
+      volumeOnBookOnly         |-> [i \in 1 .. 8 |-> 0],
       vwap                     |-> [i \in 1 .. 8 |-> 0],
-      vwapOnbookOnly           |-> [i \in 1 .. 8 |-> 0],
+      vwapOnBookOnly           |-> [i \in 1 .. 8 |-> 0],
       numberOfTrades           |-> [i \in 1 .. 4 |-> 0],
-      numberOfTradesOnbookOnly |-> [i \in 1 .. 4 |-> 0],
+      numberOfTradesOnBookOnly |-> [i \in 1 .. 4 |-> 0],
       turnover                 |-> [i \in 1 .. 8 |-> 0],
-      turnoverOnbookOnly       |-> [i \in 1 .. 8 |-> 0] ]
+      turnoverOnBookOnly       |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Statistics Message at zero, then each field in turn at the values it is checked at *)
 CheckedStatisticsMessage ==
@@ -1143,13 +1143,13 @@ CheckedStatisticsMessage ==
         \cup { [ZeroStatisticsMessage EXCEPT !.instrument = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsMessage EXCEPT !.sourceVenue = one] : one \in Sample(2) }
         \cup { [ZeroStatisticsMessage EXCEPT !.volume = one] : one \in Sample(8) }
-        \cup { [ZeroStatisticsMessage EXCEPT !.volumeOnbookOnly = one] : one \in Sample(8) }
+        \cup { [ZeroStatisticsMessage EXCEPT !.volumeOnBookOnly = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsMessage EXCEPT !.vwap = one] : one \in Sample(8) }
-        \cup { [ZeroStatisticsMessage EXCEPT !.vwapOnbookOnly = one] : one \in Sample(8) }
+        \cup { [ZeroStatisticsMessage EXCEPT !.vwapOnBookOnly = one] : one \in Sample(8) }
         \cup { [ZeroStatisticsMessage EXCEPT !.numberOfTrades = one] : one \in Sample(4) }
-        \cup { [ZeroStatisticsMessage EXCEPT !.numberOfTradesOnbookOnly = one] : one \in Sample(4) }
+        \cup { [ZeroStatisticsMessage EXCEPT !.numberOfTradesOnBookOnly = one] : one \in Sample(4) }
         \cup { [ZeroStatisticsMessage EXCEPT !.turnover = one] : one \in Sample(8) }
-        \cup { [ZeroStatisticsMessage EXCEPT !.turnoverOnbookOnly = one] : one \in Sample(8) }
+        \cup { [ZeroStatisticsMessage EXCEPT !.turnoverOnBookOnly = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Statistics Update Message: 47 bytes                                     *)

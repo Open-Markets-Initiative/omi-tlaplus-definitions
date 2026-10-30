@@ -227,29 +227,29 @@ SystemEventMessage ==
     [ nanoseconds : Sample(4),
       eventCode   : Sample(1),
       version     : Sample(1),
-      subversion  : Sample(1) ]
+      subVersion  : Sample(1) ]
 
 EncodeSystemEventMessage(message) ==
     message.nanoseconds
         \o message.eventCode
         \o message.version
-        \o message.subversion
+        \o message.subVersion
 
 DecodeSystemEventMessage(bytes) ==
     LET nanoseconds == ReadBytes(bytes, 4) IN IF ~nanoseconds.ok THEN Fail ELSE
     LET eventCode == ReadBytes(nanoseconds.rest, 1) IN IF ~eventCode.ok THEN Fail ELSE
     LET version == ReadBytes(eventCode.rest, 1) IN IF ~version.ok THEN Fail ELSE
-    LET subversion == ReadBytes(version.rest, 1) IN IF ~subversion.ok THEN Fail ELSE
+    LET subVersion == ReadBytes(version.rest, 1) IN IF ~subVersion.ok THEN Fail ELSE
     Ok([ nanoseconds |-> nanoseconds.value,
          eventCode   |-> eventCode.value,
          version     |-> version.value,
-         subversion  |-> subversion.value ], subversion.rest)
+         subVersion  |-> subVersion.value ], subVersion.rest)
 
 ZeroSystemEventMessage ==
     [ nanoseconds |-> [i \in 1 .. 4 |-> 0],
       eventCode   |-> [i \in 1 .. 1 |-> 0],
       version     |-> [i \in 1 .. 1 |-> 0],
-      subversion  |-> [i \in 1 .. 1 |-> 0] ]
+      subVersion  |-> [i \in 1 .. 1 |-> 0] ]
 
 (* System Event Message at zero, then each field in turn at the values it is checked at *)
 CheckedSystemEventMessage ==
@@ -257,7 +257,7 @@ CheckedSystemEventMessage ==
         \cup { [ZeroSystemEventMessage EXCEPT !.nanoseconds = one] : one \in Sample(4) }
         \cup { [ZeroSystemEventMessage EXCEPT !.eventCode = one] : one \in Sample(1) }
         \cup { [ZeroSystemEventMessage EXCEPT !.version = one] : one \in Sample(1) }
-        \cup { [ZeroSystemEventMessage EXCEPT !.subversion = one] : one \in Sample(1) }
+        \cup { [ZeroSystemEventMessage EXCEPT !.subVersion = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Options Directory Message: 39 bytes                                     *)

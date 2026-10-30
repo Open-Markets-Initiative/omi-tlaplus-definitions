@@ -110,7 +110,7 @@ SystemEventMessage ==
       currentMonth : Sample(1),
       currentDay   : Sample(1),
       version      : Sample(1),
-      subversion   : Sample(1) ]
+      subVersion   : Sample(1) ]
 
 EncodeSystemEventMessage(message) ==
     message.timestamp
@@ -119,7 +119,7 @@ EncodeSystemEventMessage(message) ==
         \o message.currentMonth
         \o message.currentDay
         \o message.version
-        \o message.subversion
+        \o message.subVersion
 
 DecodeSystemEventMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 6) IN IF ~timestamp.ok THEN Fail ELSE
@@ -128,14 +128,14 @@ DecodeSystemEventMessage(bytes) ==
     LET currentMonth == ReadBytes(currentYear.rest, 1) IN IF ~currentMonth.ok THEN Fail ELSE
     LET currentDay == ReadBytes(currentMonth.rest, 1) IN IF ~currentDay.ok THEN Fail ELSE
     LET version == ReadBytes(currentDay.rest, 1) IN IF ~version.ok THEN Fail ELSE
-    LET subversion == ReadBytes(version.rest, 1) IN IF ~subversion.ok THEN Fail ELSE
+    LET subVersion == ReadBytes(version.rest, 1) IN IF ~subVersion.ok THEN Fail ELSE
     Ok([ timestamp    |-> timestamp.value,
          eventCode    |-> eventCode.value,
          currentYear  |-> currentYear.value,
          currentMonth |-> currentMonth.value,
          currentDay   |-> currentDay.value,
          version      |-> version.value,
-         subversion   |-> subversion.value ], subversion.rest)
+         subVersion   |-> subVersion.value ], subVersion.rest)
 
 ZeroSystemEventMessage ==
     [ timestamp    |-> [i \in 1 .. 6 |-> 0],
@@ -144,7 +144,7 @@ ZeroSystemEventMessage ==
       currentMonth |-> [i \in 1 .. 1 |-> 0],
       currentDay   |-> [i \in 1 .. 1 |-> 0],
       version      |-> [i \in 1 .. 1 |-> 0],
-      subversion   |-> [i \in 1 .. 1 |-> 0] ]
+      subVersion   |-> [i \in 1 .. 1 |-> 0] ]
 
 (* System Event Message at zero, then each field in turn at the values it is checked at *)
 CheckedSystemEventMessage ==
@@ -155,7 +155,7 @@ CheckedSystemEventMessage ==
         \cup { [ZeroSystemEventMessage EXCEPT !.currentMonth = one] : one \in Sample(1) }
         \cup { [ZeroSystemEventMessage EXCEPT !.currentDay = one] : one \in Sample(1) }
         \cup { [ZeroSystemEventMessage EXCEPT !.version = one] : one \in Sample(1) }
-        \cup { [ZeroSystemEventMessage EXCEPT !.subversion = one] : one \in Sample(1) }
+        \cup { [ZeroSystemEventMessage EXCEPT !.subVersion = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Leg Information: 28 bytes                                               *)

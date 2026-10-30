@@ -425,6 +425,34 @@ CheckedTickTableDataMessage ==
         \cup { [ZeroTickTableDataMessage EXCEPT !.tickSize = one] : one \in Sample(8) }
 
 (***************************************************************************)
+(* Lot Size Composite: 9 bytes                                             *)
+(***************************************************************************)
+
+LotSizeComposite ==
+    [ lotSize        : Sample(8),
+      lotSizeDecimal : Sample(1) ]
+
+EncodeLotSizeComposite(message) ==
+    message.lotSize
+        \o message.lotSizeDecimal
+
+DecodeLotSizeComposite(bytes) ==
+    LET lotSize == ReadBytes(bytes, 8) IN IF ~lotSize.ok THEN Fail ELSE
+    LET lotSizeDecimal == ReadBytes(lotSize.rest, 1) IN IF ~lotSizeDecimal.ok THEN Fail ELSE
+    Ok([ lotSize        |-> lotSize.value,
+         lotSizeDecimal |-> lotSizeDecimal.value ], lotSizeDecimal.rest)
+
+ZeroLotSizeComposite ==
+    [ lotSize        |-> [i \in 1 .. 8 |-> 0],
+      lotSizeDecimal |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Lot Size Composite at zero, then each field in turn at the values it is checked at *)
+CheckedLotSizeComposite ==
+    { ZeroLotSizeComposite }
+        \cup { [ZeroLotSizeComposite EXCEPT !.lotSize = one] : one \in Sample(8) }
+        \cup { [ZeroLotSizeComposite EXCEPT !.lotSizeDecimal = one] : one \in Sample(1) }
+
+(***************************************************************************)
 (* Security Definition Message: 59 bytes                                   *)
 (***************************************************************************)
 
@@ -437,8 +465,7 @@ SecurityDefinitionMessage ==
       tickTableId             : Sample(1),
       securityDefinitionFlags : Sample(2),
       reserved20              : Sample(20),
-      lotSize                 : Sample(8),
-      lotSizeDecimal          : Sample(1) ]
+      lotSizeComposite        : LotSizeComposite ]
 
 EncodeSecurityDefinitionMessage(message) ==
     message.securityId
@@ -449,8 +476,7 @@ EncodeSecurityDefinitionMessage(message) ==
         \o message.tickTableId
         \o message.securityDefinitionFlags
         \o message.reserved20
-        \o message.lotSize
-        \o message.lotSizeDecimal
+        \o EncodeLotSizeComposite(message.lotSizeComposite)
 
 DecodeSecurityDefinitionMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
@@ -461,8 +487,7 @@ DecodeSecurityDefinitionMessage(bytes) ==
     LET tickTableId == ReadBytes(mic.rest, 1) IN IF ~tickTableId.ok THEN Fail ELSE
     LET securityDefinitionFlags == ReadBytes(tickTableId.rest, 2) IN IF ~securityDefinitionFlags.ok THEN Fail ELSE
     LET reserved20 == ReadBytes(securityDefinitionFlags.rest, 20) IN IF ~reserved20.ok THEN Fail ELSE
-    LET lotSize == ReadBytes(reserved20.rest, 8) IN IF ~lotSize.ok THEN Fail ELSE
-    LET lotSizeDecimal == ReadBytes(lotSize.rest, 1) IN IF ~lotSizeDecimal.ok THEN Fail ELSE
+    LET lotSizeComposite == DecodeLotSizeComposite(reserved20.rest) IN IF ~lotSizeComposite.ok THEN Fail ELSE
     Ok([ securityId              |-> securityId.value,
          umtf                    |-> umtf.value,
          isin                    |-> isin.value,
@@ -471,8 +496,7 @@ DecodeSecurityDefinitionMessage(bytes) ==
          tickTableId             |-> tickTableId.value,
          securityDefinitionFlags |-> securityDefinitionFlags.value,
          reserved20              |-> reserved20.value,
-         lotSize                 |-> lotSize.value,
-         lotSizeDecimal          |-> lotSizeDecimal.value ], lotSizeDecimal.rest)
+         lotSizeComposite        |-> lotSizeComposite.value ], lotSizeComposite.rest)
 
 ZeroSecurityDefinitionMessage ==
     [ securityId              |-> [i \in 1 .. 2 |-> 0],
@@ -483,8 +507,7 @@ ZeroSecurityDefinitionMessage ==
       tickTableId             |-> [i \in 1 .. 1 |-> 0],
       securityDefinitionFlags |-> [i \in 1 .. 2 |-> 0],
       reserved20              |-> [i \in 1 .. 20 |-> 0],
-      lotSize                 |-> [i \in 1 .. 8 |-> 0],
-      lotSizeDecimal          |-> [i \in 1 .. 1 |-> 0] ]
+      lotSizeComposite        |-> ZeroLotSizeComposite ]
 
 (* Security Definition Message at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionMessage ==
@@ -497,8 +520,7 @@ CheckedSecurityDefinitionMessage ==
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.tickTableId = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.securityDefinitionFlags = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.reserved20 = one] : one \in Sample(20) }
-        \cup { [ZeroSecurityDefinitionMessage EXCEPT !.lotSize = one] : one \in Sample(8) }
-        \cup { [ZeroSecurityDefinitionMessage EXCEPT !.lotSizeDecimal = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityDefinitionMessage EXCEPT !.lotSizeComposite = one] : one \in CheckedLotSizeComposite }
 
 (***************************************************************************)
 (* Security Status Message: 13 bytes                                       *)
@@ -857,6 +879,14 @@ RoundTripTradeBustMessage ==
 RoundTripTickTableDataMessage ==
     \A message \in CheckedTickTableDataMessage :
         LET read == DecodeTickTableDataMessage(EncodeTickTableDataMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Lot Size Composite decodes back to what was encoded, and leaves nothing over *)
+RoundTripLotSizeComposite ==
+    \A message \in CheckedLotSizeComposite :
+        LET read == DecodeLotSizeComposite(EncodeLotSizeComposite(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

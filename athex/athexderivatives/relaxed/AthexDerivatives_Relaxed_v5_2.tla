@@ -156,7 +156,7 @@ ApaPostTradeMessage ==
       expiryDate                             : Sample(8),
       deliveryType                           : Sample(4),
       typeEmissionAllowance                  : Sample(4),
-      otcPosttradeIndicator                  : Sample(4),
+      otcPostTradeIndicator                  : Sample(4),
       deferralIndicator                      : Sample(1),
       lmtf                                   : Sample(1),
       fulf                                   : Sample(1),
@@ -203,7 +203,7 @@ EncodeApaPostTradeMessage(message) ==
         \o message.expiryDate
         \o message.deliveryType
         \o message.typeEmissionAllowance
-        \o message.otcPosttradeIndicator
+        \o message.otcPostTradeIndicator
         \o message.deferralIndicator
         \o message.lmtf
         \o message.fulf
@@ -250,8 +250,8 @@ DecodeApaPostTradeMessage(bytes) ==
     LET expiryDate == ReadBytes(maturityDate.rest, 8) IN IF ~expiryDate.ok THEN Fail ELSE
     LET deliveryType == ReadBytes(expiryDate.rest, 4) IN IF ~deliveryType.ok THEN Fail ELSE
     LET typeEmissionAllowance == ReadBytes(deliveryType.rest, 4) IN IF ~typeEmissionAllowance.ok THEN Fail ELSE
-    LET otcPosttradeIndicator == ReadBytes(typeEmissionAllowance.rest, 4) IN IF ~otcPosttradeIndicator.ok THEN Fail ELSE
-    LET deferralIndicator == ReadBytes(otcPosttradeIndicator.rest, 1) IN IF ~deferralIndicator.ok THEN Fail ELSE
+    LET otcPostTradeIndicator == ReadBytes(typeEmissionAllowance.rest, 4) IN IF ~otcPostTradeIndicator.ok THEN Fail ELSE
+    LET deferralIndicator == ReadBytes(otcPostTradeIndicator.rest, 1) IN IF ~deferralIndicator.ok THEN Fail ELSE
     LET lmtf == ReadBytes(deferralIndicator.rest, 1) IN IF ~lmtf.ok THEN Fail ELSE
     LET fulf == ReadBytes(lmtf.rest, 1) IN IF ~fulf.ok THEN Fail ELSE
     LET datf == ReadBytes(fulf.rest, 1) IN IF ~datf.ok THEN Fail ELSE
@@ -295,7 +295,7 @@ DecodeApaPostTradeMessage(bytes) ==
          expiryDate                             |-> expiryDate.value,
          deliveryType                           |-> deliveryType.value,
          typeEmissionAllowance                  |-> typeEmissionAllowance.value,
-         otcPosttradeIndicator                  |-> otcPosttradeIndicator.value,
+         otcPostTradeIndicator                  |-> otcPostTradeIndicator.value,
          deferralIndicator                      |-> deferralIndicator.value,
          lmtf                                   |-> lmtf.value,
          fulf                                   |-> fulf.value,
@@ -342,7 +342,7 @@ ZeroApaPostTradeMessage ==
       expiryDate                             |-> [i \in 1 .. 8 |-> 0],
       deliveryType                           |-> [i \in 1 .. 4 |-> 0],
       typeEmissionAllowance                  |-> [i \in 1 .. 4 |-> 0],
-      otcPosttradeIndicator                  |-> [i \in 1 .. 4 |-> 0],
+      otcPostTradeIndicator                  |-> [i \in 1 .. 4 |-> 0],
       deferralIndicator                      |-> [i \in 1 .. 1 |-> 0],
       lmtf                                   |-> [i \in 1 .. 1 |-> 0],
       fulf                                   |-> [i \in 1 .. 1 |-> 0],
@@ -391,7 +391,7 @@ CheckedApaPostTradeMessage ==
         \cup { [ZeroApaPostTradeMessage EXCEPT !.expiryDate = one] : one \in Sample(8) }
         \cup { [ZeroApaPostTradeMessage EXCEPT !.deliveryType = one] : one \in Sample(4) }
         \cup { [ZeroApaPostTradeMessage EXCEPT !.typeEmissionAllowance = one] : one \in Sample(4) }
-        \cup { [ZeroApaPostTradeMessage EXCEPT !.otcPosttradeIndicator = one] : one \in Sample(4) }
+        \cup { [ZeroApaPostTradeMessage EXCEPT !.otcPostTradeIndicator = one] : one \in Sample(4) }
         \cup { [ZeroApaPostTradeMessage EXCEPT !.deferralIndicator = one] : one \in Sample(1) }
         \cup { [ZeroApaPostTradeMessage EXCEPT !.lmtf = one] : one \in Sample(1) }
         \cup { [ZeroApaPostTradeMessage EXCEPT !.fulf = one] : one \in Sample(1) }

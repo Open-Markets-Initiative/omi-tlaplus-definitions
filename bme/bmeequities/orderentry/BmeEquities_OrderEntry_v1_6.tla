@@ -3648,7 +3648,7 @@ TradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage ==
       settlDate                  : Sample(4),
       transactionCategory        : Sample(1),
       lastChangeFlag             : Sample(1),
-      bencrfptFlag               : Sample(1),
+      bencRfptFlag               : Sample(1),
       tradePriceCondition        : Sample(1),
       preTradeTransparencyWaiver : Sample(1),
       deferralWaiver             : Sample(1),
@@ -3721,7 +3721,7 @@ EncodeTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage(message)
         \o message.settlDate
         \o message.transactionCategory
         \o message.lastChangeFlag
-        \o message.bencrfptFlag
+        \o message.bencRfptFlag
         \o message.tradePriceCondition
         \o message.preTradeTransparencyWaiver
         \o message.deferralWaiver
@@ -3794,8 +3794,8 @@ DecodeTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage(bytes) =
     LET settlDate == ReadBytes(buyerBolsaCode.rest, 4) IN IF ~settlDate.ok THEN Fail ELSE
     LET transactionCategory == ReadBytes(settlDate.rest, 1) IN IF ~transactionCategory.ok THEN Fail ELSE
     LET lastChangeFlag == ReadBytes(transactionCategory.rest, 1) IN IF ~lastChangeFlag.ok THEN Fail ELSE
-    LET bencrfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
-    LET tradePriceCondition == ReadBytes(bencrfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
+    LET bencRfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencRfptFlag.ok THEN Fail ELSE
+    LET tradePriceCondition == ReadBytes(bencRfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
     LET preTradeTransparencyWaiver == ReadBytes(tradePriceCondition.rest, 1) IN IF ~preTradeTransparencyWaiver.ok THEN Fail ELSE
     LET deferralWaiver == ReadBytes(preTradeTransparencyWaiver.rest, 1) IN IF ~deferralWaiver.ok THEN Fail ELSE
     LET publishDateAndTime == ReadBytes(deferralWaiver.rest, 8) IN IF ~publishDateAndTime.ok THEN Fail ELSE
@@ -3865,7 +3865,7 @@ DecodeTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage(bytes) =
          settlDate                  |-> settlDate.value,
          transactionCategory        |-> transactionCategory.value,
          lastChangeFlag             |-> lastChangeFlag.value,
-         bencrfptFlag               |-> bencrfptFlag.value,
+         bencRfptFlag               |-> bencRfptFlag.value,
          tradePriceCondition        |-> tradePriceCondition.value,
          preTradeTransparencyWaiver |-> preTradeTransparencyWaiver.value,
          deferralWaiver             |-> deferralWaiver.value,
@@ -3938,7 +3938,7 @@ ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage ==
       settlDate                  |-> [i \in 1 .. 4 |-> 0],
       transactionCategory        |-> [i \in 1 .. 1 |-> 0],
       lastChangeFlag             |-> [i \in 1 .. 1 |-> 0],
-      bencrfptFlag               |-> [i \in 1 .. 1 |-> 0],
+      bencRfptFlag               |-> [i \in 1 .. 1 |-> 0],
       tradePriceCondition        |-> [i \in 1 .. 1 |-> 0],
       preTradeTransparencyWaiver |-> [i \in 1 .. 1 |-> 0],
       deferralWaiver             |-> [i \in 1 .. 1 |-> 0],
@@ -4013,7 +4013,7 @@ CheckedTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage ==
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.settlDate = one] : one \in Sample(4) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.transactionCategory = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.lastChangeFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.bencrfptFlag = one] : one \in Sample(1) }
+        \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.bencRfptFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.tradePriceCondition = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.preTradeTransparencyWaiver = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegBuyPrivateInformationMessage EXCEPT !.deferralWaiver = one] : one \in Sample(1) }
@@ -4091,7 +4091,7 @@ TradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage ==
       settlDate                  : Sample(4),
       transactionCategory        : Sample(1),
       lastChangeFlag             : Sample(1),
-      bencrfptFlag               : Sample(1),
+      bencRfptFlag               : Sample(1),
       tradePriceCondition        : Sample(1),
       preTradeTransparencyWaiver : Sample(1),
       deferralWaiver             : Sample(1),
@@ -4164,7 +4164,7 @@ EncodeTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage(message
         \o message.settlDate
         \o message.transactionCategory
         \o message.lastChangeFlag
-        \o message.bencrfptFlag
+        \o message.bencRfptFlag
         \o message.tradePriceCondition
         \o message.preTradeTransparencyWaiver
         \o message.deferralWaiver
@@ -4237,8 +4237,8 @@ DecodeTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage(bytes) 
     LET settlDate == ReadBytes(buyerBolsaCode.rest, 4) IN IF ~settlDate.ok THEN Fail ELSE
     LET transactionCategory == ReadBytes(settlDate.rest, 1) IN IF ~transactionCategory.ok THEN Fail ELSE
     LET lastChangeFlag == ReadBytes(transactionCategory.rest, 1) IN IF ~lastChangeFlag.ok THEN Fail ELSE
-    LET bencrfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
-    LET tradePriceCondition == ReadBytes(bencrfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
+    LET bencRfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencRfptFlag.ok THEN Fail ELSE
+    LET tradePriceCondition == ReadBytes(bencRfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
     LET preTradeTransparencyWaiver == ReadBytes(tradePriceCondition.rest, 1) IN IF ~preTradeTransparencyWaiver.ok THEN Fail ELSE
     LET deferralWaiver == ReadBytes(preTradeTransparencyWaiver.rest, 1) IN IF ~deferralWaiver.ok THEN Fail ELSE
     LET publishDateAndTime == ReadBytes(deferralWaiver.rest, 8) IN IF ~publishDateAndTime.ok THEN Fail ELSE
@@ -4308,7 +4308,7 @@ DecodeTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage(bytes) 
          settlDate                  |-> settlDate.value,
          transactionCategory        |-> transactionCategory.value,
          lastChangeFlag             |-> lastChangeFlag.value,
-         bencrfptFlag               |-> bencrfptFlag.value,
+         bencRfptFlag               |-> bencRfptFlag.value,
          tradePriceCondition        |-> tradePriceCondition.value,
          preTradeTransparencyWaiver |-> preTradeTransparencyWaiver.value,
          deferralWaiver             |-> deferralWaiver.value,
@@ -4381,7 +4381,7 @@ ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage ==
       settlDate                  |-> [i \in 1 .. 4 |-> 0],
       transactionCategory        |-> [i \in 1 .. 1 |-> 0],
       lastChangeFlag             |-> [i \in 1 .. 1 |-> 0],
-      bencrfptFlag               |-> [i \in 1 .. 1 |-> 0],
+      bencRfptFlag               |-> [i \in 1 .. 1 |-> 0],
       tradePriceCondition        |-> [i \in 1 .. 1 |-> 0],
       preTradeTransparencyWaiver |-> [i \in 1 .. 1 |-> 0],
       deferralWaiver             |-> [i \in 1 .. 1 |-> 0],
@@ -4456,7 +4456,7 @@ CheckedTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage ==
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.settlDate = one] : one \in Sample(4) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.transactionCategory = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.lastChangeFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.bencrfptFlag = one] : one \in Sample(1) }
+        \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.bencRfptFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.tradePriceCondition = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.preTradeTransparencyWaiver = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation1LegSellPrivateInformationMessage EXCEPT !.deferralWaiver = one] : one \in Sample(1) }
@@ -4534,7 +4534,7 @@ TradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage ==
       settlDate                   : Sample(4),
       transactionCategory         : Sample(1),
       lastChangeFlag              : Sample(1),
-      bencrfptFlag                : Sample(1),
+      bencRfptFlag                : Sample(1),
       tradePriceCondition         : Sample(1),
       preTradeTransparencyWaiver  : Sample(1),
       deferralWaiver              : Sample(1),
@@ -4649,7 +4649,7 @@ EncodeTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage(message) =
         \o message.settlDate
         \o message.transactionCategory
         \o message.lastChangeFlag
-        \o message.bencrfptFlag
+        \o message.bencRfptFlag
         \o message.tradePriceCondition
         \o message.preTradeTransparencyWaiver
         \o message.deferralWaiver
@@ -4764,8 +4764,8 @@ DecodeTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage(bytes) ==
     LET settlDate == ReadBytes(buyerBolsaCode.rest, 4) IN IF ~settlDate.ok THEN Fail ELSE
     LET transactionCategory == ReadBytes(settlDate.rest, 1) IN IF ~transactionCategory.ok THEN Fail ELSE
     LET lastChangeFlag == ReadBytes(transactionCategory.rest, 1) IN IF ~lastChangeFlag.ok THEN Fail ELSE
-    LET bencrfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
-    LET tradePriceCondition == ReadBytes(bencrfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
+    LET bencRfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencRfptFlag.ok THEN Fail ELSE
+    LET tradePriceCondition == ReadBytes(bencRfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
     LET preTradeTransparencyWaiver == ReadBytes(tradePriceCondition.rest, 1) IN IF ~preTradeTransparencyWaiver.ok THEN Fail ELSE
     LET deferralWaiver == ReadBytes(preTradeTransparencyWaiver.rest, 1) IN IF ~deferralWaiver.ok THEN Fail ELSE
     LET publishDateAndTime == ReadBytes(deferralWaiver.rest, 8) IN IF ~publishDateAndTime.ok THEN Fail ELSE
@@ -4877,7 +4877,7 @@ DecodeTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage(bytes) ==
          settlDate                   |-> settlDate.value,
          transactionCategory         |-> transactionCategory.value,
          lastChangeFlag              |-> lastChangeFlag.value,
-         bencrfptFlag                |-> bencrfptFlag.value,
+         bencRfptFlag                |-> bencRfptFlag.value,
          tradePriceCondition         |-> tradePriceCondition.value,
          preTradeTransparencyWaiver  |-> preTradeTransparencyWaiver.value,
          deferralWaiver              |-> deferralWaiver.value,
@@ -4992,7 +4992,7 @@ ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage ==
       settlDate                   |-> [i \in 1 .. 4 |-> 0],
       transactionCategory         |-> [i \in 1 .. 1 |-> 0],
       lastChangeFlag              |-> [i \in 1 .. 1 |-> 0],
-      bencrfptFlag                |-> [i \in 1 .. 1 |-> 0],
+      bencRfptFlag                |-> [i \in 1 .. 1 |-> 0],
       tradePriceCondition         |-> [i \in 1 .. 1 |-> 0],
       preTradeTransparencyWaiver  |-> [i \in 1 .. 1 |-> 0],
       deferralWaiver              |-> [i \in 1 .. 1 |-> 0],
@@ -5109,7 +5109,7 @@ CheckedTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage ==
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.settlDate = one] : one \in Sample(4) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.transactionCategory = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.lastChangeFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.bencrfptFlag = one] : one \in Sample(1) }
+        \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.bencRfptFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.tradePriceCondition = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.preTradeTransparencyWaiver = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellation2LegsPrivateInformationMessage EXCEPT !.deferralWaiver = one] : one \in Sample(1) }

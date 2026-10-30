@@ -274,7 +274,7 @@ SubscriptionRequestMessage ==
       instrumentIndex                         : Sample(2),
       subscribeToNowDepthOfBook               : Sample(1),
       subscribeToNowPaidGivenWithBucketedSize : SampleBytes,
-      subscribeToNowwamrWithConfidenceFactor  : Sample(1),
+      subscribeToNowWamrWithConfidenceFactor  : Sample(1),
       subscribeToNowMidActivityIndicator      : Sample(1) ]
 
 EncodeSubscriptionRequestMessage(message) ==
@@ -283,7 +283,7 @@ EncodeSubscriptionRequestMessage(message) ==
         \o message.instrumentIndex
         \o message.subscribeToNowDepthOfBook
         \o message.subscribeToNowPaidGivenWithBucketedSize
-        \o message.subscribeToNowwamrWithConfidenceFactor
+        \o message.subscribeToNowWamrWithConfidenceFactor
         \o message.subscribeToNowMidActivityIndicator
 
 DecodeSubscriptionRequestMessage(bytes) ==
@@ -295,14 +295,14 @@ DecodeSubscriptionRequestMessage(bytes) ==
     LET kept == SubSeq(subscribeToNowDepthOfBook.rest, Len(subscribeToNowDepthOfBook.rest) - 1, Len(subscribeToNowDepthOfBook.rest))
         subscribeToNowPaidGivenWithBucketedSize == Ok(SubSeq(subscribeToNowDepthOfBook.rest, 1, Len(subscribeToNowDepthOfBook.rest) - 2), << >>)
     IN  IF ~subscribeToNowPaidGivenWithBucketedSize.ok \/ subscribeToNowPaidGivenWithBucketedSize.rest # << >> THEN Fail ELSE
-    LET subscribeToNowwamrWithConfidenceFactor == ReadBytes(kept, 1) IN IF ~subscribeToNowwamrWithConfidenceFactor.ok THEN Fail ELSE
-    LET subscribeToNowMidActivityIndicator == ReadBytes(subscribeToNowwamrWithConfidenceFactor.rest, 1) IN IF ~subscribeToNowMidActivityIndicator.ok THEN Fail ELSE
+    LET subscribeToNowWamrWithConfidenceFactor == ReadBytes(kept, 1) IN IF ~subscribeToNowWamrWithConfidenceFactor.ok THEN Fail ELSE
+    LET subscribeToNowMidActivityIndicator == ReadBytes(subscribeToNowWamrWithConfidenceFactor.rest, 1) IN IF ~subscribeToNowMidActivityIndicator.ok THEN Fail ELSE
     Ok([ sessionId                               |-> sessionId.value,
          subscriptionType                        |-> subscriptionType.value,
          instrumentIndex                         |-> instrumentIndex.value,
          subscribeToNowDepthOfBook               |-> subscribeToNowDepthOfBook.value,
          subscribeToNowPaidGivenWithBucketedSize |-> subscribeToNowPaidGivenWithBucketedSize.value,
-         subscribeToNowwamrWithConfidenceFactor  |-> subscribeToNowwamrWithConfidenceFactor.value,
+         subscribeToNowWamrWithConfidenceFactor  |-> subscribeToNowWamrWithConfidenceFactor.value,
          subscribeToNowMidActivityIndicator      |-> subscribeToNowMidActivityIndicator.value ], subscribeToNowMidActivityIndicator.rest)
 
 ZeroSubscriptionRequestMessage ==
@@ -311,7 +311,7 @@ ZeroSubscriptionRequestMessage ==
       instrumentIndex                         |-> [i \in 1 .. 2 |-> 0],
       subscribeToNowDepthOfBook               |-> [i \in 1 .. 1 |-> 0],
       subscribeToNowPaidGivenWithBucketedSize |-> << >>,
-      subscribeToNowwamrWithConfidenceFactor  |-> [i \in 1 .. 1 |-> 0],
+      subscribeToNowWamrWithConfidenceFactor  |-> [i \in 1 .. 1 |-> 0],
       subscribeToNowMidActivityIndicator      |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Subscription Request Message at zero, then each field in turn at the values it is checked at *)
@@ -322,7 +322,7 @@ CheckedSubscriptionRequestMessage ==
         \cup { [ZeroSubscriptionRequestMessage EXCEPT !.instrumentIndex = one] : one \in Sample(2) }
         \cup { [ZeroSubscriptionRequestMessage EXCEPT !.subscribeToNowDepthOfBook = one] : one \in Sample(1) }
         \cup { [ZeroSubscriptionRequestMessage EXCEPT !.subscribeToNowPaidGivenWithBucketedSize = one] : one \in SampleBytes }
-        \cup { [ZeroSubscriptionRequestMessage EXCEPT !.subscribeToNowwamrWithConfidenceFactor = one] : one \in Sample(1) }
+        \cup { [ZeroSubscriptionRequestMessage EXCEPT !.subscribeToNowWamrWithConfidenceFactor = one] : one \in Sample(1) }
         \cup { [ZeroSubscriptionRequestMessage EXCEPT !.subscribeToNowMidActivityIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -334,7 +334,7 @@ MassSubscriptionRequestMessage ==
       subscriptionType                        : Sample(1),
       subscribeToNowDepthOfBook               : Sample(1),
       subscribeToNowPaidGivenWithBucketedSize : SampleBytes,
-      subscribeToNowwamrWithConfidenceFactor  : Sample(1),
+      subscribeToNowWamrWithConfidenceFactor  : Sample(1),
       subscribeToNowMidActivityIndicator      : Sample(1) ]
 
 EncodeMassSubscriptionRequestMessage(message) ==
@@ -342,7 +342,7 @@ EncodeMassSubscriptionRequestMessage(message) ==
         \o message.subscriptionType
         \o message.subscribeToNowDepthOfBook
         \o message.subscribeToNowPaidGivenWithBucketedSize
-        \o message.subscribeToNowwamrWithConfidenceFactor
+        \o message.subscribeToNowWamrWithConfidenceFactor
         \o message.subscribeToNowMidActivityIndicator
 
 DecodeMassSubscriptionRequestMessage(bytes) ==
@@ -353,13 +353,13 @@ DecodeMassSubscriptionRequestMessage(bytes) ==
     LET kept == SubSeq(subscribeToNowDepthOfBook.rest, Len(subscribeToNowDepthOfBook.rest) - 1, Len(subscribeToNowDepthOfBook.rest))
         subscribeToNowPaidGivenWithBucketedSize == Ok(SubSeq(subscribeToNowDepthOfBook.rest, 1, Len(subscribeToNowDepthOfBook.rest) - 2), << >>)
     IN  IF ~subscribeToNowPaidGivenWithBucketedSize.ok \/ subscribeToNowPaidGivenWithBucketedSize.rest # << >> THEN Fail ELSE
-    LET subscribeToNowwamrWithConfidenceFactor == ReadBytes(kept, 1) IN IF ~subscribeToNowwamrWithConfidenceFactor.ok THEN Fail ELSE
-    LET subscribeToNowMidActivityIndicator == ReadBytes(subscribeToNowwamrWithConfidenceFactor.rest, 1) IN IF ~subscribeToNowMidActivityIndicator.ok THEN Fail ELSE
+    LET subscribeToNowWamrWithConfidenceFactor == ReadBytes(kept, 1) IN IF ~subscribeToNowWamrWithConfidenceFactor.ok THEN Fail ELSE
+    LET subscribeToNowMidActivityIndicator == ReadBytes(subscribeToNowWamrWithConfidenceFactor.rest, 1) IN IF ~subscribeToNowMidActivityIndicator.ok THEN Fail ELSE
     Ok([ sessionId                               |-> sessionId.value,
          subscriptionType                        |-> subscriptionType.value,
          subscribeToNowDepthOfBook               |-> subscribeToNowDepthOfBook.value,
          subscribeToNowPaidGivenWithBucketedSize |-> subscribeToNowPaidGivenWithBucketedSize.value,
-         subscribeToNowwamrWithConfidenceFactor  |-> subscribeToNowwamrWithConfidenceFactor.value,
+         subscribeToNowWamrWithConfidenceFactor  |-> subscribeToNowWamrWithConfidenceFactor.value,
          subscribeToNowMidActivityIndicator      |-> subscribeToNowMidActivityIndicator.value ], subscribeToNowMidActivityIndicator.rest)
 
 ZeroMassSubscriptionRequestMessage ==
@@ -367,7 +367,7 @@ ZeroMassSubscriptionRequestMessage ==
       subscriptionType                        |-> [i \in 1 .. 1 |-> 0],
       subscribeToNowDepthOfBook               |-> [i \in 1 .. 1 |-> 0],
       subscribeToNowPaidGivenWithBucketedSize |-> << >>,
-      subscribeToNowwamrWithConfidenceFactor  |-> [i \in 1 .. 1 |-> 0],
+      subscribeToNowWamrWithConfidenceFactor  |-> [i \in 1 .. 1 |-> 0],
       subscribeToNowMidActivityIndicator      |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Mass Subscription Request Message at zero, then each field in turn at the values it is checked at *)
@@ -377,7 +377,7 @@ CheckedMassSubscriptionRequestMessage ==
         \cup { [ZeroMassSubscriptionRequestMessage EXCEPT !.subscriptionType = one] : one \in Sample(1) }
         \cup { [ZeroMassSubscriptionRequestMessage EXCEPT !.subscribeToNowDepthOfBook = one] : one \in Sample(1) }
         \cup { [ZeroMassSubscriptionRequestMessage EXCEPT !.subscribeToNowPaidGivenWithBucketedSize = one] : one \in SampleBytes }
-        \cup { [ZeroMassSubscriptionRequestMessage EXCEPT !.subscribeToNowwamrWithConfidenceFactor = one] : one \in Sample(1) }
+        \cup { [ZeroMassSubscriptionRequestMessage EXCEPT !.subscribeToNowWamrWithConfidenceFactor = one] : one \in Sample(1) }
         \cup { [ZeroMassSubscriptionRequestMessage EXCEPT !.subscribeToNowMidActivityIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)

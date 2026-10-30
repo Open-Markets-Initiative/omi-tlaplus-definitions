@@ -358,7 +358,7 @@ EnterOrderMessageWithCrossFunctionality ==
       randomReserve               : Sample(6),
       routeDestExecBroker         : Sample(4),
       custTerminalIdSenderSubId   : Sample(32),
-      intermarketSweepEligibility : Sample(1),
+      interMarketSweepEligibility : Sample(1),
       crossType                   : Sample(1),
       customerType                : Sample(1) ]
 
@@ -384,7 +384,7 @@ EncodeEnterOrderMessageWithCrossFunctionality(message) ==
         \o message.randomReserve
         \o message.routeDestExecBroker
         \o message.custTerminalIdSenderSubId
-        \o message.intermarketSweepEligibility
+        \o message.interMarketSweepEligibility
         \o message.crossType
         \o message.customerType
 
@@ -410,8 +410,8 @@ DecodeEnterOrderMessageWithCrossFunctionality(bytes) ==
     LET randomReserve == ReadBytes(capacityRule80AIndicator.rest, 6) IN IF ~randomReserve.ok THEN Fail ELSE
     LET routeDestExecBroker == ReadBytes(randomReserve.rest, 4) IN IF ~routeDestExecBroker.ok THEN Fail ELSE
     LET custTerminalIdSenderSubId == ReadBytes(routeDestExecBroker.rest, 32) IN IF ~custTerminalIdSenderSubId.ok THEN Fail ELSE
-    LET intermarketSweepEligibility == ReadBytes(custTerminalIdSenderSubId.rest, 1) IN IF ~intermarketSweepEligibility.ok THEN Fail ELSE
-    LET crossType == ReadBytes(intermarketSweepEligibility.rest, 1) IN IF ~crossType.ok THEN Fail ELSE
+    LET interMarketSweepEligibility == ReadBytes(custTerminalIdSenderSubId.rest, 1) IN IF ~interMarketSweepEligibility.ok THEN Fail ELSE
+    LET crossType == ReadBytes(interMarketSweepEligibility.rest, 1) IN IF ~crossType.ok THEN Fail ELSE
     LET customerType == ReadBytes(crossType.rest, 1) IN IF ~customerType.ok THEN Fail ELSE
     Ok([ orderTokenClientOrderId     |-> orderTokenClientOrderId.value,
          side                        |-> side.value,
@@ -434,7 +434,7 @@ DecodeEnterOrderMessageWithCrossFunctionality(bytes) ==
          randomReserve               |-> randomReserve.value,
          routeDestExecBroker         |-> routeDestExecBroker.value,
          custTerminalIdSenderSubId   |-> custTerminalIdSenderSubId.value,
-         intermarketSweepEligibility |-> intermarketSweepEligibility.value,
+         interMarketSweepEligibility |-> interMarketSweepEligibility.value,
          crossType                   |-> crossType.value,
          customerType                |-> customerType.value ], customerType.rest)
 
@@ -460,7 +460,7 @@ ZeroEnterOrderMessageWithCrossFunctionality ==
       randomReserve               |-> [i \in 1 .. 6 |-> 0],
       routeDestExecBroker         |-> [i \in 1 .. 4 |-> 0],
       custTerminalIdSenderSubId   |-> [i \in 1 .. 32 |-> 0],
-      intermarketSweepEligibility |-> [i \in 1 .. 1 |-> 0],
+      interMarketSweepEligibility |-> [i \in 1 .. 1 |-> 0],
       crossType                   |-> [i \in 1 .. 1 |-> 0],
       customerType                |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -488,7 +488,7 @@ CheckedEnterOrderMessageWithCrossFunctionality ==
         \cup { [ZeroEnterOrderMessageWithCrossFunctionality EXCEPT !.randomReserve = one] : one \in Sample(6) }
         \cup { [ZeroEnterOrderMessageWithCrossFunctionality EXCEPT !.routeDestExecBroker = one] : one \in Sample(4) }
         \cup { [ZeroEnterOrderMessageWithCrossFunctionality EXCEPT !.custTerminalIdSenderSubId = one] : one \in Sample(32) }
-        \cup { [ZeroEnterOrderMessageWithCrossFunctionality EXCEPT !.intermarketSweepEligibility = one] : one \in Sample(1) }
+        \cup { [ZeroEnterOrderMessageWithCrossFunctionality EXCEPT !.interMarketSweepEligibility = one] : one \in Sample(1) }
         \cup { [ZeroEnterOrderMessageWithCrossFunctionality EXCEPT !.crossType = one] : one \in Sample(1) }
         \cup { [ZeroEnterOrderMessageWithCrossFunctionality EXCEPT !.customerType = one] : one \in Sample(1) }
 

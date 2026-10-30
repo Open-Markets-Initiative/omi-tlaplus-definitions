@@ -1652,10 +1652,11 @@ CheckedFamilyStatusMessage ==
         \cup { [ZeroFamilyStatusMessage EXCEPT !.nonAvailabilityReason = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Trade Market Post Transparency Information Topofbook Message: 54 bytes  *)
+(* Trade Market Post Transparency Information Top Of Book Message: 54      *)
+(* bytes                                                                   *)
 (***************************************************************************)
 
-TradeMarketPostTransparencyInformationTopofbookMessage ==
+TradeMarketPostTransparencyInformationTopOfBookMessage ==
     [ sequenceNumber         : Sample(4),
       securityCode           : Sample(4),
       transactionDateAndTime : Sample(8),
@@ -1672,7 +1673,7 @@ TradeMarketPostTransparencyInformationTopofbookMessage ==
       transactionCategory    : Sample(1),
       strategyTrdMatchId     : Sample(4) ]
 
-EncodeTradeMarketPostTransparencyInformationTopofbookMessage(message) ==
+EncodeTradeMarketPostTransparencyInformationTopOfBookMessage(message) ==
     message.sequenceNumber
         \o message.securityCode
         \o message.transactionDateAndTime
@@ -1689,7 +1690,7 @@ EncodeTradeMarketPostTransparencyInformationTopofbookMessage(message) ==
         \o message.transactionCategory
         \o message.strategyTrdMatchId
 
-DecodeTradeMarketPostTransparencyInformationTopofbookMessage(bytes) ==
+DecodeTradeMarketPostTransparencyInformationTopOfBookMessage(bytes) ==
     LET sequenceNumber == ReadBytes(bytes, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET securityCode == ReadBytes(sequenceNumber.rest, 4) IN IF ~securityCode.ok THEN Fail ELSE
     LET transactionDateAndTime == ReadBytes(securityCode.rest, 8) IN IF ~transactionDateAndTime.ok THEN Fail ELSE
@@ -1721,7 +1722,7 @@ DecodeTradeMarketPostTransparencyInformationTopofbookMessage(bytes) ==
          transactionCategory    |-> transactionCategory.value,
          strategyTrdMatchId     |-> strategyTrdMatchId.value ], strategyTrdMatchId.rest)
 
-ZeroTradeMarketPostTransparencyInformationTopofbookMessage ==
+ZeroTradeMarketPostTransparencyInformationTopOfBookMessage ==
     [ sequenceNumber         |-> [i \in 1 .. 4 |-> 0],
       securityCode           |-> [i \in 1 .. 4 |-> 0],
       transactionDateAndTime |-> [i \in 1 .. 8 |-> 0],
@@ -1738,24 +1739,24 @@ ZeroTradeMarketPostTransparencyInformationTopofbookMessage ==
       transactionCategory    |-> [i \in 1 .. 1 |-> 0],
       strategyTrdMatchId     |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Trade Market Post Transparency Information Topofbook Message at zero, then each field in turn at the values it is checked at *)
-CheckedTradeMarketPostTransparencyInformationTopofbookMessage ==
-    { ZeroTradeMarketPostTransparencyInformationTopofbookMessage }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.securityCode = one] : one \in Sample(4) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.transactionDateAndTime = one] : one \in Sample(8) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.marketSegmentId = one] : one \in Sample(4) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.trdMatchId = one] : one \in Sample(4) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.tradeType = one] : one \in Sample(1) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.lastPx = one] : one \in Sample(8) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.lastQty = one] : one \in Sample(4) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.grossTradeAmt = one] : one \in Sample(8) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.designation = one] : one \in Sample(1) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.marketMechanism = one] : one \in Sample(1) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.algoFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.transactionCategory = one] : one \in Sample(1) }
-        \cup { [ZeroTradeMarketPostTransparencyInformationTopofbookMessage EXCEPT !.strategyTrdMatchId = one] : one \in Sample(4) }
+(* Trade Market Post Transparency Information Top Of Book Message at zero, then each field in turn at the values it is checked at *)
+CheckedTradeMarketPostTransparencyInformationTopOfBookMessage ==
+    { ZeroTradeMarketPostTransparencyInformationTopOfBookMessage }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.securityCode = one] : one \in Sample(4) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.transactionDateAndTime = one] : one \in Sample(8) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.marketSegmentId = one] : one \in Sample(4) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.trdMatchId = one] : one \in Sample(4) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.tradeType = one] : one \in Sample(1) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.lastPx = one] : one \in Sample(8) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.lastQty = one] : one \in Sample(4) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.grossTradeAmt = one] : one \in Sample(8) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.designation = one] : one \in Sample(1) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.marketMechanism = one] : one \in Sample(1) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.algoFlag = one] : one \in Sample(1) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.transactionCategory = one] : one \in Sample(1) }
+        \cup { [ZeroTradeMarketPostTransparencyInformationTopOfBookMessage EXCEPT !.strategyTrdMatchId = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Trade Trade Amendment Or Cancellation Message: 89 bytes                 *)
@@ -1778,7 +1779,7 @@ TradeTradeAmendmentOrCancellationMessage ==
       transactionCategory         : Sample(1),
       strategyTrdMatchId          : Sample(4),
       lastChangeFlag              : Sample(1),
-      bencrfptFlag                : Sample(1),
+      bencRfptFlag                : Sample(1),
       tradePriceCondition         : Sample(1),
       preTradeTransparencyWaiver  : Sample(1),
       deferralWaiver              : Sample(1),
@@ -1807,7 +1808,7 @@ EncodeTradeTradeAmendmentOrCancellationMessage(message) ==
         \o message.transactionCategory
         \o message.strategyTrdMatchId
         \o message.lastChangeFlag
-        \o message.bencrfptFlag
+        \o message.bencRfptFlag
         \o message.tradePriceCondition
         \o message.preTradeTransparencyWaiver
         \o message.deferralWaiver
@@ -1836,8 +1837,8 @@ DecodeTradeTradeAmendmentOrCancellationMessage(bytes) ==
     LET transactionCategory == ReadBytes(algoFlag.rest, 1) IN IF ~transactionCategory.ok THEN Fail ELSE
     LET strategyTrdMatchId == ReadBytes(transactionCategory.rest, 4) IN IF ~strategyTrdMatchId.ok THEN Fail ELSE
     LET lastChangeFlag == ReadBytes(strategyTrdMatchId.rest, 1) IN IF ~lastChangeFlag.ok THEN Fail ELSE
-    LET bencrfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencrfptFlag.ok THEN Fail ELSE
-    LET tradePriceCondition == ReadBytes(bencrfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
+    LET bencRfptFlag == ReadBytes(lastChangeFlag.rest, 1) IN IF ~bencRfptFlag.ok THEN Fail ELSE
+    LET tradePriceCondition == ReadBytes(bencRfptFlag.rest, 1) IN IF ~tradePriceCondition.ok THEN Fail ELSE
     LET preTradeTransparencyWaiver == ReadBytes(tradePriceCondition.rest, 1) IN IF ~preTradeTransparencyWaiver.ok THEN Fail ELSE
     LET deferralWaiver == ReadBytes(preTradeTransparencyWaiver.rest, 1) IN IF ~deferralWaiver.ok THEN Fail ELSE
     LET postDeferralPublicationType == ReadBytes(deferralWaiver.rest, 1) IN IF ~postDeferralPublicationType.ok THEN Fail ELSE
@@ -1863,7 +1864,7 @@ DecodeTradeTradeAmendmentOrCancellationMessage(bytes) ==
          transactionCategory         |-> transactionCategory.value,
          strategyTrdMatchId          |-> strategyTrdMatchId.value,
          lastChangeFlag              |-> lastChangeFlag.value,
-         bencrfptFlag                |-> bencrfptFlag.value,
+         bencRfptFlag                |-> bencRfptFlag.value,
          tradePriceCondition         |-> tradePriceCondition.value,
          preTradeTransparencyWaiver  |-> preTradeTransparencyWaiver.value,
          deferralWaiver              |-> deferralWaiver.value,
@@ -1892,7 +1893,7 @@ ZeroTradeTradeAmendmentOrCancellationMessage ==
       transactionCategory         |-> [i \in 1 .. 1 |-> 0],
       strategyTrdMatchId          |-> [i \in 1 .. 4 |-> 0],
       lastChangeFlag              |-> [i \in 1 .. 1 |-> 0],
-      bencrfptFlag                |-> [i \in 1 .. 1 |-> 0],
+      bencRfptFlag                |-> [i \in 1 .. 1 |-> 0],
       tradePriceCondition         |-> [i \in 1 .. 1 |-> 0],
       preTradeTransparencyWaiver  |-> [i \in 1 .. 1 |-> 0],
       deferralWaiver              |-> [i \in 1 .. 1 |-> 0],
@@ -1923,7 +1924,7 @@ CheckedTradeTradeAmendmentOrCancellationMessage ==
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.transactionCategory = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.strategyTrdMatchId = one] : one \in Sample(4) }
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.lastChangeFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.bencrfptFlag = one] : one \in Sample(1) }
+        \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.bencRfptFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.tradePriceCondition = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.preTradeTransparencyWaiver = one] : one \in Sample(1) }
         \cup { [ZeroTradeTradeAmendmentOrCancellationMessage EXCEPT !.deferralWaiver = one] : one \in Sample(1) }
@@ -2274,10 +2275,10 @@ CheckedRfqMarketPreTransparencyInformationMessage ==
         \cup { [ZeroRfqMarketPreTransparencyInformationMessage EXCEPT !.askPx5 = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Topofbook Retail Message: 44 bytes                                      *)
+(* Top Of Book Retail Message: 44 bytes                                    *)
 (***************************************************************************)
 
-TopofbookRetailMessage ==
+TopOfBookRetailMessage ==
     [ sequenceNumber         : Sample(4),
       securityCode           : Sample(4),
       transactionDateAndTime : Sample(8),
@@ -2288,7 +2289,7 @@ TopofbookRetailMessage ==
       askSize1               : Sample(4),
       askPx1                 : Sample(8) ]
 
-EncodeTopofbookRetailMessage(message) ==
+EncodeTopOfBookRetailMessage(message) ==
     message.sequenceNumber
         \o message.securityCode
         \o message.transactionDateAndTime
@@ -2299,7 +2300,7 @@ EncodeTopofbookRetailMessage(message) ==
         \o message.askSize1
         \o message.askPx1
 
-DecodeTopofbookRetailMessage(bytes) ==
+DecodeTopOfBookRetailMessage(bytes) ==
     LET sequenceNumber == ReadBytes(bytes, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET securityCode == ReadBytes(sequenceNumber.rest, 4) IN IF ~securityCode.ok THEN Fail ELSE
     LET transactionDateAndTime == ReadBytes(securityCode.rest, 8) IN IF ~transactionDateAndTime.ok THEN Fail ELSE
@@ -2319,7 +2320,7 @@ DecodeTopofbookRetailMessage(bytes) ==
          askSize1               |-> askSize1.value,
          askPx1                 |-> askPx1.value ], askPx1.rest)
 
-ZeroTopofbookRetailMessage ==
+ZeroTopOfBookRetailMessage ==
     [ sequenceNumber         |-> [i \in 1 .. 4 |-> 0],
       securityCode           |-> [i \in 1 .. 4 |-> 0],
       transactionDateAndTime |-> [i \in 1 .. 8 |-> 0],
@@ -2330,24 +2331,24 @@ ZeroTopofbookRetailMessage ==
       askSize1               |-> [i \in 1 .. 4 |-> 0],
       askPx1                 |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Topofbook Retail Message at zero, then each field in turn at the values it is checked at *)
-CheckedTopofbookRetailMessage ==
-    { ZeroTopofbookRetailMessage }
-        \cup { [ZeroTopofbookRetailMessage EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetailMessage EXCEPT !.securityCode = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetailMessage EXCEPT !.transactionDateAndTime = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetailMessage EXCEPT !.bidOrders1 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetailMessage EXCEPT !.bidSize1 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetailMessage EXCEPT !.bidPx1 = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetailMessage EXCEPT !.askOrders1 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetailMessage EXCEPT !.askSize1 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetailMessage EXCEPT !.askPx1 = one] : one \in Sample(8) }
+(* Top Of Book Retail Message at zero, then each field in turn at the values it is checked at *)
+CheckedTopOfBookRetailMessage ==
+    { ZeroTopOfBookRetailMessage }
+        \cup { [ZeroTopOfBookRetailMessage EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetailMessage EXCEPT !.securityCode = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetailMessage EXCEPT !.transactionDateAndTime = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetailMessage EXCEPT !.bidOrders1 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetailMessage EXCEPT !.bidSize1 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetailMessage EXCEPT !.bidPx1 = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetailMessage EXCEPT !.askOrders1 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetailMessage EXCEPT !.askSize1 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetailMessage EXCEPT !.askPx1 = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Topofbook Retail 5 Levels Message: 156 bytes                            *)
+(* Top Of Book Retail 5 Levels Message: 156 bytes                          *)
 (***************************************************************************)
 
-TopofbookRetail5LevelsMessage ==
+TopOfBookRetail5LevelsMessage ==
     [ sequenceNumber         : Sample(4),
       securityCode           : Sample(4),
       transactionDateAndTime : Sample(8),
@@ -2382,7 +2383,7 @@ TopofbookRetail5LevelsMessage ==
       askSize5               : Sample(4),
       askPx5                 : Sample(8) ]
 
-EncodeTopofbookRetail5LevelsMessage(message) ==
+EncodeTopOfBookRetail5LevelsMessage(message) ==
     message.sequenceNumber
         \o message.securityCode
         \o message.transactionDateAndTime
@@ -2417,7 +2418,7 @@ EncodeTopofbookRetail5LevelsMessage(message) ==
         \o message.askSize5
         \o message.askPx5
 
-DecodeTopofbookRetail5LevelsMessage(bytes) ==
+DecodeTopOfBookRetail5LevelsMessage(bytes) ==
     LET sequenceNumber == ReadBytes(bytes, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET securityCode == ReadBytes(sequenceNumber.rest, 4) IN IF ~securityCode.ok THEN Fail ELSE
     LET transactionDateAndTime == ReadBytes(securityCode.rest, 8) IN IF ~transactionDateAndTime.ok THEN Fail ELSE
@@ -2485,7 +2486,7 @@ DecodeTopofbookRetail5LevelsMessage(bytes) ==
          askSize5               |-> askSize5.value,
          askPx5                 |-> askPx5.value ], askPx5.rest)
 
-ZeroTopofbookRetail5LevelsMessage ==
+ZeroTopOfBookRetail5LevelsMessage ==
     [ sequenceNumber         |-> [i \in 1 .. 4 |-> 0],
       securityCode           |-> [i \in 1 .. 4 |-> 0],
       transactionDateAndTime |-> [i \in 1 .. 8 |-> 0],
@@ -2520,42 +2521,42 @@ ZeroTopofbookRetail5LevelsMessage ==
       askSize5               |-> [i \in 1 .. 4 |-> 0],
       askPx5                 |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Topofbook Retail 5 Levels Message at zero, then each field in turn at the values it is checked at *)
-CheckedTopofbookRetail5LevelsMessage ==
-    { ZeroTopofbookRetail5LevelsMessage }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.securityCode = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.transactionDateAndTime = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidOrders1 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidSize1 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidPx1 = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askOrders1 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askSize1 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askPx1 = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidOrders2 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidSize2 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidPx2 = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askOrders2 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askSize2 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askPx2 = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidOrders3 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidSize3 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidPx3 = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askOrders3 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askSize3 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askPx3 = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidOrders4 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidSize4 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidPx4 = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askOrders4 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askSize4 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askPx4 = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidOrders5 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidSize5 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.bidPx5 = one] : one \in Sample(8) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askOrders5 = one] : one \in Sample(2) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askSize5 = one] : one \in Sample(4) }
-        \cup { [ZeroTopofbookRetail5LevelsMessage EXCEPT !.askPx5 = one] : one \in Sample(8) }
+(* Top Of Book Retail 5 Levels Message at zero, then each field in turn at the values it is checked at *)
+CheckedTopOfBookRetail5LevelsMessage ==
+    { ZeroTopOfBookRetail5LevelsMessage }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.securityCode = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.transactionDateAndTime = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidOrders1 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidSize1 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidPx1 = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askOrders1 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askSize1 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askPx1 = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidOrders2 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidSize2 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidPx2 = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askOrders2 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askSize2 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askPx2 = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidOrders3 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidSize3 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidPx3 = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askOrders3 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askSize3 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askPx3 = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidOrders4 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidSize4 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidPx4 = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askOrders4 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askSize4 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askPx4 = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidOrders5 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidSize5 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.bidPx5 = one] : one \in Sample(8) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askOrders5 = one] : one \in Sample(2) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askSize5 = one] : one \in Sample(4) }
+        \cup { [ZeroTopOfBookRetail5LevelsMessage EXCEPT !.askPx5 = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Payload, selected by Message Type                                       *)
@@ -2573,12 +2574,12 @@ SecurityListMessageCode == 121  \* 0x79
 SecurityListUpdateReportMessageCode == 128  \* 0x80
 SecurityStatusMessageCode == 102  \* 0x66
 FamilyStatusMessageCode == 137  \* 0x89
-TradeMarketPostTransparencyInformationTopofbookMessageCode == 16  \* 0x10
+TradeMarketPostTransparencyInformationTopOfBookMessageCode == 16  \* 0x10
 TradeTradeAmendmentOrCancellationMessageCode == 24  \* 0x18
 IndicationOfInterestMessageCode == 54  \* 0x36
 RfqMarketPreTransparencyInformationMessageCode == 133  \* 0x85
-TopofbookRetailMessageCode == 145  \* 0x91
-TopofbookRetail5LevelsMessageCode == 146  \* 0x92
+TopOfBookRetailMessageCode == 145  \* 0x91
+TopOfBookRetail5LevelsMessageCode == 146  \* 0x92
 
 Payload ==
     [ tag : {LogonResponseMessageCode}, body : LogonResponseMessage ]
@@ -2593,12 +2594,12 @@ Payload ==
         \cup [ tag : {SecurityListUpdateReportMessageCode}, body : SecurityListUpdateReportMessage ]
         \cup [ tag : {SecurityStatusMessageCode}, body : SecurityStatusMessage ]
         \cup [ tag : {FamilyStatusMessageCode}, body : FamilyStatusMessage ]
-        \cup [ tag : {TradeMarketPostTransparencyInformationTopofbookMessageCode}, body : TradeMarketPostTransparencyInformationTopofbookMessage ]
+        \cup [ tag : {TradeMarketPostTransparencyInformationTopOfBookMessageCode}, body : TradeMarketPostTransparencyInformationTopOfBookMessage ]
         \cup [ tag : {TradeTradeAmendmentOrCancellationMessageCode}, body : TradeTradeAmendmentOrCancellationMessage ]
         \cup [ tag : {IndicationOfInterestMessageCode}, body : IndicationOfInterestMessage ]
         \cup [ tag : {RfqMarketPreTransparencyInformationMessageCode}, body : RfqMarketPreTransparencyInformationMessage ]
-        \cup [ tag : {TopofbookRetailMessageCode}, body : TopofbookRetailMessage ]
-        \cup [ tag : {TopofbookRetail5LevelsMessageCode}, body : TopofbookRetail5LevelsMessage ]
+        \cup [ tag : {TopOfBookRetailMessageCode}, body : TopOfBookRetailMessage ]
+        \cup [ tag : {TopOfBookRetail5LevelsMessageCode}, body : TopOfBookRetail5LevelsMessage ]
 
 EncodePayload(message) ==
     CASE message.tag = LogonResponseMessageCode -> EncodeLogonResponseMessage(message.body)
@@ -2613,12 +2614,12 @@ EncodePayload(message) ==
       [] message.tag = SecurityListUpdateReportMessageCode -> EncodeSecurityListUpdateReportMessage(message.body)
       [] message.tag = SecurityStatusMessageCode -> EncodeSecurityStatusMessage(message.body)
       [] message.tag = FamilyStatusMessageCode -> EncodeFamilyStatusMessage(message.body)
-      [] message.tag = TradeMarketPostTransparencyInformationTopofbookMessageCode -> EncodeTradeMarketPostTransparencyInformationTopofbookMessage(message.body)
+      [] message.tag = TradeMarketPostTransparencyInformationTopOfBookMessageCode -> EncodeTradeMarketPostTransparencyInformationTopOfBookMessage(message.body)
       [] message.tag = TradeTradeAmendmentOrCancellationMessageCode -> EncodeTradeTradeAmendmentOrCancellationMessage(message.body)
       [] message.tag = IndicationOfInterestMessageCode -> EncodeIndicationOfInterestMessage(message.body)
       [] message.tag = RfqMarketPreTransparencyInformationMessageCode -> EncodeRfqMarketPreTransparencyInformationMessage(message.body)
-      [] message.tag = TopofbookRetailMessageCode -> EncodeTopofbookRetailMessage(message.body)
-      [] message.tag = TopofbookRetail5LevelsMessageCode -> EncodeTopofbookRetail5LevelsMessage(message.body)
+      [] message.tag = TopOfBookRetailMessageCode -> EncodeTopOfBookRetailMessage(message.body)
+      [] message.tag = TopOfBookRetail5LevelsMessageCode -> EncodeTopOfBookRetail5LevelsMessage(message.body)
 
 DecodePayload(tag, bytes) ==
     LET read ==
@@ -2634,12 +2635,12 @@ DecodePayload(tag, bytes) ==
               [] tag = SecurityListUpdateReportMessageCode -> DecodeSecurityListUpdateReportMessage(bytes)
               [] tag = SecurityStatusMessageCode -> DecodeSecurityStatusMessage(bytes)
               [] tag = FamilyStatusMessageCode -> DecodeFamilyStatusMessage(bytes)
-              [] tag = TradeMarketPostTransparencyInformationTopofbookMessageCode -> DecodeTradeMarketPostTransparencyInformationTopofbookMessage(bytes)
+              [] tag = TradeMarketPostTransparencyInformationTopOfBookMessageCode -> DecodeTradeMarketPostTransparencyInformationTopOfBookMessage(bytes)
               [] tag = TradeTradeAmendmentOrCancellationMessageCode -> DecodeTradeTradeAmendmentOrCancellationMessage(bytes)
               [] tag = IndicationOfInterestMessageCode -> DecodeIndicationOfInterestMessage(bytes)
               [] tag = RfqMarketPreTransparencyInformationMessageCode -> DecodeRfqMarketPreTransparencyInformationMessage(bytes)
-              [] tag = TopofbookRetailMessageCode -> DecodeTopofbookRetailMessage(bytes)
-              [] tag = TopofbookRetail5LevelsMessageCode -> DecodeTopofbookRetail5LevelsMessage(bytes)
+              [] tag = TopOfBookRetailMessageCode -> DecodeTopOfBookRetailMessage(bytes)
+              [] tag = TopOfBookRetail5LevelsMessageCode -> DecodeTopOfBookRetail5LevelsMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -2659,12 +2660,12 @@ CheckedPayload ==
         \cup { [tag |-> SecurityListUpdateReportMessageCode, body |-> one] : one \in CheckedSecurityListUpdateReportMessage }
         \cup { [tag |-> SecurityStatusMessageCode, body |-> one] : one \in CheckedSecurityStatusMessage }
         \cup { [tag |-> FamilyStatusMessageCode, body |-> one] : one \in CheckedFamilyStatusMessage }
-        \cup { [tag |-> TradeMarketPostTransparencyInformationTopofbookMessageCode, body |-> one] : one \in CheckedTradeMarketPostTransparencyInformationTopofbookMessage }
+        \cup { [tag |-> TradeMarketPostTransparencyInformationTopOfBookMessageCode, body |-> one] : one \in CheckedTradeMarketPostTransparencyInformationTopOfBookMessage }
         \cup { [tag |-> TradeTradeAmendmentOrCancellationMessageCode, body |-> one] : one \in CheckedTradeTradeAmendmentOrCancellationMessage }
         \cup { [tag |-> IndicationOfInterestMessageCode, body |-> one] : one \in CheckedIndicationOfInterestMessage }
         \cup { [tag |-> RfqMarketPreTransparencyInformationMessageCode, body |-> one] : one \in CheckedRfqMarketPreTransparencyInformationMessage }
-        \cup { [tag |-> TopofbookRetailMessageCode, body |-> one] : one \in CheckedTopofbookRetailMessage }
-        \cup { [tag |-> TopofbookRetail5LevelsMessageCode, body |-> one] : one \in CheckedTopofbookRetail5LevelsMessage }
+        \cup { [tag |-> TopOfBookRetailMessageCode, body |-> one] : one \in CheckedTopOfBookRetailMessage }
+        \cup { [tag |-> TopOfBookRetail5LevelsMessageCode, body |-> one] : one \in CheckedTopOfBookRetail5LevelsMessage }
 
 (***************************************************************************)
 (* Message, framed by Message Size                                         *)
@@ -2738,12 +2739,12 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> SecurityListUpdateReportMessageCode, body |-> ZeroSecurityListUpdateReportMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SecurityStatusMessageCode, body |-> ZeroSecurityStatusMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> FamilyStatusMessageCode, body |-> ZeroFamilyStatusMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> TradeMarketPostTransparencyInformationTopofbookMessageCode, body |-> ZeroTradeMarketPostTransparencyInformationTopofbookMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> TradeMarketPostTransparencyInformationTopOfBookMessageCode, body |-> ZeroTradeMarketPostTransparencyInformationTopOfBookMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TradeTradeAmendmentOrCancellationMessageCode, body |-> ZeroTradeTradeAmendmentOrCancellationMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> IndicationOfInterestMessageCode, body |-> ZeroIndicationOfInterestMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> RfqMarketPreTransparencyInformationMessageCode, body |-> ZeroRfqMarketPreTransparencyInformationMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> TopofbookRetailMessageCode, body |-> ZeroTopofbookRetailMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> TopofbookRetail5LevelsMessageCode, body |-> ZeroTopofbookRetail5LevelsMessage]] }
+      [ZeroMessage EXCEPT !.payload = [tag |-> TopOfBookRetailMessageCode, body |-> ZeroTopOfBookRetailMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> TopOfBookRetail5LevelsMessageCode, body |-> ZeroTopOfBookRetail5LevelsMessage]] }
 
 (***************************************************************************)
 (* Packet                                                                  *)
@@ -2887,10 +2888,10 @@ RoundTripFamilyStatusMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Trade Market Post Transparency Information Topofbook Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripTradeMarketPostTransparencyInformationTopofbookMessage ==
-    \A message \in CheckedTradeMarketPostTransparencyInformationTopofbookMessage :
-        LET read == DecodeTradeMarketPostTransparencyInformationTopofbookMessage(EncodeTradeMarketPostTransparencyInformationTopofbookMessage(message))
+(* Every Trade Market Post Transparency Information Top Of Book Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTradeMarketPostTransparencyInformationTopOfBookMessage ==
+    \A message \in CheckedTradeMarketPostTransparencyInformationTopOfBookMessage :
+        LET read == DecodeTradeMarketPostTransparencyInformationTopOfBookMessage(EncodeTradeMarketPostTransparencyInformationTopOfBookMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2919,18 +2920,18 @@ RoundTripRfqMarketPreTransparencyInformationMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Topofbook Retail Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripTopofbookRetailMessage ==
-    \A message \in CheckedTopofbookRetailMessage :
-        LET read == DecodeTopofbookRetailMessage(EncodeTopofbookRetailMessage(message))
+(* Every Top Of Book Retail Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTopOfBookRetailMessage ==
+    \A message \in CheckedTopOfBookRetailMessage :
+        LET read == DecodeTopOfBookRetailMessage(EncodeTopOfBookRetailMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Topofbook Retail 5 Levels Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripTopofbookRetail5LevelsMessage ==
-    \A message \in CheckedTopofbookRetail5LevelsMessage :
-        LET read == DecodeTopofbookRetail5LevelsMessage(EncodeTopofbookRetail5LevelsMessage(message))
+(* Every Top Of Book Retail 5 Levels Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTopOfBookRetail5LevelsMessage ==
+    \A message \in CheckedTopOfBookRetail5LevelsMessage :
+        LET read == DecodeTopOfBookRetail5LevelsMessage(EncodeTopOfBookRetail5LevelsMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

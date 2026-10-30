@@ -190,33 +190,38 @@ CheckedBookStatusMessage ==
         \cup { [ZeroBookStatusMessage EXCEPT !.indicativePrice = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Book Entry Message: 18 bytes                                            *)
+(* Book Entry Message: 19 bytes                                            *)
 (***************************************************************************)
 
 BookEntryMessage ==
     [ securityId : Sample(2),
+      side       : Sample(1),
       quantity   : Sample(4),
       price      : Sample(8),
       orderRef   : Sample(4) ]
 
 EncodeBookEntryMessage(message) ==
     message.securityId
+        \o message.side
         \o message.quantity
         \o message.price
         \o message.orderRef
 
 DecodeBookEntryMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
-    LET quantity == ReadBytes(securityId.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
+    LET side == ReadBytes(securityId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET quantity == ReadBytes(side.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
     LET price == ReadBytes(quantity.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET orderRef == ReadBytes(price.rest, 4) IN IF ~orderRef.ok THEN Fail ELSE
     Ok([ securityId |-> securityId.value,
+         side       |-> side.value,
          quantity   |-> quantity.value,
          price      |-> price.value,
          orderRef   |-> orderRef.value ], orderRef.rest)
 
 ZeroBookEntryMessage ==
     [ securityId |-> [i \in 1 .. 2 |-> 0],
+      side       |-> [i \in 1 .. 1 |-> 0],
       quantity   |-> [i \in 1 .. 4 |-> 0],
       price      |-> [i \in 1 .. 8 |-> 0],
       orderRef   |-> [i \in 1 .. 4 |-> 0] ]
@@ -225,49 +230,56 @@ ZeroBookEntryMessage ==
 CheckedBookEntryMessage ==
     { ZeroBookEntryMessage }
         \cup { [ZeroBookEntryMessage EXCEPT !.securityId = one] : one \in Sample(2) }
+        \cup { [ZeroBookEntryMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroBookEntryMessage EXCEPT !.quantity = one] : one \in Sample(4) }
         \cup { [ZeroBookEntryMessage EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroBookEntryMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Market At Close Book Entry Message: 18 bytes                            *)
+(* Mac Book Entry Message: 19 bytes                                        *)
 (***************************************************************************)
 
-MarketAtCloseBookEntryMessage ==
+MacBookEntryMessage ==
     [ securityId : Sample(2),
+      side       : Sample(1),
       quantity   : Sample(4),
       price      : Sample(8),
       orderRef   : Sample(4) ]
 
-EncodeMarketAtCloseBookEntryMessage(message) ==
+EncodeMacBookEntryMessage(message) ==
     message.securityId
+        \o message.side
         \o message.quantity
         \o message.price
         \o message.orderRef
 
-DecodeMarketAtCloseBookEntryMessage(bytes) ==
+DecodeMacBookEntryMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
-    LET quantity == ReadBytes(securityId.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
+    LET side == ReadBytes(securityId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET quantity == ReadBytes(side.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
     LET price == ReadBytes(quantity.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET orderRef == ReadBytes(price.rest, 4) IN IF ~orderRef.ok THEN Fail ELSE
     Ok([ securityId |-> securityId.value,
+         side       |-> side.value,
          quantity   |-> quantity.value,
          price      |-> price.value,
          orderRef   |-> orderRef.value ], orderRef.rest)
 
-ZeroMarketAtCloseBookEntryMessage ==
+ZeroMacBookEntryMessage ==
     [ securityId |-> [i \in 1 .. 2 |-> 0],
+      side       |-> [i \in 1 .. 1 |-> 0],
       quantity   |-> [i \in 1 .. 4 |-> 0],
       price      |-> [i \in 1 .. 8 |-> 0],
       orderRef   |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Market At Close Book Entry Message at zero, then each field in turn at the values it is checked at *)
-CheckedMarketAtCloseBookEntryMessage ==
-    { ZeroMarketAtCloseBookEntryMessage }
-        \cup { [ZeroMarketAtCloseBookEntryMessage EXCEPT !.securityId = one] : one \in Sample(2) }
-        \cup { [ZeroMarketAtCloseBookEntryMessage EXCEPT !.quantity = one] : one \in Sample(4) }
-        \cup { [ZeroMarketAtCloseBookEntryMessage EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroMarketAtCloseBookEntryMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
+(* Mac Book Entry Message at zero, then each field in turn at the values it is checked at *)
+CheckedMacBookEntryMessage ==
+    { ZeroMacBookEntryMessage }
+        \cup { [ZeroMacBookEntryMessage EXCEPT !.securityId = one] : one \in Sample(2) }
+        \cup { [ZeroMacBookEntryMessage EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroMacBookEntryMessage EXCEPT !.quantity = one] : one \in Sample(4) }
+        \cup { [ZeroMacBookEntryMessage EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroMacBookEntryMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Payload, selected by Msg Type                                           *)
@@ -277,21 +289,21 @@ HeartbeatMessageCode == 1  \* 0x01
 SnapshotStartMessageCode == 10  \* 0x0a
 BookStatusMessageCode == 11  \* 0x0b
 BookEntryMessageCode == 12  \* 0x0c
-MarketAtCloseBookEntryMessageCode == 18  \* 0x12
+MacBookEntryMessageCode == 18  \* 0x12
 
 Payload ==
     [ tag : {HeartbeatMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {SnapshotStartMessageCode}, body : SnapshotStartMessage ]
         \cup [ tag : {BookStatusMessageCode}, body : BookStatusMessage ]
         \cup [ tag : {BookEntryMessageCode}, body : BookEntryMessage ]
-        \cup [ tag : {MarketAtCloseBookEntryMessageCode}, body : MarketAtCloseBookEntryMessage ]
+        \cup [ tag : {MacBookEntryMessageCode}, body : MacBookEntryMessage ]
 
 EncodePayload(message) ==
     CASE message.tag = HeartbeatMessageCode -> << >>
       [] message.tag = SnapshotStartMessageCode -> EncodeSnapshotStartMessage(message.body)
       [] message.tag = BookStatusMessageCode -> EncodeBookStatusMessage(message.body)
       [] message.tag = BookEntryMessageCode -> EncodeBookEntryMessage(message.body)
-      [] message.tag = MarketAtCloseBookEntryMessageCode -> EncodeMarketAtCloseBookEntryMessage(message.body)
+      [] message.tag = MacBookEntryMessageCode -> EncodeMacBookEntryMessage(message.body)
 
 DecodePayload(tag, bytes) ==
     LET read ==
@@ -299,7 +311,7 @@ DecodePayload(tag, bytes) ==
               [] tag = SnapshotStartMessageCode -> DecodeSnapshotStartMessage(bytes)
               [] tag = BookStatusMessageCode -> DecodeBookStatusMessage(bytes)
               [] tag = BookEntryMessageCode -> DecodeBookEntryMessage(bytes)
-              [] tag = MarketAtCloseBookEntryMessageCode -> DecodeMarketAtCloseBookEntryMessage(bytes)
+              [] tag = MacBookEntryMessageCode -> DecodeMacBookEntryMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -311,7 +323,7 @@ CheckedPayload ==
         \cup { [tag |-> SnapshotStartMessageCode, body |-> one] : one \in CheckedSnapshotStartMessage }
         \cup { [tag |-> BookStatusMessageCode, body |-> one] : one \in CheckedBookStatusMessage }
         \cup { [tag |-> BookEntryMessageCode, body |-> one] : one \in CheckedBookEntryMessage }
-        \cup { [tag |-> MarketAtCloseBookEntryMessageCode, body |-> one] : one \in CheckedMarketAtCloseBookEntryMessage }
+        \cup { [tag |-> MacBookEntryMessageCode, body |-> one] : one \in CheckedMacBookEntryMessage }
 
 (***************************************************************************)
 (* Message, framed by Msg Length                                           *)
@@ -378,7 +390,7 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotStartMessageCode, body |-> ZeroSnapshotStartMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> BookStatusMessageCode, body |-> ZeroBookStatusMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> BookEntryMessageCode, body |-> ZeroBookEntryMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MarketAtCloseBookEntryMessageCode, body |-> ZeroMarketAtCloseBookEntryMessage]] }
+      [ZeroMessage EXCEPT !.payload = [tag |-> MacBookEntryMessageCode, body |-> ZeroMacBookEntryMessage]] }
 
 (***************************************************************************)
 (* Packet                                                                  *)
@@ -444,10 +456,10 @@ RoundTripBookEntryMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Market At Close Book Entry Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripMarketAtCloseBookEntryMessage ==
-    \A message \in CheckedMarketAtCloseBookEntryMessage :
-        LET read == DecodeMarketAtCloseBookEntryMessage(EncodeMarketAtCloseBookEntryMessage(message))
+(* Every Mac Book Entry Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMacBookEntryMessage ==
+    \A message \in CheckedMacBookEntryMessage :
+        LET read == DecodeMacBookEntryMessage(EncodeMacBookEntryMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

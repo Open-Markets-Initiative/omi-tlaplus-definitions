@@ -5,10 +5,10 @@
 
 | Division | [Protocol][Omi.Tmx.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Transport | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Tmx.Specifications] |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| [Mx][Mx.Exchange] | [SolaOrderEntry][Tmx.Mx.SolaOrderEntry] | [Sail][Omi.Encoding.Sail] | 1.21 | [Firm][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Firm.Definition] [Exchange][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Exchange.Definition] | 6/18/2020 | 10603 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Url] |
+| [Mx][Mx.Exchange] | [SolaOrderEntry][Tmx.Mx.SolaOrderEntry] | [Sail][Omi.Encoding.Sail] | 1.21 | [Firm][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Firm.Definition] [Exchange][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Exchange.Definition] | 6/18/2020 | 10,603 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Url] |
 | [Tsx][Tsx.Exchange] | [GlobalFx][Tmx.Tsx.GlobalFx] | [Gfx][Omi.Encoding.Gfx] | [1.0][Tmx.Tsx.GlobalFx.Gfx.v1.0.Definition] |  | 5/20/2016 | 412 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.GlobalFx.Gfx.v1.0.Url] |
 | [Tsx][Tsx.Exchange] | [IndexFeed][Tmx.Tsx.IndexFeed] | [Qrtmd][Omi.Encoding.Qrtmd] | [1.19][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Definition] |  | 10/12/2021 | 388 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Url] |
-| [Tsx][Tsx.Exchange] | [Level1][Tmx.Tsx.Level1] | [Qrtmd][Omi.Encoding.Qrtmd] | [2.8][Tmx.Tsx.Level1.Qrtmd.v2.8.Definition] |  | 8/10/2021 | 1426 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.Level1.Qrtmd.v2.8.Url] |
+| [Tsx][Tsx.Exchange] | [Level1][Tmx.Tsx.Level1] | [Qrtmd][Omi.Encoding.Qrtmd] | [2.8][Tmx.Tsx.Level1.Qrtmd.v2.8.Definition] |  | 8/10/2021 | 1,426 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.Level1.Qrtmd.v2.8.Url] |
 | [TsxAlpha][TsxAlpha.Exchange] | [Level1][Tmx.TsxAlpha.Level1] | [Qrtmd][Omi.Encoding.Qrtmd] | [2.1][Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Definition] |  | 10/20/2020 | 963 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.TsxAlpha.Level1.Qrtmd.v2.1.Url] |
 
 

@@ -123,10 +123,10 @@ SampleLists(entries) ==
         \cup { <<one, one>> : one \in entries }
 
 (***************************************************************************)
-(* Protected Exchange Quote Message Shortform Message: 41 bytes            *)
+(* Protected Exchange Quote Message Short Form Message: 41 bytes           *)
 (***************************************************************************)
 
-ProtectedExchangeQuoteMessageShortformMessage ==
+ProtectedExchangeQuoteMessageShortFormMessage ==
     [ orig         : Sample(2),
       timestamp1   : Sample(8),
       feedSequence : Sample(8),
@@ -139,7 +139,7 @@ ProtectedExchangeQuoteMessageShortformMessage ==
       cond         : Sample(1),
       rii          : Sample(1) ]
 
-EncodeProtectedExchangeQuoteMessageShortformMessage(message) ==
+EncodeProtectedExchangeQuoteMessageShortFormMessage(message) ==
     message.orig
         \o message.timestamp1
         \o message.feedSequence
@@ -152,7 +152,7 @@ EncodeProtectedExchangeQuoteMessageShortformMessage(message) ==
         \o message.cond
         \o message.rii
 
-DecodeProtectedExchangeQuoteMessageShortformMessage(bytes) ==
+DecodeProtectedExchangeQuoteMessageShortFormMessage(bytes) ==
     LET orig == ReadBytes(bytes, 2) IN IF ~orig.ok THEN Fail ELSE
     LET timestamp1 == ReadBytes(orig.rest, 8) IN IF ~timestamp1.ok THEN Fail ELSE
     LET feedSequence == ReadBytes(timestamp1.rest, 8) IN IF ~feedSequence.ok THEN Fail ELSE
@@ -176,7 +176,7 @@ DecodeProtectedExchangeQuoteMessageShortformMessage(bytes) ==
          cond         |-> cond.value,
          rii          |-> rii.value ], rii.rest)
 
-ZeroProtectedExchangeQuoteMessageShortformMessage ==
+ZeroProtectedExchangeQuoteMessageShortFormMessage ==
     [ orig         |-> [i \in 1 .. 2 |-> 0],
       timestamp1   |-> [i \in 1 .. 8 |-> 0],
       feedSequence |-> [i \in 1 .. 8 |-> 0],
@@ -189,26 +189,26 @@ ZeroProtectedExchangeQuoteMessageShortformMessage ==
       cond         |-> [i \in 1 .. 1 |-> 0],
       rii          |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Protected Exchange Quote Message Shortform Message at zero, then each field in turn at the values it is checked at *)
-CheckedProtectedExchangeQuoteMessageShortformMessage ==
-    { ZeroProtectedExchangeQuoteMessageShortformMessage }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.orig = one] : one \in Sample(2) }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.feedSequence = one] : one \in Sample(8) }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.partToken = one] : one \in Sample(8) }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.symbolShort = one] : one \in Sample(5) }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.bidShort = one] : one \in Sample(2) }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.bidSizeShort = one] : one \in Sample(2) }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.askShort = one] : one \in Sample(2) }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.askSizeShort = one] : one \in Sample(2) }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.cond = one] : one \in Sample(1) }
-        \cup { [ZeroProtectedExchangeQuoteMessageShortformMessage EXCEPT !.rii = one] : one \in Sample(1) }
+(* Protected Exchange Quote Message Short Form Message at zero, then each field in turn at the values it is checked at *)
+CheckedProtectedExchangeQuoteMessageShortFormMessage ==
+    { ZeroProtectedExchangeQuoteMessageShortFormMessage }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.orig = one] : one \in Sample(2) }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.feedSequence = one] : one \in Sample(8) }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.partToken = one] : one \in Sample(8) }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.symbolShort = one] : one \in Sample(5) }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.bidShort = one] : one \in Sample(2) }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.bidSizeShort = one] : one \in Sample(2) }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.askShort = one] : one \in Sample(2) }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.askSizeShort = one] : one \in Sample(2) }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.cond = one] : one \in Sample(1) }
+        \cup { [ZeroProtectedExchangeQuoteMessageShortFormMessage EXCEPT !.rii = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Protected Exchange Quote Message Longform Message: 63 bytes             *)
+(* Protected Exchange Quote Message Long Form Message: 63 bytes            *)
 (***************************************************************************)
 
-ProtectedExchangeQuoteMessageLongformMessage ==
+ProtectedExchangeQuoteMessageLongFormMessage ==
     [ orig         : Sample(2),
       timestamp1   : Sample(8),
       feedSequence : Sample(8),
@@ -221,7 +221,7 @@ ProtectedExchangeQuoteMessageLongformMessage ==
       cond         : Sample(1),
       rii          : Sample(1) ]
 
-EncodeProtectedExchangeQuoteMessageLongformMessage(message) ==
+EncodeProtectedExchangeQuoteMessageLongFormMessage(message) ==
     message.orig
         \o message.timestamp1
         \o message.feedSequence
@@ -234,7 +234,7 @@ EncodeProtectedExchangeQuoteMessageLongformMessage(message) ==
         \o message.cond
         \o message.rii
 
-DecodeProtectedExchangeQuoteMessageLongformMessage(bytes) ==
+DecodeProtectedExchangeQuoteMessageLongFormMessage(bytes) ==
     LET orig == ReadBytes(bytes, 2) IN IF ~orig.ok THEN Fail ELSE
     LET timestamp1 == ReadBytes(orig.rest, 8) IN IF ~timestamp1.ok THEN Fail ELSE
     LET feedSequence == ReadBytes(timestamp1.rest, 8) IN IF ~feedSequence.ok THEN Fail ELSE
@@ -258,7 +258,7 @@ DecodeProtectedExchangeQuoteMessageLongformMessage(bytes) ==
          cond         |-> cond.value,
          rii          |-> rii.value ], rii.rest)
 
-ZeroProtectedExchangeQuoteMessageLongformMessage ==
+ZeroProtectedExchangeQuoteMessageLongFormMessage ==
     [ orig         |-> [i \in 1 .. 2 |-> 0],
       timestamp1   |-> [i \in 1 .. 8 |-> 0],
       feedSequence |-> [i \in 1 .. 8 |-> 0],
@@ -271,20 +271,20 @@ ZeroProtectedExchangeQuoteMessageLongformMessage ==
       cond         |-> [i \in 1 .. 1 |-> 0],
       rii          |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Protected Exchange Quote Message Longform Message at zero, then each field in turn at the values it is checked at *)
-CheckedProtectedExchangeQuoteMessageLongformMessage ==
-    { ZeroProtectedExchangeQuoteMessageLongformMessage }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.orig = one] : one \in Sample(2) }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.feedSequence = one] : one \in Sample(8) }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.partToken = one] : one \in Sample(8) }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.symbolLong = one] : one \in Sample(11) }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.bidLong = one] : one \in Sample(8) }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.bidSizeLong = one] : one \in Sample(4) }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.askLong = one] : one \in Sample(8) }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.askSizeLong = one] : one \in Sample(4) }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.cond = one] : one \in Sample(1) }
-        \cup { [ZeroProtectedExchangeQuoteMessageLongformMessage EXCEPT !.rii = one] : one \in Sample(1) }
+(* Protected Exchange Quote Message Long Form Message at zero, then each field in turn at the values it is checked at *)
+CheckedProtectedExchangeQuoteMessageLongFormMessage ==
+    { ZeroProtectedExchangeQuoteMessageLongFormMessage }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.orig = one] : one \in Sample(2) }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.feedSequence = one] : one \in Sample(8) }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.partToken = one] : one \in Sample(8) }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.symbolLong = one] : one \in Sample(11) }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.bidLong = one] : one \in Sample(8) }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.bidSizeLong = one] : one \in Sample(4) }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.askLong = one] : one \in Sample(8) }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.askSizeLong = one] : one \in Sample(4) }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.cond = one] : one \in Sample(1) }
+        \cup { [ZeroProtectedExchangeQuoteMessageLongFormMessage EXCEPT !.rii = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Odd Lot Bid Short Form Attachment: 4 bytes                              *)
@@ -1667,8 +1667,8 @@ CheckedFinraAdfCombinedQuoteMessageWithBbo ==
 (* Messages Message Type                                                   *)
 (***************************************************************************)
 
-ProtectedExchangeQuoteMessageShortformMessageCode == 81  \* "Q"
-ProtectedExchangeQuoteMessageLongformMessageCode == 76  \* "L"
+ProtectedExchangeQuoteMessageShortFormMessageCode == 81  \* "Q"
+ProtectedExchangeQuoteMessageLongFormMessageCode == 76  \* "L"
 ExchangeOddLotQuoteMessageShortFormMessageCode == 79  \* "O"
 ExchangeOddLotQuoteMessageLongFormMessageCode == 74  \* "J"
 ExchangeCombinedQuoteMessageShortFormMessageCode == 80  \* "P"
@@ -1679,8 +1679,8 @@ FinraAdfOddLotQuotationMessageCode == 72  \* "H"
 FinraAdfCombinedQuoteMessageWithBboCode == 82  \* "R"
 
 InboundQuoteMessagesMessagePayload ==
-    [ tag : {ProtectedExchangeQuoteMessageShortformMessageCode}, body : ProtectedExchangeQuoteMessageShortformMessage ]
-        \cup [ tag : {ProtectedExchangeQuoteMessageLongformMessageCode}, body : ProtectedExchangeQuoteMessageLongformMessage ]
+    [ tag : {ProtectedExchangeQuoteMessageShortFormMessageCode}, body : ProtectedExchangeQuoteMessageShortFormMessage ]
+        \cup [ tag : {ProtectedExchangeQuoteMessageLongFormMessageCode}, body : ProtectedExchangeQuoteMessageLongFormMessage ]
         \cup [ tag : {ExchangeOddLotQuoteMessageShortFormMessageCode}, body : ExchangeOddLotQuoteMessageShortFormMessage ]
         \cup [ tag : {ExchangeOddLotQuoteMessageLongFormMessageCode}, body : ExchangeOddLotQuoteMessageLongFormMessage ]
         \cup [ tag : {ExchangeCombinedQuoteMessageShortFormMessageCode}, body : ExchangeCombinedQuoteMessageShortFormMessage ]
@@ -1691,8 +1691,8 @@ InboundQuoteMessagesMessagePayload ==
         \cup [ tag : {FinraAdfCombinedQuoteMessageWithBboCode}, body : FinraAdfCombinedQuoteMessageWithBbo ]
 
 EncodeInboundQuoteMessagesMessagePayload(message) ==
-    CASE message.tag = ProtectedExchangeQuoteMessageShortformMessageCode -> EncodeProtectedExchangeQuoteMessageShortformMessage(message.body)
-      [] message.tag = ProtectedExchangeQuoteMessageLongformMessageCode -> EncodeProtectedExchangeQuoteMessageLongformMessage(message.body)
+    CASE message.tag = ProtectedExchangeQuoteMessageShortFormMessageCode -> EncodeProtectedExchangeQuoteMessageShortFormMessage(message.body)
+      [] message.tag = ProtectedExchangeQuoteMessageLongFormMessageCode -> EncodeProtectedExchangeQuoteMessageLongFormMessage(message.body)
       [] message.tag = ExchangeOddLotQuoteMessageShortFormMessageCode -> EncodeExchangeOddLotQuoteMessageShortFormMessage(message.body)
       [] message.tag = ExchangeOddLotQuoteMessageLongFormMessageCode -> EncodeExchangeOddLotQuoteMessageLongFormMessage(message.body)
       [] message.tag = ExchangeCombinedQuoteMessageShortFormMessageCode -> EncodeExchangeCombinedQuoteMessageShortFormMessage(message.body)
@@ -1704,8 +1704,8 @@ EncodeInboundQuoteMessagesMessagePayload(message) ==
 
 DecodeInboundQuoteMessagesMessagePayload(tag, bytes) ==
     LET read ==
-            CASE tag = ProtectedExchangeQuoteMessageShortformMessageCode -> DecodeProtectedExchangeQuoteMessageShortformMessage(bytes)
-              [] tag = ProtectedExchangeQuoteMessageLongformMessageCode -> DecodeProtectedExchangeQuoteMessageLongformMessage(bytes)
+            CASE tag = ProtectedExchangeQuoteMessageShortFormMessageCode -> DecodeProtectedExchangeQuoteMessageShortFormMessage(bytes)
+              [] tag = ProtectedExchangeQuoteMessageLongFormMessageCode -> DecodeProtectedExchangeQuoteMessageLongFormMessage(bytes)
               [] tag = ExchangeOddLotQuoteMessageShortFormMessageCode -> DecodeExchangeOddLotQuoteMessageShortFormMessage(bytes)
               [] tag = ExchangeOddLotQuoteMessageLongFormMessageCode -> DecodeExchangeOddLotQuoteMessageLongFormMessage(bytes)
               [] tag = ExchangeCombinedQuoteMessageShortFormMessageCode -> DecodeExchangeCombinedQuoteMessageShortFormMessage(bytes)
@@ -1717,12 +1717,12 @@ DecodeInboundQuoteMessagesMessagePayload(tag, bytes) ==
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroInboundQuoteMessagesMessagePayload == [tag |-> ProtectedExchangeQuoteMessageShortformMessageCode, body |-> ZeroProtectedExchangeQuoteMessageShortformMessage]
+ZeroInboundQuoteMessagesMessagePayload == [tag |-> ProtectedExchangeQuoteMessageShortFormMessageCode, body |-> ZeroProtectedExchangeQuoteMessageShortFormMessage]
 
 (* Each Inbound Quote Messages Message Payload in turn, at the values the message it names is checked at *)
 CheckedInboundQuoteMessagesMessagePayload ==
-    { [tag |-> ProtectedExchangeQuoteMessageShortformMessageCode, body |-> one] : one \in CheckedProtectedExchangeQuoteMessageShortformMessage }
-        \cup { [tag |-> ProtectedExchangeQuoteMessageLongformMessageCode, body |-> one] : one \in CheckedProtectedExchangeQuoteMessageLongformMessage }
+    { [tag |-> ProtectedExchangeQuoteMessageShortFormMessageCode, body |-> one] : one \in CheckedProtectedExchangeQuoteMessageShortFormMessage }
+        \cup { [tag |-> ProtectedExchangeQuoteMessageLongFormMessageCode, body |-> one] : one \in CheckedProtectedExchangeQuoteMessageLongFormMessage }
         \cup { [tag |-> ExchangeOddLotQuoteMessageShortFormMessageCode, body |-> one] : one \in CheckedExchangeOddLotQuoteMessageShortFormMessage }
         \cup { [tag |-> ExchangeOddLotQuoteMessageLongFormMessageCode, body |-> one] : one \in CheckedExchangeOddLotQuoteMessageLongFormMessage }
         \cup { [tag |-> ExchangeCombinedQuoteMessageShortFormMessageCode, body |-> one] : one \in CheckedExchangeCombinedQuoteMessageShortFormMessage }
@@ -4384,18 +4384,18 @@ RoundTripUIntLE ==
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
                 /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
-(* Every Protected Exchange Quote Message Shortform Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripProtectedExchangeQuoteMessageShortformMessage ==
-    \A message \in CheckedProtectedExchangeQuoteMessageShortformMessage :
-        LET read == DecodeProtectedExchangeQuoteMessageShortformMessage(EncodeProtectedExchangeQuoteMessageShortformMessage(message))
+(* Every Protected Exchange Quote Message Short Form Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripProtectedExchangeQuoteMessageShortFormMessage ==
+    \A message \in CheckedProtectedExchangeQuoteMessageShortFormMessage :
+        LET read == DecodeProtectedExchangeQuoteMessageShortFormMessage(EncodeProtectedExchangeQuoteMessageShortFormMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Protected Exchange Quote Message Longform Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripProtectedExchangeQuoteMessageLongformMessage ==
-    \A message \in CheckedProtectedExchangeQuoteMessageLongformMessage :
-        LET read == DecodeProtectedExchangeQuoteMessageLongformMessage(EncodeProtectedExchangeQuoteMessageLongformMessage(message))
+(* Every Protected Exchange Quote Message Long Form Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripProtectedExchangeQuoteMessageLongFormMessage ==
+    \A message \in CheckedProtectedExchangeQuoteMessageLongFormMessage :
+        LET read == DecodeProtectedExchangeQuoteMessageLongFormMessage(EncodeProtectedExchangeQuoteMessageLongFormMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

@@ -100,10 +100,10 @@ SampleLists(entries) ==
         \cup { <<one, one>> : one \in entries }
 
 (***************************************************************************)
-(* Trade Report Message Shortform Message: 58 bytes                        *)
+(* Trade Report Message Short Form Message: 58 bytes                       *)
 (***************************************************************************)
 
-TradeReportMessageShortformMessage ==
+TradeReportMessageShortFormMessage ==
     [ marketCenterOriginator           : Sample(1),
       subMarketCenterId                : Sample(1),
       sipTimestamp                     : Sample(8),
@@ -119,7 +119,7 @@ TradeReportMessageShortformMessage ==
       consolidatedPriceChangeIndicator : Sample(1),
       participantPriceChangeIndicator  : Sample(1) ]
 
-EncodeTradeReportMessageShortformMessage(message) ==
+EncodeTradeReportMessageShortFormMessage(message) ==
     message.marketCenterOriginator
         \o message.subMarketCenterId
         \o message.sipTimestamp
@@ -135,7 +135,7 @@ EncodeTradeReportMessageShortformMessage(message) ==
         \o message.consolidatedPriceChangeIndicator
         \o message.participantPriceChangeIndicator
 
-DecodeTradeReportMessageShortformMessage(bytes) ==
+DecodeTradeReportMessageShortFormMessage(bytes) ==
     LET marketCenterOriginator == ReadBytes(bytes, 1) IN IF ~marketCenterOriginator.ok THEN Fail ELSE
     LET subMarketCenterId == ReadBytes(marketCenterOriginator.rest, 1) IN IF ~subMarketCenterId.ok THEN Fail ELSE
     LET sipTimestamp == ReadBytes(subMarketCenterId.rest, 8) IN IF ~sipTimestamp.ok THEN Fail ELSE
@@ -165,7 +165,7 @@ DecodeTradeReportMessageShortformMessage(bytes) ==
          consolidatedPriceChangeIndicator |-> consolidatedPriceChangeIndicator.value,
          participantPriceChangeIndicator  |-> participantPriceChangeIndicator.value ], participantPriceChangeIndicator.rest)
 
-ZeroTradeReportMessageShortformMessage ==
+ZeroTradeReportMessageShortFormMessage ==
     [ marketCenterOriginator           |-> [i \in 1 .. 1 |-> 0],
       subMarketCenterId                |-> [i \in 1 .. 1 |-> 0],
       sipTimestamp                     |-> [i \in 1 .. 8 |-> 0],
@@ -181,29 +181,29 @@ ZeroTradeReportMessageShortformMessage ==
       consolidatedPriceChangeIndicator |-> [i \in 1 .. 1 |-> 0],
       participantPriceChangeIndicator  |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Trade Report Message Shortform Message at zero, then each field in turn at the values it is checked at *)
-CheckedTradeReportMessageShortformMessage ==
-    { ZeroTradeReportMessageShortformMessage }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.marketCenterOriginator = one] : one \in Sample(1) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.subMarketCenterId = one] : one \in Sample(1) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.sipTimestamp = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.participantToken = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.timestamp2 = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.symbolShort = one] : one \in Sample(5) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.tradeId = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.tradePriceShort = one] : one \in Sample(2) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.tradeVolumeShort = one] : one \in Sample(2) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.saleCondition = one] : one \in Sample(4) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.tradeThroughExemptFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.consolidatedPriceChangeIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroTradeReportMessageShortformMessage EXCEPT !.participantPriceChangeIndicator = one] : one \in Sample(1) }
+(* Trade Report Message Short Form Message at zero, then each field in turn at the values it is checked at *)
+CheckedTradeReportMessageShortFormMessage ==
+    { ZeroTradeReportMessageShortFormMessage }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.marketCenterOriginator = one] : one \in Sample(1) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.subMarketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.sipTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.participantToken = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.timestamp2 = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.symbolShort = one] : one \in Sample(5) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.tradeId = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.tradePriceShort = one] : one \in Sample(2) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.tradeVolumeShort = one] : one \in Sample(2) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.saleCondition = one] : one \in Sample(4) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.tradeThroughExemptFlag = one] : one \in Sample(1) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.consolidatedPriceChangeIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroTradeReportMessageShortFormMessage EXCEPT !.participantPriceChangeIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Trade Report Message Longform Message: 74 bytes                         *)
+(* Trade Report Message Long Form Message: 74 bytes                        *)
 (***************************************************************************)
 
-TradeReportMessageLongformMessage ==
+TradeReportMessageLongFormMessage ==
     [ marketCenterOriginator           : Sample(1),
       subMarketCenterId                : Sample(1),
       sipTimestamp                     : Sample(8),
@@ -220,7 +220,7 @@ TradeReportMessageLongformMessage ==
       consolidatedPriceChangeIndicator : Sample(1),
       participantPriceChangeIndicator  : Sample(1) ]
 
-EncodeTradeReportMessageLongformMessage(message) ==
+EncodeTradeReportMessageLongFormMessage(message) ==
     message.marketCenterOriginator
         \o message.subMarketCenterId
         \o message.sipTimestamp
@@ -237,7 +237,7 @@ EncodeTradeReportMessageLongformMessage(message) ==
         \o message.consolidatedPriceChangeIndicator
         \o message.participantPriceChangeIndicator
 
-DecodeTradeReportMessageLongformMessage(bytes) ==
+DecodeTradeReportMessageLongFormMessage(bytes) ==
     LET marketCenterOriginator == ReadBytes(bytes, 1) IN IF ~marketCenterOriginator.ok THEN Fail ELSE
     LET subMarketCenterId == ReadBytes(marketCenterOriginator.rest, 1) IN IF ~subMarketCenterId.ok THEN Fail ELSE
     LET sipTimestamp == ReadBytes(subMarketCenterId.rest, 8) IN IF ~sipTimestamp.ok THEN Fail ELSE
@@ -269,7 +269,7 @@ DecodeTradeReportMessageLongformMessage(bytes) ==
          consolidatedPriceChangeIndicator |-> consolidatedPriceChangeIndicator.value,
          participantPriceChangeIndicator  |-> participantPriceChangeIndicator.value ], participantPriceChangeIndicator.rest)
 
-ZeroTradeReportMessageLongformMessage ==
+ZeroTradeReportMessageLongFormMessage ==
     [ marketCenterOriginator           |-> [i \in 1 .. 1 |-> 0],
       subMarketCenterId                |-> [i \in 1 .. 1 |-> 0],
       sipTimestamp                     |-> [i \in 1 .. 8 |-> 0],
@@ -286,24 +286,24 @@ ZeroTradeReportMessageLongformMessage ==
       consolidatedPriceChangeIndicator |-> [i \in 1 .. 1 |-> 0],
       participantPriceChangeIndicator  |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Trade Report Message Longform Message at zero, then each field in turn at the values it is checked at *)
-CheckedTradeReportMessageLongformMessage ==
-    { ZeroTradeReportMessageLongformMessage }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.marketCenterOriginator = one] : one \in Sample(1) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.subMarketCenterId = one] : one \in Sample(1) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.sipTimestamp = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.participantToken = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.timestamp2 = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.symbolLong = one] : one \in Sample(11) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.tradeId = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.tradePriceLong = one] : one \in Sample(8) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.tradeVolumeLong = one] : one \in Sample(4) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.saleCondition = one] : one \in Sample(4) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.tradeThroughExemptFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.sellersSaleDays = one] : one \in Sample(2) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.consolidatedPriceChangeIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroTradeReportMessageLongformMessage EXCEPT !.participantPriceChangeIndicator = one] : one \in Sample(1) }
+(* Trade Report Message Long Form Message at zero, then each field in turn at the values it is checked at *)
+CheckedTradeReportMessageLongFormMessage ==
+    { ZeroTradeReportMessageLongFormMessage }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.marketCenterOriginator = one] : one \in Sample(1) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.subMarketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.sipTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.participantToken = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.timestamp2 = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.symbolLong = one] : one \in Sample(11) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.tradeId = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.tradePriceLong = one] : one \in Sample(8) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.tradeVolumeLong = one] : one \in Sample(4) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.saleCondition = one] : one \in Sample(4) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.tradeThroughExemptFlag = one] : one \in Sample(1) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.sellersSaleDays = one] : one \in Sample(2) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.consolidatedPriceChangeIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroTradeReportMessageLongFormMessage EXCEPT !.participantPriceChangeIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Trade Cancel Error Message: 139 bytes                                   *)
@@ -762,10 +762,10 @@ CheckedPriorDayAsOfTradeMessage ==
         \cup { [ZeroPriorDayAsOfTradeMessage EXCEPT !.timestampOfTrade = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Fractional Trade Report Message Shortform Message: 64 bytes             *)
+(* Fractional Trade Report Message Short Form Message: 64 bytes            *)
 (***************************************************************************)
 
-FractionalTradeReportMessageShortformMessage ==
+FractionalTradeReportMessageShortFormMessage ==
     [ marketCenterOriginator           : Sample(1),
       subMarketCenterId                : Sample(1),
       sipTimestamp                     : Sample(8),
@@ -781,7 +781,7 @@ FractionalTradeReportMessageShortformMessage ==
       consolidatedPriceChangeIndicator : Sample(1),
       participantPriceChangeIndicator  : Sample(1) ]
 
-EncodeFractionalTradeReportMessageShortformMessage(message) ==
+EncodeFractionalTradeReportMessageShortFormMessage(message) ==
     message.marketCenterOriginator
         \o message.subMarketCenterId
         \o message.sipTimestamp
@@ -797,7 +797,7 @@ EncodeFractionalTradeReportMessageShortformMessage(message) ==
         \o message.consolidatedPriceChangeIndicator
         \o message.participantPriceChangeIndicator
 
-DecodeFractionalTradeReportMessageShortformMessage(bytes) ==
+DecodeFractionalTradeReportMessageShortFormMessage(bytes) ==
     LET marketCenterOriginator == ReadBytes(bytes, 1) IN IF ~marketCenterOriginator.ok THEN Fail ELSE
     LET subMarketCenterId == ReadBytes(marketCenterOriginator.rest, 1) IN IF ~subMarketCenterId.ok THEN Fail ELSE
     LET sipTimestamp == ReadBytes(subMarketCenterId.rest, 8) IN IF ~sipTimestamp.ok THEN Fail ELSE
@@ -827,7 +827,7 @@ DecodeFractionalTradeReportMessageShortformMessage(bytes) ==
          consolidatedPriceChangeIndicator |-> consolidatedPriceChangeIndicator.value,
          participantPriceChangeIndicator  |-> participantPriceChangeIndicator.value ], participantPriceChangeIndicator.rest)
 
-ZeroFractionalTradeReportMessageShortformMessage ==
+ZeroFractionalTradeReportMessageShortFormMessage ==
     [ marketCenterOriginator           |-> [i \in 1 .. 1 |-> 0],
       subMarketCenterId                |-> [i \in 1 .. 1 |-> 0],
       sipTimestamp                     |-> [i \in 1 .. 8 |-> 0],
@@ -843,29 +843,29 @@ ZeroFractionalTradeReportMessageShortformMessage ==
       consolidatedPriceChangeIndicator |-> [i \in 1 .. 1 |-> 0],
       participantPriceChangeIndicator  |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Fractional Trade Report Message Shortform Message at zero, then each field in turn at the values it is checked at *)
-CheckedFractionalTradeReportMessageShortformMessage ==
-    { ZeroFractionalTradeReportMessageShortformMessage }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.marketCenterOriginator = one] : one \in Sample(1) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.subMarketCenterId = one] : one \in Sample(1) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.sipTimestamp = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.participantToken = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.timestamp2 = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.symbolShort = one] : one \in Sample(5) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.tradeId = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.tradePriceShort = one] : one \in Sample(2) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.tradeVolume = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.saleCondition = one] : one \in Sample(4) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.tradeThroughExemptFlag = one] : one \in Sample(1) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.consolidatedPriceChangeIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroFractionalTradeReportMessageShortformMessage EXCEPT !.participantPriceChangeIndicator = one] : one \in Sample(1) }
+(* Fractional Trade Report Message Short Form Message at zero, then each field in turn at the values it is checked at *)
+CheckedFractionalTradeReportMessageShortFormMessage ==
+    { ZeroFractionalTradeReportMessageShortFormMessage }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.marketCenterOriginator = one] : one \in Sample(1) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.subMarketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.sipTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.participantToken = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.timestamp2 = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.symbolShort = one] : one \in Sample(5) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.tradeId = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.tradePriceShort = one] : one \in Sample(2) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.tradeVolume = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.saleCondition = one] : one \in Sample(4) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.tradeThroughExemptFlag = one] : one \in Sample(1) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.consolidatedPriceChangeIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroFractionalTradeReportMessageShortFormMessage EXCEPT !.participantPriceChangeIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Fractional Trade Report Message Longform Message: 78 bytes              *)
+(* Fractional Trade Report Message Long Form Message: 78 bytes             *)
 (***************************************************************************)
 
-FractionalTradeReportMessageLongformMessage ==
+FractionalTradeReportMessageLongFormMessage ==
     [ marketCenterOriginator           : Sample(1),
       subMarketCenterId                : Sample(1),
       sipTimestamp                     : Sample(8),
@@ -882,7 +882,7 @@ FractionalTradeReportMessageLongformMessage ==
       consolidatedPriceChangeIndicator : Sample(1),
       participantPriceChangeIndicator  : Sample(1) ]
 
-EncodeFractionalTradeReportMessageLongformMessage(message) ==
+EncodeFractionalTradeReportMessageLongFormMessage(message) ==
     message.marketCenterOriginator
         \o message.subMarketCenterId
         \o message.sipTimestamp
@@ -899,7 +899,7 @@ EncodeFractionalTradeReportMessageLongformMessage(message) ==
         \o message.consolidatedPriceChangeIndicator
         \o message.participantPriceChangeIndicator
 
-DecodeFractionalTradeReportMessageLongformMessage(bytes) ==
+DecodeFractionalTradeReportMessageLongFormMessage(bytes) ==
     LET marketCenterOriginator == ReadBytes(bytes, 1) IN IF ~marketCenterOriginator.ok THEN Fail ELSE
     LET subMarketCenterId == ReadBytes(marketCenterOriginator.rest, 1) IN IF ~subMarketCenterId.ok THEN Fail ELSE
     LET sipTimestamp == ReadBytes(subMarketCenterId.rest, 8) IN IF ~sipTimestamp.ok THEN Fail ELSE
@@ -931,7 +931,7 @@ DecodeFractionalTradeReportMessageLongformMessage(bytes) ==
          consolidatedPriceChangeIndicator |-> consolidatedPriceChangeIndicator.value,
          participantPriceChangeIndicator  |-> participantPriceChangeIndicator.value ], participantPriceChangeIndicator.rest)
 
-ZeroFractionalTradeReportMessageLongformMessage ==
+ZeroFractionalTradeReportMessageLongFormMessage ==
     [ marketCenterOriginator           |-> [i \in 1 .. 1 |-> 0],
       subMarketCenterId                |-> [i \in 1 .. 1 |-> 0],
       sipTimestamp                     |-> [i \in 1 .. 8 |-> 0],
@@ -948,24 +948,24 @@ ZeroFractionalTradeReportMessageLongformMessage ==
       consolidatedPriceChangeIndicator |-> [i \in 1 .. 1 |-> 0],
       participantPriceChangeIndicator  |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Fractional Trade Report Message Longform Message at zero, then each field in turn at the values it is checked at *)
-CheckedFractionalTradeReportMessageLongformMessage ==
-    { ZeroFractionalTradeReportMessageLongformMessage }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.marketCenterOriginator = one] : one \in Sample(1) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.subMarketCenterId = one] : one \in Sample(1) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.sipTimestamp = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.participantToken = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.timestamp2 = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.symbolLong = one] : one \in Sample(11) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.tradeId = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.tradePriceLong = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.tradeVolume = one] : one \in Sample(8) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.saleCondition = one] : one \in Sample(4) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.tradeThroughExemptFlag = one] : one \in Sample(1) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.sellersSaleDays = one] : one \in Sample(2) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.consolidatedPriceChangeIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroFractionalTradeReportMessageLongformMessage EXCEPT !.participantPriceChangeIndicator = one] : one \in Sample(1) }
+(* Fractional Trade Report Message Long Form Message at zero, then each field in turn at the values it is checked at *)
+CheckedFractionalTradeReportMessageLongFormMessage ==
+    { ZeroFractionalTradeReportMessageLongFormMessage }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.marketCenterOriginator = one] : one \in Sample(1) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.subMarketCenterId = one] : one \in Sample(1) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.sipTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.timestamp1 = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.participantToken = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.timestamp2 = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.symbolLong = one] : one \in Sample(11) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.tradeId = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.tradePriceLong = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.tradeVolume = one] : one \in Sample(8) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.saleCondition = one] : one \in Sample(4) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.tradeThroughExemptFlag = one] : one \in Sample(1) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.sellersSaleDays = one] : one \in Sample(2) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.consolidatedPriceChangeIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroFractionalTradeReportMessageLongFormMessage EXCEPT !.participantPriceChangeIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Fractional Trade Cancel Error Message: 143 bytes                        *)
@@ -1427,67 +1427,67 @@ CheckedFractionalAsOfTradeMessage ==
 (* Trade Message Payload, selected by Trade Message Type                   *)
 (***************************************************************************)
 
-TradeReportMessageShortformMessageCode == 65  \* "A"
-TradeReportMessageLongformMessageCode == 87  \* "W"
+TradeReportMessageShortFormMessageCode == 65  \* "A"
+TradeReportMessageLongFormMessageCode == 87  \* "W"
 TradeCancelErrorMessageCode == 90  \* "Z"
 TradeCorrectionMessageCode == 89  \* "Y"
 PriorDayAsOfTradeMessageCode == 72  \* "H"
-FractionalTradeReportMessageShortformMessageCode == 77  \* "M"
-FractionalTradeReportMessageLongformMessageCode == 78  \* "N"
+FractionalTradeReportMessageShortFormMessageCode == 77  \* "M"
+FractionalTradeReportMessageLongFormMessageCode == 78  \* "N"
 FractionalTradeCancelErrorMessageCode == 79  \* "O"
 FractionalTradeCorrectionMessageCode == 80  \* "P"
 FractionalAsOfTradeMessageCode == 81  \* "Q"
 
 TradeMessagePayload ==
-    [ tag : {TradeReportMessageShortformMessageCode}, body : TradeReportMessageShortformMessage ]
-        \cup [ tag : {TradeReportMessageLongformMessageCode}, body : TradeReportMessageLongformMessage ]
+    [ tag : {TradeReportMessageShortFormMessageCode}, body : TradeReportMessageShortFormMessage ]
+        \cup [ tag : {TradeReportMessageLongFormMessageCode}, body : TradeReportMessageLongFormMessage ]
         \cup [ tag : {TradeCancelErrorMessageCode}, body : TradeCancelErrorMessage ]
         \cup [ tag : {TradeCorrectionMessageCode}, body : TradeCorrectionMessage ]
         \cup [ tag : {PriorDayAsOfTradeMessageCode}, body : PriorDayAsOfTradeMessage ]
-        \cup [ tag : {FractionalTradeReportMessageShortformMessageCode}, body : FractionalTradeReportMessageShortformMessage ]
-        \cup [ tag : {FractionalTradeReportMessageLongformMessageCode}, body : FractionalTradeReportMessageLongformMessage ]
+        \cup [ tag : {FractionalTradeReportMessageShortFormMessageCode}, body : FractionalTradeReportMessageShortFormMessage ]
+        \cup [ tag : {FractionalTradeReportMessageLongFormMessageCode}, body : FractionalTradeReportMessageLongFormMessage ]
         \cup [ tag : {FractionalTradeCancelErrorMessageCode}, body : FractionalTradeCancelErrorMessage ]
         \cup [ tag : {FractionalTradeCorrectionMessageCode}, body : FractionalTradeCorrectionMessage ]
         \cup [ tag : {FractionalAsOfTradeMessageCode}, body : FractionalAsOfTradeMessage ]
 
 EncodeTradeMessagePayload(message) ==
-    CASE message.tag = TradeReportMessageShortformMessageCode -> EncodeTradeReportMessageShortformMessage(message.body)
-      [] message.tag = TradeReportMessageLongformMessageCode -> EncodeTradeReportMessageLongformMessage(message.body)
+    CASE message.tag = TradeReportMessageShortFormMessageCode -> EncodeTradeReportMessageShortFormMessage(message.body)
+      [] message.tag = TradeReportMessageLongFormMessageCode -> EncodeTradeReportMessageLongFormMessage(message.body)
       [] message.tag = TradeCancelErrorMessageCode -> EncodeTradeCancelErrorMessage(message.body)
       [] message.tag = TradeCorrectionMessageCode -> EncodeTradeCorrectionMessage(message.body)
       [] message.tag = PriorDayAsOfTradeMessageCode -> EncodePriorDayAsOfTradeMessage(message.body)
-      [] message.tag = FractionalTradeReportMessageShortformMessageCode -> EncodeFractionalTradeReportMessageShortformMessage(message.body)
-      [] message.tag = FractionalTradeReportMessageLongformMessageCode -> EncodeFractionalTradeReportMessageLongformMessage(message.body)
+      [] message.tag = FractionalTradeReportMessageShortFormMessageCode -> EncodeFractionalTradeReportMessageShortFormMessage(message.body)
+      [] message.tag = FractionalTradeReportMessageLongFormMessageCode -> EncodeFractionalTradeReportMessageLongFormMessage(message.body)
       [] message.tag = FractionalTradeCancelErrorMessageCode -> EncodeFractionalTradeCancelErrorMessage(message.body)
       [] message.tag = FractionalTradeCorrectionMessageCode -> EncodeFractionalTradeCorrectionMessage(message.body)
       [] message.tag = FractionalAsOfTradeMessageCode -> EncodeFractionalAsOfTradeMessage(message.body)
 
 DecodeTradeMessagePayload(tag, bytes) ==
     LET read ==
-            CASE tag = TradeReportMessageShortformMessageCode -> DecodeTradeReportMessageShortformMessage(bytes)
-              [] tag = TradeReportMessageLongformMessageCode -> DecodeTradeReportMessageLongformMessage(bytes)
+            CASE tag = TradeReportMessageShortFormMessageCode -> DecodeTradeReportMessageShortFormMessage(bytes)
+              [] tag = TradeReportMessageLongFormMessageCode -> DecodeTradeReportMessageLongFormMessage(bytes)
               [] tag = TradeCancelErrorMessageCode -> DecodeTradeCancelErrorMessage(bytes)
               [] tag = TradeCorrectionMessageCode -> DecodeTradeCorrectionMessage(bytes)
               [] tag = PriorDayAsOfTradeMessageCode -> DecodePriorDayAsOfTradeMessage(bytes)
-              [] tag = FractionalTradeReportMessageShortformMessageCode -> DecodeFractionalTradeReportMessageShortformMessage(bytes)
-              [] tag = FractionalTradeReportMessageLongformMessageCode -> DecodeFractionalTradeReportMessageLongformMessage(bytes)
+              [] tag = FractionalTradeReportMessageShortFormMessageCode -> DecodeFractionalTradeReportMessageShortFormMessage(bytes)
+              [] tag = FractionalTradeReportMessageLongFormMessageCode -> DecodeFractionalTradeReportMessageLongFormMessage(bytes)
               [] tag = FractionalTradeCancelErrorMessageCode -> DecodeFractionalTradeCancelErrorMessage(bytes)
               [] tag = FractionalTradeCorrectionMessageCode -> DecodeFractionalTradeCorrectionMessage(bytes)
               [] tag = FractionalAsOfTradeMessageCode -> DecodeFractionalAsOfTradeMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroTradeMessagePayload == [tag |-> TradeReportMessageShortformMessageCode, body |-> ZeroTradeReportMessageShortformMessage]
+ZeroTradeMessagePayload == [tag |-> TradeReportMessageShortFormMessageCode, body |-> ZeroTradeReportMessageShortFormMessage]
 
 (* Each Trade Message Payload in turn, at the values the message it names is checked at *)
 CheckedTradeMessagePayload ==
-    { [tag |-> TradeReportMessageShortformMessageCode, body |-> one] : one \in CheckedTradeReportMessageShortformMessage }
-        \cup { [tag |-> TradeReportMessageLongformMessageCode, body |-> one] : one \in CheckedTradeReportMessageLongformMessage }
+    { [tag |-> TradeReportMessageShortFormMessageCode, body |-> one] : one \in CheckedTradeReportMessageShortFormMessage }
+        \cup { [tag |-> TradeReportMessageLongFormMessageCode, body |-> one] : one \in CheckedTradeReportMessageLongFormMessage }
         \cup { [tag |-> TradeCancelErrorMessageCode, body |-> one] : one \in CheckedTradeCancelErrorMessage }
         \cup { [tag |-> TradeCorrectionMessageCode, body |-> one] : one \in CheckedTradeCorrectionMessage }
         \cup { [tag |-> PriorDayAsOfTradeMessageCode, body |-> one] : one \in CheckedPriorDayAsOfTradeMessage }
-        \cup { [tag |-> FractionalTradeReportMessageShortformMessageCode, body |-> one] : one \in CheckedFractionalTradeReportMessageShortformMessage }
-        \cup { [tag |-> FractionalTradeReportMessageLongformMessageCode, body |-> one] : one \in CheckedFractionalTradeReportMessageLongformMessage }
+        \cup { [tag |-> FractionalTradeReportMessageShortFormMessageCode, body |-> one] : one \in CheckedFractionalTradeReportMessageShortFormMessage }
+        \cup { [tag |-> FractionalTradeReportMessageLongFormMessageCode, body |-> one] : one \in CheckedFractionalTradeReportMessageLongFormMessage }
         \cup { [tag |-> FractionalTradeCancelErrorMessageCode, body |-> one] : one \in CheckedFractionalTradeCancelErrorMessage }
         \cup { [tag |-> FractionalTradeCorrectionMessageCode, body |-> one] : one \in CheckedFractionalTradeCorrectionMessage }
         \cup { [tag |-> FractionalAsOfTradeMessageCode, body |-> one] : one \in CheckedFractionalAsOfTradeMessage }
@@ -3126,18 +3126,18 @@ RoundTripUIntLE ==
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
                 /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
-(* Every Trade Report Message Shortform Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripTradeReportMessageShortformMessage ==
-    \A message \in CheckedTradeReportMessageShortformMessage :
-        LET read == DecodeTradeReportMessageShortformMessage(EncodeTradeReportMessageShortformMessage(message))
+(* Every Trade Report Message Short Form Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTradeReportMessageShortFormMessage ==
+    \A message \in CheckedTradeReportMessageShortFormMessage :
+        LET read == DecodeTradeReportMessageShortFormMessage(EncodeTradeReportMessageShortFormMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Trade Report Message Longform Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripTradeReportMessageLongformMessage ==
-    \A message \in CheckedTradeReportMessageLongformMessage :
-        LET read == DecodeTradeReportMessageLongformMessage(EncodeTradeReportMessageLongformMessage(message))
+(* Every Trade Report Message Long Form Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTradeReportMessageLongFormMessage ==
+    \A message \in CheckedTradeReportMessageLongFormMessage :
+        LET read == DecodeTradeReportMessageLongFormMessage(EncodeTradeReportMessageLongFormMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -3166,18 +3166,18 @@ RoundTripPriorDayAsOfTradeMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Fractional Trade Report Message Shortform Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripFractionalTradeReportMessageShortformMessage ==
-    \A message \in CheckedFractionalTradeReportMessageShortformMessage :
-        LET read == DecodeFractionalTradeReportMessageShortformMessage(EncodeFractionalTradeReportMessageShortformMessage(message))
+(* Every Fractional Trade Report Message Short Form Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripFractionalTradeReportMessageShortFormMessage ==
+    \A message \in CheckedFractionalTradeReportMessageShortFormMessage :
+        LET read == DecodeFractionalTradeReportMessageShortFormMessage(EncodeFractionalTradeReportMessageShortFormMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Fractional Trade Report Message Longform Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripFractionalTradeReportMessageLongformMessage ==
-    \A message \in CheckedFractionalTradeReportMessageLongformMessage :
-        LET read == DecodeFractionalTradeReportMessageLongformMessage(EncodeFractionalTradeReportMessageLongformMessage(message))
+(* Every Fractional Trade Report Message Long Form Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripFractionalTradeReportMessageLongFormMessage ==
+    \A message \in CheckedFractionalTradeReportMessageLongFormMessage :
+        LET read == DecodeFractionalTradeReportMessageLongFormMessage(EncodeFractionalTradeReportMessageLongFormMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

@@ -205,29 +205,29 @@ SystemEventMessage ==
     [ timestamp  : Sample(8),
       eventCode  : Sample(1),
       version    : Sample(1),
-      subversion : Sample(1) ]
+      subVersion : Sample(1) ]
 
 EncodeSystemEventMessage(message) ==
     message.timestamp
         \o message.eventCode
         \o message.version
-        \o message.subversion
+        \o message.subVersion
 
 DecodeSystemEventMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET eventCode == ReadBytes(timestamp.rest, 1) IN IF ~eventCode.ok THEN Fail ELSE
     LET version == ReadBytes(eventCode.rest, 1) IN IF ~version.ok THEN Fail ELSE
-    LET subversion == ReadBytes(version.rest, 1) IN IF ~subversion.ok THEN Fail ELSE
+    LET subVersion == ReadBytes(version.rest, 1) IN IF ~subVersion.ok THEN Fail ELSE
     Ok([ timestamp  |-> timestamp.value,
          eventCode  |-> eventCode.value,
          version    |-> version.value,
-         subversion |-> subversion.value ], subversion.rest)
+         subVersion |-> subVersion.value ], subVersion.rest)
 
 ZeroSystemEventMessage ==
     [ timestamp  |-> [i \in 1 .. 8 |-> 0],
       eventCode  |-> [i \in 1 .. 1 |-> 0],
       version    |-> [i \in 1 .. 1 |-> 0],
-      subversion |-> [i \in 1 .. 1 |-> 0] ]
+      subVersion |-> [i \in 1 .. 1 |-> 0] ]
 
 (* System Event Message at zero, then each field in turn at the values it is checked at *)
 CheckedSystemEventMessage ==
@@ -235,7 +235,7 @@ CheckedSystemEventMessage ==
         \cup { [ZeroSystemEventMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroSystemEventMessage EXCEPT !.eventCode = one] : one \in Sample(1) }
         \cup { [ZeroSystemEventMessage EXCEPT !.version = one] : one \in Sample(1) }
-        \cup { [ZeroSystemEventMessage EXCEPT !.subversion = one] : one \in Sample(1) }
+        \cup { [ZeroSystemEventMessage EXCEPT !.subVersion = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Simple Instrument Directory Message: 69 bytes                           *)

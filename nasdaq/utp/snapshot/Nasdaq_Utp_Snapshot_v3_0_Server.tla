@@ -1259,10 +1259,10 @@ CheckedControlMessage ==
         \cup { [ZeroControlMessage EXCEPT !.controlMessagePayload = one] : one \in CheckedControlMessagePayload }
 
 (***************************************************************************)
-(* National Bbo Appendage Longform: 27 bytes                               *)
+(* National Bbo Appendage Long Form: 27 bytes                              *)
 (***************************************************************************)
 
-NationalBboAppendageLongform ==
+NationalBboAppendageLongForm ==
     [ nbboQuoteCondition          : Sample(1),
       nationalBestBidMarketCenter : Sample(1),
       nationalBestBidPrice        : Sample(8),
@@ -1271,7 +1271,7 @@ NationalBboAppendageLongform ==
       nationalBestAskPrice        : Sample(8),
       nationalBestAskSize         : Sample(4) ]
 
-EncodeNationalBboAppendageLongform(message) ==
+EncodeNationalBboAppendageLongForm(message) ==
     message.nbboQuoteCondition
         \o message.nationalBestBidMarketCenter
         \o message.nationalBestBidPrice
@@ -1280,7 +1280,7 @@ EncodeNationalBboAppendageLongform(message) ==
         \o message.nationalBestAskPrice
         \o message.nationalBestAskSize
 
-DecodeNationalBboAppendageLongform(bytes) ==
+DecodeNationalBboAppendageLongForm(bytes) ==
     LET nbboQuoteCondition == ReadBytes(bytes, 1) IN IF ~nbboQuoteCondition.ok THEN Fail ELSE
     LET nationalBestBidMarketCenter == ReadBytes(nbboQuoteCondition.rest, 1) IN IF ~nationalBestBidMarketCenter.ok THEN Fail ELSE
     LET nationalBestBidPrice == ReadBytes(nationalBestBidMarketCenter.rest, 8) IN IF ~nationalBestBidPrice.ok THEN Fail ELSE
@@ -1296,7 +1296,7 @@ DecodeNationalBboAppendageLongform(bytes) ==
          nationalBestAskPrice        |-> nationalBestAskPrice.value,
          nationalBestAskSize         |-> nationalBestAskSize.value ], nationalBestAskSize.rest)
 
-ZeroNationalBboAppendageLongform ==
+ZeroNationalBboAppendageLongForm ==
     [ nbboQuoteCondition          |-> [i \in 1 .. 1 |-> 0],
       nationalBestBidMarketCenter |-> [i \in 1 .. 1 |-> 0],
       nationalBestBidPrice        |-> [i \in 1 .. 8 |-> 0],
@@ -1305,43 +1305,43 @@ ZeroNationalBboAppendageLongform ==
       nationalBestAskPrice        |-> [i \in 1 .. 8 |-> 0],
       nationalBestAskSize         |-> [i \in 1 .. 4 |-> 0] ]
 
-(* National Bbo Appendage Longform at zero, then each field in turn at the values it is checked at *)
-CheckedNationalBboAppendageLongform ==
-    { ZeroNationalBboAppendageLongform }
-        \cup { [ZeroNationalBboAppendageLongform EXCEPT !.nbboQuoteCondition = one] : one \in Sample(1) }
-        \cup { [ZeroNationalBboAppendageLongform EXCEPT !.nationalBestBidMarketCenter = one] : one \in Sample(1) }
-        \cup { [ZeroNationalBboAppendageLongform EXCEPT !.nationalBestBidPrice = one] : one \in Sample(8) }
-        \cup { [ZeroNationalBboAppendageLongform EXCEPT !.nationalBestBidSize = one] : one \in Sample(4) }
-        \cup { [ZeroNationalBboAppendageLongform EXCEPT !.nationalBestAskMarketCenter = one] : one \in Sample(1) }
-        \cup { [ZeroNationalBboAppendageLongform EXCEPT !.nationalBestAskPrice = one] : one \in Sample(8) }
-        \cup { [ZeroNationalBboAppendageLongform EXCEPT !.nationalBestAskSize = one] : one \in Sample(4) }
+(* National Bbo Appendage Long Form at zero, then each field in turn at the values it is checked at *)
+CheckedNationalBboAppendageLongForm ==
+    { ZeroNationalBboAppendageLongForm }
+        \cup { [ZeroNationalBboAppendageLongForm EXCEPT !.nbboQuoteCondition = one] : one \in Sample(1) }
+        \cup { [ZeroNationalBboAppendageLongForm EXCEPT !.nationalBestBidMarketCenter = one] : one \in Sample(1) }
+        \cup { [ZeroNationalBboAppendageLongForm EXCEPT !.nationalBestBidPrice = one] : one \in Sample(8) }
+        \cup { [ZeroNationalBboAppendageLongForm EXCEPT !.nationalBestBidSize = one] : one \in Sample(4) }
+        \cup { [ZeroNationalBboAppendageLongForm EXCEPT !.nationalBestAskMarketCenter = one] : one \in Sample(1) }
+        \cup { [ZeroNationalBboAppendageLongForm EXCEPT !.nationalBestAskPrice = one] : one \in Sample(8) }
+        \cup { [ZeroNationalBboAppendageLongForm EXCEPT !.nationalBestAskSize = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* What Nbbo Appendage Indicator decides is present                        *)
 (***************************************************************************)
 
-NationalBboAppendageLongformCode == 51  \* "3"
+NationalBboAppendageLongFormCode == 51  \* "3"
 NbboAppendageIndicatorNoneCode == 0  \* 
 
 NbboAppendageIndicatorChoice ==
-    [ tag : {NationalBboAppendageLongformCode}, body : NationalBboAppendageLongform ]
+    [ tag : {NationalBboAppendageLongFormCode}, body : NationalBboAppendageLongForm ]
         \cup [ tag : {NbboAppendageIndicatorNoneCode}, body : {[empty |-> 0]} ]
 
 EncodeNbboAppendageIndicatorChoice(message) ==
-    CASE message.tag = NationalBboAppendageLongformCode -> EncodeNationalBboAppendageLongform(message.body)
+    CASE message.tag = NationalBboAppendageLongFormCode -> EncodeNationalBboAppendageLongForm(message.body)
       [] OTHER -> << >>
 
 DecodeNbboAppendageIndicatorChoice(tag, bytes) ==
     LET read ==
-            CASE tag = NationalBboAppendageLongformCode -> DecodeNationalBboAppendageLongform(bytes)
+            CASE tag = NationalBboAppendageLongFormCode -> DecodeNationalBboAppendageLongForm(bytes)
               [] OTHER -> Ok([empty |-> 0], bytes)
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroNbboAppendageIndicatorChoice == [tag |-> NationalBboAppendageLongformCode, body |-> ZeroNationalBboAppendageLongform]
+ZeroNbboAppendageIndicatorChoice == [tag |-> NationalBboAppendageLongFormCode, body |-> ZeroNationalBboAppendageLongForm]
 
 (* Each Nbbo Appendage Indicator in turn, at the values the message it names is checked at *)
 CheckedNbboAppendageIndicatorChoice ==
-    { [tag |-> NationalBboAppendageLongformCode, body |-> one] : one \in CheckedNationalBboAppendageLongform }
+    { [tag |-> NationalBboAppendageLongFormCode, body |-> one] : one \in CheckedNationalBboAppendageLongForm }
         \cup { [tag |-> NbboAppendageIndicatorNoneCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
@@ -2416,10 +2416,10 @@ RoundTripControlMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every National Bbo Appendage Longform decodes back to what was encoded, and leaves nothing over *)
-RoundTripNationalBboAppendageLongform ==
-    \A message \in CheckedNationalBboAppendageLongform :
-        LET read == DecodeNationalBboAppendageLongform(EncodeNationalBboAppendageLongform(message))
+(* Every National Bbo Appendage Long Form decodes back to what was encoded, and leaves nothing over *)
+RoundTripNationalBboAppendageLongForm ==
+    \A message \in CheckedNationalBboAppendageLongForm :
+        LET read == DecodeNationalBboAppendageLongForm(EncodeNationalBboAppendageLongForm(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

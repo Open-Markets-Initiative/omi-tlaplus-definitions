@@ -128,28 +128,28 @@ CheckedHeaderTime ==
 (***************************************************************************)
 
 WakeUpCallMessage ==
-    [ statuscodeUint81 : Sample(1),
-      startinboundnum  : Sample(4) ]
+    [ statusCodeUint81 : Sample(1),
+      startInBoundNum  : Sample(4) ]
 
 EncodeWakeUpCallMessage(message) ==
-    message.statuscodeUint81
-        \o message.startinboundnum
+    message.statusCodeUint81
+        \o message.startInBoundNum
 
 DecodeWakeUpCallMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    LET startinboundnum == ReadBytes(statuscodeUint81.rest, 4) IN IF ~startinboundnum.ok THEN Fail ELSE
-    Ok([ statuscodeUint81 |-> statuscodeUint81.value,
-         startinboundnum  |-> startinboundnum.value ], startinboundnum.rest)
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    LET startInBoundNum == ReadBytes(statusCodeUint81.rest, 4) IN IF ~startInBoundNum.ok THEN Fail ELSE
+    Ok([ statusCodeUint81 |-> statusCodeUint81.value,
+         startInBoundNum  |-> startInBoundNum.value ], startInBoundNum.rest)
 
 ZeroWakeUpCallMessage ==
-    [ statuscodeUint81 |-> [i \in 1 .. 1 |-> 0],
-      startinboundnum  |-> [i \in 1 .. 4 |-> 0] ]
+    [ statusCodeUint81 |-> [i \in 1 .. 1 |-> 0],
+      startInBoundNum  |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Wake Up Call Message at zero, then each field in turn at the values it is checked at *)
 CheckedWakeUpCallMessage ==
     { ZeroWakeUpCallMessage }
-        \cup { [ZeroWakeUpCallMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
-        \cup { [ZeroWakeUpCallMessage EXCEPT !.startinboundnum = one] : one \in Sample(4) }
+        \cup { [ZeroWakeUpCallMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroWakeUpCallMessage EXCEPT !.startInBoundNum = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Wake Up Call Confirmed Message: 1 bytes                                 *)
@@ -178,125 +178,125 @@ CheckedWakeUpCallConfirmedMessage ==
 (***************************************************************************)
 
 LogonNoticeMessage ==
-    [ statuscodeUint81 : Sample(1),
-      appendno         : Sample(2),
-      endoutboundnum   : Sample(4),
-      systemtype       : Sample(1),
+    [ statusCodeUint81 : Sample(1),
+      appendNo         : Sample(2),
+      endOutBoundNum   : Sample(4),
+      systemType       : Sample(1),
       encryptMethod    : Sample(1) ]
 
 EncodeLogonNoticeMessage(message) ==
-    message.statuscodeUint81
-        \o message.appendno
-        \o message.endoutboundnum
-        \o message.systemtype
+    message.statusCodeUint81
+        \o message.appendNo
+        \o message.endOutBoundNum
+        \o message.systemType
         \o message.encryptMethod
 
 DecodeLogonNoticeMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    LET appendno == ReadBytes(statuscodeUint81.rest, 2) IN IF ~appendno.ok THEN Fail ELSE
-    LET endoutboundnum == ReadBytes(appendno.rest, 4) IN IF ~endoutboundnum.ok THEN Fail ELSE
-    LET systemtype == ReadBytes(endoutboundnum.rest, 1) IN IF ~systemtype.ok THEN Fail ELSE
-    LET encryptMethod == ReadBytes(systemtype.rest, 1) IN IF ~encryptMethod.ok THEN Fail ELSE
-    Ok([ statuscodeUint81 |-> statuscodeUint81.value,
-         appendno         |-> appendno.value,
-         endoutboundnum   |-> endoutboundnum.value,
-         systemtype       |-> systemtype.value,
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    LET appendNo == ReadBytes(statusCodeUint81.rest, 2) IN IF ~appendNo.ok THEN Fail ELSE
+    LET endOutBoundNum == ReadBytes(appendNo.rest, 4) IN IF ~endOutBoundNum.ok THEN Fail ELSE
+    LET systemType == ReadBytes(endOutBoundNum.rest, 1) IN IF ~systemType.ok THEN Fail ELSE
+    LET encryptMethod == ReadBytes(systemType.rest, 1) IN IF ~encryptMethod.ok THEN Fail ELSE
+    Ok([ statusCodeUint81 |-> statusCodeUint81.value,
+         appendNo         |-> appendNo.value,
+         endOutBoundNum   |-> endOutBoundNum.value,
+         systemType       |-> systemType.value,
          encryptMethod    |-> encryptMethod.value ], encryptMethod.rest)
 
 ZeroLogonNoticeMessage ==
-    [ statuscodeUint81 |-> [i \in 1 .. 1 |-> 0],
-      appendno         |-> [i \in 1 .. 2 |-> 0],
-      endoutboundnum   |-> [i \in 1 .. 4 |-> 0],
-      systemtype       |-> [i \in 1 .. 1 |-> 0],
+    [ statusCodeUint81 |-> [i \in 1 .. 1 |-> 0],
+      appendNo         |-> [i \in 1 .. 2 |-> 0],
+      endOutBoundNum   |-> [i \in 1 .. 4 |-> 0],
+      systemType       |-> [i \in 1 .. 1 |-> 0],
       encryptMethod    |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Logon Notice Message at zero, then each field in turn at the values it is checked at *)
 CheckedLogonNoticeMessage ==
     { ZeroLogonNoticeMessage }
-        \cup { [ZeroLogonNoticeMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
-        \cup { [ZeroLogonNoticeMessage EXCEPT !.appendno = one] : one \in Sample(2) }
-        \cup { [ZeroLogonNoticeMessage EXCEPT !.endoutboundnum = one] : one \in Sample(4) }
-        \cup { [ZeroLogonNoticeMessage EXCEPT !.systemtype = one] : one \in Sample(1) }
+        \cup { [ZeroLogonNoticeMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroLogonNoticeMessage EXCEPT !.appendNo = one] : one \in Sample(2) }
+        \cup { [ZeroLogonNoticeMessage EXCEPT !.endOutBoundNum = one] : one \in Sample(4) }
+        \cup { [ZeroLogonNoticeMessage EXCEPT !.systemType = one] : one \in Sample(1) }
         \cup { [ZeroLogonNoticeMessage EXCEPT !.encryptMethod = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Subhdr: 6 bytes                                                         *)
+(* Sub Hdr: 6 bytes                                                        *)
 (***************************************************************************)
 
-Subhdr ==
+SubHdr ==
     [ msgTypeExt : Sample(1),
       preserve   : Sample(1),
-      msgtimens  : Sample(4) ]
+      msgTimeNs  : Sample(4) ]
 
-EncodeSubhdr(message) ==
+EncodeSubHdr(message) ==
     message.msgTypeExt
         \o message.preserve
-        \o message.msgtimens
+        \o message.msgTimeNs
 
-DecodeSubhdr(bytes) ==
+DecodeSubHdr(bytes) ==
     LET msgTypeExt == ReadBytes(bytes, 1) IN IF ~msgTypeExt.ok THEN Fail ELSE
     LET preserve == ReadBytes(msgTypeExt.rest, 1) IN IF ~preserve.ok THEN Fail ELSE
-    LET msgtimens == ReadBytes(preserve.rest, 4) IN IF ~msgtimens.ok THEN Fail ELSE
+    LET msgTimeNs == ReadBytes(preserve.rest, 4) IN IF ~msgTimeNs.ok THEN Fail ELSE
     Ok([ msgTypeExt |-> msgTypeExt.value,
          preserve   |-> preserve.value,
-         msgtimens  |-> msgtimens.value ], msgtimens.rest)
+         msgTimeNs  |-> msgTimeNs.value ], msgTimeNs.rest)
 
-ZeroSubhdr ==
+ZeroSubHdr ==
     [ msgTypeExt |-> [i \in 1 .. 1 |-> 0],
       preserve   |-> [i \in 1 .. 1 |-> 0],
-      msgtimens  |-> [i \in 1 .. 4 |-> 0] ]
+      msgTimeNs  |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Subhdr at zero, then each field in turn at the values it is checked at *)
-CheckedSubhdr ==
-    { ZeroSubhdr }
-        \cup { [ZeroSubhdr EXCEPT !.msgTypeExt = one] : one \in Sample(1) }
-        \cup { [ZeroSubhdr EXCEPT !.preserve = one] : one \in Sample(1) }
-        \cup { [ZeroSubhdr EXCEPT !.msgtimens = one] : one \in Sample(4) }
+(* Sub Hdr at zero, then each field in turn at the values it is checked at *)
+CheckedSubHdr ==
+    { ZeroSubHdr }
+        \cup { [ZeroSubHdr EXCEPT !.msgTypeExt = one] : one \in Sample(1) }
+        \cup { [ZeroSubHdr EXCEPT !.preserve = one] : one \in Sample(1) }
+        \cup { [ZeroSubHdr EXCEPT !.msgTimeNs = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Final Sequential Number Notification For Group Message: 21 bytes        *)
 (***************************************************************************)
 
 FinalSequentialNumberNotificationForGroupMessage ==
-    [ subhdr            : Subhdr,
-      statuscodeUint162 : Sample(2),
-      partid            : Sample(1),
-      endoutboundnum    : Sample(4),
+    [ subHdr            : SubHdr,
+      statusCodeUint162 : Sample(2),
+      partId            : Sample(1),
+      endOutBoundNum    : Sample(4),
       reserved8         : Sample(8) ]
 
 EncodeFinalSequentialNumberNotificationForGroupMessage(message) ==
-    EncodeSubhdr(message.subhdr)
-        \o message.statuscodeUint162
-        \o message.partid
-        \o message.endoutboundnum
+    EncodeSubHdr(message.subHdr)
+        \o message.statusCodeUint162
+        \o message.partId
+        \o message.endOutBoundNum
         \o message.reserved8
 
 DecodeFinalSequentialNumberNotificationForGroupMessage(bytes) ==
-    LET subhdr == DecodeSubhdr(bytes) IN IF ~subhdr.ok THEN Fail ELSE
-    LET statuscodeUint162 == ReadBytes(subhdr.rest, 2) IN IF ~statuscodeUint162.ok THEN Fail ELSE
-    LET partid == ReadBytes(statuscodeUint162.rest, 1) IN IF ~partid.ok THEN Fail ELSE
-    LET endoutboundnum == ReadBytes(partid.rest, 4) IN IF ~endoutboundnum.ok THEN Fail ELSE
-    LET reserved8 == ReadBytes(endoutboundnum.rest, 8) IN IF ~reserved8.ok THEN Fail ELSE
-    Ok([ subhdr            |-> subhdr.value,
-         statuscodeUint162 |-> statuscodeUint162.value,
-         partid            |-> partid.value,
-         endoutboundnum    |-> endoutboundnum.value,
+    LET subHdr == DecodeSubHdr(bytes) IN IF ~subHdr.ok THEN Fail ELSE
+    LET statusCodeUint162 == ReadBytes(subHdr.rest, 2) IN IF ~statusCodeUint162.ok THEN Fail ELSE
+    LET partId == ReadBytes(statusCodeUint162.rest, 1) IN IF ~partId.ok THEN Fail ELSE
+    LET endOutBoundNum == ReadBytes(partId.rest, 4) IN IF ~endOutBoundNum.ok THEN Fail ELSE
+    LET reserved8 == ReadBytes(endOutBoundNum.rest, 8) IN IF ~reserved8.ok THEN Fail ELSE
+    Ok([ subHdr            |-> subHdr.value,
+         statusCodeUint162 |-> statusCodeUint162.value,
+         partId            |-> partId.value,
+         endOutBoundNum    |-> endOutBoundNum.value,
          reserved8         |-> reserved8.value ], reserved8.rest)
 
 ZeroFinalSequentialNumberNotificationForGroupMessage ==
-    [ subhdr            |-> ZeroSubhdr,
-      statuscodeUint162 |-> [i \in 1 .. 2 |-> 0],
-      partid            |-> [i \in 1 .. 1 |-> 0],
-      endoutboundnum    |-> [i \in 1 .. 4 |-> 0],
+    [ subHdr            |-> ZeroSubHdr,
+      statusCodeUint162 |-> [i \in 1 .. 2 |-> 0],
+      partId            |-> [i \in 1 .. 1 |-> 0],
+      endOutBoundNum    |-> [i \in 1 .. 4 |-> 0],
       reserved8         |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Final Sequential Number Notification For Group Message at zero, then each field in turn at the values it is checked at *)
 CheckedFinalSequentialNumberNotificationForGroupMessage ==
     { ZeroFinalSequentialNumberNotificationForGroupMessage }
-        \cup { [ZeroFinalSequentialNumberNotificationForGroupMessage EXCEPT !.subhdr = one] : one \in CheckedSubhdr }
-        \cup { [ZeroFinalSequentialNumberNotificationForGroupMessage EXCEPT !.statuscodeUint162 = one] : one \in Sample(2) }
-        \cup { [ZeroFinalSequentialNumberNotificationForGroupMessage EXCEPT !.partid = one] : one \in Sample(1) }
-        \cup { [ZeroFinalSequentialNumberNotificationForGroupMessage EXCEPT !.endoutboundnum = one] : one \in Sample(4) }
+        \cup { [ZeroFinalSequentialNumberNotificationForGroupMessage EXCEPT !.subHdr = one] : one \in CheckedSubHdr }
+        \cup { [ZeroFinalSequentialNumberNotificationForGroupMessage EXCEPT !.statusCodeUint162 = one] : one \in Sample(2) }
+        \cup { [ZeroFinalSequentialNumberNotificationForGroupMessage EXCEPT !.partId = one] : one \in Sample(1) }
+        \cup { [ZeroFinalSequentialNumberNotificationForGroupMessage EXCEPT !.endOutBoundNum = one] : one \in Sample(4) }
         \cup { [ZeroFinalSequentialNumberNotificationForGroupMessage EXCEPT !.reserved8 = one] : one \in Sample(8) }
 
 (***************************************************************************)
@@ -304,1622 +304,1622 @@ CheckedFinalSequentialNumberNotificationForGroupMessage ==
 (***************************************************************************)
 
 RequestLogonMessage ==
-    [ statuscodeUint81 : Sample(1),
-      appendno         : Sample(2),
-      fcmid            : Sample(2),
-      sessionid        : Sample(2),
-      systemtype       : Sample(1),
-      apcode           : Sample(1),
-      keyvalue         : Sample(1),
-      requeststartseq  : Sample(4),
-      cancelordersec   : Sample(1) ]
+    [ statusCodeUint81 : Sample(1),
+      appendNo         : Sample(2),
+      fcmId            : Sample(2),
+      sessionId        : Sample(2),
+      systemType       : Sample(1),
+      apCode           : Sample(1),
+      keyValue         : Sample(1),
+      requestStartSeq  : Sample(4),
+      cancelOrderSec   : Sample(1) ]
 
 EncodeRequestLogonMessage(message) ==
-    message.statuscodeUint81
-        \o message.appendno
-        \o message.fcmid
-        \o message.sessionid
-        \o message.systemtype
-        \o message.apcode
-        \o message.keyvalue
-        \o message.requeststartseq
-        \o message.cancelordersec
+    message.statusCodeUint81
+        \o message.appendNo
+        \o message.fcmId
+        \o message.sessionId
+        \o message.systemType
+        \o message.apCode
+        \o message.keyValue
+        \o message.requestStartSeq
+        \o message.cancelOrderSec
 
 DecodeRequestLogonMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    LET appendno == ReadBytes(statuscodeUint81.rest, 2) IN IF ~appendno.ok THEN Fail ELSE
-    LET fcmid == ReadBytes(appendno.rest, 2) IN IF ~fcmid.ok THEN Fail ELSE
-    LET sessionid == ReadBytes(fcmid.rest, 2) IN IF ~sessionid.ok THEN Fail ELSE
-    LET systemtype == ReadBytes(sessionid.rest, 1) IN IF ~systemtype.ok THEN Fail ELSE
-    LET apcode == ReadBytes(systemtype.rest, 1) IN IF ~apcode.ok THEN Fail ELSE
-    LET keyvalue == ReadBytes(apcode.rest, 1) IN IF ~keyvalue.ok THEN Fail ELSE
-    LET requeststartseq == ReadBytes(keyvalue.rest, 4) IN IF ~requeststartseq.ok THEN Fail ELSE
-    LET cancelordersec == ReadBytes(requeststartseq.rest, 1) IN IF ~cancelordersec.ok THEN Fail ELSE
-    Ok([ statuscodeUint81 |-> statuscodeUint81.value,
-         appendno         |-> appendno.value,
-         fcmid            |-> fcmid.value,
-         sessionid        |-> sessionid.value,
-         systemtype       |-> systemtype.value,
-         apcode           |-> apcode.value,
-         keyvalue         |-> keyvalue.value,
-         requeststartseq  |-> requeststartseq.value,
-         cancelordersec   |-> cancelordersec.value ], cancelordersec.rest)
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    LET appendNo == ReadBytes(statusCodeUint81.rest, 2) IN IF ~appendNo.ok THEN Fail ELSE
+    LET fcmId == ReadBytes(appendNo.rest, 2) IN IF ~fcmId.ok THEN Fail ELSE
+    LET sessionId == ReadBytes(fcmId.rest, 2) IN IF ~sessionId.ok THEN Fail ELSE
+    LET systemType == ReadBytes(sessionId.rest, 1) IN IF ~systemType.ok THEN Fail ELSE
+    LET apCode == ReadBytes(systemType.rest, 1) IN IF ~apCode.ok THEN Fail ELSE
+    LET keyValue == ReadBytes(apCode.rest, 1) IN IF ~keyValue.ok THEN Fail ELSE
+    LET requestStartSeq == ReadBytes(keyValue.rest, 4) IN IF ~requestStartSeq.ok THEN Fail ELSE
+    LET cancelOrderSec == ReadBytes(requestStartSeq.rest, 1) IN IF ~cancelOrderSec.ok THEN Fail ELSE
+    Ok([ statusCodeUint81 |-> statusCodeUint81.value,
+         appendNo         |-> appendNo.value,
+         fcmId            |-> fcmId.value,
+         sessionId        |-> sessionId.value,
+         systemType       |-> systemType.value,
+         apCode           |-> apCode.value,
+         keyValue         |-> keyValue.value,
+         requestStartSeq  |-> requestStartSeq.value,
+         cancelOrderSec   |-> cancelOrderSec.value ], cancelOrderSec.rest)
 
 ZeroRequestLogonMessage ==
-    [ statuscodeUint81 |-> [i \in 1 .. 1 |-> 0],
-      appendno         |-> [i \in 1 .. 2 |-> 0],
-      fcmid            |-> [i \in 1 .. 2 |-> 0],
-      sessionid        |-> [i \in 1 .. 2 |-> 0],
-      systemtype       |-> [i \in 1 .. 1 |-> 0],
-      apcode           |-> [i \in 1 .. 1 |-> 0],
-      keyvalue         |-> [i \in 1 .. 1 |-> 0],
-      requeststartseq  |-> [i \in 1 .. 4 |-> 0],
-      cancelordersec   |-> [i \in 1 .. 1 |-> 0] ]
+    [ statusCodeUint81 |-> [i \in 1 .. 1 |-> 0],
+      appendNo         |-> [i \in 1 .. 2 |-> 0],
+      fcmId            |-> [i \in 1 .. 2 |-> 0],
+      sessionId        |-> [i \in 1 .. 2 |-> 0],
+      systemType       |-> [i \in 1 .. 1 |-> 0],
+      apCode           |-> [i \in 1 .. 1 |-> 0],
+      keyValue         |-> [i \in 1 .. 1 |-> 0],
+      requestStartSeq  |-> [i \in 1 .. 4 |-> 0],
+      cancelOrderSec   |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Request Logon Message at zero, then each field in turn at the values it is checked at *)
 CheckedRequestLogonMessage ==
     { ZeroRequestLogonMessage }
-        \cup { [ZeroRequestLogonMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
-        \cup { [ZeroRequestLogonMessage EXCEPT !.appendno = one] : one \in Sample(2) }
-        \cup { [ZeroRequestLogonMessage EXCEPT !.fcmid = one] : one \in Sample(2) }
-        \cup { [ZeroRequestLogonMessage EXCEPT !.sessionid = one] : one \in Sample(2) }
-        \cup { [ZeroRequestLogonMessage EXCEPT !.systemtype = one] : one \in Sample(1) }
-        \cup { [ZeroRequestLogonMessage EXCEPT !.apcode = one] : one \in Sample(1) }
-        \cup { [ZeroRequestLogonMessage EXCEPT !.keyvalue = one] : one \in Sample(1) }
-        \cup { [ZeroRequestLogonMessage EXCEPT !.requeststartseq = one] : one \in Sample(4) }
-        \cup { [ZeroRequestLogonMessage EXCEPT !.cancelordersec = one] : one \in Sample(1) }
+        \cup { [ZeroRequestLogonMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroRequestLogonMessage EXCEPT !.appendNo = one] : one \in Sample(2) }
+        \cup { [ZeroRequestLogonMessage EXCEPT !.fcmId = one] : one \in Sample(2) }
+        \cup { [ZeroRequestLogonMessage EXCEPT !.sessionId = one] : one \in Sample(2) }
+        \cup { [ZeroRequestLogonMessage EXCEPT !.systemType = one] : one \in Sample(1) }
+        \cup { [ZeroRequestLogonMessage EXCEPT !.apCode = one] : one \in Sample(1) }
+        \cup { [ZeroRequestLogonMessage EXCEPT !.keyValue = one] : one \in Sample(1) }
+        \cup { [ZeroRequestLogonMessage EXCEPT !.requestStartSeq = one] : one \in Sample(4) }
+        \cup { [ZeroRequestLogonMessage EXCEPT !.cancelOrderSec = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Activate Application System Message: 4 bytes                            *)
 (***************************************************************************)
 
 ActivateApplicationSystemMessage ==
-    [ statuscodeUint81 : Sample(1),
+    [ statusCodeUint81 : Sample(1),
       heartBtInt       : Sample(1),
-      maxflowctrlcnt   : Sample(2) ]
+      maxFlowCtrlCnt   : Sample(2) ]
 
 EncodeActivateApplicationSystemMessage(message) ==
-    message.statuscodeUint81
+    message.statusCodeUint81
         \o message.heartBtInt
-        \o message.maxflowctrlcnt
+        \o message.maxFlowCtrlCnt
 
 DecodeActivateApplicationSystemMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    LET heartBtInt == ReadBytes(statuscodeUint81.rest, 1) IN IF ~heartBtInt.ok THEN Fail ELSE
-    LET maxflowctrlcnt == ReadBytes(heartBtInt.rest, 2) IN IF ~maxflowctrlcnt.ok THEN Fail ELSE
-    Ok([ statuscodeUint81 |-> statuscodeUint81.value,
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    LET heartBtInt == ReadBytes(statusCodeUint81.rest, 1) IN IF ~heartBtInt.ok THEN Fail ELSE
+    LET maxFlowCtrlCnt == ReadBytes(heartBtInt.rest, 2) IN IF ~maxFlowCtrlCnt.ok THEN Fail ELSE
+    Ok([ statusCodeUint81 |-> statusCodeUint81.value,
          heartBtInt       |-> heartBtInt.value,
-         maxflowctrlcnt   |-> maxflowctrlcnt.value ], maxflowctrlcnt.rest)
+         maxFlowCtrlCnt   |-> maxFlowCtrlCnt.value ], maxFlowCtrlCnt.rest)
 
 ZeroActivateApplicationSystemMessage ==
-    [ statuscodeUint81 |-> [i \in 1 .. 1 |-> 0],
+    [ statusCodeUint81 |-> [i \in 1 .. 1 |-> 0],
       heartBtInt       |-> [i \in 1 .. 1 |-> 0],
-      maxflowctrlcnt   |-> [i \in 1 .. 2 |-> 0] ]
+      maxFlowCtrlCnt   |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Activate Application System Message at zero, then each field in turn at the values it is checked at *)
 CheckedActivateApplicationSystemMessage ==
     { ZeroActivateApplicationSystemMessage }
-        \cup { [ZeroActivateApplicationSystemMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroActivateApplicationSystemMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
         \cup { [ZeroActivateApplicationSystemMessage EXCEPT !.heartBtInt = one] : one \in Sample(1) }
-        \cup { [ZeroActivateApplicationSystemMessage EXCEPT !.maxflowctrlcnt = one] : one \in Sample(2) }
+        \cup { [ZeroActivateApplicationSystemMessage EXCEPT !.maxFlowCtrlCnt = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Activate Application System Confirmed Message: 1 bytes                  *)
 (***************************************************************************)
 
 ActivateApplicationSystemConfirmedMessage ==
-    [ statuscodeUint81 : Sample(1) ]
+    [ statusCodeUint81 : Sample(1) ]
 
 EncodeActivateApplicationSystemConfirmedMessage(message) ==
-    message.statuscodeUint81
+    message.statusCodeUint81
 
 DecodeActivateApplicationSystemConfirmedMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    Ok([ statuscodeUint81 |-> statuscodeUint81.value ], statuscodeUint81.rest)
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    Ok([ statusCodeUint81 |-> statusCodeUint81.value ], statusCodeUint81.rest)
 
 ZeroActivateApplicationSystemConfirmedMessage ==
-    [ statuscodeUint81 |-> [i \in 1 .. 1 |-> 0] ]
+    [ statusCodeUint81 |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Activate Application System Confirmed Message at zero, then each field in turn at the values it is checked at *)
 CheckedActivateApplicationSystemConfirmedMessage ==
     { ZeroActivateApplicationSystemConfirmedMessage }
-        \cup { [ZeroActivateApplicationSystemConfirmedMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroActivateApplicationSystemConfirmedMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Logout Confirmed Message: 1 bytes                                       *)
 (***************************************************************************)
 
 LogoutConfirmedMessage ==
-    [ statuscodeUint81 : Sample(1) ]
+    [ statusCodeUint81 : Sample(1) ]
 
 EncodeLogoutConfirmedMessage(message) ==
-    message.statuscodeUint81
+    message.statusCodeUint81
 
 DecodeLogoutConfirmedMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    Ok([ statuscodeUint81 |-> statuscodeUint81.value ], statuscodeUint81.rest)
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    Ok([ statusCodeUint81 |-> statusCodeUint81.value ], statusCodeUint81.rest)
 
 ZeroLogoutConfirmedMessage ==
-    [ statuscodeUint81 |-> [i \in 1 .. 1 |-> 0] ]
+    [ statusCodeUint81 |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Logout Confirmed Message at zero, then each field in turn at the values it is checked at *)
 CheckedLogoutConfirmedMessage ==
     { ZeroLogoutConfirmedMessage }
-        \cup { [ZeroLogoutConfirmedMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroLogoutConfirmedMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Confirm Connection Message: 1 bytes                                     *)
 (***************************************************************************)
 
 ConfirmConnectionMessage ==
-    [ statuscodeUint81 : Sample(1) ]
+    [ statusCodeUint81 : Sample(1) ]
 
 EncodeConfirmConnectionMessage(message) ==
-    message.statuscodeUint81
+    message.statusCodeUint81
 
 DecodeConfirmConnectionMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    Ok([ statuscodeUint81 |-> statuscodeUint81.value ], statuscodeUint81.rest)
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    Ok([ statusCodeUint81 |-> statusCodeUint81.value ], statusCodeUint81.rest)
 
 ZeroConfirmConnectionMessage ==
-    [ statuscodeUint81 |-> [i \in 1 .. 1 |-> 0] ]
+    [ statusCodeUint81 |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Confirm Connection Message at zero, then each field in turn at the values it is checked at *)
 CheckedConfirmConnectionMessage ==
     { ZeroConfirmConnectionMessage }
-        \cup { [ZeroConfirmConnectionMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroConfirmConnectionMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Connection Confirmed Message: 1 bytes                                   *)
 (***************************************************************************)
 
 ConnectionConfirmedMessage ==
-    [ statuscodeUint81 : Sample(1) ]
+    [ statusCodeUint81 : Sample(1) ]
 
 EncodeConnectionConfirmedMessage(message) ==
-    message.statuscodeUint81
+    message.statusCodeUint81
 
 DecodeConnectionConfirmedMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    Ok([ statuscodeUint81 |-> statuscodeUint81.value ], statuscodeUint81.rest)
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    Ok([ statusCodeUint81 |-> statusCodeUint81.value ], statusCodeUint81.rest)
 
 ZeroConnectionConfirmedMessage ==
-    [ statuscodeUint81 |-> [i \in 1 .. 1 |-> 0] ]
+    [ statusCodeUint81 |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Connection Confirmed Message at zero, then each field in turn at the values it is checked at *)
 CheckedConnectionConfirmedMessage ==
     { ZeroConnectionConfirmedMessage }
-        \cup { [ZeroConnectionConfirmedMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroConnectionConfirmedMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Symbolnum: 19 bytes                                                     *)
+(* Symbol Num: 19 bytes                                                    *)
 (***************************************************************************)
 
-Symbolnum ==
+SymbolNum ==
     [ pseq1          : Sample(2),
       pseq2          : Sample(2),
-      legsideUint822 : Sample(1),
-      combop         : Sample(1),
+      legSideUint822 : Sample(1),
+      combOp         : Sample(1),
       reserved13     : Sample(13) ]
 
-EncodeSymbolnum(message) ==
+EncodeSymbolNum(message) ==
     message.pseq1
         \o message.pseq2
-        \o message.legsideUint822
-        \o message.combop
+        \o message.legSideUint822
+        \o message.combOp
         \o message.reserved13
 
-DecodeSymbolnum(bytes) ==
+DecodeSymbolNum(bytes) ==
     LET pseq1 == ReadBytes(bytes, 2) IN IF ~pseq1.ok THEN Fail ELSE
     LET pseq2 == ReadBytes(pseq1.rest, 2) IN IF ~pseq2.ok THEN Fail ELSE
-    LET legsideUint822 == ReadBytes(pseq2.rest, 1) IN IF ~legsideUint822.ok THEN Fail ELSE
-    LET combop == ReadBytes(legsideUint822.rest, 1) IN IF ~combop.ok THEN Fail ELSE
-    LET reserved13 == ReadBytes(combop.rest, 13) IN IF ~reserved13.ok THEN Fail ELSE
+    LET legSideUint822 == ReadBytes(pseq2.rest, 1) IN IF ~legSideUint822.ok THEN Fail ELSE
+    LET combOp == ReadBytes(legSideUint822.rest, 1) IN IF ~combOp.ok THEN Fail ELSE
+    LET reserved13 == ReadBytes(combOp.rest, 13) IN IF ~reserved13.ok THEN Fail ELSE
     Ok([ pseq1          |-> pseq1.value,
          pseq2          |-> pseq2.value,
-         legsideUint822 |-> legsideUint822.value,
-         combop         |-> combop.value,
+         legSideUint822 |-> legSideUint822.value,
+         combOp         |-> combOp.value,
          reserved13     |-> reserved13.value ], reserved13.rest)
 
-ZeroSymbolnum ==
+ZeroSymbolNum ==
     [ pseq1          |-> [i \in 1 .. 2 |-> 0],
       pseq2          |-> [i \in 1 .. 2 |-> 0],
-      legsideUint822 |-> [i \in 1 .. 1 |-> 0],
-      combop         |-> [i \in 1 .. 1 |-> 0],
+      legSideUint822 |-> [i \in 1 .. 1 |-> 0],
+      combOp         |-> [i \in 1 .. 1 |-> 0],
       reserved13     |-> [i \in 1 .. 13 |-> 0] ]
 
-(* Symbolnum at zero, then each field in turn at the values it is checked at *)
-CheckedSymbolnum ==
-    { ZeroSymbolnum }
-        \cup { [ZeroSymbolnum EXCEPT !.pseq1 = one] : one \in Sample(2) }
-        \cup { [ZeroSymbolnum EXCEPT !.pseq2 = one] : one \in Sample(2) }
-        \cup { [ZeroSymbolnum EXCEPT !.legsideUint822 = one] : one \in Sample(1) }
-        \cup { [ZeroSymbolnum EXCEPT !.combop = one] : one \in Sample(1) }
-        \cup { [ZeroSymbolnum EXCEPT !.reserved13 = one] : one \in Sample(13) }
+(* Symbol Num at zero, then each field in turn at the values it is checked at *)
+CheckedSymbolNum ==
+    { ZeroSymbolNum }
+        \cup { [ZeroSymbolNum EXCEPT !.pseq1 = one] : one \in Sample(2) }
+        \cup { [ZeroSymbolNum EXCEPT !.pseq2 = one] : one \in Sample(2) }
+        \cup { [ZeroSymbolNum EXCEPT !.legSideUint822 = one] : one \in Sample(1) }
+        \cup { [ZeroSymbolNum EXCEPT !.combOp = one] : one \in Sample(1) }
+        \cup { [ZeroSymbolNum EXCEPT !.reserved13 = one] : one \in Sample(13) }
 
 (***************************************************************************)
-(* Symboltext: 20 bytes                                                    *)
+(* Symbol Text: 20 bytes                                                   *)
 (***************************************************************************)
 
-Symboltext ==
+SymbolText ==
     [ symbolChar2020 : Sample(20) ]
 
-EncodeSymboltext(message) ==
+EncodeSymbolText(message) ==
     message.symbolChar2020
 
-DecodeSymboltext(bytes) ==
+DecodeSymbolText(bytes) ==
     LET symbolChar2020 == ReadBytes(bytes, 20) IN IF ~symbolChar2020.ok THEN Fail ELSE
     Ok([ symbolChar2020 |-> symbolChar2020.value ], symbolChar2020.rest)
 
-ZeroSymboltext ==
+ZeroSymbolText ==
     [ symbolChar2020 |-> [i \in 1 .. 20 |-> 0] ]
 
-(* Symboltext at zero, then each field in turn at the values it is checked at *)
-CheckedSymboltext ==
-    { ZeroSymboltext }
-        \cup { [ZeroSymboltext EXCEPT !.symbolChar2020 = one] : one \in Sample(20) }
+(* Symbol Text at zero, then each field in turn at the values it is checked at *)
+CheckedSymbolText ==
+    { ZeroSymbolText }
+        \cup { [ZeroSymbolText EXCEPT !.symbolChar2020 = one] : one \in Sample(20) }
 
 (***************************************************************************)
-(* Sym Symbolx, selected by Symboltype                                     *)
+(* Sym Symbol X, selected by Symbol Type                                   *)
 (***************************************************************************)
 
-SymbolnumCode == 1  \* 0x01
-SymboltextCode == 2  \* 0x02
+SymbolNumCode == 1  \* 0x01
+SymbolTextCode == 2  \* 0x02
 
-SymSymbolx ==
-    [ tag : {SymbolnumCode}, body : Symbolnum ]
-        \cup [ tag : {SymboltextCode}, body : Symboltext ]
+SymSymbolX ==
+    [ tag : {SymbolNumCode}, body : SymbolNum ]
+        \cup [ tag : {SymbolTextCode}, body : SymbolText ]
 
-EncodeSymSymbolx(message) ==
-    CASE message.tag = SymbolnumCode -> EncodeSymbolnum(message.body)
-      [] message.tag = SymboltextCode -> EncodeSymboltext(message.body)
+EncodeSymSymbolX(message) ==
+    CASE message.tag = SymbolNumCode -> EncodeSymbolNum(message.body)
+      [] message.tag = SymbolTextCode -> EncodeSymbolText(message.body)
 
-DecodeSymSymbolx(tag, bytes) ==
+DecodeSymSymbolX(tag, bytes) ==
     LET read ==
-            CASE tag = SymbolnumCode -> DecodeSymbolnum(bytes)
-              [] tag = SymboltextCode -> DecodeSymboltext(bytes)
+            CASE tag = SymbolNumCode -> DecodeSymbolNum(bytes)
+              [] tag = SymbolTextCode -> DecodeSymbolText(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroSymSymbolx == [tag |-> SymbolnumCode, body |-> ZeroSymbolnum]
+ZeroSymSymbolX == [tag |-> SymbolNumCode, body |-> ZeroSymbolNum]
 
-(* Each Sym Symbolx in turn, at the values the message it names is checked at *)
-CheckedSymSymbolx ==
-    { [tag |-> SymbolnumCode, body |-> one] : one \in CheckedSymbolnum }
-        \cup { [tag |-> SymboltextCode, body |-> one] : one \in CheckedSymboltext }
+(* Each Sym Symbol X in turn, at the values the message it names is checked at *)
+CheckedSymSymbolX ==
+    { [tag |-> SymbolNumCode, body |-> one] : one \in CheckedSymbolNum }
+        \cup { [tag |-> SymbolTextCode, body |-> one] : one \in CheckedSymbolText }
 
 (***************************************************************************)
-(* Orgtranstime Msgtime: 6 bytes                                           *)
+(* Org Trans Time Msg Time: 6 bytes                                        *)
 (***************************************************************************)
 
-OrgtranstimeMsgtime ==
-    [ epochsInt324 : Sample(4),
+OrgTransTimeMsgTime ==
+    [ epochSInt324 : Sample(4),
       ms           : Sample(2) ]
 
-EncodeOrgtranstimeMsgtime(message) ==
-    message.epochsInt324
+EncodeOrgTransTimeMsgTime(message) ==
+    message.epochSInt324
         \o message.ms
 
-DecodeOrgtranstimeMsgtime(bytes) ==
-    LET epochsInt324 == ReadBytes(bytes, 4) IN IF ~epochsInt324.ok THEN Fail ELSE
-    LET ms == ReadBytes(epochsInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
-    Ok([ epochsInt324 |-> epochsInt324.value,
+DecodeOrgTransTimeMsgTime(bytes) ==
+    LET epochSInt324 == ReadBytes(bytes, 4) IN IF ~epochSInt324.ok THEN Fail ELSE
+    LET ms == ReadBytes(epochSInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
+    Ok([ epochSInt324 |-> epochSInt324.value,
          ms           |-> ms.value ], ms.rest)
 
-ZeroOrgtranstimeMsgtime ==
-    [ epochsInt324 |-> [i \in 1 .. 4 |-> 0],
+ZeroOrgTransTimeMsgTime ==
+    [ epochSInt324 |-> [i \in 1 .. 4 |-> 0],
       ms           |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Orgtranstime Msgtime at zero, then each field in turn at the values it is checked at *)
-CheckedOrgtranstimeMsgtime ==
-    { ZeroOrgtranstimeMsgtime }
-        \cup { [ZeroOrgtranstimeMsgtime EXCEPT !.epochsInt324 = one] : one \in Sample(4) }
-        \cup { [ZeroOrgtranstimeMsgtime EXCEPT !.ms = one] : one \in Sample(2) }
+(* Org Trans Time Msg Time at zero, then each field in turn at the values it is checked at *)
+CheckedOrgTransTimeMsgTime ==
+    { ZeroOrgTransTimeMsgTime }
+        \cup { [ZeroOrgTransTimeMsgTime EXCEPT !.epochSInt324 = one] : one \in Sample(4) }
+        \cup { [ZeroOrgTransTimeMsgTime EXCEPT !.ms = one] : one \in Sample(2) }
 
 (***************************************************************************)
-(* Transact Time Msgtime: 6 bytes                                          *)
+(* Transact Time Msg Time: 6 bytes                                         *)
 (***************************************************************************)
 
-TransactTimeMsgtime ==
-    [ epochsInt324 : Sample(4),
+TransactTimeMsgTime ==
+    [ epochSInt324 : Sample(4),
       ms           : Sample(2) ]
 
-EncodeTransactTimeMsgtime(message) ==
-    message.epochsInt324
+EncodeTransactTimeMsgTime(message) ==
+    message.epochSInt324
         \o message.ms
 
-DecodeTransactTimeMsgtime(bytes) ==
-    LET epochsInt324 == ReadBytes(bytes, 4) IN IF ~epochsInt324.ok THEN Fail ELSE
-    LET ms == ReadBytes(epochsInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
-    Ok([ epochsInt324 |-> epochsInt324.value,
+DecodeTransactTimeMsgTime(bytes) ==
+    LET epochSInt324 == ReadBytes(bytes, 4) IN IF ~epochSInt324.ok THEN Fail ELSE
+    LET ms == ReadBytes(epochSInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
+    Ok([ epochSInt324 |-> epochSInt324.value,
          ms           |-> ms.value ], ms.rest)
 
-ZeroTransactTimeMsgtime ==
-    [ epochsInt324 |-> [i \in 1 .. 4 |-> 0],
+ZeroTransactTimeMsgTime ==
+    [ epochSInt324 |-> [i \in 1 .. 4 |-> 0],
       ms           |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Transact Time Msgtime at zero, then each field in turn at the values it is checked at *)
-CheckedTransactTimeMsgtime ==
-    { ZeroTransactTimeMsgtime }
-        \cup { [ZeroTransactTimeMsgtime EXCEPT !.epochsInt324 = one] : one \in Sample(4) }
-        \cup { [ZeroTransactTimeMsgtime EXCEPT !.ms = one] : one \in Sample(2) }
+(* Transact Time Msg Time at zero, then each field in turn at the values it is checked at *)
+CheckedTransactTimeMsgTime ==
+    { ZeroTransactTimeMsgTime }
+        \cup { [ZeroTransactTimeMsgTime EXCEPT !.epochSInt324 = one] : one \in Sample(4) }
+        \cup { [ZeroTransactTimeMsgTime EXCEPT !.ms = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Order Status Report Message                                             *)
 (***************************************************************************)
 
 OrderStatusReportMessage ==
-    [ statuscodeUint81    : Sample(1),
+    [ statusCodeUint81    : Sample(1),
       execType            : Sample(1),
-      cmid                : Sample(2),
-      fcmid               : Sample(2),
-      orderno             : Sample(5),
-      ordid               : Sample(4),
-      userdefine          : Sample(8),
-      symSymbolx          : SymSymbolx,
+      cmId                : Sample(2),
+      fcmId               : Sample(2),
+      orderNo             : Sample(5),
+      ordId               : Sample(4),
+      userDefine          : Sample(8),
+      symSymbolX          : SymSymbolX,
       price               : Sample(4),
       qty                 : Sample(2),
-      investoracno        : Sample(4),
-      investorflag        : Sample(1),
+      investorAcno        : Sample(4),
+      investorFlag        : Sample(1),
       side                : Sample(1),
       ordType             : Sample(1),
       timeInForce         : Sample(1),
       positionEffect      : Sample(1),
       lastPx              : Sample(4),
       lastQty             : Sample(2),
-      pxsubtotal          : Sample(8),
+      pxSubtotal          : Sample(8),
       cumQty              : Sample(2),
       leavesQty           : Sample(2),
-      beforeqty           : Sample(2),
-      legsideUint822      : Sample(1),
-      legpx               : Sample(4),
-      legqtyUint1624      : Sample(2),
-      orgtranstimeMsgtime : OrgtranstimeMsgtime,
-      transactTimeMsgtime : TransactTimeMsgtime,
-      targetid            : Sample(1),
-      uniqid              : Sample(4),
-      rptseq              : Sample(4),
-      protocoltype        : Sample(1) ]
+      beforeQty           : Sample(2),
+      legSideUint822      : Sample(1),
+      legPx               : Sample(4),
+      legQtyUint1624      : Sample(2),
+      orgTransTimeMsgTime : OrgTransTimeMsgTime,
+      transactTimeMsgTime : TransactTimeMsgTime,
+      targetId            : Sample(1),
+      uniqId              : Sample(4),
+      rptSeq              : Sample(4),
+      protocolType        : Sample(1) ]
 
 EncodeOrderStatusReportMessage(message) ==
-    message.statuscodeUint81
+    message.statusCodeUint81
         \o message.execType
-        \o message.cmid
-        \o message.fcmid
-        \o message.orderno
-        \o message.ordid
-        \o message.userdefine
-        \o EncodeUIntBE(message.symSymbolx.tag, 1)
-        \o EncodeSymSymbolx(message.symSymbolx)
+        \o message.cmId
+        \o message.fcmId
+        \o message.orderNo
+        \o message.ordId
+        \o message.userDefine
+        \o EncodeUIntBE(message.symSymbolX.tag, 1)
+        \o EncodeSymSymbolX(message.symSymbolX)
         \o message.price
         \o message.qty
-        \o message.investoracno
-        \o message.investorflag
+        \o message.investorAcno
+        \o message.investorFlag
         \o message.side
         \o message.ordType
         \o message.timeInForce
         \o message.positionEffect
         \o message.lastPx
         \o message.lastQty
-        \o message.pxsubtotal
+        \o message.pxSubtotal
         \o message.cumQty
         \o message.leavesQty
-        \o message.beforeqty
-        \o message.legsideUint822
-        \o message.legpx
-        \o message.legqtyUint1624
-        \o EncodeOrgtranstimeMsgtime(message.orgtranstimeMsgtime)
-        \o EncodeTransactTimeMsgtime(message.transactTimeMsgtime)
-        \o message.targetid
-        \o message.uniqid
-        \o message.rptseq
-        \o message.protocoltype
+        \o message.beforeQty
+        \o message.legSideUint822
+        \o message.legPx
+        \o message.legQtyUint1624
+        \o EncodeOrgTransTimeMsgTime(message.orgTransTimeMsgTime)
+        \o EncodeTransactTimeMsgTime(message.transactTimeMsgTime)
+        \o message.targetId
+        \o message.uniqId
+        \o message.rptSeq
+        \o message.protocolType
 
 DecodeOrderStatusReportMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    LET execType == ReadBytes(statuscodeUint81.rest, 1) IN IF ~execType.ok THEN Fail ELSE
-    LET cmid == ReadBytes(execType.rest, 2) IN IF ~cmid.ok THEN Fail ELSE
-    LET fcmid == ReadBytes(cmid.rest, 2) IN IF ~fcmid.ok THEN Fail ELSE
-    LET orderno == ReadBytes(fcmid.rest, 5) IN IF ~orderno.ok THEN Fail ELSE
-    LET ordid == ReadBytes(orderno.rest, 4) IN IF ~ordid.ok THEN Fail ELSE
-    LET userdefine == ReadBytes(ordid.rest, 8) IN IF ~userdefine.ok THEN Fail ELSE
-    LET symboltype == ReadUIntBE(userdefine.rest, 1) IN IF ~symboltype.ok THEN Fail ELSE
-    LET symSymbolx == DecodeSymSymbolx(symboltype.value, symboltype.rest) IN IF ~symSymbolx.ok THEN Fail ELSE
-    LET price == ReadBytes(symSymbolx.rest, 4) IN IF ~price.ok THEN Fail ELSE
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    LET execType == ReadBytes(statusCodeUint81.rest, 1) IN IF ~execType.ok THEN Fail ELSE
+    LET cmId == ReadBytes(execType.rest, 2) IN IF ~cmId.ok THEN Fail ELSE
+    LET fcmId == ReadBytes(cmId.rest, 2) IN IF ~fcmId.ok THEN Fail ELSE
+    LET orderNo == ReadBytes(fcmId.rest, 5) IN IF ~orderNo.ok THEN Fail ELSE
+    LET ordId == ReadBytes(orderNo.rest, 4) IN IF ~ordId.ok THEN Fail ELSE
+    LET userDefine == ReadBytes(ordId.rest, 8) IN IF ~userDefine.ok THEN Fail ELSE
+    LET symbolType == ReadUIntBE(userDefine.rest, 1) IN IF ~symbolType.ok THEN Fail ELSE
+    LET symSymbolX == DecodeSymSymbolX(symbolType.value, symbolType.rest) IN IF ~symSymbolX.ok THEN Fail ELSE
+    LET price == ReadBytes(symSymbolX.rest, 4) IN IF ~price.ok THEN Fail ELSE
     LET qty == ReadBytes(price.rest, 2) IN IF ~qty.ok THEN Fail ELSE
-    LET investoracno == ReadBytes(qty.rest, 4) IN IF ~investoracno.ok THEN Fail ELSE
-    LET investorflag == ReadBytes(investoracno.rest, 1) IN IF ~investorflag.ok THEN Fail ELSE
-    LET side == ReadBytes(investorflag.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET investorAcno == ReadBytes(qty.rest, 4) IN IF ~investorAcno.ok THEN Fail ELSE
+    LET investorFlag == ReadBytes(investorAcno.rest, 1) IN IF ~investorFlag.ok THEN Fail ELSE
+    LET side == ReadBytes(investorFlag.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET ordType == ReadBytes(side.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
     LET timeInForce == ReadBytes(ordType.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
     LET positionEffect == ReadBytes(timeInForce.rest, 1) IN IF ~positionEffect.ok THEN Fail ELSE
     LET lastPx == ReadBytes(positionEffect.rest, 4) IN IF ~lastPx.ok THEN Fail ELSE
     LET lastQty == ReadBytes(lastPx.rest, 2) IN IF ~lastQty.ok THEN Fail ELSE
-    LET pxsubtotal == ReadBytes(lastQty.rest, 8) IN IF ~pxsubtotal.ok THEN Fail ELSE
-    LET cumQty == ReadBytes(pxsubtotal.rest, 2) IN IF ~cumQty.ok THEN Fail ELSE
+    LET pxSubtotal == ReadBytes(lastQty.rest, 8) IN IF ~pxSubtotal.ok THEN Fail ELSE
+    LET cumQty == ReadBytes(pxSubtotal.rest, 2) IN IF ~cumQty.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(cumQty.rest, 2) IN IF ~leavesQty.ok THEN Fail ELSE
-    LET beforeqty == ReadBytes(leavesQty.rest, 2) IN IF ~beforeqty.ok THEN Fail ELSE
-    LET legsideUint822 == ReadBytes(beforeqty.rest, 1) IN IF ~legsideUint822.ok THEN Fail ELSE
-    LET legpx == ReadBytes(legsideUint822.rest, 4) IN IF ~legpx.ok THEN Fail ELSE
-    LET legqtyUint1624 == ReadBytes(legpx.rest, 2) IN IF ~legqtyUint1624.ok THEN Fail ELSE
-    LET orgtranstimeMsgtime == DecodeOrgtranstimeMsgtime(legqtyUint1624.rest) IN IF ~orgtranstimeMsgtime.ok THEN Fail ELSE
-    LET transactTimeMsgtime == DecodeTransactTimeMsgtime(orgtranstimeMsgtime.rest) IN IF ~transactTimeMsgtime.ok THEN Fail ELSE
-    LET targetid == ReadBytes(transactTimeMsgtime.rest, 1) IN IF ~targetid.ok THEN Fail ELSE
-    LET uniqid == ReadBytes(targetid.rest, 4) IN IF ~uniqid.ok THEN Fail ELSE
-    LET rptseq == ReadBytes(uniqid.rest, 4) IN IF ~rptseq.ok THEN Fail ELSE
-    LET protocoltype == ReadBytes(rptseq.rest, 1) IN IF ~protocoltype.ok THEN Fail ELSE
-    Ok([ statuscodeUint81    |-> statuscodeUint81.value,
+    LET beforeQty == ReadBytes(leavesQty.rest, 2) IN IF ~beforeQty.ok THEN Fail ELSE
+    LET legSideUint822 == ReadBytes(beforeQty.rest, 1) IN IF ~legSideUint822.ok THEN Fail ELSE
+    LET legPx == ReadBytes(legSideUint822.rest, 4) IN IF ~legPx.ok THEN Fail ELSE
+    LET legQtyUint1624 == ReadBytes(legPx.rest, 2) IN IF ~legQtyUint1624.ok THEN Fail ELSE
+    LET orgTransTimeMsgTime == DecodeOrgTransTimeMsgTime(legQtyUint1624.rest) IN IF ~orgTransTimeMsgTime.ok THEN Fail ELSE
+    LET transactTimeMsgTime == DecodeTransactTimeMsgTime(orgTransTimeMsgTime.rest) IN IF ~transactTimeMsgTime.ok THEN Fail ELSE
+    LET targetId == ReadBytes(transactTimeMsgTime.rest, 1) IN IF ~targetId.ok THEN Fail ELSE
+    LET uniqId == ReadBytes(targetId.rest, 4) IN IF ~uniqId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(uniqId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET protocolType == ReadBytes(rptSeq.rest, 1) IN IF ~protocolType.ok THEN Fail ELSE
+    Ok([ statusCodeUint81    |-> statusCodeUint81.value,
          execType            |-> execType.value,
-         cmid                |-> cmid.value,
-         fcmid               |-> fcmid.value,
-         orderno             |-> orderno.value,
-         ordid               |-> ordid.value,
-         userdefine          |-> userdefine.value,
-         symSymbolx          |-> symSymbolx.value,
+         cmId                |-> cmId.value,
+         fcmId               |-> fcmId.value,
+         orderNo             |-> orderNo.value,
+         ordId               |-> ordId.value,
+         userDefine          |-> userDefine.value,
+         symSymbolX          |-> symSymbolX.value,
          price               |-> price.value,
          qty                 |-> qty.value,
-         investoracno        |-> investoracno.value,
-         investorflag        |-> investorflag.value,
+         investorAcno        |-> investorAcno.value,
+         investorFlag        |-> investorFlag.value,
          side                |-> side.value,
          ordType             |-> ordType.value,
          timeInForce         |-> timeInForce.value,
          positionEffect      |-> positionEffect.value,
          lastPx              |-> lastPx.value,
          lastQty             |-> lastQty.value,
-         pxsubtotal          |-> pxsubtotal.value,
+         pxSubtotal          |-> pxSubtotal.value,
          cumQty              |-> cumQty.value,
          leavesQty           |-> leavesQty.value,
-         beforeqty           |-> beforeqty.value,
-         legsideUint822      |-> legsideUint822.value,
-         legpx               |-> legpx.value,
-         legqtyUint1624      |-> legqtyUint1624.value,
-         orgtranstimeMsgtime |-> orgtranstimeMsgtime.value,
-         transactTimeMsgtime |-> transactTimeMsgtime.value,
-         targetid            |-> targetid.value,
-         uniqid              |-> uniqid.value,
-         rptseq              |-> rptseq.value,
-         protocoltype        |-> protocoltype.value ], protocoltype.rest)
+         beforeQty           |-> beforeQty.value,
+         legSideUint822      |-> legSideUint822.value,
+         legPx               |-> legPx.value,
+         legQtyUint1624      |-> legQtyUint1624.value,
+         orgTransTimeMsgTime |-> orgTransTimeMsgTime.value,
+         transactTimeMsgTime |-> transactTimeMsgTime.value,
+         targetId            |-> targetId.value,
+         uniqId              |-> uniqId.value,
+         rptSeq              |-> rptSeq.value,
+         protocolType        |-> protocolType.value ], protocolType.rest)
 
 ZeroOrderStatusReportMessage ==
-    [ statuscodeUint81    |-> [i \in 1 .. 1 |-> 0],
+    [ statusCodeUint81    |-> [i \in 1 .. 1 |-> 0],
       execType            |-> [i \in 1 .. 1 |-> 0],
-      cmid                |-> [i \in 1 .. 2 |-> 0],
-      fcmid               |-> [i \in 1 .. 2 |-> 0],
-      orderno             |-> [i \in 1 .. 5 |-> 0],
-      ordid               |-> [i \in 1 .. 4 |-> 0],
-      userdefine          |-> [i \in 1 .. 8 |-> 0],
-      symSymbolx          |-> ZeroSymSymbolx,
+      cmId                |-> [i \in 1 .. 2 |-> 0],
+      fcmId               |-> [i \in 1 .. 2 |-> 0],
+      orderNo             |-> [i \in 1 .. 5 |-> 0],
+      ordId               |-> [i \in 1 .. 4 |-> 0],
+      userDefine          |-> [i \in 1 .. 8 |-> 0],
+      symSymbolX          |-> ZeroSymSymbolX,
       price               |-> [i \in 1 .. 4 |-> 0],
       qty                 |-> [i \in 1 .. 2 |-> 0],
-      investoracno        |-> [i \in 1 .. 4 |-> 0],
-      investorflag        |-> [i \in 1 .. 1 |-> 0],
+      investorAcno        |-> [i \in 1 .. 4 |-> 0],
+      investorFlag        |-> [i \in 1 .. 1 |-> 0],
       side                |-> [i \in 1 .. 1 |-> 0],
       ordType             |-> [i \in 1 .. 1 |-> 0],
       timeInForce         |-> [i \in 1 .. 1 |-> 0],
       positionEffect      |-> [i \in 1 .. 1 |-> 0],
       lastPx              |-> [i \in 1 .. 4 |-> 0],
       lastQty             |-> [i \in 1 .. 2 |-> 0],
-      pxsubtotal          |-> [i \in 1 .. 8 |-> 0],
+      pxSubtotal          |-> [i \in 1 .. 8 |-> 0],
       cumQty              |-> [i \in 1 .. 2 |-> 0],
       leavesQty           |-> [i \in 1 .. 2 |-> 0],
-      beforeqty           |-> [i \in 1 .. 2 |-> 0],
-      legsideUint822      |-> [i \in 1 .. 1 |-> 0],
-      legpx               |-> [i \in 1 .. 4 |-> 0],
-      legqtyUint1624      |-> [i \in 1 .. 2 |-> 0],
-      orgtranstimeMsgtime |-> ZeroOrgtranstimeMsgtime,
-      transactTimeMsgtime |-> ZeroTransactTimeMsgtime,
-      targetid            |-> [i \in 1 .. 1 |-> 0],
-      uniqid              |-> [i \in 1 .. 4 |-> 0],
-      rptseq              |-> [i \in 1 .. 4 |-> 0],
-      protocoltype        |-> [i \in 1 .. 1 |-> 0] ]
+      beforeQty           |-> [i \in 1 .. 2 |-> 0],
+      legSideUint822      |-> [i \in 1 .. 1 |-> 0],
+      legPx               |-> [i \in 1 .. 4 |-> 0],
+      legQtyUint1624      |-> [i \in 1 .. 2 |-> 0],
+      orgTransTimeMsgTime |-> ZeroOrgTransTimeMsgTime,
+      transactTimeMsgTime |-> ZeroTransactTimeMsgTime,
+      targetId            |-> [i \in 1 .. 1 |-> 0],
+      uniqId              |-> [i \in 1 .. 4 |-> 0],
+      rptSeq              |-> [i \in 1 .. 4 |-> 0],
+      protocolType        |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Order Status Report Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderStatusReportMessage ==
     { ZeroOrderStatusReportMessage }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.execType = one] : one \in Sample(1) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.cmid = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.fcmid = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.orderno = one] : one \in Sample(5) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.ordid = one] : one \in Sample(4) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.userdefine = one] : one \in Sample(8) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.symSymbolx = one] : one \in CheckedSymSymbolx }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.cmId = one] : one \in Sample(2) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.fcmId = one] : one \in Sample(2) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.orderNo = one] : one \in Sample(5) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.ordId = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.userDefine = one] : one \in Sample(8) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.symSymbolX = one] : one \in CheckedSymSymbolX }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.price = one] : one \in Sample(4) }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.qty = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.investoracno = one] : one \in Sample(4) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.investorflag = one] : one \in Sample(1) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.investorAcno = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.investorFlag = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.ordType = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.timeInForce = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.positionEffect = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.lastPx = one] : one \in Sample(4) }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.lastQty = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.pxsubtotal = one] : one \in Sample(8) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.pxSubtotal = one] : one \in Sample(8) }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.cumQty = one] : one \in Sample(2) }
         \cup { [ZeroOrderStatusReportMessage EXCEPT !.leavesQty = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.beforeqty = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.legsideUint822 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.legpx = one] : one \in Sample(4) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.legqtyUint1624 = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.orgtranstimeMsgtime = one] : one \in CheckedOrgtranstimeMsgtime }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.transactTimeMsgtime = one] : one \in CheckedTransactTimeMsgtime }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.targetid = one] : one \in Sample(1) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.uniqid = one] : one \in Sample(4) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.rptseq = one] : one \in Sample(4) }
-        \cup { [ZeroOrderStatusReportMessage EXCEPT !.protocoltype = one] : one \in Sample(1) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.beforeQty = one] : one \in Sample(2) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.legSideUint822 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.legPx = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.legQtyUint1624 = one] : one \in Sample(2) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.orgTransTimeMsgTime = one] : one \in CheckedOrgTransTimeMsgTime }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.transactTimeMsgTime = one] : one \in CheckedTransactTimeMsgTime }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.targetId = one] : one \in Sample(1) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.uniqId = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusReportMessage EXCEPT !.protocolType = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Longsymbolnum: 39 bytes                                                 *)
+(* Long Symbol Num: 39 bytes                                               *)
 (***************************************************************************)
 
-Longsymbolnum ==
+LongSymbolNum ==
     [ pseq1          : Sample(2),
       pseq2          : Sample(2),
-      legsideUint822 : Sample(1),
-      combop         : Sample(1),
+      legSideUint822 : Sample(1),
+      combOp         : Sample(1),
       reserved33     : Sample(33) ]
 
-EncodeLongsymbolnum(message) ==
+EncodeLongSymbolNum(message) ==
     message.pseq1
         \o message.pseq2
-        \o message.legsideUint822
-        \o message.combop
+        \o message.legSideUint822
+        \o message.combOp
         \o message.reserved33
 
-DecodeLongsymbolnum(bytes) ==
+DecodeLongSymbolNum(bytes) ==
     LET pseq1 == ReadBytes(bytes, 2) IN IF ~pseq1.ok THEN Fail ELSE
     LET pseq2 == ReadBytes(pseq1.rest, 2) IN IF ~pseq2.ok THEN Fail ELSE
-    LET legsideUint822 == ReadBytes(pseq2.rest, 1) IN IF ~legsideUint822.ok THEN Fail ELSE
-    LET combop == ReadBytes(legsideUint822.rest, 1) IN IF ~combop.ok THEN Fail ELSE
-    LET reserved33 == ReadBytes(combop.rest, 33) IN IF ~reserved33.ok THEN Fail ELSE
+    LET legSideUint822 == ReadBytes(pseq2.rest, 1) IN IF ~legSideUint822.ok THEN Fail ELSE
+    LET combOp == ReadBytes(legSideUint822.rest, 1) IN IF ~combOp.ok THEN Fail ELSE
+    LET reserved33 == ReadBytes(combOp.rest, 33) IN IF ~reserved33.ok THEN Fail ELSE
     Ok([ pseq1          |-> pseq1.value,
          pseq2          |-> pseq2.value,
-         legsideUint822 |-> legsideUint822.value,
-         combop         |-> combop.value,
+         legSideUint822 |-> legSideUint822.value,
+         combOp         |-> combOp.value,
          reserved33     |-> reserved33.value ], reserved33.rest)
 
-ZeroLongsymbolnum ==
+ZeroLongSymbolNum ==
     [ pseq1          |-> [i \in 1 .. 2 |-> 0],
       pseq2          |-> [i \in 1 .. 2 |-> 0],
-      legsideUint822 |-> [i \in 1 .. 1 |-> 0],
-      combop         |-> [i \in 1 .. 1 |-> 0],
+      legSideUint822 |-> [i \in 1 .. 1 |-> 0],
+      combOp         |-> [i \in 1 .. 1 |-> 0],
       reserved33     |-> [i \in 1 .. 33 |-> 0] ]
 
-(* Longsymbolnum at zero, then each field in turn at the values it is checked at *)
-CheckedLongsymbolnum ==
-    { ZeroLongsymbolnum }
-        \cup { [ZeroLongsymbolnum EXCEPT !.pseq1 = one] : one \in Sample(2) }
-        \cup { [ZeroLongsymbolnum EXCEPT !.pseq2 = one] : one \in Sample(2) }
-        \cup { [ZeroLongsymbolnum EXCEPT !.legsideUint822 = one] : one \in Sample(1) }
-        \cup { [ZeroLongsymbolnum EXCEPT !.combop = one] : one \in Sample(1) }
-        \cup { [ZeroLongsymbolnum EXCEPT !.reserved33 = one] : one \in Sample(33) }
+(* Long Symbol Num at zero, then each field in turn at the values it is checked at *)
+CheckedLongSymbolNum ==
+    { ZeroLongSymbolNum }
+        \cup { [ZeroLongSymbolNum EXCEPT !.pseq1 = one] : one \in Sample(2) }
+        \cup { [ZeroLongSymbolNum EXCEPT !.pseq2 = one] : one \in Sample(2) }
+        \cup { [ZeroLongSymbolNum EXCEPT !.legSideUint822 = one] : one \in Sample(1) }
+        \cup { [ZeroLongSymbolNum EXCEPT !.combOp = one] : one \in Sample(1) }
+        \cup { [ZeroLongSymbolNum EXCEPT !.reserved33 = one] : one \in Sample(33) }
 
 (***************************************************************************)
-(* Longsymboltext: 40 bytes                                                *)
+(* Long Symbol Text: 40 bytes                                              *)
 (***************************************************************************)
 
-Longsymboltext ==
+LongSymbolText ==
     [ symbolChar4040 : Sample(40) ]
 
-EncodeLongsymboltext(message) ==
+EncodeLongSymbolText(message) ==
     message.symbolChar4040
 
-DecodeLongsymboltext(bytes) ==
+DecodeLongSymbolText(bytes) ==
     LET symbolChar4040 == ReadBytes(bytes, 40) IN IF ~symbolChar4040.ok THEN Fail ELSE
     Ok([ symbolChar4040 |-> symbolChar4040.value ], symbolChar4040.rest)
 
-ZeroLongsymboltext ==
+ZeroLongSymbolText ==
     [ symbolChar4040 |-> [i \in 1 .. 40 |-> 0] ]
 
-(* Longsymboltext at zero, then each field in turn at the values it is checked at *)
-CheckedLongsymboltext ==
-    { ZeroLongsymboltext }
-        \cup { [ZeroLongsymboltext EXCEPT !.symbolChar4040 = one] : one \in Sample(40) }
+(* Long Symbol Text at zero, then each field in turn at the values it is checked at *)
+CheckedLongSymbolText ==
+    { ZeroLongSymbolText }
+        \cup { [ZeroLongSymbolText EXCEPT !.symbolChar4040 = one] : one \in Sample(40) }
 
 (***************************************************************************)
-(* Sym Longsymbolx, selected by Symboltype                                 *)
+(* Sym Long Symbol X, selected by Symbol Type                              *)
 (***************************************************************************)
 
-LongsymbolnumCode == 3  \* 0x03
-LongsymboltextCode == 4  \* 0x04
+LongSymbolNumCode == 3  \* 0x03
+LongSymbolTextCode == 4  \* 0x04
 
-SymLongsymbolx ==
-    [ tag : {LongsymbolnumCode}, body : Longsymbolnum ]
-        \cup [ tag : {LongsymboltextCode}, body : Longsymboltext ]
+SymLongSymbolX ==
+    [ tag : {LongSymbolNumCode}, body : LongSymbolNum ]
+        \cup [ tag : {LongSymbolTextCode}, body : LongSymbolText ]
 
-EncodeSymLongsymbolx(message) ==
-    CASE message.tag = LongsymbolnumCode -> EncodeLongsymbolnum(message.body)
-      [] message.tag = LongsymboltextCode -> EncodeLongsymboltext(message.body)
+EncodeSymLongSymbolX(message) ==
+    CASE message.tag = LongSymbolNumCode -> EncodeLongSymbolNum(message.body)
+      [] message.tag = LongSymbolTextCode -> EncodeLongSymbolText(message.body)
 
-DecodeSymLongsymbolx(tag, bytes) ==
+DecodeSymLongSymbolX(tag, bytes) ==
     LET read ==
-            CASE tag = LongsymbolnumCode -> DecodeLongsymbolnum(bytes)
-              [] tag = LongsymboltextCode -> DecodeLongsymboltext(bytes)
+            CASE tag = LongSymbolNumCode -> DecodeLongSymbolNum(bytes)
+              [] tag = LongSymbolTextCode -> DecodeLongSymbolText(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroSymLongsymbolx == [tag |-> LongsymbolnumCode, body |-> ZeroLongsymbolnum]
+ZeroSymLongSymbolX == [tag |-> LongSymbolNumCode, body |-> ZeroLongSymbolNum]
 
-(* Each Sym Longsymbolx in turn, at the values the message it names is checked at *)
-CheckedSymLongsymbolx ==
-    { [tag |-> LongsymbolnumCode, body |-> one] : one \in CheckedLongsymbolnum }
-        \cup { [tag |-> LongsymboltextCode, body |-> one] : one \in CheckedLongsymboltext }
+(* Each Sym Long Symbol X in turn, at the values the message it names is checked at *)
+CheckedSymLongSymbolX ==
+    { [tag |-> LongSymbolNumCode, body |-> one] : one \in CheckedLongSymbolNum }
+        \cup { [tag |-> LongSymbolTextCode, body |-> one] : one \in CheckedLongSymbolText }
 
 (***************************************************************************)
-(* Orgtranstime Msgtime: 6 bytes                                           *)
+(* Org Trans Time Msg Time: 6 bytes                                        *)
 (***************************************************************************)
 
-OrgtranstimeMsgtime2 ==
-    [ epochsInt324 : Sample(4),
+OrgTransTimeMsgTime2 ==
+    [ epochSInt324 : Sample(4),
       ms           : Sample(2) ]
 
-EncodeOrgtranstimeMsgtime2(message) ==
-    message.epochsInt324
+EncodeOrgTransTimeMsgTime2(message) ==
+    message.epochSInt324
         \o message.ms
 
-DecodeOrgtranstimeMsgtime2(bytes) ==
-    LET epochsInt324 == ReadBytes(bytes, 4) IN IF ~epochsInt324.ok THEN Fail ELSE
-    LET ms == ReadBytes(epochsInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
-    Ok([ epochsInt324 |-> epochsInt324.value,
+DecodeOrgTransTimeMsgTime2(bytes) ==
+    LET epochSInt324 == ReadBytes(bytes, 4) IN IF ~epochSInt324.ok THEN Fail ELSE
+    LET ms == ReadBytes(epochSInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
+    Ok([ epochSInt324 |-> epochSInt324.value,
          ms           |-> ms.value ], ms.rest)
 
-ZeroOrgtranstimeMsgtime2 ==
-    [ epochsInt324 |-> [i \in 1 .. 4 |-> 0],
+ZeroOrgTransTimeMsgTime2 ==
+    [ epochSInt324 |-> [i \in 1 .. 4 |-> 0],
       ms           |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Orgtranstime Msgtime at zero, then each field in turn at the values it is checked at *)
-CheckedOrgtranstimeMsgtime2 ==
-    { ZeroOrgtranstimeMsgtime2 }
-        \cup { [ZeroOrgtranstimeMsgtime2 EXCEPT !.epochsInt324 = one] : one \in Sample(4) }
-        \cup { [ZeroOrgtranstimeMsgtime2 EXCEPT !.ms = one] : one \in Sample(2) }
+(* Org Trans Time Msg Time at zero, then each field in turn at the values it is checked at *)
+CheckedOrgTransTimeMsgTime2 ==
+    { ZeroOrgTransTimeMsgTime2 }
+        \cup { [ZeroOrgTransTimeMsgTime2 EXCEPT !.epochSInt324 = one] : one \in Sample(4) }
+        \cup { [ZeroOrgTransTimeMsgTime2 EXCEPT !.ms = one] : one \in Sample(2) }
 
 (***************************************************************************)
-(* Transact Time Msgtime: 6 bytes                                          *)
+(* Transact Time Msg Time: 6 bytes                                         *)
 (***************************************************************************)
 
-TransactTimeMsgtime2 ==
-    [ epochsInt324 : Sample(4),
+TransactTimeMsgTime2 ==
+    [ epochSInt324 : Sample(4),
       ms           : Sample(2) ]
 
-EncodeTransactTimeMsgtime2(message) ==
-    message.epochsInt324
+EncodeTransactTimeMsgTime2(message) ==
+    message.epochSInt324
         \o message.ms
 
-DecodeTransactTimeMsgtime2(bytes) ==
-    LET epochsInt324 == ReadBytes(bytes, 4) IN IF ~epochsInt324.ok THEN Fail ELSE
-    LET ms == ReadBytes(epochsInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
-    Ok([ epochsInt324 |-> epochsInt324.value,
+DecodeTransactTimeMsgTime2(bytes) ==
+    LET epochSInt324 == ReadBytes(bytes, 4) IN IF ~epochSInt324.ok THEN Fail ELSE
+    LET ms == ReadBytes(epochSInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
+    Ok([ epochSInt324 |-> epochSInt324.value,
          ms           |-> ms.value ], ms.rest)
 
-ZeroTransactTimeMsgtime2 ==
-    [ epochsInt324 |-> [i \in 1 .. 4 |-> 0],
+ZeroTransactTimeMsgTime2 ==
+    [ epochSInt324 |-> [i \in 1 .. 4 |-> 0],
       ms           |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Transact Time Msgtime at zero, then each field in turn at the values it is checked at *)
-CheckedTransactTimeMsgtime2 ==
-    { ZeroTransactTimeMsgtime2 }
-        \cup { [ZeroTransactTimeMsgtime2 EXCEPT !.epochsInt324 = one] : one \in Sample(4) }
-        \cup { [ZeroTransactTimeMsgtime2 EXCEPT !.ms = one] : one \in Sample(2) }
+(* Transact Time Msg Time at zero, then each field in turn at the values it is checked at *)
+CheckedTransactTimeMsgTime2 ==
+    { ZeroTransactTimeMsgTime2 }
+        \cup { [ZeroTransactTimeMsgTime2 EXCEPT !.epochSInt324 = one] : one \in Sample(4) }
+        \cup { [ZeroTransactTimeMsgTime2 EXCEPT !.ms = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Order Status Report Long Format Message                                 *)
 (***************************************************************************)
 
 OrderStatusReportLongFormatMessage ==
-    [ statuscodeUint81    : Sample(1),
+    [ statusCodeUint81    : Sample(1),
       execType            : Sample(1),
-      cmid                : Sample(2),
-      fcmid               : Sample(2),
-      orderno             : Sample(5),
-      ordid               : Sample(4),
-      userdefine          : Sample(8),
-      symLongsymbolx      : SymLongsymbolx,
+      cmId                : Sample(2),
+      fcmId               : Sample(2),
+      orderNo             : Sample(5),
+      ordId               : Sample(4),
+      userDefine          : Sample(8),
+      symLongSymbolX      : SymLongSymbolX,
       price               : Sample(4),
       qty                 : Sample(2),
-      investoracno        : Sample(4),
-      investorflag        : Sample(1),
+      investorAcno        : Sample(4),
+      investorFlag        : Sample(1),
       side                : Sample(1),
       ordType             : Sample(1),
       timeInForce         : Sample(1),
       positionEffect      : Sample(1),
       lastPx              : Sample(4),
       lastQty             : Sample(2),
-      pxsubtotal          : Sample(8),
+      pxSubtotal          : Sample(8),
       cumQty              : Sample(2),
       leavesQty           : Sample(2),
-      beforeqty           : Sample(2),
-      legsideUint822      : Sample(1),
-      legpx               : Sample(4),
-      legqtyUint1624      : Sample(2),
-      orgtranstimeMsgtime : OrgtranstimeMsgtime2,
-      transactTimeMsgtime : TransactTimeMsgtime2,
-      targetid            : Sample(1),
-      uniqid              : Sample(4),
-      rptseq              : Sample(4),
-      protocoltype        : Sample(1) ]
+      beforeQty           : Sample(2),
+      legSideUint822      : Sample(1),
+      legPx               : Sample(4),
+      legQtyUint1624      : Sample(2),
+      orgTransTimeMsgTime : OrgTransTimeMsgTime2,
+      transactTimeMsgTime : TransactTimeMsgTime2,
+      targetId            : Sample(1),
+      uniqId              : Sample(4),
+      rptSeq              : Sample(4),
+      protocolType        : Sample(1) ]
 
 EncodeOrderStatusReportLongFormatMessage(message) ==
-    message.statuscodeUint81
+    message.statusCodeUint81
         \o message.execType
-        \o message.cmid
-        \o message.fcmid
-        \o message.orderno
-        \o message.ordid
-        \o message.userdefine
-        \o EncodeUIntBE(message.symLongsymbolx.tag, 1)
-        \o EncodeSymLongsymbolx(message.symLongsymbolx)
+        \o message.cmId
+        \o message.fcmId
+        \o message.orderNo
+        \o message.ordId
+        \o message.userDefine
+        \o EncodeUIntBE(message.symLongSymbolX.tag, 1)
+        \o EncodeSymLongSymbolX(message.symLongSymbolX)
         \o message.price
         \o message.qty
-        \o message.investoracno
-        \o message.investorflag
+        \o message.investorAcno
+        \o message.investorFlag
         \o message.side
         \o message.ordType
         \o message.timeInForce
         \o message.positionEffect
         \o message.lastPx
         \o message.lastQty
-        \o message.pxsubtotal
+        \o message.pxSubtotal
         \o message.cumQty
         \o message.leavesQty
-        \o message.beforeqty
-        \o message.legsideUint822
-        \o message.legpx
-        \o message.legqtyUint1624
-        \o EncodeOrgtranstimeMsgtime2(message.orgtranstimeMsgtime)
-        \o EncodeTransactTimeMsgtime2(message.transactTimeMsgtime)
-        \o message.targetid
-        \o message.uniqid
-        \o message.rptseq
-        \o message.protocoltype
+        \o message.beforeQty
+        \o message.legSideUint822
+        \o message.legPx
+        \o message.legQtyUint1624
+        \o EncodeOrgTransTimeMsgTime2(message.orgTransTimeMsgTime)
+        \o EncodeTransactTimeMsgTime2(message.transactTimeMsgTime)
+        \o message.targetId
+        \o message.uniqId
+        \o message.rptSeq
+        \o message.protocolType
 
 DecodeOrderStatusReportLongFormatMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    LET execType == ReadBytes(statuscodeUint81.rest, 1) IN IF ~execType.ok THEN Fail ELSE
-    LET cmid == ReadBytes(execType.rest, 2) IN IF ~cmid.ok THEN Fail ELSE
-    LET fcmid == ReadBytes(cmid.rest, 2) IN IF ~fcmid.ok THEN Fail ELSE
-    LET orderno == ReadBytes(fcmid.rest, 5) IN IF ~orderno.ok THEN Fail ELSE
-    LET ordid == ReadBytes(orderno.rest, 4) IN IF ~ordid.ok THEN Fail ELSE
-    LET userdefine == ReadBytes(ordid.rest, 8) IN IF ~userdefine.ok THEN Fail ELSE
-    LET symboltype == ReadUIntBE(userdefine.rest, 1) IN IF ~symboltype.ok THEN Fail ELSE
-    LET symLongsymbolx == DecodeSymLongsymbolx(symboltype.value, symboltype.rest) IN IF ~symLongsymbolx.ok THEN Fail ELSE
-    LET price == ReadBytes(symLongsymbolx.rest, 4) IN IF ~price.ok THEN Fail ELSE
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    LET execType == ReadBytes(statusCodeUint81.rest, 1) IN IF ~execType.ok THEN Fail ELSE
+    LET cmId == ReadBytes(execType.rest, 2) IN IF ~cmId.ok THEN Fail ELSE
+    LET fcmId == ReadBytes(cmId.rest, 2) IN IF ~fcmId.ok THEN Fail ELSE
+    LET orderNo == ReadBytes(fcmId.rest, 5) IN IF ~orderNo.ok THEN Fail ELSE
+    LET ordId == ReadBytes(orderNo.rest, 4) IN IF ~ordId.ok THEN Fail ELSE
+    LET userDefine == ReadBytes(ordId.rest, 8) IN IF ~userDefine.ok THEN Fail ELSE
+    LET symbolType == ReadUIntBE(userDefine.rest, 1) IN IF ~symbolType.ok THEN Fail ELSE
+    LET symLongSymbolX == DecodeSymLongSymbolX(symbolType.value, symbolType.rest) IN IF ~symLongSymbolX.ok THEN Fail ELSE
+    LET price == ReadBytes(symLongSymbolX.rest, 4) IN IF ~price.ok THEN Fail ELSE
     LET qty == ReadBytes(price.rest, 2) IN IF ~qty.ok THEN Fail ELSE
-    LET investoracno == ReadBytes(qty.rest, 4) IN IF ~investoracno.ok THEN Fail ELSE
-    LET investorflag == ReadBytes(investoracno.rest, 1) IN IF ~investorflag.ok THEN Fail ELSE
-    LET side == ReadBytes(investorflag.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET investorAcno == ReadBytes(qty.rest, 4) IN IF ~investorAcno.ok THEN Fail ELSE
+    LET investorFlag == ReadBytes(investorAcno.rest, 1) IN IF ~investorFlag.ok THEN Fail ELSE
+    LET side == ReadBytes(investorFlag.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET ordType == ReadBytes(side.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
     LET timeInForce == ReadBytes(ordType.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
     LET positionEffect == ReadBytes(timeInForce.rest, 1) IN IF ~positionEffect.ok THEN Fail ELSE
     LET lastPx == ReadBytes(positionEffect.rest, 4) IN IF ~lastPx.ok THEN Fail ELSE
     LET lastQty == ReadBytes(lastPx.rest, 2) IN IF ~lastQty.ok THEN Fail ELSE
-    LET pxsubtotal == ReadBytes(lastQty.rest, 8) IN IF ~pxsubtotal.ok THEN Fail ELSE
-    LET cumQty == ReadBytes(pxsubtotal.rest, 2) IN IF ~cumQty.ok THEN Fail ELSE
+    LET pxSubtotal == ReadBytes(lastQty.rest, 8) IN IF ~pxSubtotal.ok THEN Fail ELSE
+    LET cumQty == ReadBytes(pxSubtotal.rest, 2) IN IF ~cumQty.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(cumQty.rest, 2) IN IF ~leavesQty.ok THEN Fail ELSE
-    LET beforeqty == ReadBytes(leavesQty.rest, 2) IN IF ~beforeqty.ok THEN Fail ELSE
-    LET legsideUint822 == ReadBytes(beforeqty.rest, 1) IN IF ~legsideUint822.ok THEN Fail ELSE
-    LET legpx == ReadBytes(legsideUint822.rest, 4) IN IF ~legpx.ok THEN Fail ELSE
-    LET legqtyUint1624 == ReadBytes(legpx.rest, 2) IN IF ~legqtyUint1624.ok THEN Fail ELSE
-    LET orgtranstimeMsgtime == DecodeOrgtranstimeMsgtime2(legqtyUint1624.rest) IN IF ~orgtranstimeMsgtime.ok THEN Fail ELSE
-    LET transactTimeMsgtime == DecodeTransactTimeMsgtime2(orgtranstimeMsgtime.rest) IN IF ~transactTimeMsgtime.ok THEN Fail ELSE
-    LET targetid == ReadBytes(transactTimeMsgtime.rest, 1) IN IF ~targetid.ok THEN Fail ELSE
-    LET uniqid == ReadBytes(targetid.rest, 4) IN IF ~uniqid.ok THEN Fail ELSE
-    LET rptseq == ReadBytes(uniqid.rest, 4) IN IF ~rptseq.ok THEN Fail ELSE
-    LET protocoltype == ReadBytes(rptseq.rest, 1) IN IF ~protocoltype.ok THEN Fail ELSE
-    Ok([ statuscodeUint81    |-> statuscodeUint81.value,
+    LET beforeQty == ReadBytes(leavesQty.rest, 2) IN IF ~beforeQty.ok THEN Fail ELSE
+    LET legSideUint822 == ReadBytes(beforeQty.rest, 1) IN IF ~legSideUint822.ok THEN Fail ELSE
+    LET legPx == ReadBytes(legSideUint822.rest, 4) IN IF ~legPx.ok THEN Fail ELSE
+    LET legQtyUint1624 == ReadBytes(legPx.rest, 2) IN IF ~legQtyUint1624.ok THEN Fail ELSE
+    LET orgTransTimeMsgTime == DecodeOrgTransTimeMsgTime2(legQtyUint1624.rest) IN IF ~orgTransTimeMsgTime.ok THEN Fail ELSE
+    LET transactTimeMsgTime == DecodeTransactTimeMsgTime2(orgTransTimeMsgTime.rest) IN IF ~transactTimeMsgTime.ok THEN Fail ELSE
+    LET targetId == ReadBytes(transactTimeMsgTime.rest, 1) IN IF ~targetId.ok THEN Fail ELSE
+    LET uniqId == ReadBytes(targetId.rest, 4) IN IF ~uniqId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(uniqId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET protocolType == ReadBytes(rptSeq.rest, 1) IN IF ~protocolType.ok THEN Fail ELSE
+    Ok([ statusCodeUint81    |-> statusCodeUint81.value,
          execType            |-> execType.value,
-         cmid                |-> cmid.value,
-         fcmid               |-> fcmid.value,
-         orderno             |-> orderno.value,
-         ordid               |-> ordid.value,
-         userdefine          |-> userdefine.value,
-         symLongsymbolx      |-> symLongsymbolx.value,
+         cmId                |-> cmId.value,
+         fcmId               |-> fcmId.value,
+         orderNo             |-> orderNo.value,
+         ordId               |-> ordId.value,
+         userDefine          |-> userDefine.value,
+         symLongSymbolX      |-> symLongSymbolX.value,
          price               |-> price.value,
          qty                 |-> qty.value,
-         investoracno        |-> investoracno.value,
-         investorflag        |-> investorflag.value,
+         investorAcno        |-> investorAcno.value,
+         investorFlag        |-> investorFlag.value,
          side                |-> side.value,
          ordType             |-> ordType.value,
          timeInForce         |-> timeInForce.value,
          positionEffect      |-> positionEffect.value,
          lastPx              |-> lastPx.value,
          lastQty             |-> lastQty.value,
-         pxsubtotal          |-> pxsubtotal.value,
+         pxSubtotal          |-> pxSubtotal.value,
          cumQty              |-> cumQty.value,
          leavesQty           |-> leavesQty.value,
-         beforeqty           |-> beforeqty.value,
-         legsideUint822      |-> legsideUint822.value,
-         legpx               |-> legpx.value,
-         legqtyUint1624      |-> legqtyUint1624.value,
-         orgtranstimeMsgtime |-> orgtranstimeMsgtime.value,
-         transactTimeMsgtime |-> transactTimeMsgtime.value,
-         targetid            |-> targetid.value,
-         uniqid              |-> uniqid.value,
-         rptseq              |-> rptseq.value,
-         protocoltype        |-> protocoltype.value ], protocoltype.rest)
+         beforeQty           |-> beforeQty.value,
+         legSideUint822      |-> legSideUint822.value,
+         legPx               |-> legPx.value,
+         legQtyUint1624      |-> legQtyUint1624.value,
+         orgTransTimeMsgTime |-> orgTransTimeMsgTime.value,
+         transactTimeMsgTime |-> transactTimeMsgTime.value,
+         targetId            |-> targetId.value,
+         uniqId              |-> uniqId.value,
+         rptSeq              |-> rptSeq.value,
+         protocolType        |-> protocolType.value ], protocolType.rest)
 
 ZeroOrderStatusReportLongFormatMessage ==
-    [ statuscodeUint81    |-> [i \in 1 .. 1 |-> 0],
+    [ statusCodeUint81    |-> [i \in 1 .. 1 |-> 0],
       execType            |-> [i \in 1 .. 1 |-> 0],
-      cmid                |-> [i \in 1 .. 2 |-> 0],
-      fcmid               |-> [i \in 1 .. 2 |-> 0],
-      orderno             |-> [i \in 1 .. 5 |-> 0],
-      ordid               |-> [i \in 1 .. 4 |-> 0],
-      userdefine          |-> [i \in 1 .. 8 |-> 0],
-      symLongsymbolx      |-> ZeroSymLongsymbolx,
+      cmId                |-> [i \in 1 .. 2 |-> 0],
+      fcmId               |-> [i \in 1 .. 2 |-> 0],
+      orderNo             |-> [i \in 1 .. 5 |-> 0],
+      ordId               |-> [i \in 1 .. 4 |-> 0],
+      userDefine          |-> [i \in 1 .. 8 |-> 0],
+      symLongSymbolX      |-> ZeroSymLongSymbolX,
       price               |-> [i \in 1 .. 4 |-> 0],
       qty                 |-> [i \in 1 .. 2 |-> 0],
-      investoracno        |-> [i \in 1 .. 4 |-> 0],
-      investorflag        |-> [i \in 1 .. 1 |-> 0],
+      investorAcno        |-> [i \in 1 .. 4 |-> 0],
+      investorFlag        |-> [i \in 1 .. 1 |-> 0],
       side                |-> [i \in 1 .. 1 |-> 0],
       ordType             |-> [i \in 1 .. 1 |-> 0],
       timeInForce         |-> [i \in 1 .. 1 |-> 0],
       positionEffect      |-> [i \in 1 .. 1 |-> 0],
       lastPx              |-> [i \in 1 .. 4 |-> 0],
       lastQty             |-> [i \in 1 .. 2 |-> 0],
-      pxsubtotal          |-> [i \in 1 .. 8 |-> 0],
+      pxSubtotal          |-> [i \in 1 .. 8 |-> 0],
       cumQty              |-> [i \in 1 .. 2 |-> 0],
       leavesQty           |-> [i \in 1 .. 2 |-> 0],
-      beforeqty           |-> [i \in 1 .. 2 |-> 0],
-      legsideUint822      |-> [i \in 1 .. 1 |-> 0],
-      legpx               |-> [i \in 1 .. 4 |-> 0],
-      legqtyUint1624      |-> [i \in 1 .. 2 |-> 0],
-      orgtranstimeMsgtime |-> ZeroOrgtranstimeMsgtime2,
-      transactTimeMsgtime |-> ZeroTransactTimeMsgtime2,
-      targetid            |-> [i \in 1 .. 1 |-> 0],
-      uniqid              |-> [i \in 1 .. 4 |-> 0],
-      rptseq              |-> [i \in 1 .. 4 |-> 0],
-      protocoltype        |-> [i \in 1 .. 1 |-> 0] ]
+      beforeQty           |-> [i \in 1 .. 2 |-> 0],
+      legSideUint822      |-> [i \in 1 .. 1 |-> 0],
+      legPx               |-> [i \in 1 .. 4 |-> 0],
+      legQtyUint1624      |-> [i \in 1 .. 2 |-> 0],
+      orgTransTimeMsgTime |-> ZeroOrgTransTimeMsgTime2,
+      transactTimeMsgTime |-> ZeroTransactTimeMsgTime2,
+      targetId            |-> [i \in 1 .. 1 |-> 0],
+      uniqId              |-> [i \in 1 .. 4 |-> 0],
+      rptSeq              |-> [i \in 1 .. 4 |-> 0],
+      protocolType        |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Order Status Report Long Format Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderStatusReportLongFormatMessage ==
     { ZeroOrderStatusReportLongFormatMessage }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.execType = one] : one \in Sample(1) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.cmid = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.fcmid = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.orderno = one] : one \in Sample(5) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.ordid = one] : one \in Sample(4) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.userdefine = one] : one \in Sample(8) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.symLongsymbolx = one] : one \in CheckedSymLongsymbolx }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.cmId = one] : one \in Sample(2) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.fcmId = one] : one \in Sample(2) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.orderNo = one] : one \in Sample(5) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.ordId = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.userDefine = one] : one \in Sample(8) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.symLongSymbolX = one] : one \in CheckedSymLongSymbolX }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.price = one] : one \in Sample(4) }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.qty = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.investoracno = one] : one \in Sample(4) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.investorflag = one] : one \in Sample(1) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.investorAcno = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.investorFlag = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.ordType = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.timeInForce = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.positionEffect = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.lastPx = one] : one \in Sample(4) }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.lastQty = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.pxsubtotal = one] : one \in Sample(8) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.pxSubtotal = one] : one \in Sample(8) }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.cumQty = one] : one \in Sample(2) }
         \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.leavesQty = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.beforeqty = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.legsideUint822 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.legpx = one] : one \in Sample(4) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.legqtyUint1624 = one] : one \in Sample(2) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.orgtranstimeMsgtime = one] : one \in CheckedOrgtranstimeMsgtime2 }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.transactTimeMsgtime = one] : one \in CheckedTransactTimeMsgtime2 }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.targetid = one] : one \in Sample(1) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.uniqid = one] : one \in Sample(4) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.rptseq = one] : one \in Sample(4) }
-        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.protocoltype = one] : one \in Sample(1) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.beforeQty = one] : one \in Sample(2) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.legSideUint822 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.legPx = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.legQtyUint1624 = one] : one \in Sample(2) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.orgTransTimeMsgTime = one] : one \in CheckedOrgTransTimeMsgTime2 }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.transactTimeMsgTime = one] : one \in CheckedTransactTimeMsgTime2 }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.targetId = one] : one \in Sample(1) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.uniqId = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusReportLongFormatMessage EXCEPT !.protocolType = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Symbolnum: 19 bytes                                                     *)
+(* Symbol Num: 19 bytes                                                    *)
 (***************************************************************************)
 
-Symbolnum2 ==
+SymbolNum2 ==
     [ pseq1          : Sample(2),
       pseq2          : Sample(2),
-      legsideUint822 : Sample(1),
-      combop         : Sample(1),
+      legSideUint822 : Sample(1),
+      combOp         : Sample(1),
       reserved13     : Sample(13) ]
 
-EncodeSymbolnum2(message) ==
+EncodeSymbolNum2(message) ==
     message.pseq1
         \o message.pseq2
-        \o message.legsideUint822
-        \o message.combop
+        \o message.legSideUint822
+        \o message.combOp
         \o message.reserved13
 
-DecodeSymbolnum2(bytes) ==
+DecodeSymbolNum2(bytes) ==
     LET pseq1 == ReadBytes(bytes, 2) IN IF ~pseq1.ok THEN Fail ELSE
     LET pseq2 == ReadBytes(pseq1.rest, 2) IN IF ~pseq2.ok THEN Fail ELSE
-    LET legsideUint822 == ReadBytes(pseq2.rest, 1) IN IF ~legsideUint822.ok THEN Fail ELSE
-    LET combop == ReadBytes(legsideUint822.rest, 1) IN IF ~combop.ok THEN Fail ELSE
-    LET reserved13 == ReadBytes(combop.rest, 13) IN IF ~reserved13.ok THEN Fail ELSE
+    LET legSideUint822 == ReadBytes(pseq2.rest, 1) IN IF ~legSideUint822.ok THEN Fail ELSE
+    LET combOp == ReadBytes(legSideUint822.rest, 1) IN IF ~combOp.ok THEN Fail ELSE
+    LET reserved13 == ReadBytes(combOp.rest, 13) IN IF ~reserved13.ok THEN Fail ELSE
     Ok([ pseq1          |-> pseq1.value,
          pseq2          |-> pseq2.value,
-         legsideUint822 |-> legsideUint822.value,
-         combop         |-> combop.value,
+         legSideUint822 |-> legSideUint822.value,
+         combOp         |-> combOp.value,
          reserved13     |-> reserved13.value ], reserved13.rest)
 
-ZeroSymbolnum2 ==
+ZeroSymbolNum2 ==
     [ pseq1          |-> [i \in 1 .. 2 |-> 0],
       pseq2          |-> [i \in 1 .. 2 |-> 0],
-      legsideUint822 |-> [i \in 1 .. 1 |-> 0],
-      combop         |-> [i \in 1 .. 1 |-> 0],
+      legSideUint822 |-> [i \in 1 .. 1 |-> 0],
+      combOp         |-> [i \in 1 .. 1 |-> 0],
       reserved13     |-> [i \in 1 .. 13 |-> 0] ]
 
-(* Symbolnum at zero, then each field in turn at the values it is checked at *)
-CheckedSymbolnum2 ==
-    { ZeroSymbolnum2 }
-        \cup { [ZeroSymbolnum2 EXCEPT !.pseq1 = one] : one \in Sample(2) }
-        \cup { [ZeroSymbolnum2 EXCEPT !.pseq2 = one] : one \in Sample(2) }
-        \cup { [ZeroSymbolnum2 EXCEPT !.legsideUint822 = one] : one \in Sample(1) }
-        \cup { [ZeroSymbolnum2 EXCEPT !.combop = one] : one \in Sample(1) }
-        \cup { [ZeroSymbolnum2 EXCEPT !.reserved13 = one] : one \in Sample(13) }
+(* Symbol Num at zero, then each field in turn at the values it is checked at *)
+CheckedSymbolNum2 ==
+    { ZeroSymbolNum2 }
+        \cup { [ZeroSymbolNum2 EXCEPT !.pseq1 = one] : one \in Sample(2) }
+        \cup { [ZeroSymbolNum2 EXCEPT !.pseq2 = one] : one \in Sample(2) }
+        \cup { [ZeroSymbolNum2 EXCEPT !.legSideUint822 = one] : one \in Sample(1) }
+        \cup { [ZeroSymbolNum2 EXCEPT !.combOp = one] : one \in Sample(1) }
+        \cup { [ZeroSymbolNum2 EXCEPT !.reserved13 = one] : one \in Sample(13) }
 
 (***************************************************************************)
-(* Symboltext: 20 bytes                                                    *)
+(* Symbol Text: 20 bytes                                                   *)
 (***************************************************************************)
 
-Symboltext2 ==
+SymbolText2 ==
     [ symbolChar2020 : Sample(20) ]
 
-EncodeSymboltext2(message) ==
+EncodeSymbolText2(message) ==
     message.symbolChar2020
 
-DecodeSymboltext2(bytes) ==
+DecodeSymbolText2(bytes) ==
     LET symbolChar2020 == ReadBytes(bytes, 20) IN IF ~symbolChar2020.ok THEN Fail ELSE
     Ok([ symbolChar2020 |-> symbolChar2020.value ], symbolChar2020.rest)
 
-ZeroSymboltext2 ==
+ZeroSymbolText2 ==
     [ symbolChar2020 |-> [i \in 1 .. 20 |-> 0] ]
 
-(* Symboltext at zero, then each field in turn at the values it is checked at *)
-CheckedSymboltext2 ==
-    { ZeroSymboltext2 }
-        \cup { [ZeroSymboltext2 EXCEPT !.symbolChar2020 = one] : one \in Sample(20) }
+(* Symbol Text at zero, then each field in turn at the values it is checked at *)
+CheckedSymbolText2 ==
+    { ZeroSymbolText2 }
+        \cup { [ZeroSymbolText2 EXCEPT !.symbolChar2020 = one] : one \in Sample(20) }
 
 (***************************************************************************)
-(* Sym Symbolx, selected by Symboltype                                     *)
+(* Sym Symbol X, selected by Symbol Type                                   *)
 (***************************************************************************)
 
-SymbolnumCode2 == 1  \* 0x01
-SymboltextCode2 == 2  \* 0x02
+SymbolNumCode2 == 1  \* 0x01
+SymbolTextCode2 == 2  \* 0x02
 
-SymSymbolx2 ==
-    [ tag : {SymbolnumCode2}, body : Symbolnum2 ]
-        \cup [ tag : {SymboltextCode2}, body : Symboltext2 ]
+SymSymbolX2 ==
+    [ tag : {SymbolNumCode2}, body : SymbolNum2 ]
+        \cup [ tag : {SymbolTextCode2}, body : SymbolText2 ]
 
-EncodeSymSymbolx2(message) ==
-    CASE message.tag = SymbolnumCode2 -> EncodeSymbolnum2(message.body)
-      [] message.tag = SymboltextCode2 -> EncodeSymboltext2(message.body)
+EncodeSymSymbolX2(message) ==
+    CASE message.tag = SymbolNumCode2 -> EncodeSymbolNum2(message.body)
+      [] message.tag = SymbolTextCode2 -> EncodeSymbolText2(message.body)
 
-DecodeSymSymbolx2(tag, bytes) ==
+DecodeSymSymbolX2(tag, bytes) ==
     LET read ==
-            CASE tag = SymbolnumCode2 -> DecodeSymbolnum2(bytes)
-              [] tag = SymboltextCode2 -> DecodeSymboltext2(bytes)
+            CASE tag = SymbolNumCode2 -> DecodeSymbolNum2(bytes)
+              [] tag = SymbolTextCode2 -> DecodeSymbolText2(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroSymSymbolx2 == [tag |-> SymbolnumCode2, body |-> ZeroSymbolnum2]
+ZeroSymSymbolX2 == [tag |-> SymbolNumCode2, body |-> ZeroSymbolNum2]
 
-(* Each Sym Symbolx in turn, at the values the message it names is checked at *)
-CheckedSymSymbolx2 ==
-    { [tag |-> SymbolnumCode2, body |-> one] : one \in CheckedSymbolnum2 }
-        \cup { [tag |-> SymboltextCode2, body |-> one] : one \in CheckedSymboltext2 }
+(* Each Sym Symbol X in turn, at the values the message it names is checked at *)
+CheckedSymSymbolX2 ==
+    { [tag |-> SymbolNumCode2, body |-> one] : one \in CheckedSymbolNum2 }
+        \cup { [tag |-> SymbolTextCode2, body |-> one] : one \in CheckedSymbolText2 }
 
 (***************************************************************************)
-(* Orgtranstime Msgtime: 6 bytes                                           *)
+(* Org Trans Time Msg Time: 6 bytes                                        *)
 (***************************************************************************)
 
-OrgtranstimeMsgtime3 ==
-    [ epochsInt324 : Sample(4),
+OrgTransTimeMsgTime3 ==
+    [ epochSInt324 : Sample(4),
       ms           : Sample(2) ]
 
-EncodeOrgtranstimeMsgtime3(message) ==
-    message.epochsInt324
+EncodeOrgTransTimeMsgTime3(message) ==
+    message.epochSInt324
         \o message.ms
 
-DecodeOrgtranstimeMsgtime3(bytes) ==
-    LET epochsInt324 == ReadBytes(bytes, 4) IN IF ~epochsInt324.ok THEN Fail ELSE
-    LET ms == ReadBytes(epochsInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
-    Ok([ epochsInt324 |-> epochsInt324.value,
+DecodeOrgTransTimeMsgTime3(bytes) ==
+    LET epochSInt324 == ReadBytes(bytes, 4) IN IF ~epochSInt324.ok THEN Fail ELSE
+    LET ms == ReadBytes(epochSInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
+    Ok([ epochSInt324 |-> epochSInt324.value,
          ms           |-> ms.value ], ms.rest)
 
-ZeroOrgtranstimeMsgtime3 ==
-    [ epochsInt324 |-> [i \in 1 .. 4 |-> 0],
+ZeroOrgTransTimeMsgTime3 ==
+    [ epochSInt324 |-> [i \in 1 .. 4 |-> 0],
       ms           |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Orgtranstime Msgtime at zero, then each field in turn at the values it is checked at *)
-CheckedOrgtranstimeMsgtime3 ==
-    { ZeroOrgtranstimeMsgtime3 }
-        \cup { [ZeroOrgtranstimeMsgtime3 EXCEPT !.epochsInt324 = one] : one \in Sample(4) }
-        \cup { [ZeroOrgtranstimeMsgtime3 EXCEPT !.ms = one] : one \in Sample(2) }
+(* Org Trans Time Msg Time at zero, then each field in turn at the values it is checked at *)
+CheckedOrgTransTimeMsgTime3 ==
+    { ZeroOrgTransTimeMsgTime3 }
+        \cup { [ZeroOrgTransTimeMsgTime3 EXCEPT !.epochSInt324 = one] : one \in Sample(4) }
+        \cup { [ZeroOrgTransTimeMsgTime3 EXCEPT !.ms = one] : one \in Sample(2) }
 
 (***************************************************************************)
-(* Transact Time Msgtime: 6 bytes                                          *)
+(* Transact Time Msg Time: 6 bytes                                         *)
 (***************************************************************************)
 
-TransactTimeMsgtime3 ==
-    [ epochsInt324 : Sample(4),
+TransactTimeMsgTime3 ==
+    [ epochSInt324 : Sample(4),
       ms           : Sample(2) ]
 
-EncodeTransactTimeMsgtime3(message) ==
-    message.epochsInt324
+EncodeTransactTimeMsgTime3(message) ==
+    message.epochSInt324
         \o message.ms
 
-DecodeTransactTimeMsgtime3(bytes) ==
-    LET epochsInt324 == ReadBytes(bytes, 4) IN IF ~epochsInt324.ok THEN Fail ELSE
-    LET ms == ReadBytes(epochsInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
-    Ok([ epochsInt324 |-> epochsInt324.value,
+DecodeTransactTimeMsgTime3(bytes) ==
+    LET epochSInt324 == ReadBytes(bytes, 4) IN IF ~epochSInt324.ok THEN Fail ELSE
+    LET ms == ReadBytes(epochSInt324.rest, 2) IN IF ~ms.ok THEN Fail ELSE
+    Ok([ epochSInt324 |-> epochSInt324.value,
          ms           |-> ms.value ], ms.rest)
 
-ZeroTransactTimeMsgtime3 ==
-    [ epochsInt324 |-> [i \in 1 .. 4 |-> 0],
+ZeroTransactTimeMsgTime3 ==
+    [ epochSInt324 |-> [i \in 1 .. 4 |-> 0],
       ms           |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Transact Time Msgtime at zero, then each field in turn at the values it is checked at *)
-CheckedTransactTimeMsgtime3 ==
-    { ZeroTransactTimeMsgtime3 }
-        \cup { [ZeroTransactTimeMsgtime3 EXCEPT !.epochsInt324 = one] : one \in Sample(4) }
-        \cup { [ZeroTransactTimeMsgtime3 EXCEPT !.ms = one] : one \in Sample(2) }
+(* Transact Time Msg Time at zero, then each field in turn at the values it is checked at *)
+CheckedTransactTimeMsgTime3 ==
+    { ZeroTransactTimeMsgTime3 }
+        \cup { [ZeroTransactTimeMsgTime3 EXCEPT !.epochSInt324 = one] : one \in Sample(4) }
+        \cup { [ZeroTransactTimeMsgTime3 EXCEPT !.ms = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Execution Report Including Head Office And Branch Offices Message       *)
 (***************************************************************************)
 
 ExecutionReportIncludingHeadOfficeAndBranchOfficesMessage ==
-    [ statuscodeUint81    : Sample(1),
+    [ statusCodeUint81    : Sample(1),
       execType            : Sample(1),
-      cmid                : Sample(2),
-      fcmid               : Sample(2),
-      orderno             : Sample(5),
-      ordid               : Sample(4),
-      userdefine          : Sample(8),
-      symSymbolx          : SymSymbolx2,
+      cmId                : Sample(2),
+      fcmId               : Sample(2),
+      orderNo             : Sample(5),
+      ordId               : Sample(4),
+      userDefine          : Sample(8),
+      symSymbolX          : SymSymbolX2,
       price               : Sample(4),
       qty                 : Sample(2),
-      investoracno        : Sample(4),
-      investorflag        : Sample(1),
+      investorAcno        : Sample(4),
+      investorFlag        : Sample(1),
       side                : Sample(1),
       ordType             : Sample(1),
       timeInForce         : Sample(1),
       positionEffect      : Sample(1),
       lastPx              : Sample(4),
       lastQty             : Sample(2),
-      pxsubtotal          : Sample(8),
+      pxSubtotal          : Sample(8),
       cumQty              : Sample(2),
       leavesQty           : Sample(2),
-      beforeqty           : Sample(2),
-      legsideUint822      : Sample(1),
-      legpx               : Sample(4),
-      legqtyUint1624      : Sample(2),
-      orgtranstimeMsgtime : OrgtranstimeMsgtime3,
-      transactTimeMsgtime : TransactTimeMsgtime3,
-      targetid            : Sample(1),
-      uniqid              : Sample(4),
-      rptseq              : Sample(4),
-      protocoltype        : Sample(1),
-      rptsessionid        : Sample(2) ]
+      beforeQty           : Sample(2),
+      legSideUint822      : Sample(1),
+      legPx               : Sample(4),
+      legQtyUint1624      : Sample(2),
+      orgTransTimeMsgTime : OrgTransTimeMsgTime3,
+      transactTimeMsgTime : TransactTimeMsgTime3,
+      targetId            : Sample(1),
+      uniqId              : Sample(4),
+      rptSeq              : Sample(4),
+      protocolType        : Sample(1),
+      rptSessionId        : Sample(2) ]
 
 EncodeExecutionReportIncludingHeadOfficeAndBranchOfficesMessage(message) ==
-    message.statuscodeUint81
+    message.statusCodeUint81
         \o message.execType
-        \o message.cmid
-        \o message.fcmid
-        \o message.orderno
-        \o message.ordid
-        \o message.userdefine
-        \o EncodeUIntBE(message.symSymbolx.tag, 1)
-        \o EncodeSymSymbolx2(message.symSymbolx)
+        \o message.cmId
+        \o message.fcmId
+        \o message.orderNo
+        \o message.ordId
+        \o message.userDefine
+        \o EncodeUIntBE(message.symSymbolX.tag, 1)
+        \o EncodeSymSymbolX2(message.symSymbolX)
         \o message.price
         \o message.qty
-        \o message.investoracno
-        \o message.investorflag
+        \o message.investorAcno
+        \o message.investorFlag
         \o message.side
         \o message.ordType
         \o message.timeInForce
         \o message.positionEffect
         \o message.lastPx
         \o message.lastQty
-        \o message.pxsubtotal
+        \o message.pxSubtotal
         \o message.cumQty
         \o message.leavesQty
-        \o message.beforeqty
-        \o message.legsideUint822
-        \o message.legpx
-        \o message.legqtyUint1624
-        \o EncodeOrgtranstimeMsgtime3(message.orgtranstimeMsgtime)
-        \o EncodeTransactTimeMsgtime3(message.transactTimeMsgtime)
-        \o message.targetid
-        \o message.uniqid
-        \o message.rptseq
-        \o message.protocoltype
-        \o message.rptsessionid
+        \o message.beforeQty
+        \o message.legSideUint822
+        \o message.legPx
+        \o message.legQtyUint1624
+        \o EncodeOrgTransTimeMsgTime3(message.orgTransTimeMsgTime)
+        \o EncodeTransactTimeMsgTime3(message.transactTimeMsgTime)
+        \o message.targetId
+        \o message.uniqId
+        \o message.rptSeq
+        \o message.protocolType
+        \o message.rptSessionId
 
 DecodeExecutionReportIncludingHeadOfficeAndBranchOfficesMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    LET execType == ReadBytes(statuscodeUint81.rest, 1) IN IF ~execType.ok THEN Fail ELSE
-    LET cmid == ReadBytes(execType.rest, 2) IN IF ~cmid.ok THEN Fail ELSE
-    LET fcmid == ReadBytes(cmid.rest, 2) IN IF ~fcmid.ok THEN Fail ELSE
-    LET orderno == ReadBytes(fcmid.rest, 5) IN IF ~orderno.ok THEN Fail ELSE
-    LET ordid == ReadBytes(orderno.rest, 4) IN IF ~ordid.ok THEN Fail ELSE
-    LET userdefine == ReadBytes(ordid.rest, 8) IN IF ~userdefine.ok THEN Fail ELSE
-    LET symboltype == ReadUIntBE(userdefine.rest, 1) IN IF ~symboltype.ok THEN Fail ELSE
-    LET symSymbolx == DecodeSymSymbolx2(symboltype.value, symboltype.rest) IN IF ~symSymbolx.ok THEN Fail ELSE
-    LET price == ReadBytes(symSymbolx.rest, 4) IN IF ~price.ok THEN Fail ELSE
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    LET execType == ReadBytes(statusCodeUint81.rest, 1) IN IF ~execType.ok THEN Fail ELSE
+    LET cmId == ReadBytes(execType.rest, 2) IN IF ~cmId.ok THEN Fail ELSE
+    LET fcmId == ReadBytes(cmId.rest, 2) IN IF ~fcmId.ok THEN Fail ELSE
+    LET orderNo == ReadBytes(fcmId.rest, 5) IN IF ~orderNo.ok THEN Fail ELSE
+    LET ordId == ReadBytes(orderNo.rest, 4) IN IF ~ordId.ok THEN Fail ELSE
+    LET userDefine == ReadBytes(ordId.rest, 8) IN IF ~userDefine.ok THEN Fail ELSE
+    LET symbolType == ReadUIntBE(userDefine.rest, 1) IN IF ~symbolType.ok THEN Fail ELSE
+    LET symSymbolX == DecodeSymSymbolX2(symbolType.value, symbolType.rest) IN IF ~symSymbolX.ok THEN Fail ELSE
+    LET price == ReadBytes(symSymbolX.rest, 4) IN IF ~price.ok THEN Fail ELSE
     LET qty == ReadBytes(price.rest, 2) IN IF ~qty.ok THEN Fail ELSE
-    LET investoracno == ReadBytes(qty.rest, 4) IN IF ~investoracno.ok THEN Fail ELSE
-    LET investorflag == ReadBytes(investoracno.rest, 1) IN IF ~investorflag.ok THEN Fail ELSE
-    LET side == ReadBytes(investorflag.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET investorAcno == ReadBytes(qty.rest, 4) IN IF ~investorAcno.ok THEN Fail ELSE
+    LET investorFlag == ReadBytes(investorAcno.rest, 1) IN IF ~investorFlag.ok THEN Fail ELSE
+    LET side == ReadBytes(investorFlag.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET ordType == ReadBytes(side.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
     LET timeInForce == ReadBytes(ordType.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
     LET positionEffect == ReadBytes(timeInForce.rest, 1) IN IF ~positionEffect.ok THEN Fail ELSE
     LET lastPx == ReadBytes(positionEffect.rest, 4) IN IF ~lastPx.ok THEN Fail ELSE
     LET lastQty == ReadBytes(lastPx.rest, 2) IN IF ~lastQty.ok THEN Fail ELSE
-    LET pxsubtotal == ReadBytes(lastQty.rest, 8) IN IF ~pxsubtotal.ok THEN Fail ELSE
-    LET cumQty == ReadBytes(pxsubtotal.rest, 2) IN IF ~cumQty.ok THEN Fail ELSE
+    LET pxSubtotal == ReadBytes(lastQty.rest, 8) IN IF ~pxSubtotal.ok THEN Fail ELSE
+    LET cumQty == ReadBytes(pxSubtotal.rest, 2) IN IF ~cumQty.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(cumQty.rest, 2) IN IF ~leavesQty.ok THEN Fail ELSE
-    LET beforeqty == ReadBytes(leavesQty.rest, 2) IN IF ~beforeqty.ok THEN Fail ELSE
-    LET legsideUint822 == ReadBytes(beforeqty.rest, 1) IN IF ~legsideUint822.ok THEN Fail ELSE
-    LET legpx == ReadBytes(legsideUint822.rest, 4) IN IF ~legpx.ok THEN Fail ELSE
-    LET legqtyUint1624 == ReadBytes(legpx.rest, 2) IN IF ~legqtyUint1624.ok THEN Fail ELSE
-    LET orgtranstimeMsgtime == DecodeOrgtranstimeMsgtime3(legqtyUint1624.rest) IN IF ~orgtranstimeMsgtime.ok THEN Fail ELSE
-    LET transactTimeMsgtime == DecodeTransactTimeMsgtime3(orgtranstimeMsgtime.rest) IN IF ~transactTimeMsgtime.ok THEN Fail ELSE
-    LET targetid == ReadBytes(transactTimeMsgtime.rest, 1) IN IF ~targetid.ok THEN Fail ELSE
-    LET uniqid == ReadBytes(targetid.rest, 4) IN IF ~uniqid.ok THEN Fail ELSE
-    LET rptseq == ReadBytes(uniqid.rest, 4) IN IF ~rptseq.ok THEN Fail ELSE
-    LET protocoltype == ReadBytes(rptseq.rest, 1) IN IF ~protocoltype.ok THEN Fail ELSE
-    LET rptsessionid == ReadBytes(protocoltype.rest, 2) IN IF ~rptsessionid.ok THEN Fail ELSE
-    Ok([ statuscodeUint81    |-> statuscodeUint81.value,
+    LET beforeQty == ReadBytes(leavesQty.rest, 2) IN IF ~beforeQty.ok THEN Fail ELSE
+    LET legSideUint822 == ReadBytes(beforeQty.rest, 1) IN IF ~legSideUint822.ok THEN Fail ELSE
+    LET legPx == ReadBytes(legSideUint822.rest, 4) IN IF ~legPx.ok THEN Fail ELSE
+    LET legQtyUint1624 == ReadBytes(legPx.rest, 2) IN IF ~legQtyUint1624.ok THEN Fail ELSE
+    LET orgTransTimeMsgTime == DecodeOrgTransTimeMsgTime3(legQtyUint1624.rest) IN IF ~orgTransTimeMsgTime.ok THEN Fail ELSE
+    LET transactTimeMsgTime == DecodeTransactTimeMsgTime3(orgTransTimeMsgTime.rest) IN IF ~transactTimeMsgTime.ok THEN Fail ELSE
+    LET targetId == ReadBytes(transactTimeMsgTime.rest, 1) IN IF ~targetId.ok THEN Fail ELSE
+    LET uniqId == ReadBytes(targetId.rest, 4) IN IF ~uniqId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(uniqId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET protocolType == ReadBytes(rptSeq.rest, 1) IN IF ~protocolType.ok THEN Fail ELSE
+    LET rptSessionId == ReadBytes(protocolType.rest, 2) IN IF ~rptSessionId.ok THEN Fail ELSE
+    Ok([ statusCodeUint81    |-> statusCodeUint81.value,
          execType            |-> execType.value,
-         cmid                |-> cmid.value,
-         fcmid               |-> fcmid.value,
-         orderno             |-> orderno.value,
-         ordid               |-> ordid.value,
-         userdefine          |-> userdefine.value,
-         symSymbolx          |-> symSymbolx.value,
+         cmId                |-> cmId.value,
+         fcmId               |-> fcmId.value,
+         orderNo             |-> orderNo.value,
+         ordId               |-> ordId.value,
+         userDefine          |-> userDefine.value,
+         symSymbolX          |-> symSymbolX.value,
          price               |-> price.value,
          qty                 |-> qty.value,
-         investoracno        |-> investoracno.value,
-         investorflag        |-> investorflag.value,
+         investorAcno        |-> investorAcno.value,
+         investorFlag        |-> investorFlag.value,
          side                |-> side.value,
          ordType             |-> ordType.value,
          timeInForce         |-> timeInForce.value,
          positionEffect      |-> positionEffect.value,
          lastPx              |-> lastPx.value,
          lastQty             |-> lastQty.value,
-         pxsubtotal          |-> pxsubtotal.value,
+         pxSubtotal          |-> pxSubtotal.value,
          cumQty              |-> cumQty.value,
          leavesQty           |-> leavesQty.value,
-         beforeqty           |-> beforeqty.value,
-         legsideUint822      |-> legsideUint822.value,
-         legpx               |-> legpx.value,
-         legqtyUint1624      |-> legqtyUint1624.value,
-         orgtranstimeMsgtime |-> orgtranstimeMsgtime.value,
-         transactTimeMsgtime |-> transactTimeMsgtime.value,
-         targetid            |-> targetid.value,
-         uniqid              |-> uniqid.value,
-         rptseq              |-> rptseq.value,
-         protocoltype        |-> protocoltype.value,
-         rptsessionid        |-> rptsessionid.value ], rptsessionid.rest)
+         beforeQty           |-> beforeQty.value,
+         legSideUint822      |-> legSideUint822.value,
+         legPx               |-> legPx.value,
+         legQtyUint1624      |-> legQtyUint1624.value,
+         orgTransTimeMsgTime |-> orgTransTimeMsgTime.value,
+         transactTimeMsgTime |-> transactTimeMsgTime.value,
+         targetId            |-> targetId.value,
+         uniqId              |-> uniqId.value,
+         rptSeq              |-> rptSeq.value,
+         protocolType        |-> protocolType.value,
+         rptSessionId        |-> rptSessionId.value ], rptSessionId.rest)
 
 ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage ==
-    [ statuscodeUint81    |-> [i \in 1 .. 1 |-> 0],
+    [ statusCodeUint81    |-> [i \in 1 .. 1 |-> 0],
       execType            |-> [i \in 1 .. 1 |-> 0],
-      cmid                |-> [i \in 1 .. 2 |-> 0],
-      fcmid               |-> [i \in 1 .. 2 |-> 0],
-      orderno             |-> [i \in 1 .. 5 |-> 0],
-      ordid               |-> [i \in 1 .. 4 |-> 0],
-      userdefine          |-> [i \in 1 .. 8 |-> 0],
-      symSymbolx          |-> ZeroSymSymbolx2,
+      cmId                |-> [i \in 1 .. 2 |-> 0],
+      fcmId               |-> [i \in 1 .. 2 |-> 0],
+      orderNo             |-> [i \in 1 .. 5 |-> 0],
+      ordId               |-> [i \in 1 .. 4 |-> 0],
+      userDefine          |-> [i \in 1 .. 8 |-> 0],
+      symSymbolX          |-> ZeroSymSymbolX2,
       price               |-> [i \in 1 .. 4 |-> 0],
       qty                 |-> [i \in 1 .. 2 |-> 0],
-      investoracno        |-> [i \in 1 .. 4 |-> 0],
-      investorflag        |-> [i \in 1 .. 1 |-> 0],
+      investorAcno        |-> [i \in 1 .. 4 |-> 0],
+      investorFlag        |-> [i \in 1 .. 1 |-> 0],
       side                |-> [i \in 1 .. 1 |-> 0],
       ordType             |-> [i \in 1 .. 1 |-> 0],
       timeInForce         |-> [i \in 1 .. 1 |-> 0],
       positionEffect      |-> [i \in 1 .. 1 |-> 0],
       lastPx              |-> [i \in 1 .. 4 |-> 0],
       lastQty             |-> [i \in 1 .. 2 |-> 0],
-      pxsubtotal          |-> [i \in 1 .. 8 |-> 0],
+      pxSubtotal          |-> [i \in 1 .. 8 |-> 0],
       cumQty              |-> [i \in 1 .. 2 |-> 0],
       leavesQty           |-> [i \in 1 .. 2 |-> 0],
-      beforeqty           |-> [i \in 1 .. 2 |-> 0],
-      legsideUint822      |-> [i \in 1 .. 1 |-> 0],
-      legpx               |-> [i \in 1 .. 4 |-> 0],
-      legqtyUint1624      |-> [i \in 1 .. 2 |-> 0],
-      orgtranstimeMsgtime |-> ZeroOrgtranstimeMsgtime3,
-      transactTimeMsgtime |-> ZeroTransactTimeMsgtime3,
-      targetid            |-> [i \in 1 .. 1 |-> 0],
-      uniqid              |-> [i \in 1 .. 4 |-> 0],
-      rptseq              |-> [i \in 1 .. 4 |-> 0],
-      protocoltype        |-> [i \in 1 .. 1 |-> 0],
-      rptsessionid        |-> [i \in 1 .. 2 |-> 0] ]
+      beforeQty           |-> [i \in 1 .. 2 |-> 0],
+      legSideUint822      |-> [i \in 1 .. 1 |-> 0],
+      legPx               |-> [i \in 1 .. 4 |-> 0],
+      legQtyUint1624      |-> [i \in 1 .. 2 |-> 0],
+      orgTransTimeMsgTime |-> ZeroOrgTransTimeMsgTime3,
+      transactTimeMsgTime |-> ZeroTransactTimeMsgTime3,
+      targetId            |-> [i \in 1 .. 1 |-> 0],
+      uniqId              |-> [i \in 1 .. 4 |-> 0],
+      rptSeq              |-> [i \in 1 .. 4 |-> 0],
+      protocolType        |-> [i \in 1 .. 1 |-> 0],
+      rptSessionId        |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Execution Report Including Head Office And Branch Offices Message at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionReportIncludingHeadOfficeAndBranchOfficesMessage ==
     { ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.execType = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.cmid = one] : one \in Sample(2) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.fcmid = one] : one \in Sample(2) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.orderno = one] : one \in Sample(5) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.ordid = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.userdefine = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.symSymbolx = one] : one \in CheckedSymSymbolx2 }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.cmId = one] : one \in Sample(2) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.fcmId = one] : one \in Sample(2) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.orderNo = one] : one \in Sample(5) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.ordId = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.userDefine = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.symSymbolX = one] : one \in CheckedSymSymbolX2 }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.price = one] : one \in Sample(4) }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.qty = one] : one \in Sample(2) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.investoracno = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.investorflag = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.investorAcno = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.investorFlag = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.ordType = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.timeInForce = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.positionEffect = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.lastPx = one] : one \in Sample(4) }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.lastQty = one] : one \in Sample(2) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.pxsubtotal = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.pxSubtotal = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.cumQty = one] : one \in Sample(2) }
         \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.leavesQty = one] : one \in Sample(2) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.beforeqty = one] : one \in Sample(2) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.legsideUint822 = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.legpx = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.legqtyUint1624 = one] : one \in Sample(2) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.orgtranstimeMsgtime = one] : one \in CheckedOrgtranstimeMsgtime3 }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.transactTimeMsgtime = one] : one \in CheckedTransactTimeMsgtime3 }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.targetid = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.uniqid = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.rptseq = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.protocoltype = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.rptsessionid = one] : one \in Sample(2) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.beforeQty = one] : one \in Sample(2) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.legSideUint822 = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.legPx = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.legQtyUint1624 = one] : one \in Sample(2) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.orgTransTimeMsgTime = one] : one \in CheckedOrgTransTimeMsgTime3 }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.transactTimeMsgTime = one] : one \in CheckedTransactTimeMsgTime3 }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.targetId = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.uniqId = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.protocolType = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportIncludingHeadOfficeAndBranchOfficesMessage EXCEPT !.rptSessionId = one] : one \in Sample(2) }
 
 (***************************************************************************)
-(* Symbolnumx: 4 bytes                                                     *)
+(* Symbol Num X: 4 bytes                                                   *)
 (***************************************************************************)
 
-Symbolnumx ==
+SymbolNumX ==
     [ pseq : Sample(4) ]
 
-EncodeSymbolnumx(message) ==
+EncodeSymbolNumX(message) ==
     message.pseq
 
-DecodeSymbolnumx(bytes) ==
+DecodeSymbolNumX(bytes) ==
     LET pseq == ReadBytes(bytes, 4) IN IF ~pseq.ok THEN Fail ELSE
     Ok([ pseq |-> pseq.value ], pseq.rest)
 
-ZeroSymbolnumx ==
+ZeroSymbolNumX ==
     [ pseq |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Symbolnumx at zero, then each field in turn at the values it is checked at *)
-CheckedSymbolnumx ==
-    { ZeroSymbolnumx }
-        \cup { [ZeroSymbolnumx EXCEPT !.pseq = one] : one \in Sample(4) }
+(* Symbol Num X at zero, then each field in turn at the values it is checked at *)
+CheckedSymbolNumX ==
+    { ZeroSymbolNumX }
+        \cup { [ZeroSymbolNumX EXCEPT !.pseq = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Symboltxtx: 20 bytes                                                    *)
+(* Symbol Txt X: 20 bytes                                                  *)
 (***************************************************************************)
 
-Symboltxtx ==
-    [ prodid : Sample(20) ]
+SymbolTxtX ==
+    [ prodId : Sample(20) ]
 
-EncodeSymboltxtx(message) ==
-    message.prodid
+EncodeSymbolTxtX(message) ==
+    message.prodId
 
-DecodeSymboltxtx(bytes) ==
-    LET prodid == ReadBytes(bytes, 20) IN IF ~prodid.ok THEN Fail ELSE
-    Ok([ prodid |-> prodid.value ], prodid.rest)
+DecodeSymbolTxtX(bytes) ==
+    LET prodId == ReadBytes(bytes, 20) IN IF ~prodId.ok THEN Fail ELSE
+    Ok([ prodId |-> prodId.value ], prodId.rest)
 
-ZeroSymboltxtx ==
-    [ prodid |-> [i \in 1 .. 20 |-> 0] ]
+ZeroSymbolTxtX ==
+    [ prodId |-> [i \in 1 .. 20 |-> 0] ]
 
-(* Symboltxtx at zero, then each field in turn at the values it is checked at *)
-CheckedSymboltxtx ==
-    { ZeroSymboltxtx }
-        \cup { [ZeroSymboltxtx EXCEPT !.prodid = one] : one \in Sample(20) }
+(* Symbol Txt X at zero, then each field in turn at the values it is checked at *)
+CheckedSymbolTxtX ==
+    { ZeroSymbolTxtX }
+        \cup { [ZeroSymbolTxtX EXCEPT !.prodId = one] : one \in Sample(20) }
 
 (***************************************************************************)
-(* Legsym Symbolnumx: 4 bytes                                              *)
+(* Leg Sym Symbol Num X: 4 bytes                                           *)
 (***************************************************************************)
 
-LegsymSymbolnumx ==
+LegSymSymbolNumX ==
     [ pseq : Sample(4) ]
 
-EncodeLegsymSymbolnumx(message) ==
+EncodeLegSymSymbolNumX(message) ==
     message.pseq
 
-DecodeLegsymSymbolnumx(bytes) ==
+DecodeLegSymSymbolNumX(bytes) ==
     LET pseq == ReadBytes(bytes, 4) IN IF ~pseq.ok THEN Fail ELSE
     Ok([ pseq |-> pseq.value ], pseq.rest)
 
-ZeroLegsymSymbolnumx ==
+ZeroLegSymSymbolNumX ==
     [ pseq |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Legsym Symbolnumx at zero, then each field in turn at the values it is checked at *)
-CheckedLegsymSymbolnumx ==
-    { ZeroLegsymSymbolnumx }
-        \cup { [ZeroLegsymSymbolnumx EXCEPT !.pseq = one] : one \in Sample(4) }
+(* Leg Sym Symbol Num X at zero, then each field in turn at the values it is checked at *)
+CheckedLegSymSymbolNumX ==
+    { ZeroLegSymSymbolNumX }
+        \cup { [ZeroLegSymSymbolNumX EXCEPT !.pseq = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Legentrynum: 7 bytes                                                    *)
+(* Leg Entry Num: 7 bytes                                                  *)
 (***************************************************************************)
 
-Legentrynum ==
-    [ legsymSymbolnumx : LegsymSymbolnumx,
-      legsideUint81    : Sample(1),
-      legqtyUint162    : Sample(2) ]
+LegEntryNum ==
+    [ legSymSymbolNumX : LegSymSymbolNumX,
+      legSideUint81    : Sample(1),
+      legQtyUint162    : Sample(2) ]
 
-EncodeLegentrynum(message) ==
-    EncodeLegsymSymbolnumx(message.legsymSymbolnumx)
-        \o message.legsideUint81
-        \o message.legqtyUint162
+EncodeLegEntryNum(message) ==
+    EncodeLegSymSymbolNumX(message.legSymSymbolNumX)
+        \o message.legSideUint81
+        \o message.legQtyUint162
 
-DecodeLegentrynum(bytes) ==
-    LET legsymSymbolnumx == DecodeLegsymSymbolnumx(bytes) IN IF ~legsymSymbolnumx.ok THEN Fail ELSE
-    LET legsideUint81 == ReadBytes(legsymSymbolnumx.rest, 1) IN IF ~legsideUint81.ok THEN Fail ELSE
-    LET legqtyUint162 == ReadBytes(legsideUint81.rest, 2) IN IF ~legqtyUint162.ok THEN Fail ELSE
-    Ok([ legsymSymbolnumx |-> legsymSymbolnumx.value,
-         legsideUint81    |-> legsideUint81.value,
-         legqtyUint162    |-> legqtyUint162.value ], legqtyUint162.rest)
+DecodeLegEntryNum(bytes) ==
+    LET legSymSymbolNumX == DecodeLegSymSymbolNumX(bytes) IN IF ~legSymSymbolNumX.ok THEN Fail ELSE
+    LET legSideUint81 == ReadBytes(legSymSymbolNumX.rest, 1) IN IF ~legSideUint81.ok THEN Fail ELSE
+    LET legQtyUint162 == ReadBytes(legSideUint81.rest, 2) IN IF ~legQtyUint162.ok THEN Fail ELSE
+    Ok([ legSymSymbolNumX |-> legSymSymbolNumX.value,
+         legSideUint81    |-> legSideUint81.value,
+         legQtyUint162    |-> legQtyUint162.value ], legQtyUint162.rest)
 
-ZeroLegentrynum ==
-    [ legsymSymbolnumx |-> ZeroLegsymSymbolnumx,
-      legsideUint81    |-> [i \in 1 .. 1 |-> 0],
-      legqtyUint162    |-> [i \in 1 .. 2 |-> 0] ]
+ZeroLegEntryNum ==
+    [ legSymSymbolNumX |-> ZeroLegSymSymbolNumX,
+      legSideUint81    |-> [i \in 1 .. 1 |-> 0],
+      legQtyUint162    |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Legentrynum at zero, then each field in turn at the values it is checked at *)
-CheckedLegentrynum ==
-    { ZeroLegentrynum }
-        \cup { [ZeroLegentrynum EXCEPT !.legsymSymbolnumx = one] : one \in CheckedLegsymSymbolnumx }
-        \cup { [ZeroLegentrynum EXCEPT !.legsideUint81 = one] : one \in Sample(1) }
-        \cup { [ZeroLegentrynum EXCEPT !.legqtyUint162 = one] : one \in Sample(2) }
+(* Leg Entry Num at zero, then each field in turn at the values it is checked at *)
+CheckedLegEntryNum ==
+    { ZeroLegEntryNum }
+        \cup { [ZeroLegEntryNum EXCEPT !.legSymSymbolNumX = one] : one \in CheckedLegSymSymbolNumX }
+        \cup { [ZeroLegEntryNum EXCEPT !.legSideUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroLegEntryNum EXCEPT !.legQtyUint162 = one] : one \in Sample(2) }
 
-(* A run of Legentrynum, written one after another *)
-RECURSIVE EncodeLegentrynumList(_)
-EncodeLegentrynumList(messages) ==
+(* A run of Leg Entry Num, written one after another *)
+RECURSIVE EncodeLegEntryNumList(_)
+EncodeLegEntryNumList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeLegentrynum(Head(messages)) \o EncodeLegentrynumList(Tail(messages))
+    ELSE EncodeLegEntryNum(Head(messages)) \o EncodeLegEntryNumList(Tail(messages))
 
-(* As many Legentrynum as the field that counts them says *)
-RECURSIVE ReadLegentrynumList(_, _)
-ReadLegentrynumList(bytes, count) ==
+(* As many Leg Entry Num as the field that counts them says *)
+RECURSIVE ReadLegEntryNumList(_, _)
+ReadLegEntryNumList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeLegentrynum(bytes)
+    ELSE LET one == DecodeLegEntryNum(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadLegentrynumList(one.rest, count - 1)
+             ELSE LET more == ReadLegEntryNumList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Legentrynum of each kind, for the lists that carry them *)
-OneLegentrynum == { ZeroLegentrynum }
+(* One Leg Entry Num of each kind, for the lists that carry them *)
+OneLegEntryNum == { ZeroLegEntryNum }
 
 (***************************************************************************)
-(* Multilegnum                                                             *)
+(* Multi Leg Num                                                           *)
 (***************************************************************************)
 
-Multilegnum ==
-    [ combop      : Sample(1),
-      legentrynum : SampleLists(OneLegentrynum) ]
+MultiLegNum ==
+    [ combOp      : Sample(1),
+      legEntryNum : SampleLists(OneLegEntryNum) ]
 
-EncodeMultilegnum(message) ==
-    EncodeUIntBE(Len(message.legentrynum), 1)
-        \o message.combop
-        \o EncodeLegentrynumList(message.legentrynum)
+EncodeMultiLegNum(message) ==
+    EncodeUIntBE(Len(message.legEntryNum), 1)
+        \o message.combOp
+        \o EncodeLegEntryNumList(message.legEntryNum)
 
-DecodeMultilegnum(bytes) ==
+DecodeMultiLegNum(bytes) ==
     LET noLeg == ReadUIntBE(bytes, 1) IN IF ~noLeg.ok THEN Fail ELSE
-    LET combop == ReadBytes(noLeg.rest, 1) IN IF ~combop.ok THEN Fail ELSE
-    LET legentrynum == ReadLegentrynumList(combop.rest, noLeg.value) IN IF ~legentrynum.ok THEN Fail ELSE
-    Ok([ combop      |-> combop.value,
-         legentrynum |-> legentrynum.value ], legentrynum.rest)
+    LET combOp == ReadBytes(noLeg.rest, 1) IN IF ~combOp.ok THEN Fail ELSE
+    LET legEntryNum == ReadLegEntryNumList(combOp.rest, noLeg.value) IN IF ~legEntryNum.ok THEN Fail ELSE
+    Ok([ combOp      |-> combOp.value,
+         legEntryNum |-> legEntryNum.value ], legEntryNum.rest)
 
-ZeroMultilegnum ==
-    [ combop      |-> [i \in 1 .. 1 |-> 0],
-      legentrynum |-> << >> ]
+ZeroMultiLegNum ==
+    [ combOp      |-> [i \in 1 .. 1 |-> 0],
+      legEntryNum |-> << >> ]
 
-(* Multilegnum at zero, then each field in turn at the values it is checked at *)
-CheckedMultilegnum ==
-    { ZeroMultilegnum }
-        \cup { [ZeroMultilegnum EXCEPT !.combop = one] : one \in Sample(1) }
-        \cup { [ZeroMultilegnum EXCEPT !.legentrynum = one] : one \in SampleLists(OneLegentrynum) }
-
-(***************************************************************************)
-(* Legsym Symboltxtx: 20 bytes                                             *)
-(***************************************************************************)
-
-LegsymSymboltxtx ==
-    [ prodid : Sample(20) ]
-
-EncodeLegsymSymboltxtx(message) ==
-    message.prodid
-
-DecodeLegsymSymboltxtx(bytes) ==
-    LET prodid == ReadBytes(bytes, 20) IN IF ~prodid.ok THEN Fail ELSE
-    Ok([ prodid |-> prodid.value ], prodid.rest)
-
-ZeroLegsymSymboltxtx ==
-    [ prodid |-> [i \in 1 .. 20 |-> 0] ]
-
-(* Legsym Symboltxtx at zero, then each field in turn at the values it is checked at *)
-CheckedLegsymSymboltxtx ==
-    { ZeroLegsymSymboltxtx }
-        \cup { [ZeroLegsymSymboltxtx EXCEPT !.prodid = one] : one \in Sample(20) }
+(* Multi Leg Num at zero, then each field in turn at the values it is checked at *)
+CheckedMultiLegNum ==
+    { ZeroMultiLegNum }
+        \cup { [ZeroMultiLegNum EXCEPT !.combOp = one] : one \in Sample(1) }
+        \cup { [ZeroMultiLegNum EXCEPT !.legEntryNum = one] : one \in SampleLists(OneLegEntryNum) }
 
 (***************************************************************************)
-(* Legentrytxt: 23 bytes                                                   *)
+(* Leg Sym Symbol Txt X: 20 bytes                                          *)
 (***************************************************************************)
 
-Legentrytxt ==
-    [ legsymSymboltxtx : LegsymSymboltxtx,
-      legsideUint81    : Sample(1),
-      legqtyUint162    : Sample(2) ]
+LegSymSymbolTxtX ==
+    [ prodId : Sample(20) ]
 
-EncodeLegentrytxt(message) ==
-    EncodeLegsymSymboltxtx(message.legsymSymboltxtx)
-        \o message.legsideUint81
-        \o message.legqtyUint162
+EncodeLegSymSymbolTxtX(message) ==
+    message.prodId
 
-DecodeLegentrytxt(bytes) ==
-    LET legsymSymboltxtx == DecodeLegsymSymboltxtx(bytes) IN IF ~legsymSymboltxtx.ok THEN Fail ELSE
-    LET legsideUint81 == ReadBytes(legsymSymboltxtx.rest, 1) IN IF ~legsideUint81.ok THEN Fail ELSE
-    LET legqtyUint162 == ReadBytes(legsideUint81.rest, 2) IN IF ~legqtyUint162.ok THEN Fail ELSE
-    Ok([ legsymSymboltxtx |-> legsymSymboltxtx.value,
-         legsideUint81    |-> legsideUint81.value,
-         legqtyUint162    |-> legqtyUint162.value ], legqtyUint162.rest)
+DecodeLegSymSymbolTxtX(bytes) ==
+    LET prodId == ReadBytes(bytes, 20) IN IF ~prodId.ok THEN Fail ELSE
+    Ok([ prodId |-> prodId.value ], prodId.rest)
 
-ZeroLegentrytxt ==
-    [ legsymSymboltxtx |-> ZeroLegsymSymboltxtx,
-      legsideUint81    |-> [i \in 1 .. 1 |-> 0],
-      legqtyUint162    |-> [i \in 1 .. 2 |-> 0] ]
+ZeroLegSymSymbolTxtX ==
+    [ prodId |-> [i \in 1 .. 20 |-> 0] ]
 
-(* Legentrytxt at zero, then each field in turn at the values it is checked at *)
-CheckedLegentrytxt ==
-    { ZeroLegentrytxt }
-        \cup { [ZeroLegentrytxt EXCEPT !.legsymSymboltxtx = one] : one \in CheckedLegsymSymboltxtx }
-        \cup { [ZeroLegentrytxt EXCEPT !.legsideUint81 = one] : one \in Sample(1) }
-        \cup { [ZeroLegentrytxt EXCEPT !.legqtyUint162 = one] : one \in Sample(2) }
+(* Leg Sym Symbol Txt X at zero, then each field in turn at the values it is checked at *)
+CheckedLegSymSymbolTxtX ==
+    { ZeroLegSymSymbolTxtX }
+        \cup { [ZeroLegSymSymbolTxtX EXCEPT !.prodId = one] : one \in Sample(20) }
 
-(* A run of Legentrytxt, written one after another *)
-RECURSIVE EncodeLegentrytxtList(_)
-EncodeLegentrytxtList(messages) ==
+(***************************************************************************)
+(* Leg Entry Txt: 23 bytes                                                 *)
+(***************************************************************************)
+
+LegEntryTxt ==
+    [ legSymSymbolTxtX : LegSymSymbolTxtX,
+      legSideUint81    : Sample(1),
+      legQtyUint162    : Sample(2) ]
+
+EncodeLegEntryTxt(message) ==
+    EncodeLegSymSymbolTxtX(message.legSymSymbolTxtX)
+        \o message.legSideUint81
+        \o message.legQtyUint162
+
+DecodeLegEntryTxt(bytes) ==
+    LET legSymSymbolTxtX == DecodeLegSymSymbolTxtX(bytes) IN IF ~legSymSymbolTxtX.ok THEN Fail ELSE
+    LET legSideUint81 == ReadBytes(legSymSymbolTxtX.rest, 1) IN IF ~legSideUint81.ok THEN Fail ELSE
+    LET legQtyUint162 == ReadBytes(legSideUint81.rest, 2) IN IF ~legQtyUint162.ok THEN Fail ELSE
+    Ok([ legSymSymbolTxtX |-> legSymSymbolTxtX.value,
+         legSideUint81    |-> legSideUint81.value,
+         legQtyUint162    |-> legQtyUint162.value ], legQtyUint162.rest)
+
+ZeroLegEntryTxt ==
+    [ legSymSymbolTxtX |-> ZeroLegSymSymbolTxtX,
+      legSideUint81    |-> [i \in 1 .. 1 |-> 0],
+      legQtyUint162    |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Leg Entry Txt at zero, then each field in turn at the values it is checked at *)
+CheckedLegEntryTxt ==
+    { ZeroLegEntryTxt }
+        \cup { [ZeroLegEntryTxt EXCEPT !.legSymSymbolTxtX = one] : one \in CheckedLegSymSymbolTxtX }
+        \cup { [ZeroLegEntryTxt EXCEPT !.legSideUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroLegEntryTxt EXCEPT !.legQtyUint162 = one] : one \in Sample(2) }
+
+(* A run of Leg Entry Txt, written one after another *)
+RECURSIVE EncodeLegEntryTxtList(_)
+EncodeLegEntryTxtList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeLegentrytxt(Head(messages)) \o EncodeLegentrytxtList(Tail(messages))
+    ELSE EncodeLegEntryTxt(Head(messages)) \o EncodeLegEntryTxtList(Tail(messages))
 
-(* As many Legentrytxt as the field that counts them says *)
-RECURSIVE ReadLegentrytxtList(_, _)
-ReadLegentrytxtList(bytes, count) ==
+(* As many Leg Entry Txt as the field that counts them says *)
+RECURSIVE ReadLegEntryTxtList(_, _)
+ReadLegEntryTxtList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeLegentrytxt(bytes)
+    ELSE LET one == DecodeLegEntryTxt(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadLegentrytxtList(one.rest, count - 1)
+             ELSE LET more == ReadLegEntryTxtList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Legentrytxt of each kind, for the lists that carry them *)
-OneLegentrytxt == { ZeroLegentrytxt }
+(* One Leg Entry Txt of each kind, for the lists that carry them *)
+OneLegEntryTxt == { ZeroLegEntryTxt }
 
 (***************************************************************************)
-(* Multilegtxt                                                             *)
+(* Multi Leg Txt                                                           *)
 (***************************************************************************)
 
-Multilegtxt ==
-    [ combop      : Sample(1),
-      legentrytxt : SampleLists(OneLegentrytxt) ]
+MultiLegTxt ==
+    [ combOp      : Sample(1),
+      legEntryTxt : SampleLists(OneLegEntryTxt) ]
 
-EncodeMultilegtxt(message) ==
-    EncodeUIntBE(Len(message.legentrytxt), 1)
-        \o message.combop
-        \o EncodeLegentrytxtList(message.legentrytxt)
+EncodeMultiLegTxt(message) ==
+    EncodeUIntBE(Len(message.legEntryTxt), 1)
+        \o message.combOp
+        \o EncodeLegEntryTxtList(message.legEntryTxt)
 
-DecodeMultilegtxt(bytes) ==
+DecodeMultiLegTxt(bytes) ==
     LET noLeg == ReadUIntBE(bytes, 1) IN IF ~noLeg.ok THEN Fail ELSE
-    LET combop == ReadBytes(noLeg.rest, 1) IN IF ~combop.ok THEN Fail ELSE
-    LET legentrytxt == ReadLegentrytxtList(combop.rest, noLeg.value) IN IF ~legentrytxt.ok THEN Fail ELSE
-    Ok([ combop      |-> combop.value,
-         legentrytxt |-> legentrytxt.value ], legentrytxt.rest)
+    LET combOp == ReadBytes(noLeg.rest, 1) IN IF ~combOp.ok THEN Fail ELSE
+    LET legEntryTxt == ReadLegEntryTxtList(combOp.rest, noLeg.value) IN IF ~legEntryTxt.ok THEN Fail ELSE
+    Ok([ combOp      |-> combOp.value,
+         legEntryTxt |-> legEntryTxt.value ], legEntryTxt.rest)
 
-ZeroMultilegtxt ==
-    [ combop      |-> [i \in 1 .. 1 |-> 0],
-      legentrytxt |-> << >> ]
+ZeroMultiLegTxt ==
+    [ combOp      |-> [i \in 1 .. 1 |-> 0],
+      legEntryTxt |-> << >> ]
 
-(* Multilegtxt at zero, then each field in turn at the values it is checked at *)
-CheckedMultilegtxt ==
-    { ZeroMultilegtxt }
-        \cup { [ZeroMultilegtxt EXCEPT !.combop = one] : one \in Sample(1) }
-        \cup { [ZeroMultilegtxt EXCEPT !.legentrytxt = one] : one \in SampleLists(OneLegentrytxt) }
+(* Multi Leg Txt at zero, then each field in turn at the values it is checked at *)
+CheckedMultiLegTxt ==
+    { ZeroMultiLegTxt }
+        \cup { [ZeroMultiLegTxt EXCEPT !.combOp = one] : one \in Sample(1) }
+        \cup { [ZeroMultiLegTxt EXCEPT !.legEntryTxt = one] : one \in SampleLists(OneLegEntryTxt) }
 
 (***************************************************************************)
-(* Sym Flexproductx, selected by Msg Type Ext                              *)
+(* Sym Flex Product X, selected by Msg Type Ext                            *)
 (***************************************************************************)
 
-SymbolnumxCode == 1  \* 0x01
-SymboltxtxCode == 2  \* 0x02
-MultilegnumCode == 3  \* 0x03
-MultilegtxtCode == 4  \* 0x04
+SymbolNumXCode == 1  \* 0x01
+SymbolTxtXCode == 2  \* 0x02
+MultiLegNumCode == 3  \* 0x03
+MultiLegTxtCode == 4  \* 0x04
 
-SymFlexproductx ==
-    [ tag : {SymbolnumxCode}, body : Symbolnumx ]
-        \cup [ tag : {SymboltxtxCode}, body : Symboltxtx ]
-        \cup [ tag : {MultilegnumCode}, body : Multilegnum ]
-        \cup [ tag : {MultilegtxtCode}, body : Multilegtxt ]
+SymFlexProductX ==
+    [ tag : {SymbolNumXCode}, body : SymbolNumX ]
+        \cup [ tag : {SymbolTxtXCode}, body : SymbolTxtX ]
+        \cup [ tag : {MultiLegNumCode}, body : MultiLegNum ]
+        \cup [ tag : {MultiLegTxtCode}, body : MultiLegTxt ]
 
-EncodeSymFlexproductx(message) ==
-    CASE message.tag = SymbolnumxCode -> EncodeSymbolnumx(message.body)
-      [] message.tag = SymboltxtxCode -> EncodeSymboltxtx(message.body)
-      [] message.tag = MultilegnumCode -> EncodeMultilegnum(message.body)
-      [] message.tag = MultilegtxtCode -> EncodeMultilegtxt(message.body)
+EncodeSymFlexProductX(message) ==
+    CASE message.tag = SymbolNumXCode -> EncodeSymbolNumX(message.body)
+      [] message.tag = SymbolTxtXCode -> EncodeSymbolTxtX(message.body)
+      [] message.tag = MultiLegNumCode -> EncodeMultiLegNum(message.body)
+      [] message.tag = MultiLegTxtCode -> EncodeMultiLegTxt(message.body)
 
-DecodeSymFlexproductx(tag, bytes) ==
+DecodeSymFlexProductX(tag, bytes) ==
     LET read ==
-            CASE tag = SymbolnumxCode -> DecodeSymbolnumx(bytes)
-              [] tag = SymboltxtxCode -> DecodeSymboltxtx(bytes)
-              [] tag = MultilegnumCode -> DecodeMultilegnum(bytes)
-              [] tag = MultilegtxtCode -> DecodeMultilegtxt(bytes)
+            CASE tag = SymbolNumXCode -> DecodeSymbolNumX(bytes)
+              [] tag = SymbolTxtXCode -> DecodeSymbolTxtX(bytes)
+              [] tag = MultiLegNumCode -> DecodeMultiLegNum(bytes)
+              [] tag = MultiLegTxtCode -> DecodeMultiLegTxt(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroSymFlexproductx == [tag |-> SymbolnumxCode, body |-> ZeroSymbolnumx]
+ZeroSymFlexProductX == [tag |-> SymbolNumXCode, body |-> ZeroSymbolNumX]
 
-(* Each Sym Flexproductx in turn, at the values the message it names is checked at *)
-CheckedSymFlexproductx ==
-    { [tag |-> SymbolnumxCode, body |-> one] : one \in CheckedSymbolnumx }
-        \cup { [tag |-> SymboltxtxCode, body |-> one] : one \in CheckedSymboltxtx }
-        \cup { [tag |-> MultilegnumCode, body |-> one] : one \in CheckedMultilegnum }
-        \cup { [tag |-> MultilegtxtCode, body |-> one] : one \in CheckedMultilegtxt }
+(* Each Sym Flex Product X in turn, at the values the message it names is checked at *)
+CheckedSymFlexProductX ==
+    { [tag |-> SymbolNumXCode, body |-> one] : one \in CheckedSymbolNumX }
+        \cup { [tag |-> SymbolTxtXCode, body |-> one] : one \in CheckedSymbolTxtX }
+        \cup { [tag |-> MultiLegNumCode, body |-> one] : one \in CheckedMultiLegNum }
+        \cup { [tag |-> MultiLegTxtCode, body |-> one] : one \in CheckedMultiLegTxt }
 
 (***************************************************************************)
-(* Orgtranstime Msgtimex: 8 bytes                                          *)
+(* Org Trans Time Msg Time X: 8 bytes                                      *)
 (***************************************************************************)
 
-OrgtranstimeMsgtimex ==
-    [ epochsUint324 : Sample(4),
+OrgTransTimeMsgTimeX ==
+    [ epochSUint324 : Sample(4),
       nanosecond    : Sample(4) ]
 
-EncodeOrgtranstimeMsgtimex(message) ==
-    message.epochsUint324
+EncodeOrgTransTimeMsgTimeX(message) ==
+    message.epochSUint324
         \o message.nanosecond
 
-DecodeOrgtranstimeMsgtimex(bytes) ==
-    LET epochsUint324 == ReadBytes(bytes, 4) IN IF ~epochsUint324.ok THEN Fail ELSE
-    LET nanosecond == ReadBytes(epochsUint324.rest, 4) IN IF ~nanosecond.ok THEN Fail ELSE
-    Ok([ epochsUint324 |-> epochsUint324.value,
+DecodeOrgTransTimeMsgTimeX(bytes) ==
+    LET epochSUint324 == ReadBytes(bytes, 4) IN IF ~epochSUint324.ok THEN Fail ELSE
+    LET nanosecond == ReadBytes(epochSUint324.rest, 4) IN IF ~nanosecond.ok THEN Fail ELSE
+    Ok([ epochSUint324 |-> epochSUint324.value,
          nanosecond    |-> nanosecond.value ], nanosecond.rest)
 
-ZeroOrgtranstimeMsgtimex ==
-    [ epochsUint324 |-> [i \in 1 .. 4 |-> 0],
+ZeroOrgTransTimeMsgTimeX ==
+    [ epochSUint324 |-> [i \in 1 .. 4 |-> 0],
       nanosecond    |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Orgtranstime Msgtimex at zero, then each field in turn at the values it is checked at *)
-CheckedOrgtranstimeMsgtimex ==
-    { ZeroOrgtranstimeMsgtimex }
-        \cup { [ZeroOrgtranstimeMsgtimex EXCEPT !.epochsUint324 = one] : one \in Sample(4) }
-        \cup { [ZeroOrgtranstimeMsgtimex EXCEPT !.nanosecond = one] : one \in Sample(4) }
+(* Org Trans Time Msg Time X at zero, then each field in turn at the values it is checked at *)
+CheckedOrgTransTimeMsgTimeX ==
+    { ZeroOrgTransTimeMsgTimeX }
+        \cup { [ZeroOrgTransTimeMsgTimeX EXCEPT !.epochSUint324 = one] : one \in Sample(4) }
+        \cup { [ZeroOrgTransTimeMsgTimeX EXCEPT !.nanosecond = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Transact Time Msgtimex: 8 bytes                                         *)
+(* Transact Time Msg Time X: 8 bytes                                       *)
 (***************************************************************************)
 
-TransactTimeMsgtimex ==
-    [ epochsUint324 : Sample(4),
+TransactTimeMsgTimeX ==
+    [ epochSUint324 : Sample(4),
       nanosecond    : Sample(4) ]
 
-EncodeTransactTimeMsgtimex(message) ==
-    message.epochsUint324
+EncodeTransactTimeMsgTimeX(message) ==
+    message.epochSUint324
         \o message.nanosecond
 
-DecodeTransactTimeMsgtimex(bytes) ==
-    LET epochsUint324 == ReadBytes(bytes, 4) IN IF ~epochsUint324.ok THEN Fail ELSE
-    LET nanosecond == ReadBytes(epochsUint324.rest, 4) IN IF ~nanosecond.ok THEN Fail ELSE
-    Ok([ epochsUint324 |-> epochsUint324.value,
+DecodeTransactTimeMsgTimeX(bytes) ==
+    LET epochSUint324 == ReadBytes(bytes, 4) IN IF ~epochSUint324.ok THEN Fail ELSE
+    LET nanosecond == ReadBytes(epochSUint324.rest, 4) IN IF ~nanosecond.ok THEN Fail ELSE
+    Ok([ epochSUint324 |-> epochSUint324.value,
          nanosecond    |-> nanosecond.value ], nanosecond.rest)
 
-ZeroTransactTimeMsgtimex ==
-    [ epochsUint324 |-> [i \in 1 .. 4 |-> 0],
+ZeroTransactTimeMsgTimeX ==
+    [ epochSUint324 |-> [i \in 1 .. 4 |-> 0],
       nanosecond    |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Transact Time Msgtimex at zero, then each field in turn at the values it is checked at *)
-CheckedTransactTimeMsgtimex ==
-    { ZeroTransactTimeMsgtimex }
-        \cup { [ZeroTransactTimeMsgtimex EXCEPT !.epochsUint324 = one] : one \in Sample(4) }
-        \cup { [ZeroTransactTimeMsgtimex EXCEPT !.nanosecond = one] : one \in Sample(4) }
+(* Transact Time Msg Time X at zero, then each field in turn at the values it is checked at *)
+CheckedTransactTimeMsgTimeX ==
+    { ZeroTransactTimeMsgTimeX }
+        \cup { [ZeroTransactTimeMsgTimeX EXCEPT !.epochSUint324 = one] : one \in Sample(4) }
+        \cup { [ZeroTransactTimeMsgTimeX EXCEPT !.nanosecond = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Flex Order Status Report Message                                        *)
@@ -1927,220 +1927,220 @@ CheckedTransactTimeMsgtimex ==
 
 FlexOrderStatusReportMessage ==
     [ preserve             : Sample(1),
-      msgtimens            : Sample(4),
-      partid               : Sample(1),
+      msgTimeNs            : Sample(4),
+      partId               : Sample(1),
       noLeg                : Sample(1),
-      statuscodeUint162    : Sample(2),
+      statusCodeUint162    : Sample(2),
       execType             : Sample(1),
-      cmid                 : Sample(2),
-      fcmid                : Sample(2),
-      orderno              : Sample(5),
-      ordid                : Sample(4),
-      userdefine           : Sample(8),
-      symFlexproductx      : SymFlexproductx,
+      cmId                 : Sample(2),
+      fcmId                : Sample(2),
+      orderNo              : Sample(5),
+      ordId                : Sample(4),
+      userDefine           : Sample(8),
+      symFlexProductX      : SymFlexProductX,
       price                : Sample(4),
       qty                  : Sample(2),
-      investoracno         : Sample(4),
-      investorflag         : Sample(1),
+      investorAcno         : Sample(4),
+      investorFlag         : Sample(1),
       side                 : Sample(1),
       ordType              : Sample(1),
       timeInForce          : Sample(1),
       positionEffect       : Sample(1),
       lastPx               : Sample(4),
       lastQty              : Sample(2),
-      pxsubtotal           : Sample(8),
+      pxSubtotal           : Sample(8),
       cumQty               : Sample(2),
       leavesQty            : Sample(2),
-      beforeqty            : Sample(2),
-      orgtranstimeMsgtimex : OrgtranstimeMsgtimex,
-      transactTimeMsgtimex : TransactTimeMsgtimex,
-      targetid             : Sample(1),
-      uniqid               : Sample(4),
-      rptseq               : Sample(4),
-      rptsessionid         : Sample(2),
-      rptsessionseq        : Sample(4),
+      beforeQty            : Sample(2),
+      orgTransTimeMsgTimeX : OrgTransTimeMsgTimeX,
+      transactTimeMsgTimeX : TransactTimeMsgTimeX,
+      targetId             : Sample(1),
+      uniqId               : Sample(4),
+      rptSeq               : Sample(4),
+      rptSessionId         : Sample(2),
+      rptSessionSeq        : Sample(4),
       reserved12           : Sample(12) ]
 
 EncodeFlexOrderStatusReportMessage(message) ==
-    EncodeUIntBE(message.symFlexproductx.tag, 1)
+    EncodeUIntBE(message.symFlexProductX.tag, 1)
         \o message.preserve
-        \o message.msgtimens
-        \o message.partid
+        \o message.msgTimeNs
+        \o message.partId
         \o message.noLeg
-        \o message.statuscodeUint162
+        \o message.statusCodeUint162
         \o message.execType
-        \o message.cmid
-        \o message.fcmid
-        \o message.orderno
-        \o message.ordid
-        \o message.userdefine
-        \o EncodeSymFlexproductx(message.symFlexproductx)
+        \o message.cmId
+        \o message.fcmId
+        \o message.orderNo
+        \o message.ordId
+        \o message.userDefine
+        \o EncodeSymFlexProductX(message.symFlexProductX)
         \o message.price
         \o message.qty
-        \o message.investoracno
-        \o message.investorflag
+        \o message.investorAcno
+        \o message.investorFlag
         \o message.side
         \o message.ordType
         \o message.timeInForce
         \o message.positionEffect
         \o message.lastPx
         \o message.lastQty
-        \o message.pxsubtotal
+        \o message.pxSubtotal
         \o message.cumQty
         \o message.leavesQty
-        \o message.beforeqty
-        \o EncodeOrgtranstimeMsgtimex(message.orgtranstimeMsgtimex)
-        \o EncodeTransactTimeMsgtimex(message.transactTimeMsgtimex)
-        \o message.targetid
-        \o message.uniqid
-        \o message.rptseq
-        \o message.rptsessionid
-        \o message.rptsessionseq
+        \o message.beforeQty
+        \o EncodeOrgTransTimeMsgTimeX(message.orgTransTimeMsgTimeX)
+        \o EncodeTransactTimeMsgTimeX(message.transactTimeMsgTimeX)
+        \o message.targetId
+        \o message.uniqId
+        \o message.rptSeq
+        \o message.rptSessionId
+        \o message.rptSessionSeq
         \o message.reserved12
 
 DecodeFlexOrderStatusReportMessage(bytes) ==
     LET msgTypeExt == ReadUIntBE(bytes, 1) IN IF ~msgTypeExt.ok THEN Fail ELSE
     LET preserve == ReadBytes(msgTypeExt.rest, 1) IN IF ~preserve.ok THEN Fail ELSE
-    LET msgtimens == ReadBytes(preserve.rest, 4) IN IF ~msgtimens.ok THEN Fail ELSE
-    LET partid == ReadBytes(msgtimens.rest, 1) IN IF ~partid.ok THEN Fail ELSE
-    LET noLeg == ReadBytes(partid.rest, 1) IN IF ~noLeg.ok THEN Fail ELSE
-    LET statuscodeUint162 == ReadBytes(noLeg.rest, 2) IN IF ~statuscodeUint162.ok THEN Fail ELSE
-    LET execType == ReadBytes(statuscodeUint162.rest, 1) IN IF ~execType.ok THEN Fail ELSE
-    LET cmid == ReadBytes(execType.rest, 2) IN IF ~cmid.ok THEN Fail ELSE
-    LET fcmid == ReadBytes(cmid.rest, 2) IN IF ~fcmid.ok THEN Fail ELSE
-    LET orderno == ReadBytes(fcmid.rest, 5) IN IF ~orderno.ok THEN Fail ELSE
-    LET ordid == ReadBytes(orderno.rest, 4) IN IF ~ordid.ok THEN Fail ELSE
-    LET userdefine == ReadBytes(ordid.rest, 8) IN IF ~userdefine.ok THEN Fail ELSE
-    LET symFlexproductx == DecodeSymFlexproductx(msgTypeExt.value, userdefine.rest) IN IF ~symFlexproductx.ok THEN Fail ELSE
-    LET price == ReadBytes(symFlexproductx.rest, 4) IN IF ~price.ok THEN Fail ELSE
+    LET msgTimeNs == ReadBytes(preserve.rest, 4) IN IF ~msgTimeNs.ok THEN Fail ELSE
+    LET partId == ReadBytes(msgTimeNs.rest, 1) IN IF ~partId.ok THEN Fail ELSE
+    LET noLeg == ReadBytes(partId.rest, 1) IN IF ~noLeg.ok THEN Fail ELSE
+    LET statusCodeUint162 == ReadBytes(noLeg.rest, 2) IN IF ~statusCodeUint162.ok THEN Fail ELSE
+    LET execType == ReadBytes(statusCodeUint162.rest, 1) IN IF ~execType.ok THEN Fail ELSE
+    LET cmId == ReadBytes(execType.rest, 2) IN IF ~cmId.ok THEN Fail ELSE
+    LET fcmId == ReadBytes(cmId.rest, 2) IN IF ~fcmId.ok THEN Fail ELSE
+    LET orderNo == ReadBytes(fcmId.rest, 5) IN IF ~orderNo.ok THEN Fail ELSE
+    LET ordId == ReadBytes(orderNo.rest, 4) IN IF ~ordId.ok THEN Fail ELSE
+    LET userDefine == ReadBytes(ordId.rest, 8) IN IF ~userDefine.ok THEN Fail ELSE
+    LET symFlexProductX == DecodeSymFlexProductX(msgTypeExt.value, userDefine.rest) IN IF ~symFlexProductX.ok THEN Fail ELSE
+    LET price == ReadBytes(symFlexProductX.rest, 4) IN IF ~price.ok THEN Fail ELSE
     LET qty == ReadBytes(price.rest, 2) IN IF ~qty.ok THEN Fail ELSE
-    LET investoracno == ReadBytes(qty.rest, 4) IN IF ~investoracno.ok THEN Fail ELSE
-    LET investorflag == ReadBytes(investoracno.rest, 1) IN IF ~investorflag.ok THEN Fail ELSE
-    LET side == ReadBytes(investorflag.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET investorAcno == ReadBytes(qty.rest, 4) IN IF ~investorAcno.ok THEN Fail ELSE
+    LET investorFlag == ReadBytes(investorAcno.rest, 1) IN IF ~investorFlag.ok THEN Fail ELSE
+    LET side == ReadBytes(investorFlag.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET ordType == ReadBytes(side.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
     LET timeInForce == ReadBytes(ordType.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
     LET positionEffect == ReadBytes(timeInForce.rest, 1) IN IF ~positionEffect.ok THEN Fail ELSE
     LET lastPx == ReadBytes(positionEffect.rest, 4) IN IF ~lastPx.ok THEN Fail ELSE
     LET lastQty == ReadBytes(lastPx.rest, 2) IN IF ~lastQty.ok THEN Fail ELSE
-    LET pxsubtotal == ReadBytes(lastQty.rest, 8) IN IF ~pxsubtotal.ok THEN Fail ELSE
-    LET cumQty == ReadBytes(pxsubtotal.rest, 2) IN IF ~cumQty.ok THEN Fail ELSE
+    LET pxSubtotal == ReadBytes(lastQty.rest, 8) IN IF ~pxSubtotal.ok THEN Fail ELSE
+    LET cumQty == ReadBytes(pxSubtotal.rest, 2) IN IF ~cumQty.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(cumQty.rest, 2) IN IF ~leavesQty.ok THEN Fail ELSE
-    LET beforeqty == ReadBytes(leavesQty.rest, 2) IN IF ~beforeqty.ok THEN Fail ELSE
-    LET orgtranstimeMsgtimex == DecodeOrgtranstimeMsgtimex(beforeqty.rest) IN IF ~orgtranstimeMsgtimex.ok THEN Fail ELSE
-    LET transactTimeMsgtimex == DecodeTransactTimeMsgtimex(orgtranstimeMsgtimex.rest) IN IF ~transactTimeMsgtimex.ok THEN Fail ELSE
-    LET targetid == ReadBytes(transactTimeMsgtimex.rest, 1) IN IF ~targetid.ok THEN Fail ELSE
-    LET uniqid == ReadBytes(targetid.rest, 4) IN IF ~uniqid.ok THEN Fail ELSE
-    LET rptseq == ReadBytes(uniqid.rest, 4) IN IF ~rptseq.ok THEN Fail ELSE
-    LET rptsessionid == ReadBytes(rptseq.rest, 2) IN IF ~rptsessionid.ok THEN Fail ELSE
-    LET rptsessionseq == ReadBytes(rptsessionid.rest, 4) IN IF ~rptsessionseq.ok THEN Fail ELSE
-    LET reserved12 == ReadBytes(rptsessionseq.rest, 12) IN IF ~reserved12.ok THEN Fail ELSE
+    LET beforeQty == ReadBytes(leavesQty.rest, 2) IN IF ~beforeQty.ok THEN Fail ELSE
+    LET orgTransTimeMsgTimeX == DecodeOrgTransTimeMsgTimeX(beforeQty.rest) IN IF ~orgTransTimeMsgTimeX.ok THEN Fail ELSE
+    LET transactTimeMsgTimeX == DecodeTransactTimeMsgTimeX(orgTransTimeMsgTimeX.rest) IN IF ~transactTimeMsgTimeX.ok THEN Fail ELSE
+    LET targetId == ReadBytes(transactTimeMsgTimeX.rest, 1) IN IF ~targetId.ok THEN Fail ELSE
+    LET uniqId == ReadBytes(targetId.rest, 4) IN IF ~uniqId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(uniqId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET rptSessionId == ReadBytes(rptSeq.rest, 2) IN IF ~rptSessionId.ok THEN Fail ELSE
+    LET rptSessionSeq == ReadBytes(rptSessionId.rest, 4) IN IF ~rptSessionSeq.ok THEN Fail ELSE
+    LET reserved12 == ReadBytes(rptSessionSeq.rest, 12) IN IF ~reserved12.ok THEN Fail ELSE
     Ok([ preserve             |-> preserve.value,
-         msgtimens            |-> msgtimens.value,
-         partid               |-> partid.value,
+         msgTimeNs            |-> msgTimeNs.value,
+         partId               |-> partId.value,
          noLeg                |-> noLeg.value,
-         statuscodeUint162    |-> statuscodeUint162.value,
+         statusCodeUint162    |-> statusCodeUint162.value,
          execType             |-> execType.value,
-         cmid                 |-> cmid.value,
-         fcmid                |-> fcmid.value,
-         orderno              |-> orderno.value,
-         ordid                |-> ordid.value,
-         userdefine           |-> userdefine.value,
-         symFlexproductx      |-> symFlexproductx.value,
+         cmId                 |-> cmId.value,
+         fcmId                |-> fcmId.value,
+         orderNo              |-> orderNo.value,
+         ordId                |-> ordId.value,
+         userDefine           |-> userDefine.value,
+         symFlexProductX      |-> symFlexProductX.value,
          price                |-> price.value,
          qty                  |-> qty.value,
-         investoracno         |-> investoracno.value,
-         investorflag         |-> investorflag.value,
+         investorAcno         |-> investorAcno.value,
+         investorFlag         |-> investorFlag.value,
          side                 |-> side.value,
          ordType              |-> ordType.value,
          timeInForce          |-> timeInForce.value,
          positionEffect       |-> positionEffect.value,
          lastPx               |-> lastPx.value,
          lastQty              |-> lastQty.value,
-         pxsubtotal           |-> pxsubtotal.value,
+         pxSubtotal           |-> pxSubtotal.value,
          cumQty               |-> cumQty.value,
          leavesQty            |-> leavesQty.value,
-         beforeqty            |-> beforeqty.value,
-         orgtranstimeMsgtimex |-> orgtranstimeMsgtimex.value,
-         transactTimeMsgtimex |-> transactTimeMsgtimex.value,
-         targetid             |-> targetid.value,
-         uniqid               |-> uniqid.value,
-         rptseq               |-> rptseq.value,
-         rptsessionid         |-> rptsessionid.value,
-         rptsessionseq        |-> rptsessionseq.value,
+         beforeQty            |-> beforeQty.value,
+         orgTransTimeMsgTimeX |-> orgTransTimeMsgTimeX.value,
+         transactTimeMsgTimeX |-> transactTimeMsgTimeX.value,
+         targetId             |-> targetId.value,
+         uniqId               |-> uniqId.value,
+         rptSeq               |-> rptSeq.value,
+         rptSessionId         |-> rptSessionId.value,
+         rptSessionSeq        |-> rptSessionSeq.value,
          reserved12           |-> reserved12.value ], reserved12.rest)
 
 ZeroFlexOrderStatusReportMessage ==
     [ preserve             |-> [i \in 1 .. 1 |-> 0],
-      msgtimens            |-> [i \in 1 .. 4 |-> 0],
-      partid               |-> [i \in 1 .. 1 |-> 0],
+      msgTimeNs            |-> [i \in 1 .. 4 |-> 0],
+      partId               |-> [i \in 1 .. 1 |-> 0],
       noLeg                |-> [i \in 1 .. 1 |-> 0],
-      statuscodeUint162    |-> [i \in 1 .. 2 |-> 0],
+      statusCodeUint162    |-> [i \in 1 .. 2 |-> 0],
       execType             |-> [i \in 1 .. 1 |-> 0],
-      cmid                 |-> [i \in 1 .. 2 |-> 0],
-      fcmid                |-> [i \in 1 .. 2 |-> 0],
-      orderno              |-> [i \in 1 .. 5 |-> 0],
-      ordid                |-> [i \in 1 .. 4 |-> 0],
-      userdefine           |-> [i \in 1 .. 8 |-> 0],
-      symFlexproductx      |-> ZeroSymFlexproductx,
+      cmId                 |-> [i \in 1 .. 2 |-> 0],
+      fcmId                |-> [i \in 1 .. 2 |-> 0],
+      orderNo              |-> [i \in 1 .. 5 |-> 0],
+      ordId                |-> [i \in 1 .. 4 |-> 0],
+      userDefine           |-> [i \in 1 .. 8 |-> 0],
+      symFlexProductX      |-> ZeroSymFlexProductX,
       price                |-> [i \in 1 .. 4 |-> 0],
       qty                  |-> [i \in 1 .. 2 |-> 0],
-      investoracno         |-> [i \in 1 .. 4 |-> 0],
-      investorflag         |-> [i \in 1 .. 1 |-> 0],
+      investorAcno         |-> [i \in 1 .. 4 |-> 0],
+      investorFlag         |-> [i \in 1 .. 1 |-> 0],
       side                 |-> [i \in 1 .. 1 |-> 0],
       ordType              |-> [i \in 1 .. 1 |-> 0],
       timeInForce          |-> [i \in 1 .. 1 |-> 0],
       positionEffect       |-> [i \in 1 .. 1 |-> 0],
       lastPx               |-> [i \in 1 .. 4 |-> 0],
       lastQty              |-> [i \in 1 .. 2 |-> 0],
-      pxsubtotal           |-> [i \in 1 .. 8 |-> 0],
+      pxSubtotal           |-> [i \in 1 .. 8 |-> 0],
       cumQty               |-> [i \in 1 .. 2 |-> 0],
       leavesQty            |-> [i \in 1 .. 2 |-> 0],
-      beforeqty            |-> [i \in 1 .. 2 |-> 0],
-      orgtranstimeMsgtimex |-> ZeroOrgtranstimeMsgtimex,
-      transactTimeMsgtimex |-> ZeroTransactTimeMsgtimex,
-      targetid             |-> [i \in 1 .. 1 |-> 0],
-      uniqid               |-> [i \in 1 .. 4 |-> 0],
-      rptseq               |-> [i \in 1 .. 4 |-> 0],
-      rptsessionid         |-> [i \in 1 .. 2 |-> 0],
-      rptsessionseq        |-> [i \in 1 .. 4 |-> 0],
+      beforeQty            |-> [i \in 1 .. 2 |-> 0],
+      orgTransTimeMsgTimeX |-> ZeroOrgTransTimeMsgTimeX,
+      transactTimeMsgTimeX |-> ZeroTransactTimeMsgTimeX,
+      targetId             |-> [i \in 1 .. 1 |-> 0],
+      uniqId               |-> [i \in 1 .. 4 |-> 0],
+      rptSeq               |-> [i \in 1 .. 4 |-> 0],
+      rptSessionId         |-> [i \in 1 .. 2 |-> 0],
+      rptSessionSeq        |-> [i \in 1 .. 4 |-> 0],
       reserved12           |-> [i \in 1 .. 12 |-> 0] ]
 
 (* Flex Order Status Report Message at zero, then each field in turn at the values it is checked at *)
 CheckedFlexOrderStatusReportMessage ==
     { ZeroFlexOrderStatusReportMessage }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.preserve = one] : one \in Sample(1) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.msgtimens = one] : one \in Sample(4) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.partid = one] : one \in Sample(1) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.msgTimeNs = one] : one \in Sample(4) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.partId = one] : one \in Sample(1) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.noLeg = one] : one \in Sample(1) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.statuscodeUint162 = one] : one \in Sample(2) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.statusCodeUint162 = one] : one \in Sample(2) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.execType = one] : one \in Sample(1) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.cmid = one] : one \in Sample(2) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.fcmid = one] : one \in Sample(2) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.orderno = one] : one \in Sample(5) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.ordid = one] : one \in Sample(4) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.userdefine = one] : one \in Sample(8) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.symFlexproductx = one] : one \in CheckedSymFlexproductx }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.cmId = one] : one \in Sample(2) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.fcmId = one] : one \in Sample(2) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.orderNo = one] : one \in Sample(5) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.ordId = one] : one \in Sample(4) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.userDefine = one] : one \in Sample(8) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.symFlexProductX = one] : one \in CheckedSymFlexProductX }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.price = one] : one \in Sample(4) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.qty = one] : one \in Sample(2) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.investoracno = one] : one \in Sample(4) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.investorflag = one] : one \in Sample(1) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.investorAcno = one] : one \in Sample(4) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.investorFlag = one] : one \in Sample(1) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.ordType = one] : one \in Sample(1) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.timeInForce = one] : one \in Sample(1) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.positionEffect = one] : one \in Sample(1) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.lastPx = one] : one \in Sample(4) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.lastQty = one] : one \in Sample(2) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.pxsubtotal = one] : one \in Sample(8) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.pxSubtotal = one] : one \in Sample(8) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.cumQty = one] : one \in Sample(2) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.leavesQty = one] : one \in Sample(2) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.beforeqty = one] : one \in Sample(2) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.orgtranstimeMsgtimex = one] : one \in CheckedOrgtranstimeMsgtimex }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.transactTimeMsgtimex = one] : one \in CheckedTransactTimeMsgtimex }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.targetid = one] : one \in Sample(1) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.uniqid = one] : one \in Sample(4) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.rptseq = one] : one \in Sample(4) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.rptsessionid = one] : one \in Sample(2) }
-        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.rptsessionseq = one] : one \in Sample(4) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.beforeQty = one] : one \in Sample(2) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.orgTransTimeMsgTimeX = one] : one \in CheckedOrgTransTimeMsgTimeX }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.transactTimeMsgTimeX = one] : one \in CheckedTransactTimeMsgTimeX }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.targetId = one] : one \in Sample(1) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.uniqId = one] : one \in Sample(4) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.rptSessionId = one] : one \in Sample(2) }
+        \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.rptSessionSeq = one] : one \in Sample(4) }
         \cup { [ZeroFlexOrderStatusReportMessage EXCEPT !.reserved12 = one] : one \in Sample(12) }
 
 (***************************************************************************)
@@ -2148,245 +2148,245 @@ CheckedFlexOrderStatusReportMessage ==
 (***************************************************************************)
 
 ClearingMemberInitiateOperationMessage ==
-    [ memberid : Sample(2),
-      targetid : Sample(1),
-      reqcmseq : Sample(4) ]
+    [ memberId : Sample(2),
+      targetId : Sample(1),
+      reqCmSeq : Sample(4) ]
 
 EncodeClearingMemberInitiateOperationMessage(message) ==
-    message.memberid
-        \o message.targetid
-        \o message.reqcmseq
+    message.memberId
+        \o message.targetId
+        \o message.reqCmSeq
 
 DecodeClearingMemberInitiateOperationMessage(bytes) ==
-    LET memberid == ReadBytes(bytes, 2) IN IF ~memberid.ok THEN Fail ELSE
-    LET targetid == ReadBytes(memberid.rest, 1) IN IF ~targetid.ok THEN Fail ELSE
-    LET reqcmseq == ReadBytes(targetid.rest, 4) IN IF ~reqcmseq.ok THEN Fail ELSE
-    Ok([ memberid |-> memberid.value,
-         targetid |-> targetid.value,
-         reqcmseq |-> reqcmseq.value ], reqcmseq.rest)
+    LET memberId == ReadBytes(bytes, 2) IN IF ~memberId.ok THEN Fail ELSE
+    LET targetId == ReadBytes(memberId.rest, 1) IN IF ~targetId.ok THEN Fail ELSE
+    LET reqCmSeq == ReadBytes(targetId.rest, 4) IN IF ~reqCmSeq.ok THEN Fail ELSE
+    Ok([ memberId |-> memberId.value,
+         targetId |-> targetId.value,
+         reqCmSeq |-> reqCmSeq.value ], reqCmSeq.rest)
 
 ZeroClearingMemberInitiateOperationMessage ==
-    [ memberid |-> [i \in 1 .. 2 |-> 0],
-      targetid |-> [i \in 1 .. 1 |-> 0],
-      reqcmseq |-> [i \in 1 .. 4 |-> 0] ]
+    [ memberId |-> [i \in 1 .. 2 |-> 0],
+      targetId |-> [i \in 1 .. 1 |-> 0],
+      reqCmSeq |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Clearing Member Initiate Operation Message at zero, then each field in turn at the values it is checked at *)
 CheckedClearingMemberInitiateOperationMessage ==
     { ZeroClearingMemberInitiateOperationMessage }
-        \cup { [ZeroClearingMemberInitiateOperationMessage EXCEPT !.memberid = one] : one \in Sample(2) }
-        \cup { [ZeroClearingMemberInitiateOperationMessage EXCEPT !.targetid = one] : one \in Sample(1) }
-        \cup { [ZeroClearingMemberInitiateOperationMessage EXCEPT !.reqcmseq = one] : one \in Sample(4) }
+        \cup { [ZeroClearingMemberInitiateOperationMessage EXCEPT !.memberId = one] : one \in Sample(2) }
+        \cup { [ZeroClearingMemberInitiateOperationMessage EXCEPT !.targetId = one] : one \in Sample(1) }
+        \cup { [ZeroClearingMemberInitiateOperationMessage EXCEPT !.reqCmSeq = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Clearing Member Initiate Operation Confirmed Message: 8 bytes           *)
 (***************************************************************************)
 
 ClearingMemberInitiateOperationConfirmedMessage ==
-    [ statuscodeUint81 : Sample(1),
-      memberid         : Sample(2),
-      targetid         : Sample(1),
-      reqcmseq         : Sample(4) ]
+    [ statusCodeUint81 : Sample(1),
+      memberId         : Sample(2),
+      targetId         : Sample(1),
+      reqCmSeq         : Sample(4) ]
 
 EncodeClearingMemberInitiateOperationConfirmedMessage(message) ==
-    message.statuscodeUint81
-        \o message.memberid
-        \o message.targetid
-        \o message.reqcmseq
+    message.statusCodeUint81
+        \o message.memberId
+        \o message.targetId
+        \o message.reqCmSeq
 
 DecodeClearingMemberInitiateOperationConfirmedMessage(bytes) ==
-    LET statuscodeUint81 == ReadBytes(bytes, 1) IN IF ~statuscodeUint81.ok THEN Fail ELSE
-    LET memberid == ReadBytes(statuscodeUint81.rest, 2) IN IF ~memberid.ok THEN Fail ELSE
-    LET targetid == ReadBytes(memberid.rest, 1) IN IF ~targetid.ok THEN Fail ELSE
-    LET reqcmseq == ReadBytes(targetid.rest, 4) IN IF ~reqcmseq.ok THEN Fail ELSE
-    Ok([ statuscodeUint81 |-> statuscodeUint81.value,
-         memberid         |-> memberid.value,
-         targetid         |-> targetid.value,
-         reqcmseq         |-> reqcmseq.value ], reqcmseq.rest)
+    LET statusCodeUint81 == ReadBytes(bytes, 1) IN IF ~statusCodeUint81.ok THEN Fail ELSE
+    LET memberId == ReadBytes(statusCodeUint81.rest, 2) IN IF ~memberId.ok THEN Fail ELSE
+    LET targetId == ReadBytes(memberId.rest, 1) IN IF ~targetId.ok THEN Fail ELSE
+    LET reqCmSeq == ReadBytes(targetId.rest, 4) IN IF ~reqCmSeq.ok THEN Fail ELSE
+    Ok([ statusCodeUint81 |-> statusCodeUint81.value,
+         memberId         |-> memberId.value,
+         targetId         |-> targetId.value,
+         reqCmSeq         |-> reqCmSeq.value ], reqCmSeq.rest)
 
 ZeroClearingMemberInitiateOperationConfirmedMessage ==
-    [ statuscodeUint81 |-> [i \in 1 .. 1 |-> 0],
-      memberid         |-> [i \in 1 .. 2 |-> 0],
-      targetid         |-> [i \in 1 .. 1 |-> 0],
-      reqcmseq         |-> [i \in 1 .. 4 |-> 0] ]
+    [ statusCodeUint81 |-> [i \in 1 .. 1 |-> 0],
+      memberId         |-> [i \in 1 .. 2 |-> 0],
+      targetId         |-> [i \in 1 .. 1 |-> 0],
+      reqCmSeq         |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Clearing Member Initiate Operation Confirmed Message at zero, then each field in turn at the values it is checked at *)
 CheckedClearingMemberInitiateOperationConfirmedMessage ==
     { ZeroClearingMemberInitiateOperationConfirmedMessage }
-        \cup { [ZeroClearingMemberInitiateOperationConfirmedMessage EXCEPT !.statuscodeUint81 = one] : one \in Sample(1) }
-        \cup { [ZeroClearingMemberInitiateOperationConfirmedMessage EXCEPT !.memberid = one] : one \in Sample(2) }
-        \cup { [ZeroClearingMemberInitiateOperationConfirmedMessage EXCEPT !.targetid = one] : one \in Sample(1) }
-        \cup { [ZeroClearingMemberInitiateOperationConfirmedMessage EXCEPT !.reqcmseq = one] : one \in Sample(4) }
+        \cup { [ZeroClearingMemberInitiateOperationConfirmedMessage EXCEPT !.statusCodeUint81 = one] : one \in Sample(1) }
+        \cup { [ZeroClearingMemberInitiateOperationConfirmedMessage EXCEPT !.memberId = one] : one \in Sample(2) }
+        \cup { [ZeroClearingMemberInitiateOperationConfirmedMessage EXCEPT !.targetId = one] : one \in Sample(1) }
+        \cup { [ZeroClearingMemberInitiateOperationConfirmedMessage EXCEPT !.reqCmSeq = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Subhdr: 6 bytes                                                         *)
+(* Sub Hdr: 6 bytes                                                        *)
 (***************************************************************************)
 
-Subhdr2 ==
+SubHdr2 ==
     [ msgTypeExt : Sample(1),
       preserve   : Sample(1),
-      msgtimens  : Sample(4) ]
+      msgTimeNs  : Sample(4) ]
 
-EncodeSubhdr2(message) ==
+EncodeSubHdr2(message) ==
     message.msgTypeExt
         \o message.preserve
-        \o message.msgtimens
+        \o message.msgTimeNs
 
-DecodeSubhdr2(bytes) ==
+DecodeSubHdr2(bytes) ==
     LET msgTypeExt == ReadBytes(bytes, 1) IN IF ~msgTypeExt.ok THEN Fail ELSE
     LET preserve == ReadBytes(msgTypeExt.rest, 1) IN IF ~preserve.ok THEN Fail ELSE
-    LET msgtimens == ReadBytes(preserve.rest, 4) IN IF ~msgtimens.ok THEN Fail ELSE
+    LET msgTimeNs == ReadBytes(preserve.rest, 4) IN IF ~msgTimeNs.ok THEN Fail ELSE
     Ok([ msgTypeExt |-> msgTypeExt.value,
          preserve   |-> preserve.value,
-         msgtimens  |-> msgtimens.value ], msgtimens.rest)
+         msgTimeNs  |-> msgTimeNs.value ], msgTimeNs.rest)
 
-ZeroSubhdr2 ==
+ZeroSubHdr2 ==
     [ msgTypeExt |-> [i \in 1 .. 1 |-> 0],
       preserve   |-> [i \in 1 .. 1 |-> 0],
-      msgtimens  |-> [i \in 1 .. 4 |-> 0] ]
+      msgTimeNs  |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Subhdr at zero, then each field in turn at the values it is checked at *)
-CheckedSubhdr2 ==
-    { ZeroSubhdr2 }
-        \cup { [ZeroSubhdr2 EXCEPT !.msgTypeExt = one] : one \in Sample(1) }
-        \cup { [ZeroSubhdr2 EXCEPT !.preserve = one] : one \in Sample(1) }
-        \cup { [ZeroSubhdr2 EXCEPT !.msgtimens = one] : one \in Sample(4) }
+(* Sub Hdr at zero, then each field in turn at the values it is checked at *)
+CheckedSubHdr2 ==
+    { ZeroSubHdr2 }
+        \cup { [ZeroSubHdr2 EXCEPT !.msgTypeExt = one] : one \in Sample(1) }
+        \cup { [ZeroSubHdr2 EXCEPT !.preserve = one] : one \in Sample(1) }
+        \cup { [ZeroSubHdr2 EXCEPT !.msgTimeNs = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Flex Clearing Member Initiate Operation Message: 14 bytes               *)
 (***************************************************************************)
 
 FlexClearingMemberInitiateOperationMessage ==
-    [ subhdr   : Subhdr2,
-      partid   : Sample(1),
-      memberid : Sample(2),
-      targetid : Sample(1),
-      reqcmseq : Sample(4) ]
+    [ subHdr   : SubHdr2,
+      partId   : Sample(1),
+      memberId : Sample(2),
+      targetId : Sample(1),
+      reqCmSeq : Sample(4) ]
 
 EncodeFlexClearingMemberInitiateOperationMessage(message) ==
-    EncodeSubhdr2(message.subhdr)
-        \o message.partid
-        \o message.memberid
-        \o message.targetid
-        \o message.reqcmseq
+    EncodeSubHdr2(message.subHdr)
+        \o message.partId
+        \o message.memberId
+        \o message.targetId
+        \o message.reqCmSeq
 
 DecodeFlexClearingMemberInitiateOperationMessage(bytes) ==
-    LET subhdr == DecodeSubhdr2(bytes) IN IF ~subhdr.ok THEN Fail ELSE
-    LET partid == ReadBytes(subhdr.rest, 1) IN IF ~partid.ok THEN Fail ELSE
-    LET memberid == ReadBytes(partid.rest, 2) IN IF ~memberid.ok THEN Fail ELSE
-    LET targetid == ReadBytes(memberid.rest, 1) IN IF ~targetid.ok THEN Fail ELSE
-    LET reqcmseq == ReadBytes(targetid.rest, 4) IN IF ~reqcmseq.ok THEN Fail ELSE
-    Ok([ subhdr   |-> subhdr.value,
-         partid   |-> partid.value,
-         memberid |-> memberid.value,
-         targetid |-> targetid.value,
-         reqcmseq |-> reqcmseq.value ], reqcmseq.rest)
+    LET subHdr == DecodeSubHdr2(bytes) IN IF ~subHdr.ok THEN Fail ELSE
+    LET partId == ReadBytes(subHdr.rest, 1) IN IF ~partId.ok THEN Fail ELSE
+    LET memberId == ReadBytes(partId.rest, 2) IN IF ~memberId.ok THEN Fail ELSE
+    LET targetId == ReadBytes(memberId.rest, 1) IN IF ~targetId.ok THEN Fail ELSE
+    LET reqCmSeq == ReadBytes(targetId.rest, 4) IN IF ~reqCmSeq.ok THEN Fail ELSE
+    Ok([ subHdr   |-> subHdr.value,
+         partId   |-> partId.value,
+         memberId |-> memberId.value,
+         targetId |-> targetId.value,
+         reqCmSeq |-> reqCmSeq.value ], reqCmSeq.rest)
 
 ZeroFlexClearingMemberInitiateOperationMessage ==
-    [ subhdr   |-> ZeroSubhdr2,
-      partid   |-> [i \in 1 .. 1 |-> 0],
-      memberid |-> [i \in 1 .. 2 |-> 0],
-      targetid |-> [i \in 1 .. 1 |-> 0],
-      reqcmseq |-> [i \in 1 .. 4 |-> 0] ]
+    [ subHdr   |-> ZeroSubHdr2,
+      partId   |-> [i \in 1 .. 1 |-> 0],
+      memberId |-> [i \in 1 .. 2 |-> 0],
+      targetId |-> [i \in 1 .. 1 |-> 0],
+      reqCmSeq |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Flex Clearing Member Initiate Operation Message at zero, then each field in turn at the values it is checked at *)
 CheckedFlexClearingMemberInitiateOperationMessage ==
     { ZeroFlexClearingMemberInitiateOperationMessage }
-        \cup { [ZeroFlexClearingMemberInitiateOperationMessage EXCEPT !.subhdr = one] : one \in CheckedSubhdr2 }
-        \cup { [ZeroFlexClearingMemberInitiateOperationMessage EXCEPT !.partid = one] : one \in Sample(1) }
-        \cup { [ZeroFlexClearingMemberInitiateOperationMessage EXCEPT !.memberid = one] : one \in Sample(2) }
-        \cup { [ZeroFlexClearingMemberInitiateOperationMessage EXCEPT !.targetid = one] : one \in Sample(1) }
-        \cup { [ZeroFlexClearingMemberInitiateOperationMessage EXCEPT !.reqcmseq = one] : one \in Sample(4) }
+        \cup { [ZeroFlexClearingMemberInitiateOperationMessage EXCEPT !.subHdr = one] : one \in CheckedSubHdr2 }
+        \cup { [ZeroFlexClearingMemberInitiateOperationMessage EXCEPT !.partId = one] : one \in Sample(1) }
+        \cup { [ZeroFlexClearingMemberInitiateOperationMessage EXCEPT !.memberId = one] : one \in Sample(2) }
+        \cup { [ZeroFlexClearingMemberInitiateOperationMessage EXCEPT !.targetId = one] : one \in Sample(1) }
+        \cup { [ZeroFlexClearingMemberInitiateOperationMessage EXCEPT !.reqCmSeq = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Subhdr: 6 bytes                                                         *)
+(* Sub Hdr: 6 bytes                                                        *)
 (***************************************************************************)
 
-Subhdr3 ==
+SubHdr3 ==
     [ msgTypeExt : Sample(1),
       preserve   : Sample(1),
-      msgtimens  : Sample(4) ]
+      msgTimeNs  : Sample(4) ]
 
-EncodeSubhdr3(message) ==
+EncodeSubHdr3(message) ==
     message.msgTypeExt
         \o message.preserve
-        \o message.msgtimens
+        \o message.msgTimeNs
 
-DecodeSubhdr3(bytes) ==
+DecodeSubHdr3(bytes) ==
     LET msgTypeExt == ReadBytes(bytes, 1) IN IF ~msgTypeExt.ok THEN Fail ELSE
     LET preserve == ReadBytes(msgTypeExt.rest, 1) IN IF ~preserve.ok THEN Fail ELSE
-    LET msgtimens == ReadBytes(preserve.rest, 4) IN IF ~msgtimens.ok THEN Fail ELSE
+    LET msgTimeNs == ReadBytes(preserve.rest, 4) IN IF ~msgTimeNs.ok THEN Fail ELSE
     Ok([ msgTypeExt |-> msgTypeExt.value,
          preserve   |-> preserve.value,
-         msgtimens  |-> msgtimens.value ], msgtimens.rest)
+         msgTimeNs  |-> msgTimeNs.value ], msgTimeNs.rest)
 
-ZeroSubhdr3 ==
+ZeroSubHdr3 ==
     [ msgTypeExt |-> [i \in 1 .. 1 |-> 0],
       preserve   |-> [i \in 1 .. 1 |-> 0],
-      msgtimens  |-> [i \in 1 .. 4 |-> 0] ]
+      msgTimeNs  |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Subhdr at zero, then each field in turn at the values it is checked at *)
-CheckedSubhdr3 ==
-    { ZeroSubhdr3 }
-        \cup { [ZeroSubhdr3 EXCEPT !.msgTypeExt = one] : one \in Sample(1) }
-        \cup { [ZeroSubhdr3 EXCEPT !.preserve = one] : one \in Sample(1) }
-        \cup { [ZeroSubhdr3 EXCEPT !.msgtimens = one] : one \in Sample(4) }
+(* Sub Hdr at zero, then each field in turn at the values it is checked at *)
+CheckedSubHdr3 ==
+    { ZeroSubHdr3 }
+        \cup { [ZeroSubHdr3 EXCEPT !.msgTypeExt = one] : one \in Sample(1) }
+        \cup { [ZeroSubHdr3 EXCEPT !.preserve = one] : one \in Sample(1) }
+        \cup { [ZeroSubHdr3 EXCEPT !.msgTimeNs = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Flex Clearing Member Initiate Operation Confirmed Message: 32 bytes     *)
 (***************************************************************************)
 
 FlexClearingMemberInitiateOperationConfirmedMessage ==
-    [ subhdr            : Subhdr3,
-      partid            : Sample(1),
-      statuscodeUint162 : Sample(2),
-      memberid          : Sample(2),
-      targetid          : Sample(1),
-      reqcmseq          : Sample(4),
+    [ subHdr            : SubHdr3,
+      partId            : Sample(1),
+      statusCodeUint162 : Sample(2),
+      memberId          : Sample(2),
+      targetId          : Sample(1),
+      reqCmSeq          : Sample(4),
       reserved16        : Sample(16) ]
 
 EncodeFlexClearingMemberInitiateOperationConfirmedMessage(message) ==
-    EncodeSubhdr3(message.subhdr)
-        \o message.partid
-        \o message.statuscodeUint162
-        \o message.memberid
-        \o message.targetid
-        \o message.reqcmseq
+    EncodeSubHdr3(message.subHdr)
+        \o message.partId
+        \o message.statusCodeUint162
+        \o message.memberId
+        \o message.targetId
+        \o message.reqCmSeq
         \o message.reserved16
 
 DecodeFlexClearingMemberInitiateOperationConfirmedMessage(bytes) ==
-    LET subhdr == DecodeSubhdr3(bytes) IN IF ~subhdr.ok THEN Fail ELSE
-    LET partid == ReadBytes(subhdr.rest, 1) IN IF ~partid.ok THEN Fail ELSE
-    LET statuscodeUint162 == ReadBytes(partid.rest, 2) IN IF ~statuscodeUint162.ok THEN Fail ELSE
-    LET memberid == ReadBytes(statuscodeUint162.rest, 2) IN IF ~memberid.ok THEN Fail ELSE
-    LET targetid == ReadBytes(memberid.rest, 1) IN IF ~targetid.ok THEN Fail ELSE
-    LET reqcmseq == ReadBytes(targetid.rest, 4) IN IF ~reqcmseq.ok THEN Fail ELSE
-    LET reserved16 == ReadBytes(reqcmseq.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    Ok([ subhdr            |-> subhdr.value,
-         partid            |-> partid.value,
-         statuscodeUint162 |-> statuscodeUint162.value,
-         memberid          |-> memberid.value,
-         targetid          |-> targetid.value,
-         reqcmseq          |-> reqcmseq.value,
+    LET subHdr == DecodeSubHdr3(bytes) IN IF ~subHdr.ok THEN Fail ELSE
+    LET partId == ReadBytes(subHdr.rest, 1) IN IF ~partId.ok THEN Fail ELSE
+    LET statusCodeUint162 == ReadBytes(partId.rest, 2) IN IF ~statusCodeUint162.ok THEN Fail ELSE
+    LET memberId == ReadBytes(statusCodeUint162.rest, 2) IN IF ~memberId.ok THEN Fail ELSE
+    LET targetId == ReadBytes(memberId.rest, 1) IN IF ~targetId.ok THEN Fail ELSE
+    LET reqCmSeq == ReadBytes(targetId.rest, 4) IN IF ~reqCmSeq.ok THEN Fail ELSE
+    LET reserved16 == ReadBytes(reqCmSeq.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
+    Ok([ subHdr            |-> subHdr.value,
+         partId            |-> partId.value,
+         statusCodeUint162 |-> statusCodeUint162.value,
+         memberId          |-> memberId.value,
+         targetId          |-> targetId.value,
+         reqCmSeq          |-> reqCmSeq.value,
          reserved16        |-> reserved16.value ], reserved16.rest)
 
 ZeroFlexClearingMemberInitiateOperationConfirmedMessage ==
-    [ subhdr            |-> ZeroSubhdr3,
-      partid            |-> [i \in 1 .. 1 |-> 0],
-      statuscodeUint162 |-> [i \in 1 .. 2 |-> 0],
-      memberid          |-> [i \in 1 .. 2 |-> 0],
-      targetid          |-> [i \in 1 .. 1 |-> 0],
-      reqcmseq          |-> [i \in 1 .. 4 |-> 0],
+    [ subHdr            |-> ZeroSubHdr3,
+      partId            |-> [i \in 1 .. 1 |-> 0],
+      statusCodeUint162 |-> [i \in 1 .. 2 |-> 0],
+      memberId          |-> [i \in 1 .. 2 |-> 0],
+      targetId          |-> [i \in 1 .. 1 |-> 0],
+      reqCmSeq          |-> [i \in 1 .. 4 |-> 0],
       reserved16        |-> [i \in 1 .. 16 |-> 0] ]
 
 (* Flex Clearing Member Initiate Operation Confirmed Message at zero, then each field in turn at the values it is checked at *)
 CheckedFlexClearingMemberInitiateOperationConfirmedMessage ==
     { ZeroFlexClearingMemberInitiateOperationConfirmedMessage }
-        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.subhdr = one] : one \in CheckedSubhdr3 }
-        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.partid = one] : one \in Sample(1) }
-        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.statuscodeUint162 = one] : one \in Sample(2) }
-        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.memberid = one] : one \in Sample(2) }
-        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.targetid = one] : one \in Sample(1) }
-        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.reqcmseq = one] : one \in Sample(4) }
+        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.subHdr = one] : one \in CheckedSubHdr3 }
+        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.partId = one] : one \in Sample(1) }
+        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.statusCodeUint162 = one] : one \in Sample(2) }
+        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.memberId = one] : one \in Sample(2) }
+        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.targetId = one] : one \in Sample(1) }
+        \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.reqCmSeq = one] : one \in Sample(4) }
         \cup { [ZeroFlexClearingMemberInitiateOperationConfirmedMessage EXCEPT !.reserved16 = one] : one \in Sample(16) }
 
 (***************************************************************************)
@@ -2532,8 +2532,8 @@ CheckedMessageTail ==
 TmpMessage ==
     [ msgSeqNum   : Sample(4),
       headerTime  : HeaderTime,
-      fcmid       : Sample(2),
-      sessionid   : Sample(2),
+      fcmId       : Sample(2),
+      sessionId   : Sample(2),
       payload     : Payload,
       messageTail : MessageTail ]
 
@@ -2541,8 +2541,8 @@ EncodeTmpMessageBody(message) ==
     message.msgSeqNum
         \o EncodeHeaderTime(message.headerTime)
         \o EncodeUIntBE(message.payload.tag, 1)
-        \o message.fcmid
-        \o message.sessionid
+        \o message.fcmId
+        \o message.sessionId
         \o EncodePayload(message.payload)
         \o EncodeMessageTail(message.messageTail)
 
@@ -2555,14 +2555,14 @@ DecodeTmpMessageBody(bytes) ==
     LET msgSeqNum == ReadBytes(bytes, 4) IN IF ~msgSeqNum.ok THEN Fail ELSE
     LET headerTime == DecodeHeaderTime(msgSeqNum.rest) IN IF ~headerTime.ok THEN Fail ELSE
     LET messageType == ReadUIntBE(headerTime.rest, 1) IN IF ~messageType.ok THEN Fail ELSE
-    LET fcmid == ReadBytes(messageType.rest, 2) IN IF ~fcmid.ok THEN Fail ELSE
-    LET sessionid == ReadBytes(fcmid.rest, 2) IN IF ~sessionid.ok THEN Fail ELSE
-    LET payload == DecodePayload(messageType.value, sessionid.rest) IN IF ~payload.ok THEN Fail ELSE
+    LET fcmId == ReadBytes(messageType.rest, 2) IN IF ~fcmId.ok THEN Fail ELSE
+    LET sessionId == ReadBytes(fcmId.rest, 2) IN IF ~sessionId.ok THEN Fail ELSE
+    LET payload == DecodePayload(messageType.value, sessionId.rest) IN IF ~payload.ok THEN Fail ELSE
     LET messageTail == DecodeMessageTail(payload.rest) IN IF ~messageTail.ok THEN Fail ELSE
     Ok([ msgSeqNum   |-> msgSeqNum.value,
          headerTime  |-> headerTime.value,
-         fcmid       |-> fcmid.value,
-         sessionid   |-> sessionid.value,
+         fcmId       |-> fcmId.value,
+         sessionId   |-> sessionId.value,
          payload     |-> payload.value,
          messageTail |-> messageTail.value ], messageTail.rest)
 
@@ -2579,8 +2579,8 @@ DecodeTmpMessage(bytes) ==
 ZeroTmpMessage ==
     [ msgSeqNum   |-> [i \in 1 .. 4 |-> 0],
       headerTime  |-> ZeroHeaderTime,
-      fcmid       |-> [i \in 1 .. 2 |-> 0],
-      sessionid   |-> [i \in 1 .. 2 |-> 0],
+      fcmId       |-> [i \in 1 .. 2 |-> 0],
+      sessionId   |-> [i \in 1 .. 2 |-> 0],
       payload     |-> ZeroPayload,
       messageTail |-> ZeroMessageTail ]
 
@@ -2589,8 +2589,8 @@ CheckedTmpMessage ==
     { ZeroTmpMessage }
         \cup { [ZeroTmpMessage EXCEPT !.msgSeqNum = one] : one \in Sample(4) }
         \cup { [ZeroTmpMessage EXCEPT !.headerTime = one] : one \in CheckedHeaderTime }
-        \cup { [ZeroTmpMessage EXCEPT !.fcmid = one] : one \in Sample(2) }
-        \cup { [ZeroTmpMessage EXCEPT !.sessionid = one] : one \in Sample(2) }
+        \cup { [ZeroTmpMessage EXCEPT !.fcmId = one] : one \in Sample(2) }
+        \cup { [ZeroTmpMessage EXCEPT !.sessionId = one] : one \in Sample(2) }
         \cup { [ZeroTmpMessage EXCEPT !.payload = one] : one \in CheckedPayload }
         \cup { [ZeroTmpMessage EXCEPT !.messageTail = one] : one \in CheckedMessageTail }
 
@@ -2642,10 +2642,10 @@ RoundTripLogonNoticeMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Subhdr decodes back to what was encoded, and leaves nothing over *)
-RoundTripSubhdr ==
-    \A message \in CheckedSubhdr :
-        LET read == DecodeSubhdr(EncodeSubhdr(message))
+(* Every Sub Hdr decodes back to what was encoded, and leaves nothing over *)
+RoundTripSubHdr ==
+    \A message \in CheckedSubHdr :
+        LET read == DecodeSubHdr(EncodeSubHdr(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2706,34 +2706,34 @@ RoundTripConnectionConfirmedMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Symbolnum decodes back to what was encoded, and leaves nothing over *)
-RoundTripSymbolnum ==
-    \A message \in CheckedSymbolnum :
-        LET read == DecodeSymbolnum(EncodeSymbolnum(message))
+(* Every Symbol Num decodes back to what was encoded, and leaves nothing over *)
+RoundTripSymbolNum ==
+    \A message \in CheckedSymbolNum :
+        LET read == DecodeSymbolNum(EncodeSymbolNum(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Symboltext decodes back to what was encoded, and leaves nothing over *)
-RoundTripSymboltext ==
-    \A message \in CheckedSymboltext :
-        LET read == DecodeSymboltext(EncodeSymboltext(message))
+(* Every Symbol Text decodes back to what was encoded, and leaves nothing over *)
+RoundTripSymbolText ==
+    \A message \in CheckedSymbolText :
+        LET read == DecodeSymbolText(EncodeSymbolText(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Orgtranstime Msgtime decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrgtranstimeMsgtime ==
-    \A message \in CheckedOrgtranstimeMsgtime :
-        LET read == DecodeOrgtranstimeMsgtime(EncodeOrgtranstimeMsgtime(message))
+(* Every Org Trans Time Msg Time decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrgTransTimeMsgTime ==
+    \A message \in CheckedOrgTransTimeMsgTime :
+        LET read == DecodeOrgTransTimeMsgTime(EncodeOrgTransTimeMsgTime(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Transact Time Msgtime decodes back to what was encoded, and leaves nothing over *)
-RoundTripTransactTimeMsgtime ==
-    \A message \in CheckedTransactTimeMsgtime :
-        LET read == DecodeTransactTimeMsgtime(EncodeTransactTimeMsgtime(message))
+(* Every Transact Time Msg Time decodes back to what was encoded, and leaves nothing over *)
+RoundTripTransactTimeMsgTime ==
+    \A message \in CheckedTransactTimeMsgTime :
+        LET read == DecodeTransactTimeMsgTime(EncodeTransactTimeMsgTime(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2746,34 +2746,34 @@ RoundTripOrderStatusReportMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Longsymbolnum decodes back to what was encoded, and leaves nothing over *)
-RoundTripLongsymbolnum ==
-    \A message \in CheckedLongsymbolnum :
-        LET read == DecodeLongsymbolnum(EncodeLongsymbolnum(message))
+(* Every Long Symbol Num decodes back to what was encoded, and leaves nothing over *)
+RoundTripLongSymbolNum ==
+    \A message \in CheckedLongSymbolNum :
+        LET read == DecodeLongSymbolNum(EncodeLongSymbolNum(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Longsymboltext decodes back to what was encoded, and leaves nothing over *)
-RoundTripLongsymboltext ==
-    \A message \in CheckedLongsymboltext :
-        LET read == DecodeLongsymboltext(EncodeLongsymboltext(message))
+(* Every Long Symbol Text decodes back to what was encoded, and leaves nothing over *)
+RoundTripLongSymbolText ==
+    \A message \in CheckedLongSymbolText :
+        LET read == DecodeLongSymbolText(EncodeLongSymbolText(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Orgtranstime Msgtime decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrgtranstimeMsgtime2 ==
-    \A message \in CheckedOrgtranstimeMsgtime2 :
-        LET read == DecodeOrgtranstimeMsgtime2(EncodeOrgtranstimeMsgtime2(message))
+(* Every Org Trans Time Msg Time decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrgTransTimeMsgTime2 ==
+    \A message \in CheckedOrgTransTimeMsgTime2 :
+        LET read == DecodeOrgTransTimeMsgTime2(EncodeOrgTransTimeMsgTime2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Transact Time Msgtime decodes back to what was encoded, and leaves nothing over *)
-RoundTripTransactTimeMsgtime2 ==
-    \A message \in CheckedTransactTimeMsgtime2 :
-        LET read == DecodeTransactTimeMsgtime2(EncodeTransactTimeMsgtime2(message))
+(* Every Transact Time Msg Time decodes back to what was encoded, and leaves nothing over *)
+RoundTripTransactTimeMsgTime2 ==
+    \A message \in CheckedTransactTimeMsgTime2 :
+        LET read == DecodeTransactTimeMsgTime2(EncodeTransactTimeMsgTime2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2786,34 +2786,34 @@ RoundTripOrderStatusReportLongFormatMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Symbolnum decodes back to what was encoded, and leaves nothing over *)
-RoundTripSymbolnum2 ==
-    \A message \in CheckedSymbolnum2 :
-        LET read == DecodeSymbolnum2(EncodeSymbolnum2(message))
+(* Every Symbol Num decodes back to what was encoded, and leaves nothing over *)
+RoundTripSymbolNum2 ==
+    \A message \in CheckedSymbolNum2 :
+        LET read == DecodeSymbolNum2(EncodeSymbolNum2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Symboltext decodes back to what was encoded, and leaves nothing over *)
-RoundTripSymboltext2 ==
-    \A message \in CheckedSymboltext2 :
-        LET read == DecodeSymboltext2(EncodeSymboltext2(message))
+(* Every Symbol Text decodes back to what was encoded, and leaves nothing over *)
+RoundTripSymbolText2 ==
+    \A message \in CheckedSymbolText2 :
+        LET read == DecodeSymbolText2(EncodeSymbolText2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Orgtranstime Msgtime decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrgtranstimeMsgtime3 ==
-    \A message \in CheckedOrgtranstimeMsgtime3 :
-        LET read == DecodeOrgtranstimeMsgtime3(EncodeOrgtranstimeMsgtime3(message))
+(* Every Org Trans Time Msg Time decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrgTransTimeMsgTime3 ==
+    \A message \in CheckedOrgTransTimeMsgTime3 :
+        LET read == DecodeOrgTransTimeMsgTime3(EncodeOrgTransTimeMsgTime3(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Transact Time Msgtime decodes back to what was encoded, and leaves nothing over *)
-RoundTripTransactTimeMsgtime3 ==
-    \A message \in CheckedTransactTimeMsgtime3 :
-        LET read == DecodeTransactTimeMsgtime3(EncodeTransactTimeMsgtime3(message))
+(* Every Transact Time Msg Time decodes back to what was encoded, and leaves nothing over *)
+RoundTripTransactTimeMsgTime3 ==
+    \A message \in CheckedTransactTimeMsgTime3 :
+        LET read == DecodeTransactTimeMsgTime3(EncodeTransactTimeMsgTime3(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2826,82 +2826,82 @@ RoundTripExecutionReportIncludingHeadOfficeAndBranchOfficesMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Symbolnumx decodes back to what was encoded, and leaves nothing over *)
-RoundTripSymbolnumx ==
-    \A message \in CheckedSymbolnumx :
-        LET read == DecodeSymbolnumx(EncodeSymbolnumx(message))
+(* Every Symbol Num X decodes back to what was encoded, and leaves nothing over *)
+RoundTripSymbolNumX ==
+    \A message \in CheckedSymbolNumX :
+        LET read == DecodeSymbolNumX(EncodeSymbolNumX(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Symboltxtx decodes back to what was encoded, and leaves nothing over *)
-RoundTripSymboltxtx ==
-    \A message \in CheckedSymboltxtx :
-        LET read == DecodeSymboltxtx(EncodeSymboltxtx(message))
+(* Every Symbol Txt X decodes back to what was encoded, and leaves nothing over *)
+RoundTripSymbolTxtX ==
+    \A message \in CheckedSymbolTxtX :
+        LET read == DecodeSymbolTxtX(EncodeSymbolTxtX(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Legsym Symbolnumx decodes back to what was encoded, and leaves nothing over *)
-RoundTripLegsymSymbolnumx ==
-    \A message \in CheckedLegsymSymbolnumx :
-        LET read == DecodeLegsymSymbolnumx(EncodeLegsymSymbolnumx(message))
+(* Every Leg Sym Symbol Num X decodes back to what was encoded, and leaves nothing over *)
+RoundTripLegSymSymbolNumX ==
+    \A message \in CheckedLegSymSymbolNumX :
+        LET read == DecodeLegSymSymbolNumX(EncodeLegSymSymbolNumX(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Legentrynum decodes back to what was encoded, and leaves nothing over *)
-RoundTripLegentrynum ==
-    \A message \in CheckedLegentrynum :
-        LET read == DecodeLegentrynum(EncodeLegentrynum(message))
+(* Every Leg Entry Num decodes back to what was encoded, and leaves nothing over *)
+RoundTripLegEntryNum ==
+    \A message \in CheckedLegEntryNum :
+        LET read == DecodeLegEntryNum(EncodeLegEntryNum(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Multilegnum decodes back to what was encoded, and leaves nothing over *)
-RoundTripMultilegnum ==
-    \A message \in CheckedMultilegnum :
-        LET read == DecodeMultilegnum(EncodeMultilegnum(message))
+(* Every Multi Leg Num decodes back to what was encoded, and leaves nothing over *)
+RoundTripMultiLegNum ==
+    \A message \in CheckedMultiLegNum :
+        LET read == DecodeMultiLegNum(EncodeMultiLegNum(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Legsym Symboltxtx decodes back to what was encoded, and leaves nothing over *)
-RoundTripLegsymSymboltxtx ==
-    \A message \in CheckedLegsymSymboltxtx :
-        LET read == DecodeLegsymSymboltxtx(EncodeLegsymSymboltxtx(message))
+(* Every Leg Sym Symbol Txt X decodes back to what was encoded, and leaves nothing over *)
+RoundTripLegSymSymbolTxtX ==
+    \A message \in CheckedLegSymSymbolTxtX :
+        LET read == DecodeLegSymSymbolTxtX(EncodeLegSymSymbolTxtX(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Legentrytxt decodes back to what was encoded, and leaves nothing over *)
-RoundTripLegentrytxt ==
-    \A message \in CheckedLegentrytxt :
-        LET read == DecodeLegentrytxt(EncodeLegentrytxt(message))
+(* Every Leg Entry Txt decodes back to what was encoded, and leaves nothing over *)
+RoundTripLegEntryTxt ==
+    \A message \in CheckedLegEntryTxt :
+        LET read == DecodeLegEntryTxt(EncodeLegEntryTxt(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Multilegtxt decodes back to what was encoded, and leaves nothing over *)
-RoundTripMultilegtxt ==
-    \A message \in CheckedMultilegtxt :
-        LET read == DecodeMultilegtxt(EncodeMultilegtxt(message))
+(* Every Multi Leg Txt decodes back to what was encoded, and leaves nothing over *)
+RoundTripMultiLegTxt ==
+    \A message \in CheckedMultiLegTxt :
+        LET read == DecodeMultiLegTxt(EncodeMultiLegTxt(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Orgtranstime Msgtimex decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrgtranstimeMsgtimex ==
-    \A message \in CheckedOrgtranstimeMsgtimex :
-        LET read == DecodeOrgtranstimeMsgtimex(EncodeOrgtranstimeMsgtimex(message))
+(* Every Org Trans Time Msg Time X decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrgTransTimeMsgTimeX ==
+    \A message \in CheckedOrgTransTimeMsgTimeX :
+        LET read == DecodeOrgTransTimeMsgTimeX(EncodeOrgTransTimeMsgTimeX(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Transact Time Msgtimex decodes back to what was encoded, and leaves nothing over *)
-RoundTripTransactTimeMsgtimex ==
-    \A message \in CheckedTransactTimeMsgtimex :
-        LET read == DecodeTransactTimeMsgtimex(EncodeTransactTimeMsgtimex(message))
+(* Every Transact Time Msg Time X decodes back to what was encoded, and leaves nothing over *)
+RoundTripTransactTimeMsgTimeX ==
+    \A message \in CheckedTransactTimeMsgTimeX :
+        LET read == DecodeTransactTimeMsgTimeX(EncodeTransactTimeMsgTimeX(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2930,10 +2930,10 @@ RoundTripClearingMemberInitiateOperationConfirmedMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Subhdr decodes back to what was encoded, and leaves nothing over *)
-RoundTripSubhdr2 ==
-    \A message \in CheckedSubhdr2 :
-        LET read == DecodeSubhdr2(EncodeSubhdr2(message))
+(* Every Sub Hdr decodes back to what was encoded, and leaves nothing over *)
+RoundTripSubHdr2 ==
+    \A message \in CheckedSubHdr2 :
+        LET read == DecodeSubHdr2(EncodeSubHdr2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2946,10 +2946,10 @@ RoundTripFlexClearingMemberInitiateOperationMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Subhdr decodes back to what was encoded, and leaves nothing over *)
-RoundTripSubhdr3 ==
-    \A message \in CheckedSubhdr3 :
-        LET read == DecodeSubhdr3(EncodeSubhdr3(message))
+(* Every Sub Hdr decodes back to what was encoded, and leaves nothing over *)
+RoundTripSubHdr3 ==
+    \A message \in CheckedSubHdr3 :
+        LET read == DecodeSubHdr3(EncodeSubHdr3(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2978,28 +2978,28 @@ RoundTripTmpMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* A Sym Symbolx is selected by the Symboltype it is written under *)
-SelectsSymSymbolx ==
-    \A message \in CheckedSymSymbolx :
-        LET read == DecodeSymSymbolx(message.tag, EncodeSymSymbolx(message))
+(* A Sym Symbol X is selected by the Symbol Type it is written under *)
+SelectsSymSymbolX ==
+    \A message \in CheckedSymSymbolX :
+        LET read == DecodeSymSymbolX(message.tag, EncodeSymSymbolX(message))
         IN  read.ok /\ read.value.tag = message.tag
 
-(* A Sym Longsymbolx is selected by the Symboltype it is written under *)
-SelectsSymLongsymbolx ==
-    \A message \in CheckedSymLongsymbolx :
-        LET read == DecodeSymLongsymbolx(message.tag, EncodeSymLongsymbolx(message))
+(* A Sym Long Symbol X is selected by the Symbol Type it is written under *)
+SelectsSymLongSymbolX ==
+    \A message \in CheckedSymLongSymbolX :
+        LET read == DecodeSymLongSymbolX(message.tag, EncodeSymLongSymbolX(message))
         IN  read.ok /\ read.value.tag = message.tag
 
-(* A Sym Symbolx is selected by the Symboltype it is written under *)
-SelectsSymSymbolx2 ==
-    \A message \in CheckedSymSymbolx2 :
-        LET read == DecodeSymSymbolx2(message.tag, EncodeSymSymbolx2(message))
+(* A Sym Symbol X is selected by the Symbol Type it is written under *)
+SelectsSymSymbolX2 ==
+    \A message \in CheckedSymSymbolX2 :
+        LET read == DecodeSymSymbolX2(message.tag, EncodeSymSymbolX2(message))
         IN  read.ok /\ read.value.tag = message.tag
 
-(* A Sym Flexproductx is selected by the Msg Type Ext it is written under *)
-SelectsSymFlexproductx ==
-    \A message \in CheckedSymFlexproductx :
-        LET read == DecodeSymFlexproductx(message.tag, EncodeSymFlexproductx(message))
+(* A Sym Flex Product X is selected by the Msg Type Ext it is written under *)
+SelectsSymFlexProductX ==
+    \A message \in CheckedSymFlexProductX :
+        LET read == DecodeSymFlexProductX(message.tag, EncodeSymFlexProductX(message))
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Payload is selected by the Message Type it is written under *)

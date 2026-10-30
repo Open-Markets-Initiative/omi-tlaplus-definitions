@@ -146,7 +146,7 @@ StockDirectoryMessage ==
       roundLotSize                : Sample(4),
       roundLotsOnly               : Sample(1),
       issueClassification         : Sample(1),
-      issueSubtype                : Sample(2),
+      issueSubType                : Sample(2),
       authenticity                : Sample(1),
       shortSaleThresholdIndicator : Sample(1),
       ipoFlag                     : Sample(1),
@@ -164,7 +164,7 @@ EncodeStockDirectoryMessage(message) ==
         \o message.roundLotSize
         \o message.roundLotsOnly
         \o message.issueClassification
-        \o message.issueSubtype
+        \o message.issueSubType
         \o message.authenticity
         \o message.shortSaleThresholdIndicator
         \o message.ipoFlag
@@ -182,8 +182,8 @@ DecodeStockDirectoryMessage(bytes) ==
     LET roundLotSize == ReadBytes(financialStatusIndicator.rest, 4) IN IF ~roundLotSize.ok THEN Fail ELSE
     LET roundLotsOnly == ReadBytes(roundLotSize.rest, 1) IN IF ~roundLotsOnly.ok THEN Fail ELSE
     LET issueClassification == ReadBytes(roundLotsOnly.rest, 1) IN IF ~issueClassification.ok THEN Fail ELSE
-    LET issueSubtype == ReadBytes(issueClassification.rest, 2) IN IF ~issueSubtype.ok THEN Fail ELSE
-    LET authenticity == ReadBytes(issueSubtype.rest, 1) IN IF ~authenticity.ok THEN Fail ELSE
+    LET issueSubType == ReadBytes(issueClassification.rest, 2) IN IF ~issueSubType.ok THEN Fail ELSE
+    LET authenticity == ReadBytes(issueSubType.rest, 1) IN IF ~authenticity.ok THEN Fail ELSE
     LET shortSaleThresholdIndicator == ReadBytes(authenticity.rest, 1) IN IF ~shortSaleThresholdIndicator.ok THEN Fail ELSE
     LET ipoFlag == ReadBytes(shortSaleThresholdIndicator.rest, 1) IN IF ~ipoFlag.ok THEN Fail ELSE
     LET luldReferencePriceTier == ReadBytes(ipoFlag.rest, 1) IN IF ~luldReferencePriceTier.ok THEN Fail ELSE
@@ -198,7 +198,7 @@ DecodeStockDirectoryMessage(bytes) ==
          roundLotSize                |-> roundLotSize.value,
          roundLotsOnly               |-> roundLotsOnly.value,
          issueClassification         |-> issueClassification.value,
-         issueSubtype                |-> issueSubtype.value,
+         issueSubType                |-> issueSubType.value,
          authenticity                |-> authenticity.value,
          shortSaleThresholdIndicator |-> shortSaleThresholdIndicator.value,
          ipoFlag                     |-> ipoFlag.value,
@@ -216,7 +216,7 @@ ZeroStockDirectoryMessage ==
       roundLotSize                |-> [i \in 1 .. 4 |-> 0],
       roundLotsOnly               |-> [i \in 1 .. 1 |-> 0],
       issueClassification         |-> [i \in 1 .. 1 |-> 0],
-      issueSubtype                |-> [i \in 1 .. 2 |-> 0],
+      issueSubType                |-> [i \in 1 .. 2 |-> 0],
       authenticity                |-> [i \in 1 .. 1 |-> 0],
       shortSaleThresholdIndicator |-> [i \in 1 .. 1 |-> 0],
       ipoFlag                     |-> [i \in 1 .. 1 |-> 0],
@@ -236,7 +236,7 @@ CheckedStockDirectoryMessage ==
         \cup { [ZeroStockDirectoryMessage EXCEPT !.roundLotSize = one] : one \in Sample(4) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.roundLotsOnly = one] : one \in Sample(1) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.issueClassification = one] : one \in Sample(1) }
-        \cup { [ZeroStockDirectoryMessage EXCEPT !.issueSubtype = one] : one \in Sample(2) }
+        \cup { [ZeroStockDirectoryMessage EXCEPT !.issueSubType = one] : one \in Sample(2) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.authenticity = one] : one \in Sample(1) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.shortSaleThresholdIndicator = one] : one \in Sample(1) }
         \cup { [ZeroStockDirectoryMessage EXCEPT !.ipoFlag = one] : one \in Sample(1) }
