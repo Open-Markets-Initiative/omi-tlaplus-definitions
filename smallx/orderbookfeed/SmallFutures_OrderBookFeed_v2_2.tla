@@ -753,10 +753,10 @@ CheckedTradeBustMessage ==
         \cup { [ZeroTradeBustMessage EXCEPT !.tradeBustGroups = one] : one \in CheckedTradeBustGroups }
 
 (***************************************************************************)
-(* Incremetal Orders Group: 44 bytes                                       *)
+(* Incremental Orders Group: 44 bytes                                      *)
 (***************************************************************************)
 
-IncremetalOrdersGroup ==
+IncrementalOrdersGroup ==
     [ orderUpdateAction     : Sample(1),
       orderId               : Sample(8),
       tradeIdOptional       : Sample(8),
@@ -766,7 +766,7 @@ IncremetalOrdersGroup ==
       orderPriorityOptional : Sample(8),
       orderAttributes       : Sample(2) ]
 
-EncodeIncremetalOrdersGroup(message) ==
+EncodeIncrementalOrdersGroup(message) ==
     message.orderUpdateAction
         \o message.orderId
         \o message.tradeIdOptional
@@ -776,7 +776,7 @@ EncodeIncremetalOrdersGroup(message) ==
         \o message.orderPriorityOptional
         \o message.orderAttributes
 
-DecodeIncremetalOrdersGroup(bytes) ==
+DecodeIncrementalOrdersGroup(bytes) ==
     LET orderUpdateAction == ReadBytes(bytes, 1) IN IF ~orderUpdateAction.ok THEN Fail ELSE
     LET orderId == ReadBytes(orderUpdateAction.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET tradeIdOptional == ReadBytes(orderId.rest, 8) IN IF ~tradeIdOptional.ok THEN Fail ELSE
@@ -794,7 +794,7 @@ DecodeIncremetalOrdersGroup(bytes) ==
          orderPriorityOptional |-> orderPriorityOptional.value,
          orderAttributes       |-> orderAttributes.value ], orderAttributes.rest)
 
-ZeroIncremetalOrdersGroup ==
+ZeroIncrementalOrdersGroup ==
     [ orderUpdateAction     |-> [i \in 1 .. 1 |-> 0],
       orderId               |-> [i \in 1 .. 8 |-> 0],
       tradeIdOptional       |-> [i \in 1 .. 8 |-> 0],
@@ -804,68 +804,68 @@ ZeroIncremetalOrdersGroup ==
       orderPriorityOptional |-> [i \in 1 .. 8 |-> 0],
       orderAttributes       |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Incremetal Orders Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncremetalOrdersGroup ==
-    { ZeroIncremetalOrdersGroup }
-        \cup { [ZeroIncremetalOrdersGroup EXCEPT !.orderUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncremetalOrdersGroup EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroIncremetalOrdersGroup EXCEPT !.tradeIdOptional = one] : one \in Sample(8) }
-        \cup { [ZeroIncremetalOrdersGroup EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroIncremetalOrdersGroup EXCEPT !.priceOptional = one] : one \in Sample(8) }
-        \cup { [ZeroIncremetalOrdersGroup EXCEPT !.size = one] : one \in Sample(8) }
-        \cup { [ZeroIncremetalOrdersGroup EXCEPT !.orderPriorityOptional = one] : one \in Sample(8) }
-        \cup { [ZeroIncremetalOrdersGroup EXCEPT !.orderAttributes = one] : one \in Sample(2) }
+(* Incremental Orders Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalOrdersGroup ==
+    { ZeroIncrementalOrdersGroup }
+        \cup { [ZeroIncrementalOrdersGroup EXCEPT !.orderUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalOrdersGroup EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalOrdersGroup EXCEPT !.tradeIdOptional = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalOrdersGroup EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalOrdersGroup EXCEPT !.priceOptional = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalOrdersGroup EXCEPT !.size = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalOrdersGroup EXCEPT !.orderPriorityOptional = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalOrdersGroup EXCEPT !.orderAttributes = one] : one \in Sample(2) }
 
-(* A run of Incremetal Orders Group, written one after another *)
-RECURSIVE EncodeIncremetalOrdersGroupList(_)
-EncodeIncremetalOrdersGroupList(messages) ==
+(* A run of Incremental Orders Group, written one after another *)
+RECURSIVE EncodeIncrementalOrdersGroupList(_)
+EncodeIncrementalOrdersGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeIncremetalOrdersGroup(Head(messages)) \o EncodeIncremetalOrdersGroupList(Tail(messages))
+    ELSE EncodeIncrementalOrdersGroup(Head(messages)) \o EncodeIncrementalOrdersGroupList(Tail(messages))
 
-(* As many Incremetal Orders Group as the field that counts them says *)
-RECURSIVE ReadIncremetalOrdersGroupList(_, _)
-ReadIncremetalOrdersGroupList(bytes, count) ==
+(* As many Incremental Orders Group as the field that counts them says *)
+RECURSIVE ReadIncrementalOrdersGroupList(_, _)
+ReadIncrementalOrdersGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncremetalOrdersGroup(bytes)
+    ELSE LET one == DecodeIncrementalOrdersGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncremetalOrdersGroupList(one.rest, count - 1)
+             ELSE LET more == ReadIncrementalOrdersGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Incremetal Orders Group of each kind, for the lists that carry them *)
-OneIncremetalOrdersGroup == { ZeroIncremetalOrdersGroup }
+(* One Incremental Orders Group of each kind, for the lists that carry them *)
+OneIncrementalOrdersGroup == { ZeroIncrementalOrdersGroup }
 
 (***************************************************************************)
-(* Incremetal Orders Groups                                                *)
+(* Incremental Orders Groups                                               *)
 (***************************************************************************)
 
-IncremetalOrdersGroups ==
-    [ blockLength           : Sample(2),
-      incremetalOrdersGroup : SampleLists(OneIncremetalOrdersGroup) ]
+IncrementalOrdersGroups ==
+    [ blockLength            : Sample(2),
+      incrementalOrdersGroup : SampleLists(OneIncrementalOrdersGroup) ]
 
-EncodeIncremetalOrdersGroups(message) ==
+EncodeIncrementalOrdersGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.incremetalOrdersGroup), 1)
-        \o EncodeIncremetalOrdersGroupList(message.incremetalOrdersGroup)
+        \o EncodeUIntBE(Len(message.incrementalOrdersGroup), 1)
+        \o EncodeIncrementalOrdersGroupList(message.incrementalOrdersGroup)
 
-DecodeIncremetalOrdersGroups(bytes) ==
+DecodeIncrementalOrdersGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incremetalOrdersGroup == ReadIncremetalOrdersGroupList(numInGroup.rest, numInGroup.value) IN IF ~incremetalOrdersGroup.ok THEN Fail ELSE
-    Ok([ blockLength           |-> blockLength.value,
-         incremetalOrdersGroup |-> incremetalOrdersGroup.value ], incremetalOrdersGroup.rest)
+    LET incrementalOrdersGroup == ReadIncrementalOrdersGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalOrdersGroup.ok THEN Fail ELSE
+    Ok([ blockLength            |-> blockLength.value,
+         incrementalOrdersGroup |-> incrementalOrdersGroup.value ], incrementalOrdersGroup.rest)
 
-ZeroIncremetalOrdersGroups ==
-    [ blockLength           |-> [i \in 1 .. 2 |-> 0],
-      incremetalOrdersGroup |-> << >> ]
+ZeroIncrementalOrdersGroups ==
+    [ blockLength            |-> [i \in 1 .. 2 |-> 0],
+      incrementalOrdersGroup |-> << >> ]
 
-(* Incremetal Orders Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncremetalOrdersGroups ==
-    { ZeroIncremetalOrdersGroups }
-        \cup { [ZeroIncremetalOrdersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncremetalOrdersGroups EXCEPT !.incremetalOrdersGroup = one] : one \in SampleLists(OneIncremetalOrdersGroup) }
+(* Incremental Orders Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalOrdersGroups ==
+    { ZeroIncrementalOrdersGroups }
+        \cup { [ZeroIncrementalOrdersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalOrdersGroups EXCEPT !.incrementalOrdersGroup = one] : one \in SampleLists(OneIncrementalOrdersGroup) }
 
 (***************************************************************************)
 (* Order Book Incremental Message                                          *)
@@ -878,7 +878,7 @@ OrderBookIncrementalMessage ==
       tradingSessionDate             : Sample(2),
       instrumentTradingStatus        : Sample(1),
       incrementalMessageInstructions : Sample(2),
-      incremetalOrdersGroups         : IncremetalOrdersGroups ]
+      incrementalOrdersGroups        : IncrementalOrdersGroups ]
 
 EncodeOrderBookIncrementalMessage(message) ==
     message.instrumentId
@@ -887,7 +887,7 @@ EncodeOrderBookIncrementalMessage(message) ==
         \o message.tradingSessionDate
         \o message.instrumentTradingStatus
         \o message.incrementalMessageInstructions
-        \o EncodeIncremetalOrdersGroups(message.incremetalOrdersGroups)
+        \o EncodeIncrementalOrdersGroups(message.incrementalOrdersGroups)
 
 DecodeOrderBookIncrementalMessage(bytes) ==
     LET instrumentId == ReadBytes(bytes, 4) IN IF ~instrumentId.ok THEN Fail ELSE
@@ -896,14 +896,14 @@ DecodeOrderBookIncrementalMessage(bytes) ==
     LET tradingSessionDate == ReadBytes(transactTime.rest, 2) IN IF ~tradingSessionDate.ok THEN Fail ELSE
     LET instrumentTradingStatus == ReadBytes(tradingSessionDate.rest, 1) IN IF ~instrumentTradingStatus.ok THEN Fail ELSE
     LET incrementalMessageInstructions == ReadBytes(instrumentTradingStatus.rest, 2) IN IF ~incrementalMessageInstructions.ok THEN Fail ELSE
-    LET incremetalOrdersGroups == DecodeIncremetalOrdersGroups(incrementalMessageInstructions.rest) IN IF ~incremetalOrdersGroups.ok THEN Fail ELSE
+    LET incrementalOrdersGroups == DecodeIncrementalOrdersGroups(incrementalMessageInstructions.rest) IN IF ~incrementalOrdersGroups.ok THEN Fail ELSE
     Ok([ instrumentId                   |-> instrumentId.value,
          instrumentMessageNo            |-> instrumentMessageNo.value,
          transactTime                   |-> transactTime.value,
          tradingSessionDate             |-> tradingSessionDate.value,
          instrumentTradingStatus        |-> instrumentTradingStatus.value,
          incrementalMessageInstructions |-> incrementalMessageInstructions.value,
-         incremetalOrdersGroups         |-> incremetalOrdersGroups.value ], incremetalOrdersGroups.rest)
+         incrementalOrdersGroups        |-> incrementalOrdersGroups.value ], incrementalOrdersGroups.rest)
 
 ZeroOrderBookIncrementalMessage ==
     [ instrumentId                   |-> [i \in 1 .. 4 |-> 0],
@@ -912,7 +912,7 @@ ZeroOrderBookIncrementalMessage ==
       tradingSessionDate             |-> [i \in 1 .. 2 |-> 0],
       instrumentTradingStatus        |-> [i \in 1 .. 1 |-> 0],
       incrementalMessageInstructions |-> [i \in 1 .. 2 |-> 0],
-      incremetalOrdersGroups         |-> ZeroIncremetalOrdersGroups ]
+      incrementalOrdersGroups        |-> ZeroIncrementalOrdersGroups ]
 
 (* Order Book Incremental Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderBookIncrementalMessage ==
@@ -923,7 +923,7 @@ CheckedOrderBookIncrementalMessage ==
         \cup { [ZeroOrderBookIncrementalMessage EXCEPT !.tradingSessionDate = one] : one \in Sample(2) }
         \cup { [ZeroOrderBookIncrementalMessage EXCEPT !.instrumentTradingStatus = one] : one \in Sample(1) }
         \cup { [ZeroOrderBookIncrementalMessage EXCEPT !.incrementalMessageInstructions = one] : one \in Sample(2) }
-        \cup { [ZeroOrderBookIncrementalMessage EXCEPT !.incremetalOrdersGroups = one] : one \in CheckedIncremetalOrdersGroups }
+        \cup { [ZeroOrderBookIncrementalMessage EXCEPT !.incrementalOrdersGroups = one] : one \in CheckedIncrementalOrdersGroups }
 
 (***************************************************************************)
 (* Market Summary Incremental Message: 75 bytes                            *)
@@ -1026,10 +1026,10 @@ CheckedMarketSummaryIncrementalMessage ==
         \cup { [ZeroMarketSummaryIncrementalMessage EXCEPT !.settlementPriceType = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Snaphot Orders Group: 43 bytes                                          *)
+(* Snapshot Orders Group: 43 bytes                                         *)
 (***************************************************************************)
 
-SnaphotOrdersGroup ==
+SnapshotOrdersGroup ==
     [ orderId         : Sample(8),
       side            : Sample(1),
       price           : Sample(8),
@@ -1038,7 +1038,7 @@ SnaphotOrdersGroup ==
       orderAttributes : Sample(2),
       time            : Sample(8) ]
 
-EncodeSnaphotOrdersGroup(message) ==
+EncodeSnapshotOrdersGroup(message) ==
     message.orderId
         \o message.side
         \o message.price
@@ -1047,7 +1047,7 @@ EncodeSnaphotOrdersGroup(message) ==
         \o message.orderAttributes
         \o message.time
 
-DecodeSnaphotOrdersGroup(bytes) ==
+DecodeSnapshotOrdersGroup(bytes) ==
     LET orderId == ReadBytes(bytes, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET side == ReadBytes(orderId.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET price == ReadBytes(side.rest, 8) IN IF ~price.ok THEN Fail ELSE
@@ -1063,7 +1063,7 @@ DecodeSnaphotOrdersGroup(bytes) ==
          orderAttributes |-> orderAttributes.value,
          time            |-> time.value ], time.rest)
 
-ZeroSnaphotOrdersGroup ==
+ZeroSnapshotOrdersGroup ==
     [ orderId         |-> [i \in 1 .. 8 |-> 0],
       side            |-> [i \in 1 .. 1 |-> 0],
       price           |-> [i \in 1 .. 8 |-> 0],
@@ -1072,67 +1072,67 @@ ZeroSnaphotOrdersGroup ==
       orderAttributes |-> [i \in 1 .. 2 |-> 0],
       time            |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Snaphot Orders Group at zero, then each field in turn at the values it is checked at *)
-CheckedSnaphotOrdersGroup ==
-    { ZeroSnaphotOrdersGroup }
-        \cup { [ZeroSnaphotOrdersGroup EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroSnaphotOrdersGroup EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroSnaphotOrdersGroup EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroSnaphotOrdersGroup EXCEPT !.size = one] : one \in Sample(8) }
-        \cup { [ZeroSnaphotOrdersGroup EXCEPT !.orderPriority = one] : one \in Sample(8) }
-        \cup { [ZeroSnaphotOrdersGroup EXCEPT !.orderAttributes = one] : one \in Sample(2) }
-        \cup { [ZeroSnaphotOrdersGroup EXCEPT !.time = one] : one \in Sample(8) }
+(* Snapshot Orders Group at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotOrdersGroup ==
+    { ZeroSnapshotOrdersGroup }
+        \cup { [ZeroSnapshotOrdersGroup EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotOrdersGroup EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotOrdersGroup EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotOrdersGroup EXCEPT !.size = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotOrdersGroup EXCEPT !.orderPriority = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotOrdersGroup EXCEPT !.orderAttributes = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotOrdersGroup EXCEPT !.time = one] : one \in Sample(8) }
 
-(* A run of Snaphot Orders Group, written one after another *)
-RECURSIVE EncodeSnaphotOrdersGroupList(_)
-EncodeSnaphotOrdersGroupList(messages) ==
+(* A run of Snapshot Orders Group, written one after another *)
+RECURSIVE EncodeSnapshotOrdersGroupList(_)
+EncodeSnapshotOrdersGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeSnaphotOrdersGroup(Head(messages)) \o EncodeSnaphotOrdersGroupList(Tail(messages))
+    ELSE EncodeSnapshotOrdersGroup(Head(messages)) \o EncodeSnapshotOrdersGroupList(Tail(messages))
 
-(* As many Snaphot Orders Group as the field that counts them says *)
-RECURSIVE ReadSnaphotOrdersGroupList(_, _)
-ReadSnaphotOrdersGroupList(bytes, count) ==
+(* As many Snapshot Orders Group as the field that counts them says *)
+RECURSIVE ReadSnapshotOrdersGroupList(_, _)
+ReadSnapshotOrdersGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeSnaphotOrdersGroup(bytes)
+    ELSE LET one == DecodeSnapshotOrdersGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadSnaphotOrdersGroupList(one.rest, count - 1)
+             ELSE LET more == ReadSnapshotOrdersGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Snaphot Orders Group of each kind, for the lists that carry them *)
-OneSnaphotOrdersGroup == { ZeroSnaphotOrdersGroup }
+(* One Snapshot Orders Group of each kind, for the lists that carry them *)
+OneSnapshotOrdersGroup == { ZeroSnapshotOrdersGroup }
 
 (***************************************************************************)
-(* Snaphot Orders Groups                                                   *)
+(* Snapshot Orders Groups                                                  *)
 (***************************************************************************)
 
-SnaphotOrdersGroups ==
-    [ blockLength        : Sample(2),
-      snaphotOrdersGroup : SampleLists(OneSnaphotOrdersGroup) ]
+SnapshotOrdersGroups ==
+    [ blockLength         : Sample(2),
+      snapshotOrdersGroup : SampleLists(OneSnapshotOrdersGroup) ]
 
-EncodeSnaphotOrdersGroups(message) ==
+EncodeSnapshotOrdersGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.snaphotOrdersGroup), 1)
-        \o EncodeSnaphotOrdersGroupList(message.snaphotOrdersGroup)
+        \o EncodeUIntBE(Len(message.snapshotOrdersGroup), 1)
+        \o EncodeSnapshotOrdersGroupList(message.snapshotOrdersGroup)
 
-DecodeSnaphotOrdersGroups(bytes) ==
+DecodeSnapshotOrdersGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET snaphotOrdersGroup == ReadSnaphotOrdersGroupList(numInGroup.rest, numInGroup.value) IN IF ~snaphotOrdersGroup.ok THEN Fail ELSE
-    Ok([ blockLength        |-> blockLength.value,
-         snaphotOrdersGroup |-> snaphotOrdersGroup.value ], snaphotOrdersGroup.rest)
+    LET snapshotOrdersGroup == ReadSnapshotOrdersGroupList(numInGroup.rest, numInGroup.value) IN IF ~snapshotOrdersGroup.ok THEN Fail ELSE
+    Ok([ blockLength         |-> blockLength.value,
+         snapshotOrdersGroup |-> snapshotOrdersGroup.value ], snapshotOrdersGroup.rest)
 
-ZeroSnaphotOrdersGroups ==
-    [ blockLength        |-> [i \in 1 .. 2 |-> 0],
-      snaphotOrdersGroup |-> << >> ]
+ZeroSnapshotOrdersGroups ==
+    [ blockLength         |-> [i \in 1 .. 2 |-> 0],
+      snapshotOrdersGroup |-> << >> ]
 
-(* Snaphot Orders Groups at zero, then each field in turn at the values it is checked at *)
-CheckedSnaphotOrdersGroups ==
-    { ZeroSnaphotOrdersGroups }
-        \cup { [ZeroSnaphotOrdersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroSnaphotOrdersGroups EXCEPT !.snaphotOrdersGroup = one] : one \in SampleLists(OneSnaphotOrdersGroup) }
+(* Snapshot Orders Groups at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotOrdersGroups ==
+    { ZeroSnapshotOrdersGroups }
+        \cup { [ZeroSnapshotOrdersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotOrdersGroups EXCEPT !.snapshotOrdersGroup = one] : one \in SampleLists(OneSnapshotOrdersGroup) }
 
 (***************************************************************************)
 (* Order Book Snapshot Message                                             *)
@@ -1147,7 +1147,7 @@ OrderBookSnapshotMessage ==
       snapshotMessageInstructions : Sample(2),
       snapshotInstrumentsCount    : Sample(4),
       lastIncrementalMessageSeq   : Sample(8),
-      snaphotOrdersGroups         : SnaphotOrdersGroups ]
+      snapshotOrdersGroups        : SnapshotOrdersGroups ]
 
 EncodeOrderBookSnapshotMessage(message) ==
     message.instrumentId
@@ -1158,7 +1158,7 @@ EncodeOrderBookSnapshotMessage(message) ==
         \o message.snapshotMessageInstructions
         \o message.snapshotInstrumentsCount
         \o message.lastIncrementalMessageSeq
-        \o EncodeSnaphotOrdersGroups(message.snaphotOrdersGroups)
+        \o EncodeSnapshotOrdersGroups(message.snapshotOrdersGroups)
 
 DecodeOrderBookSnapshotMessage(bytes) ==
     LET instrumentId == ReadBytes(bytes, 4) IN IF ~instrumentId.ok THEN Fail ELSE
@@ -1169,7 +1169,7 @@ DecodeOrderBookSnapshotMessage(bytes) ==
     LET snapshotMessageInstructions == ReadBytes(instrumentTradingStatus.rest, 2) IN IF ~snapshotMessageInstructions.ok THEN Fail ELSE
     LET snapshotInstrumentsCount == ReadBytes(snapshotMessageInstructions.rest, 4) IN IF ~snapshotInstrumentsCount.ok THEN Fail ELSE
     LET lastIncrementalMessageSeq == ReadBytes(snapshotInstrumentsCount.rest, 8) IN IF ~lastIncrementalMessageSeq.ok THEN Fail ELSE
-    LET snaphotOrdersGroups == DecodeSnaphotOrdersGroups(lastIncrementalMessageSeq.rest) IN IF ~snaphotOrdersGroups.ok THEN Fail ELSE
+    LET snapshotOrdersGroups == DecodeSnapshotOrdersGroups(lastIncrementalMessageSeq.rest) IN IF ~snapshotOrdersGroups.ok THEN Fail ELSE
     Ok([ instrumentId                |-> instrumentId.value,
          instrumentMessageNo         |-> instrumentMessageNo.value,
          transactTime                |-> transactTime.value,
@@ -1178,7 +1178,7 @@ DecodeOrderBookSnapshotMessage(bytes) ==
          snapshotMessageInstructions |-> snapshotMessageInstructions.value,
          snapshotInstrumentsCount    |-> snapshotInstrumentsCount.value,
          lastIncrementalMessageSeq   |-> lastIncrementalMessageSeq.value,
-         snaphotOrdersGroups         |-> snaphotOrdersGroups.value ], snaphotOrdersGroups.rest)
+         snapshotOrdersGroups        |-> snapshotOrdersGroups.value ], snapshotOrdersGroups.rest)
 
 ZeroOrderBookSnapshotMessage ==
     [ instrumentId                |-> [i \in 1 .. 4 |-> 0],
@@ -1189,7 +1189,7 @@ ZeroOrderBookSnapshotMessage ==
       snapshotMessageInstructions |-> [i \in 1 .. 2 |-> 0],
       snapshotInstrumentsCount    |-> [i \in 1 .. 4 |-> 0],
       lastIncrementalMessageSeq   |-> [i \in 1 .. 8 |-> 0],
-      snaphotOrdersGroups         |-> ZeroSnaphotOrdersGroups ]
+      snapshotOrdersGroups        |-> ZeroSnapshotOrdersGroups ]
 
 (* Order Book Snapshot Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderBookSnapshotMessage ==
@@ -1202,7 +1202,7 @@ CheckedOrderBookSnapshotMessage ==
         \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.snapshotMessageInstructions = one] : one \in Sample(2) }
         \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.snapshotInstrumentsCount = one] : one \in Sample(4) }
         \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.lastIncrementalMessageSeq = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.snaphotOrdersGroups = one] : one \in CheckedSnaphotOrdersGroups }
+        \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.snapshotOrdersGroups = one] : one \in CheckedSnapshotOrdersGroups }
 
 (***************************************************************************)
 (* Market Summary Snapshot Message: 119 bytes                              *)
@@ -2581,18 +2581,18 @@ RoundTripTradeBustMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremetal Orders Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncremetalOrdersGroup ==
-    \A message \in CheckedIncremetalOrdersGroup :
-        LET read == DecodeIncremetalOrdersGroup(EncodeIncremetalOrdersGroup(message))
+(* Every Incremental Orders Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalOrdersGroup ==
+    \A message \in CheckedIncrementalOrdersGroup :
+        LET read == DecodeIncrementalOrdersGroup(EncodeIncrementalOrdersGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremetal Orders Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncremetalOrdersGroups ==
-    \A message \in CheckedIncremetalOrdersGroups :
-        LET read == DecodeIncremetalOrdersGroups(EncodeIncremetalOrdersGroups(message))
+(* Every Incremental Orders Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalOrdersGroups ==
+    \A message \in CheckedIncrementalOrdersGroups :
+        LET read == DecodeIncrementalOrdersGroups(EncodeIncrementalOrdersGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2613,18 +2613,18 @@ RoundTripMarketSummaryIncrementalMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snaphot Orders Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripSnaphotOrdersGroup ==
-    \A message \in CheckedSnaphotOrdersGroup :
-        LET read == DecodeSnaphotOrdersGroup(EncodeSnaphotOrdersGroup(message))
+(* Every Snapshot Orders Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripSnapshotOrdersGroup ==
+    \A message \in CheckedSnapshotOrdersGroup :
+        LET read == DecodeSnapshotOrdersGroup(EncodeSnapshotOrdersGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snaphot Orders Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripSnaphotOrdersGroups ==
-    \A message \in CheckedSnaphotOrdersGroups :
-        LET read == DecodeSnaphotOrdersGroups(EncodeSnaphotOrdersGroups(message))
+(* Every Snapshot Orders Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripSnapshotOrdersGroups ==
+    \A message \in CheckedSnapshotOrdersGroups :
+        LET read == DecodeSnapshotOrdersGroups(EncodeSnapshotOrdersGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
