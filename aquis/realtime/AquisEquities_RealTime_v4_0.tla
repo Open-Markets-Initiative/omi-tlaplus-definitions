@@ -20,8 +20,8 @@
 (* Note: Binary Mmt is a bit field set, checked as its 4 bytes rather than *)
 (* bit by bit.                                                             *)
 (*                                                                         *)
-(* Note: Security Definition Flags is a bit field set, checked as its 2    *)
-(* bytes rather than bit by bit.                                           *)
+(* Note: Flags is a bit field set, checked as its 2 bytes rather than bit  *)
+(* by bit.                                                                 *)
 (*                                                                         *)
 (* Note: Market Flags is a bit field set, checked as its 1 byte rather     *)
 (* than bit by bit.                                                        *)
@@ -107,10 +107,10 @@ SampleLists(entries) ==
         \cup { <<one, one>> : one \in entries }
 
 (***************************************************************************)
-(* Order Add: 28 bytes                                                     *)
+(* Order Add Message: 28 bytes                                             *)
 (***************************************************************************)
 
-OrderAdd ==
+OrderAddMessage ==
     [ securityId : Sample(2),
       side       : Sample(1),
       quantity   : Sample(4),
@@ -119,7 +119,7 @@ OrderAdd ==
       timestamp  : Sample(8),
       mdFlags    : Sample(1) ]
 
-EncodeOrderAdd(message) ==
+EncodeOrderAddMessage(message) ==
     message.securityId
         \o message.side
         \o message.quantity
@@ -128,7 +128,7 @@ EncodeOrderAdd(message) ==
         \o message.timestamp
         \o message.mdFlags
 
-DecodeOrderAdd(bytes) ==
+DecodeOrderAddMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
     LET side == ReadBytes(securityId.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET quantity == ReadBytes(side.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
@@ -144,7 +144,7 @@ DecodeOrderAdd(bytes) ==
          timestamp  |-> timestamp.value,
          mdFlags    |-> mdFlags.value ], mdFlags.rest)
 
-ZeroOrderAdd ==
+ZeroOrderAddMessage ==
     [ securityId |-> [i \in 1 .. 2 |-> 0],
       side       |-> [i \in 1 .. 1 |-> 0],
       quantity   |-> [i \in 1 .. 4 |-> 0],
@@ -153,34 +153,34 @@ ZeroOrderAdd ==
       timestamp  |-> [i \in 1 .. 8 |-> 0],
       mdFlags    |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Order Add at zero, then each field in turn at the values it is checked at *)
-CheckedOrderAdd ==
-    { ZeroOrderAdd }
-        \cup { [ZeroOrderAdd EXCEPT !.securityId = one] : one \in Sample(2) }
-        \cup { [ZeroOrderAdd EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAdd EXCEPT !.quantity = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAdd EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroOrderAdd EXCEPT !.orderRef = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAdd EXCEPT !.timestamp = one] : one \in Sample(8) }
-        \cup { [ZeroOrderAdd EXCEPT !.mdFlags = one] : one \in Sample(1) }
+(* Order Add Message at zero, then each field in turn at the values it is checked at *)
+CheckedOrderAddMessage ==
+    { ZeroOrderAddMessage }
+        \cup { [ZeroOrderAddMessage EXCEPT !.securityId = one] : one \in Sample(2) }
+        \cup { [ZeroOrderAddMessage EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAddMessage EXCEPT !.quantity = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddMessage EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroOrderAddMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAddMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
+        \cup { [ZeroOrderAddMessage EXCEPT !.mdFlags = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Order Cancel: 15 bytes                                                  *)
+(* Order Cancel Message: 15 bytes                                          *)
 (***************************************************************************)
 
-OrderCancel ==
+OrderCancelMessage ==
     [ securityId : Sample(2),
       orderRef   : Sample(4),
       timestamp  : Sample(8),
       mdFlags    : Sample(1) ]
 
-EncodeOrderCancel(message) ==
+EncodeOrderCancelMessage(message) ==
     message.securityId
         \o message.orderRef
         \o message.timestamp
         \o message.mdFlags
 
-DecodeOrderCancel(bytes) ==
+DecodeOrderCancelMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
     LET orderRef == ReadBytes(securityId.rest, 4) IN IF ~orderRef.ok THEN Fail ELSE
     LET timestamp == ReadBytes(orderRef.rest, 8) IN IF ~timestamp.ok THEN Fail ELSE
@@ -190,190 +190,190 @@ DecodeOrderCancel(bytes) ==
          timestamp  |-> timestamp.value,
          mdFlags    |-> mdFlags.value ], mdFlags.rest)
 
-ZeroOrderCancel ==
+ZeroOrderCancelMessage ==
     [ securityId |-> [i \in 1 .. 2 |-> 0],
       orderRef   |-> [i \in 1 .. 4 |-> 0],
       timestamp  |-> [i \in 1 .. 8 |-> 0],
       mdFlags    |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Order Cancel at zero, then each field in turn at the values it is checked at *)
-CheckedOrderCancel ==
-    { ZeroOrderCancel }
-        \cup { [ZeroOrderCancel EXCEPT !.securityId = one] : one \in Sample(2) }
-        \cup { [ZeroOrderCancel EXCEPT !.orderRef = one] : one \in Sample(4) }
-        \cup { [ZeroOrderCancel EXCEPT !.timestamp = one] : one \in Sample(8) }
-        \cup { [ZeroOrderCancel EXCEPT !.mdFlags = one] : one \in Sample(1) }
+(* Order Cancel Message at zero, then each field in turn at the values it is checked at *)
+CheckedOrderCancelMessage ==
+    { ZeroOrderCancelMessage }
+        \cup { [ZeroOrderCancelMessage EXCEPT !.securityId = one] : one \in Sample(2) }
+        \cup { [ZeroOrderCancelMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
+        \cup { [ZeroOrderCancelMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
+        \cup { [ZeroOrderCancelMessage EXCEPT !.mdFlags = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Order Modify: 27 bytes                                                  *)
+(* Order Modify Message: 27 bytes                                          *)
 (***************************************************************************)
 
-OrderModify ==
-    [ securityId : Sample(2),
-      quantity   : Sample(4),
-      price      : Sample(8),
-      orderRef   : Sample(4),
-      timestamp  : Sample(8),
-      mdFlags    : Sample(1) ]
+OrderModifyMessage ==
+    [ securityId        : Sample(2),
+      remainingQuantity : Sample(4),
+      price             : Sample(8),
+      orderRef          : Sample(4),
+      timestamp         : Sample(8),
+      mdFlags           : Sample(1) ]
 
-EncodeOrderModify(message) ==
+EncodeOrderModifyMessage(message) ==
     message.securityId
-        \o message.quantity
+        \o message.remainingQuantity
         \o message.price
         \o message.orderRef
         \o message.timestamp
         \o message.mdFlags
 
-DecodeOrderModify(bytes) ==
+DecodeOrderModifyMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
-    LET quantity == ReadBytes(securityId.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
-    LET price == ReadBytes(quantity.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET remainingQuantity == ReadBytes(securityId.rest, 4) IN IF ~remainingQuantity.ok THEN Fail ELSE
+    LET price == ReadBytes(remainingQuantity.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET orderRef == ReadBytes(price.rest, 4) IN IF ~orderRef.ok THEN Fail ELSE
     LET timestamp == ReadBytes(orderRef.rest, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET mdFlags == ReadBytes(timestamp.rest, 1) IN IF ~mdFlags.ok THEN Fail ELSE
-    Ok([ securityId |-> securityId.value,
-         quantity   |-> quantity.value,
-         price      |-> price.value,
-         orderRef   |-> orderRef.value,
-         timestamp  |-> timestamp.value,
-         mdFlags    |-> mdFlags.value ], mdFlags.rest)
+    Ok([ securityId        |-> securityId.value,
+         remainingQuantity |-> remainingQuantity.value,
+         price             |-> price.value,
+         orderRef          |-> orderRef.value,
+         timestamp         |-> timestamp.value,
+         mdFlags           |-> mdFlags.value ], mdFlags.rest)
 
-ZeroOrderModify ==
-    [ securityId |-> [i \in 1 .. 2 |-> 0],
-      quantity   |-> [i \in 1 .. 4 |-> 0],
-      price      |-> [i \in 1 .. 8 |-> 0],
-      orderRef   |-> [i \in 1 .. 4 |-> 0],
-      timestamp  |-> [i \in 1 .. 8 |-> 0],
-      mdFlags    |-> [i \in 1 .. 1 |-> 0] ]
+ZeroOrderModifyMessage ==
+    [ securityId        |-> [i \in 1 .. 2 |-> 0],
+      remainingQuantity |-> [i \in 1 .. 4 |-> 0],
+      price             |-> [i \in 1 .. 8 |-> 0],
+      orderRef          |-> [i \in 1 .. 4 |-> 0],
+      timestamp         |-> [i \in 1 .. 8 |-> 0],
+      mdFlags           |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Order Modify at zero, then each field in turn at the values it is checked at *)
-CheckedOrderModify ==
-    { ZeroOrderModify }
-        \cup { [ZeroOrderModify EXCEPT !.securityId = one] : one \in Sample(2) }
-        \cup { [ZeroOrderModify EXCEPT !.quantity = one] : one \in Sample(4) }
-        \cup { [ZeroOrderModify EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroOrderModify EXCEPT !.orderRef = one] : one \in Sample(4) }
-        \cup { [ZeroOrderModify EXCEPT !.timestamp = one] : one \in Sample(8) }
-        \cup { [ZeroOrderModify EXCEPT !.mdFlags = one] : one \in Sample(1) }
+(* Order Modify Message at zero, then each field in turn at the values it is checked at *)
+CheckedOrderModifyMessage ==
+    { ZeroOrderModifyMessage }
+        \cup { [ZeroOrderModifyMessage EXCEPT !.securityId = one] : one \in Sample(2) }
+        \cup { [ZeroOrderModifyMessage EXCEPT !.remainingQuantity = one] : one \in Sample(4) }
+        \cup { [ZeroOrderModifyMessage EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroOrderModifyMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
+        \cup { [ZeroOrderModifyMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
+        \cup { [ZeroOrderModifyMessage EXCEPT !.mdFlags = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Trade: 36 bytes                                                         *)
+(* Trade Message: 36 bytes                                                 *)
 (***************************************************************************)
 
-Trade ==
-    [ securityId : Sample(2),
-      tradeType  : Sample(1),
-      quantity   : Sample(4),
-      price      : Sample(8),
-      orderRef   : Sample(4),
-      tradeRef   : Sample(4),
-      timestamp  : Sample(8),
-      binaryMmt  : Sample(4),
-      mdFlags    : Sample(1) ]
+TradeMessage ==
+    [ securityId     : Sample(2),
+      tradeType      : Sample(1),
+      tradedQuantity : Sample(4),
+      executionPrice : Sample(8),
+      orderRef       : Sample(4),
+      tradeRef       : Sample(4),
+      timestamp      : Sample(8),
+      binaryMmt      : Sample(4),
+      mdFlags        : Sample(1) ]
 
-EncodeTrade(message) ==
+EncodeTradeMessage(message) ==
     message.securityId
         \o message.tradeType
-        \o message.quantity
-        \o message.price
+        \o message.tradedQuantity
+        \o message.executionPrice
         \o message.orderRef
         \o message.tradeRef
         \o message.timestamp
         \o message.binaryMmt
         \o message.mdFlags
 
-DecodeTrade(bytes) ==
+DecodeTradeMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
     LET tradeType == ReadBytes(securityId.rest, 1) IN IF ~tradeType.ok THEN Fail ELSE
-    LET quantity == ReadBytes(tradeType.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
-    LET price == ReadBytes(quantity.rest, 8) IN IF ~price.ok THEN Fail ELSE
-    LET orderRef == ReadBytes(price.rest, 4) IN IF ~orderRef.ok THEN Fail ELSE
+    LET tradedQuantity == ReadBytes(tradeType.rest, 4) IN IF ~tradedQuantity.ok THEN Fail ELSE
+    LET executionPrice == ReadBytes(tradedQuantity.rest, 8) IN IF ~executionPrice.ok THEN Fail ELSE
+    LET orderRef == ReadBytes(executionPrice.rest, 4) IN IF ~orderRef.ok THEN Fail ELSE
     LET tradeRef == ReadBytes(orderRef.rest, 4) IN IF ~tradeRef.ok THEN Fail ELSE
     LET timestamp == ReadBytes(tradeRef.rest, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET binaryMmt == ReadBytes(timestamp.rest, 4) IN IF ~binaryMmt.ok THEN Fail ELSE
     LET mdFlags == ReadBytes(binaryMmt.rest, 1) IN IF ~mdFlags.ok THEN Fail ELSE
-    Ok([ securityId |-> securityId.value,
-         tradeType  |-> tradeType.value,
-         quantity   |-> quantity.value,
-         price      |-> price.value,
-         orderRef   |-> orderRef.value,
-         tradeRef   |-> tradeRef.value,
-         timestamp  |-> timestamp.value,
-         binaryMmt  |-> binaryMmt.value,
-         mdFlags    |-> mdFlags.value ], mdFlags.rest)
+    Ok([ securityId     |-> securityId.value,
+         tradeType      |-> tradeType.value,
+         tradedQuantity |-> tradedQuantity.value,
+         executionPrice |-> executionPrice.value,
+         orderRef       |-> orderRef.value,
+         tradeRef       |-> tradeRef.value,
+         timestamp      |-> timestamp.value,
+         binaryMmt      |-> binaryMmt.value,
+         mdFlags        |-> mdFlags.value ], mdFlags.rest)
 
-ZeroTrade ==
-    [ securityId |-> [i \in 1 .. 2 |-> 0],
-      tradeType  |-> [i \in 1 .. 1 |-> 0],
-      quantity   |-> [i \in 1 .. 4 |-> 0],
-      price      |-> [i \in 1 .. 8 |-> 0],
-      orderRef   |-> [i \in 1 .. 4 |-> 0],
-      tradeRef   |-> [i \in 1 .. 4 |-> 0],
-      timestamp  |-> [i \in 1 .. 8 |-> 0],
-      binaryMmt  |-> [i \in 1 .. 4 |-> 0],
-      mdFlags    |-> [i \in 1 .. 1 |-> 0] ]
+ZeroTradeMessage ==
+    [ securityId     |-> [i \in 1 .. 2 |-> 0],
+      tradeType      |-> [i \in 1 .. 1 |-> 0],
+      tradedQuantity |-> [i \in 1 .. 4 |-> 0],
+      executionPrice |-> [i \in 1 .. 8 |-> 0],
+      orderRef       |-> [i \in 1 .. 4 |-> 0],
+      tradeRef       |-> [i \in 1 .. 4 |-> 0],
+      timestamp      |-> [i \in 1 .. 8 |-> 0],
+      binaryMmt      |-> [i \in 1 .. 4 |-> 0],
+      mdFlags        |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Trade at zero, then each field in turn at the values it is checked at *)
-CheckedTrade ==
-    { ZeroTrade }
-        \cup { [ZeroTrade EXCEPT !.securityId = one] : one \in Sample(2) }
-        \cup { [ZeroTrade EXCEPT !.tradeType = one] : one \in Sample(1) }
-        \cup { [ZeroTrade EXCEPT !.quantity = one] : one \in Sample(4) }
-        \cup { [ZeroTrade EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroTrade EXCEPT !.orderRef = one] : one \in Sample(4) }
-        \cup { [ZeroTrade EXCEPT !.tradeRef = one] : one \in Sample(4) }
-        \cup { [ZeroTrade EXCEPT !.timestamp = one] : one \in Sample(8) }
-        \cup { [ZeroTrade EXCEPT !.binaryMmt = one] : one \in Sample(4) }
-        \cup { [ZeroTrade EXCEPT !.mdFlags = one] : one \in Sample(1) }
+(* Trade Message at zero, then each field in turn at the values it is checked at *)
+CheckedTradeMessage ==
+    { ZeroTradeMessage }
+        \cup { [ZeroTradeMessage EXCEPT !.securityId = one] : one \in Sample(2) }
+        \cup { [ZeroTradeMessage EXCEPT !.tradeType = one] : one \in Sample(1) }
+        \cup { [ZeroTradeMessage EXCEPT !.tradedQuantity = one] : one \in Sample(4) }
+        \cup { [ZeroTradeMessage EXCEPT !.executionPrice = one] : one \in Sample(8) }
+        \cup { [ZeroTradeMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
+        \cup { [ZeroTradeMessage EXCEPT !.tradeRef = one] : one \in Sample(4) }
+        \cup { [ZeroTradeMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
+        \cup { [ZeroTradeMessage EXCEPT !.binaryMmt = one] : one \in Sample(4) }
+        \cup { [ZeroTradeMessage EXCEPT !.mdFlags = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Trade Bust Message: 30 bytes                                            *)
 (***************************************************************************)
 
 TradeBustMessage ==
-    [ securityId : Sample(2),
-      quantity   : Sample(4),
-      price      : Sample(8),
-      tradeRef   : Sample(4),
-      timestamp  : Sample(8),
-      binaryMmt  : Sample(4) ]
+    [ securityId     : Sample(2),
+      tradedQuantity : Sample(4),
+      executionPrice : Sample(8),
+      tradeRef       : Sample(4),
+      timestamp      : Sample(8),
+      binaryMmt      : Sample(4) ]
 
 EncodeTradeBustMessage(message) ==
     message.securityId
-        \o message.quantity
-        \o message.price
+        \o message.tradedQuantity
+        \o message.executionPrice
         \o message.tradeRef
         \o message.timestamp
         \o message.binaryMmt
 
 DecodeTradeBustMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
-    LET quantity == ReadBytes(securityId.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
-    LET price == ReadBytes(quantity.rest, 8) IN IF ~price.ok THEN Fail ELSE
-    LET tradeRef == ReadBytes(price.rest, 4) IN IF ~tradeRef.ok THEN Fail ELSE
+    LET tradedQuantity == ReadBytes(securityId.rest, 4) IN IF ~tradedQuantity.ok THEN Fail ELSE
+    LET executionPrice == ReadBytes(tradedQuantity.rest, 8) IN IF ~executionPrice.ok THEN Fail ELSE
+    LET tradeRef == ReadBytes(executionPrice.rest, 4) IN IF ~tradeRef.ok THEN Fail ELSE
     LET timestamp == ReadBytes(tradeRef.rest, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET binaryMmt == ReadBytes(timestamp.rest, 4) IN IF ~binaryMmt.ok THEN Fail ELSE
-    Ok([ securityId |-> securityId.value,
-         quantity   |-> quantity.value,
-         price      |-> price.value,
-         tradeRef   |-> tradeRef.value,
-         timestamp  |-> timestamp.value,
-         binaryMmt  |-> binaryMmt.value ], binaryMmt.rest)
+    Ok([ securityId     |-> securityId.value,
+         tradedQuantity |-> tradedQuantity.value,
+         executionPrice |-> executionPrice.value,
+         tradeRef       |-> tradeRef.value,
+         timestamp      |-> timestamp.value,
+         binaryMmt      |-> binaryMmt.value ], binaryMmt.rest)
 
 ZeroTradeBustMessage ==
-    [ securityId |-> [i \in 1 .. 2 |-> 0],
-      quantity   |-> [i \in 1 .. 4 |-> 0],
-      price      |-> [i \in 1 .. 8 |-> 0],
-      tradeRef   |-> [i \in 1 .. 4 |-> 0],
-      timestamp  |-> [i \in 1 .. 8 |-> 0],
-      binaryMmt  |-> [i \in 1 .. 4 |-> 0] ]
+    [ securityId     |-> [i \in 1 .. 2 |-> 0],
+      tradedQuantity |-> [i \in 1 .. 4 |-> 0],
+      executionPrice |-> [i \in 1 .. 8 |-> 0],
+      tradeRef       |-> [i \in 1 .. 4 |-> 0],
+      timestamp      |-> [i \in 1 .. 8 |-> 0],
+      binaryMmt      |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Trade Bust Message at zero, then each field in turn at the values it is checked at *)
 CheckedTradeBustMessage ==
     { ZeroTradeBustMessage }
         \cup { [ZeroTradeBustMessage EXCEPT !.securityId = one] : one \in Sample(2) }
-        \cup { [ZeroTradeBustMessage EXCEPT !.quantity = one] : one \in Sample(4) }
-        \cup { [ZeroTradeBustMessage EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroTradeBustMessage EXCEPT !.tradedQuantity = one] : one \in Sample(4) }
+        \cup { [ZeroTradeBustMessage EXCEPT !.executionPrice = one] : one \in Sample(8) }
         \cup { [ZeroTradeBustMessage EXCEPT !.tradeRef = one] : one \in Sample(4) }
         \cup { [ZeroTradeBustMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroTradeBustMessage EXCEPT !.binaryMmt = one] : one \in Sample(4) }
@@ -451,15 +451,15 @@ CheckedLotSizeComposite ==
 (***************************************************************************)
 
 SecurityDefinitionMessage ==
-    [ securityId              : Sample(2),
-      umtf                    : Sample(6),
-      isin                    : Sample(12),
-      currency                : Sample(3),
-      mic                     : Sample(4),
-      tickTableId             : Sample(1),
-      securityDefinitionFlags : Sample(2),
-      reserved20              : Sample(20),
-      lotSizeComposite        : LotSizeComposite ]
+    [ securityId       : Sample(2),
+      umtf             : Sample(6),
+      isin             : Sample(12),
+      currency         : Sample(3),
+      mic              : Sample(4),
+      tickTableId      : Sample(1),
+      flags            : Sample(2),
+      reserved20       : Sample(20),
+      lotSizeComposite : LotSizeComposite ]
 
 EncodeSecurityDefinitionMessage(message) ==
     message.securityId
@@ -468,7 +468,7 @@ EncodeSecurityDefinitionMessage(message) ==
         \o message.currency
         \o message.mic
         \o message.tickTableId
-        \o message.securityDefinitionFlags
+        \o message.flags
         \o message.reserved20
         \o EncodeLotSizeComposite(message.lotSizeComposite)
 
@@ -479,29 +479,29 @@ DecodeSecurityDefinitionMessage(bytes) ==
     LET currency == ReadBytes(isin.rest, 3) IN IF ~currency.ok THEN Fail ELSE
     LET mic == ReadBytes(currency.rest, 4) IN IF ~mic.ok THEN Fail ELSE
     LET tickTableId == ReadBytes(mic.rest, 1) IN IF ~tickTableId.ok THEN Fail ELSE
-    LET securityDefinitionFlags == ReadBytes(tickTableId.rest, 2) IN IF ~securityDefinitionFlags.ok THEN Fail ELSE
-    LET reserved20 == ReadBytes(securityDefinitionFlags.rest, 20) IN IF ~reserved20.ok THEN Fail ELSE
+    LET flags == ReadBytes(tickTableId.rest, 2) IN IF ~flags.ok THEN Fail ELSE
+    LET reserved20 == ReadBytes(flags.rest, 20) IN IF ~reserved20.ok THEN Fail ELSE
     LET lotSizeComposite == DecodeLotSizeComposite(reserved20.rest) IN IF ~lotSizeComposite.ok THEN Fail ELSE
-    Ok([ securityId              |-> securityId.value,
-         umtf                    |-> umtf.value,
-         isin                    |-> isin.value,
-         currency                |-> currency.value,
-         mic                     |-> mic.value,
-         tickTableId             |-> tickTableId.value,
-         securityDefinitionFlags |-> securityDefinitionFlags.value,
-         reserved20              |-> reserved20.value,
-         lotSizeComposite        |-> lotSizeComposite.value ], lotSizeComposite.rest)
+    Ok([ securityId       |-> securityId.value,
+         umtf             |-> umtf.value,
+         isin             |-> isin.value,
+         currency         |-> currency.value,
+         mic              |-> mic.value,
+         tickTableId      |-> tickTableId.value,
+         flags            |-> flags.value,
+         reserved20       |-> reserved20.value,
+         lotSizeComposite |-> lotSizeComposite.value ], lotSizeComposite.rest)
 
 ZeroSecurityDefinitionMessage ==
-    [ securityId              |-> [i \in 1 .. 2 |-> 0],
-      umtf                    |-> [i \in 1 .. 6 |-> 0],
-      isin                    |-> [i \in 1 .. 12 |-> 0],
-      currency                |-> [i \in 1 .. 3 |-> 0],
-      mic                     |-> [i \in 1 .. 4 |-> 0],
-      tickTableId             |-> [i \in 1 .. 1 |-> 0],
-      securityDefinitionFlags |-> [i \in 1 .. 2 |-> 0],
-      reserved20              |-> [i \in 1 .. 20 |-> 0],
-      lotSizeComposite        |-> ZeroLotSizeComposite ]
+    [ securityId       |-> [i \in 1 .. 2 |-> 0],
+      umtf             |-> [i \in 1 .. 6 |-> 0],
+      isin             |-> [i \in 1 .. 12 |-> 0],
+      currency         |-> [i \in 1 .. 3 |-> 0],
+      mic              |-> [i \in 1 .. 4 |-> 0],
+      tickTableId      |-> [i \in 1 .. 1 |-> 0],
+      flags            |-> [i \in 1 .. 2 |-> 0],
+      reserved20       |-> [i \in 1 .. 20 |-> 0],
+      lotSizeComposite |-> ZeroLotSizeComposite ]
 
 (* Security Definition Message at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionMessage ==
@@ -512,7 +512,7 @@ CheckedSecurityDefinitionMessage ==
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.currency = one] : one \in Sample(3) }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.mic = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.tickTableId = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionMessage EXCEPT !.securityDefinitionFlags = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionMessage EXCEPT !.flags = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.reserved20 = one] : one \in Sample(20) }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.lotSizeComposite = one] : one \in CheckedLotSizeComposite }
 
@@ -563,22 +563,22 @@ CheckedSecurityStatusMessage ==
         \cup { [ZeroSecurityStatusMessage EXCEPT !.tradingPhase = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Ao D Update Message: 22 bytes                                           *)
+(* Aod Update Message: 22 bytes                                            *)
 (***************************************************************************)
 
-AoDUpdateMessage ==
+AodUpdateMessage ==
     [ securityId      : Sample(2),
       indicativePrice : Sample(8),
       matchVol        : Sample(4),
       timestamp       : Sample(8) ]
 
-EncodeAoDUpdateMessage(message) ==
+EncodeAodUpdateMessage(message) ==
     message.securityId
         \o message.indicativePrice
         \o message.matchVol
         \o message.timestamp
 
-DecodeAoDUpdateMessage(bytes) ==
+DecodeAodUpdateMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
     LET indicativePrice == ReadBytes(securityId.rest, 8) IN IF ~indicativePrice.ok THEN Fail ELSE
     LET matchVol == ReadBytes(indicativePrice.rest, 4) IN IF ~matchVol.ok THEN Fail ELSE
@@ -588,39 +588,39 @@ DecodeAoDUpdateMessage(bytes) ==
          matchVol        |-> matchVol.value,
          timestamp       |-> timestamp.value ], timestamp.rest)
 
-ZeroAoDUpdateMessage ==
+ZeroAodUpdateMessage ==
     [ securityId      |-> [i \in 1 .. 2 |-> 0],
       indicativePrice |-> [i \in 1 .. 8 |-> 0],
       matchVol        |-> [i \in 1 .. 4 |-> 0],
       timestamp       |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Ao D Update Message at zero, then each field in turn at the values it is checked at *)
-CheckedAoDUpdateMessage ==
-    { ZeroAoDUpdateMessage }
-        \cup { [ZeroAoDUpdateMessage EXCEPT !.securityId = one] : one \in Sample(2) }
-        \cup { [ZeroAoDUpdateMessage EXCEPT !.indicativePrice = one] : one \in Sample(8) }
-        \cup { [ZeroAoDUpdateMessage EXCEPT !.matchVol = one] : one \in Sample(4) }
-        \cup { [ZeroAoDUpdateMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
+(* Aod Update Message at zero, then each field in turn at the values it is checked at *)
+CheckedAodUpdateMessage ==
+    { ZeroAodUpdateMessage }
+        \cup { [ZeroAodUpdateMessage EXCEPT !.securityId = one] : one \in Sample(2) }
+        \cup { [ZeroAodUpdateMessage EXCEPT !.indicativePrice = one] : one \in Sample(8) }
+        \cup { [ZeroAodUpdateMessage EXCEPT !.matchVol = one] : one \in Sample(4) }
+        \cup { [ZeroAodUpdateMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Ma C Update Message: 26 bytes                                           *)
+(* Mac Update Message: 26 bytes                                            *)
 (***************************************************************************)
 
-MaCUpdateMessage ==
+MacUpdateMessage ==
     [ securityId      : Sample(2),
       indicativePrice : Sample(8),
       closingBuyQty   : Sample(4),
       closingSellQty  : Sample(4),
       timestamp       : Sample(8) ]
 
-EncodeMaCUpdateMessage(message) ==
+EncodeMacUpdateMessage(message) ==
     message.securityId
         \o message.indicativePrice
         \o message.closingBuyQty
         \o message.closingSellQty
         \o message.timestamp
 
-DecodeMaCUpdateMessage(bytes) ==
+DecodeMacUpdateMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
     LET indicativePrice == ReadBytes(securityId.rest, 8) IN IF ~indicativePrice.ok THEN Fail ELSE
     LET closingBuyQty == ReadBytes(indicativePrice.rest, 4) IN IF ~closingBuyQty.ok THEN Fail ELSE
@@ -632,90 +632,95 @@ DecodeMaCUpdateMessage(bytes) ==
          closingSellQty  |-> closingSellQty.value,
          timestamp       |-> timestamp.value ], timestamp.rest)
 
-ZeroMaCUpdateMessage ==
+ZeroMacUpdateMessage ==
     [ securityId      |-> [i \in 1 .. 2 |-> 0],
       indicativePrice |-> [i \in 1 .. 8 |-> 0],
       closingBuyQty   |-> [i \in 1 .. 4 |-> 0],
       closingSellQty  |-> [i \in 1 .. 4 |-> 0],
       timestamp       |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Ma C Update Message at zero, then each field in turn at the values it is checked at *)
-CheckedMaCUpdateMessage ==
-    { ZeroMaCUpdateMessage }
-        \cup { [ZeroMaCUpdateMessage EXCEPT !.securityId = one] : one \in Sample(2) }
-        \cup { [ZeroMaCUpdateMessage EXCEPT !.indicativePrice = one] : one \in Sample(8) }
-        \cup { [ZeroMaCUpdateMessage EXCEPT !.closingBuyQty = one] : one \in Sample(4) }
-        \cup { [ZeroMaCUpdateMessage EXCEPT !.closingSellQty = one] : one \in Sample(4) }
-        \cup { [ZeroMaCUpdateMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
+(* Mac Update Message at zero, then each field in turn at the values it is checked at *)
+CheckedMacUpdateMessage ==
+    { ZeroMacUpdateMessage }
+        \cup { [ZeroMacUpdateMessage EXCEPT !.securityId = one] : one \in Sample(2) }
+        \cup { [ZeroMacUpdateMessage EXCEPT !.indicativePrice = one] : one \in Sample(8) }
+        \cup { [ZeroMacUpdateMessage EXCEPT !.closingBuyQty = one] : one \in Sample(4) }
+        \cup { [ZeroMacUpdateMessage EXCEPT !.closingSellQty = one] : one \in Sample(4) }
+        \cup { [ZeroMacUpdateMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Payload, selected by Msg Type                                           *)
 (***************************************************************************)
 
-OrderAddCode == 2  \* 0x02
-OrderCancelCode == 3  \* 0x03
-OrderModifyCode == 4  \* 0x04
-TradeCode == 5  \* 0x05
+HeartbeatMessageCode == 1  \* 0x01
+OrderAddMessageCode == 2  \* 0x02
+OrderCancelMessageCode == 3  \* 0x03
+OrderModifyMessageCode == 4  \* 0x04
+TradeMessageCode == 5  \* 0x05
 TradeBustMessageCode == 6  \* 0x06
 TickTableDataMessageCode == 7  \* 0x07
 SecurityDefinitionMessageCode == 8  \* 0x08
 SecurityStatusMessageCode == 9  \* 0x09
-AoDUpdateMessageCode == 17  \* 0x11
-MaCUpdateMessageCode == 16  \* 0x10
+AodUpdateMessageCode == 17  \* 0x11
+MacUpdateMessageCode == 16  \* 0x10
 
 Payload ==
-    [ tag : {OrderAddCode}, body : OrderAdd ]
-        \cup [ tag : {OrderCancelCode}, body : OrderCancel ]
-        \cup [ tag : {OrderModifyCode}, body : OrderModify ]
-        \cup [ tag : {TradeCode}, body : Trade ]
+    [ tag : {HeartbeatMessageCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {OrderAddMessageCode}, body : OrderAddMessage ]
+        \cup [ tag : {OrderCancelMessageCode}, body : OrderCancelMessage ]
+        \cup [ tag : {OrderModifyMessageCode}, body : OrderModifyMessage ]
+        \cup [ tag : {TradeMessageCode}, body : TradeMessage ]
         \cup [ tag : {TradeBustMessageCode}, body : TradeBustMessage ]
         \cup [ tag : {TickTableDataMessageCode}, body : TickTableDataMessage ]
         \cup [ tag : {SecurityDefinitionMessageCode}, body : SecurityDefinitionMessage ]
         \cup [ tag : {SecurityStatusMessageCode}, body : SecurityStatusMessage ]
-        \cup [ tag : {AoDUpdateMessageCode}, body : AoDUpdateMessage ]
-        \cup [ tag : {MaCUpdateMessageCode}, body : MaCUpdateMessage ]
+        \cup [ tag : {AodUpdateMessageCode}, body : AodUpdateMessage ]
+        \cup [ tag : {MacUpdateMessageCode}, body : MacUpdateMessage ]
 
 EncodePayload(message) ==
-    CASE message.tag = OrderAddCode -> EncodeOrderAdd(message.body)
-      [] message.tag = OrderCancelCode -> EncodeOrderCancel(message.body)
-      [] message.tag = OrderModifyCode -> EncodeOrderModify(message.body)
-      [] message.tag = TradeCode -> EncodeTrade(message.body)
+    CASE message.tag = HeartbeatMessageCode -> << >>
+      [] message.tag = OrderAddMessageCode -> EncodeOrderAddMessage(message.body)
+      [] message.tag = OrderCancelMessageCode -> EncodeOrderCancelMessage(message.body)
+      [] message.tag = OrderModifyMessageCode -> EncodeOrderModifyMessage(message.body)
+      [] message.tag = TradeMessageCode -> EncodeTradeMessage(message.body)
       [] message.tag = TradeBustMessageCode -> EncodeTradeBustMessage(message.body)
       [] message.tag = TickTableDataMessageCode -> EncodeTickTableDataMessage(message.body)
       [] message.tag = SecurityDefinitionMessageCode -> EncodeSecurityDefinitionMessage(message.body)
       [] message.tag = SecurityStatusMessageCode -> EncodeSecurityStatusMessage(message.body)
-      [] message.tag = AoDUpdateMessageCode -> EncodeAoDUpdateMessage(message.body)
-      [] message.tag = MaCUpdateMessageCode -> EncodeMaCUpdateMessage(message.body)
+      [] message.tag = AodUpdateMessageCode -> EncodeAodUpdateMessage(message.body)
+      [] message.tag = MacUpdateMessageCode -> EncodeMacUpdateMessage(message.body)
 
 DecodePayload(tag, bytes) ==
     LET read ==
-            CASE tag = OrderAddCode -> DecodeOrderAdd(bytes)
-              [] tag = OrderCancelCode -> DecodeOrderCancel(bytes)
-              [] tag = OrderModifyCode -> DecodeOrderModify(bytes)
-              [] tag = TradeCode -> DecodeTrade(bytes)
+            CASE tag = HeartbeatMessageCode -> Ok([empty |-> 0], bytes)
+              [] tag = OrderAddMessageCode -> DecodeOrderAddMessage(bytes)
+              [] tag = OrderCancelMessageCode -> DecodeOrderCancelMessage(bytes)
+              [] tag = OrderModifyMessageCode -> DecodeOrderModifyMessage(bytes)
+              [] tag = TradeMessageCode -> DecodeTradeMessage(bytes)
               [] tag = TradeBustMessageCode -> DecodeTradeBustMessage(bytes)
               [] tag = TickTableDataMessageCode -> DecodeTickTableDataMessage(bytes)
               [] tag = SecurityDefinitionMessageCode -> DecodeSecurityDefinitionMessage(bytes)
               [] tag = SecurityStatusMessageCode -> DecodeSecurityStatusMessage(bytes)
-              [] tag = AoDUpdateMessageCode -> DecodeAoDUpdateMessage(bytes)
-              [] tag = MaCUpdateMessageCode -> DecodeMaCUpdateMessage(bytes)
+              [] tag = AodUpdateMessageCode -> DecodeAodUpdateMessage(bytes)
+              [] tag = MacUpdateMessageCode -> DecodeMacUpdateMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroPayload == [tag |-> OrderAddCode, body |-> ZeroOrderAdd]
+ZeroPayload == [tag |-> HeartbeatMessageCode, body |-> [empty |-> 0]]
 
 (* Each Payload in turn, at the values the message it names is checked at *)
 CheckedPayload ==
-    { [tag |-> OrderAddCode, body |-> one] : one \in CheckedOrderAdd }
-        \cup { [tag |-> OrderCancelCode, body |-> one] : one \in CheckedOrderCancel }
-        \cup { [tag |-> OrderModifyCode, body |-> one] : one \in CheckedOrderModify }
-        \cup { [tag |-> TradeCode, body |-> one] : one \in CheckedTrade }
+    { [tag |-> HeartbeatMessageCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> OrderAddMessageCode, body |-> one] : one \in CheckedOrderAddMessage }
+        \cup { [tag |-> OrderCancelMessageCode, body |-> one] : one \in CheckedOrderCancelMessage }
+        \cup { [tag |-> OrderModifyMessageCode, body |-> one] : one \in CheckedOrderModifyMessage }
+        \cup { [tag |-> TradeMessageCode, body |-> one] : one \in CheckedTradeMessage }
         \cup { [tag |-> TradeBustMessageCode, body |-> one] : one \in CheckedTradeBustMessage }
         \cup { [tag |-> TickTableDataMessageCode, body |-> one] : one \in CheckedTickTableDataMessage }
         \cup { [tag |-> SecurityDefinitionMessageCode, body |-> one] : one \in CheckedSecurityDefinitionMessage }
         \cup { [tag |-> SecurityStatusMessageCode, body |-> one] : one \in CheckedSecurityStatusMessage }
-        \cup { [tag |-> AoDUpdateMessageCode, body |-> one] : one \in CheckedAoDUpdateMessage }
-        \cup { [tag |-> MaCUpdateMessageCode, body |-> one] : one \in CheckedMaCUpdateMessage }
+        \cup { [tag |-> AodUpdateMessageCode, body |-> one] : one \in CheckedAodUpdateMessage }
+        \cup { [tag |-> MacUpdateMessageCode, body |-> one] : one \in CheckedMacUpdateMessage }
 
 (***************************************************************************)
 (* Message, framed by Msg Length                                           *)
@@ -778,16 +783,17 @@ ReadMessageList(bytes, count) ==
 
 (* One Message of each kind, for the lists that carry them *)
 OneMessage ==
-    { [ZeroMessage EXCEPT !.payload = [tag |-> OrderAddCode, body |-> ZeroOrderAdd]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> OrderCancelCode, body |-> ZeroOrderCancel]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> OrderModifyCode, body |-> ZeroOrderModify]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> TradeCode, body |-> ZeroTrade]],
+    { [ZeroMessage EXCEPT !.payload = [tag |-> HeartbeatMessageCode, body |-> [empty |-> 0]]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OrderAddMessageCode, body |-> ZeroOrderAddMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OrderCancelMessageCode, body |-> ZeroOrderCancelMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> OrderModifyMessageCode, body |-> ZeroOrderModifyMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> TradeMessageCode, body |-> ZeroTradeMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TradeBustMessageCode, body |-> ZeroTradeBustMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> TickTableDataMessageCode, body |-> ZeroTickTableDataMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SecurityDefinitionMessageCode, body |-> ZeroSecurityDefinitionMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SecurityStatusMessageCode, body |-> ZeroSecurityStatusMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> AoDUpdateMessageCode, body |-> ZeroAoDUpdateMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MaCUpdateMessageCode, body |-> ZeroMaCUpdateMessage]] }
+      [ZeroMessage EXCEPT !.payload = [tag |-> AodUpdateMessageCode, body |-> ZeroAodUpdateMessage]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> MacUpdateMessageCode, body |-> ZeroMacUpdateMessage]] }
 
 (***************************************************************************)
 (* Packet                                                                  *)
@@ -829,34 +835,34 @@ RoundTripUIntLE ==
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
                 /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
-(* Every Order Add decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderAdd ==
-    \A message \in CheckedOrderAdd :
-        LET read == DecodeOrderAdd(EncodeOrderAdd(message))
+(* Every Order Add Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderAddMessage ==
+    \A message \in CheckedOrderAddMessage :
+        LET read == DecodeOrderAddMessage(EncodeOrderAddMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Cancel decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderCancel ==
-    \A message \in CheckedOrderCancel :
-        LET read == DecodeOrderCancel(EncodeOrderCancel(message))
+(* Every Order Cancel Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderCancelMessage ==
+    \A message \in CheckedOrderCancelMessage :
+        LET read == DecodeOrderCancelMessage(EncodeOrderCancelMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Modify decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderModify ==
-    \A message \in CheckedOrderModify :
-        LET read == DecodeOrderModify(EncodeOrderModify(message))
+(* Every Order Modify Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderModifyMessage ==
+    \A message \in CheckedOrderModifyMessage :
+        LET read == DecodeOrderModifyMessage(EncodeOrderModifyMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Trade decodes back to what was encoded, and leaves nothing over *)
-RoundTripTrade ==
-    \A message \in CheckedTrade :
-        LET read == DecodeTrade(EncodeTrade(message))
+(* Every Trade Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTradeMessage ==
+    \A message \in CheckedTradeMessage :
+        LET read == DecodeTradeMessage(EncodeTradeMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -901,18 +907,18 @@ RoundTripSecurityStatusMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Ao D Update Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripAoDUpdateMessage ==
-    \A message \in CheckedAoDUpdateMessage :
-        LET read == DecodeAoDUpdateMessage(EncodeAoDUpdateMessage(message))
+(* Every Aod Update Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripAodUpdateMessage ==
+    \A message \in CheckedAodUpdateMessage :
+        LET read == DecodeAodUpdateMessage(EncodeAodUpdateMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Ma C Update Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripMaCUpdateMessage ==
-    \A message \in CheckedMaCUpdateMessage :
-        LET read == DecodeMaCUpdateMessage(EncodeMaCUpdateMessage(message))
+(* Every Mac Update Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMacUpdateMessage ==
+    \A message \in CheckedMacUpdateMessage :
+        LET read == DecodeMacUpdateMessage(EncodeMacUpdateMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

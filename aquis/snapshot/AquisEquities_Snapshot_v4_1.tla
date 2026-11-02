@@ -236,24 +236,24 @@ CheckedBookEntryMessage ==
         \cup { [ZeroBookEntryMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Ma C Book Entry Message: 19 bytes                                       *)
+(* Mac Book Entry Message: 19 bytes                                        *)
 (***************************************************************************)
 
-MaCBookEntryMessage ==
+MacBookEntryMessage ==
     [ securityId : Sample(2),
       side       : Sample(1),
       quantity   : Sample(4),
       price      : Sample(8),
       orderRef   : Sample(4) ]
 
-EncodeMaCBookEntryMessage(message) ==
+EncodeMacBookEntryMessage(message) ==
     message.securityId
         \o message.side
         \o message.quantity
         \o message.price
         \o message.orderRef
 
-DecodeMaCBookEntryMessage(bytes) ==
+DecodeMacBookEntryMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 2) IN IF ~securityId.ok THEN Fail ELSE
     LET side == ReadBytes(securityId.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET quantity == ReadBytes(side.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
@@ -265,21 +265,21 @@ DecodeMaCBookEntryMessage(bytes) ==
          price      |-> price.value,
          orderRef   |-> orderRef.value ], orderRef.rest)
 
-ZeroMaCBookEntryMessage ==
+ZeroMacBookEntryMessage ==
     [ securityId |-> [i \in 1 .. 2 |-> 0],
       side       |-> [i \in 1 .. 1 |-> 0],
       quantity   |-> [i \in 1 .. 4 |-> 0],
       price      |-> [i \in 1 .. 8 |-> 0],
       orderRef   |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Ma C Book Entry Message at zero, then each field in turn at the values it is checked at *)
-CheckedMaCBookEntryMessage ==
-    { ZeroMaCBookEntryMessage }
-        \cup { [ZeroMaCBookEntryMessage EXCEPT !.securityId = one] : one \in Sample(2) }
-        \cup { [ZeroMaCBookEntryMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroMaCBookEntryMessage EXCEPT !.quantity = one] : one \in Sample(4) }
-        \cup { [ZeroMaCBookEntryMessage EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroMaCBookEntryMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
+(* Mac Book Entry Message at zero, then each field in turn at the values it is checked at *)
+CheckedMacBookEntryMessage ==
+    { ZeroMacBookEntryMessage }
+        \cup { [ZeroMacBookEntryMessage EXCEPT !.securityId = one] : one \in Sample(2) }
+        \cup { [ZeroMacBookEntryMessage EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroMacBookEntryMessage EXCEPT !.quantity = one] : one \in Sample(4) }
+        \cup { [ZeroMacBookEntryMessage EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroMacBookEntryMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Payload, selected by Msg Type                                           *)
@@ -288,26 +288,26 @@ CheckedMaCBookEntryMessage ==
 SnapshotStartMessageCode == 10  \* 0x0a
 BookStatusMessageCode == 11  \* 0x0b
 BookEntryMessageCode == 12  \* 0x0c
-MaCBookEntryMessageCode == 18  \* 0x12
+MacBookEntryMessageCode == 18  \* 0x12
 
 Payload ==
     [ tag : {SnapshotStartMessageCode}, body : SnapshotStartMessage ]
         \cup [ tag : {BookStatusMessageCode}, body : BookStatusMessage ]
         \cup [ tag : {BookEntryMessageCode}, body : BookEntryMessage ]
-        \cup [ tag : {MaCBookEntryMessageCode}, body : MaCBookEntryMessage ]
+        \cup [ tag : {MacBookEntryMessageCode}, body : MacBookEntryMessage ]
 
 EncodePayload(message) ==
     CASE message.tag = SnapshotStartMessageCode -> EncodeSnapshotStartMessage(message.body)
       [] message.tag = BookStatusMessageCode -> EncodeBookStatusMessage(message.body)
       [] message.tag = BookEntryMessageCode -> EncodeBookEntryMessage(message.body)
-      [] message.tag = MaCBookEntryMessageCode -> EncodeMaCBookEntryMessage(message.body)
+      [] message.tag = MacBookEntryMessageCode -> EncodeMacBookEntryMessage(message.body)
 
 DecodePayload(tag, bytes) ==
     LET read ==
             CASE tag = SnapshotStartMessageCode -> DecodeSnapshotStartMessage(bytes)
               [] tag = BookStatusMessageCode -> DecodeBookStatusMessage(bytes)
               [] tag = BookEntryMessageCode -> DecodeBookEntryMessage(bytes)
-              [] tag = MaCBookEntryMessageCode -> DecodeMaCBookEntryMessage(bytes)
+              [] tag = MacBookEntryMessageCode -> DecodeMacBookEntryMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -318,7 +318,7 @@ CheckedPayload ==
     { [tag |-> SnapshotStartMessageCode, body |-> one] : one \in CheckedSnapshotStartMessage }
         \cup { [tag |-> BookStatusMessageCode, body |-> one] : one \in CheckedBookStatusMessage }
         \cup { [tag |-> BookEntryMessageCode, body |-> one] : one \in CheckedBookEntryMessage }
-        \cup { [tag |-> MaCBookEntryMessageCode, body |-> one] : one \in CheckedMaCBookEntryMessage }
+        \cup { [tag |-> MacBookEntryMessageCode, body |-> one] : one \in CheckedMacBookEntryMessage }
 
 (***************************************************************************)
 (* Message, framed by Msg Length                                           *)
@@ -384,7 +384,7 @@ OneMessage ==
     { [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotStartMessageCode, body |-> ZeroSnapshotStartMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> BookStatusMessageCode, body |-> ZeroBookStatusMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> BookEntryMessageCode, body |-> ZeroBookEntryMessage]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MaCBookEntryMessageCode, body |-> ZeroMaCBookEntryMessage]] }
+      [ZeroMessage EXCEPT !.payload = [tag |-> MacBookEntryMessageCode, body |-> ZeroMacBookEntryMessage]] }
 
 (***************************************************************************)
 (* Packet                                                                  *)
@@ -450,10 +450,10 @@ RoundTripBookEntryMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Ma C Book Entry Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripMaCBookEntryMessage ==
-    \A message \in CheckedMaCBookEntryMessage :
-        LET read == DecodeMaCBookEntryMessage(EncodeMaCBookEntryMessage(message))
+(* Every Mac Book Entry Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMacBookEntryMessage ==
+    \A message \in CheckedMacBookEntryMessage :
+        LET read == DecodeMacBookEntryMessage(EncodeMacBookEntryMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

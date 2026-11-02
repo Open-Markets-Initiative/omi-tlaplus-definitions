@@ -21233,10 +21233,14 @@ DealerLimitUpdateOutMessageCode == 5733  \* 0x1665
 ResetUserPasswordOutMessageCode == 5741  \* 0x166d
 ColUserStatusChangeOutMessageCode == 5745  \* 0x1671
 SpdOrdLimitUpdateOutMessageCode == 5772  \* 0x168c
+HeaderRecordMessageCode == 7011  \* 0x1b63
+MessageRecordMessageCode == 7021  \* 0x1b6d
+TrailerRecordMessageCode == 7031  \* 0x1b77
 UpdateLocaldbHeaderMessageCode == 7307  \* 0x1c8b
 UpdateLocaldbTrailerMessageCode == 7308  \* 0x1c8c
 BcastAssetMstrChgMessageCode == 7325  \* 0x1c9d
 BoxSignOnRequestOutMessageCode == 23001  \* 0x59d9
+SecureBoxRegistrationResponseOutMessageCode == 23009  \* 0x59e1
 BoxSignOffMessageCode == 20322  \* 0x4f62
 
 ServerMessagePayload ==
@@ -21295,10 +21299,14 @@ ServerMessagePayload ==
         \cup [ tag : {ResetUserPasswordOutMessageCode}, body : ResetUserPasswordOutMessage ]
         \cup [ tag : {ColUserStatusChangeOutMessageCode}, body : ColUserStatusChangeOutMessage ]
         \cup [ tag : {SpdOrdLimitUpdateOutMessageCode}, body : SpdOrdLimitUpdateOutMessage ]
+        \cup [ tag : {HeaderRecordMessageCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {MessageRecordMessageCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {TrailerRecordMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {UpdateLocaldbHeaderMessageCode}, body : UpdateLocaldbHeaderMessage ]
         \cup [ tag : {UpdateLocaldbTrailerMessageCode}, body : UpdateLocaldbTrailerMessage ]
         \cup [ tag : {BcastAssetMstrChgMessageCode}, body : BcastAssetMstrChgMessage ]
         \cup [ tag : {BoxSignOnRequestOutMessageCode}, body : BoxSignOnRequestOutMessage ]
+        \cup [ tag : {SecureBoxRegistrationResponseOutMessageCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {BoxSignOffMessageCode}, body : BoxSignOffMessage ]
 
 EncodeServerMessagePayload(message) ==
@@ -21357,10 +21365,14 @@ EncodeServerMessagePayload(message) ==
       [] message.tag = ResetUserPasswordOutMessageCode -> EncodeResetUserPasswordOutMessage(message.body)
       [] message.tag = ColUserStatusChangeOutMessageCode -> EncodeColUserStatusChangeOutMessage(message.body)
       [] message.tag = SpdOrdLimitUpdateOutMessageCode -> EncodeSpdOrdLimitUpdateOutMessage(message.body)
+      [] message.tag = HeaderRecordMessageCode -> << >>
+      [] message.tag = MessageRecordMessageCode -> << >>
+      [] message.tag = TrailerRecordMessageCode -> << >>
       [] message.tag = UpdateLocaldbHeaderMessageCode -> EncodeUpdateLocaldbHeaderMessage(message.body)
       [] message.tag = UpdateLocaldbTrailerMessageCode -> EncodeUpdateLocaldbTrailerMessage(message.body)
       [] message.tag = BcastAssetMstrChgMessageCode -> EncodeBcastAssetMstrChgMessage(message.body)
       [] message.tag = BoxSignOnRequestOutMessageCode -> EncodeBoxSignOnRequestOutMessage(message.body)
+      [] message.tag = SecureBoxRegistrationResponseOutMessageCode -> << >>
       [] message.tag = BoxSignOffMessageCode -> EncodeBoxSignOffMessage(message.body)
 
 DecodeServerMessagePayload(tag, bytes) ==
@@ -21420,10 +21432,14 @@ DecodeServerMessagePayload(tag, bytes) ==
               [] tag = ResetUserPasswordOutMessageCode -> DecodeResetUserPasswordOutMessage(bytes)
               [] tag = ColUserStatusChangeOutMessageCode -> DecodeColUserStatusChangeOutMessage(bytes)
               [] tag = SpdOrdLimitUpdateOutMessageCode -> DecodeSpdOrdLimitUpdateOutMessage(bytes)
+              [] tag = HeaderRecordMessageCode -> Ok([empty |-> 0], bytes)
+              [] tag = MessageRecordMessageCode -> Ok([empty |-> 0], bytes)
+              [] tag = TrailerRecordMessageCode -> Ok([empty |-> 0], bytes)
               [] tag = UpdateLocaldbHeaderMessageCode -> DecodeUpdateLocaldbHeaderMessage(bytes)
               [] tag = UpdateLocaldbTrailerMessageCode -> DecodeUpdateLocaldbTrailerMessage(bytes)
               [] tag = BcastAssetMstrChgMessageCode -> DecodeBcastAssetMstrChgMessage(bytes)
               [] tag = BoxSignOnRequestOutMessageCode -> DecodeBoxSignOnRequestOutMessage(bytes)
+              [] tag = SecureBoxRegistrationResponseOutMessageCode -> Ok([empty |-> 0], bytes)
               [] tag = BoxSignOffMessageCode -> DecodeBoxSignOffMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
@@ -21487,10 +21503,14 @@ CheckedServerMessagePayload ==
         \cup { [tag |-> ResetUserPasswordOutMessageCode, body |-> one] : one \in CheckedResetUserPasswordOutMessage }
         \cup { [tag |-> ColUserStatusChangeOutMessageCode, body |-> one] : one \in CheckedColUserStatusChangeOutMessage }
         \cup { [tag |-> SpdOrdLimitUpdateOutMessageCode, body |-> one] : one \in CheckedSpdOrdLimitUpdateOutMessage }
+        \cup { [tag |-> HeaderRecordMessageCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> MessageRecordMessageCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> TrailerRecordMessageCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> UpdateLocaldbHeaderMessageCode, body |-> one] : one \in CheckedUpdateLocaldbHeaderMessage }
         \cup { [tag |-> UpdateLocaldbTrailerMessageCode, body |-> one] : one \in CheckedUpdateLocaldbTrailerMessage }
         \cup { [tag |-> BcastAssetMstrChgMessageCode, body |-> one] : one \in CheckedBcastAssetMstrChgMessage }
         \cup { [tag |-> BoxSignOnRequestOutMessageCode, body |-> one] : one \in CheckedBoxSignOnRequestOutMessage }
+        \cup { [tag |-> SecureBoxRegistrationResponseOutMessageCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> BoxSignOffMessageCode, body |-> one] : one \in CheckedBoxSignOffMessage }
 
 (***************************************************************************)
@@ -21639,10 +21659,14 @@ OneServerMessage ==
       [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> ResetUserPasswordOutMessageCode, body |-> ZeroResetUserPasswordOutMessage]],
       [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> ColUserStatusChangeOutMessageCode, body |-> ZeroColUserStatusChangeOutMessage]],
       [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> SpdOrdLimitUpdateOutMessageCode, body |-> ZeroSpdOrdLimitUpdateOutMessage]],
+      [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> HeaderRecordMessageCode, body |-> [empty |-> 0]]],
+      [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> MessageRecordMessageCode, body |-> [empty |-> 0]]],
+      [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> TrailerRecordMessageCode, body |-> [empty |-> 0]]],
       [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> UpdateLocaldbHeaderMessageCode, body |-> ZeroUpdateLocaldbHeaderMessage]],
       [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> UpdateLocaldbTrailerMessageCode, body |-> ZeroUpdateLocaldbTrailerMessage]],
       [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> BcastAssetMstrChgMessageCode, body |-> ZeroBcastAssetMstrChgMessage]],
       [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> BoxSignOnRequestOutMessageCode, body |-> ZeroBoxSignOnRequestOutMessage]],
+      [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> SecureBoxRegistrationResponseOutMessageCode, body |-> [empty |-> 0]]],
       [ZeroServerMessage EXCEPT !.serverMessagePayload = [tag |-> BoxSignOffMessageCode, body |-> ZeroBoxSignOffMessage]] }
 
 (***************************************************************************)
