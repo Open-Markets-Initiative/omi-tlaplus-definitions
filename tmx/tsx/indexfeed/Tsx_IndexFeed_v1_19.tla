@@ -13,6 +13,8 @@
 (* Note: TLC evaluates integers in 32 bits, so a field wider than that has *)
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
+(*                                                                         *)
+(* License: MIT No Attribution                                             *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

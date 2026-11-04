@@ -1,12 +1,12 @@
-[![Txse](https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Txse/Images/Logo.png)](https://www.txse.com)
+[![Txse](https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/Organizations/Txse/Images/Logo.png)](https://www.txse.com)
 
 
 ## Texas Stock Exchange
 
 | Division | [Protocol][Omi.Txse.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Transport | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Txse.Specifications] |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
-| [TxseEquities][TxseEquities.Exchange] | [Framing][Txse.TxseEquities.Framing] | [Tcp][Omi.Encoding.Tcp] | 1.0 | [Client][Txse.TxseEquities.Framing.Tcp.v1.0.Client.Definition] [Server][Txse.TxseEquities.Framing.Tcp.v1.0.Server.Definition] | 6/12/2026 | 762 | [Header][Omi.Glossary.Deployment.Header] | [Untested][Omi.Glossary.Testing.Untested] | [url][Txse.TxseEquities.Framing.Tcp.v1.0.Url] - [pdf][Txse.TxseEquities.Framing.Tcp.v1.0.Pdf] |
-| [TxseEquities][TxseEquities.Exchange] | [Framing][Txse.TxseEquities.Framing] | [Udp][Omi.Encoding.Udp] | [1.0][Txse.TxseEquities.Framing.Udp.v1.0.Definition] |  | 6/12/2026 | 256 | [Header][Omi.Glossary.Deployment.Header] | [Untested][Omi.Glossary.Testing.Untested] | [url][Txse.TxseEquities.Framing.Udp.v1.0.Url] - [pdf][Txse.TxseEquities.Framing.Udp.v1.0.Pdf] |
+| [TxseEquities][TxseEquities.Exchange] | [Framing][Txse.TxseEquities.Framing] | [Tcp][Omi.Encoding.Tcp] | 1.0 | [Client][Txse.TxseEquities.Framing.Tcp.v1.0.Client.Definition] [Server][Txse.TxseEquities.Framing.Tcp.v1.0.Server.Definition] | 6/12/2026 | 766 | [Header][Omi.Glossary.Deployment.Header] | [Untested][Omi.Glossary.Testing.Untested] | [url][Txse.TxseEquities.Framing.Tcp.v1.0.Url] - [pdf][Txse.TxseEquities.Framing.Tcp.v1.0.Pdf] |
+| [TxseEquities][TxseEquities.Exchange] | [Framing][Txse.TxseEquities.Framing] | [Udp][Omi.Encoding.Udp] | [1.0][Txse.TxseEquities.Framing.Udp.v1.0.Definition] |  | 6/12/2026 | 258 | [Header][Omi.Glossary.Deployment.Header] | [Untested][Omi.Glossary.Testing.Untested] | [url][Txse.TxseEquities.Framing.Udp.v1.0.Url] - [pdf][Txse.TxseEquities.Framing.Udp.v1.0.Pdf] |
 
 
 <p align="center"><a href="https://www.txse.com" title="Texas Stock Exchange Website"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Website.png" alt="Website" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://www.linkedin.com/company/txse" title="Texas Stock Exchange on LinkedIn"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/LinkedIn.png" alt="LinkedIn" width="32" height="32"></a>&nbsp;&nbsp;<a href="https://en.wikipedia.org/wiki/Texas_Stock_Exchange" title="Texas Stock Exchange on Wikipedia"><img src="https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/raw/main/About/Icons/Wikipedia.png" alt="Wikipedia" width="32" height="32"></a></p>

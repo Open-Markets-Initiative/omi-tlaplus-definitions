@@ -14,6 +14,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Md Instrument Entry Grp is written as 15 slots, however many of   *)
 (* them No Md Entries says are in use.                                     *)
 (*                                                                         *)

@@ -15,6 +15,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Exchange Order Type is a bit field set, checked as its 2 bytes    *)
 (* rather than bit by bit.                                                 *)
 (*                                                                         *)

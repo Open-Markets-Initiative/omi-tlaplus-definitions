@@ -14,6 +14,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Cross Request fills what is left of the frame Body Len states,    *)
 (* which is what it is read from.                                          *)
 (*                                                                         *)

@@ -14,6 +14,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Packet fills its datagram with as many messages as the bytes      *)
 (* hold, so it is read as a run of them.                                   *)
 (***************************************************************************)

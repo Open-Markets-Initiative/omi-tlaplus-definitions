@@ -15,6 +15,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Appendage Length and what follows it are read only when the       *)
 (* message runs on past what precedes them.                                *)
 (*                                                                         *)

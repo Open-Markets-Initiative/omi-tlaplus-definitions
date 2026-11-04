@@ -14,6 +14,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Level is written as 20 slots, however many of them the count      *)
 (* beside it says are in use.                                              *)
 (*                                                                         *)

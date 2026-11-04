@@ -14,6 +14,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: a Message Count of 0 marks Heartbeat and carries no Message.      *)
 (*                                                                         *)
 (* Note: Adap Flags is a bit field set, checked as its 1 byte rather than  *)

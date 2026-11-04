@@ -15,6 +15,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Unsequenced Data Packet fills what is left of the frame Packet    *)
 (* Length states, which is what it is read from.                           *)
 (***************************************************************************)

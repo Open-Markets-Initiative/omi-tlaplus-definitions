@@ -14,6 +14,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Block Pad Byte pads to a 2 byte boundary: it is read as the bytes *)
 (* left to the end of the frame, and the frame's length is trusted to keep *)
 (* that boundary.                                                          *)

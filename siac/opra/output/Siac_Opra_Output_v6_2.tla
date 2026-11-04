@@ -14,6 +14,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Message Data Length states the length of Message Data, which is   *)
 (* everything the bytes it frames hold, so Message Data is read as what is *)
 (* left of them.                                                           *)

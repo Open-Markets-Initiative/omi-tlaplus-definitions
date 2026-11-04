@@ -14,6 +14,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Md Flags is a bit field set, checked as its 1 byte rather than    *)
 (* bit by bit.                                                             *)
 (*                                                                         *)

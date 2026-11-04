@@ -15,6 +15,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: a Message Count of any value but 0 is that many Message.          *)
 (***************************************************************************)
 EXTENDS Integers, Sequences

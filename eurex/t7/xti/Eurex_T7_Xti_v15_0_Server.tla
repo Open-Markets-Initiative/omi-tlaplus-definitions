@@ -14,6 +14,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: Alignment Padding pads to a 8 byte boundary: it is read as the    *)
 (* bytes left to the end of the frame, and the frame's length is trusted   *)
 (* to keep that boundary.                                                  *)

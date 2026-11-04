@@ -22,7 +22,7 @@ Updates are greatly appreciated; however, this entire repository is source gener
 
 | Protocol Count | Generated Lines |
 | --- | --- |
-| 1,257 | 4,344,306 |
+| 1,229 | 4,277,367 |
 
 ## Testing
 
@@ -321,22 +321,12 @@ Enjoy.
 [Finra.Trace.Btds144A]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Finra/Protocols/Trace/Btds144A.md "Bond Trade Dissemination Service for 144A Transactions"
 [Finra.Trace.Spds]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Finra/Protocols/Trace/Spds.md "Securitized Products Dissemination Service"
 [Finra.Trace.Spds144A]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Finra/Protocols/Trace/Spds144A.md "Securitized Products Dissemination Service for 144A Transactions"
-[Hkex.HkexSecurities.Combined]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/Combined.md "Orion Market Data Cash Combined"
-[Hkex.HkexSecurities.CombinedRefresh]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/CombinedRefresh.md "Orion Market Data Cash Combined Refresh"
-[Hkex.HkexSecurities.CombinedRetrans]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/CombinedRetrans.md "Orion Market Data Cash Combined Retransmission"
 [Hkex.HkexSecurities.FullTick]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/FullTick.md "Orion Market Data Cash FullTick"
 [Hkex.HkexSecurities.FullTickRefresh]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/FullTickRefresh.md "Orion Market Data Cash FullTick Refresh"
 [Hkex.HkexSecurities.FullTickRetrans]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/FullTickRetrans.md "Orion Market Data Cash FullTick Retransmission"
 [Hkex.HkexSecurities.Index]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/Index.md "Orion Market Data Cash Index"
 [Hkex.HkexSecurities.IndexRefresh]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/IndexRefresh.md "Orion Market Data Cash Index Refresh"
 [Hkex.HkexSecurities.IndexRetrans]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/IndexRetrans.md "Orion Market Data Cash Index Retransmission"
-[Hkex.HkexSecurities.Mmdh]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/Mmdh.md "Orion Market Data Cash Mainland Market Data Hub"
-[Hkex.HkexSecurities.Premium]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/Premium.md "Orion Market Data Cash Premium"
-[Hkex.HkexSecurities.PremiumRefresh]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/PremiumRefresh.md "Orion Market Data Cash Premium Refresh"
-[Hkex.HkexSecurities.PremiumRetrans]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/PremiumRetrans.md "Orion Market Data Cash Premium Retransmission"
-[Hkex.HkexSecurities.Standard]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/Standard.md "Orion Market Data Cash Standard"
-[Hkex.HkexSecurities.StandardRefresh]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/StandardRefresh.md "Orion Market Data Cash Standard Refresh"
-[Hkex.HkexSecurities.StandardRetrans]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/HkexSecurities/StandardRetrans.md "Orion Market Data Cash Standard Retransmission"
 [Hkex.Sse.ChinaConnect]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/Sse/ChinaConnect.md "Orion Market Data China Connect"
 [Hkex.Sse.ChinaConnectRefresh]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/Sse/ChinaConnectRefresh.md "Orion Market Data China Connect Refresh"
 [Hkex.Sse.ChinaConnectRetrans]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Hkex/Protocols/Sse/ChinaConnectRetrans.md "Orion Market Data China Connect Retransmission"

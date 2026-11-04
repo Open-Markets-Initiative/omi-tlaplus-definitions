@@ -14,6 +14,8 @@
 (* no range it can enumerate; every field is checked as its bytes, which   *)
 (* is exact at any width.                                                  *)
 (*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
 (* Note: a National Bbo Indicator of any value but 81 or 73 or 85 or 80 or *)
 (* 72 or 84 carries none of them.                                          *)
 (*                                                                         *)
