@@ -15,12 +15,6 @@
 (* is exact at any width.                                                  *)
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
-(*                                                                         *)
-(* Note: Allowed Book Types is a bit field set, checked as its 1 byte      *)
-(* rather than bit by bit.                                                 *)
-(*                                                                         *)
-(* Note: Order Book Update is a bit field set, checked as its 1 byte       *)
-(* rather than bit by bit.                                                 *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

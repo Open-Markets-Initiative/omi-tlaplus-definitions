@@ -15,9 +15,6 @@
 (* is exact at any width.                                                  *)
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
-(*                                                                         *)
-(* Note: Status is a bit field set, checked as its 1 byte rather than bit  *)
-(* by bit.                                                                 *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -616,18 +613,18 @@ CheckedOrderModifyExtendedMessage ==
 (***************************************************************************)
 
 OrderAddResponseMessage ==
-    [ orderRef       : Sample(4),
-      marketDataId   : Sample(4),
-      status         : Sample(1),
-      tradedQuantity : Sample(4),
-      timestamp      : Sample(8),
-      userTag        : Sample(8),
-      reserved1      : Sample(1) ]
+    [ orderRef               : Sample(4),
+      marketDataId           : Sample(4),
+      orderAddResponseStatus : Sample(1),
+      tradedQuantity         : Sample(4),
+      timestamp              : Sample(8),
+      userTag                : Sample(8),
+      reserved1              : Sample(1) ]
 
 EncodeOrderAddResponseMessage(message) ==
     message.orderRef
         \o message.marketDataId
-        \o message.status
+        \o message.orderAddResponseStatus
         \o message.tradedQuantity
         \o message.timestamp
         \o message.userTag
@@ -636,34 +633,34 @@ EncodeOrderAddResponseMessage(message) ==
 DecodeOrderAddResponseMessage(bytes) ==
     LET orderRef == ReadBytes(bytes, 4) IN IF ~orderRef.ok THEN Fail ELSE
     LET marketDataId == ReadBytes(orderRef.rest, 4) IN IF ~marketDataId.ok THEN Fail ELSE
-    LET status == ReadBytes(marketDataId.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET tradedQuantity == ReadBytes(status.rest, 4) IN IF ~tradedQuantity.ok THEN Fail ELSE
+    LET orderAddResponseStatus == ReadBytes(marketDataId.rest, 1) IN IF ~orderAddResponseStatus.ok THEN Fail ELSE
+    LET tradedQuantity == ReadBytes(orderAddResponseStatus.rest, 4) IN IF ~tradedQuantity.ok THEN Fail ELSE
     LET timestamp == ReadBytes(tradedQuantity.rest, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET userTag == ReadBytes(timestamp.rest, 8) IN IF ~userTag.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(userTag.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
-    Ok([ orderRef       |-> orderRef.value,
-         marketDataId   |-> marketDataId.value,
-         status         |-> status.value,
-         tradedQuantity |-> tradedQuantity.value,
-         timestamp      |-> timestamp.value,
-         userTag        |-> userTag.value,
-         reserved1      |-> reserved1.value ], reserved1.rest)
+    Ok([ orderRef               |-> orderRef.value,
+         marketDataId           |-> marketDataId.value,
+         orderAddResponseStatus |-> orderAddResponseStatus.value,
+         tradedQuantity         |-> tradedQuantity.value,
+         timestamp              |-> timestamp.value,
+         userTag                |-> userTag.value,
+         reserved1              |-> reserved1.value ], reserved1.rest)
 
 ZeroOrderAddResponseMessage ==
-    [ orderRef       |-> [i \in 1 .. 4 |-> 0],
-      marketDataId   |-> [i \in 1 .. 4 |-> 0],
-      status         |-> [i \in 1 .. 1 |-> 0],
-      tradedQuantity |-> [i \in 1 .. 4 |-> 0],
-      timestamp      |-> [i \in 1 .. 8 |-> 0],
-      userTag        |-> [i \in 1 .. 8 |-> 0],
-      reserved1      |-> [i \in 1 .. 1 |-> 0] ]
+    [ orderRef               |-> [i \in 1 .. 4 |-> 0],
+      marketDataId           |-> [i \in 1 .. 4 |-> 0],
+      orderAddResponseStatus |-> [i \in 1 .. 1 |-> 0],
+      tradedQuantity         |-> [i \in 1 .. 4 |-> 0],
+      timestamp              |-> [i \in 1 .. 8 |-> 0],
+      userTag                |-> [i \in 1 .. 8 |-> 0],
+      reserved1              |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Order Add Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderAddResponseMessage ==
     { ZeroOrderAddResponseMessage }
         \cup { [ZeroOrderAddResponseMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
         \cup { [ZeroOrderAddResponseMessage EXCEPT !.marketDataId = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAddResponseMessage EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAddResponseMessage EXCEPT !.orderAddResponseStatus = one] : one \in Sample(1) }
         \cup { [ZeroOrderAddResponseMessage EXCEPT !.tradedQuantity = one] : one \in Sample(4) }
         \cup { [ZeroOrderAddResponseMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroOrderAddResponseMessage EXCEPT !.userTag = one] : one \in Sample(8) }
@@ -674,44 +671,44 @@ CheckedOrderAddResponseMessage ==
 (***************************************************************************)
 
 OrderCancelResponseMessage ==
-    [ orderRef              : Sample(4),
-      requestRef            : Sample(4),
-      status                : Sample(1),
-      cancellationTimestamp : Sample(8),
-      userTag               : Sample(8) ]
+    [ orderRef                  : Sample(4),
+      requestRef                : Sample(4),
+      orderCancelResponseStatus : Sample(1),
+      cancellationTimestamp     : Sample(8),
+      userTag                   : Sample(8) ]
 
 EncodeOrderCancelResponseMessage(message) ==
     message.orderRef
         \o message.requestRef
-        \o message.status
+        \o message.orderCancelResponseStatus
         \o message.cancellationTimestamp
         \o message.userTag
 
 DecodeOrderCancelResponseMessage(bytes) ==
     LET orderRef == ReadBytes(bytes, 4) IN IF ~orderRef.ok THEN Fail ELSE
     LET requestRef == ReadBytes(orderRef.rest, 4) IN IF ~requestRef.ok THEN Fail ELSE
-    LET status == ReadBytes(requestRef.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET cancellationTimestamp == ReadBytes(status.rest, 8) IN IF ~cancellationTimestamp.ok THEN Fail ELSE
+    LET orderCancelResponseStatus == ReadBytes(requestRef.rest, 1) IN IF ~orderCancelResponseStatus.ok THEN Fail ELSE
+    LET cancellationTimestamp == ReadBytes(orderCancelResponseStatus.rest, 8) IN IF ~cancellationTimestamp.ok THEN Fail ELSE
     LET userTag == ReadBytes(cancellationTimestamp.rest, 8) IN IF ~userTag.ok THEN Fail ELSE
-    Ok([ orderRef              |-> orderRef.value,
-         requestRef            |-> requestRef.value,
-         status                |-> status.value,
-         cancellationTimestamp |-> cancellationTimestamp.value,
-         userTag               |-> userTag.value ], userTag.rest)
+    Ok([ orderRef                  |-> orderRef.value,
+         requestRef                |-> requestRef.value,
+         orderCancelResponseStatus |-> orderCancelResponseStatus.value,
+         cancellationTimestamp     |-> cancellationTimestamp.value,
+         userTag                   |-> userTag.value ], userTag.rest)
 
 ZeroOrderCancelResponseMessage ==
-    [ orderRef              |-> [i \in 1 .. 4 |-> 0],
-      requestRef            |-> [i \in 1 .. 4 |-> 0],
-      status                |-> [i \in 1 .. 1 |-> 0],
-      cancellationTimestamp |-> [i \in 1 .. 8 |-> 0],
-      userTag               |-> [i \in 1 .. 8 |-> 0] ]
+    [ orderRef                  |-> [i \in 1 .. 4 |-> 0],
+      requestRef                |-> [i \in 1 .. 4 |-> 0],
+      orderCancelResponseStatus |-> [i \in 1 .. 1 |-> 0],
+      cancellationTimestamp     |-> [i \in 1 .. 8 |-> 0],
+      userTag                   |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Order Cancel Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderCancelResponseMessage ==
     { ZeroOrderCancelResponseMessage }
         \cup { [ZeroOrderCancelResponseMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
         \cup { [ZeroOrderCancelResponseMessage EXCEPT !.requestRef = one] : one \in Sample(4) }
-        \cup { [ZeroOrderCancelResponseMessage EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelResponseMessage EXCEPT !.orderCancelResponseStatus = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelResponseMessage EXCEPT !.cancellationTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroOrderCancelResponseMessage EXCEPT !.userTag = one] : one \in Sample(8) }
 
@@ -720,17 +717,17 @@ CheckedOrderCancelResponseMessage ==
 (***************************************************************************)
 
 OrderModifyResponseMessage ==
-    [ orderRef              : Sample(4),
-      requestRef            : Sample(4),
-      status                : Sample(1),
-      modificationTimestamp : Sample(8),
-      userTag               : Sample(8),
-      reserved1             : Sample(1) ]
+    [ orderRef                  : Sample(4),
+      requestRef                : Sample(4),
+      orderModifyResponseStatus : Sample(1),
+      modificationTimestamp     : Sample(8),
+      userTag                   : Sample(8),
+      reserved1                 : Sample(1) ]
 
 EncodeOrderModifyResponseMessage(message) ==
     message.orderRef
         \o message.requestRef
-        \o message.status
+        \o message.orderModifyResponseStatus
         \o message.modificationTimestamp
         \o message.userTag
         \o message.reserved1
@@ -738,31 +735,31 @@ EncodeOrderModifyResponseMessage(message) ==
 DecodeOrderModifyResponseMessage(bytes) ==
     LET orderRef == ReadBytes(bytes, 4) IN IF ~orderRef.ok THEN Fail ELSE
     LET requestRef == ReadBytes(orderRef.rest, 4) IN IF ~requestRef.ok THEN Fail ELSE
-    LET status == ReadBytes(requestRef.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET modificationTimestamp == ReadBytes(status.rest, 8) IN IF ~modificationTimestamp.ok THEN Fail ELSE
+    LET orderModifyResponseStatus == ReadBytes(requestRef.rest, 1) IN IF ~orderModifyResponseStatus.ok THEN Fail ELSE
+    LET modificationTimestamp == ReadBytes(orderModifyResponseStatus.rest, 8) IN IF ~modificationTimestamp.ok THEN Fail ELSE
     LET userTag == ReadBytes(modificationTimestamp.rest, 8) IN IF ~userTag.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(userTag.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
-    Ok([ orderRef              |-> orderRef.value,
-         requestRef            |-> requestRef.value,
-         status                |-> status.value,
-         modificationTimestamp |-> modificationTimestamp.value,
-         userTag               |-> userTag.value,
-         reserved1             |-> reserved1.value ], reserved1.rest)
+    Ok([ orderRef                  |-> orderRef.value,
+         requestRef                |-> requestRef.value,
+         orderModifyResponseStatus |-> orderModifyResponseStatus.value,
+         modificationTimestamp     |-> modificationTimestamp.value,
+         userTag                   |-> userTag.value,
+         reserved1                 |-> reserved1.value ], reserved1.rest)
 
 ZeroOrderModifyResponseMessage ==
-    [ orderRef              |-> [i \in 1 .. 4 |-> 0],
-      requestRef            |-> [i \in 1 .. 4 |-> 0],
-      status                |-> [i \in 1 .. 1 |-> 0],
-      modificationTimestamp |-> [i \in 1 .. 8 |-> 0],
-      userTag               |-> [i \in 1 .. 8 |-> 0],
-      reserved1             |-> [i \in 1 .. 1 |-> 0] ]
+    [ orderRef                  |-> [i \in 1 .. 4 |-> 0],
+      requestRef                |-> [i \in 1 .. 4 |-> 0],
+      orderModifyResponseStatus |-> [i \in 1 .. 1 |-> 0],
+      modificationTimestamp     |-> [i \in 1 .. 8 |-> 0],
+      userTag                   |-> [i \in 1 .. 8 |-> 0],
+      reserved1                 |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Order Modify Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderModifyResponseMessage ==
     { ZeroOrderModifyResponseMessage }
         \cup { [ZeroOrderModifyResponseMessage EXCEPT !.orderRef = one] : one \in Sample(4) }
         \cup { [ZeroOrderModifyResponseMessage EXCEPT !.requestRef = one] : one \in Sample(4) }
-        \cup { [ZeroOrderModifyResponseMessage EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModifyResponseMessage EXCEPT !.orderModifyResponseStatus = one] : one \in Sample(1) }
         \cup { [ZeroOrderModifyResponseMessage EXCEPT !.modificationTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroOrderModifyResponseMessage EXCEPT !.userTag = one] : one \in Sample(8) }
         \cup { [ZeroOrderModifyResponseMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }

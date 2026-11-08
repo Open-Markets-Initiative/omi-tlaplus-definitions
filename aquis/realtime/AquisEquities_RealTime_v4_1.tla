@@ -15,18 +15,6 @@
 (* is exact at any width.                                                  *)
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
-(*                                                                         *)
-(* Note: Md Flags is a bit field set, checked as its 1 byte rather than    *)
-(* bit by bit.                                                             *)
-(*                                                                         *)
-(* Note: Binary Mmt is a bit field set, checked as its 4 bytes rather than *)
-(* bit by bit.                                                             *)
-(*                                                                         *)
-(* Note: Flags is a bit field set, checked as its 2 bytes rather than bit  *)
-(* by bit.                                                                 *)
-(*                                                                         *)
-(* Note: Market Flags is a bit field set, checked as its 1 byte rather     *)
-(* than bit by bit.                                                        *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

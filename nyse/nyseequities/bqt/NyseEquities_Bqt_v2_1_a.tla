@@ -16,9 +16,6 @@
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
 (*                                                                         *)
-(* Note: Trade Session is a bit field set, checked as its 1 byte rather    *)
-(* than bit by bit.                                                        *)
-(*                                                                         *)
 (* Note: a Current Refresh Pkt of any value but 1 carries none of them.    *)
 (***************************************************************************)
 EXTENDS Integers, Sequences

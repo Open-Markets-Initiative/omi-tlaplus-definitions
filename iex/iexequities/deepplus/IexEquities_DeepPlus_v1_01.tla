@@ -17,15 +17,6 @@
 (* License: MIT No Attribution                                             *)
 (*                                                                         *)
 (* Note: a Message Count of 0 marks Heartbeat and carries no Message.      *)
-(*                                                                         *)
-(* Note: Security Directory Flags is a bit field set, checked as its 1     *)
-(* byte rather than bit by bit.                                            *)
-(*                                                                         *)
-(* Note: Modify Flags is a bit field set, checked as its 1 byte rather     *)
-(* than bit by bit.                                                        *)
-(*                                                                         *)
-(* Note: Sale Condition Flags is a bit field set, checked as its 1 byte    *)
-(* rather than bit by bit.                                                 *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

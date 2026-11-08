@@ -20,11 +20,11 @@
 (*                                                                         *)
 (* Note: a Message Count of 0 marks End Of Session and carries no Message. *)
 (*                                                                         *)
-(* Note: Combination Leg is written as 6 slots, however many of them the   *)
-(* count beside it says are in use.                                        *)
+(* Note: Combination Leg is written as 6 slots, however many of them Legs  *)
+(* says are in use.                                                        *)
 (*                                                                         *)
-(* Note: Bundle Leg is written as 20 slots, however many of them the count *)
-(* beside it says are in use.                                              *)
+(* Note: Bundle Leg is written as 20 slots, however many of them Legs says *)
+(* are in use.                                                             *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -597,7 +597,7 @@ CombinationSymbolDirectoryMessage ==
       priceDisplayDecimals       : Sample(1),
       priceFractionalDenominator : Sample(4),
       priceMinimumTick           : Sample(4),
-      legs                       : Sample(1),
+      legs                       : 0 .. 255,
       combinationLeg             : SlotsCombinationLeg ]
 
 EncodeCombinationSymbolDirectoryMessage(message) ==
@@ -611,7 +611,7 @@ EncodeCombinationSymbolDirectoryMessage(message) ==
         \o message.priceDisplayDecimals
         \o message.priceFractionalDenominator
         \o message.priceMinimumTick
-        \o message.legs
+        \o EncodeUIntBE(message.legs, 1)
         \o EncodeCombinationLegList(message.combinationLeg)
 
 DecodeCombinationSymbolDirectoryMessage(bytes) ==
@@ -625,7 +625,7 @@ DecodeCombinationSymbolDirectoryMessage(bytes) ==
     LET priceDisplayDecimals == ReadBytes(priceMethod.rest, 1) IN IF ~priceDisplayDecimals.ok THEN Fail ELSE
     LET priceFractionalDenominator == ReadBytes(priceDisplayDecimals.rest, 4) IN IF ~priceFractionalDenominator.ok THEN Fail ELSE
     LET priceMinimumTick == ReadBytes(priceFractionalDenominator.rest, 4) IN IF ~priceMinimumTick.ok THEN Fail ELSE
-    LET legs == ReadBytes(priceMinimumTick.rest, 1) IN IF ~legs.ok THEN Fail ELSE
+    LET legs == ReadUIntBE(priceMinimumTick.rest, 1) IN IF ~legs.ok THEN Fail ELSE
     LET combinationLeg == ReadCombinationLegList(legs.rest, 6) IN IF ~combinationLeg.ok THEN Fail ELSE
     Ok([ nanoseconds                |-> nanoseconds.value,
          tradeDate                  |-> tradeDate.value,
@@ -651,7 +651,7 @@ ZeroCombinationSymbolDirectoryMessage ==
       priceDisplayDecimals       |-> [i \in 1 .. 1 |-> 0],
       priceFractionalDenominator |-> [i \in 1 .. 4 |-> 0],
       priceMinimumTick           |-> [i \in 1 .. 4 |-> 0],
-      legs                       |-> [i \in 1 .. 1 |-> 0],
+      legs                       |-> 0,
       combinationLeg             |-> [i \in 1 .. 6 |-> ZeroCombinationLeg] ]
 
 (* Combination Symbol Directory Message at zero, then each field in turn at the values it is checked at *)
@@ -667,7 +667,7 @@ CheckedCombinationSymbolDirectoryMessage ==
         \cup { [ZeroCombinationSymbolDirectoryMessage EXCEPT !.priceDisplayDecimals = one] : one \in Sample(1) }
         \cup { [ZeroCombinationSymbolDirectoryMessage EXCEPT !.priceFractionalDenominator = one] : one \in Sample(4) }
         \cup { [ZeroCombinationSymbolDirectoryMessage EXCEPT !.priceMinimumTick = one] : one \in Sample(4) }
-        \cup { [ZeroCombinationSymbolDirectoryMessage EXCEPT !.legs = one] : one \in Sample(1) }
+        \cup { [ZeroCombinationSymbolDirectoryMessage EXCEPT !.legs = one] : one \in {0, 1, 255} }
         \cup { [ZeroCombinationSymbolDirectoryMessage EXCEPT !.combinationLeg = one] : one \in SlotsCombinationLeg }
 
 (***************************************************************************)
@@ -749,7 +749,7 @@ BundlesSymbolDirectory ==
       priceDisplayDecimals       : Sample(1),
       priceFractionalDenominator : Sample(4),
       priceMinimumTick           : Sample(4),
-      legs                       : Sample(1),
+      legs                       : 0 .. 255,
       bundleLeg                  : SlotsBundleLeg ]
 
 EncodeBundlesSymbolDirectory(message) ==
@@ -763,7 +763,7 @@ EncodeBundlesSymbolDirectory(message) ==
         \o message.priceDisplayDecimals
         \o message.priceFractionalDenominator
         \o message.priceMinimumTick
-        \o message.legs
+        \o EncodeUIntBE(message.legs, 1)
         \o EncodeBundleLegList(message.bundleLeg)
 
 DecodeBundlesSymbolDirectory(bytes) ==
@@ -777,7 +777,7 @@ DecodeBundlesSymbolDirectory(bytes) ==
     LET priceDisplayDecimals == ReadBytes(priceMethod.rest, 1) IN IF ~priceDisplayDecimals.ok THEN Fail ELSE
     LET priceFractionalDenominator == ReadBytes(priceDisplayDecimals.rest, 4) IN IF ~priceFractionalDenominator.ok THEN Fail ELSE
     LET priceMinimumTick == ReadBytes(priceFractionalDenominator.rest, 4) IN IF ~priceMinimumTick.ok THEN Fail ELSE
-    LET legs == ReadBytes(priceMinimumTick.rest, 1) IN IF ~legs.ok THEN Fail ELSE
+    LET legs == ReadUIntBE(priceMinimumTick.rest, 1) IN IF ~legs.ok THEN Fail ELSE
     LET bundleLeg == ReadBundleLegList(legs.rest, 20) IN IF ~bundleLeg.ok THEN Fail ELSE
     Ok([ nanoseconds                |-> nanoseconds.value,
          tradeDate                  |-> tradeDate.value,
@@ -803,7 +803,7 @@ ZeroBundlesSymbolDirectory ==
       priceDisplayDecimals       |-> [i \in 1 .. 1 |-> 0],
       priceFractionalDenominator |-> [i \in 1 .. 4 |-> 0],
       priceMinimumTick           |-> [i \in 1 .. 4 |-> 0],
-      legs                       |-> [i \in 1 .. 1 |-> 0],
+      legs                       |-> 0,
       bundleLeg                  |-> [i \in 1 .. 20 |-> ZeroBundleLeg] ]
 
 (* Bundles Symbol Directory at zero, then each field in turn at the values it is checked at *)
@@ -819,7 +819,7 @@ CheckedBundlesSymbolDirectory ==
         \cup { [ZeroBundlesSymbolDirectory EXCEPT !.priceDisplayDecimals = one] : one \in Sample(1) }
         \cup { [ZeroBundlesSymbolDirectory EXCEPT !.priceFractionalDenominator = one] : one \in Sample(4) }
         \cup { [ZeroBundlesSymbolDirectory EXCEPT !.priceMinimumTick = one] : one \in Sample(4) }
-        \cup { [ZeroBundlesSymbolDirectory EXCEPT !.legs = one] : one \in Sample(1) }
+        \cup { [ZeroBundlesSymbolDirectory EXCEPT !.legs = one] : one \in {0, 1, 255} }
         \cup { [ZeroBundlesSymbolDirectory EXCEPT !.bundleLeg = one] : one \in SlotsBundleLeg }
 
 (***************************************************************************)

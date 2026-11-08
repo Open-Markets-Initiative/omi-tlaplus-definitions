@@ -4451,7 +4451,7 @@ CheckedSecurityDefinitionResponseMessage ==
         \cup { [ZeroSecurityDefinitionResponseMessage EXCEPT !.enteringTrader = one] : one \in Sample(5) }
 
 (***************************************************************************)
-(* Bidirectional Business Header: 19 bytes                                 *)
+(* Bidirectional Business Header: 20 bytes                                 *)
 (***************************************************************************)
 
 BidirectionalBusinessHeader ==
@@ -4460,7 +4460,7 @@ BidirectionalBusinessHeader ==
       sendingTime             : Sample(8),
       possResend              : Sample(1),
       marketSegmentIdOptional : Sample(1),
-      padding                 : Sample(1) ]
+      paddingChar2            : Sample(2) ]
 
 EncodeBidirectionalBusinessHeader(message) ==
     message.sessionId
@@ -4468,7 +4468,7 @@ EncodeBidirectionalBusinessHeader(message) ==
         \o message.sendingTime
         \o message.possResend
         \o message.marketSegmentIdOptional
-        \o message.padding
+        \o message.paddingChar2
 
 DecodeBidirectionalBusinessHeader(bytes) ==
     LET sessionId == ReadBytes(bytes, 4) IN IF ~sessionId.ok THEN Fail ELSE
@@ -4476,13 +4476,13 @@ DecodeBidirectionalBusinessHeader(bytes) ==
     LET sendingTime == ReadBytes(msgSeqNum.rest, 8) IN IF ~sendingTime.ok THEN Fail ELSE
     LET possResend == ReadBytes(sendingTime.rest, 1) IN IF ~possResend.ok THEN Fail ELSE
     LET marketSegmentIdOptional == ReadBytes(possResend.rest, 1) IN IF ~marketSegmentIdOptional.ok THEN Fail ELSE
-    LET padding == ReadBytes(marketSegmentIdOptional.rest, 1) IN IF ~padding.ok THEN Fail ELSE
+    LET paddingChar2 == ReadBytes(marketSegmentIdOptional.rest, 2) IN IF ~paddingChar2.ok THEN Fail ELSE
     Ok([ sessionId               |-> sessionId.value,
          msgSeqNum               |-> msgSeqNum.value,
          sendingTime             |-> sendingTime.value,
          possResend              |-> possResend.value,
          marketSegmentIdOptional |-> marketSegmentIdOptional.value,
-         padding                 |-> padding.value ], padding.rest)
+         paddingChar2            |-> paddingChar2.value ], paddingChar2.rest)
 
 ZeroBidirectionalBusinessHeader ==
     [ sessionId               |-> [i \in 1 .. 4 |-> 0],
@@ -4490,7 +4490,7 @@ ZeroBidirectionalBusinessHeader ==
       sendingTime             |-> [i \in 1 .. 8 |-> 0],
       possResend              |-> [i \in 1 .. 1 |-> 0],
       marketSegmentIdOptional |-> [i \in 1 .. 1 |-> 0],
-      padding                 |-> [i \in 1 .. 1 |-> 0] ]
+      paddingChar2            |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Bidirectional Business Header at zero, then each field in turn at the values it is checked at *)
 CheckedBidirectionalBusinessHeader ==
@@ -4500,7 +4500,7 @@ CheckedBidirectionalBusinessHeader ==
         \cup { [ZeroBidirectionalBusinessHeader EXCEPT !.sendingTime = one] : one \in Sample(8) }
         \cup { [ZeroBidirectionalBusinessHeader EXCEPT !.possResend = one] : one \in Sample(1) }
         \cup { [ZeroBidirectionalBusinessHeader EXCEPT !.marketSegmentIdOptional = one] : one \in Sample(1) }
-        \cup { [ZeroBidirectionalBusinessHeader EXCEPT !.padding = one] : one \in Sample(1) }
+        \cup { [ZeroBidirectionalBusinessHeader EXCEPT !.paddingChar2 = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Sides Group: 5 bytes                                                    *)
@@ -4784,7 +4784,7 @@ CheckedQuoteRequestMessage ==
         \cup { [ZeroQuoteRequestMessage EXCEPT !.memo = one] : one \in CheckedMemo14 }
 
 (***************************************************************************)
-(* Bidirectional Business Header: 19 bytes                                 *)
+(* Bidirectional Business Header: 20 bytes                                 *)
 (***************************************************************************)
 
 BidirectionalBusinessHeader2 ==
@@ -4793,7 +4793,7 @@ BidirectionalBusinessHeader2 ==
       sendingTime             : Sample(8),
       possResend              : Sample(1),
       marketSegmentIdOptional : Sample(1),
-      padding                 : Sample(1) ]
+      paddingChar2            : Sample(2) ]
 
 EncodeBidirectionalBusinessHeader2(message) ==
     message.sessionId
@@ -4801,7 +4801,7 @@ EncodeBidirectionalBusinessHeader2(message) ==
         \o message.sendingTime
         \o message.possResend
         \o message.marketSegmentIdOptional
-        \o message.padding
+        \o message.paddingChar2
 
 DecodeBidirectionalBusinessHeader2(bytes) ==
     LET sessionId == ReadBytes(bytes, 4) IN IF ~sessionId.ok THEN Fail ELSE
@@ -4809,13 +4809,13 @@ DecodeBidirectionalBusinessHeader2(bytes) ==
     LET sendingTime == ReadBytes(msgSeqNum.rest, 8) IN IF ~sendingTime.ok THEN Fail ELSE
     LET possResend == ReadBytes(sendingTime.rest, 1) IN IF ~possResend.ok THEN Fail ELSE
     LET marketSegmentIdOptional == ReadBytes(possResend.rest, 1) IN IF ~marketSegmentIdOptional.ok THEN Fail ELSE
-    LET padding == ReadBytes(marketSegmentIdOptional.rest, 1) IN IF ~padding.ok THEN Fail ELSE
+    LET paddingChar2 == ReadBytes(marketSegmentIdOptional.rest, 2) IN IF ~paddingChar2.ok THEN Fail ELSE
     Ok([ sessionId               |-> sessionId.value,
          msgSeqNum               |-> msgSeqNum.value,
          sendingTime             |-> sendingTime.value,
          possResend              |-> possResend.value,
          marketSegmentIdOptional |-> marketSegmentIdOptional.value,
-         padding                 |-> padding.value ], padding.rest)
+         paddingChar2            |-> paddingChar2.value ], paddingChar2.rest)
 
 ZeroBidirectionalBusinessHeader2 ==
     [ sessionId               |-> [i \in 1 .. 4 |-> 0],
@@ -4823,7 +4823,7 @@ ZeroBidirectionalBusinessHeader2 ==
       sendingTime             |-> [i \in 1 .. 8 |-> 0],
       possResend              |-> [i \in 1 .. 1 |-> 0],
       marketSegmentIdOptional |-> [i \in 1 .. 1 |-> 0],
-      padding                 |-> [i \in 1 .. 1 |-> 0] ]
+      paddingChar2            |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Bidirectional Business Header at zero, then each field in turn at the values it is checked at *)
 CheckedBidirectionalBusinessHeader2 ==
@@ -4833,7 +4833,7 @@ CheckedBidirectionalBusinessHeader2 ==
         \cup { [ZeroBidirectionalBusinessHeader2 EXCEPT !.sendingTime = one] : one \in Sample(8) }
         \cup { [ZeroBidirectionalBusinessHeader2 EXCEPT !.possResend = one] : one \in Sample(1) }
         \cup { [ZeroBidirectionalBusinessHeader2 EXCEPT !.marketSegmentIdOptional = one] : one \in Sample(1) }
-        \cup { [ZeroBidirectionalBusinessHeader2 EXCEPT !.padding = one] : one \in Sample(1) }
+        \cup { [ZeroBidirectionalBusinessHeader2 EXCEPT !.paddingChar2 = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Quote Req Id                                                            *)
@@ -5092,7 +5092,7 @@ CheckedQuoteStatusReportMessage ==
         \cup { [ZeroQuoteStatusReportMessage EXCEPT !.text = one] : one \in CheckedText3 }
 
 (***************************************************************************)
-(* Bidirectional Business Header: 19 bytes                                 *)
+(* Bidirectional Business Header: 20 bytes                                 *)
 (***************************************************************************)
 
 BidirectionalBusinessHeader3 ==
@@ -5101,7 +5101,7 @@ BidirectionalBusinessHeader3 ==
       sendingTime             : Sample(8),
       possResend              : Sample(1),
       marketSegmentIdOptional : Sample(1),
-      padding                 : Sample(1) ]
+      paddingChar2            : Sample(2) ]
 
 EncodeBidirectionalBusinessHeader3(message) ==
     message.sessionId
@@ -5109,7 +5109,7 @@ EncodeBidirectionalBusinessHeader3(message) ==
         \o message.sendingTime
         \o message.possResend
         \o message.marketSegmentIdOptional
-        \o message.padding
+        \o message.paddingChar2
 
 DecodeBidirectionalBusinessHeader3(bytes) ==
     LET sessionId == ReadBytes(bytes, 4) IN IF ~sessionId.ok THEN Fail ELSE
@@ -5117,13 +5117,13 @@ DecodeBidirectionalBusinessHeader3(bytes) ==
     LET sendingTime == ReadBytes(msgSeqNum.rest, 8) IN IF ~sendingTime.ok THEN Fail ELSE
     LET possResend == ReadBytes(sendingTime.rest, 1) IN IF ~possResend.ok THEN Fail ELSE
     LET marketSegmentIdOptional == ReadBytes(possResend.rest, 1) IN IF ~marketSegmentIdOptional.ok THEN Fail ELSE
-    LET padding == ReadBytes(marketSegmentIdOptional.rest, 1) IN IF ~padding.ok THEN Fail ELSE
+    LET paddingChar2 == ReadBytes(marketSegmentIdOptional.rest, 2) IN IF ~paddingChar2.ok THEN Fail ELSE
     Ok([ sessionId               |-> sessionId.value,
          msgSeqNum               |-> msgSeqNum.value,
          sendingTime             |-> sendingTime.value,
          possResend              |-> possResend.value,
          marketSegmentIdOptional |-> marketSegmentIdOptional.value,
-         padding                 |-> padding.value ], padding.rest)
+         paddingChar2            |-> paddingChar2.value ], paddingChar2.rest)
 
 ZeroBidirectionalBusinessHeader3 ==
     [ sessionId               |-> [i \in 1 .. 4 |-> 0],
@@ -5131,7 +5131,7 @@ ZeroBidirectionalBusinessHeader3 ==
       sendingTime             |-> [i \in 1 .. 8 |-> 0],
       possResend              |-> [i \in 1 .. 1 |-> 0],
       marketSegmentIdOptional |-> [i \in 1 .. 1 |-> 0],
-      padding                 |-> [i \in 1 .. 1 |-> 0] ]
+      paddingChar2            |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Bidirectional Business Header at zero, then each field in turn at the values it is checked at *)
 CheckedBidirectionalBusinessHeader3 ==
@@ -5141,7 +5141,7 @@ CheckedBidirectionalBusinessHeader3 ==
         \cup { [ZeroBidirectionalBusinessHeader3 EXCEPT !.sendingTime = one] : one \in Sample(8) }
         \cup { [ZeroBidirectionalBusinessHeader3 EXCEPT !.possResend = one] : one \in Sample(1) }
         \cup { [ZeroBidirectionalBusinessHeader3 EXCEPT !.marketSegmentIdOptional = one] : one \in Sample(1) }
-        \cup { [ZeroBidirectionalBusinessHeader3 EXCEPT !.padding = one] : one \in Sample(1) }
+        \cup { [ZeroBidirectionalBusinessHeader3 EXCEPT !.paddingChar2 = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Quote Req Id                                                            *)
@@ -5340,7 +5340,7 @@ CheckedQuoteMessage ==
         \cup { [ZeroQuoteMessage EXCEPT !.memo = one] : one \in CheckedMemo16 }
 
 (***************************************************************************)
-(* Bidirectional Business Header: 19 bytes                                 *)
+(* Bidirectional Business Header: 20 bytes                                 *)
 (***************************************************************************)
 
 BidirectionalBusinessHeader4 ==
@@ -5349,7 +5349,7 @@ BidirectionalBusinessHeader4 ==
       sendingTime             : Sample(8),
       possResend              : Sample(1),
       marketSegmentIdOptional : Sample(1),
-      padding                 : Sample(1) ]
+      paddingChar2            : Sample(2) ]
 
 EncodeBidirectionalBusinessHeader4(message) ==
     message.sessionId
@@ -5357,7 +5357,7 @@ EncodeBidirectionalBusinessHeader4(message) ==
         \o message.sendingTime
         \o message.possResend
         \o message.marketSegmentIdOptional
-        \o message.padding
+        \o message.paddingChar2
 
 DecodeBidirectionalBusinessHeader4(bytes) ==
     LET sessionId == ReadBytes(bytes, 4) IN IF ~sessionId.ok THEN Fail ELSE
@@ -5365,13 +5365,13 @@ DecodeBidirectionalBusinessHeader4(bytes) ==
     LET sendingTime == ReadBytes(msgSeqNum.rest, 8) IN IF ~sendingTime.ok THEN Fail ELSE
     LET possResend == ReadBytes(sendingTime.rest, 1) IN IF ~possResend.ok THEN Fail ELSE
     LET marketSegmentIdOptional == ReadBytes(possResend.rest, 1) IN IF ~marketSegmentIdOptional.ok THEN Fail ELSE
-    LET padding == ReadBytes(marketSegmentIdOptional.rest, 1) IN IF ~padding.ok THEN Fail ELSE
+    LET paddingChar2 == ReadBytes(marketSegmentIdOptional.rest, 2) IN IF ~paddingChar2.ok THEN Fail ELSE
     Ok([ sessionId               |-> sessionId.value,
          msgSeqNum               |-> msgSeqNum.value,
          sendingTime             |-> sendingTime.value,
          possResend              |-> possResend.value,
          marketSegmentIdOptional |-> marketSegmentIdOptional.value,
-         padding                 |-> padding.value ], padding.rest)
+         paddingChar2            |-> paddingChar2.value ], paddingChar2.rest)
 
 ZeroBidirectionalBusinessHeader4 ==
     [ sessionId               |-> [i \in 1 .. 4 |-> 0],
@@ -5379,7 +5379,7 @@ ZeroBidirectionalBusinessHeader4 ==
       sendingTime             |-> [i \in 1 .. 8 |-> 0],
       possResend              |-> [i \in 1 .. 1 |-> 0],
       marketSegmentIdOptional |-> [i \in 1 .. 1 |-> 0],
-      padding                 |-> [i \in 1 .. 1 |-> 0] ]
+      paddingChar2            |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Bidirectional Business Header at zero, then each field in turn at the values it is checked at *)
 CheckedBidirectionalBusinessHeader4 ==
@@ -5389,7 +5389,7 @@ CheckedBidirectionalBusinessHeader4 ==
         \cup { [ZeroBidirectionalBusinessHeader4 EXCEPT !.sendingTime = one] : one \in Sample(8) }
         \cup { [ZeroBidirectionalBusinessHeader4 EXCEPT !.possResend = one] : one \in Sample(1) }
         \cup { [ZeroBidirectionalBusinessHeader4 EXCEPT !.marketSegmentIdOptional = one] : one \in Sample(1) }
-        \cup { [ZeroBidirectionalBusinessHeader4 EXCEPT !.padding = one] : one \in Sample(1) }
+        \cup { [ZeroBidirectionalBusinessHeader4 EXCEPT !.paddingChar2 = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Quote Req Id                                                            *)
@@ -5540,7 +5540,7 @@ CheckedQuoteCancelMessage ==
         \cup { [ZeroQuoteCancelMessage EXCEPT !.memo = one] : one \in CheckedMemo17 }
 
 (***************************************************************************)
-(* Bidirectional Business Header: 19 bytes                                 *)
+(* Bidirectional Business Header: 20 bytes                                 *)
 (***************************************************************************)
 
 BidirectionalBusinessHeader5 ==
@@ -5549,7 +5549,7 @@ BidirectionalBusinessHeader5 ==
       sendingTime             : Sample(8),
       possResend              : Sample(1),
       marketSegmentIdOptional : Sample(1),
-      padding                 : Sample(1) ]
+      paddingChar2            : Sample(2) ]
 
 EncodeBidirectionalBusinessHeader5(message) ==
     message.sessionId
@@ -5557,7 +5557,7 @@ EncodeBidirectionalBusinessHeader5(message) ==
         \o message.sendingTime
         \o message.possResend
         \o message.marketSegmentIdOptional
-        \o message.padding
+        \o message.paddingChar2
 
 DecodeBidirectionalBusinessHeader5(bytes) ==
     LET sessionId == ReadBytes(bytes, 4) IN IF ~sessionId.ok THEN Fail ELSE
@@ -5565,13 +5565,13 @@ DecodeBidirectionalBusinessHeader5(bytes) ==
     LET sendingTime == ReadBytes(msgSeqNum.rest, 8) IN IF ~sendingTime.ok THEN Fail ELSE
     LET possResend == ReadBytes(sendingTime.rest, 1) IN IF ~possResend.ok THEN Fail ELSE
     LET marketSegmentIdOptional == ReadBytes(possResend.rest, 1) IN IF ~marketSegmentIdOptional.ok THEN Fail ELSE
-    LET padding == ReadBytes(marketSegmentIdOptional.rest, 1) IN IF ~padding.ok THEN Fail ELSE
+    LET paddingChar2 == ReadBytes(marketSegmentIdOptional.rest, 2) IN IF ~paddingChar2.ok THEN Fail ELSE
     Ok([ sessionId               |-> sessionId.value,
          msgSeqNum               |-> msgSeqNum.value,
          sendingTime             |-> sendingTime.value,
          possResend              |-> possResend.value,
          marketSegmentIdOptional |-> marketSegmentIdOptional.value,
-         padding                 |-> padding.value ], padding.rest)
+         paddingChar2            |-> paddingChar2.value ], paddingChar2.rest)
 
 ZeroBidirectionalBusinessHeader5 ==
     [ sessionId               |-> [i \in 1 .. 4 |-> 0],
@@ -5579,7 +5579,7 @@ ZeroBidirectionalBusinessHeader5 ==
       sendingTime             |-> [i \in 1 .. 8 |-> 0],
       possResend              |-> [i \in 1 .. 1 |-> 0],
       marketSegmentIdOptional |-> [i \in 1 .. 1 |-> 0],
-      padding                 |-> [i \in 1 .. 1 |-> 0] ]
+      paddingChar2            |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Bidirectional Business Header at zero, then each field in turn at the values it is checked at *)
 CheckedBidirectionalBusinessHeader5 ==
@@ -5589,7 +5589,7 @@ CheckedBidirectionalBusinessHeader5 ==
         \cup { [ZeroBidirectionalBusinessHeader5 EXCEPT !.sendingTime = one] : one \in Sample(8) }
         \cup { [ZeroBidirectionalBusinessHeader5 EXCEPT !.possResend = one] : one \in Sample(1) }
         \cup { [ZeroBidirectionalBusinessHeader5 EXCEPT !.marketSegmentIdOptional = one] : one \in Sample(1) }
-        \cup { [ZeroBidirectionalBusinessHeader5 EXCEPT !.padding = one] : one \in Sample(1) }
+        \cup { [ZeroBidirectionalBusinessHeader5 EXCEPT !.paddingChar2 = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Sides Group: 5 bytes                                                    *)

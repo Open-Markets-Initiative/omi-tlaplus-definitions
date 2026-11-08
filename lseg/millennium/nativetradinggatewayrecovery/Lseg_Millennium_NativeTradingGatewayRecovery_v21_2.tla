@@ -15,18 +15,6 @@
 (* is exact at any width.                                                  *)
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
-(*                                                                         *)
-(* Note: Waiver Flags Post Trade Flags is a bit field set, checked as its  *)
-(* 1 byte rather than bit by bit.                                          *)
-(*                                                                         *)
-(* Note: Mi Fid Flags is a bit field set, checked as its 1 byte rather     *)
-(* than bit by bit.                                                        *)
-(*                                                                         *)
-(* Note: Party Role Qualifiers is a bit field set, checked as its 1 byte   *)
-(* rather than bit by bit.                                                 *)
-(*                                                                         *)
-(* Note: Waiver Flags is a bit field set, checked as its 1 byte rather     *)
-(* than bit by bit.                                                        *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

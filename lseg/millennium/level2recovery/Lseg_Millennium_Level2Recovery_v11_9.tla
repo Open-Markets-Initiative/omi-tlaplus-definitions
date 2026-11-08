@@ -15,18 +15,6 @@
 (* is exact at any width.                                                  *)
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
-(*                                                                         *)
-(* Note: Snapshot Complete Flags is a bit field set, checked as its 1 byte *)
-(* rather than bit by bit.                                                 *)
-(*                                                                         *)
-(* Note: Symbol Status Flags is a bit field set, checked as its 1 byte     *)
-(* rather than bit by bit.                                                 *)
-(*                                                                         *)
-(* Note: Add Order Flags is a bit field set, checked as its 1 byte rather  *)
-(* than bit by bit.                                                        *)
-(*                                                                         *)
-(* Note: Add Attributed Order Flags is a bit field set, checked as its 1   *)
-(* byte rather than bit by bit.                                            *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

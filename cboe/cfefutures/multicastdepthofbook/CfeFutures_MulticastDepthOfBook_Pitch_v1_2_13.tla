@@ -17,12 +17,6 @@
 (* License: MIT No Attribution                                             *)
 (*                                                                         *)
 (* Note: a Message Count of 0 marks Heartbeat and carries no Message.      *)
-(*                                                                         *)
-(* Note: Futures Flags is a bit field set, checked as its 1 byte rather    *)
-(* than bit by bit.                                                        *)
-(*                                                                         *)
-(* Note: Summary Flags is a bit field set, checked as its 1 byte rather    *)
-(* than bit by bit.                                                        *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

@@ -15,9 +15,6 @@
 (* is exact at any width.                                                  *)
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
-(*                                                                         *)
-(* Note: Security Flags is a bit field set, checked as its 2 bytes rather  *)
-(* than bit by bit.                                                        *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

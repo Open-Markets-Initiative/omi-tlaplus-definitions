@@ -15,15 +15,6 @@
 (* is exact at any width.                                                  *)
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
-(*                                                                         *)
-(* Note: Match Event Indicator is a bit field set, checked as its 1 byte   *)
-(* rather than bit by bit.                                                 *)
-(*                                                                         *)
-(* Note: Settl Price Type is a bit field set, checked as its 1 byte rather *)
-(* than bit by bit.                                                        *)
-(*                                                                         *)
-(* Note: Inst Attrib Value is a bit field set, checked as its 4 bytes      *)
-(* rather than bit by bit.                                                 *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

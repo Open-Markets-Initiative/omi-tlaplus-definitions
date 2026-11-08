@@ -268,20 +268,20 @@ CheckedLoginRequest ==
         \cup { [ZeroLoginRequest EXCEPT !.requestedMatchingEngine = one] : one \in SampleLists(OneRequestedMatchingEngine) }
 
 (***************************************************************************)
-(* Matching Engine Status: 10 bytes                                        *)
+(* Login Matching Engine: 10 bytes                                         *)
 (***************************************************************************)
 
-MatchingEngineStatus ==
+LoginMatchingEngine ==
     [ loginStatus           : Sample(1),
       tradingSessionId      : Sample(1),
       highestSequenceNumber : Sample(8) ]
 
-EncodeMatchingEngineStatus(message) ==
+EncodeLoginMatchingEngine(message) ==
     message.loginStatus
         \o message.tradingSessionId
         \o message.highestSequenceNumber
 
-DecodeMatchingEngineStatus(bytes) ==
+DecodeLoginMatchingEngine(bytes) ==
     LET loginStatus == ReadBytes(bytes, 1) IN IF ~loginStatus.ok THEN Fail ELSE
     LET tradingSessionId == ReadBytes(loginStatus.rest, 1) IN IF ~tradingSessionId.ok THEN Fail ELSE
     LET highestSequenceNumber == ReadBytes(tradingSessionId.rest, 8) IN IF ~highestSequenceNumber.ok THEN Fail ELSE
@@ -289,62 +289,62 @@ DecodeMatchingEngineStatus(bytes) ==
          tradingSessionId      |-> tradingSessionId.value,
          highestSequenceNumber |-> highestSequenceNumber.value ], highestSequenceNumber.rest)
 
-ZeroMatchingEngineStatus ==
+ZeroLoginMatchingEngine ==
     [ loginStatus           |-> [i \in 1 .. 1 |-> 0],
       tradingSessionId      |-> [i \in 1 .. 1 |-> 0],
       highestSequenceNumber |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Matching Engine Status at zero, then each field in turn at the values it is checked at *)
-CheckedMatchingEngineStatus ==
-    { ZeroMatchingEngineStatus }
-        \cup { [ZeroMatchingEngineStatus EXCEPT !.loginStatus = one] : one \in Sample(1) }
-        \cup { [ZeroMatchingEngineStatus EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
-        \cup { [ZeroMatchingEngineStatus EXCEPT !.highestSequenceNumber = one] : one \in Sample(8) }
+(* Login Matching Engine at zero, then each field in turn at the values it is checked at *)
+CheckedLoginMatchingEngine ==
+    { ZeroLoginMatchingEngine }
+        \cup { [ZeroLoginMatchingEngine EXCEPT !.loginStatus = one] : one \in Sample(1) }
+        \cup { [ZeroLoginMatchingEngine EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
+        \cup { [ZeroLoginMatchingEngine EXCEPT !.highestSequenceNumber = one] : one \in Sample(8) }
 
-(* A run of Matching Engine Status, written one after another *)
-RECURSIVE EncodeMatchingEngineStatusList(_)
-EncodeMatchingEngineStatusList(messages) ==
+(* A run of Login Matching Engine, written one after another *)
+RECURSIVE EncodeLoginMatchingEngineList(_)
+EncodeLoginMatchingEngineList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeMatchingEngineStatus(Head(messages)) \o EncodeMatchingEngineStatusList(Tail(messages))
+    ELSE EncodeLoginMatchingEngine(Head(messages)) \o EncodeLoginMatchingEngineList(Tail(messages))
 
-(* As many Matching Engine Status as the field that counts them says *)
-RECURSIVE ReadMatchingEngineStatusList(_, _)
-ReadMatchingEngineStatusList(bytes, count) ==
+(* As many Login Matching Engine as the field that counts them says *)
+RECURSIVE ReadLoginMatchingEngineList(_, _)
+ReadLoginMatchingEngineList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeMatchingEngineStatus(bytes)
+    ELSE LET one == DecodeLoginMatchingEngine(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadMatchingEngineStatusList(one.rest, count - 1)
+             ELSE LET more == ReadLoginMatchingEngineList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Matching Engine Status of each kind, for the lists that carry them *)
-OneMatchingEngineStatus == { ZeroMatchingEngineStatus }
+(* One Login Matching Engine of each kind, for the lists that carry them *)
+OneLoginMatchingEngine == { ZeroLoginMatchingEngine }
 
 (***************************************************************************)
 (* Login Response                                                          *)
 (***************************************************************************)
 
 LoginResponse ==
-    [ matchingEngineStatus : SampleLists(OneMatchingEngineStatus) ]
+    [ loginMatchingEngine : SampleLists(OneLoginMatchingEngine) ]
 
 EncodeLoginResponse(message) ==
-    EncodeUIntBE(Len(message.matchingEngineStatus), 1)
-        \o EncodeMatchingEngineStatusList(message.matchingEngineStatus)
+    EncodeUIntBE(Len(message.loginMatchingEngine), 1)
+        \o EncodeLoginMatchingEngineList(message.loginMatchingEngine)
 
 DecodeLoginResponse(bytes) ==
     LET numberOfMatchingEngines == ReadUIntBE(bytes, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
-    LET matchingEngineStatus == ReadMatchingEngineStatusList(numberOfMatchingEngines.rest, numberOfMatchingEngines.value) IN IF ~matchingEngineStatus.ok THEN Fail ELSE
-    Ok([ matchingEngineStatus |-> matchingEngineStatus.value ], matchingEngineStatus.rest)
+    LET loginMatchingEngine == ReadLoginMatchingEngineList(numberOfMatchingEngines.rest, numberOfMatchingEngines.value) IN IF ~loginMatchingEngine.ok THEN Fail ELSE
+    Ok([ loginMatchingEngine |-> loginMatchingEngine.value ], loginMatchingEngine.rest)
 
 ZeroLoginResponse ==
-    [ matchingEngineStatus |-> << >> ]
+    [ loginMatchingEngine |-> << >> ]
 
 (* Login Response at zero, then each field in turn at the values it is checked at *)
 CheckedLoginResponse ==
     { ZeroLoginResponse }
-        \cup { [ZeroLoginResponse EXCEPT !.matchingEngineStatus = one] : one \in SampleLists(OneMatchingEngineStatus) }
+        \cup { [ZeroLoginResponse EXCEPT !.loginMatchingEngine = one] : one \in SampleLists(OneLoginMatchingEngine) }
 
 (***************************************************************************)
 (* Synchronization Complete: 1 bytes                                       *)
@@ -695,10 +695,10 @@ RoundTripLoginRequest ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Matching Engine Status decodes back to what was encoded, and leaves nothing over *)
-RoundTripMatchingEngineStatus ==
-    \A message \in CheckedMatchingEngineStatus :
-        LET read == DecodeMatchingEngineStatus(EncodeMatchingEngineStatus(message))
+(* Every Login Matching Engine decodes back to what was encoded, and leaves nothing over *)
+RoundTripLoginMatchingEngine ==
+    \A message \in CheckedLoginMatchingEngine :
+        LET read == DecodeLoginMatchingEngine(EncodeLoginMatchingEngine(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

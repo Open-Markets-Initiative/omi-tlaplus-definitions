@@ -15,15 +15,6 @@
 (* is exact at any width.                                                  *)
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
-(*                                                                         *)
-(* Note: Match Event Indicator is a bit field set, checked as its 1 byte   *)
-(* rather than bit by bit.                                                 *)
-(*                                                                         *)
-(* Note: Imbalance Condition is a bit field set, checked as its 2 bytes    *)
-(* rather than bit by bit.                                                 *)
-(*                                                                         *)
-(* Note: Trade Condition is a bit field set, checked as its 2 bytes rather *)
-(* than bit by bit.                                                        *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

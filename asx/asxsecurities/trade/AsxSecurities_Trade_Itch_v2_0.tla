@@ -19,9 +19,6 @@
 (* Note: a Message Count of 0 marks Heartbeat and carries no Message.      *)
 (*                                                                         *)
 (* Note: a Message Count of 0 marks End Of Session and carries no Message. *)
-(*                                                                         *)
-(* Note: Exchange Order Type is a bit field set, checked as its 2 bytes    *)
-(* rather than bit by bit.                                                 *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

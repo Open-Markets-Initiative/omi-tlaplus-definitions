@@ -17,9 +17,6 @@
 (* License: MIT No Attribution                                             *)
 (*                                                                         *)
 (* Note: a Current Refresh Pkt of any value but 1 carries none of them.    *)
-(*                                                                         *)
-(* Note: Retail Pricing Indicator is a bit field set, checked as its 1     *)
-(* byte rather than bit by bit.                                            *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

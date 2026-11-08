@@ -2021,43 +2021,52 @@ CheckedPayload ==
         \cup { [tag |-> HeartbeatMessageCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
-(* Message                                                                 *)
+(* Message, framed by Message Length                                       *)
 (***************************************************************************)
 
 Message ==
-    [ messageLength : Sample(2),
-      messageType   : Sample(1),
-      msgSeqNum     : Sample(4),
-      payload       : Payload ]
+    [ messageType : Sample(1),
+      msgSeqNum   : Sample(4),
+      payload     : Payload ]
 
-EncodeMessage(message) ==
-    message.messageLength
-        \o EncodeUIntBE(message.payload.tag, 1)
+EncodeMessageBody(message) ==
+    EncodeUIntBE(message.payload.tag, 1)
         \o message.messageType
         \o message.msgSeqNum
         \o EncodePayload(message.payload)
 
-DecodeMessage(bytes) ==
-    LET messageLength == ReadBytes(bytes, 2) IN IF ~messageLength.ok THEN Fail ELSE
-    LET templateId == ReadUIntBE(messageLength.rest, 1) IN IF ~templateId.ok THEN Fail ELSE
+(* Message Length counts the bytes it frames, so it is written from them *)
+EncodeMessage(message) ==
+    LET body == EncodeMessageBody(message)
+    IN  EncodeUIntBE(Len(body) + 2, 2) \o body
+
+DecodeMessageBody(bytes) ==
+    LET templateId == ReadUIntBE(bytes, 1) IN IF ~templateId.ok THEN Fail ELSE
     LET messageType == ReadBytes(templateId.rest, 1) IN IF ~messageType.ok THEN Fail ELSE
     LET msgSeqNum == ReadBytes(messageType.rest, 4) IN IF ~msgSeqNum.ok THEN Fail ELSE
     LET payload == DecodePayload(templateId.value, msgSeqNum.rest) IN IF ~payload.ok THEN Fail ELSE
-    Ok([ messageLength |-> messageLength.value,
-         messageType   |-> messageType.value,
-         msgSeqNum     |-> msgSeqNum.value,
-         payload       |-> payload.value ], payload.rest)
+    Ok([ messageType |-> messageType.value,
+         msgSeqNum   |-> msgSeqNum.value,
+         payload     |-> payload.value ], payload.rest)
+
+DecodeMessage(bytes) ==
+    LET length == ReadUIntBE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
+    LET size == length.value - 2 IN
+    IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
+    LET framed == SubSeq(length.rest, 1, size)
+        beyond == SubSeq(length.rest, size + 1, Len(length.rest))
+        body   == DecodeMessageBody(framed)
+    IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
+    Ok(body.value, beyond)
 
 ZeroMessage ==
-    [ messageLength |-> [i \in 1 .. 2 |-> 0],
-      messageType   |-> [i \in 1 .. 1 |-> 0],
-      msgSeqNum     |-> [i \in 1 .. 4 |-> 0],
-      payload       |-> ZeroPayload ]
+    [ messageType |-> [i \in 1 .. 1 |-> 0],
+      msgSeqNum   |-> [i \in 1 .. 4 |-> 0],
+      payload     |-> ZeroPayload ]
 
 (* Message at zero, then each field in turn at the values it is checked at *)
 CheckedMessage ==
     { ZeroMessage }
-        \cup { [ZeroMessage EXCEPT !.messageLength = one] : one \in Sample(2) }
         \cup { [ZeroMessage EXCEPT !.messageType = one] : one \in Sample(1) }
         \cup { [ZeroMessage EXCEPT !.msgSeqNum = one] : one \in Sample(4) }
         \cup { [ZeroMessage EXCEPT !.payload = one] : one \in CheckedPayload }
@@ -2556,6 +2565,12 @@ SelectsPayload ==
     \A message \in CheckedPayload :
         LET read == DecodePayload(message.tag, EncodePayload(message))
         IN  read.ok /\ read.value.tag = message.tag
+
+(* Message Length is written from the bytes it frames *)
+FramesMessage ==
+    \A message \in CheckedMessage :
+        LET bytes == EncodeMessage(message)
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 2)) = Len(bytes) - 0
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

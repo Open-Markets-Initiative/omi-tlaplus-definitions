@@ -15,12 +15,6 @@
 (* is exact at any width.                                                  *)
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
-(*                                                                         *)
-(* Note: St Order Flags is a bit field set, checked as its 2 bytes rather  *)
-(* than bit by bit.                                                        *)
-(*                                                                         *)
-(* Note: Broker Eligibility Per Market is a bit field set, checked as its  *)
-(* 2 bytes rather than bit by bit.                                         *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 

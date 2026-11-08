@@ -15,15 +15,6 @@
 (* is exact at any width.                                                  *)
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
-(*                                                                         *)
-(* Note: Packet Flags is a bit field set, checked as its 1 byte rather     *)
-(* than bit by bit.                                                        *)
-(*                                                                         *)
-(* Note: Definition Flags is a bit field set, checked as its 2 bytes       *)
-(* rather than bit by bit.                                                 *)
-(*                                                                         *)
-(* Note: Flags is a bit field set, checked as its 1 byte rather than bit   *)
-(* by bit.                                                                 *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
