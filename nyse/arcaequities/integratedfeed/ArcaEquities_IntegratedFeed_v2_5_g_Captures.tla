@@ -24,6 +24,14 @@ DeleteOrderMessageCapture ==
        25, 0, 102, 0, 0, 166, 151, 59, 248, 121, 0, 0, 183, 9, 0, 0,
        73, 186, 28, 0, 0, 3, 52, 0, 0 >>
 
+ImbalanceMessageCapture ==
+    << 89, 0, 11, 1, 133, 139, 20, 0, 89, 184, 228, 100, 0, 221, 219, 1,
+       73, 0, 105, 0, 89, 184, 228, 100, 0, 163, 219, 1, 160, 41, 1, 0,
+       22, 0, 0, 0, 0, 45, 49, 1, 0, 0, 0, 0, 244, 1, 0, 0,
+       0, 0, 0, 0, 162, 3, 77, 66, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 128, 244, 47, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 32, 32 >>
+
 ModifyOrderMessageCapture ==
     << 51, 0, 11, 1, 138, 87, 18, 0, 88, 184, 228, 100, 0, 144, 16, 0,
        35, 0, 101, 0, 0, 96, 16, 0, 148, 121, 0, 0, 168, 107, 0, 0,
@@ -66,7 +74,7 @@ SourceTimeReferenceMessageCapture ==
        58, 139, 31, 0, 0, 3, 58, 0, 0, 12, 99, 4, 44, 1, 0, 0,
        66, 32, 32, 32, 32, 32, 0 >>
 
-Captures == { AddOrderMessageCapture, CrossTradeMessageCapture, DeleteOrderMessageCapture, ModifyOrderMessageCapture, NonDisplayedTradeMessageCapture, OrderExecutionMessageCapture, ReplaceOrderMessageCapture, RetailPriceImprovementMessageCapture, SecurityStatusMessageCapture, SourceTimeReferenceMessageCapture }
+Captures == { AddOrderMessageCapture, CrossTradeMessageCapture, DeleteOrderMessageCapture, ImbalanceMessageCapture, ModifyOrderMessageCapture, NonDisplayedTradeMessageCapture, OrderExecutionMessageCapture, ReplaceOrderMessageCapture, RetailPriceImprovementMessageCapture, SecurityStatusMessageCapture, SourceTimeReferenceMessageCapture }
 
 (* Every recorded packet reads, reads whole, and writes back unchanged *)
 CapturesRoundTrip ==

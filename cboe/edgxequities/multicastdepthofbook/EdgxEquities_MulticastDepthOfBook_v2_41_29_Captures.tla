@@ -46,6 +46,10 @@ OrderExecutedMessageCapture ==
        80, 6, 78, 69, 56, 2, 2, 0, 0, 0, 61, 112, 222, 62, 18, 0,
        0, 0 >>
 
+ReduceSizeLongMessageCapture ==
+    << 26, 0, 1, 23, 235, 20, 8, 0, 18, 37, 128, 216, 240, 46, 218, 121,
+       213, 143, 162, 200, 103, 42, 216, 8, 1, 0 >>
+
 ReduceSizeShortMessageCapture ==
     << 24, 0, 1, 20, 186, 58, 1, 0, 16, 38, 168, 54, 28, 0, 152, 148,
        15, 125, 232, 240, 236, 36, 100, 0 >>
@@ -69,7 +73,7 @@ TradingStatusMessageCapture ==
     << 26, 0, 1, 6, 81, 86, 1, 0, 18, 49, 56, 155, 251, 8, 67, 80,
        72, 73, 32, 32, 32, 32, 84, 49, 32, 32 >>
 
-Captures == { AddOrderExpandedMessageCapture, AddOrderLongMessageCapture, AddOrderShortMessageCapture, DeleteOrderMessageCapture, ModifyOrderLongMessageCapture, ModifyOrderShortMessageCapture, OrderExecutedAtPriceSizeMessageCapture, OrderExecutedMessageCapture, ReduceSizeShortMessageCapture, TimeMessageCapture, TradeLongMessageCapture, TradeShortMessageCapture, TradingStatusMessageCapture }
+Captures == { AddOrderExpandedMessageCapture, AddOrderLongMessageCapture, AddOrderShortMessageCapture, DeleteOrderMessageCapture, ModifyOrderLongMessageCapture, ModifyOrderShortMessageCapture, OrderExecutedAtPriceSizeMessageCapture, OrderExecutedMessageCapture, ReduceSizeLongMessageCapture, ReduceSizeShortMessageCapture, TimeMessageCapture, TradeLongMessageCapture, TradeShortMessageCapture, TradingStatusMessageCapture }
 
 (* Every recorded packet reads, reads whole, and writes back unchanged *)
 CapturesRoundTrip ==
