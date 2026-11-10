@@ -2664,22 +2664,22 @@ CheckedLoginResponse ==
 (***************************************************************************)
 
 SynchronizationComplete ==
-    [ numberOfMatchingEngines : Sample(1) ]
+    [ matchingEngineId : Sample(1) ]
 
 EncodeSynchronizationComplete(message) ==
-    message.numberOfMatchingEngines
+    message.matchingEngineId
 
 DecodeSynchronizationComplete(bytes) ==
-    LET numberOfMatchingEngines == ReadBytes(bytes, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
-    Ok([ numberOfMatchingEngines |-> numberOfMatchingEngines.value ], numberOfMatchingEngines.rest)
+    LET matchingEngineId == ReadBytes(bytes, 1) IN IF ~matchingEngineId.ok THEN Fail ELSE
+    Ok([ matchingEngineId |-> matchingEngineId.value ], matchingEngineId.rest)
 
 ZeroSynchronizationComplete ==
-    [ numberOfMatchingEngines |-> [i \in 1 .. 1 |-> 0] ]
+    [ matchingEngineId |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Synchronization Complete at zero, then each field in turn at the values it is checked at *)
 CheckedSynchronizationComplete ==
     { ZeroSynchronizationComplete }
-        \cup { [ZeroSynchronizationComplete EXCEPT !.numberOfMatchingEngines = one] : one \in Sample(1) }
+        \cup { [ZeroSynchronizationComplete EXCEPT !.matchingEngineId = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Retransmission Request: 16 bytes                                        *)
@@ -2742,28 +2742,56 @@ CheckedLogoutRequest ==
 (***************************************************************************)
 
 GoodbyePacket ==
-    [ logoutReason : Sample(1),
-      logoutText   : SampleBytes ]
+    [ goodbyeReason : Sample(1),
+      logoutText    : SampleBytes ]
 
 EncodeGoodbyePacket(message) ==
-    message.logoutReason
+    message.goodbyeReason
         \o message.logoutText
 
 DecodeGoodbyePacket(bytes) ==
-    LET logoutReason == ReadBytes(bytes, 1) IN IF ~logoutReason.ok THEN Fail ELSE
-    LET logoutText == Ok(logoutReason.rest, << >>) IN IF ~logoutText.ok THEN Fail ELSE
-    Ok([ logoutReason |-> logoutReason.value,
-         logoutText   |-> logoutText.value ], logoutText.rest)
+    LET goodbyeReason == ReadBytes(bytes, 1) IN IF ~goodbyeReason.ok THEN Fail ELSE
+    LET logoutText == Ok(goodbyeReason.rest, << >>) IN IF ~logoutText.ok THEN Fail ELSE
+    Ok([ goodbyeReason |-> goodbyeReason.value,
+         logoutText    |-> logoutText.value ], logoutText.rest)
 
 ZeroGoodbyePacket ==
-    [ logoutReason |-> [i \in 1 .. 1 |-> 0],
-      logoutText   |-> << >> ]
+    [ goodbyeReason |-> [i \in 1 .. 1 |-> 0],
+      logoutText    |-> << >> ]
 
 (* Goodbye Packet at zero, then each field in turn at the values it is checked at *)
 CheckedGoodbyePacket ==
     { ZeroGoodbyePacket }
-        \cup { [ZeroGoodbyePacket EXCEPT !.logoutReason = one] : one \in Sample(1) }
+        \cup { [ZeroGoodbyePacket EXCEPT !.goodbyeReason = one] : one \in Sample(1) }
         \cup { [ZeroGoodbyePacket EXCEPT !.logoutText = one] : one \in SampleBytes }
+
+(***************************************************************************)
+(* Trading Session Update: 2 bytes                                         *)
+(***************************************************************************)
+
+TradingSessionUpdate ==
+    [ matchingEngineId : Sample(1),
+      tradingSessionId : Sample(1) ]
+
+EncodeTradingSessionUpdate(message) ==
+    message.matchingEngineId
+        \o message.tradingSessionId
+
+DecodeTradingSessionUpdate(bytes) ==
+    LET matchingEngineId == ReadBytes(bytes, 1) IN IF ~matchingEngineId.ok THEN Fail ELSE
+    LET tradingSessionId == ReadBytes(matchingEngineId.rest, 1) IN IF ~tradingSessionId.ok THEN Fail ELSE
+    Ok([ matchingEngineId |-> matchingEngineId.value,
+         tradingSessionId |-> tradingSessionId.value ], tradingSessionId.rest)
+
+ZeroTradingSessionUpdate ==
+    [ matchingEngineId |-> [i \in 1 .. 1 |-> 0],
+      tradingSessionId |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Trading Session Update at zero, then each field in turn at the values it is checked at *)
+CheckedTradingSessionUpdate ==
+    { ZeroTradingSessionUpdate }
+        \cup { [ZeroTradingSessionUpdate EXCEPT !.matchingEngineId = one] : one \in Sample(1) }
+        \cup { [ZeroTradingSessionUpdate EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Test Packet                                                             *)
@@ -2813,7 +2841,7 @@ EsesmPayload ==
         \cup [ tag : {RetransmissionRequestCode}, body : RetransmissionRequest ]
         \cup [ tag : {LogoutRequestCode}, body : LogoutRequest ]
         \cup [ tag : {GoodbyePacketCode}, body : GoodbyePacket ]
-        \cup [ tag : {TradingSessionUpdateCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {TradingSessionUpdateCode}, body : TradingSessionUpdate ]
         \cup [ tag : {ServerHeartbeatCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {ClientHeartbeatCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {TestPacketCode}, body : TestPacket ]
@@ -2827,7 +2855,7 @@ EncodeEsesmPayload(message) ==
       [] message.tag = RetransmissionRequestCode -> EncodeRetransmissionRequest(message.body)
       [] message.tag = LogoutRequestCode -> EncodeLogoutRequest(message.body)
       [] message.tag = GoodbyePacketCode -> EncodeGoodbyePacket(message.body)
-      [] message.tag = TradingSessionUpdateCode -> << >>
+      [] message.tag = TradingSessionUpdateCode -> EncodeTradingSessionUpdate(message.body)
       [] message.tag = ServerHeartbeatCode -> << >>
       [] message.tag = ClientHeartbeatCode -> << >>
       [] message.tag = TestPacketCode -> EncodeTestPacket(message.body)
@@ -2842,7 +2870,7 @@ DecodeEsesmPayload(tag, bytes) ==
               [] tag = RetransmissionRequestCode -> DecodeRetransmissionRequest(bytes)
               [] tag = LogoutRequestCode -> DecodeLogoutRequest(bytes)
               [] tag = GoodbyePacketCode -> DecodeGoodbyePacket(bytes)
-              [] tag = TradingSessionUpdateCode -> Ok([empty |-> 0], bytes)
+              [] tag = TradingSessionUpdateCode -> DecodeTradingSessionUpdate(bytes)
               [] tag = ServerHeartbeatCode -> Ok([empty |-> 0], bytes)
               [] tag = ClientHeartbeatCode -> Ok([empty |-> 0], bytes)
               [] tag = TestPacketCode -> DecodeTestPacket(bytes)
@@ -2861,7 +2889,7 @@ CheckedEsesmPayload ==
         \cup { [tag |-> RetransmissionRequestCode, body |-> one] : one \in CheckedRetransmissionRequest }
         \cup { [tag |-> LogoutRequestCode, body |-> one] : one \in CheckedLogoutRequest }
         \cup { [tag |-> GoodbyePacketCode, body |-> one] : one \in CheckedGoodbyePacket }
-        \cup { [tag |-> TradingSessionUpdateCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> TradingSessionUpdateCode, body |-> one] : one \in CheckedTradingSessionUpdate }
         \cup { [tag |-> ServerHeartbeatCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> ClientHeartbeatCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> TestPacketCode, body |-> one] : one \in CheckedTestPacket }
@@ -2933,7 +2961,7 @@ OneEsesmTcpPacket ==
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> RetransmissionRequestCode, body |-> ZeroRetransmissionRequest]],
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> LogoutRequestCode, body |-> ZeroLogoutRequest]],
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> GoodbyePacketCode, body |-> ZeroGoodbyePacket]],
-      [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> TradingSessionUpdateCode, body |-> [empty |-> 0]]],
+      [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> TradingSessionUpdateCode, body |-> ZeroTradingSessionUpdate]],
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> ServerHeartbeatCode, body |-> [empty |-> 0]]],
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> ClientHeartbeatCode, body |-> [empty |-> 0]]],
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> TestPacketCode, body |-> ZeroTestPacket]] }
@@ -3268,6 +3296,14 @@ RoundTripLogoutRequest ==
 RoundTripGoodbyePacket ==
     \A message \in CheckedGoodbyePacket :
         LET read == DecodeGoodbyePacket(EncodeGoodbyePacket(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Trading Session Update decodes back to what was encoded, and leaves nothing over *)
+RoundTripTradingSessionUpdate ==
+    \A message \in CheckedTradingSessionUpdate :
+        LET read == DecodeTradingSessionUpdate(EncodeTradingSessionUpdate(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

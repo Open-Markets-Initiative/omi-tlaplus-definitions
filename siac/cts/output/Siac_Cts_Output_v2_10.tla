@@ -157,24 +157,24 @@ CheckedTimestamp1 ==
         \cup { [ZeroTimestamp1 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Start Of End Of Day Message: 22 bytes                                   *)
+(* Start Of End Of Day Summary Message: 22 bytes                           *)
 (***************************************************************************)
 
-StartOfEndOfDayMessage ==
+StartOfEndOfDaySummaryMessage ==
     [ participantId              : Sample(1),
       timestamp1                 : Timestamp1,
       messageId                  : Sample(1),
       transactionId              : Sample(4),
       participantReferenceNumber : Sample(8) ]
 
-EncodeStartOfEndOfDayMessage(message) ==
+EncodeStartOfEndOfDaySummaryMessage(message) ==
     message.participantId
         \o EncodeTimestamp1(message.timestamp1)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
 
-DecodeStartOfEndOfDayMessage(bytes) ==
+DecodeStartOfEndOfDaySummaryMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
     LET timestamp1 == DecodeTimestamp1(participantId.rest) IN IF ~timestamp1.ok THEN Fail ELSE
     LET messageId == ReadBytes(timestamp1.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
@@ -186,21 +186,21 @@ DecodeStartOfEndOfDayMessage(bytes) ==
          transactionId              |-> transactionId.value,
          participantReferenceNumber |-> participantReferenceNumber.value ], participantReferenceNumber.rest)
 
-ZeroStartOfEndOfDayMessage ==
+ZeroStartOfEndOfDaySummaryMessage ==
     [ participantId              |-> [i \in 1 .. 1 |-> 0],
       timestamp1                 |-> ZeroTimestamp1,
       messageId                  |-> [i \in 1 .. 1 |-> 0],
       transactionId              |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Start Of End Of Day Message at zero, then each field in turn at the values it is checked at *)
-CheckedStartOfEndOfDayMessage ==
-    { ZeroStartOfEndOfDayMessage }
-        \cup { [ZeroStartOfEndOfDayMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroStartOfEndOfDayMessage EXCEPT !.timestamp1 = one] : one \in CheckedTimestamp1 }
-        \cup { [ZeroStartOfEndOfDayMessage EXCEPT !.messageId = one] : one \in Sample(1) }
-        \cup { [ZeroStartOfEndOfDayMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
-        \cup { [ZeroStartOfEndOfDayMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
+(* Start Of End Of Day Summary Message at zero, then each field in turn at the values it is checked at *)
+CheckedStartOfEndOfDaySummaryMessage ==
+    { ZeroStartOfEndOfDaySummaryMessage }
+        \cup { [ZeroStartOfEndOfDaySummaryMessage EXCEPT !.participantId = one] : one \in Sample(1) }
+        \cup { [ZeroStartOfEndOfDaySummaryMessage EXCEPT !.timestamp1 = one] : one \in CheckedTimestamp1 }
+        \cup { [ZeroStartOfEndOfDaySummaryMessage EXCEPT !.messageId = one] : one \in Sample(1) }
+        \cup { [ZeroStartOfEndOfDaySummaryMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
+        \cup { [ZeroStartOfEndOfDaySummaryMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Timestamp 1: 8 bytes                                                    *)
@@ -231,24 +231,24 @@ CheckedTimestamp12 ==
         \cup { [ZeroTimestamp12 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* End Of End Of Day Message: 22 bytes                                     *)
+(* End Of End Of Day Summary Message: 22 bytes                             *)
 (***************************************************************************)
 
-EndOfEndOfDayMessage ==
+EndOfEndOfDaySummaryMessage ==
     [ participantId              : Sample(1),
       timestamp1                 : Timestamp12,
       messageId                  : Sample(1),
       transactionId              : Sample(4),
       participantReferenceNumber : Sample(8) ]
 
-EncodeEndOfEndOfDayMessage(message) ==
+EncodeEndOfEndOfDaySummaryMessage(message) ==
     message.participantId
         \o EncodeTimestamp12(message.timestamp1)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
 
-DecodeEndOfEndOfDayMessage(bytes) ==
+DecodeEndOfEndOfDaySummaryMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
     LET timestamp1 == DecodeTimestamp12(participantId.rest) IN IF ~timestamp1.ok THEN Fail ELSE
     LET messageId == ReadBytes(timestamp1.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
@@ -260,21 +260,21 @@ DecodeEndOfEndOfDayMessage(bytes) ==
          transactionId              |-> transactionId.value,
          participantReferenceNumber |-> participantReferenceNumber.value ], participantReferenceNumber.rest)
 
-ZeroEndOfEndOfDayMessage ==
+ZeroEndOfEndOfDaySummaryMessage ==
     [ participantId              |-> [i \in 1 .. 1 |-> 0],
       timestamp1                 |-> ZeroTimestamp12,
       messageId                  |-> [i \in 1 .. 1 |-> 0],
       transactionId              |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
 
-(* End Of End Of Day Message at zero, then each field in turn at the values it is checked at *)
-CheckedEndOfEndOfDayMessage ==
-    { ZeroEndOfEndOfDayMessage }
-        \cup { [ZeroEndOfEndOfDayMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroEndOfEndOfDayMessage EXCEPT !.timestamp1 = one] : one \in CheckedTimestamp12 }
-        \cup { [ZeroEndOfEndOfDayMessage EXCEPT !.messageId = one] : one \in Sample(1) }
-        \cup { [ZeroEndOfEndOfDayMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
-        \cup { [ZeroEndOfEndOfDayMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
+(* End Of End Of Day Summary Message at zero, then each field in turn at the values it is checked at *)
+CheckedEndOfEndOfDaySummaryMessage ==
+    { ZeroEndOfEndOfDaySummaryMessage }
+        \cup { [ZeroEndOfEndOfDaySummaryMessage EXCEPT !.participantId = one] : one \in Sample(1) }
+        \cup { [ZeroEndOfEndOfDaySummaryMessage EXCEPT !.timestamp1 = one] : one \in CheckedTimestamp12 }
+        \cup { [ZeroEndOfEndOfDaySummaryMessage EXCEPT !.messageId = one] : one \in Sample(1) }
+        \cup { [ZeroEndOfEndOfDaySummaryMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
+        \cup { [ZeroEndOfEndOfDaySummaryMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Timestamp 1: 8 bytes                                                    *)
@@ -305,24 +305,24 @@ CheckedTimestamp13 ==
         \cup { [ZeroTimestamp13 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Start Of Start Of Day Message: 22 bytes                                 *)
+(* Start Of Start Of Day Summary Message: 22 bytes                         *)
 (***************************************************************************)
 
-StartOfStartOfDayMessage ==
+StartOfStartOfDaySummaryMessage ==
     [ participantId              : Sample(1),
       timestamp1                 : Timestamp13,
       messageId                  : Sample(1),
       transactionId              : Sample(4),
       participantReferenceNumber : Sample(8) ]
 
-EncodeStartOfStartOfDayMessage(message) ==
+EncodeStartOfStartOfDaySummaryMessage(message) ==
     message.participantId
         \o EncodeTimestamp13(message.timestamp1)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
 
-DecodeStartOfStartOfDayMessage(bytes) ==
+DecodeStartOfStartOfDaySummaryMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
     LET timestamp1 == DecodeTimestamp13(participantId.rest) IN IF ~timestamp1.ok THEN Fail ELSE
     LET messageId == ReadBytes(timestamp1.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
@@ -334,21 +334,21 @@ DecodeStartOfStartOfDayMessage(bytes) ==
          transactionId              |-> transactionId.value,
          participantReferenceNumber |-> participantReferenceNumber.value ], participantReferenceNumber.rest)
 
-ZeroStartOfStartOfDayMessage ==
+ZeroStartOfStartOfDaySummaryMessage ==
     [ participantId              |-> [i \in 1 .. 1 |-> 0],
       timestamp1                 |-> ZeroTimestamp13,
       messageId                  |-> [i \in 1 .. 1 |-> 0],
       transactionId              |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Start Of Start Of Day Message at zero, then each field in turn at the values it is checked at *)
-CheckedStartOfStartOfDayMessage ==
-    { ZeroStartOfStartOfDayMessage }
-        \cup { [ZeroStartOfStartOfDayMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroStartOfStartOfDayMessage EXCEPT !.timestamp1 = one] : one \in CheckedTimestamp13 }
-        \cup { [ZeroStartOfStartOfDayMessage EXCEPT !.messageId = one] : one \in Sample(1) }
-        \cup { [ZeroStartOfStartOfDayMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
-        \cup { [ZeroStartOfStartOfDayMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
+(* Start Of Start Of Day Summary Message at zero, then each field in turn at the values it is checked at *)
+CheckedStartOfStartOfDaySummaryMessage ==
+    { ZeroStartOfStartOfDaySummaryMessage }
+        \cup { [ZeroStartOfStartOfDaySummaryMessage EXCEPT !.participantId = one] : one \in Sample(1) }
+        \cup { [ZeroStartOfStartOfDaySummaryMessage EXCEPT !.timestamp1 = one] : one \in CheckedTimestamp13 }
+        \cup { [ZeroStartOfStartOfDaySummaryMessage EXCEPT !.messageId = one] : one \in Sample(1) }
+        \cup { [ZeroStartOfStartOfDaySummaryMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
+        \cup { [ZeroStartOfStartOfDaySummaryMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Timestamp 1: 8 bytes                                                    *)
@@ -379,24 +379,24 @@ CheckedTimestamp14 ==
         \cup { [ZeroTimestamp14 EXCEPT !.nanoseconds = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* End Of Start Of Day Message: 22 bytes                                   *)
+(* End Of Start Of Day Summary Message: 22 bytes                           *)
 (***************************************************************************)
 
-EndOfStartOfDayMessage ==
+EndOfStartOfDaySummaryMessage ==
     [ participantId              : Sample(1),
       timestamp1                 : Timestamp14,
       messageId                  : Sample(1),
       transactionId              : Sample(4),
       participantReferenceNumber : Sample(8) ]
 
-EncodeEndOfStartOfDayMessage(message) ==
+EncodeEndOfStartOfDaySummaryMessage(message) ==
     message.participantId
         \o EncodeTimestamp14(message.timestamp1)
         \o message.messageId
         \o message.transactionId
         \o message.participantReferenceNumber
 
-DecodeEndOfStartOfDayMessage(bytes) ==
+DecodeEndOfStartOfDaySummaryMessage(bytes) ==
     LET participantId == ReadBytes(bytes, 1) IN IF ~participantId.ok THEN Fail ELSE
     LET timestamp1 == DecodeTimestamp14(participantId.rest) IN IF ~timestamp1.ok THEN Fail ELSE
     LET messageId == ReadBytes(timestamp1.rest, 1) IN IF ~messageId.ok THEN Fail ELSE
@@ -408,60 +408,60 @@ DecodeEndOfStartOfDayMessage(bytes) ==
          transactionId              |-> transactionId.value,
          participantReferenceNumber |-> participantReferenceNumber.value ], participantReferenceNumber.rest)
 
-ZeroEndOfStartOfDayMessage ==
+ZeroEndOfStartOfDaySummaryMessage ==
     [ participantId              |-> [i \in 1 .. 1 |-> 0],
       timestamp1                 |-> ZeroTimestamp14,
       messageId                  |-> [i \in 1 .. 1 |-> 0],
       transactionId              |-> [i \in 1 .. 4 |-> 0],
       participantReferenceNumber |-> [i \in 1 .. 8 |-> 0] ]
 
-(* End Of Start Of Day Message at zero, then each field in turn at the values it is checked at *)
-CheckedEndOfStartOfDayMessage ==
-    { ZeroEndOfStartOfDayMessage }
-        \cup { [ZeroEndOfStartOfDayMessage EXCEPT !.participantId = one] : one \in Sample(1) }
-        \cup { [ZeroEndOfStartOfDayMessage EXCEPT !.timestamp1 = one] : one \in CheckedTimestamp14 }
-        \cup { [ZeroEndOfStartOfDayMessage EXCEPT !.messageId = one] : one \in Sample(1) }
-        \cup { [ZeroEndOfStartOfDayMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
-        \cup { [ZeroEndOfStartOfDayMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
+(* End Of Start Of Day Summary Message at zero, then each field in turn at the values it is checked at *)
+CheckedEndOfStartOfDaySummaryMessage ==
+    { ZeroEndOfStartOfDaySummaryMessage }
+        \cup { [ZeroEndOfStartOfDaySummaryMessage EXCEPT !.participantId = one] : one \in Sample(1) }
+        \cup { [ZeroEndOfStartOfDaySummaryMessage EXCEPT !.timestamp1 = one] : one \in CheckedTimestamp14 }
+        \cup { [ZeroEndOfStartOfDaySummaryMessage EXCEPT !.messageId = one] : one \in Sample(1) }
+        \cup { [ZeroEndOfStartOfDaySummaryMessage EXCEPT !.transactionId = one] : one \in Sample(4) }
+        \cup { [ZeroEndOfStartOfDaySummaryMessage EXCEPT !.participantReferenceNumber = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Administrative Message Payload, selected by Administrative Message Type *)
 (***************************************************************************)
 
-StartOfEndOfDayMessageCode == 65  \* "A"
-EndOfEndOfDayMessageCode == 66  \* "B"
-StartOfStartOfDayMessageCode == 67  \* "C"
-EndOfStartOfDayMessageCode == 68  \* "D"
+StartOfEndOfDaySummaryMessageCode == 65  \* "A"
+EndOfEndOfDaySummaryMessageCode == 66  \* "B"
+StartOfStartOfDaySummaryMessageCode == 67  \* "C"
+EndOfStartOfDaySummaryMessageCode == 68  \* "D"
 
 AdministrativeMessagePayload ==
-    [ tag : {StartOfEndOfDayMessageCode}, body : StartOfEndOfDayMessage ]
-        \cup [ tag : {EndOfEndOfDayMessageCode}, body : EndOfEndOfDayMessage ]
-        \cup [ tag : {StartOfStartOfDayMessageCode}, body : StartOfStartOfDayMessage ]
-        \cup [ tag : {EndOfStartOfDayMessageCode}, body : EndOfStartOfDayMessage ]
+    [ tag : {StartOfEndOfDaySummaryMessageCode}, body : StartOfEndOfDaySummaryMessage ]
+        \cup [ tag : {EndOfEndOfDaySummaryMessageCode}, body : EndOfEndOfDaySummaryMessage ]
+        \cup [ tag : {StartOfStartOfDaySummaryMessageCode}, body : StartOfStartOfDaySummaryMessage ]
+        \cup [ tag : {EndOfStartOfDaySummaryMessageCode}, body : EndOfStartOfDaySummaryMessage ]
 
 EncodeAdministrativeMessagePayload(message) ==
-    CASE message.tag = StartOfEndOfDayMessageCode -> EncodeStartOfEndOfDayMessage(message.body)
-      [] message.tag = EndOfEndOfDayMessageCode -> EncodeEndOfEndOfDayMessage(message.body)
-      [] message.tag = StartOfStartOfDayMessageCode -> EncodeStartOfStartOfDayMessage(message.body)
-      [] message.tag = EndOfStartOfDayMessageCode -> EncodeEndOfStartOfDayMessage(message.body)
+    CASE message.tag = StartOfEndOfDaySummaryMessageCode -> EncodeStartOfEndOfDaySummaryMessage(message.body)
+      [] message.tag = EndOfEndOfDaySummaryMessageCode -> EncodeEndOfEndOfDaySummaryMessage(message.body)
+      [] message.tag = StartOfStartOfDaySummaryMessageCode -> EncodeStartOfStartOfDaySummaryMessage(message.body)
+      [] message.tag = EndOfStartOfDaySummaryMessageCode -> EncodeEndOfStartOfDaySummaryMessage(message.body)
 
 DecodeAdministrativeMessagePayload(tag, bytes) ==
     LET read ==
-            CASE tag = StartOfEndOfDayMessageCode -> DecodeStartOfEndOfDayMessage(bytes)
-              [] tag = EndOfEndOfDayMessageCode -> DecodeEndOfEndOfDayMessage(bytes)
-              [] tag = StartOfStartOfDayMessageCode -> DecodeStartOfStartOfDayMessage(bytes)
-              [] tag = EndOfStartOfDayMessageCode -> DecodeEndOfStartOfDayMessage(bytes)
+            CASE tag = StartOfEndOfDaySummaryMessageCode -> DecodeStartOfEndOfDaySummaryMessage(bytes)
+              [] tag = EndOfEndOfDaySummaryMessageCode -> DecodeEndOfEndOfDaySummaryMessage(bytes)
+              [] tag = StartOfStartOfDaySummaryMessageCode -> DecodeStartOfStartOfDaySummaryMessage(bytes)
+              [] tag = EndOfStartOfDaySummaryMessageCode -> DecodeEndOfStartOfDaySummaryMessage(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
-ZeroAdministrativeMessagePayload == [tag |-> StartOfEndOfDayMessageCode, body |-> ZeroStartOfEndOfDayMessage]
+ZeroAdministrativeMessagePayload == [tag |-> StartOfEndOfDaySummaryMessageCode, body |-> ZeroStartOfEndOfDaySummaryMessage]
 
 (* Each Administrative Message Payload in turn, at the values the message it names is checked at *)
 CheckedAdministrativeMessagePayload ==
-    { [tag |-> StartOfEndOfDayMessageCode, body |-> one] : one \in CheckedStartOfEndOfDayMessage }
-        \cup { [tag |-> EndOfEndOfDayMessageCode, body |-> one] : one \in CheckedEndOfEndOfDayMessage }
-        \cup { [tag |-> StartOfStartOfDayMessageCode, body |-> one] : one \in CheckedStartOfStartOfDayMessage }
-        \cup { [tag |-> EndOfStartOfDayMessageCode, body |-> one] : one \in CheckedEndOfStartOfDayMessage }
+    { [tag |-> StartOfEndOfDaySummaryMessageCode, body |-> one] : one \in CheckedStartOfEndOfDaySummaryMessage }
+        \cup { [tag |-> EndOfEndOfDaySummaryMessageCode, body |-> one] : one \in CheckedEndOfEndOfDaySummaryMessage }
+        \cup { [tag |-> StartOfStartOfDaySummaryMessageCode, body |-> one] : one \in CheckedStartOfStartOfDaySummaryMessage }
+        \cup { [tag |-> EndOfStartOfDaySummaryMessageCode, body |-> one] : one \in CheckedEndOfStartOfDaySummaryMessage }
 
 (***************************************************************************)
 (* Administrative Message                                                  *)
@@ -7375,10 +7375,10 @@ RoundTripTimestamp1 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Start Of End Of Day Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripStartOfEndOfDayMessage ==
-    \A message \in CheckedStartOfEndOfDayMessage :
-        LET read == DecodeStartOfEndOfDayMessage(EncodeStartOfEndOfDayMessage(message))
+(* Every Start Of End Of Day Summary Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripStartOfEndOfDaySummaryMessage ==
+    \A message \in CheckedStartOfEndOfDaySummaryMessage :
+        LET read == DecodeStartOfEndOfDaySummaryMessage(EncodeStartOfEndOfDaySummaryMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -7391,10 +7391,10 @@ RoundTripTimestamp12 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every End Of End Of Day Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripEndOfEndOfDayMessage ==
-    \A message \in CheckedEndOfEndOfDayMessage :
-        LET read == DecodeEndOfEndOfDayMessage(EncodeEndOfEndOfDayMessage(message))
+(* Every End Of End Of Day Summary Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripEndOfEndOfDaySummaryMessage ==
+    \A message \in CheckedEndOfEndOfDaySummaryMessage :
+        LET read == DecodeEndOfEndOfDaySummaryMessage(EncodeEndOfEndOfDaySummaryMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -7407,10 +7407,10 @@ RoundTripTimestamp13 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Start Of Start Of Day Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripStartOfStartOfDayMessage ==
-    \A message \in CheckedStartOfStartOfDayMessage :
-        LET read == DecodeStartOfStartOfDayMessage(EncodeStartOfStartOfDayMessage(message))
+(* Every Start Of Start Of Day Summary Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripStartOfStartOfDaySummaryMessage ==
+    \A message \in CheckedStartOfStartOfDaySummaryMessage :
+        LET read == DecodeStartOfStartOfDaySummaryMessage(EncodeStartOfStartOfDaySummaryMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -7423,10 +7423,10 @@ RoundTripTimestamp14 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every End Of Start Of Day Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripEndOfStartOfDayMessage ==
-    \A message \in CheckedEndOfStartOfDayMessage :
-        LET read == DecodeEndOfStartOfDayMessage(EncodeEndOfStartOfDayMessage(message))
+(* Every End Of Start Of Day Summary Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripEndOfStartOfDaySummaryMessage ==
+    \A message \in CheckedEndOfStartOfDaySummaryMessage :
+        LET read == DecodeEndOfStartOfDaySummaryMessage(EncodeEndOfStartOfDaySummaryMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

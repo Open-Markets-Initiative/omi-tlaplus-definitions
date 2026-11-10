@@ -261,46 +261,92 @@ CheckedUnsequencedDataPacket ==
         \cup { [ZeroUnsequencedDataPacket EXCEPT !.unsequencedMessage = one] : one \in CheckedUnsequencedMessage }
 
 (***************************************************************************)
-(* Login Request: 35 bytes                                                 *)
+(* Requested Matching Engine: 9 bytes                                      *)
+(***************************************************************************)
+
+RequestedMatchingEngine ==
+    [ requestedTradingSessionId : Sample(1),
+      requestedSequenceNumber   : Sample(8) ]
+
+EncodeRequestedMatchingEngine(message) ==
+    message.requestedTradingSessionId
+        \o message.requestedSequenceNumber
+
+DecodeRequestedMatchingEngine(bytes) ==
+    LET requestedTradingSessionId == ReadBytes(bytes, 1) IN IF ~requestedTradingSessionId.ok THEN Fail ELSE
+    LET requestedSequenceNumber == ReadBytes(requestedTradingSessionId.rest, 8) IN IF ~requestedSequenceNumber.ok THEN Fail ELSE
+    Ok([ requestedTradingSessionId |-> requestedTradingSessionId.value,
+         requestedSequenceNumber   |-> requestedSequenceNumber.value ], requestedSequenceNumber.rest)
+
+ZeroRequestedMatchingEngine ==
+    [ requestedTradingSessionId |-> [i \in 1 .. 1 |-> 0],
+      requestedSequenceNumber   |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Requested Matching Engine at zero, then each field in turn at the values it is checked at *)
+CheckedRequestedMatchingEngine ==
+    { ZeroRequestedMatchingEngine }
+        \cup { [ZeroRequestedMatchingEngine EXCEPT !.requestedTradingSessionId = one] : one \in Sample(1) }
+        \cup { [ZeroRequestedMatchingEngine EXCEPT !.requestedSequenceNumber = one] : one \in Sample(8) }
+
+(* A run of Requested Matching Engine, written one after another *)
+RECURSIVE EncodeRequestedMatchingEngineList(_)
+EncodeRequestedMatchingEngineList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeRequestedMatchingEngine(Head(messages)) \o EncodeRequestedMatchingEngineList(Tail(messages))
+
+(* As many Requested Matching Engine as the field that counts them says *)
+RECURSIVE ReadRequestedMatchingEngineList(_, _)
+ReadRequestedMatchingEngineList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeRequestedMatchingEngine(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadRequestedMatchingEngineList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Requested Matching Engine of each kind, for the lists that carry them *)
+OneRequestedMatchingEngine == { ZeroRequestedMatchingEngine }
+
+(***************************************************************************)
+(* Login Request                                                           *)
 (***************************************************************************)
 
 LoginRequest ==
-    [ esesmVersion              : Sample(5),
-      username                  : Sample(5),
-      computerId                : Sample(8),
-      applicationProtocol       : Sample(8),
-      requestedTradingSessionId : Sample(1),
-      requestedSequenceNumber   : Sample(8) ]
+    [ esesmVersion            : Sample(5),
+      username                : Sample(5),
+      computerId              : Sample(8),
+      applicationProtocol     : Sample(8),
+      requestedMatchingEngine : SampleLists(OneRequestedMatchingEngine) ]
 
 EncodeLoginRequest(message) ==
     message.esesmVersion
         \o message.username
         \o message.computerId
         \o message.applicationProtocol
-        \o message.requestedTradingSessionId
-        \o message.requestedSequenceNumber
+        \o EncodeUIntBE(Len(message.requestedMatchingEngine), 1)
+        \o EncodeRequestedMatchingEngineList(message.requestedMatchingEngine)
 
 DecodeLoginRequest(bytes) ==
     LET esesmVersion == ReadBytes(bytes, 5) IN IF ~esesmVersion.ok THEN Fail ELSE
     LET username == ReadBytes(esesmVersion.rest, 5) IN IF ~username.ok THEN Fail ELSE
     LET computerId == ReadBytes(username.rest, 8) IN IF ~computerId.ok THEN Fail ELSE
     LET applicationProtocol == ReadBytes(computerId.rest, 8) IN IF ~applicationProtocol.ok THEN Fail ELSE
-    LET requestedTradingSessionId == ReadBytes(applicationProtocol.rest, 1) IN IF ~requestedTradingSessionId.ok THEN Fail ELSE
-    LET requestedSequenceNumber == ReadBytes(requestedTradingSessionId.rest, 8) IN IF ~requestedSequenceNumber.ok THEN Fail ELSE
-    Ok([ esesmVersion              |-> esesmVersion.value,
-         username                  |-> username.value,
-         computerId                |-> computerId.value,
-         applicationProtocol       |-> applicationProtocol.value,
-         requestedTradingSessionId |-> requestedTradingSessionId.value,
-         requestedSequenceNumber   |-> requestedSequenceNumber.value ], requestedSequenceNumber.rest)
+    LET numberOfMatchingEngines == ReadUIntBE(applicationProtocol.rest, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
+    LET requestedMatchingEngine == ReadRequestedMatchingEngineList(numberOfMatchingEngines.rest, numberOfMatchingEngines.value) IN IF ~requestedMatchingEngine.ok THEN Fail ELSE
+    Ok([ esesmVersion            |-> esesmVersion.value,
+         username                |-> username.value,
+         computerId              |-> computerId.value,
+         applicationProtocol     |-> applicationProtocol.value,
+         requestedMatchingEngine |-> requestedMatchingEngine.value ], requestedMatchingEngine.rest)
 
 ZeroLoginRequest ==
-    [ esesmVersion              |-> [i \in 1 .. 5 |-> 0],
-      username                  |-> [i \in 1 .. 5 |-> 0],
-      computerId                |-> [i \in 1 .. 8 |-> 0],
-      applicationProtocol       |-> [i \in 1 .. 8 |-> 0],
-      requestedTradingSessionId |-> [i \in 1 .. 1 |-> 0],
-      requestedSequenceNumber   |-> [i \in 1 .. 8 |-> 0] ]
+    [ esesmVersion            |-> [i \in 1 .. 5 |-> 0],
+      username                |-> [i \in 1 .. 5 |-> 0],
+      computerId              |-> [i \in 1 .. 8 |-> 0],
+      applicationProtocol     |-> [i \in 1 .. 8 |-> 0],
+      requestedMatchingEngine |-> << >> ]
 
 (* Login Request at zero, then each field in turn at the values it is checked at *)
 CheckedLoginRequest ==
@@ -309,70 +355,108 @@ CheckedLoginRequest ==
         \cup { [ZeroLoginRequest EXCEPT !.username = one] : one \in Sample(5) }
         \cup { [ZeroLoginRequest EXCEPT !.computerId = one] : one \in Sample(8) }
         \cup { [ZeroLoginRequest EXCEPT !.applicationProtocol = one] : one \in Sample(8) }
-        \cup { [ZeroLoginRequest EXCEPT !.requestedTradingSessionId = one] : one \in Sample(1) }
-        \cup { [ZeroLoginRequest EXCEPT !.requestedSequenceNumber = one] : one \in Sample(8) }
+        \cup { [ZeroLoginRequest EXCEPT !.requestedMatchingEngine = one] : one \in SampleLists(OneRequestedMatchingEngine) }
 
 (***************************************************************************)
-(* Login Response: 11 bytes                                                *)
+(* Login Matching Engine: 10 bytes                                         *)
 (***************************************************************************)
 
-LoginResponse ==
-    [ numberOfMatchingEngines : Sample(1),
-      loginStatus             : Sample(1),
-      tradingSessionId        : Sample(1),
-      highestSequenceNumber   : Sample(8) ]
+LoginMatchingEngine ==
+    [ loginStatus           : Sample(1),
+      tradingSessionId      : Sample(1),
+      highestSequenceNumber : Sample(8) ]
 
-EncodeLoginResponse(message) ==
-    message.numberOfMatchingEngines
-        \o message.loginStatus
+EncodeLoginMatchingEngine(message) ==
+    message.loginStatus
         \o message.tradingSessionId
         \o message.highestSequenceNumber
 
-DecodeLoginResponse(bytes) ==
-    LET numberOfMatchingEngines == ReadBytes(bytes, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
-    LET loginStatus == ReadBytes(numberOfMatchingEngines.rest, 1) IN IF ~loginStatus.ok THEN Fail ELSE
+DecodeLoginMatchingEngine(bytes) ==
+    LET loginStatus == ReadBytes(bytes, 1) IN IF ~loginStatus.ok THEN Fail ELSE
     LET tradingSessionId == ReadBytes(loginStatus.rest, 1) IN IF ~tradingSessionId.ok THEN Fail ELSE
     LET highestSequenceNumber == ReadBytes(tradingSessionId.rest, 8) IN IF ~highestSequenceNumber.ok THEN Fail ELSE
-    Ok([ numberOfMatchingEngines |-> numberOfMatchingEngines.value,
-         loginStatus             |-> loginStatus.value,
-         tradingSessionId        |-> tradingSessionId.value,
-         highestSequenceNumber   |-> highestSequenceNumber.value ], highestSequenceNumber.rest)
+    Ok([ loginStatus           |-> loginStatus.value,
+         tradingSessionId      |-> tradingSessionId.value,
+         highestSequenceNumber |-> highestSequenceNumber.value ], highestSequenceNumber.rest)
+
+ZeroLoginMatchingEngine ==
+    [ loginStatus           |-> [i \in 1 .. 1 |-> 0],
+      tradingSessionId      |-> [i \in 1 .. 1 |-> 0],
+      highestSequenceNumber |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Login Matching Engine at zero, then each field in turn at the values it is checked at *)
+CheckedLoginMatchingEngine ==
+    { ZeroLoginMatchingEngine }
+        \cup { [ZeroLoginMatchingEngine EXCEPT !.loginStatus = one] : one \in Sample(1) }
+        \cup { [ZeroLoginMatchingEngine EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
+        \cup { [ZeroLoginMatchingEngine EXCEPT !.highestSequenceNumber = one] : one \in Sample(8) }
+
+(* A run of Login Matching Engine, written one after another *)
+RECURSIVE EncodeLoginMatchingEngineList(_)
+EncodeLoginMatchingEngineList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeLoginMatchingEngine(Head(messages)) \o EncodeLoginMatchingEngineList(Tail(messages))
+
+(* As many Login Matching Engine as the field that counts them says *)
+RECURSIVE ReadLoginMatchingEngineList(_, _)
+ReadLoginMatchingEngineList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeLoginMatchingEngine(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadLoginMatchingEngineList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Login Matching Engine of each kind, for the lists that carry them *)
+OneLoginMatchingEngine == { ZeroLoginMatchingEngine }
+
+(***************************************************************************)
+(* Login Response                                                          *)
+(***************************************************************************)
+
+LoginResponse ==
+    [ loginMatchingEngine : SampleLists(OneLoginMatchingEngine) ]
+
+EncodeLoginResponse(message) ==
+    EncodeUIntBE(Len(message.loginMatchingEngine), 1)
+        \o EncodeLoginMatchingEngineList(message.loginMatchingEngine)
+
+DecodeLoginResponse(bytes) ==
+    LET numberOfMatchingEngines == ReadUIntBE(bytes, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
+    LET loginMatchingEngine == ReadLoginMatchingEngineList(numberOfMatchingEngines.rest, numberOfMatchingEngines.value) IN IF ~loginMatchingEngine.ok THEN Fail ELSE
+    Ok([ loginMatchingEngine |-> loginMatchingEngine.value ], loginMatchingEngine.rest)
 
 ZeroLoginResponse ==
-    [ numberOfMatchingEngines |-> [i \in 1 .. 1 |-> 0],
-      loginStatus             |-> [i \in 1 .. 1 |-> 0],
-      tradingSessionId        |-> [i \in 1 .. 1 |-> 0],
-      highestSequenceNumber   |-> [i \in 1 .. 8 |-> 0] ]
+    [ loginMatchingEngine |-> << >> ]
 
 (* Login Response at zero, then each field in turn at the values it is checked at *)
 CheckedLoginResponse ==
     { ZeroLoginResponse }
-        \cup { [ZeroLoginResponse EXCEPT !.numberOfMatchingEngines = one] : one \in Sample(1) }
-        \cup { [ZeroLoginResponse EXCEPT !.loginStatus = one] : one \in Sample(1) }
-        \cup { [ZeroLoginResponse EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
-        \cup { [ZeroLoginResponse EXCEPT !.highestSequenceNumber = one] : one \in Sample(8) }
+        \cup { [ZeroLoginResponse EXCEPT !.loginMatchingEngine = one] : one \in SampleLists(OneLoginMatchingEngine) }
 
 (***************************************************************************)
 (* Synchronization Complete: 1 bytes                                       *)
 (***************************************************************************)
 
 SynchronizationComplete ==
-    [ numberOfMatchingEngines : Sample(1) ]
+    [ matchingEngineId : Sample(1) ]
 
 EncodeSynchronizationComplete(message) ==
-    message.numberOfMatchingEngines
+    message.matchingEngineId
 
 DecodeSynchronizationComplete(bytes) ==
-    LET numberOfMatchingEngines == ReadBytes(bytes, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
-    Ok([ numberOfMatchingEngines |-> numberOfMatchingEngines.value ], numberOfMatchingEngines.rest)
+    LET matchingEngineId == ReadBytes(bytes, 1) IN IF ~matchingEngineId.ok THEN Fail ELSE
+    Ok([ matchingEngineId |-> matchingEngineId.value ], matchingEngineId.rest)
 
 ZeroSynchronizationComplete ==
-    [ numberOfMatchingEngines |-> [i \in 1 .. 1 |-> 0] ]
+    [ matchingEngineId |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Synchronization Complete at zero, then each field in turn at the values it is checked at *)
 CheckedSynchronizationComplete ==
     { ZeroSynchronizationComplete }
-        \cup { [ZeroSynchronizationComplete EXCEPT !.numberOfMatchingEngines = one] : one \in Sample(1) }
+        \cup { [ZeroSynchronizationComplete EXCEPT !.matchingEngineId = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Retransmission Request: 16 bytes                                        *)
@@ -435,28 +519,56 @@ CheckedLogoutRequest ==
 (***************************************************************************)
 
 GoodbyePacket ==
-    [ logoutReason : Sample(1),
-      logoutText   : SampleBytes ]
+    [ goodbyeReason : Sample(1),
+      logoutText    : SampleBytes ]
 
 EncodeGoodbyePacket(message) ==
-    message.logoutReason
+    message.goodbyeReason
         \o message.logoutText
 
 DecodeGoodbyePacket(bytes) ==
-    LET logoutReason == ReadBytes(bytes, 1) IN IF ~logoutReason.ok THEN Fail ELSE
-    LET logoutText == Ok(logoutReason.rest, << >>) IN IF ~logoutText.ok THEN Fail ELSE
-    Ok([ logoutReason |-> logoutReason.value,
-         logoutText   |-> logoutText.value ], logoutText.rest)
+    LET goodbyeReason == ReadBytes(bytes, 1) IN IF ~goodbyeReason.ok THEN Fail ELSE
+    LET logoutText == Ok(goodbyeReason.rest, << >>) IN IF ~logoutText.ok THEN Fail ELSE
+    Ok([ goodbyeReason |-> goodbyeReason.value,
+         logoutText    |-> logoutText.value ], logoutText.rest)
 
 ZeroGoodbyePacket ==
-    [ logoutReason |-> [i \in 1 .. 1 |-> 0],
-      logoutText   |-> << >> ]
+    [ goodbyeReason |-> [i \in 1 .. 1 |-> 0],
+      logoutText    |-> << >> ]
 
 (* Goodbye Packet at zero, then each field in turn at the values it is checked at *)
 CheckedGoodbyePacket ==
     { ZeroGoodbyePacket }
-        \cup { [ZeroGoodbyePacket EXCEPT !.logoutReason = one] : one \in Sample(1) }
+        \cup { [ZeroGoodbyePacket EXCEPT !.goodbyeReason = one] : one \in Sample(1) }
         \cup { [ZeroGoodbyePacket EXCEPT !.logoutText = one] : one \in SampleBytes }
+
+(***************************************************************************)
+(* Trading Session Update: 2 bytes                                         *)
+(***************************************************************************)
+
+TradingSessionUpdate ==
+    [ matchingEngineId : Sample(1),
+      tradingSessionId : Sample(1) ]
+
+EncodeTradingSessionUpdate(message) ==
+    message.matchingEngineId
+        \o message.tradingSessionId
+
+DecodeTradingSessionUpdate(bytes) ==
+    LET matchingEngineId == ReadBytes(bytes, 1) IN IF ~matchingEngineId.ok THEN Fail ELSE
+    LET tradingSessionId == ReadBytes(matchingEngineId.rest, 1) IN IF ~tradingSessionId.ok THEN Fail ELSE
+    Ok([ matchingEngineId |-> matchingEngineId.value,
+         tradingSessionId |-> tradingSessionId.value ], tradingSessionId.rest)
+
+ZeroTradingSessionUpdate ==
+    [ matchingEngineId |-> [i \in 1 .. 1 |-> 0],
+      tradingSessionId |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Trading Session Update at zero, then each field in turn at the values it is checked at *)
+CheckedTradingSessionUpdate ==
+    { ZeroTradingSessionUpdate }
+        \cup { [ZeroTradingSessionUpdate EXCEPT !.matchingEngineId = one] : one \in Sample(1) }
+        \cup { [ZeroTradingSessionUpdate EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Test Packet                                                             *)
@@ -506,7 +618,7 @@ EsesmPayload ==
         \cup [ tag : {RetransmissionRequestCode}, body : RetransmissionRequest ]
         \cup [ tag : {LogoutRequestCode}, body : LogoutRequest ]
         \cup [ tag : {GoodbyePacketCode}, body : GoodbyePacket ]
-        \cup [ tag : {TradingSessionUpdateCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {TradingSessionUpdateCode}, body : TradingSessionUpdate ]
         \cup [ tag : {ServerHeartbeatCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {ClientHeartbeatCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {TestPacketCode}, body : TestPacket ]
@@ -520,7 +632,7 @@ EncodeEsesmPayload(message) ==
       [] message.tag = RetransmissionRequestCode -> EncodeRetransmissionRequest(message.body)
       [] message.tag = LogoutRequestCode -> EncodeLogoutRequest(message.body)
       [] message.tag = GoodbyePacketCode -> EncodeGoodbyePacket(message.body)
-      [] message.tag = TradingSessionUpdateCode -> << >>
+      [] message.tag = TradingSessionUpdateCode -> EncodeTradingSessionUpdate(message.body)
       [] message.tag = ServerHeartbeatCode -> << >>
       [] message.tag = ClientHeartbeatCode -> << >>
       [] message.tag = TestPacketCode -> EncodeTestPacket(message.body)
@@ -535,7 +647,7 @@ DecodeEsesmPayload(tag, bytes) ==
               [] tag = RetransmissionRequestCode -> DecodeRetransmissionRequest(bytes)
               [] tag = LogoutRequestCode -> DecodeLogoutRequest(bytes)
               [] tag = GoodbyePacketCode -> DecodeGoodbyePacket(bytes)
-              [] tag = TradingSessionUpdateCode -> Ok([empty |-> 0], bytes)
+              [] tag = TradingSessionUpdateCode -> DecodeTradingSessionUpdate(bytes)
               [] tag = ServerHeartbeatCode -> Ok([empty |-> 0], bytes)
               [] tag = ClientHeartbeatCode -> Ok([empty |-> 0], bytes)
               [] tag = TestPacketCode -> DecodeTestPacket(bytes)
@@ -554,7 +666,7 @@ CheckedEsesmPayload ==
         \cup { [tag |-> RetransmissionRequestCode, body |-> one] : one \in CheckedRetransmissionRequest }
         \cup { [tag |-> LogoutRequestCode, body |-> one] : one \in CheckedLogoutRequest }
         \cup { [tag |-> GoodbyePacketCode, body |-> one] : one \in CheckedGoodbyePacket }
-        \cup { [tag |-> TradingSessionUpdateCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> TradingSessionUpdateCode, body |-> one] : one \in CheckedTradingSessionUpdate }
         \cup { [tag |-> ServerHeartbeatCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> ClientHeartbeatCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> TestPacketCode, body |-> one] : one \in CheckedTestPacket }
@@ -626,7 +738,7 @@ OneEsesmTcpPacket ==
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> RetransmissionRequestCode, body |-> ZeroRetransmissionRequest]],
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> LogoutRequestCode, body |-> ZeroLogoutRequest]],
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> GoodbyePacketCode, body |-> ZeroGoodbyePacket]],
-      [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> TradingSessionUpdateCode, body |-> [empty |-> 0]]],
+      [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> TradingSessionUpdateCode, body |-> ZeroTradingSessionUpdate]],
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> ServerHeartbeatCode, body |-> [empty |-> 0]]],
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> ClientHeartbeatCode, body |-> [empty |-> 0]]],
       [ZeroEsesmTcpPacket EXCEPT !.esesmPayload = [tag |-> TestPacketCode, body |-> ZeroTestPacket]] }
@@ -709,10 +821,26 @@ RoundTripUnsequencedDataPacket ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Requested Matching Engine decodes back to what was encoded, and leaves nothing over *)
+RoundTripRequestedMatchingEngine ==
+    \A message \in CheckedRequestedMatchingEngine :
+        LET read == DecodeRequestedMatchingEngine(EncodeRequestedMatchingEngine(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Login Request decodes back to what was encoded, and leaves nothing over *)
 RoundTripLoginRequest ==
     \A message \in CheckedLoginRequest :
         LET read == DecodeLoginRequest(EncodeLoginRequest(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Login Matching Engine decodes back to what was encoded, and leaves nothing over *)
+RoundTripLoginMatchingEngine ==
+    \A message \in CheckedLoginMatchingEngine :
+        LET read == DecodeLoginMatchingEngine(EncodeLoginMatchingEngine(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -753,6 +881,14 @@ RoundTripLogoutRequest ==
 RoundTripGoodbyePacket ==
     \A message \in CheckedGoodbyePacket :
         LET read == DecodeGoodbyePacket(EncodeGoodbyePacket(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Trading Session Update decodes back to what was encoded, and leaves nothing over *)
+RoundTripTradingSessionUpdate ==
+    \A message \in CheckedTradingSessionUpdate :
+        LET read == DecodeTradingSessionUpdate(EncodeTradingSessionUpdate(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
