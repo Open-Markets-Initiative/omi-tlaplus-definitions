@@ -372,7 +372,8 @@ RoundTripClientPacket ==
 (* A Client Data is selected by the Client Message Type it is written under *)
 SelectsClientData ==
     \A message \in CheckedClientData :
-        LET read == DecodeClientData(message.tag, EncodeClientData(message))
+        LET sent == EncodeClientData(message)
+            read == DecodeClientData(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

@@ -3480,49 +3480,57 @@ RoundTripPacket ==
 (* A Administrative Message Payload is selected by the Administrative Message Type it is written under *)
 SelectsAdministrativeMessagePayload ==
     \A message \in CheckedAdministrativeMessagePayload :
-        LET read == DecodeAdministrativeMessagePayload(message.tag, EncodeAdministrativeMessagePayload(message))
+        LET sent == EncodeAdministrativeMessagePayload(message)
+            read == DecodeAdministrativeMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Control Message Payload is selected by the Control Message Type it is written under *)
 SelectsControlMessagePayload ==
     \A message \in CheckedControlMessagePayload :
-        LET read == DecodeControlMessagePayload(message.tag, EncodeControlMessagePayload(message))
+        LET sent == EncodeControlMessagePayload(message)
+            read == DecodeControlMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Market Status Message Payload is selected by the Market Status Message Type it is written under *)
 SelectsMarketStatusMessagePayload ==
     \A message \in CheckedMarketStatusMessagePayload :
-        LET read == DecodeMarketStatusMessagePayload(message.tag, EncodeMarketStatusMessagePayload(message))
+        LET sent == EncodeMarketStatusMessagePayload(message)
+            read == DecodeMarketStatusMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A National Bbo Indicator is selected by the National Bbo Indicator it is written under *)
 SelectsNationalBboIndicatorChoice ==
     \A message \in CheckedNationalBboIndicatorChoice :
-        LET read == DecodeNationalBboIndicatorChoice(message.tag, EncodeNationalBboIndicatorChoice(message))
+        LET sent == EncodeNationalBboIndicatorChoice(message)
+            read == DecodeNationalBboIndicatorChoice(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A National Bbo Indicator is selected by the National Bbo Indicator it is written under *)
 SelectsNationalBboIndicatorChoice2 ==
     \A message \in CheckedNationalBboIndicatorChoice2 :
-        LET read == DecodeNationalBboIndicatorChoice2(message.tag, EncodeNationalBboIndicatorChoice2(message))
+        LET sent == EncodeNationalBboIndicatorChoice2(message)
+            read == DecodeNationalBboIndicatorChoice2(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A National Bbo Indicator is selected by the National Bbo Indicator it is written under *)
 SelectsNationalBboIndicatorChoice3 ==
     \A message \in CheckedNationalBboIndicatorChoice3 :
-        LET read == DecodeNationalBboIndicatorChoice3(message.tag, EncodeNationalBboIndicatorChoice3(message))
+        LET sent == EncodeNationalBboIndicatorChoice3(message)
+            read == DecodeNationalBboIndicatorChoice3(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Quote Message Payload is selected by the Quote Message Type it is written under *)
 SelectsQuoteMessagePayload ==
     \A message \in CheckedQuoteMessagePayload :
-        LET read == DecodeQuoteMessagePayload(message.tag, EncodeQuoteMessagePayload(message))
+        LET sent == EncodeQuoteMessagePayload(message)
+            read == DecodeQuoteMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Category Payload is selected by the Message Category it is written under *)
 SelectsCategoryPayload ==
     \A message \in CheckedCategoryPayload :
-        LET read == DecodeCategoryPayload(message.tag, EncodeCategoryPayload(message))
+        LET sent == EncodeCategoryPayload(message)
+            read == DecodeCategoryPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

@@ -2392,73 +2392,85 @@ RoundTripPacket ==
 (* A Administrative Message Payload is selected by the Administrative Message Type it is written under *)
 SelectsAdministrativeMessagePayload ==
     \A message \in CheckedAdministrativeMessagePayload :
-        LET read == DecodeAdministrativeMessagePayload(message.tag, EncodeAdministrativeMessagePayload(message))
+        LET sent == EncodeAdministrativeMessagePayload(message)
+            read == DecodeAdministrativeMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Control Message Payload is selected by the Control Message Type it is written under *)
 SelectsControlMessagePayload ==
     \A message \in CheckedControlMessagePayload :
-        LET read == DecodeControlMessagePayload(message.tag, EncodeControlMessagePayload(message))
+        LET sent == EncodeControlMessagePayload(message)
+            read == DecodeControlMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Equity And Index Last Sale Message Payload is selected by the Equity And Index Last Sale Message Type it is written under *)
 SelectsEquityAndIndexLastSaleMessagePayload ==
     \A message \in CheckedEquityAndIndexLastSaleMessagePayload :
-        LET read == DecodeEquityAndIndexLastSaleMessagePayload(message.tag, EncodeEquityAndIndexLastSaleMessagePayload(message))
+        LET sent == EncodeEquityAndIndexLastSaleMessagePayload(message)
+            read == DecodeEquityAndIndexLastSaleMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Open Interest Message Payload is selected by the Open Interest Message Type it is written under *)
 SelectsOpenInterestMessagePayload ==
     \A message \in CheckedOpenInterestMessagePayload :
-        LET read == DecodeOpenInterestMessagePayload(message.tag, EncodeOpenInterestMessagePayload(message))
+        LET sent == EncodeOpenInterestMessagePayload(message)
+            read == DecodeOpenInterestMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Equity And Index End Of Day Summary Message Payload is selected by the Equity And Index End Of Day Summary Message Type it is written under *)
 SelectsEquityAndIndexEndOfDaySummaryMessagePayload ==
     \A message \in CheckedEquityAndIndexEndOfDaySummaryMessagePayload :
-        LET read == DecodeEquityAndIndexEndOfDaySummaryMessagePayload(message.tag, EncodeEquityAndIndexEndOfDaySummaryMessagePayload(message))
+        LET sent == EncodeEquityAndIndexEndOfDaySummaryMessagePayload(message)
+            read == DecodeEquityAndIndexEndOfDaySummaryMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Bbo Indicator is selected by the Bbo Indicator it is written under *)
 SelectsBboIndicatorChoice ==
     \A message \in CheckedBboIndicatorChoice :
-        LET read == DecodeBboIndicatorChoice(message.tag, EncodeBboIndicatorChoice(message))
+        LET sent == EncodeBboIndicatorChoice(message)
+            read == DecodeBboIndicatorChoice(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Long Equity And Index Quote Message Payload is selected by the Long Equity And Index Quote Message Type it is written under *)
 SelectsLongEquityAndIndexQuoteMessagePayload ==
     \A message \in CheckedLongEquityAndIndexQuoteMessagePayload :
-        LET read == DecodeLongEquityAndIndexQuoteMessagePayload(message.tag, EncodeLongEquityAndIndexQuoteMessagePayload(message))
+        LET sent == EncodeLongEquityAndIndexQuoteMessagePayload(message)
+            read == DecodeLongEquityAndIndexQuoteMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Bbo Indicator is selected by the Bbo Indicator it is written under *)
 SelectsBboIndicatorChoice2 ==
     \A message \in CheckedBboIndicatorChoice2 :
-        LET read == DecodeBboIndicatorChoice2(message.tag, EncodeBboIndicatorChoice2(message))
+        LET sent == EncodeBboIndicatorChoice2(message)
+            read == DecodeBboIndicatorChoice2(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Short Equity And Index Quote Message Payload is selected by the Short Equity And Index Quote Message Type it is written under *)
 SelectsShortEquityAndIndexQuoteMessagePayload ==
     \A message \in CheckedShortEquityAndIndexQuoteMessagePayload :
-        LET read == DecodeShortEquityAndIndexQuoteMessagePayload(message.tag, EncodeShortEquityAndIndexQuoteMessagePayload(message))
+        LET sent == EncodeShortEquityAndIndexQuoteMessagePayload(message)
+            read == DecodeShortEquityAndIndexQuoteMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Series Mapping Message Payload is selected by the Series Mapping Message Type it is written under *)
 SelectsSeriesMappingMessagePayload ==
     \A message \in CheckedSeriesMappingMessagePayload :
-        LET read == DecodeSeriesMappingMessagePayload(message.tag, EncodeSeriesMappingMessagePayload(message))
+        LET sent == EncodeSeriesMappingMessagePayload(message)
+            read == DecodeSeriesMappingMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Underlying Value Message Payload is selected by the Underlying Value Message Type it is written under *)
 SelectsUnderlyingValueMessagePayload ==
     \A message \in CheckedUnderlyingValueMessagePayload :
-        LET read == DecodeUnderlyingValueMessagePayload(message.tag, EncodeUnderlyingValueMessagePayload(message))
+        LET sent == EncodeUnderlyingValueMessagePayload(message)
+            read == DecodeUnderlyingValueMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Payload is selected by the Message Category it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Data Length is written from the bytes it frames *)

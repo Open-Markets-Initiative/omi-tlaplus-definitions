@@ -901,22 +901,22 @@ CheckedOxTradeBreakMessage ==
 (***************************************************************************)
 
 OxEndOfSession ==
-    [ timestamp : Sample(4) ]
+    [ timeOffset : Sample(4) ]
 
 EncodeOxEndOfSession(message) ==
-    message.timestamp
+    message.timeOffset
 
 DecodeOxEndOfSession(bytes) ==
-    LET timestamp == ReadBytes(bytes, 4) IN IF ~timestamp.ok THEN Fail ELSE
-    Ok([ timestamp |-> timestamp.value ], timestamp.rest)
+    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    Ok([ timeOffset |-> timeOffset.value ], timeOffset.rest)
 
 ZeroOxEndOfSession ==
-    [ timestamp |-> [i \in 1 .. 4 |-> 0] ]
+    [ timeOffset |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Ox End Of Session at zero, then each field in turn at the values it is checked at *)
 CheckedOxEndOfSession ==
     { ZeroOxEndOfSession }
-        \cup { [ZeroOxEndOfSession EXCEPT !.timestamp = one] : one \in Sample(4) }
+        \cup { [ZeroOxEndOfSession EXCEPT !.timeOffset = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Ox Symbol Mapping Message: 36 bytes                                     *)
@@ -1988,7 +1988,8 @@ RoundTripPacket ==
 (* A Payload is selected by the Message Type it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

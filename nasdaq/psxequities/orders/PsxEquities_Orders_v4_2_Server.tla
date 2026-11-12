@@ -498,7 +498,7 @@ CheckedCanceledMessage ==
         \cup { [ZeroCanceledMessage EXCEPT !.canceledReason = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Aiq Canceled Message: 36 bytes                                          *)
+(* Aiq Canceled Message: 37 bytes                                          *)
 (***************************************************************************)
 
 AiqCanceledMessage ==
@@ -508,7 +508,8 @@ AiqCanceledMessage ==
       aiqCanceledReason            : Sample(1),
       quantityPreventedFromTrading : Sample(4),
       executionPrice               : Sample(4),
-      liquidityFlag                : Sample(1) ]
+      liquidityFlag                : Sample(1),
+      aiqStrategy                  : Sample(1) ]
 
 EncodeAiqCanceledMessage(message) ==
     message.timestamp
@@ -518,6 +519,7 @@ EncodeAiqCanceledMessage(message) ==
         \o message.quantityPreventedFromTrading
         \o message.executionPrice
         \o message.liquidityFlag
+        \o message.aiqStrategy
 
 DecodeAiqCanceledMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
@@ -527,13 +529,15 @@ DecodeAiqCanceledMessage(bytes) ==
     LET quantityPreventedFromTrading == ReadBytes(aiqCanceledReason.rest, 4) IN IF ~quantityPreventedFromTrading.ok THEN Fail ELSE
     LET executionPrice == ReadBytes(quantityPreventedFromTrading.rest, 4) IN IF ~executionPrice.ok THEN Fail ELSE
     LET liquidityFlag == ReadBytes(executionPrice.rest, 1) IN IF ~liquidityFlag.ok THEN Fail ELSE
+    LET aiqStrategy == ReadBytes(liquidityFlag.rest, 1) IN IF ~aiqStrategy.ok THEN Fail ELSE
     Ok([ timestamp                    |-> timestamp.value,
          orderToken                   |-> orderToken.value,
          decrementShares              |-> decrementShares.value,
          aiqCanceledReason            |-> aiqCanceledReason.value,
          quantityPreventedFromTrading |-> quantityPreventedFromTrading.value,
          executionPrice               |-> executionPrice.value,
-         liquidityFlag                |-> liquidityFlag.value ], liquidityFlag.rest)
+         liquidityFlag                |-> liquidityFlag.value,
+         aiqStrategy                  |-> aiqStrategy.value ], aiqStrategy.rest)
 
 ZeroAiqCanceledMessage ==
     [ timestamp                    |-> [i \in 1 .. 8 |-> 0],
@@ -542,7 +546,8 @@ ZeroAiqCanceledMessage ==
       aiqCanceledReason            |-> [i \in 1 .. 1 |-> 0],
       quantityPreventedFromTrading |-> [i \in 1 .. 4 |-> 0],
       executionPrice               |-> [i \in 1 .. 4 |-> 0],
-      liquidityFlag                |-> [i \in 1 .. 1 |-> 0] ]
+      liquidityFlag                |-> [i \in 1 .. 1 |-> 0],
+      aiqStrategy                  |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Aiq Canceled Message at zero, then each field in turn at the values it is checked at *)
 CheckedAiqCanceledMessage ==
@@ -554,6 +559,7 @@ CheckedAiqCanceledMessage ==
         \cup { [ZeroAiqCanceledMessage EXCEPT !.quantityPreventedFromTrading = one] : one \in Sample(4) }
         \cup { [ZeroAiqCanceledMessage EXCEPT !.executionPrice = one] : one \in Sample(4) }
         \cup { [ZeroAiqCanceledMessage EXCEPT !.liquidityFlag = one] : one \in Sample(1) }
+        \cup { [ZeroAiqCanceledMessage EXCEPT !.aiqStrategy = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Executed Message: 39 bytes                                              *)
@@ -1237,13 +1243,15 @@ RoundTripServerPacket ==
 (* A Sequenced Message is selected by the Sequenced Message Type it is written under *)
 SelectsSequencedMessage ==
     \A message \in CheckedSequencedMessage :
-        LET read == DecodeSequencedMessage(message.tag, EncodeSequencedMessage(message))
+        LET sent == EncodeSequencedMessage(message)
+            read == DecodeSequencedMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Server Payload is selected by the Server Packet Type it is written under *)
 SelectsServerPayload ==
     \A message \in CheckedServerPayload :
-        LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
+        LET sent == EncodeServerPayload(message)
+            read == DecodeServerPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)

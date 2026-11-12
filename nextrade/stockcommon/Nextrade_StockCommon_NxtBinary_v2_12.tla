@@ -1,0 +1,4050 @@
+--------------- MODULE Nextrade_StockCommon_NxtBinary_v2_12 ----------------
+(***************************************************************************)
+(* Nextrade Nextrade Stock Market Data Common v2.12                        *)
+(*                                                                         *)
+(* Generated from the binary model. A field is the bytes it occupies; an   *)
+(* integer is read only where a rule depends on one - a length, a count, a *)
+(* message type - which are the dependencies the parse rules run on.       *)
+(*                                                                         *)
+(* TLC checks that every record decodes back to what was encoded, that a   *)
+(* dispatch selects the message its type names, and that a derived length  *)
+(* or count is written from what it describes.                             *)
+(*                                                                         *)
+(* Note: TLC evaluates integers in 32 bits, so a field wider than that has *)
+(* no range it can enumerate; every field is checked as its bytes, which   *)
+(* is exact at any width.                                                  *)
+(*                                                                         *)
+(* License: MIT No Attribution                                             *)
+(*                                                                         *)
+(* Note: Packet fills its datagram with as many messages as the bytes      *)
+(* hold, so it is read as a run of them.                                   *)
+(***************************************************************************)
+EXTENDS Integers, Sequences
+
+(***************************************************************************)
+(* Wire primitives                                                         *)
+(***************************************************************************)
+
+Byte == 0 .. 255
+
+(* An unsigned integer, least significant byte first. Read only where a rule *)
+(* depends on the value: a length, a count, a message type. *)
+RECURSIVE DecodeUIntLE(_)
+DecodeUIntLE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE Head(bytes) + 256 * DecodeUIntLE(Tail(bytes))
+
+RECURSIVE EncodeUIntLE(_, _)
+EncodeUIntLE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE <<value % 256>> \o EncodeUIntLE(value \div 256, width - 1)
+
+(* The same, most significant byte first, which is how a big endian protocol writes it *)
+RECURSIVE DecodeUIntBE(_)
+DecodeUIntBE(bytes) ==
+    IF bytes = << >>
+    THEN 0
+    ELSE DecodeUIntBE(SubSeq(bytes, 1, Len(bytes) - 1)) * 256 + bytes[Len(bytes)]
+
+RECURSIVE EncodeUIntBE(_, _)
+EncodeUIntBE(value, width) ==
+    IF width = 0
+    THEN << >>
+    ELSE EncodeUIntBE(value \div 256, width - 1) \o <<value % 256>>
+
+(***************************************************************************)
+(* A decoder yields the value it read and the bytes left, or fails         *)
+(***************************************************************************)
+
+Fail == [ok |-> FALSE]
+Ok(value, rest) == [ok |-> TRUE, value |-> value, rest |-> rest]
+
+(* The bytes a field of this width occupies, kept as they lie *)
+ReadBytes(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(SubSeq(bytes, 1, width), SubSeq(bytes, width + 1, Len(bytes)))
+
+(* The integer a rule depends on, in the byte order the field states *)
+ReadUIntLE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntLE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+ReadUIntBE(bytes, width) ==
+    IF Len(bytes) < width
+    THEN Fail
+    ELSE Ok(DecodeUIntBE(SubSeq(bytes, 1, width)), SubSeq(bytes, width + 1, Len(bytes)))
+
+(***************************************************************************)
+(* The values a field is checked at: zero, the spaces a text field is      *)
+(* padded with, and                                                        *)
+(* every bit set, which is where an encoding goes wrong if it goes wrong   *)
+(***************************************************************************)
+
+Sample(width) ==
+    { [i \in 1 .. width |-> 0],
+      [i \in 1 .. width |-> 32],
+      [i \in 1 .. width |-> 255] }
+
+(* The bytes a field of no width of its own is checked at: none, one, and a short run *)
+SampleBytes == { << >>, <<0>>, <<32, 255>> }
+
+(* The lists a record is checked over: none, one, and a run of two. What a run has *)
+(* to get right is reading one entry after another, which two of a kind already say. *)
+SampleLists(entries) ==
+    { << >> }
+        \cup { <<one>> : one \in entries }
+        \cup { <<one, one>> : one \in entries }
+
+(***************************************************************************)
+(* Polling Data Message: 8 bytes                                           *)
+(***************************************************************************)
+
+PollingDataMessage ==
+    [ currentTime1MinuteInterval : Sample(4),
+      endKeyword                 : Sample(4) ]
+
+EncodePollingDataMessage(message) ==
+    message.currentTime1MinuteInterval
+        \o message.endKeyword
+
+DecodePollingDataMessage(bytes) ==
+    LET currentTime1MinuteInterval == ReadBytes(bytes, 4) IN IF ~currentTime1MinuteInterval.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(currentTime1MinuteInterval.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ currentTime1MinuteInterval |-> currentTime1MinuteInterval.value,
+         endKeyword                 |-> endKeyword.value ], endKeyword.rest)
+
+ZeroPollingDataMessage ==
+    [ currentTime1MinuteInterval |-> [i \in 1 .. 4 |-> 0],
+      endKeyword                 |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Polling Data Message at zero, then each field in turn at the values it is checked at *)
+CheckedPollingDataMessage ==
+    { ZeroPollingDataMessage }
+        \cup { [ZeroPollingDataMessage EXCEPT !.currentTime1MinuteInterval = one] : one \in Sample(4) }
+        \cup { [ZeroPollingDataMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Securities Quote 10 Level Message: 416 bytes                            *)
+(***************************************************************************)
+
+SecuritiesQuote10LevelMessage ==
+    [ messageSequenceNumber                          : Sample(4),
+      boardId                                        : Sample(2),
+      sessionId                                      : Sample(2),
+      isinCode                                       : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx             : Sample(4),
+      processingTimeOfTradingSystem                  : Sample(12),
+      askLevel1Price                                 : Sample(8),
+      bidLevel1Price                                 : Sample(8),
+      askLevel1Volume                                : Sample(8),
+      bidLevel1Volume                                : Sample(8),
+      askLevel2Price                                 : Sample(8),
+      bidLevel2Price                                 : Sample(8),
+      askLevel2Volume                                : Sample(8),
+      bidLevel2Volume                                : Sample(8),
+      askLevel3Price                                 : Sample(8),
+      bidLevel3Price                                 : Sample(8),
+      askLevel3Volume                                : Sample(8),
+      bidLevel3Volume                                : Sample(8),
+      askLevel4Price                                 : Sample(8),
+      bidLevel4Price                                 : Sample(8),
+      askLevel4Volume                                : Sample(8),
+      bidLevel4Volume                                : Sample(8),
+      askLevel5Price                                 : Sample(8),
+      bidLevel5Price                                 : Sample(8),
+      askLevel5Volume                                : Sample(8),
+      bidLevel5Volume                                : Sample(8),
+      askLevel6Price                                 : Sample(8),
+      bidLevel6Price                                 : Sample(8),
+      askLevel6Volume                                : Sample(8),
+      bidLevel6Volume                                : Sample(8),
+      askLevel7Price                                 : Sample(8),
+      bidLevel7Price                                 : Sample(8),
+      askLevel7Volume                                : Sample(8),
+      bidLevel7Volume                                : Sample(8),
+      askLevel8Price                                 : Sample(8),
+      bidLevel8Price                                 : Sample(8),
+      askLevel8Volume                                : Sample(8),
+      bidLevel8Volume                                : Sample(8),
+      askLevel9Price                                 : Sample(8),
+      bidLevel9Price                                 : Sample(8),
+      askLevel9Volume                                : Sample(8),
+      bidLevel9Volume                                : Sample(8),
+      askLevel10Price                                : Sample(8),
+      bidLevel10Price                                : Sample(8),
+      askLevel10Volume                               : Sample(8),
+      bidLevel10Volume                               : Sample(8),
+      totalAskVolume                                 : Sample(8),
+      totalBidVolume                                 : Sample(8),
+      estimatedTradingPrice                          : Sample(8),
+      estimatedTradingVolume                         : Sample(8),
+      midPrice                                       : Sample(8),
+      totalMidPriceAskVolumeTotalAskVolumeOnMidPrice : Sample(8),
+      totalMidPriceBidVolumeTotalBidVolumeOnMidPrice : Sample(8),
+      endKeyword                                     : Sample(4) ]
+
+EncodeSecuritiesQuote10LevelMessage(message) ==
+    message.messageSequenceNumber
+        \o message.boardId
+        \o message.sessionId
+        \o message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.processingTimeOfTradingSystem
+        \o message.askLevel1Price
+        \o message.bidLevel1Price
+        \o message.askLevel1Volume
+        \o message.bidLevel1Volume
+        \o message.askLevel2Price
+        \o message.bidLevel2Price
+        \o message.askLevel2Volume
+        \o message.bidLevel2Volume
+        \o message.askLevel3Price
+        \o message.bidLevel3Price
+        \o message.askLevel3Volume
+        \o message.bidLevel3Volume
+        \o message.askLevel4Price
+        \o message.bidLevel4Price
+        \o message.askLevel4Volume
+        \o message.bidLevel4Volume
+        \o message.askLevel5Price
+        \o message.bidLevel5Price
+        \o message.askLevel5Volume
+        \o message.bidLevel5Volume
+        \o message.askLevel6Price
+        \o message.bidLevel6Price
+        \o message.askLevel6Volume
+        \o message.bidLevel6Volume
+        \o message.askLevel7Price
+        \o message.bidLevel7Price
+        \o message.askLevel7Volume
+        \o message.bidLevel7Volume
+        \o message.askLevel8Price
+        \o message.bidLevel8Price
+        \o message.askLevel8Volume
+        \o message.bidLevel8Volume
+        \o message.askLevel9Price
+        \o message.bidLevel9Price
+        \o message.askLevel9Volume
+        \o message.bidLevel9Volume
+        \o message.askLevel10Price
+        \o message.bidLevel10Price
+        \o message.askLevel10Volume
+        \o message.bidLevel10Volume
+        \o message.totalAskVolume
+        \o message.totalBidVolume
+        \o message.estimatedTradingPrice
+        \o message.estimatedTradingVolume
+        \o message.midPrice
+        \o message.totalMidPriceAskVolumeTotalAskVolumeOnMidPrice
+        \o message.totalMidPriceBidVolumeTotalBidVolumeOnMidPrice
+        \o message.endKeyword
+
+DecodeSecuritiesQuote10LevelMessage(bytes) ==
+    LET messageSequenceNumber == ReadBytes(bytes, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET boardId == ReadBytes(messageSequenceNumber.rest, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET sessionId == ReadBytes(boardId.rest, 2) IN IF ~sessionId.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
+    LET askLevel1Price == ReadBytes(processingTimeOfTradingSystem.rest, 8) IN IF ~askLevel1Price.ok THEN Fail ELSE
+    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 8) IN IF ~bidLevel1Price.ok THEN Fail ELSE
+    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 8) IN IF ~askLevel1Volume.ok THEN Fail ELSE
+    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 8) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
+    LET askLevel2Price == ReadBytes(bidLevel1Volume.rest, 8) IN IF ~askLevel2Price.ok THEN Fail ELSE
+    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 8) IN IF ~bidLevel2Price.ok THEN Fail ELSE
+    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 8) IN IF ~askLevel2Volume.ok THEN Fail ELSE
+    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 8) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
+    LET askLevel3Price == ReadBytes(bidLevel2Volume.rest, 8) IN IF ~askLevel3Price.ok THEN Fail ELSE
+    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 8) IN IF ~bidLevel3Price.ok THEN Fail ELSE
+    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 8) IN IF ~askLevel3Volume.ok THEN Fail ELSE
+    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 8) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
+    LET askLevel4Price == ReadBytes(bidLevel3Volume.rest, 8) IN IF ~askLevel4Price.ok THEN Fail ELSE
+    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 8) IN IF ~bidLevel4Price.ok THEN Fail ELSE
+    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 8) IN IF ~askLevel4Volume.ok THEN Fail ELSE
+    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 8) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
+    LET askLevel5Price == ReadBytes(bidLevel4Volume.rest, 8) IN IF ~askLevel5Price.ok THEN Fail ELSE
+    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 8) IN IF ~bidLevel5Price.ok THEN Fail ELSE
+    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 8) IN IF ~askLevel5Volume.ok THEN Fail ELSE
+    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 8) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
+    LET askLevel6Price == ReadBytes(bidLevel5Volume.rest, 8) IN IF ~askLevel6Price.ok THEN Fail ELSE
+    LET bidLevel6Price == ReadBytes(askLevel6Price.rest, 8) IN IF ~bidLevel6Price.ok THEN Fail ELSE
+    LET askLevel6Volume == ReadBytes(bidLevel6Price.rest, 8) IN IF ~askLevel6Volume.ok THEN Fail ELSE
+    LET bidLevel6Volume == ReadBytes(askLevel6Volume.rest, 8) IN IF ~bidLevel6Volume.ok THEN Fail ELSE
+    LET askLevel7Price == ReadBytes(bidLevel6Volume.rest, 8) IN IF ~askLevel7Price.ok THEN Fail ELSE
+    LET bidLevel7Price == ReadBytes(askLevel7Price.rest, 8) IN IF ~bidLevel7Price.ok THEN Fail ELSE
+    LET askLevel7Volume == ReadBytes(bidLevel7Price.rest, 8) IN IF ~askLevel7Volume.ok THEN Fail ELSE
+    LET bidLevel7Volume == ReadBytes(askLevel7Volume.rest, 8) IN IF ~bidLevel7Volume.ok THEN Fail ELSE
+    LET askLevel8Price == ReadBytes(bidLevel7Volume.rest, 8) IN IF ~askLevel8Price.ok THEN Fail ELSE
+    LET bidLevel8Price == ReadBytes(askLevel8Price.rest, 8) IN IF ~bidLevel8Price.ok THEN Fail ELSE
+    LET askLevel8Volume == ReadBytes(bidLevel8Price.rest, 8) IN IF ~askLevel8Volume.ok THEN Fail ELSE
+    LET bidLevel8Volume == ReadBytes(askLevel8Volume.rest, 8) IN IF ~bidLevel8Volume.ok THEN Fail ELSE
+    LET askLevel9Price == ReadBytes(bidLevel8Volume.rest, 8) IN IF ~askLevel9Price.ok THEN Fail ELSE
+    LET bidLevel9Price == ReadBytes(askLevel9Price.rest, 8) IN IF ~bidLevel9Price.ok THEN Fail ELSE
+    LET askLevel9Volume == ReadBytes(bidLevel9Price.rest, 8) IN IF ~askLevel9Volume.ok THEN Fail ELSE
+    LET bidLevel9Volume == ReadBytes(askLevel9Volume.rest, 8) IN IF ~bidLevel9Volume.ok THEN Fail ELSE
+    LET askLevel10Price == ReadBytes(bidLevel9Volume.rest, 8) IN IF ~askLevel10Price.ok THEN Fail ELSE
+    LET bidLevel10Price == ReadBytes(askLevel10Price.rest, 8) IN IF ~bidLevel10Price.ok THEN Fail ELSE
+    LET askLevel10Volume == ReadBytes(bidLevel10Price.rest, 8) IN IF ~askLevel10Volume.ok THEN Fail ELSE
+    LET bidLevel10Volume == ReadBytes(askLevel10Volume.rest, 8) IN IF ~bidLevel10Volume.ok THEN Fail ELSE
+    LET totalAskVolume == ReadBytes(bidLevel10Volume.rest, 8) IN IF ~totalAskVolume.ok THEN Fail ELSE
+    LET totalBidVolume == ReadBytes(totalAskVolume.rest, 8) IN IF ~totalBidVolume.ok THEN Fail ELSE
+    LET estimatedTradingPrice == ReadBytes(totalBidVolume.rest, 8) IN IF ~estimatedTradingPrice.ok THEN Fail ELSE
+    LET estimatedTradingVolume == ReadBytes(estimatedTradingPrice.rest, 8) IN IF ~estimatedTradingVolume.ok THEN Fail ELSE
+    LET midPrice == ReadBytes(estimatedTradingVolume.rest, 8) IN IF ~midPrice.ok THEN Fail ELSE
+    LET totalMidPriceAskVolumeTotalAskVolumeOnMidPrice == ReadBytes(midPrice.rest, 8) IN IF ~totalMidPriceAskVolumeTotalAskVolumeOnMidPrice.ok THEN Fail ELSE
+    LET totalMidPriceBidVolumeTotalBidVolumeOnMidPrice == ReadBytes(totalMidPriceAskVolumeTotalAskVolumeOnMidPrice.rest, 8) IN IF ~totalMidPriceBidVolumeTotalBidVolumeOnMidPrice.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(totalMidPriceBidVolumeTotalBidVolumeOnMidPrice.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ messageSequenceNumber                          |-> messageSequenceNumber.value,
+         boardId                                        |-> boardId.value,
+         sessionId                                      |-> sessionId.value,
+         isinCode                                       |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx             |-> aDesignatedNumberForAnIssueFromKrx.value,
+         processingTimeOfTradingSystem                  |-> processingTimeOfTradingSystem.value,
+         askLevel1Price                                 |-> askLevel1Price.value,
+         bidLevel1Price                                 |-> bidLevel1Price.value,
+         askLevel1Volume                                |-> askLevel1Volume.value,
+         bidLevel1Volume                                |-> bidLevel1Volume.value,
+         askLevel2Price                                 |-> askLevel2Price.value,
+         bidLevel2Price                                 |-> bidLevel2Price.value,
+         askLevel2Volume                                |-> askLevel2Volume.value,
+         bidLevel2Volume                                |-> bidLevel2Volume.value,
+         askLevel3Price                                 |-> askLevel3Price.value,
+         bidLevel3Price                                 |-> bidLevel3Price.value,
+         askLevel3Volume                                |-> askLevel3Volume.value,
+         bidLevel3Volume                                |-> bidLevel3Volume.value,
+         askLevel4Price                                 |-> askLevel4Price.value,
+         bidLevel4Price                                 |-> bidLevel4Price.value,
+         askLevel4Volume                                |-> askLevel4Volume.value,
+         bidLevel4Volume                                |-> bidLevel4Volume.value,
+         askLevel5Price                                 |-> askLevel5Price.value,
+         bidLevel5Price                                 |-> bidLevel5Price.value,
+         askLevel5Volume                                |-> askLevel5Volume.value,
+         bidLevel5Volume                                |-> bidLevel5Volume.value,
+         askLevel6Price                                 |-> askLevel6Price.value,
+         bidLevel6Price                                 |-> bidLevel6Price.value,
+         askLevel6Volume                                |-> askLevel6Volume.value,
+         bidLevel6Volume                                |-> bidLevel6Volume.value,
+         askLevel7Price                                 |-> askLevel7Price.value,
+         bidLevel7Price                                 |-> bidLevel7Price.value,
+         askLevel7Volume                                |-> askLevel7Volume.value,
+         bidLevel7Volume                                |-> bidLevel7Volume.value,
+         askLevel8Price                                 |-> askLevel8Price.value,
+         bidLevel8Price                                 |-> bidLevel8Price.value,
+         askLevel8Volume                                |-> askLevel8Volume.value,
+         bidLevel8Volume                                |-> bidLevel8Volume.value,
+         askLevel9Price                                 |-> askLevel9Price.value,
+         bidLevel9Price                                 |-> bidLevel9Price.value,
+         askLevel9Volume                                |-> askLevel9Volume.value,
+         bidLevel9Volume                                |-> bidLevel9Volume.value,
+         askLevel10Price                                |-> askLevel10Price.value,
+         bidLevel10Price                                |-> bidLevel10Price.value,
+         askLevel10Volume                               |-> askLevel10Volume.value,
+         bidLevel10Volume                               |-> bidLevel10Volume.value,
+         totalAskVolume                                 |-> totalAskVolume.value,
+         totalBidVolume                                 |-> totalBidVolume.value,
+         estimatedTradingPrice                          |-> estimatedTradingPrice.value,
+         estimatedTradingVolume                         |-> estimatedTradingVolume.value,
+         midPrice                                       |-> midPrice.value,
+         totalMidPriceAskVolumeTotalAskVolumeOnMidPrice |-> totalMidPriceAskVolumeTotalAskVolumeOnMidPrice.value,
+         totalMidPriceBidVolumeTotalBidVolumeOnMidPrice |-> totalMidPriceBidVolumeTotalBidVolumeOnMidPrice.value,
+         endKeyword                                     |-> endKeyword.value ], endKeyword.rest)
+
+ZeroSecuritiesQuote10LevelMessage ==
+    [ messageSequenceNumber                          |-> [i \in 1 .. 4 |-> 0],
+      boardId                                        |-> [i \in 1 .. 2 |-> 0],
+      sessionId                                      |-> [i \in 1 .. 2 |-> 0],
+      isinCode                                       |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx             |-> [i \in 1 .. 4 |-> 0],
+      processingTimeOfTradingSystem                  |-> [i \in 1 .. 12 |-> 0],
+      askLevel1Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel1Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel1Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel1Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel2Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel2Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel2Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel2Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel3Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel3Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel3Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel3Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel4Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel4Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel4Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel4Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel5Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel5Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel5Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel5Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel6Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel6Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel6Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel6Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel7Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel7Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel7Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel7Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel8Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel8Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel8Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel8Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel9Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel9Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel9Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel9Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel10Price                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel10Price                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel10Volume                               |-> [i \in 1 .. 8 |-> 0],
+      bidLevel10Volume                               |-> [i \in 1 .. 8 |-> 0],
+      totalAskVolume                                 |-> [i \in 1 .. 8 |-> 0],
+      totalBidVolume                                 |-> [i \in 1 .. 8 |-> 0],
+      estimatedTradingPrice                          |-> [i \in 1 .. 8 |-> 0],
+      estimatedTradingVolume                         |-> [i \in 1 .. 8 |-> 0],
+      midPrice                                       |-> [i \in 1 .. 8 |-> 0],
+      totalMidPriceAskVolumeTotalAskVolumeOnMidPrice |-> [i \in 1 .. 8 |-> 0],
+      totalMidPriceBidVolumeTotalBidVolumeOnMidPrice |-> [i \in 1 .. 8 |-> 0],
+      endKeyword                                     |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Securities Quote 10 Level Message at zero, then each field in turn at the values it is checked at *)
+CheckedSecuritiesQuote10LevelMessage ==
+    { ZeroSecuritiesQuote10LevelMessage }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.boardId = one] : one \in Sample(2) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.sessionId = one] : one \in Sample(2) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel1Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel2Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel3Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel4Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel5Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel6Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel6Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel6Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel6Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel7Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel7Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel7Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel7Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel8Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel8Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel8Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel8Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel9Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel9Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel9Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel9Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel10Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel10Price = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.askLevel10Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.bidLevel10Volume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.totalAskVolume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.totalBidVolume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.estimatedTradingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.estimatedTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.midPrice = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.totalMidPriceAskVolumeTotalAskVolumeOnMidPrice = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.totalMidPriceBidVolumeTotalBidVolumeOnMidPrice = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesQuote10LevelMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Securities Order Filled Message: 138 bytes                              *)
+(***************************************************************************)
+
+SecuritiesOrderFilledMessage ==
+    [ messageSequenceNumber              : Sample(4),
+      boardId                            : Sample(2),
+      sessionId                          : Sample(2),
+      isinCode                           : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx : Sample(4),
+      processingTimeOfTradingSystem      : Sample(12),
+      priceChangeAgainstPreviousDay      : Sample(1),
+      aPriceChangeAgainstThePreviousDay  : Sample(8),
+      tradingPrice                       : Sample(8),
+      tradingVolume                      : Sample(8),
+      openingPrice                       : Sample(8),
+      todaysHigh                         : Sample(8),
+      todaysLow                          : Sample(8),
+      accumulatedTradingVolume           : Sample(8),
+      accumulatedTradingValue            : Sample(16),
+      finalAskBidTypeCode                : Sample(1),
+      lpHoldingQuantity                  : Sample(8),
+      theBestAsk                         : Sample(8),
+      theBestBid                         : Sample(8),
+      endKeyword                         : Sample(4) ]
+
+EncodeSecuritiesOrderFilledMessage(message) ==
+    message.messageSequenceNumber
+        \o message.boardId
+        \o message.sessionId
+        \o message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.processingTimeOfTradingSystem
+        \o message.priceChangeAgainstPreviousDay
+        \o message.aPriceChangeAgainstThePreviousDay
+        \o message.tradingPrice
+        \o message.tradingVolume
+        \o message.openingPrice
+        \o message.todaysHigh
+        \o message.todaysLow
+        \o message.accumulatedTradingVolume
+        \o message.accumulatedTradingValue
+        \o message.finalAskBidTypeCode
+        \o message.lpHoldingQuantity
+        \o message.theBestAsk
+        \o message.theBestBid
+        \o message.endKeyword
+
+DecodeSecuritiesOrderFilledMessage(bytes) ==
+    LET messageSequenceNumber == ReadBytes(bytes, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET boardId == ReadBytes(messageSequenceNumber.rest, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET sessionId == ReadBytes(boardId.rest, 2) IN IF ~sessionId.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
+    LET priceChangeAgainstPreviousDay == ReadBytes(processingTimeOfTradingSystem.rest, 1) IN IF ~priceChangeAgainstPreviousDay.ok THEN Fail ELSE
+    LET aPriceChangeAgainstThePreviousDay == ReadBytes(priceChangeAgainstPreviousDay.rest, 8) IN IF ~aPriceChangeAgainstThePreviousDay.ok THEN Fail ELSE
+    LET tradingPrice == ReadBytes(aPriceChangeAgainstThePreviousDay.rest, 8) IN IF ~tradingPrice.ok THEN Fail ELSE
+    LET tradingVolume == ReadBytes(tradingPrice.rest, 8) IN IF ~tradingVolume.ok THEN Fail ELSE
+    LET openingPrice == ReadBytes(tradingVolume.rest, 8) IN IF ~openingPrice.ok THEN Fail ELSE
+    LET todaysHigh == ReadBytes(openingPrice.rest, 8) IN IF ~todaysHigh.ok THEN Fail ELSE
+    LET todaysLow == ReadBytes(todaysHigh.rest, 8) IN IF ~todaysLow.ok THEN Fail ELSE
+    LET accumulatedTradingVolume == ReadBytes(todaysLow.rest, 8) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
+    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 16) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
+    LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
+    LET lpHoldingQuantity == ReadBytes(finalAskBidTypeCode.rest, 8) IN IF ~lpHoldingQuantity.ok THEN Fail ELSE
+    LET theBestAsk == ReadBytes(lpHoldingQuantity.rest, 8) IN IF ~theBestAsk.ok THEN Fail ELSE
+    LET theBestBid == ReadBytes(theBestAsk.rest, 8) IN IF ~theBestBid.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(theBestBid.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ messageSequenceNumber              |-> messageSequenceNumber.value,
+         boardId                            |-> boardId.value,
+         sessionId                          |-> sessionId.value,
+         isinCode                           |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx |-> aDesignatedNumberForAnIssueFromKrx.value,
+         processingTimeOfTradingSystem      |-> processingTimeOfTradingSystem.value,
+         priceChangeAgainstPreviousDay      |-> priceChangeAgainstPreviousDay.value,
+         aPriceChangeAgainstThePreviousDay  |-> aPriceChangeAgainstThePreviousDay.value,
+         tradingPrice                       |-> tradingPrice.value,
+         tradingVolume                      |-> tradingVolume.value,
+         openingPrice                       |-> openingPrice.value,
+         todaysHigh                         |-> todaysHigh.value,
+         todaysLow                          |-> todaysLow.value,
+         accumulatedTradingVolume           |-> accumulatedTradingVolume.value,
+         accumulatedTradingValue            |-> accumulatedTradingValue.value,
+         finalAskBidTypeCode                |-> finalAskBidTypeCode.value,
+         lpHoldingQuantity                  |-> lpHoldingQuantity.value,
+         theBestAsk                         |-> theBestAsk.value,
+         theBestBid                         |-> theBestBid.value,
+         endKeyword                         |-> endKeyword.value ], endKeyword.rest)
+
+ZeroSecuritiesOrderFilledMessage ==
+    [ messageSequenceNumber              |-> [i \in 1 .. 4 |-> 0],
+      boardId                            |-> [i \in 1 .. 2 |-> 0],
+      sessionId                          |-> [i \in 1 .. 2 |-> 0],
+      isinCode                           |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx |-> [i \in 1 .. 4 |-> 0],
+      processingTimeOfTradingSystem      |-> [i \in 1 .. 12 |-> 0],
+      priceChangeAgainstPreviousDay      |-> [i \in 1 .. 1 |-> 0],
+      aPriceChangeAgainstThePreviousDay  |-> [i \in 1 .. 8 |-> 0],
+      tradingPrice                       |-> [i \in 1 .. 8 |-> 0],
+      tradingVolume                      |-> [i \in 1 .. 8 |-> 0],
+      openingPrice                       |-> [i \in 1 .. 8 |-> 0],
+      todaysHigh                         |-> [i \in 1 .. 8 |-> 0],
+      todaysLow                          |-> [i \in 1 .. 8 |-> 0],
+      accumulatedTradingVolume           |-> [i \in 1 .. 8 |-> 0],
+      accumulatedTradingValue            |-> [i \in 1 .. 16 |-> 0],
+      finalAskBidTypeCode                |-> [i \in 1 .. 1 |-> 0],
+      lpHoldingQuantity                  |-> [i \in 1 .. 8 |-> 0],
+      theBestAsk                         |-> [i \in 1 .. 8 |-> 0],
+      theBestBid                         |-> [i \in 1 .. 8 |-> 0],
+      endKeyword                         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Securities Order Filled Message at zero, then each field in turn at the values it is checked at *)
+CheckedSecuritiesOrderFilledMessage ==
+    { ZeroSecuritiesOrderFilledMessage }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.boardId = one] : one \in Sample(2) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.sessionId = one] : one \in Sample(2) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.priceChangeAgainstPreviousDay = one] : one \in Sample(1) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.aPriceChangeAgainstThePreviousDay = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.tradingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.tradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.openingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.todaysHigh = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.todaysLow = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.lpHoldingQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.theBestAsk = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.theBestBid = one] : one \in Sample(8) }
+        \cup { [ZeroSecuritiesOrderFilledMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Market Operation Ts Message: 59 bytes                                   *)
+(***************************************************************************)
+
+MarketOperationTsMessage ==
+    [ messageSequenceNumber              : Sample(4),
+      boardId                            : Sample(2),
+      sessionId                          : Sample(2),
+      isinCode                           : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx : Sample(4),
+      processingTimeOfTradingSystem      : Sample(12),
+      boardEventId                       : Sample(3),
+      startTimeOfABoardEvent             : Sample(9),
+      boardEventGroupCode                : Sample(4),
+      tradingHaltReasonCode              : Sample(3),
+      endKeyword                         : Sample(4) ]
+
+EncodeMarketOperationTsMessage(message) ==
+    message.messageSequenceNumber
+        \o message.boardId
+        \o message.sessionId
+        \o message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.processingTimeOfTradingSystem
+        \o message.boardEventId
+        \o message.startTimeOfABoardEvent
+        \o message.boardEventGroupCode
+        \o message.tradingHaltReasonCode
+        \o message.endKeyword
+
+DecodeMarketOperationTsMessage(bytes) ==
+    LET messageSequenceNumber == ReadBytes(bytes, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET boardId == ReadBytes(messageSequenceNumber.rest, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET sessionId == ReadBytes(boardId.rest, 2) IN IF ~sessionId.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
+    LET boardEventId == ReadBytes(processingTimeOfTradingSystem.rest, 3) IN IF ~boardEventId.ok THEN Fail ELSE
+    LET startTimeOfABoardEvent == ReadBytes(boardEventId.rest, 9) IN IF ~startTimeOfABoardEvent.ok THEN Fail ELSE
+    LET boardEventGroupCode == ReadBytes(startTimeOfABoardEvent.rest, 4) IN IF ~boardEventGroupCode.ok THEN Fail ELSE
+    LET tradingHaltReasonCode == ReadBytes(boardEventGroupCode.rest, 3) IN IF ~tradingHaltReasonCode.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(tradingHaltReasonCode.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ messageSequenceNumber              |-> messageSequenceNumber.value,
+         boardId                            |-> boardId.value,
+         sessionId                          |-> sessionId.value,
+         isinCode                           |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx |-> aDesignatedNumberForAnIssueFromKrx.value,
+         processingTimeOfTradingSystem      |-> processingTimeOfTradingSystem.value,
+         boardEventId                       |-> boardEventId.value,
+         startTimeOfABoardEvent             |-> startTimeOfABoardEvent.value,
+         boardEventGroupCode                |-> boardEventGroupCode.value,
+         tradingHaltReasonCode              |-> tradingHaltReasonCode.value,
+         endKeyword                         |-> endKeyword.value ], endKeyword.rest)
+
+ZeroMarketOperationTsMessage ==
+    [ messageSequenceNumber              |-> [i \in 1 .. 4 |-> 0],
+      boardId                            |-> [i \in 1 .. 2 |-> 0],
+      sessionId                          |-> [i \in 1 .. 2 |-> 0],
+      isinCode                           |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx |-> [i \in 1 .. 4 |-> 0],
+      processingTimeOfTradingSystem      |-> [i \in 1 .. 12 |-> 0],
+      boardEventId                       |-> [i \in 1 .. 3 |-> 0],
+      startTimeOfABoardEvent             |-> [i \in 1 .. 9 |-> 0],
+      boardEventGroupCode                |-> [i \in 1 .. 4 |-> 0],
+      tradingHaltReasonCode              |-> [i \in 1 .. 3 |-> 0],
+      endKeyword                         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Market Operation Ts Message at zero, then each field in turn at the values it is checked at *)
+CheckedMarketOperationTsMessage ==
+    { ZeroMarketOperationTsMessage }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.boardId = one] : one \in Sample(2) }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.sessionId = one] : one \in Sample(2) }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.boardEventId = one] : one \in Sample(3) }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.startTimeOfABoardEvent = one] : one \in Sample(9) }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.boardEventGroupCode = one] : one \in Sample(4) }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.tradingHaltReasonCode = one] : one \in Sample(3) }
+        \cup { [ZeroMarketOperationTsMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Issue Closing Message: 83 bytes                                         *)
+(***************************************************************************)
+
+IssueClosingMessage ==
+    [ messageSequenceNumber                                    : Sample(4),
+      boardId                                                  : Sample(2),
+      isinCode                                                 : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx                       : Sample(4),
+      closingPrice                                             : Sample(8),
+      closingPriceTypeCode                                     : Sample(1),
+      upperLimitPriceOnTheSinglePriceTradeInTheOffHoursSession : Sample(8),
+      lowerLimitPriceOnTheSinglePriceTradeInTheOffHoursSession : Sample(8),
+      closingPriceWeightedStockPriceAverage                    : Sample(8),
+      closingPriceBasePriceOfBuyIn                             : Sample(8),
+      closingPriceUpperLimitOfBuyIn                            : Sample(8),
+      closingPriceLowerLimitOfBuyIn                            : Sample(8),
+      endKeyword                                               : Sample(4) ]
+
+EncodeIssueClosingMessage(message) ==
+    message.messageSequenceNumber
+        \o message.boardId
+        \o message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.closingPrice
+        \o message.closingPriceTypeCode
+        \o message.upperLimitPriceOnTheSinglePriceTradeInTheOffHoursSession
+        \o message.lowerLimitPriceOnTheSinglePriceTradeInTheOffHoursSession
+        \o message.closingPriceWeightedStockPriceAverage
+        \o message.closingPriceBasePriceOfBuyIn
+        \o message.closingPriceUpperLimitOfBuyIn
+        \o message.closingPriceLowerLimitOfBuyIn
+        \o message.endKeyword
+
+DecodeIssueClosingMessage(bytes) ==
+    LET messageSequenceNumber == ReadBytes(bytes, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET boardId == ReadBytes(messageSequenceNumber.rest, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(boardId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET closingPrice == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 8) IN IF ~closingPrice.ok THEN Fail ELSE
+    LET closingPriceTypeCode == ReadBytes(closingPrice.rest, 1) IN IF ~closingPriceTypeCode.ok THEN Fail ELSE
+    LET upperLimitPriceOnTheSinglePriceTradeInTheOffHoursSession == ReadBytes(closingPriceTypeCode.rest, 8) IN IF ~upperLimitPriceOnTheSinglePriceTradeInTheOffHoursSession.ok THEN Fail ELSE
+    LET lowerLimitPriceOnTheSinglePriceTradeInTheOffHoursSession == ReadBytes(upperLimitPriceOnTheSinglePriceTradeInTheOffHoursSession.rest, 8) IN IF ~lowerLimitPriceOnTheSinglePriceTradeInTheOffHoursSession.ok THEN Fail ELSE
+    LET closingPriceWeightedStockPriceAverage == ReadBytes(lowerLimitPriceOnTheSinglePriceTradeInTheOffHoursSession.rest, 8) IN IF ~closingPriceWeightedStockPriceAverage.ok THEN Fail ELSE
+    LET closingPriceBasePriceOfBuyIn == ReadBytes(closingPriceWeightedStockPriceAverage.rest, 8) IN IF ~closingPriceBasePriceOfBuyIn.ok THEN Fail ELSE
+    LET closingPriceUpperLimitOfBuyIn == ReadBytes(closingPriceBasePriceOfBuyIn.rest, 8) IN IF ~closingPriceUpperLimitOfBuyIn.ok THEN Fail ELSE
+    LET closingPriceLowerLimitOfBuyIn == ReadBytes(closingPriceUpperLimitOfBuyIn.rest, 8) IN IF ~closingPriceLowerLimitOfBuyIn.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(closingPriceLowerLimitOfBuyIn.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ messageSequenceNumber                                    |-> messageSequenceNumber.value,
+         boardId                                                  |-> boardId.value,
+         isinCode                                                 |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx                       |-> aDesignatedNumberForAnIssueFromKrx.value,
+         closingPrice                                             |-> closingPrice.value,
+         closingPriceTypeCode                                     |-> closingPriceTypeCode.value,
+         upperLimitPriceOnTheSinglePriceTradeInTheOffHoursSession |-> upperLimitPriceOnTheSinglePriceTradeInTheOffHoursSession.value,
+         lowerLimitPriceOnTheSinglePriceTradeInTheOffHoursSession |-> lowerLimitPriceOnTheSinglePriceTradeInTheOffHoursSession.value,
+         closingPriceWeightedStockPriceAverage                    |-> closingPriceWeightedStockPriceAverage.value,
+         closingPriceBasePriceOfBuyIn                             |-> closingPriceBasePriceOfBuyIn.value,
+         closingPriceUpperLimitOfBuyIn                            |-> closingPriceUpperLimitOfBuyIn.value,
+         closingPriceLowerLimitOfBuyIn                            |-> closingPriceLowerLimitOfBuyIn.value,
+         endKeyword                                               |-> endKeyword.value ], endKeyword.rest)
+
+ZeroIssueClosingMessage ==
+    [ messageSequenceNumber                                    |-> [i \in 1 .. 4 |-> 0],
+      boardId                                                  |-> [i \in 1 .. 2 |-> 0],
+      isinCode                                                 |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx                       |-> [i \in 1 .. 4 |-> 0],
+      closingPrice                                             |-> [i \in 1 .. 8 |-> 0],
+      closingPriceTypeCode                                     |-> [i \in 1 .. 1 |-> 0],
+      upperLimitPriceOnTheSinglePriceTradeInTheOffHoursSession |-> [i \in 1 .. 8 |-> 0],
+      lowerLimitPriceOnTheSinglePriceTradeInTheOffHoursSession |-> [i \in 1 .. 8 |-> 0],
+      closingPriceWeightedStockPriceAverage                    |-> [i \in 1 .. 8 |-> 0],
+      closingPriceBasePriceOfBuyIn                             |-> [i \in 1 .. 8 |-> 0],
+      closingPriceUpperLimitOfBuyIn                            |-> [i \in 1 .. 8 |-> 0],
+      closingPriceLowerLimitOfBuyIn                            |-> [i \in 1 .. 8 |-> 0],
+      endKeyword                                               |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Issue Closing Message at zero, then each field in turn at the values it is checked at *)
+CheckedIssueClosingMessage ==
+    { ZeroIssueClosingMessage }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.boardId = one] : one \in Sample(2) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.closingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.closingPriceTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.upperLimitPriceOnTheSinglePriceTradeInTheOffHoursSession = one] : one \in Sample(8) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.lowerLimitPriceOnTheSinglePriceTradeInTheOffHoursSession = one] : one \in Sample(8) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.closingPriceWeightedStockPriceAverage = one] : one \in Sample(8) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.closingPriceBasePriceOfBuyIn = one] : one \in Sample(8) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.closingPriceUpperLimitOfBuyIn = one] : one \in Sample(8) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.closingPriceLowerLimitOfBuyIn = one] : one \in Sample(8) }
+        \cup { [ZeroIssueClosingMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Triggering Removing Vi Message: 89 bytes                                *)
+(***************************************************************************)
+
+TriggeringRemovingViMessage ==
+    [ messageSequenceNumber              : Sample(4),
+      boardId                            : Sample(2),
+      isinCode                           : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx : Sample(4),
+      processingTimeOfTradingSystem      : Sample(12),
+      theTimeEndingVi                    : Sample(9),
+      viStatusCode                       : Sample(1),
+      viTypeCode                         : Sample(1),
+      aBasePriceToTriggerStaticVi        : Sample(8),
+      aBasePriceToTriggerDynamicVi       : Sample(8),
+      viTriggeringPrice                  : Sample(8),
+      disparateRatioToTriggerStaticVi    : Sample(8),
+      disparateRatioToTriggerDynamicVi   : Sample(8),
+      endKeyword                         : Sample(4) ]
+
+EncodeTriggeringRemovingViMessage(message) ==
+    message.messageSequenceNumber
+        \o message.boardId
+        \o message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.processingTimeOfTradingSystem
+        \o message.theTimeEndingVi
+        \o message.viStatusCode
+        \o message.viTypeCode
+        \o message.aBasePriceToTriggerStaticVi
+        \o message.aBasePriceToTriggerDynamicVi
+        \o message.viTriggeringPrice
+        \o message.disparateRatioToTriggerStaticVi
+        \o message.disparateRatioToTriggerDynamicVi
+        \o message.endKeyword
+
+DecodeTriggeringRemovingViMessage(bytes) ==
+    LET messageSequenceNumber == ReadBytes(bytes, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET boardId == ReadBytes(messageSequenceNumber.rest, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(boardId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
+    LET theTimeEndingVi == ReadBytes(processingTimeOfTradingSystem.rest, 9) IN IF ~theTimeEndingVi.ok THEN Fail ELSE
+    LET viStatusCode == ReadBytes(theTimeEndingVi.rest, 1) IN IF ~viStatusCode.ok THEN Fail ELSE
+    LET viTypeCode == ReadBytes(viStatusCode.rest, 1) IN IF ~viTypeCode.ok THEN Fail ELSE
+    LET aBasePriceToTriggerStaticVi == ReadBytes(viTypeCode.rest, 8) IN IF ~aBasePriceToTriggerStaticVi.ok THEN Fail ELSE
+    LET aBasePriceToTriggerDynamicVi == ReadBytes(aBasePriceToTriggerStaticVi.rest, 8) IN IF ~aBasePriceToTriggerDynamicVi.ok THEN Fail ELSE
+    LET viTriggeringPrice == ReadBytes(aBasePriceToTriggerDynamicVi.rest, 8) IN IF ~viTriggeringPrice.ok THEN Fail ELSE
+    LET disparateRatioToTriggerStaticVi == ReadBytes(viTriggeringPrice.rest, 8) IN IF ~disparateRatioToTriggerStaticVi.ok THEN Fail ELSE
+    LET disparateRatioToTriggerDynamicVi == ReadBytes(disparateRatioToTriggerStaticVi.rest, 8) IN IF ~disparateRatioToTriggerDynamicVi.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(disparateRatioToTriggerDynamicVi.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ messageSequenceNumber              |-> messageSequenceNumber.value,
+         boardId                            |-> boardId.value,
+         isinCode                           |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx |-> aDesignatedNumberForAnIssueFromKrx.value,
+         processingTimeOfTradingSystem      |-> processingTimeOfTradingSystem.value,
+         theTimeEndingVi                    |-> theTimeEndingVi.value,
+         viStatusCode                       |-> viStatusCode.value,
+         viTypeCode                         |-> viTypeCode.value,
+         aBasePriceToTriggerStaticVi        |-> aBasePriceToTriggerStaticVi.value,
+         aBasePriceToTriggerDynamicVi       |-> aBasePriceToTriggerDynamicVi.value,
+         viTriggeringPrice                  |-> viTriggeringPrice.value,
+         disparateRatioToTriggerStaticVi    |-> disparateRatioToTriggerStaticVi.value,
+         disparateRatioToTriggerDynamicVi   |-> disparateRatioToTriggerDynamicVi.value,
+         endKeyword                         |-> endKeyword.value ], endKeyword.rest)
+
+ZeroTriggeringRemovingViMessage ==
+    [ messageSequenceNumber              |-> [i \in 1 .. 4 |-> 0],
+      boardId                            |-> [i \in 1 .. 2 |-> 0],
+      isinCode                           |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx |-> [i \in 1 .. 4 |-> 0],
+      processingTimeOfTradingSystem      |-> [i \in 1 .. 12 |-> 0],
+      theTimeEndingVi                    |-> [i \in 1 .. 9 |-> 0],
+      viStatusCode                       |-> [i \in 1 .. 1 |-> 0],
+      viTypeCode                         |-> [i \in 1 .. 1 |-> 0],
+      aBasePriceToTriggerStaticVi        |-> [i \in 1 .. 8 |-> 0],
+      aBasePriceToTriggerDynamicVi       |-> [i \in 1 .. 8 |-> 0],
+      viTriggeringPrice                  |-> [i \in 1 .. 8 |-> 0],
+      disparateRatioToTriggerStaticVi    |-> [i \in 1 .. 8 |-> 0],
+      disparateRatioToTriggerDynamicVi   |-> [i \in 1 .. 8 |-> 0],
+      endKeyword                         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Triggering Removing Vi Message at zero, then each field in turn at the values it is checked at *)
+CheckedTriggeringRemovingViMessage ==
+    { ZeroTriggeringRemovingViMessage }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.boardId = one] : one \in Sample(2) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.theTimeEndingVi = one] : one \in Sample(9) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.viStatusCode = one] : one \in Sample(1) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.viTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.aBasePriceToTriggerStaticVi = one] : one \in Sample(8) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.aBasePriceToTriggerDynamicVi = one] : one \in Sample(8) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.viTriggeringPrice = one] : one \in Sample(8) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.disparateRatioToTriggerStaticVi = one] : one \in Sample(8) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.disparateRatioToTriggerDynamicVi = one] : one \in Sample(8) }
+        \cup { [ZeroTriggeringRemovingViMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Closing Price Trading Quote Message: 42 bytes                           *)
+(***************************************************************************)
+
+ClosingPriceTradingQuoteMessage ==
+    [ messageSequenceNumber              : Sample(4),
+      boardId                            : Sample(2),
+      isinCode                           : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx : Sample(4),
+      totalAskVolume                     : Sample(8),
+      totalBidVolume                     : Sample(8),
+      endKeyword                         : Sample(4) ]
+
+EncodeClosingPriceTradingQuoteMessage(message) ==
+    message.messageSequenceNumber
+        \o message.boardId
+        \o message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.totalAskVolume
+        \o message.totalBidVolume
+        \o message.endKeyword
+
+DecodeClosingPriceTradingQuoteMessage(bytes) ==
+    LET messageSequenceNumber == ReadBytes(bytes, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET boardId == ReadBytes(messageSequenceNumber.rest, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(boardId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET totalAskVolume == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 8) IN IF ~totalAskVolume.ok THEN Fail ELSE
+    LET totalBidVolume == ReadBytes(totalAskVolume.rest, 8) IN IF ~totalBidVolume.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(totalBidVolume.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ messageSequenceNumber              |-> messageSequenceNumber.value,
+         boardId                            |-> boardId.value,
+         isinCode                           |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx |-> aDesignatedNumberForAnIssueFromKrx.value,
+         totalAskVolume                     |-> totalAskVolume.value,
+         totalBidVolume                     |-> totalBidVolume.value,
+         endKeyword                         |-> endKeyword.value ], endKeyword.rest)
+
+ZeroClosingPriceTradingQuoteMessage ==
+    [ messageSequenceNumber              |-> [i \in 1 .. 4 |-> 0],
+      boardId                            |-> [i \in 1 .. 2 |-> 0],
+      isinCode                           |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx |-> [i \in 1 .. 4 |-> 0],
+      totalAskVolume                     |-> [i \in 1 .. 8 |-> 0],
+      totalBidVolume                     |-> [i \in 1 .. 8 |-> 0],
+      endKeyword                         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Closing Price Trading Quote Message at zero, then each field in turn at the values it is checked at *)
+CheckedClosingPriceTradingQuoteMessage ==
+    { ZeroClosingPriceTradingQuoteMessage }
+        \cup { [ZeroClosingPriceTradingQuoteMessage EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroClosingPriceTradingQuoteMessage EXCEPT !.boardId = one] : one \in Sample(2) }
+        \cup { [ZeroClosingPriceTradingQuoteMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroClosingPriceTradingQuoteMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroClosingPriceTradingQuoteMessage EXCEPT !.totalAskVolume = one] : one \in Sample(8) }
+        \cup { [ZeroClosingPriceTradingQuoteMessage EXCEPT !.totalBidVolume = one] : one \in Sample(8) }
+        \cup { [ZeroClosingPriceTradingQuoteMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Equities Snapshot 10 Level Message: 484 bytes                           *)
+(***************************************************************************)
+
+EquitiesSnapshot10LevelMessage ==
+    [ boardId                                        : Sample(2),
+      sessionId                                      : Sample(2),
+      isinCode                                       : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx             : Sample(4),
+      priceChangeAgainstPreviousDay                  : Sample(1),
+      aPriceChangeAgainstThePreviousDay              : Sample(8),
+      upperLimitPrice                                : Sample(8),
+      lowerLimitPrice                                : Sample(8),
+      currentPrice                                   : Sample(8),
+      openingPrice                                   : Sample(8),
+      todaysHigh                                     : Sample(8),
+      todaysLow                                      : Sample(8),
+      accumulatedTradingVolume                       : Sample(8),
+      accumulatedTradingValue                        : Sample(16),
+      finalAskBidTypeCode                            : Sample(1),
+      askLevel1Price                                 : Sample(8),
+      bidLevel1Price                                 : Sample(8),
+      askLevel1Volume                                : Sample(8),
+      bidLevel1Volume                                : Sample(8),
+      askLevel2Price                                 : Sample(8),
+      bidLevel2Price                                 : Sample(8),
+      askLevel2Volume                                : Sample(8),
+      bidLevel2Volume                                : Sample(8),
+      askLevel3Price                                 : Sample(8),
+      bidLevel3Price                                 : Sample(8),
+      askLevel3Volume                                : Sample(8),
+      bidLevel3Volume                                : Sample(8),
+      askLevel4Price                                 : Sample(8),
+      bidLevel4Price                                 : Sample(8),
+      askLevel4Volume                                : Sample(8),
+      bidLevel4Volume                                : Sample(8),
+      askLevel5Price                                 : Sample(8),
+      bidLevel5Price                                 : Sample(8),
+      askLevel5Volume                                : Sample(8),
+      bidLevel5Volume                                : Sample(8),
+      askLevel6Price                                 : Sample(8),
+      bidLevel6Price                                 : Sample(8),
+      askLevel6Volume                                : Sample(8),
+      bidLevel6Volume                                : Sample(8),
+      askLevel7Price                                 : Sample(8),
+      bidLevel7Price                                 : Sample(8),
+      askLevel7Volume                                : Sample(8),
+      bidLevel7Volume                                : Sample(8),
+      askLevel8Price                                 : Sample(8),
+      bidLevel8Price                                 : Sample(8),
+      askLevel8Volume                                : Sample(8),
+      bidLevel8Volume                                : Sample(8),
+      askLevel9Price                                 : Sample(8),
+      bidLevel9Price                                 : Sample(8),
+      askLevel9Volume                                : Sample(8),
+      bidLevel9Volume                                : Sample(8),
+      askLevel10Price                                : Sample(8),
+      bidLevel10Price                                : Sample(8),
+      askLevel10Volume                               : Sample(8),
+      bidLevel10Volume                               : Sample(8),
+      totalAskVolume                                 : Sample(8),
+      totalBidVolume                                 : Sample(8),
+      estimatedTradingPrice                          : Sample(8),
+      estimatedTradingVolume                         : Sample(8),
+      closingPriceTypeCode                           : Sample(1),
+      tradingHalt                                    : Sample(1),
+      midPrice                                       : Sample(8),
+      totalMidPriceAskVolumeTotalAskVolumeOnMidPrice : Sample(8),
+      totalMidPriceBidVolumeTotalBidVolumeOnMidPrice : Sample(8),
+      endKeyword                                     : Sample(4) ]
+
+EncodeEquitiesSnapshot10LevelMessage(message) ==
+    message.boardId
+        \o message.sessionId
+        \o message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.priceChangeAgainstPreviousDay
+        \o message.aPriceChangeAgainstThePreviousDay
+        \o message.upperLimitPrice
+        \o message.lowerLimitPrice
+        \o message.currentPrice
+        \o message.openingPrice
+        \o message.todaysHigh
+        \o message.todaysLow
+        \o message.accumulatedTradingVolume
+        \o message.accumulatedTradingValue
+        \o message.finalAskBidTypeCode
+        \o message.askLevel1Price
+        \o message.bidLevel1Price
+        \o message.askLevel1Volume
+        \o message.bidLevel1Volume
+        \o message.askLevel2Price
+        \o message.bidLevel2Price
+        \o message.askLevel2Volume
+        \o message.bidLevel2Volume
+        \o message.askLevel3Price
+        \o message.bidLevel3Price
+        \o message.askLevel3Volume
+        \o message.bidLevel3Volume
+        \o message.askLevel4Price
+        \o message.bidLevel4Price
+        \o message.askLevel4Volume
+        \o message.bidLevel4Volume
+        \o message.askLevel5Price
+        \o message.bidLevel5Price
+        \o message.askLevel5Volume
+        \o message.bidLevel5Volume
+        \o message.askLevel6Price
+        \o message.bidLevel6Price
+        \o message.askLevel6Volume
+        \o message.bidLevel6Volume
+        \o message.askLevel7Price
+        \o message.bidLevel7Price
+        \o message.askLevel7Volume
+        \o message.bidLevel7Volume
+        \o message.askLevel8Price
+        \o message.bidLevel8Price
+        \o message.askLevel8Volume
+        \o message.bidLevel8Volume
+        \o message.askLevel9Price
+        \o message.bidLevel9Price
+        \o message.askLevel9Volume
+        \o message.bidLevel9Volume
+        \o message.askLevel10Price
+        \o message.bidLevel10Price
+        \o message.askLevel10Volume
+        \o message.bidLevel10Volume
+        \o message.totalAskVolume
+        \o message.totalBidVolume
+        \o message.estimatedTradingPrice
+        \o message.estimatedTradingVolume
+        \o message.closingPriceTypeCode
+        \o message.tradingHalt
+        \o message.midPrice
+        \o message.totalMidPriceAskVolumeTotalAskVolumeOnMidPrice
+        \o message.totalMidPriceBidVolumeTotalBidVolumeOnMidPrice
+        \o message.endKeyword
+
+DecodeEquitiesSnapshot10LevelMessage(bytes) ==
+    LET boardId == ReadBytes(bytes, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET sessionId == ReadBytes(boardId.rest, 2) IN IF ~sessionId.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET priceChangeAgainstPreviousDay == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 1) IN IF ~priceChangeAgainstPreviousDay.ok THEN Fail ELSE
+    LET aPriceChangeAgainstThePreviousDay == ReadBytes(priceChangeAgainstPreviousDay.rest, 8) IN IF ~aPriceChangeAgainstThePreviousDay.ok THEN Fail ELSE
+    LET upperLimitPrice == ReadBytes(aPriceChangeAgainstThePreviousDay.rest, 8) IN IF ~upperLimitPrice.ok THEN Fail ELSE
+    LET lowerLimitPrice == ReadBytes(upperLimitPrice.rest, 8) IN IF ~lowerLimitPrice.ok THEN Fail ELSE
+    LET currentPrice == ReadBytes(lowerLimitPrice.rest, 8) IN IF ~currentPrice.ok THEN Fail ELSE
+    LET openingPrice == ReadBytes(currentPrice.rest, 8) IN IF ~openingPrice.ok THEN Fail ELSE
+    LET todaysHigh == ReadBytes(openingPrice.rest, 8) IN IF ~todaysHigh.ok THEN Fail ELSE
+    LET todaysLow == ReadBytes(todaysHigh.rest, 8) IN IF ~todaysLow.ok THEN Fail ELSE
+    LET accumulatedTradingVolume == ReadBytes(todaysLow.rest, 8) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
+    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 16) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
+    LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
+    LET askLevel1Price == ReadBytes(finalAskBidTypeCode.rest, 8) IN IF ~askLevel1Price.ok THEN Fail ELSE
+    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 8) IN IF ~bidLevel1Price.ok THEN Fail ELSE
+    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 8) IN IF ~askLevel1Volume.ok THEN Fail ELSE
+    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 8) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
+    LET askLevel2Price == ReadBytes(bidLevel1Volume.rest, 8) IN IF ~askLevel2Price.ok THEN Fail ELSE
+    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 8) IN IF ~bidLevel2Price.ok THEN Fail ELSE
+    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 8) IN IF ~askLevel2Volume.ok THEN Fail ELSE
+    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 8) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
+    LET askLevel3Price == ReadBytes(bidLevel2Volume.rest, 8) IN IF ~askLevel3Price.ok THEN Fail ELSE
+    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 8) IN IF ~bidLevel3Price.ok THEN Fail ELSE
+    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 8) IN IF ~askLevel3Volume.ok THEN Fail ELSE
+    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 8) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
+    LET askLevel4Price == ReadBytes(bidLevel3Volume.rest, 8) IN IF ~askLevel4Price.ok THEN Fail ELSE
+    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 8) IN IF ~bidLevel4Price.ok THEN Fail ELSE
+    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 8) IN IF ~askLevel4Volume.ok THEN Fail ELSE
+    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 8) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
+    LET askLevel5Price == ReadBytes(bidLevel4Volume.rest, 8) IN IF ~askLevel5Price.ok THEN Fail ELSE
+    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 8) IN IF ~bidLevel5Price.ok THEN Fail ELSE
+    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 8) IN IF ~askLevel5Volume.ok THEN Fail ELSE
+    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 8) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
+    LET askLevel6Price == ReadBytes(bidLevel5Volume.rest, 8) IN IF ~askLevel6Price.ok THEN Fail ELSE
+    LET bidLevel6Price == ReadBytes(askLevel6Price.rest, 8) IN IF ~bidLevel6Price.ok THEN Fail ELSE
+    LET askLevel6Volume == ReadBytes(bidLevel6Price.rest, 8) IN IF ~askLevel6Volume.ok THEN Fail ELSE
+    LET bidLevel6Volume == ReadBytes(askLevel6Volume.rest, 8) IN IF ~bidLevel6Volume.ok THEN Fail ELSE
+    LET askLevel7Price == ReadBytes(bidLevel6Volume.rest, 8) IN IF ~askLevel7Price.ok THEN Fail ELSE
+    LET bidLevel7Price == ReadBytes(askLevel7Price.rest, 8) IN IF ~bidLevel7Price.ok THEN Fail ELSE
+    LET askLevel7Volume == ReadBytes(bidLevel7Price.rest, 8) IN IF ~askLevel7Volume.ok THEN Fail ELSE
+    LET bidLevel7Volume == ReadBytes(askLevel7Volume.rest, 8) IN IF ~bidLevel7Volume.ok THEN Fail ELSE
+    LET askLevel8Price == ReadBytes(bidLevel7Volume.rest, 8) IN IF ~askLevel8Price.ok THEN Fail ELSE
+    LET bidLevel8Price == ReadBytes(askLevel8Price.rest, 8) IN IF ~bidLevel8Price.ok THEN Fail ELSE
+    LET askLevel8Volume == ReadBytes(bidLevel8Price.rest, 8) IN IF ~askLevel8Volume.ok THEN Fail ELSE
+    LET bidLevel8Volume == ReadBytes(askLevel8Volume.rest, 8) IN IF ~bidLevel8Volume.ok THEN Fail ELSE
+    LET askLevel9Price == ReadBytes(bidLevel8Volume.rest, 8) IN IF ~askLevel9Price.ok THEN Fail ELSE
+    LET bidLevel9Price == ReadBytes(askLevel9Price.rest, 8) IN IF ~bidLevel9Price.ok THEN Fail ELSE
+    LET askLevel9Volume == ReadBytes(bidLevel9Price.rest, 8) IN IF ~askLevel9Volume.ok THEN Fail ELSE
+    LET bidLevel9Volume == ReadBytes(askLevel9Volume.rest, 8) IN IF ~bidLevel9Volume.ok THEN Fail ELSE
+    LET askLevel10Price == ReadBytes(bidLevel9Volume.rest, 8) IN IF ~askLevel10Price.ok THEN Fail ELSE
+    LET bidLevel10Price == ReadBytes(askLevel10Price.rest, 8) IN IF ~bidLevel10Price.ok THEN Fail ELSE
+    LET askLevel10Volume == ReadBytes(bidLevel10Price.rest, 8) IN IF ~askLevel10Volume.ok THEN Fail ELSE
+    LET bidLevel10Volume == ReadBytes(askLevel10Volume.rest, 8) IN IF ~bidLevel10Volume.ok THEN Fail ELSE
+    LET totalAskVolume == ReadBytes(bidLevel10Volume.rest, 8) IN IF ~totalAskVolume.ok THEN Fail ELSE
+    LET totalBidVolume == ReadBytes(totalAskVolume.rest, 8) IN IF ~totalBidVolume.ok THEN Fail ELSE
+    LET estimatedTradingPrice == ReadBytes(totalBidVolume.rest, 8) IN IF ~estimatedTradingPrice.ok THEN Fail ELSE
+    LET estimatedTradingVolume == ReadBytes(estimatedTradingPrice.rest, 8) IN IF ~estimatedTradingVolume.ok THEN Fail ELSE
+    LET closingPriceTypeCode == ReadBytes(estimatedTradingVolume.rest, 1) IN IF ~closingPriceTypeCode.ok THEN Fail ELSE
+    LET tradingHalt == ReadBytes(closingPriceTypeCode.rest, 1) IN IF ~tradingHalt.ok THEN Fail ELSE
+    LET midPrice == ReadBytes(tradingHalt.rest, 8) IN IF ~midPrice.ok THEN Fail ELSE
+    LET totalMidPriceAskVolumeTotalAskVolumeOnMidPrice == ReadBytes(midPrice.rest, 8) IN IF ~totalMidPriceAskVolumeTotalAskVolumeOnMidPrice.ok THEN Fail ELSE
+    LET totalMidPriceBidVolumeTotalBidVolumeOnMidPrice == ReadBytes(totalMidPriceAskVolumeTotalAskVolumeOnMidPrice.rest, 8) IN IF ~totalMidPriceBidVolumeTotalBidVolumeOnMidPrice.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(totalMidPriceBidVolumeTotalBidVolumeOnMidPrice.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ boardId                                        |-> boardId.value,
+         sessionId                                      |-> sessionId.value,
+         isinCode                                       |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx             |-> aDesignatedNumberForAnIssueFromKrx.value,
+         priceChangeAgainstPreviousDay                  |-> priceChangeAgainstPreviousDay.value,
+         aPriceChangeAgainstThePreviousDay              |-> aPriceChangeAgainstThePreviousDay.value,
+         upperLimitPrice                                |-> upperLimitPrice.value,
+         lowerLimitPrice                                |-> lowerLimitPrice.value,
+         currentPrice                                   |-> currentPrice.value,
+         openingPrice                                   |-> openingPrice.value,
+         todaysHigh                                     |-> todaysHigh.value,
+         todaysLow                                      |-> todaysLow.value,
+         accumulatedTradingVolume                       |-> accumulatedTradingVolume.value,
+         accumulatedTradingValue                        |-> accumulatedTradingValue.value,
+         finalAskBidTypeCode                            |-> finalAskBidTypeCode.value,
+         askLevel1Price                                 |-> askLevel1Price.value,
+         bidLevel1Price                                 |-> bidLevel1Price.value,
+         askLevel1Volume                                |-> askLevel1Volume.value,
+         bidLevel1Volume                                |-> bidLevel1Volume.value,
+         askLevel2Price                                 |-> askLevel2Price.value,
+         bidLevel2Price                                 |-> bidLevel2Price.value,
+         askLevel2Volume                                |-> askLevel2Volume.value,
+         bidLevel2Volume                                |-> bidLevel2Volume.value,
+         askLevel3Price                                 |-> askLevel3Price.value,
+         bidLevel3Price                                 |-> bidLevel3Price.value,
+         askLevel3Volume                                |-> askLevel3Volume.value,
+         bidLevel3Volume                                |-> bidLevel3Volume.value,
+         askLevel4Price                                 |-> askLevel4Price.value,
+         bidLevel4Price                                 |-> bidLevel4Price.value,
+         askLevel4Volume                                |-> askLevel4Volume.value,
+         bidLevel4Volume                                |-> bidLevel4Volume.value,
+         askLevel5Price                                 |-> askLevel5Price.value,
+         bidLevel5Price                                 |-> bidLevel5Price.value,
+         askLevel5Volume                                |-> askLevel5Volume.value,
+         bidLevel5Volume                                |-> bidLevel5Volume.value,
+         askLevel6Price                                 |-> askLevel6Price.value,
+         bidLevel6Price                                 |-> bidLevel6Price.value,
+         askLevel6Volume                                |-> askLevel6Volume.value,
+         bidLevel6Volume                                |-> bidLevel6Volume.value,
+         askLevel7Price                                 |-> askLevel7Price.value,
+         bidLevel7Price                                 |-> bidLevel7Price.value,
+         askLevel7Volume                                |-> askLevel7Volume.value,
+         bidLevel7Volume                                |-> bidLevel7Volume.value,
+         askLevel8Price                                 |-> askLevel8Price.value,
+         bidLevel8Price                                 |-> bidLevel8Price.value,
+         askLevel8Volume                                |-> askLevel8Volume.value,
+         bidLevel8Volume                                |-> bidLevel8Volume.value,
+         askLevel9Price                                 |-> askLevel9Price.value,
+         bidLevel9Price                                 |-> bidLevel9Price.value,
+         askLevel9Volume                                |-> askLevel9Volume.value,
+         bidLevel9Volume                                |-> bidLevel9Volume.value,
+         askLevel10Price                                |-> askLevel10Price.value,
+         bidLevel10Price                                |-> bidLevel10Price.value,
+         askLevel10Volume                               |-> askLevel10Volume.value,
+         bidLevel10Volume                               |-> bidLevel10Volume.value,
+         totalAskVolume                                 |-> totalAskVolume.value,
+         totalBidVolume                                 |-> totalBidVolume.value,
+         estimatedTradingPrice                          |-> estimatedTradingPrice.value,
+         estimatedTradingVolume                         |-> estimatedTradingVolume.value,
+         closingPriceTypeCode                           |-> closingPriceTypeCode.value,
+         tradingHalt                                    |-> tradingHalt.value,
+         midPrice                                       |-> midPrice.value,
+         totalMidPriceAskVolumeTotalAskVolumeOnMidPrice |-> totalMidPriceAskVolumeTotalAskVolumeOnMidPrice.value,
+         totalMidPriceBidVolumeTotalBidVolumeOnMidPrice |-> totalMidPriceBidVolumeTotalBidVolumeOnMidPrice.value,
+         endKeyword                                     |-> endKeyword.value ], endKeyword.rest)
+
+ZeroEquitiesSnapshot10LevelMessage ==
+    [ boardId                                        |-> [i \in 1 .. 2 |-> 0],
+      sessionId                                      |-> [i \in 1 .. 2 |-> 0],
+      isinCode                                       |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx             |-> [i \in 1 .. 4 |-> 0],
+      priceChangeAgainstPreviousDay                  |-> [i \in 1 .. 1 |-> 0],
+      aPriceChangeAgainstThePreviousDay              |-> [i \in 1 .. 8 |-> 0],
+      upperLimitPrice                                |-> [i \in 1 .. 8 |-> 0],
+      lowerLimitPrice                                |-> [i \in 1 .. 8 |-> 0],
+      currentPrice                                   |-> [i \in 1 .. 8 |-> 0],
+      openingPrice                                   |-> [i \in 1 .. 8 |-> 0],
+      todaysHigh                                     |-> [i \in 1 .. 8 |-> 0],
+      todaysLow                                      |-> [i \in 1 .. 8 |-> 0],
+      accumulatedTradingVolume                       |-> [i \in 1 .. 8 |-> 0],
+      accumulatedTradingValue                        |-> [i \in 1 .. 16 |-> 0],
+      finalAskBidTypeCode                            |-> [i \in 1 .. 1 |-> 0],
+      askLevel1Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel1Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel1Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel1Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel2Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel2Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel2Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel2Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel3Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel3Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel3Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel3Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel4Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel4Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel4Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel4Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel5Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel5Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel5Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel5Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel6Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel6Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel6Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel6Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel7Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel7Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel7Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel7Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel8Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel8Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel8Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel8Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel9Price                                 |-> [i \in 1 .. 8 |-> 0],
+      bidLevel9Price                                 |-> [i \in 1 .. 8 |-> 0],
+      askLevel9Volume                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel9Volume                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel10Price                                |-> [i \in 1 .. 8 |-> 0],
+      bidLevel10Price                                |-> [i \in 1 .. 8 |-> 0],
+      askLevel10Volume                               |-> [i \in 1 .. 8 |-> 0],
+      bidLevel10Volume                               |-> [i \in 1 .. 8 |-> 0],
+      totalAskVolume                                 |-> [i \in 1 .. 8 |-> 0],
+      totalBidVolume                                 |-> [i \in 1 .. 8 |-> 0],
+      estimatedTradingPrice                          |-> [i \in 1 .. 8 |-> 0],
+      estimatedTradingVolume                         |-> [i \in 1 .. 8 |-> 0],
+      closingPriceTypeCode                           |-> [i \in 1 .. 1 |-> 0],
+      tradingHalt                                    |-> [i \in 1 .. 1 |-> 0],
+      midPrice                                       |-> [i \in 1 .. 8 |-> 0],
+      totalMidPriceAskVolumeTotalAskVolumeOnMidPrice |-> [i \in 1 .. 8 |-> 0],
+      totalMidPriceBidVolumeTotalBidVolumeOnMidPrice |-> [i \in 1 .. 8 |-> 0],
+      endKeyword                                     |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Equities Snapshot 10 Level Message at zero, then each field in turn at the values it is checked at *)
+CheckedEquitiesSnapshot10LevelMessage ==
+    { ZeroEquitiesSnapshot10LevelMessage }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.boardId = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.sessionId = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.priceChangeAgainstPreviousDay = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.aPriceChangeAgainstThePreviousDay = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.upperLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.lowerLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.currentPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.openingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.todaysHigh = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.todaysLow = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel1Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel2Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel3Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel4Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel5Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel6Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel6Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel6Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel6Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel7Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel7Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel7Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel7Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel8Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel8Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel8Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel8Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel9Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel9Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel9Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel9Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel10Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel10Price = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.askLevel10Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.bidLevel10Volume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.totalAskVolume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.totalBidVolume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.estimatedTradingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.estimatedTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.closingPriceTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.tradingHalt = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.midPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.totalMidPriceAskVolumeTotalAskVolumeOnMidPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.totalMidPriceBidVolumeTotalBidVolumeOnMidPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesSnapshot10LevelMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Investor Activities Per An Industry Message: 83 bytes                   *)
+(***************************************************************************)
+
+InvestorActivitiesPerAnIndustryMessage ==
+    [ calculationTime             : Sample(6),
+      investorCode                : Sample(4),
+      interfaceIndexId            : Sample(6),
+      indexIsinCode               : Sample(12),
+      accumulatedAskTradingVolume : Sample(8),
+      accumulatedAskTradingValue  : Sample(16),
+      accumulatedBidTradingVolume : Sample(8),
+      accumulatedBidTradingValue  : Sample(16),
+      filler3                     : Sample(3),
+      endKeyword                  : Sample(4) ]
+
+EncodeInvestorActivitiesPerAnIndustryMessage(message) ==
+    message.calculationTime
+        \o message.investorCode
+        \o message.interfaceIndexId
+        \o message.indexIsinCode
+        \o message.accumulatedAskTradingVolume
+        \o message.accumulatedAskTradingValue
+        \o message.accumulatedBidTradingVolume
+        \o message.accumulatedBidTradingValue
+        \o message.filler3
+        \o message.endKeyword
+
+DecodeInvestorActivitiesPerAnIndustryMessage(bytes) ==
+    LET calculationTime == ReadBytes(bytes, 6) IN IF ~calculationTime.ok THEN Fail ELSE
+    LET investorCode == ReadBytes(calculationTime.rest, 4) IN IF ~investorCode.ok THEN Fail ELSE
+    LET interfaceIndexId == ReadBytes(investorCode.rest, 6) IN IF ~interfaceIndexId.ok THEN Fail ELSE
+    LET indexIsinCode == ReadBytes(interfaceIndexId.rest, 12) IN IF ~indexIsinCode.ok THEN Fail ELSE
+    LET accumulatedAskTradingVolume == ReadBytes(indexIsinCode.rest, 8) IN IF ~accumulatedAskTradingVolume.ok THEN Fail ELSE
+    LET accumulatedAskTradingValue == ReadBytes(accumulatedAskTradingVolume.rest, 16) IN IF ~accumulatedAskTradingValue.ok THEN Fail ELSE
+    LET accumulatedBidTradingVolume == ReadBytes(accumulatedAskTradingValue.rest, 8) IN IF ~accumulatedBidTradingVolume.ok THEN Fail ELSE
+    LET accumulatedBidTradingValue == ReadBytes(accumulatedBidTradingVolume.rest, 16) IN IF ~accumulatedBidTradingValue.ok THEN Fail ELSE
+    LET filler3 == ReadBytes(accumulatedBidTradingValue.rest, 3) IN IF ~filler3.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(filler3.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ calculationTime             |-> calculationTime.value,
+         investorCode                |-> investorCode.value,
+         interfaceIndexId            |-> interfaceIndexId.value,
+         indexIsinCode               |-> indexIsinCode.value,
+         accumulatedAskTradingVolume |-> accumulatedAskTradingVolume.value,
+         accumulatedAskTradingValue  |-> accumulatedAskTradingValue.value,
+         accumulatedBidTradingVolume |-> accumulatedBidTradingVolume.value,
+         accumulatedBidTradingValue  |-> accumulatedBidTradingValue.value,
+         filler3                     |-> filler3.value,
+         endKeyword                  |-> endKeyword.value ], endKeyword.rest)
+
+ZeroInvestorActivitiesPerAnIndustryMessage ==
+    [ calculationTime             |-> [i \in 1 .. 6 |-> 0],
+      investorCode                |-> [i \in 1 .. 4 |-> 0],
+      interfaceIndexId            |-> [i \in 1 .. 6 |-> 0],
+      indexIsinCode               |-> [i \in 1 .. 12 |-> 0],
+      accumulatedAskTradingVolume |-> [i \in 1 .. 8 |-> 0],
+      accumulatedAskTradingValue  |-> [i \in 1 .. 16 |-> 0],
+      accumulatedBidTradingVolume |-> [i \in 1 .. 8 |-> 0],
+      accumulatedBidTradingValue  |-> [i \in 1 .. 16 |-> 0],
+      filler3                     |-> [i \in 1 .. 3 |-> 0],
+      endKeyword                  |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Investor Activities Per An Industry Message at zero, then each field in turn at the values it is checked at *)
+CheckedInvestorActivitiesPerAnIndustryMessage ==
+    { ZeroInvestorActivitiesPerAnIndustryMessage }
+        \cup { [ZeroInvestorActivitiesPerAnIndustryMessage EXCEPT !.calculationTime = one] : one \in Sample(6) }
+        \cup { [ZeroInvestorActivitiesPerAnIndustryMessage EXCEPT !.investorCode = one] : one \in Sample(4) }
+        \cup { [ZeroInvestorActivitiesPerAnIndustryMessage EXCEPT !.interfaceIndexId = one] : one \in Sample(6) }
+        \cup { [ZeroInvestorActivitiesPerAnIndustryMessage EXCEPT !.indexIsinCode = one] : one \in Sample(12) }
+        \cup { [ZeroInvestorActivitiesPerAnIndustryMessage EXCEPT !.accumulatedAskTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroInvestorActivitiesPerAnIndustryMessage EXCEPT !.accumulatedAskTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroInvestorActivitiesPerAnIndustryMessage EXCEPT !.accumulatedBidTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroInvestorActivitiesPerAnIndustryMessage EXCEPT !.accumulatedBidTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroInvestorActivitiesPerAnIndustryMessage EXCEPT !.filler3 = one] : one \in Sample(3) }
+        \cup { [ZeroInvestorActivitiesPerAnIndustryMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Current Movement Message: 44 bytes                                      *)
+(***************************************************************************)
+
+CurrentMovementMessage ==
+    [ totalNumberOfIssues                      : Sample(4),
+      numberOfIssuesForMovementCalculation     : Sample(4),
+      numberOfIssuesOfUpperLimit               : Sample(4),
+      numberOfIssuesOfGoingUp                  : Sample(4),
+      numberOfIssuesOfSteadiness               : Sample(4),
+      numberOfIssuesOfLowerLimit               : Sample(4),
+      numberOfIssuesOfGoingDown                : Sample(4),
+      numberOfIssuesHavingQuotes               : Sample(4),
+      numberOfIssuesOfWhichQuotesAreIncreasing : Sample(4),
+      numberOfIssuesOfWhichQuotesAreDecreasing : Sample(4),
+      endKeyword                               : Sample(4) ]
+
+EncodeCurrentMovementMessage(message) ==
+    message.totalNumberOfIssues
+        \o message.numberOfIssuesForMovementCalculation
+        \o message.numberOfIssuesOfUpperLimit
+        \o message.numberOfIssuesOfGoingUp
+        \o message.numberOfIssuesOfSteadiness
+        \o message.numberOfIssuesOfLowerLimit
+        \o message.numberOfIssuesOfGoingDown
+        \o message.numberOfIssuesHavingQuotes
+        \o message.numberOfIssuesOfWhichQuotesAreIncreasing
+        \o message.numberOfIssuesOfWhichQuotesAreDecreasing
+        \o message.endKeyword
+
+DecodeCurrentMovementMessage(bytes) ==
+    LET totalNumberOfIssues == ReadBytes(bytes, 4) IN IF ~totalNumberOfIssues.ok THEN Fail ELSE
+    LET numberOfIssuesForMovementCalculation == ReadBytes(totalNumberOfIssues.rest, 4) IN IF ~numberOfIssuesForMovementCalculation.ok THEN Fail ELSE
+    LET numberOfIssuesOfUpperLimit == ReadBytes(numberOfIssuesForMovementCalculation.rest, 4) IN IF ~numberOfIssuesOfUpperLimit.ok THEN Fail ELSE
+    LET numberOfIssuesOfGoingUp == ReadBytes(numberOfIssuesOfUpperLimit.rest, 4) IN IF ~numberOfIssuesOfGoingUp.ok THEN Fail ELSE
+    LET numberOfIssuesOfSteadiness == ReadBytes(numberOfIssuesOfGoingUp.rest, 4) IN IF ~numberOfIssuesOfSteadiness.ok THEN Fail ELSE
+    LET numberOfIssuesOfLowerLimit == ReadBytes(numberOfIssuesOfSteadiness.rest, 4) IN IF ~numberOfIssuesOfLowerLimit.ok THEN Fail ELSE
+    LET numberOfIssuesOfGoingDown == ReadBytes(numberOfIssuesOfLowerLimit.rest, 4) IN IF ~numberOfIssuesOfGoingDown.ok THEN Fail ELSE
+    LET numberOfIssuesHavingQuotes == ReadBytes(numberOfIssuesOfGoingDown.rest, 4) IN IF ~numberOfIssuesHavingQuotes.ok THEN Fail ELSE
+    LET numberOfIssuesOfWhichQuotesAreIncreasing == ReadBytes(numberOfIssuesHavingQuotes.rest, 4) IN IF ~numberOfIssuesOfWhichQuotesAreIncreasing.ok THEN Fail ELSE
+    LET numberOfIssuesOfWhichQuotesAreDecreasing == ReadBytes(numberOfIssuesOfWhichQuotesAreIncreasing.rest, 4) IN IF ~numberOfIssuesOfWhichQuotesAreDecreasing.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(numberOfIssuesOfWhichQuotesAreDecreasing.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ totalNumberOfIssues                      |-> totalNumberOfIssues.value,
+         numberOfIssuesForMovementCalculation     |-> numberOfIssuesForMovementCalculation.value,
+         numberOfIssuesOfUpperLimit               |-> numberOfIssuesOfUpperLimit.value,
+         numberOfIssuesOfGoingUp                  |-> numberOfIssuesOfGoingUp.value,
+         numberOfIssuesOfSteadiness               |-> numberOfIssuesOfSteadiness.value,
+         numberOfIssuesOfLowerLimit               |-> numberOfIssuesOfLowerLimit.value,
+         numberOfIssuesOfGoingDown                |-> numberOfIssuesOfGoingDown.value,
+         numberOfIssuesHavingQuotes               |-> numberOfIssuesHavingQuotes.value,
+         numberOfIssuesOfWhichQuotesAreIncreasing |-> numberOfIssuesOfWhichQuotesAreIncreasing.value,
+         numberOfIssuesOfWhichQuotesAreDecreasing |-> numberOfIssuesOfWhichQuotesAreDecreasing.value,
+         endKeyword                               |-> endKeyword.value ], endKeyword.rest)
+
+ZeroCurrentMovementMessage ==
+    [ totalNumberOfIssues                      |-> [i \in 1 .. 4 |-> 0],
+      numberOfIssuesForMovementCalculation     |-> [i \in 1 .. 4 |-> 0],
+      numberOfIssuesOfUpperLimit               |-> [i \in 1 .. 4 |-> 0],
+      numberOfIssuesOfGoingUp                  |-> [i \in 1 .. 4 |-> 0],
+      numberOfIssuesOfSteadiness               |-> [i \in 1 .. 4 |-> 0],
+      numberOfIssuesOfLowerLimit               |-> [i \in 1 .. 4 |-> 0],
+      numberOfIssuesOfGoingDown                |-> [i \in 1 .. 4 |-> 0],
+      numberOfIssuesHavingQuotes               |-> [i \in 1 .. 4 |-> 0],
+      numberOfIssuesOfWhichQuotesAreIncreasing |-> [i \in 1 .. 4 |-> 0],
+      numberOfIssuesOfWhichQuotesAreDecreasing |-> [i \in 1 .. 4 |-> 0],
+      endKeyword                               |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Current Movement Message at zero, then each field in turn at the values it is checked at *)
+CheckedCurrentMovementMessage ==
+    { ZeroCurrentMovementMessage }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.totalNumberOfIssues = one] : one \in Sample(4) }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.numberOfIssuesForMovementCalculation = one] : one \in Sample(4) }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.numberOfIssuesOfUpperLimit = one] : one \in Sample(4) }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.numberOfIssuesOfGoingUp = one] : one \in Sample(4) }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.numberOfIssuesOfSteadiness = one] : one \in Sample(4) }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.numberOfIssuesOfLowerLimit = one] : one \in Sample(4) }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.numberOfIssuesOfGoingDown = one] : one \in Sample(4) }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.numberOfIssuesHavingQuotes = one] : one \in Sample(4) }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.numberOfIssuesOfWhichQuotesAreIncreasing = one] : one \in Sample(4) }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.numberOfIssuesOfWhichQuotesAreDecreasing = one] : one \in Sample(4) }
+        \cup { [ZeroCurrentMovementMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Program Trading Activity Per Investor Message: 110 bytes                *)
+(***************************************************************************)
+
+ProgramTradingActivityPerInvestorMessage ==
+    [ calculationTime            : Sample(6),
+      investorCode               : Sample(4),
+      sellSideArbitrageVolume    : Sample(8),
+      sellSideArbitrageValue     : Sample(16),
+      sellSideNonArbitrageVolume : Sample(8),
+      sellSideNonArbitrageValue  : Sample(16),
+      buySideArbitrageVolume     : Sample(8),
+      buySideArbitrageValue      : Sample(16),
+      buySideNonArbitrageVolume  : Sample(8),
+      buySideNonArbitrageValue   : Sample(16),
+      endKeyword                 : Sample(4) ]
+
+EncodeProgramTradingActivityPerInvestorMessage(message) ==
+    message.calculationTime
+        \o message.investorCode
+        \o message.sellSideArbitrageVolume
+        \o message.sellSideArbitrageValue
+        \o message.sellSideNonArbitrageVolume
+        \o message.sellSideNonArbitrageValue
+        \o message.buySideArbitrageVolume
+        \o message.buySideArbitrageValue
+        \o message.buySideNonArbitrageVolume
+        \o message.buySideNonArbitrageValue
+        \o message.endKeyword
+
+DecodeProgramTradingActivityPerInvestorMessage(bytes) ==
+    LET calculationTime == ReadBytes(bytes, 6) IN IF ~calculationTime.ok THEN Fail ELSE
+    LET investorCode == ReadBytes(calculationTime.rest, 4) IN IF ~investorCode.ok THEN Fail ELSE
+    LET sellSideArbitrageVolume == ReadBytes(investorCode.rest, 8) IN IF ~sellSideArbitrageVolume.ok THEN Fail ELSE
+    LET sellSideArbitrageValue == ReadBytes(sellSideArbitrageVolume.rest, 16) IN IF ~sellSideArbitrageValue.ok THEN Fail ELSE
+    LET sellSideNonArbitrageVolume == ReadBytes(sellSideArbitrageValue.rest, 8) IN IF ~sellSideNonArbitrageVolume.ok THEN Fail ELSE
+    LET sellSideNonArbitrageValue == ReadBytes(sellSideNonArbitrageVolume.rest, 16) IN IF ~sellSideNonArbitrageValue.ok THEN Fail ELSE
+    LET buySideArbitrageVolume == ReadBytes(sellSideNonArbitrageValue.rest, 8) IN IF ~buySideArbitrageVolume.ok THEN Fail ELSE
+    LET buySideArbitrageValue == ReadBytes(buySideArbitrageVolume.rest, 16) IN IF ~buySideArbitrageValue.ok THEN Fail ELSE
+    LET buySideNonArbitrageVolume == ReadBytes(buySideArbitrageValue.rest, 8) IN IF ~buySideNonArbitrageVolume.ok THEN Fail ELSE
+    LET buySideNonArbitrageValue == ReadBytes(buySideNonArbitrageVolume.rest, 16) IN IF ~buySideNonArbitrageValue.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(buySideNonArbitrageValue.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ calculationTime            |-> calculationTime.value,
+         investorCode               |-> investorCode.value,
+         sellSideArbitrageVolume    |-> sellSideArbitrageVolume.value,
+         sellSideArbitrageValue     |-> sellSideArbitrageValue.value,
+         sellSideNonArbitrageVolume |-> sellSideNonArbitrageVolume.value,
+         sellSideNonArbitrageValue  |-> sellSideNonArbitrageValue.value,
+         buySideArbitrageVolume     |-> buySideArbitrageVolume.value,
+         buySideArbitrageValue      |-> buySideArbitrageValue.value,
+         buySideNonArbitrageVolume  |-> buySideNonArbitrageVolume.value,
+         buySideNonArbitrageValue   |-> buySideNonArbitrageValue.value,
+         endKeyword                 |-> endKeyword.value ], endKeyword.rest)
+
+ZeroProgramTradingActivityPerInvestorMessage ==
+    [ calculationTime            |-> [i \in 1 .. 6 |-> 0],
+      investorCode               |-> [i \in 1 .. 4 |-> 0],
+      sellSideArbitrageVolume    |-> [i \in 1 .. 8 |-> 0],
+      sellSideArbitrageValue     |-> [i \in 1 .. 16 |-> 0],
+      sellSideNonArbitrageVolume |-> [i \in 1 .. 8 |-> 0],
+      sellSideNonArbitrageValue  |-> [i \in 1 .. 16 |-> 0],
+      buySideArbitrageVolume     |-> [i \in 1 .. 8 |-> 0],
+      buySideArbitrageValue      |-> [i \in 1 .. 16 |-> 0],
+      buySideNonArbitrageVolume  |-> [i \in 1 .. 8 |-> 0],
+      buySideNonArbitrageValue   |-> [i \in 1 .. 16 |-> 0],
+      endKeyword                 |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Program Trading Activity Per Investor Message at zero, then each field in turn at the values it is checked at *)
+CheckedProgramTradingActivityPerInvestorMessage ==
+    { ZeroProgramTradingActivityPerInvestorMessage }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.calculationTime = one] : one \in Sample(6) }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.investorCode = one] : one \in Sample(4) }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.sellSideArbitrageVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.sellSideArbitrageValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.sellSideNonArbitrageVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.sellSideNonArbitrageValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.buySideArbitrageVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.buySideArbitrageValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.buySideNonArbitrageVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.buySideNonArbitrageValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingActivityPerInvestorMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Program Trading Information Per Issue Aggregated Information Message:   *)
+(* 276 bytes                                                               *)
+(***************************************************************************)
+
+ProgramTradingInformationPerIssueAggregatedInformationMessage ==
+    [ isinCode                                  : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx        : Sample(4),
+      sellSideArbitrageTradingRemainingQuantity : Sample(8),
+      buySideArbitrageTradingRemainingQuantity  : Sample(8),
+      sellSideNonArbitrageRemainingQuantity     : Sample(8),
+      buySideNonArbitrageRemainingQuantity      : Sample(8),
+      sellSideArbitrageQuantity                 : Sample(8),
+      buySideArbitrageQuantity                  : Sample(8),
+      sellSideNonArbitrageQuantity              : Sample(8),
+      buySideNonArbitrageQuantity               : Sample(8),
+      arbitrageAskTrustTradingVolume            : Sample(8),
+      arbitrageAskPrincipalTradingVolume        : Sample(8),
+      arbitrageBidTrustTradingVolume            : Sample(8),
+      arbitrageBidPrincipalTradingVolume        : Sample(8),
+      nonArbitrageAskTrustTradingVolume         : Sample(8),
+      nonArbitrageAskPrincipalTradingVolume     : Sample(8),
+      nonArbitrageBidTrustTradingVolume         : Sample(8),
+      nonArbitrageBidPrincipalTradingVolume     : Sample(8),
+      arbitrageAskTrustTradingValue             : Sample(16),
+      arbitrageAskPrincipalTradingValue         : Sample(16),
+      arbitrageBidTrustTradingValue             : Sample(16),
+      arbitrageBidPrincipalTradingValue         : Sample(16),
+      nonArbitrageAskTrustTradingValue          : Sample(16),
+      nonArbitrageAskPrincipalTradingValue      : Sample(16),
+      nonArbitrageBidTrustTradingValue          : Sample(16),
+      nonArbitrageBidPrincipalTradingValue      : Sample(16),
+      endKeyword                                : Sample(4) ]
+
+EncodeProgramTradingInformationPerIssueAggregatedInformationMessage(message) ==
+    message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.sellSideArbitrageTradingRemainingQuantity
+        \o message.buySideArbitrageTradingRemainingQuantity
+        \o message.sellSideNonArbitrageRemainingQuantity
+        \o message.buySideNonArbitrageRemainingQuantity
+        \o message.sellSideArbitrageQuantity
+        \o message.buySideArbitrageQuantity
+        \o message.sellSideNonArbitrageQuantity
+        \o message.buySideNonArbitrageQuantity
+        \o message.arbitrageAskTrustTradingVolume
+        \o message.arbitrageAskPrincipalTradingVolume
+        \o message.arbitrageBidTrustTradingVolume
+        \o message.arbitrageBidPrincipalTradingVolume
+        \o message.nonArbitrageAskTrustTradingVolume
+        \o message.nonArbitrageAskPrincipalTradingVolume
+        \o message.nonArbitrageBidTrustTradingVolume
+        \o message.nonArbitrageBidPrincipalTradingVolume
+        \o message.arbitrageAskTrustTradingValue
+        \o message.arbitrageAskPrincipalTradingValue
+        \o message.arbitrageBidTrustTradingValue
+        \o message.arbitrageBidPrincipalTradingValue
+        \o message.nonArbitrageAskTrustTradingValue
+        \o message.nonArbitrageAskPrincipalTradingValue
+        \o message.nonArbitrageBidTrustTradingValue
+        \o message.nonArbitrageBidPrincipalTradingValue
+        \o message.endKeyword
+
+DecodeProgramTradingInformationPerIssueAggregatedInformationMessage(bytes) ==
+    LET isinCode == ReadBytes(bytes, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET sellSideArbitrageTradingRemainingQuantity == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 8) IN IF ~sellSideArbitrageTradingRemainingQuantity.ok THEN Fail ELSE
+    LET buySideArbitrageTradingRemainingQuantity == ReadBytes(sellSideArbitrageTradingRemainingQuantity.rest, 8) IN IF ~buySideArbitrageTradingRemainingQuantity.ok THEN Fail ELSE
+    LET sellSideNonArbitrageRemainingQuantity == ReadBytes(buySideArbitrageTradingRemainingQuantity.rest, 8) IN IF ~sellSideNonArbitrageRemainingQuantity.ok THEN Fail ELSE
+    LET buySideNonArbitrageRemainingQuantity == ReadBytes(sellSideNonArbitrageRemainingQuantity.rest, 8) IN IF ~buySideNonArbitrageRemainingQuantity.ok THEN Fail ELSE
+    LET sellSideArbitrageQuantity == ReadBytes(buySideNonArbitrageRemainingQuantity.rest, 8) IN IF ~sellSideArbitrageQuantity.ok THEN Fail ELSE
+    LET buySideArbitrageQuantity == ReadBytes(sellSideArbitrageQuantity.rest, 8) IN IF ~buySideArbitrageQuantity.ok THEN Fail ELSE
+    LET sellSideNonArbitrageQuantity == ReadBytes(buySideArbitrageQuantity.rest, 8) IN IF ~sellSideNonArbitrageQuantity.ok THEN Fail ELSE
+    LET buySideNonArbitrageQuantity == ReadBytes(sellSideNonArbitrageQuantity.rest, 8) IN IF ~buySideNonArbitrageQuantity.ok THEN Fail ELSE
+    LET arbitrageAskTrustTradingVolume == ReadBytes(buySideNonArbitrageQuantity.rest, 8) IN IF ~arbitrageAskTrustTradingVolume.ok THEN Fail ELSE
+    LET arbitrageAskPrincipalTradingVolume == ReadBytes(arbitrageAskTrustTradingVolume.rest, 8) IN IF ~arbitrageAskPrincipalTradingVolume.ok THEN Fail ELSE
+    LET arbitrageBidTrustTradingVolume == ReadBytes(arbitrageAskPrincipalTradingVolume.rest, 8) IN IF ~arbitrageBidTrustTradingVolume.ok THEN Fail ELSE
+    LET arbitrageBidPrincipalTradingVolume == ReadBytes(arbitrageBidTrustTradingVolume.rest, 8) IN IF ~arbitrageBidPrincipalTradingVolume.ok THEN Fail ELSE
+    LET nonArbitrageAskTrustTradingVolume == ReadBytes(arbitrageBidPrincipalTradingVolume.rest, 8) IN IF ~nonArbitrageAskTrustTradingVolume.ok THEN Fail ELSE
+    LET nonArbitrageAskPrincipalTradingVolume == ReadBytes(nonArbitrageAskTrustTradingVolume.rest, 8) IN IF ~nonArbitrageAskPrincipalTradingVolume.ok THEN Fail ELSE
+    LET nonArbitrageBidTrustTradingVolume == ReadBytes(nonArbitrageAskPrincipalTradingVolume.rest, 8) IN IF ~nonArbitrageBidTrustTradingVolume.ok THEN Fail ELSE
+    LET nonArbitrageBidPrincipalTradingVolume == ReadBytes(nonArbitrageBidTrustTradingVolume.rest, 8) IN IF ~nonArbitrageBidPrincipalTradingVolume.ok THEN Fail ELSE
+    LET arbitrageAskTrustTradingValue == ReadBytes(nonArbitrageBidPrincipalTradingVolume.rest, 16) IN IF ~arbitrageAskTrustTradingValue.ok THEN Fail ELSE
+    LET arbitrageAskPrincipalTradingValue == ReadBytes(arbitrageAskTrustTradingValue.rest, 16) IN IF ~arbitrageAskPrincipalTradingValue.ok THEN Fail ELSE
+    LET arbitrageBidTrustTradingValue == ReadBytes(arbitrageAskPrincipalTradingValue.rest, 16) IN IF ~arbitrageBidTrustTradingValue.ok THEN Fail ELSE
+    LET arbitrageBidPrincipalTradingValue == ReadBytes(arbitrageBidTrustTradingValue.rest, 16) IN IF ~arbitrageBidPrincipalTradingValue.ok THEN Fail ELSE
+    LET nonArbitrageAskTrustTradingValue == ReadBytes(arbitrageBidPrincipalTradingValue.rest, 16) IN IF ~nonArbitrageAskTrustTradingValue.ok THEN Fail ELSE
+    LET nonArbitrageAskPrincipalTradingValue == ReadBytes(nonArbitrageAskTrustTradingValue.rest, 16) IN IF ~nonArbitrageAskPrincipalTradingValue.ok THEN Fail ELSE
+    LET nonArbitrageBidTrustTradingValue == ReadBytes(nonArbitrageAskPrincipalTradingValue.rest, 16) IN IF ~nonArbitrageBidTrustTradingValue.ok THEN Fail ELSE
+    LET nonArbitrageBidPrincipalTradingValue == ReadBytes(nonArbitrageBidTrustTradingValue.rest, 16) IN IF ~nonArbitrageBidPrincipalTradingValue.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(nonArbitrageBidPrincipalTradingValue.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ isinCode                                  |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx        |-> aDesignatedNumberForAnIssueFromKrx.value,
+         sellSideArbitrageTradingRemainingQuantity |-> sellSideArbitrageTradingRemainingQuantity.value,
+         buySideArbitrageTradingRemainingQuantity  |-> buySideArbitrageTradingRemainingQuantity.value,
+         sellSideNonArbitrageRemainingQuantity     |-> sellSideNonArbitrageRemainingQuantity.value,
+         buySideNonArbitrageRemainingQuantity      |-> buySideNonArbitrageRemainingQuantity.value,
+         sellSideArbitrageQuantity                 |-> sellSideArbitrageQuantity.value,
+         buySideArbitrageQuantity                  |-> buySideArbitrageQuantity.value,
+         sellSideNonArbitrageQuantity              |-> sellSideNonArbitrageQuantity.value,
+         buySideNonArbitrageQuantity               |-> buySideNonArbitrageQuantity.value,
+         arbitrageAskTrustTradingVolume            |-> arbitrageAskTrustTradingVolume.value,
+         arbitrageAskPrincipalTradingVolume        |-> arbitrageAskPrincipalTradingVolume.value,
+         arbitrageBidTrustTradingVolume            |-> arbitrageBidTrustTradingVolume.value,
+         arbitrageBidPrincipalTradingVolume        |-> arbitrageBidPrincipalTradingVolume.value,
+         nonArbitrageAskTrustTradingVolume         |-> nonArbitrageAskTrustTradingVolume.value,
+         nonArbitrageAskPrincipalTradingVolume     |-> nonArbitrageAskPrincipalTradingVolume.value,
+         nonArbitrageBidTrustTradingVolume         |-> nonArbitrageBidTrustTradingVolume.value,
+         nonArbitrageBidPrincipalTradingVolume     |-> nonArbitrageBidPrincipalTradingVolume.value,
+         arbitrageAskTrustTradingValue             |-> arbitrageAskTrustTradingValue.value,
+         arbitrageAskPrincipalTradingValue         |-> arbitrageAskPrincipalTradingValue.value,
+         arbitrageBidTrustTradingValue             |-> arbitrageBidTrustTradingValue.value,
+         arbitrageBidPrincipalTradingValue         |-> arbitrageBidPrincipalTradingValue.value,
+         nonArbitrageAskTrustTradingValue          |-> nonArbitrageAskTrustTradingValue.value,
+         nonArbitrageAskPrincipalTradingValue      |-> nonArbitrageAskPrincipalTradingValue.value,
+         nonArbitrageBidTrustTradingValue          |-> nonArbitrageBidTrustTradingValue.value,
+         nonArbitrageBidPrincipalTradingValue      |-> nonArbitrageBidPrincipalTradingValue.value,
+         endKeyword                                |-> endKeyword.value ], endKeyword.rest)
+
+ZeroProgramTradingInformationPerIssueAggregatedInformationMessage ==
+    [ isinCode                                  |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx        |-> [i \in 1 .. 4 |-> 0],
+      sellSideArbitrageTradingRemainingQuantity |-> [i \in 1 .. 8 |-> 0],
+      buySideArbitrageTradingRemainingQuantity  |-> [i \in 1 .. 8 |-> 0],
+      sellSideNonArbitrageRemainingQuantity     |-> [i \in 1 .. 8 |-> 0],
+      buySideNonArbitrageRemainingQuantity      |-> [i \in 1 .. 8 |-> 0],
+      sellSideArbitrageQuantity                 |-> [i \in 1 .. 8 |-> 0],
+      buySideArbitrageQuantity                  |-> [i \in 1 .. 8 |-> 0],
+      sellSideNonArbitrageQuantity              |-> [i \in 1 .. 8 |-> 0],
+      buySideNonArbitrageQuantity               |-> [i \in 1 .. 8 |-> 0],
+      arbitrageAskTrustTradingVolume            |-> [i \in 1 .. 8 |-> 0],
+      arbitrageAskPrincipalTradingVolume        |-> [i \in 1 .. 8 |-> 0],
+      arbitrageBidTrustTradingVolume            |-> [i \in 1 .. 8 |-> 0],
+      arbitrageBidPrincipalTradingVolume        |-> [i \in 1 .. 8 |-> 0],
+      nonArbitrageAskTrustTradingVolume         |-> [i \in 1 .. 8 |-> 0],
+      nonArbitrageAskPrincipalTradingVolume     |-> [i \in 1 .. 8 |-> 0],
+      nonArbitrageBidTrustTradingVolume         |-> [i \in 1 .. 8 |-> 0],
+      nonArbitrageBidPrincipalTradingVolume     |-> [i \in 1 .. 8 |-> 0],
+      arbitrageAskTrustTradingValue             |-> [i \in 1 .. 16 |-> 0],
+      arbitrageAskPrincipalTradingValue         |-> [i \in 1 .. 16 |-> 0],
+      arbitrageBidTrustTradingValue             |-> [i \in 1 .. 16 |-> 0],
+      arbitrageBidPrincipalTradingValue         |-> [i \in 1 .. 16 |-> 0],
+      nonArbitrageAskTrustTradingValue          |-> [i \in 1 .. 16 |-> 0],
+      nonArbitrageAskPrincipalTradingValue      |-> [i \in 1 .. 16 |-> 0],
+      nonArbitrageBidTrustTradingValue          |-> [i \in 1 .. 16 |-> 0],
+      nonArbitrageBidPrincipalTradingValue      |-> [i \in 1 .. 16 |-> 0],
+      endKeyword                                |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Program Trading Information Per Issue Aggregated Information Message at zero, then each field in turn at the values it is checked at *)
+CheckedProgramTradingInformationPerIssueAggregatedInformationMessage ==
+    { ZeroProgramTradingInformationPerIssueAggregatedInformationMessage }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.sellSideArbitrageTradingRemainingQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.buySideArbitrageTradingRemainingQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.sellSideNonArbitrageRemainingQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.buySideNonArbitrageRemainingQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.sellSideArbitrageQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.buySideArbitrageQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.sellSideNonArbitrageQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.buySideNonArbitrageQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.arbitrageAskTrustTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.arbitrageAskPrincipalTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.arbitrageBidTrustTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.arbitrageBidPrincipalTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.nonArbitrageAskTrustTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.nonArbitrageAskPrincipalTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.nonArbitrageBidTrustTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.nonArbitrageBidPrincipalTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.arbitrageAskTrustTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.arbitrageAskPrincipalTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.arbitrageBidTrustTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.arbitrageBidPrincipalTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.nonArbitrageAskTrustTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.nonArbitrageAskPrincipalTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.nonArbitrageBidTrustTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.nonArbitrageBidPrincipalTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationPerIssueAggregatedInformationMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Program Trading Information Of Total Aggregated Information Message:    *)
+(* 260 bytes                                                               *)
+(***************************************************************************)
+
+ProgramTradingInformationOfTotalAggregatedInformationMessage ==
+    [ sellSideArbitrageTradingRemainingQuantity : Sample(8),
+      buySideArbitrageTradingRemainingQuantity  : Sample(8),
+      sellSideNonArbitrageRemainingQuantity     : Sample(8),
+      buySideNonArbitrageRemainingQuantity      : Sample(8),
+      sellSideArbitrageQuantity                 : Sample(8),
+      buySideArbitrageQuantity                  : Sample(8),
+      sellSideNonArbitrageQuantity              : Sample(8),
+      buySideNonArbitrageQuantity               : Sample(8),
+      arbitrageAskTrustTradingVolume            : Sample(8),
+      arbitrageAskPrincipalTradingVolume        : Sample(8),
+      arbitrageBidTrustTradingVolume            : Sample(8),
+      arbitrageBidPrincipalTradingVolume        : Sample(8),
+      nonArbitrageAskTrustTradingVolume         : Sample(8),
+      nonArbitrageAskPrincipalTradingVolume     : Sample(8),
+      nonArbitrageBidTrustTradingVolume         : Sample(8),
+      nonArbitrageBidPrincipalTradingVolume     : Sample(8),
+      arbitrageAskTrustTradingValue             : Sample(16),
+      arbitrageAskPrincipalTradingValue         : Sample(16),
+      arbitrageBidTrustTradingValue             : Sample(16),
+      arbitrageBidPrincipalTradingValue         : Sample(16),
+      nonArbitrageAskTrustTradingValue          : Sample(16),
+      nonArbitrageAskPrincipalTradingValue      : Sample(16),
+      nonArbitrageBidTrustTradingValue          : Sample(16),
+      nonArbitrageBidPrincipalTradingValue      : Sample(16),
+      endKeyword                                : Sample(4) ]
+
+EncodeProgramTradingInformationOfTotalAggregatedInformationMessage(message) ==
+    message.sellSideArbitrageTradingRemainingQuantity
+        \o message.buySideArbitrageTradingRemainingQuantity
+        \o message.sellSideNonArbitrageRemainingQuantity
+        \o message.buySideNonArbitrageRemainingQuantity
+        \o message.sellSideArbitrageQuantity
+        \o message.buySideArbitrageQuantity
+        \o message.sellSideNonArbitrageQuantity
+        \o message.buySideNonArbitrageQuantity
+        \o message.arbitrageAskTrustTradingVolume
+        \o message.arbitrageAskPrincipalTradingVolume
+        \o message.arbitrageBidTrustTradingVolume
+        \o message.arbitrageBidPrincipalTradingVolume
+        \o message.nonArbitrageAskTrustTradingVolume
+        \o message.nonArbitrageAskPrincipalTradingVolume
+        \o message.nonArbitrageBidTrustTradingVolume
+        \o message.nonArbitrageBidPrincipalTradingVolume
+        \o message.arbitrageAskTrustTradingValue
+        \o message.arbitrageAskPrincipalTradingValue
+        \o message.arbitrageBidTrustTradingValue
+        \o message.arbitrageBidPrincipalTradingValue
+        \o message.nonArbitrageAskTrustTradingValue
+        \o message.nonArbitrageAskPrincipalTradingValue
+        \o message.nonArbitrageBidTrustTradingValue
+        \o message.nonArbitrageBidPrincipalTradingValue
+        \o message.endKeyword
+
+DecodeProgramTradingInformationOfTotalAggregatedInformationMessage(bytes) ==
+    LET sellSideArbitrageTradingRemainingQuantity == ReadBytes(bytes, 8) IN IF ~sellSideArbitrageTradingRemainingQuantity.ok THEN Fail ELSE
+    LET buySideArbitrageTradingRemainingQuantity == ReadBytes(sellSideArbitrageTradingRemainingQuantity.rest, 8) IN IF ~buySideArbitrageTradingRemainingQuantity.ok THEN Fail ELSE
+    LET sellSideNonArbitrageRemainingQuantity == ReadBytes(buySideArbitrageTradingRemainingQuantity.rest, 8) IN IF ~sellSideNonArbitrageRemainingQuantity.ok THEN Fail ELSE
+    LET buySideNonArbitrageRemainingQuantity == ReadBytes(sellSideNonArbitrageRemainingQuantity.rest, 8) IN IF ~buySideNonArbitrageRemainingQuantity.ok THEN Fail ELSE
+    LET sellSideArbitrageQuantity == ReadBytes(buySideNonArbitrageRemainingQuantity.rest, 8) IN IF ~sellSideArbitrageQuantity.ok THEN Fail ELSE
+    LET buySideArbitrageQuantity == ReadBytes(sellSideArbitrageQuantity.rest, 8) IN IF ~buySideArbitrageQuantity.ok THEN Fail ELSE
+    LET sellSideNonArbitrageQuantity == ReadBytes(buySideArbitrageQuantity.rest, 8) IN IF ~sellSideNonArbitrageQuantity.ok THEN Fail ELSE
+    LET buySideNonArbitrageQuantity == ReadBytes(sellSideNonArbitrageQuantity.rest, 8) IN IF ~buySideNonArbitrageQuantity.ok THEN Fail ELSE
+    LET arbitrageAskTrustTradingVolume == ReadBytes(buySideNonArbitrageQuantity.rest, 8) IN IF ~arbitrageAskTrustTradingVolume.ok THEN Fail ELSE
+    LET arbitrageAskPrincipalTradingVolume == ReadBytes(arbitrageAskTrustTradingVolume.rest, 8) IN IF ~arbitrageAskPrincipalTradingVolume.ok THEN Fail ELSE
+    LET arbitrageBidTrustTradingVolume == ReadBytes(arbitrageAskPrincipalTradingVolume.rest, 8) IN IF ~arbitrageBidTrustTradingVolume.ok THEN Fail ELSE
+    LET arbitrageBidPrincipalTradingVolume == ReadBytes(arbitrageBidTrustTradingVolume.rest, 8) IN IF ~arbitrageBidPrincipalTradingVolume.ok THEN Fail ELSE
+    LET nonArbitrageAskTrustTradingVolume == ReadBytes(arbitrageBidPrincipalTradingVolume.rest, 8) IN IF ~nonArbitrageAskTrustTradingVolume.ok THEN Fail ELSE
+    LET nonArbitrageAskPrincipalTradingVolume == ReadBytes(nonArbitrageAskTrustTradingVolume.rest, 8) IN IF ~nonArbitrageAskPrincipalTradingVolume.ok THEN Fail ELSE
+    LET nonArbitrageBidTrustTradingVolume == ReadBytes(nonArbitrageAskPrincipalTradingVolume.rest, 8) IN IF ~nonArbitrageBidTrustTradingVolume.ok THEN Fail ELSE
+    LET nonArbitrageBidPrincipalTradingVolume == ReadBytes(nonArbitrageBidTrustTradingVolume.rest, 8) IN IF ~nonArbitrageBidPrincipalTradingVolume.ok THEN Fail ELSE
+    LET arbitrageAskTrustTradingValue == ReadBytes(nonArbitrageBidPrincipalTradingVolume.rest, 16) IN IF ~arbitrageAskTrustTradingValue.ok THEN Fail ELSE
+    LET arbitrageAskPrincipalTradingValue == ReadBytes(arbitrageAskTrustTradingValue.rest, 16) IN IF ~arbitrageAskPrincipalTradingValue.ok THEN Fail ELSE
+    LET arbitrageBidTrustTradingValue == ReadBytes(arbitrageAskPrincipalTradingValue.rest, 16) IN IF ~arbitrageBidTrustTradingValue.ok THEN Fail ELSE
+    LET arbitrageBidPrincipalTradingValue == ReadBytes(arbitrageBidTrustTradingValue.rest, 16) IN IF ~arbitrageBidPrincipalTradingValue.ok THEN Fail ELSE
+    LET nonArbitrageAskTrustTradingValue == ReadBytes(arbitrageBidPrincipalTradingValue.rest, 16) IN IF ~nonArbitrageAskTrustTradingValue.ok THEN Fail ELSE
+    LET nonArbitrageAskPrincipalTradingValue == ReadBytes(nonArbitrageAskTrustTradingValue.rest, 16) IN IF ~nonArbitrageAskPrincipalTradingValue.ok THEN Fail ELSE
+    LET nonArbitrageBidTrustTradingValue == ReadBytes(nonArbitrageAskPrincipalTradingValue.rest, 16) IN IF ~nonArbitrageBidTrustTradingValue.ok THEN Fail ELSE
+    LET nonArbitrageBidPrincipalTradingValue == ReadBytes(nonArbitrageBidTrustTradingValue.rest, 16) IN IF ~nonArbitrageBidPrincipalTradingValue.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(nonArbitrageBidPrincipalTradingValue.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ sellSideArbitrageTradingRemainingQuantity |-> sellSideArbitrageTradingRemainingQuantity.value,
+         buySideArbitrageTradingRemainingQuantity  |-> buySideArbitrageTradingRemainingQuantity.value,
+         sellSideNonArbitrageRemainingQuantity     |-> sellSideNonArbitrageRemainingQuantity.value,
+         buySideNonArbitrageRemainingQuantity      |-> buySideNonArbitrageRemainingQuantity.value,
+         sellSideArbitrageQuantity                 |-> sellSideArbitrageQuantity.value,
+         buySideArbitrageQuantity                  |-> buySideArbitrageQuantity.value,
+         sellSideNonArbitrageQuantity              |-> sellSideNonArbitrageQuantity.value,
+         buySideNonArbitrageQuantity               |-> buySideNonArbitrageQuantity.value,
+         arbitrageAskTrustTradingVolume            |-> arbitrageAskTrustTradingVolume.value,
+         arbitrageAskPrincipalTradingVolume        |-> arbitrageAskPrincipalTradingVolume.value,
+         arbitrageBidTrustTradingVolume            |-> arbitrageBidTrustTradingVolume.value,
+         arbitrageBidPrincipalTradingVolume        |-> arbitrageBidPrincipalTradingVolume.value,
+         nonArbitrageAskTrustTradingVolume         |-> nonArbitrageAskTrustTradingVolume.value,
+         nonArbitrageAskPrincipalTradingVolume     |-> nonArbitrageAskPrincipalTradingVolume.value,
+         nonArbitrageBidTrustTradingVolume         |-> nonArbitrageBidTrustTradingVolume.value,
+         nonArbitrageBidPrincipalTradingVolume     |-> nonArbitrageBidPrincipalTradingVolume.value,
+         arbitrageAskTrustTradingValue             |-> arbitrageAskTrustTradingValue.value,
+         arbitrageAskPrincipalTradingValue         |-> arbitrageAskPrincipalTradingValue.value,
+         arbitrageBidTrustTradingValue             |-> arbitrageBidTrustTradingValue.value,
+         arbitrageBidPrincipalTradingValue         |-> arbitrageBidPrincipalTradingValue.value,
+         nonArbitrageAskTrustTradingValue          |-> nonArbitrageAskTrustTradingValue.value,
+         nonArbitrageAskPrincipalTradingValue      |-> nonArbitrageAskPrincipalTradingValue.value,
+         nonArbitrageBidTrustTradingValue          |-> nonArbitrageBidTrustTradingValue.value,
+         nonArbitrageBidPrincipalTradingValue      |-> nonArbitrageBidPrincipalTradingValue.value,
+         endKeyword                                |-> endKeyword.value ], endKeyword.rest)
+
+ZeroProgramTradingInformationOfTotalAggregatedInformationMessage ==
+    [ sellSideArbitrageTradingRemainingQuantity |-> [i \in 1 .. 8 |-> 0],
+      buySideArbitrageTradingRemainingQuantity  |-> [i \in 1 .. 8 |-> 0],
+      sellSideNonArbitrageRemainingQuantity     |-> [i \in 1 .. 8 |-> 0],
+      buySideNonArbitrageRemainingQuantity      |-> [i \in 1 .. 8 |-> 0],
+      sellSideArbitrageQuantity                 |-> [i \in 1 .. 8 |-> 0],
+      buySideArbitrageQuantity                  |-> [i \in 1 .. 8 |-> 0],
+      sellSideNonArbitrageQuantity              |-> [i \in 1 .. 8 |-> 0],
+      buySideNonArbitrageQuantity               |-> [i \in 1 .. 8 |-> 0],
+      arbitrageAskTrustTradingVolume            |-> [i \in 1 .. 8 |-> 0],
+      arbitrageAskPrincipalTradingVolume        |-> [i \in 1 .. 8 |-> 0],
+      arbitrageBidTrustTradingVolume            |-> [i \in 1 .. 8 |-> 0],
+      arbitrageBidPrincipalTradingVolume        |-> [i \in 1 .. 8 |-> 0],
+      nonArbitrageAskTrustTradingVolume         |-> [i \in 1 .. 8 |-> 0],
+      nonArbitrageAskPrincipalTradingVolume     |-> [i \in 1 .. 8 |-> 0],
+      nonArbitrageBidTrustTradingVolume         |-> [i \in 1 .. 8 |-> 0],
+      nonArbitrageBidPrincipalTradingVolume     |-> [i \in 1 .. 8 |-> 0],
+      arbitrageAskTrustTradingValue             |-> [i \in 1 .. 16 |-> 0],
+      arbitrageAskPrincipalTradingValue         |-> [i \in 1 .. 16 |-> 0],
+      arbitrageBidTrustTradingValue             |-> [i \in 1 .. 16 |-> 0],
+      arbitrageBidPrincipalTradingValue         |-> [i \in 1 .. 16 |-> 0],
+      nonArbitrageAskTrustTradingValue          |-> [i \in 1 .. 16 |-> 0],
+      nonArbitrageAskPrincipalTradingValue      |-> [i \in 1 .. 16 |-> 0],
+      nonArbitrageBidTrustTradingValue          |-> [i \in 1 .. 16 |-> 0],
+      nonArbitrageBidPrincipalTradingValue      |-> [i \in 1 .. 16 |-> 0],
+      endKeyword                                |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Program Trading Information Of Total Aggregated Information Message at zero, then each field in turn at the values it is checked at *)
+CheckedProgramTradingInformationOfTotalAggregatedInformationMessage ==
+    { ZeroProgramTradingInformationOfTotalAggregatedInformationMessage }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.sellSideArbitrageTradingRemainingQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.buySideArbitrageTradingRemainingQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.sellSideNonArbitrageRemainingQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.buySideNonArbitrageRemainingQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.sellSideArbitrageQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.buySideArbitrageQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.sellSideNonArbitrageQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.buySideNonArbitrageQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.arbitrageAskTrustTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.arbitrageAskPrincipalTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.arbitrageBidTrustTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.arbitrageBidPrincipalTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.nonArbitrageAskTrustTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.nonArbitrageAskPrincipalTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.nonArbitrageBidTrustTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.nonArbitrageBidPrincipalTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.arbitrageAskTrustTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.arbitrageAskPrincipalTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.arbitrageBidTrustTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.arbitrageBidPrincipalTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.nonArbitrageAskTrustTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.nonArbitrageAskPrincipalTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.nonArbitrageBidTrustTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.nonArbitrageBidPrincipalTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroProgramTradingInformationOfTotalAggregatedInformationMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Market Operation Schedule Message: 82 bytes                             *)
+(***************************************************************************)
+
+MarketOperationScheduleMessage ==
+    [ marketOperationProductId                     : Sample(3),
+      boardId                                      : Sample(2),
+      boardEventId                                 : Sample(3),
+      startTimeOfABoardEvent                       : Sample(9),
+      boardEventGroupCode                          : Sample(4),
+      sessionStartEndCode                          : Sample(2),
+      sessionId                                    : Sample(2),
+      isinCode                                     : Sample(12),
+      isinCodeOfACommonStock                       : Sample(12),
+      productId                                    : Sample(11),
+      tradingHaltReasonCode                        : Sample(3),
+      tradingHaltTypeCode                          : Sample(1),
+      stepApplied                                  : Sample(4),
+      priceLimitRangeExpansionForBaseIssueTypeCode : Sample(1),
+      expectedTimeOfExpandingPriceLimitRange       : Sample(9),
+      endKeyword                                   : Sample(4) ]
+
+EncodeMarketOperationScheduleMessage(message) ==
+    message.marketOperationProductId
+        \o message.boardId
+        \o message.boardEventId
+        \o message.startTimeOfABoardEvent
+        \o message.boardEventGroupCode
+        \o message.sessionStartEndCode
+        \o message.sessionId
+        \o message.isinCode
+        \o message.isinCodeOfACommonStock
+        \o message.productId
+        \o message.tradingHaltReasonCode
+        \o message.tradingHaltTypeCode
+        \o message.stepApplied
+        \o message.priceLimitRangeExpansionForBaseIssueTypeCode
+        \o message.expectedTimeOfExpandingPriceLimitRange
+        \o message.endKeyword
+
+DecodeMarketOperationScheduleMessage(bytes) ==
+    LET marketOperationProductId == ReadBytes(bytes, 3) IN IF ~marketOperationProductId.ok THEN Fail ELSE
+    LET boardId == ReadBytes(marketOperationProductId.rest, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET boardEventId == ReadBytes(boardId.rest, 3) IN IF ~boardEventId.ok THEN Fail ELSE
+    LET startTimeOfABoardEvent == ReadBytes(boardEventId.rest, 9) IN IF ~startTimeOfABoardEvent.ok THEN Fail ELSE
+    LET boardEventGroupCode == ReadBytes(startTimeOfABoardEvent.rest, 4) IN IF ~boardEventGroupCode.ok THEN Fail ELSE
+    LET sessionStartEndCode == ReadBytes(boardEventGroupCode.rest, 2) IN IF ~sessionStartEndCode.ok THEN Fail ELSE
+    LET sessionId == ReadBytes(sessionStartEndCode.rest, 2) IN IF ~sessionId.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET isinCodeOfACommonStock == ReadBytes(isinCode.rest, 12) IN IF ~isinCodeOfACommonStock.ok THEN Fail ELSE
+    LET productId == ReadBytes(isinCodeOfACommonStock.rest, 11) IN IF ~productId.ok THEN Fail ELSE
+    LET tradingHaltReasonCode == ReadBytes(productId.rest, 3) IN IF ~tradingHaltReasonCode.ok THEN Fail ELSE
+    LET tradingHaltTypeCode == ReadBytes(tradingHaltReasonCode.rest, 1) IN IF ~tradingHaltTypeCode.ok THEN Fail ELSE
+    LET stepApplied == ReadBytes(tradingHaltTypeCode.rest, 4) IN IF ~stepApplied.ok THEN Fail ELSE
+    LET priceLimitRangeExpansionForBaseIssueTypeCode == ReadBytes(stepApplied.rest, 1) IN IF ~priceLimitRangeExpansionForBaseIssueTypeCode.ok THEN Fail ELSE
+    LET expectedTimeOfExpandingPriceLimitRange == ReadBytes(priceLimitRangeExpansionForBaseIssueTypeCode.rest, 9) IN IF ~expectedTimeOfExpandingPriceLimitRange.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(expectedTimeOfExpandingPriceLimitRange.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ marketOperationProductId                     |-> marketOperationProductId.value,
+         boardId                                      |-> boardId.value,
+         boardEventId                                 |-> boardEventId.value,
+         startTimeOfABoardEvent                       |-> startTimeOfABoardEvent.value,
+         boardEventGroupCode                          |-> boardEventGroupCode.value,
+         sessionStartEndCode                          |-> sessionStartEndCode.value,
+         sessionId                                    |-> sessionId.value,
+         isinCode                                     |-> isinCode.value,
+         isinCodeOfACommonStock                       |-> isinCodeOfACommonStock.value,
+         productId                                    |-> productId.value,
+         tradingHaltReasonCode                        |-> tradingHaltReasonCode.value,
+         tradingHaltTypeCode                          |-> tradingHaltTypeCode.value,
+         stepApplied                                  |-> stepApplied.value,
+         priceLimitRangeExpansionForBaseIssueTypeCode |-> priceLimitRangeExpansionForBaseIssueTypeCode.value,
+         expectedTimeOfExpandingPriceLimitRange       |-> expectedTimeOfExpandingPriceLimitRange.value,
+         endKeyword                                   |-> endKeyword.value ], endKeyword.rest)
+
+ZeroMarketOperationScheduleMessage ==
+    [ marketOperationProductId                     |-> [i \in 1 .. 3 |-> 0],
+      boardId                                      |-> [i \in 1 .. 2 |-> 0],
+      boardEventId                                 |-> [i \in 1 .. 3 |-> 0],
+      startTimeOfABoardEvent                       |-> [i \in 1 .. 9 |-> 0],
+      boardEventGroupCode                          |-> [i \in 1 .. 4 |-> 0],
+      sessionStartEndCode                          |-> [i \in 1 .. 2 |-> 0],
+      sessionId                                    |-> [i \in 1 .. 2 |-> 0],
+      isinCode                                     |-> [i \in 1 .. 12 |-> 0],
+      isinCodeOfACommonStock                       |-> [i \in 1 .. 12 |-> 0],
+      productId                                    |-> [i \in 1 .. 11 |-> 0],
+      tradingHaltReasonCode                        |-> [i \in 1 .. 3 |-> 0],
+      tradingHaltTypeCode                          |-> [i \in 1 .. 1 |-> 0],
+      stepApplied                                  |-> [i \in 1 .. 4 |-> 0],
+      priceLimitRangeExpansionForBaseIssueTypeCode |-> [i \in 1 .. 1 |-> 0],
+      expectedTimeOfExpandingPriceLimitRange       |-> [i \in 1 .. 9 |-> 0],
+      endKeyword                                   |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Market Operation Schedule Message at zero, then each field in turn at the values it is checked at *)
+CheckedMarketOperationScheduleMessage ==
+    { ZeroMarketOperationScheduleMessage }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.marketOperationProductId = one] : one \in Sample(3) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.boardId = one] : one \in Sample(2) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.boardEventId = one] : one \in Sample(3) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.startTimeOfABoardEvent = one] : one \in Sample(9) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.boardEventGroupCode = one] : one \in Sample(4) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.sessionStartEndCode = one] : one \in Sample(2) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.sessionId = one] : one \in Sample(2) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.isinCodeOfACommonStock = one] : one \in Sample(12) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.productId = one] : one \in Sample(11) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.tradingHaltReasonCode = one] : one \in Sample(3) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.tradingHaltTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.stepApplied = one] : one \in Sample(4) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.priceLimitRangeExpansionForBaseIssueTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.expectedTimeOfExpandingPriceLimitRange = one] : one \in Sample(9) }
+        \cup { [ZeroMarketOperationScheduleMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Member Firm Imposing Lifting Sanctions Message: 41 bytes                *)
+(***************************************************************************)
+
+MemberFirmImposingLiftingSanctionsMessage ==
+    [ isinCode                           : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx : Sample(4),
+      disclosingDataTypeCode             : Sample(3),
+      disclosureTime                     : Sample(9),
+      memberNumber                       : Sample(5),
+      memberFirmTrustPrincipalTypeCode   : Sample(4),
+      endKeyword                         : Sample(4) ]
+
+EncodeMemberFirmImposingLiftingSanctionsMessage(message) ==
+    message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.disclosingDataTypeCode
+        \o message.disclosureTime
+        \o message.memberNumber
+        \o message.memberFirmTrustPrincipalTypeCode
+        \o message.endKeyword
+
+DecodeMemberFirmImposingLiftingSanctionsMessage(bytes) ==
+    LET isinCode == ReadBytes(bytes, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET disclosingDataTypeCode == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 3) IN IF ~disclosingDataTypeCode.ok THEN Fail ELSE
+    LET disclosureTime == ReadBytes(disclosingDataTypeCode.rest, 9) IN IF ~disclosureTime.ok THEN Fail ELSE
+    LET memberNumber == ReadBytes(disclosureTime.rest, 5) IN IF ~memberNumber.ok THEN Fail ELSE
+    LET memberFirmTrustPrincipalTypeCode == ReadBytes(memberNumber.rest, 4) IN IF ~memberFirmTrustPrincipalTypeCode.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(memberFirmTrustPrincipalTypeCode.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ isinCode                           |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx |-> aDesignatedNumberForAnIssueFromKrx.value,
+         disclosingDataTypeCode             |-> disclosingDataTypeCode.value,
+         disclosureTime                     |-> disclosureTime.value,
+         memberNumber                       |-> memberNumber.value,
+         memberFirmTrustPrincipalTypeCode   |-> memberFirmTrustPrincipalTypeCode.value,
+         endKeyword                         |-> endKeyword.value ], endKeyword.rest)
+
+ZeroMemberFirmImposingLiftingSanctionsMessage ==
+    [ isinCode                           |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx |-> [i \in 1 .. 4 |-> 0],
+      disclosingDataTypeCode             |-> [i \in 1 .. 3 |-> 0],
+      disclosureTime                     |-> [i \in 1 .. 9 |-> 0],
+      memberNumber                       |-> [i \in 1 .. 5 |-> 0],
+      memberFirmTrustPrincipalTypeCode   |-> [i \in 1 .. 4 |-> 0],
+      endKeyword                         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Member Firm Imposing Lifting Sanctions Message at zero, then each field in turn at the values it is checked at *)
+CheckedMemberFirmImposingLiftingSanctionsMessage ==
+    { ZeroMemberFirmImposingLiftingSanctionsMessage }
+        \cup { [ZeroMemberFirmImposingLiftingSanctionsMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroMemberFirmImposingLiftingSanctionsMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroMemberFirmImposingLiftingSanctionsMessage EXCEPT !.disclosingDataTypeCode = one] : one \in Sample(3) }
+        \cup { [ZeroMemberFirmImposingLiftingSanctionsMessage EXCEPT !.disclosureTime = one] : one \in Sample(9) }
+        \cup { [ZeroMemberFirmImposingLiftingSanctionsMessage EXCEPT !.memberNumber = one] : one \in Sample(5) }
+        \cup { [ZeroMemberFirmImposingLiftingSanctionsMessage EXCEPT !.memberFirmTrustPrincipalTypeCode = one] : one \in Sample(4) }
+        \cup { [ZeroMemberFirmImposingLiftingSanctionsMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Top Five Traders Activities Message: 310 bytes                          *)
+(***************************************************************************)
+
+TopFiveTradersActivitiesMessage ==
+    [ isinCode                           : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx : Sample(4),
+      memberNumber1ForAsk                : Sample(5),
+      askTradingVolume1                  : Sample(8),
+      askTradingValue1                   : Sample(16),
+      memberNumber1ForBid                : Sample(5),
+      bidTradingVolume1                  : Sample(8),
+      bidTradingValue1                   : Sample(16),
+      memberNumber2ForAsk                : Sample(5),
+      askTradingVolume2                  : Sample(8),
+      askTradingValue2                   : Sample(16),
+      memberNumber2ForBid                : Sample(5),
+      bidTradingVolume2                  : Sample(8),
+      bidTradingValue2                   : Sample(16),
+      memberNumber3ForAsk                : Sample(5),
+      askTradingVolume3                  : Sample(8),
+      askTradingValue3                   : Sample(16),
+      memberNumber3ForBid                : Sample(5),
+      bidTradingVolume3                  : Sample(8),
+      bidTradingValue3                   : Sample(16),
+      memberNumber4ForAsk                : Sample(5),
+      askTradingVolume4                  : Sample(8),
+      askTradingValue4                   : Sample(16),
+      memberNumber4ForBid                : Sample(5),
+      bidTradingVolume4                  : Sample(8),
+      bidTradingValue4                   : Sample(16),
+      memberNumber5ForAsk                : Sample(5),
+      askTradingVolume5                  : Sample(8),
+      askTradingValue5                   : Sample(16),
+      memberNumber5ForBid                : Sample(5),
+      bidTradingVolume5                  : Sample(8),
+      bidTradingValue5                   : Sample(16),
+      endKeyword                         : Sample(4) ]
+
+EncodeTopFiveTradersActivitiesMessage(message) ==
+    message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.memberNumber1ForAsk
+        \o message.askTradingVolume1
+        \o message.askTradingValue1
+        \o message.memberNumber1ForBid
+        \o message.bidTradingVolume1
+        \o message.bidTradingValue1
+        \o message.memberNumber2ForAsk
+        \o message.askTradingVolume2
+        \o message.askTradingValue2
+        \o message.memberNumber2ForBid
+        \o message.bidTradingVolume2
+        \o message.bidTradingValue2
+        \o message.memberNumber3ForAsk
+        \o message.askTradingVolume3
+        \o message.askTradingValue3
+        \o message.memberNumber3ForBid
+        \o message.bidTradingVolume3
+        \o message.bidTradingValue3
+        \o message.memberNumber4ForAsk
+        \o message.askTradingVolume4
+        \o message.askTradingValue4
+        \o message.memberNumber4ForBid
+        \o message.bidTradingVolume4
+        \o message.bidTradingValue4
+        \o message.memberNumber5ForAsk
+        \o message.askTradingVolume5
+        \o message.askTradingValue5
+        \o message.memberNumber5ForBid
+        \o message.bidTradingVolume5
+        \o message.bidTradingValue5
+        \o message.endKeyword
+
+DecodeTopFiveTradersActivitiesMessage(bytes) ==
+    LET isinCode == ReadBytes(bytes, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET memberNumber1ForAsk == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 5) IN IF ~memberNumber1ForAsk.ok THEN Fail ELSE
+    LET askTradingVolume1 == ReadBytes(memberNumber1ForAsk.rest, 8) IN IF ~askTradingVolume1.ok THEN Fail ELSE
+    LET askTradingValue1 == ReadBytes(askTradingVolume1.rest, 16) IN IF ~askTradingValue1.ok THEN Fail ELSE
+    LET memberNumber1ForBid == ReadBytes(askTradingValue1.rest, 5) IN IF ~memberNumber1ForBid.ok THEN Fail ELSE
+    LET bidTradingVolume1 == ReadBytes(memberNumber1ForBid.rest, 8) IN IF ~bidTradingVolume1.ok THEN Fail ELSE
+    LET bidTradingValue1 == ReadBytes(bidTradingVolume1.rest, 16) IN IF ~bidTradingValue1.ok THEN Fail ELSE
+    LET memberNumber2ForAsk == ReadBytes(bidTradingValue1.rest, 5) IN IF ~memberNumber2ForAsk.ok THEN Fail ELSE
+    LET askTradingVolume2 == ReadBytes(memberNumber2ForAsk.rest, 8) IN IF ~askTradingVolume2.ok THEN Fail ELSE
+    LET askTradingValue2 == ReadBytes(askTradingVolume2.rest, 16) IN IF ~askTradingValue2.ok THEN Fail ELSE
+    LET memberNumber2ForBid == ReadBytes(askTradingValue2.rest, 5) IN IF ~memberNumber2ForBid.ok THEN Fail ELSE
+    LET bidTradingVolume2 == ReadBytes(memberNumber2ForBid.rest, 8) IN IF ~bidTradingVolume2.ok THEN Fail ELSE
+    LET bidTradingValue2 == ReadBytes(bidTradingVolume2.rest, 16) IN IF ~bidTradingValue2.ok THEN Fail ELSE
+    LET memberNumber3ForAsk == ReadBytes(bidTradingValue2.rest, 5) IN IF ~memberNumber3ForAsk.ok THEN Fail ELSE
+    LET askTradingVolume3 == ReadBytes(memberNumber3ForAsk.rest, 8) IN IF ~askTradingVolume3.ok THEN Fail ELSE
+    LET askTradingValue3 == ReadBytes(askTradingVolume3.rest, 16) IN IF ~askTradingValue3.ok THEN Fail ELSE
+    LET memberNumber3ForBid == ReadBytes(askTradingValue3.rest, 5) IN IF ~memberNumber3ForBid.ok THEN Fail ELSE
+    LET bidTradingVolume3 == ReadBytes(memberNumber3ForBid.rest, 8) IN IF ~bidTradingVolume3.ok THEN Fail ELSE
+    LET bidTradingValue3 == ReadBytes(bidTradingVolume3.rest, 16) IN IF ~bidTradingValue3.ok THEN Fail ELSE
+    LET memberNumber4ForAsk == ReadBytes(bidTradingValue3.rest, 5) IN IF ~memberNumber4ForAsk.ok THEN Fail ELSE
+    LET askTradingVolume4 == ReadBytes(memberNumber4ForAsk.rest, 8) IN IF ~askTradingVolume4.ok THEN Fail ELSE
+    LET askTradingValue4 == ReadBytes(askTradingVolume4.rest, 16) IN IF ~askTradingValue4.ok THEN Fail ELSE
+    LET memberNumber4ForBid == ReadBytes(askTradingValue4.rest, 5) IN IF ~memberNumber4ForBid.ok THEN Fail ELSE
+    LET bidTradingVolume4 == ReadBytes(memberNumber4ForBid.rest, 8) IN IF ~bidTradingVolume4.ok THEN Fail ELSE
+    LET bidTradingValue4 == ReadBytes(bidTradingVolume4.rest, 16) IN IF ~bidTradingValue4.ok THEN Fail ELSE
+    LET memberNumber5ForAsk == ReadBytes(bidTradingValue4.rest, 5) IN IF ~memberNumber5ForAsk.ok THEN Fail ELSE
+    LET askTradingVolume5 == ReadBytes(memberNumber5ForAsk.rest, 8) IN IF ~askTradingVolume5.ok THEN Fail ELSE
+    LET askTradingValue5 == ReadBytes(askTradingVolume5.rest, 16) IN IF ~askTradingValue5.ok THEN Fail ELSE
+    LET memberNumber5ForBid == ReadBytes(askTradingValue5.rest, 5) IN IF ~memberNumber5ForBid.ok THEN Fail ELSE
+    LET bidTradingVolume5 == ReadBytes(memberNumber5ForBid.rest, 8) IN IF ~bidTradingVolume5.ok THEN Fail ELSE
+    LET bidTradingValue5 == ReadBytes(bidTradingVolume5.rest, 16) IN IF ~bidTradingValue5.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(bidTradingValue5.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ isinCode                           |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx |-> aDesignatedNumberForAnIssueFromKrx.value,
+         memberNumber1ForAsk                |-> memberNumber1ForAsk.value,
+         askTradingVolume1                  |-> askTradingVolume1.value,
+         askTradingValue1                   |-> askTradingValue1.value,
+         memberNumber1ForBid                |-> memberNumber1ForBid.value,
+         bidTradingVolume1                  |-> bidTradingVolume1.value,
+         bidTradingValue1                   |-> bidTradingValue1.value,
+         memberNumber2ForAsk                |-> memberNumber2ForAsk.value,
+         askTradingVolume2                  |-> askTradingVolume2.value,
+         askTradingValue2                   |-> askTradingValue2.value,
+         memberNumber2ForBid                |-> memberNumber2ForBid.value,
+         bidTradingVolume2                  |-> bidTradingVolume2.value,
+         bidTradingValue2                   |-> bidTradingValue2.value,
+         memberNumber3ForAsk                |-> memberNumber3ForAsk.value,
+         askTradingVolume3                  |-> askTradingVolume3.value,
+         askTradingValue3                   |-> askTradingValue3.value,
+         memberNumber3ForBid                |-> memberNumber3ForBid.value,
+         bidTradingVolume3                  |-> bidTradingVolume3.value,
+         bidTradingValue3                   |-> bidTradingValue3.value,
+         memberNumber4ForAsk                |-> memberNumber4ForAsk.value,
+         askTradingVolume4                  |-> askTradingVolume4.value,
+         askTradingValue4                   |-> askTradingValue4.value,
+         memberNumber4ForBid                |-> memberNumber4ForBid.value,
+         bidTradingVolume4                  |-> bidTradingVolume4.value,
+         bidTradingValue4                   |-> bidTradingValue4.value,
+         memberNumber5ForAsk                |-> memberNumber5ForAsk.value,
+         askTradingVolume5                  |-> askTradingVolume5.value,
+         askTradingValue5                   |-> askTradingValue5.value,
+         memberNumber5ForBid                |-> memberNumber5ForBid.value,
+         bidTradingVolume5                  |-> bidTradingVolume5.value,
+         bidTradingValue5                   |-> bidTradingValue5.value,
+         endKeyword                         |-> endKeyword.value ], endKeyword.rest)
+
+ZeroTopFiveTradersActivitiesMessage ==
+    [ isinCode                           |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx |-> [i \in 1 .. 4 |-> 0],
+      memberNumber1ForAsk                |-> [i \in 1 .. 5 |-> 0],
+      askTradingVolume1                  |-> [i \in 1 .. 8 |-> 0],
+      askTradingValue1                   |-> [i \in 1 .. 16 |-> 0],
+      memberNumber1ForBid                |-> [i \in 1 .. 5 |-> 0],
+      bidTradingVolume1                  |-> [i \in 1 .. 8 |-> 0],
+      bidTradingValue1                   |-> [i \in 1 .. 16 |-> 0],
+      memberNumber2ForAsk                |-> [i \in 1 .. 5 |-> 0],
+      askTradingVolume2                  |-> [i \in 1 .. 8 |-> 0],
+      askTradingValue2                   |-> [i \in 1 .. 16 |-> 0],
+      memberNumber2ForBid                |-> [i \in 1 .. 5 |-> 0],
+      bidTradingVolume2                  |-> [i \in 1 .. 8 |-> 0],
+      bidTradingValue2                   |-> [i \in 1 .. 16 |-> 0],
+      memberNumber3ForAsk                |-> [i \in 1 .. 5 |-> 0],
+      askTradingVolume3                  |-> [i \in 1 .. 8 |-> 0],
+      askTradingValue3                   |-> [i \in 1 .. 16 |-> 0],
+      memberNumber3ForBid                |-> [i \in 1 .. 5 |-> 0],
+      bidTradingVolume3                  |-> [i \in 1 .. 8 |-> 0],
+      bidTradingValue3                   |-> [i \in 1 .. 16 |-> 0],
+      memberNumber4ForAsk                |-> [i \in 1 .. 5 |-> 0],
+      askTradingVolume4                  |-> [i \in 1 .. 8 |-> 0],
+      askTradingValue4                   |-> [i \in 1 .. 16 |-> 0],
+      memberNumber4ForBid                |-> [i \in 1 .. 5 |-> 0],
+      bidTradingVolume4                  |-> [i \in 1 .. 8 |-> 0],
+      bidTradingValue4                   |-> [i \in 1 .. 16 |-> 0],
+      memberNumber5ForAsk                |-> [i \in 1 .. 5 |-> 0],
+      askTradingVolume5                  |-> [i \in 1 .. 8 |-> 0],
+      askTradingValue5                   |-> [i \in 1 .. 16 |-> 0],
+      memberNumber5ForBid                |-> [i \in 1 .. 5 |-> 0],
+      bidTradingVolume5                  |-> [i \in 1 .. 8 |-> 0],
+      bidTradingValue5                   |-> [i \in 1 .. 16 |-> 0],
+      endKeyword                         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Top Five Traders Activities Message at zero, then each field in turn at the values it is checked at *)
+CheckedTopFiveTradersActivitiesMessage ==
+    { ZeroTopFiveTradersActivitiesMessage }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.memberNumber1ForAsk = one] : one \in Sample(5) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.askTradingVolume1 = one] : one \in Sample(8) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.askTradingValue1 = one] : one \in Sample(16) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.memberNumber1ForBid = one] : one \in Sample(5) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.bidTradingVolume1 = one] : one \in Sample(8) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.bidTradingValue1 = one] : one \in Sample(16) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.memberNumber2ForAsk = one] : one \in Sample(5) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.askTradingVolume2 = one] : one \in Sample(8) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.askTradingValue2 = one] : one \in Sample(16) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.memberNumber2ForBid = one] : one \in Sample(5) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.bidTradingVolume2 = one] : one \in Sample(8) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.bidTradingValue2 = one] : one \in Sample(16) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.memberNumber3ForAsk = one] : one \in Sample(5) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.askTradingVolume3 = one] : one \in Sample(8) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.askTradingValue3 = one] : one \in Sample(16) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.memberNumber3ForBid = one] : one \in Sample(5) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.bidTradingVolume3 = one] : one \in Sample(8) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.bidTradingValue3 = one] : one \in Sample(16) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.memberNumber4ForAsk = one] : one \in Sample(5) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.askTradingVolume4 = one] : one \in Sample(8) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.askTradingValue4 = one] : one \in Sample(16) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.memberNumber4ForBid = one] : one \in Sample(5) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.bidTradingVolume4 = one] : one \in Sample(8) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.bidTradingValue4 = one] : one \in Sample(16) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.memberNumber5ForAsk = one] : one \in Sample(5) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.askTradingVolume5 = one] : one \in Sample(8) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.askTradingValue5 = one] : one \in Sample(16) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.memberNumber5ForBid = one] : one \in Sample(5) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.bidTradingVolume5 = one] : one \in Sample(8) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.bidTradingValue5 = one] : one \in Sample(16) }
+        \cup { [ZeroTopFiveTradersActivitiesMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Equities Batch Data Message: 551 bytes                                  *)
+(***************************************************************************)
+
+EquitiesBatchDataMessage ==
+    [ messageSequenceNumber                                  : Sample(4),
+      totalNumberOfInstrumentsOfTheContract                  : Sample(4),
+      businessDate                                           : Sample(8),
+      isinCode                                               : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx                     : Sample(4),
+      abbreviatedIssueCode                                   : Sample(9),
+      abbreviatedIssueName                                   : Sample(40),
+      abbreviatedIssueNameInEn                               : Sample(40),
+      groupNumber                                            : Sample(5),
+      marketOperationProductId                               : Sample(3),
+      securityGroupId                                        : Sample(2),
+      unitTrading                                            : Sample(1),
+      rightsTypeCode                                         : Sample(2),
+      parValueTypeCode                                       : Sample(2),
+      anIssueOfWhichBasePriceIsSettledWithATodaysSinglePrice : Sample(1),
+      reevaluationReasonCode                                 : Sample(2),
+      basePriceChange                                        : Sample(1),
+      randomEndTriggerCode                                   : Sample(1),
+      marketAlert                                            : Sample(1),
+      marketAlertTypeCode                                    : Sample(2),
+      koreaCorporateGovernanceStockPriceIndexKogi            : Sample(1),
+      issueForAdministration                                 : Sample(1),
+      unfaithfulDisclosure                                   : Sample(1),
+      backDoorListing                                        : Sample(1),
+      tradingHalt                                            : Sample(1),
+      industryId                                             : Sample(10),
+      smallMediumSizedBusiness                               : Sample(1),
+      sectionTypeCode                                        : Sample(1),
+      investmentInstitutionTypeCode                          : Sample(1),
+      basePrice                                              : Sample(8),
+      yesterdaysClosingPriceTypeCodeKrx                      : Sample(1),
+      yesterdaysClosingPriceKrx                              : Sample(8),
+      yesterdaysAccumulatedTradingAmount                     : Sample(8),
+      yesterdaysAccumulatedTradingValue                      : Sample(16),
+      upperLimitPrice                                        : Sample(8),
+      lowerLimitPrice                                        : Sample(8),
+      substitutePriceOfSecurities                            : Sample(8),
+      parValue                                               : Sample(8),
+      issuingPrice                                           : Sample(8),
+      listingDate                                            : Sample(8),
+      numberOfListedShares                                   : Sample(8),
+      liquidationTrade                                       : Sample(1),
+      theEstablishmentDate                                   : Sample(8),
+      maturityDate                                           : Sample(8),
+      exercisingPeriod                                       : Sample(8),
+      expirationDateForRight                                 : Sample(8),
+      exercisePriceOfElwOrBw                                 : Sample(8),
+      capital                                                : Sample(16),
+      creditOrderPossibility                                 : Sample(1),
+      limitOrderPermissionTypeCode                           : Sample(4),
+      marketPriceOrderPermissionTypeCode                     : Sample(4),
+      conditionedOrderPermissionTypeCode                     : Sample(4),
+      bestFavorableOrderPermissionTypeCode                   : Sample(4),
+      firstBestOrderPermissionType                           : Sample(4),
+      midPriceOrderPermissionTypeCode                        : Sample(4),
+      stopLimitPriceOrderPermissionTypeCode                  : Sample(4),
+      capitalIncreaseTypeCode                                : Sample(2),
+      otherStockTypeCode                                     : Sample(1),
+      nationalStock                                          : Sample(1),
+      appraisedPrice                                         : Sample(8),
+      lowestOrderPrice                                       : Sample(8),
+      highestOrderPrice                                      : Sample(8),
+      unitOfVolumeInMainBoard                                : Sample(8),
+      lotSizeAfterHoursTrading                               : Sample(8),
+      reiTsTypeCode                                          : Sample(1),
+      targetStockIsinCode                                    : Sample(12),
+      currencyIsoCode                                        : Sample(3),
+      countryCode                                            : Sample(3),
+      marketMakingPossibility                                : Sample(1),
+      closingPriceTradingPossibilityInTheAfterHours          : Sample(1),
+      closingPriceTradingInThePreOpeningMarket               : Sample(1),
+      blockTradingInThePreOpeningMarket                      : Sample(1),
+      basketTradingInThePreOpeningMarket                     : Sample(1),
+      announcementOfEstimatedTradingPrice                    : Sample(1),
+      shortSelling                                           : Sample(1),
+      etfTrackingDifference                                  : Sample(8),
+      regs                                                   : Sample(1),
+      spac                                                   : Sample(1),
+      taxTypeCode                                            : Sample(1),
+      appraisalRatioOfSubstitutePrice                        : Sample(8),
+      investmentCautionIssue                                 : Sample(1),
+      delistingDate                                          : Sample(8),
+      shortTermOverheatIssueTypeCode                         : Sample(1),
+      etfReplicationMethodsTypeCode                          : Sample(1),
+      expirationDate                                         : Sample(8),
+      distributionTypeCode                                   : Sample(2),
+      calculationOfRedemptionPriceStartDate                  : Sample(8),
+      calculationOfRedemptionPriceEndDate                    : Sample(8),
+      etpProductTypeCode                                     : Sample(1),
+      indexCalculationInstitutionTypeCode                    : Sample(2),
+      indexMarketClassificationId                            : Sample(6),
+      indexSequenceNumber                                    : Sample(3),
+      trackingIndexLeverageInverseTypeCode                   : Sample(2),
+      referenceIndexLeverageInverseTypeCode                  : Sample(2),
+      indexAssetClassificationId1                            : Sample(6),
+      indexAssetClassificationId2                            : Sample(6),
+      ipoUnderwriterMemberNumber                             : Sample(5),
+      lpOrder                                                : Sample(1),
+      lowLiquidity                                           : Sample(1),
+      abnormalRise                                           : Sample(1),
+      upperLimitQuantity                                     : Sample(16),
+      investmentPrecautionIssue                              : Sample(1),
+      preferredStocksWithLesserShares                        : Sample(1),
+      spacMerger                                             : Sample(1),
+      segmentTypeCode                                        : Sample(1),
+      afterMarketPossibility                                 : Sample(1),
+      choiceOnCompetitiveTrading                             : Sample(1),
+      limitOnCompetitiveTradingVolume                        : Sample(1),
+      occurrenceOfReasonsProhibitingCompetitiveTrading       : Sample(1),
+      approvalOnCompetitiveTrading                           : Sample(1),
+      approvalOnNegotiationTrading                           : Sample(1),
+      yesterdaysClosingPriceTypeCodeNxt                      : Sample(1),
+      yesterdaysClosingPriceNxt                              : Sample(8),
+      competitionBoardTradePermissionCode                    : Sample(4),
+      negotiationPossibleOrNotBeforeMainMarket               : Sample(1),
+      endKeyword                                             : Sample(4) ]
+
+EncodeEquitiesBatchDataMessage(message) ==
+    message.messageSequenceNumber
+        \o message.totalNumberOfInstrumentsOfTheContract
+        \o message.businessDate
+        \o message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.abbreviatedIssueCode
+        \o message.abbreviatedIssueName
+        \o message.abbreviatedIssueNameInEn
+        \o message.groupNumber
+        \o message.marketOperationProductId
+        \o message.securityGroupId
+        \o message.unitTrading
+        \o message.rightsTypeCode
+        \o message.parValueTypeCode
+        \o message.anIssueOfWhichBasePriceIsSettledWithATodaysSinglePrice
+        \o message.reevaluationReasonCode
+        \o message.basePriceChange
+        \o message.randomEndTriggerCode
+        \o message.marketAlert
+        \o message.marketAlertTypeCode
+        \o message.koreaCorporateGovernanceStockPriceIndexKogi
+        \o message.issueForAdministration
+        \o message.unfaithfulDisclosure
+        \o message.backDoorListing
+        \o message.tradingHalt
+        \o message.industryId
+        \o message.smallMediumSizedBusiness
+        \o message.sectionTypeCode
+        \o message.investmentInstitutionTypeCode
+        \o message.basePrice
+        \o message.yesterdaysClosingPriceTypeCodeKrx
+        \o message.yesterdaysClosingPriceKrx
+        \o message.yesterdaysAccumulatedTradingAmount
+        \o message.yesterdaysAccumulatedTradingValue
+        \o message.upperLimitPrice
+        \o message.lowerLimitPrice
+        \o message.substitutePriceOfSecurities
+        \o message.parValue
+        \o message.issuingPrice
+        \o message.listingDate
+        \o message.numberOfListedShares
+        \o message.liquidationTrade
+        \o message.theEstablishmentDate
+        \o message.maturityDate
+        \o message.exercisingPeriod
+        \o message.expirationDateForRight
+        \o message.exercisePriceOfElwOrBw
+        \o message.capital
+        \o message.creditOrderPossibility
+        \o message.limitOrderPermissionTypeCode
+        \o message.marketPriceOrderPermissionTypeCode
+        \o message.conditionedOrderPermissionTypeCode
+        \o message.bestFavorableOrderPermissionTypeCode
+        \o message.firstBestOrderPermissionType
+        \o message.midPriceOrderPermissionTypeCode
+        \o message.stopLimitPriceOrderPermissionTypeCode
+        \o message.capitalIncreaseTypeCode
+        \o message.otherStockTypeCode
+        \o message.nationalStock
+        \o message.appraisedPrice
+        \o message.lowestOrderPrice
+        \o message.highestOrderPrice
+        \o message.unitOfVolumeInMainBoard
+        \o message.lotSizeAfterHoursTrading
+        \o message.reiTsTypeCode
+        \o message.targetStockIsinCode
+        \o message.currencyIsoCode
+        \o message.countryCode
+        \o message.marketMakingPossibility
+        \o message.closingPriceTradingPossibilityInTheAfterHours
+        \o message.closingPriceTradingInThePreOpeningMarket
+        \o message.blockTradingInThePreOpeningMarket
+        \o message.basketTradingInThePreOpeningMarket
+        \o message.announcementOfEstimatedTradingPrice
+        \o message.shortSelling
+        \o message.etfTrackingDifference
+        \o message.regs
+        \o message.spac
+        \o message.taxTypeCode
+        \o message.appraisalRatioOfSubstitutePrice
+        \o message.investmentCautionIssue
+        \o message.delistingDate
+        \o message.shortTermOverheatIssueTypeCode
+        \o message.etfReplicationMethodsTypeCode
+        \o message.expirationDate
+        \o message.distributionTypeCode
+        \o message.calculationOfRedemptionPriceStartDate
+        \o message.calculationOfRedemptionPriceEndDate
+        \o message.etpProductTypeCode
+        \o message.indexCalculationInstitutionTypeCode
+        \o message.indexMarketClassificationId
+        \o message.indexSequenceNumber
+        \o message.trackingIndexLeverageInverseTypeCode
+        \o message.referenceIndexLeverageInverseTypeCode
+        \o message.indexAssetClassificationId1
+        \o message.indexAssetClassificationId2
+        \o message.ipoUnderwriterMemberNumber
+        \o message.lpOrder
+        \o message.lowLiquidity
+        \o message.abnormalRise
+        \o message.upperLimitQuantity
+        \o message.investmentPrecautionIssue
+        \o message.preferredStocksWithLesserShares
+        \o message.spacMerger
+        \o message.segmentTypeCode
+        \o message.afterMarketPossibility
+        \o message.choiceOnCompetitiveTrading
+        \o message.limitOnCompetitiveTradingVolume
+        \o message.occurrenceOfReasonsProhibitingCompetitiveTrading
+        \o message.approvalOnCompetitiveTrading
+        \o message.approvalOnNegotiationTrading
+        \o message.yesterdaysClosingPriceTypeCodeNxt
+        \o message.yesterdaysClosingPriceNxt
+        \o message.competitionBoardTradePermissionCode
+        \o message.negotiationPossibleOrNotBeforeMainMarket
+        \o message.endKeyword
+
+DecodeEquitiesBatchDataMessage(bytes) ==
+    LET messageSequenceNumber == ReadBytes(bytes, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET totalNumberOfInstrumentsOfTheContract == ReadBytes(messageSequenceNumber.rest, 4) IN IF ~totalNumberOfInstrumentsOfTheContract.ok THEN Fail ELSE
+    LET businessDate == ReadBytes(totalNumberOfInstrumentsOfTheContract.rest, 8) IN IF ~businessDate.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(businessDate.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET abbreviatedIssueCode == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 9) IN IF ~abbreviatedIssueCode.ok THEN Fail ELSE
+    LET abbreviatedIssueName == ReadBytes(abbreviatedIssueCode.rest, 40) IN IF ~abbreviatedIssueName.ok THEN Fail ELSE
+    LET abbreviatedIssueNameInEn == ReadBytes(abbreviatedIssueName.rest, 40) IN IF ~abbreviatedIssueNameInEn.ok THEN Fail ELSE
+    LET groupNumber == ReadBytes(abbreviatedIssueNameInEn.rest, 5) IN IF ~groupNumber.ok THEN Fail ELSE
+    LET marketOperationProductId == ReadBytes(groupNumber.rest, 3) IN IF ~marketOperationProductId.ok THEN Fail ELSE
+    LET securityGroupId == ReadBytes(marketOperationProductId.rest, 2) IN IF ~securityGroupId.ok THEN Fail ELSE
+    LET unitTrading == ReadBytes(securityGroupId.rest, 1) IN IF ~unitTrading.ok THEN Fail ELSE
+    LET rightsTypeCode == ReadBytes(unitTrading.rest, 2) IN IF ~rightsTypeCode.ok THEN Fail ELSE
+    LET parValueTypeCode == ReadBytes(rightsTypeCode.rest, 2) IN IF ~parValueTypeCode.ok THEN Fail ELSE
+    LET anIssueOfWhichBasePriceIsSettledWithATodaysSinglePrice == ReadBytes(parValueTypeCode.rest, 1) IN IF ~anIssueOfWhichBasePriceIsSettledWithATodaysSinglePrice.ok THEN Fail ELSE
+    LET reevaluationReasonCode == ReadBytes(anIssueOfWhichBasePriceIsSettledWithATodaysSinglePrice.rest, 2) IN IF ~reevaluationReasonCode.ok THEN Fail ELSE
+    LET basePriceChange == ReadBytes(reevaluationReasonCode.rest, 1) IN IF ~basePriceChange.ok THEN Fail ELSE
+    LET randomEndTriggerCode == ReadBytes(basePriceChange.rest, 1) IN IF ~randomEndTriggerCode.ok THEN Fail ELSE
+    LET marketAlert == ReadBytes(randomEndTriggerCode.rest, 1) IN IF ~marketAlert.ok THEN Fail ELSE
+    LET marketAlertTypeCode == ReadBytes(marketAlert.rest, 2) IN IF ~marketAlertTypeCode.ok THEN Fail ELSE
+    LET koreaCorporateGovernanceStockPriceIndexKogi == ReadBytes(marketAlertTypeCode.rest, 1) IN IF ~koreaCorporateGovernanceStockPriceIndexKogi.ok THEN Fail ELSE
+    LET issueForAdministration == ReadBytes(koreaCorporateGovernanceStockPriceIndexKogi.rest, 1) IN IF ~issueForAdministration.ok THEN Fail ELSE
+    LET unfaithfulDisclosure == ReadBytes(issueForAdministration.rest, 1) IN IF ~unfaithfulDisclosure.ok THEN Fail ELSE
+    LET backDoorListing == ReadBytes(unfaithfulDisclosure.rest, 1) IN IF ~backDoorListing.ok THEN Fail ELSE
+    LET tradingHalt == ReadBytes(backDoorListing.rest, 1) IN IF ~tradingHalt.ok THEN Fail ELSE
+    LET industryId == ReadBytes(tradingHalt.rest, 10) IN IF ~industryId.ok THEN Fail ELSE
+    LET smallMediumSizedBusiness == ReadBytes(industryId.rest, 1) IN IF ~smallMediumSizedBusiness.ok THEN Fail ELSE
+    LET sectionTypeCode == ReadBytes(smallMediumSizedBusiness.rest, 1) IN IF ~sectionTypeCode.ok THEN Fail ELSE
+    LET investmentInstitutionTypeCode == ReadBytes(sectionTypeCode.rest, 1) IN IF ~investmentInstitutionTypeCode.ok THEN Fail ELSE
+    LET basePrice == ReadBytes(investmentInstitutionTypeCode.rest, 8) IN IF ~basePrice.ok THEN Fail ELSE
+    LET yesterdaysClosingPriceTypeCodeKrx == ReadBytes(basePrice.rest, 1) IN IF ~yesterdaysClosingPriceTypeCodeKrx.ok THEN Fail ELSE
+    LET yesterdaysClosingPriceKrx == ReadBytes(yesterdaysClosingPriceTypeCodeKrx.rest, 8) IN IF ~yesterdaysClosingPriceKrx.ok THEN Fail ELSE
+    LET yesterdaysAccumulatedTradingAmount == ReadBytes(yesterdaysClosingPriceKrx.rest, 8) IN IF ~yesterdaysAccumulatedTradingAmount.ok THEN Fail ELSE
+    LET yesterdaysAccumulatedTradingValue == ReadBytes(yesterdaysAccumulatedTradingAmount.rest, 16) IN IF ~yesterdaysAccumulatedTradingValue.ok THEN Fail ELSE
+    LET upperLimitPrice == ReadBytes(yesterdaysAccumulatedTradingValue.rest, 8) IN IF ~upperLimitPrice.ok THEN Fail ELSE
+    LET lowerLimitPrice == ReadBytes(upperLimitPrice.rest, 8) IN IF ~lowerLimitPrice.ok THEN Fail ELSE
+    LET substitutePriceOfSecurities == ReadBytes(lowerLimitPrice.rest, 8) IN IF ~substitutePriceOfSecurities.ok THEN Fail ELSE
+    LET parValue == ReadBytes(substitutePriceOfSecurities.rest, 8) IN IF ~parValue.ok THEN Fail ELSE
+    LET issuingPrice == ReadBytes(parValue.rest, 8) IN IF ~issuingPrice.ok THEN Fail ELSE
+    LET listingDate == ReadBytes(issuingPrice.rest, 8) IN IF ~listingDate.ok THEN Fail ELSE
+    LET numberOfListedShares == ReadBytes(listingDate.rest, 8) IN IF ~numberOfListedShares.ok THEN Fail ELSE
+    LET liquidationTrade == ReadBytes(numberOfListedShares.rest, 1) IN IF ~liquidationTrade.ok THEN Fail ELSE
+    LET theEstablishmentDate == ReadBytes(liquidationTrade.rest, 8) IN IF ~theEstablishmentDate.ok THEN Fail ELSE
+    LET maturityDate == ReadBytes(theEstablishmentDate.rest, 8) IN IF ~maturityDate.ok THEN Fail ELSE
+    LET exercisingPeriod == ReadBytes(maturityDate.rest, 8) IN IF ~exercisingPeriod.ok THEN Fail ELSE
+    LET expirationDateForRight == ReadBytes(exercisingPeriod.rest, 8) IN IF ~expirationDateForRight.ok THEN Fail ELSE
+    LET exercisePriceOfElwOrBw == ReadBytes(expirationDateForRight.rest, 8) IN IF ~exercisePriceOfElwOrBw.ok THEN Fail ELSE
+    LET capital == ReadBytes(exercisePriceOfElwOrBw.rest, 16) IN IF ~capital.ok THEN Fail ELSE
+    LET creditOrderPossibility == ReadBytes(capital.rest, 1) IN IF ~creditOrderPossibility.ok THEN Fail ELSE
+    LET limitOrderPermissionTypeCode == ReadBytes(creditOrderPossibility.rest, 4) IN IF ~limitOrderPermissionTypeCode.ok THEN Fail ELSE
+    LET marketPriceOrderPermissionTypeCode == ReadBytes(limitOrderPermissionTypeCode.rest, 4) IN IF ~marketPriceOrderPermissionTypeCode.ok THEN Fail ELSE
+    LET conditionedOrderPermissionTypeCode == ReadBytes(marketPriceOrderPermissionTypeCode.rest, 4) IN IF ~conditionedOrderPermissionTypeCode.ok THEN Fail ELSE
+    LET bestFavorableOrderPermissionTypeCode == ReadBytes(conditionedOrderPermissionTypeCode.rest, 4) IN IF ~bestFavorableOrderPermissionTypeCode.ok THEN Fail ELSE
+    LET firstBestOrderPermissionType == ReadBytes(bestFavorableOrderPermissionTypeCode.rest, 4) IN IF ~firstBestOrderPermissionType.ok THEN Fail ELSE
+    LET midPriceOrderPermissionTypeCode == ReadBytes(firstBestOrderPermissionType.rest, 4) IN IF ~midPriceOrderPermissionTypeCode.ok THEN Fail ELSE
+    LET stopLimitPriceOrderPermissionTypeCode == ReadBytes(midPriceOrderPermissionTypeCode.rest, 4) IN IF ~stopLimitPriceOrderPermissionTypeCode.ok THEN Fail ELSE
+    LET capitalIncreaseTypeCode == ReadBytes(stopLimitPriceOrderPermissionTypeCode.rest, 2) IN IF ~capitalIncreaseTypeCode.ok THEN Fail ELSE
+    LET otherStockTypeCode == ReadBytes(capitalIncreaseTypeCode.rest, 1) IN IF ~otherStockTypeCode.ok THEN Fail ELSE
+    LET nationalStock == ReadBytes(otherStockTypeCode.rest, 1) IN IF ~nationalStock.ok THEN Fail ELSE
+    LET appraisedPrice == ReadBytes(nationalStock.rest, 8) IN IF ~appraisedPrice.ok THEN Fail ELSE
+    LET lowestOrderPrice == ReadBytes(appraisedPrice.rest, 8) IN IF ~lowestOrderPrice.ok THEN Fail ELSE
+    LET highestOrderPrice == ReadBytes(lowestOrderPrice.rest, 8) IN IF ~highestOrderPrice.ok THEN Fail ELSE
+    LET unitOfVolumeInMainBoard == ReadBytes(highestOrderPrice.rest, 8) IN IF ~unitOfVolumeInMainBoard.ok THEN Fail ELSE
+    LET lotSizeAfterHoursTrading == ReadBytes(unitOfVolumeInMainBoard.rest, 8) IN IF ~lotSizeAfterHoursTrading.ok THEN Fail ELSE
+    LET reiTsTypeCode == ReadBytes(lotSizeAfterHoursTrading.rest, 1) IN IF ~reiTsTypeCode.ok THEN Fail ELSE
+    LET targetStockIsinCode == ReadBytes(reiTsTypeCode.rest, 12) IN IF ~targetStockIsinCode.ok THEN Fail ELSE
+    LET currencyIsoCode == ReadBytes(targetStockIsinCode.rest, 3) IN IF ~currencyIsoCode.ok THEN Fail ELSE
+    LET countryCode == ReadBytes(currencyIsoCode.rest, 3) IN IF ~countryCode.ok THEN Fail ELSE
+    LET marketMakingPossibility == ReadBytes(countryCode.rest, 1) IN IF ~marketMakingPossibility.ok THEN Fail ELSE
+    LET closingPriceTradingPossibilityInTheAfterHours == ReadBytes(marketMakingPossibility.rest, 1) IN IF ~closingPriceTradingPossibilityInTheAfterHours.ok THEN Fail ELSE
+    LET closingPriceTradingInThePreOpeningMarket == ReadBytes(closingPriceTradingPossibilityInTheAfterHours.rest, 1) IN IF ~closingPriceTradingInThePreOpeningMarket.ok THEN Fail ELSE
+    LET blockTradingInThePreOpeningMarket == ReadBytes(closingPriceTradingInThePreOpeningMarket.rest, 1) IN IF ~blockTradingInThePreOpeningMarket.ok THEN Fail ELSE
+    LET basketTradingInThePreOpeningMarket == ReadBytes(blockTradingInThePreOpeningMarket.rest, 1) IN IF ~basketTradingInThePreOpeningMarket.ok THEN Fail ELSE
+    LET announcementOfEstimatedTradingPrice == ReadBytes(basketTradingInThePreOpeningMarket.rest, 1) IN IF ~announcementOfEstimatedTradingPrice.ok THEN Fail ELSE
+    LET shortSelling == ReadBytes(announcementOfEstimatedTradingPrice.rest, 1) IN IF ~shortSelling.ok THEN Fail ELSE
+    LET etfTrackingDifference == ReadBytes(shortSelling.rest, 8) IN IF ~etfTrackingDifference.ok THEN Fail ELSE
+    LET regs == ReadBytes(etfTrackingDifference.rest, 1) IN IF ~regs.ok THEN Fail ELSE
+    LET spac == ReadBytes(regs.rest, 1) IN IF ~spac.ok THEN Fail ELSE
+    LET taxTypeCode == ReadBytes(spac.rest, 1) IN IF ~taxTypeCode.ok THEN Fail ELSE
+    LET appraisalRatioOfSubstitutePrice == ReadBytes(taxTypeCode.rest, 8) IN IF ~appraisalRatioOfSubstitutePrice.ok THEN Fail ELSE
+    LET investmentCautionIssue == ReadBytes(appraisalRatioOfSubstitutePrice.rest, 1) IN IF ~investmentCautionIssue.ok THEN Fail ELSE
+    LET delistingDate == ReadBytes(investmentCautionIssue.rest, 8) IN IF ~delistingDate.ok THEN Fail ELSE
+    LET shortTermOverheatIssueTypeCode == ReadBytes(delistingDate.rest, 1) IN IF ~shortTermOverheatIssueTypeCode.ok THEN Fail ELSE
+    LET etfReplicationMethodsTypeCode == ReadBytes(shortTermOverheatIssueTypeCode.rest, 1) IN IF ~etfReplicationMethodsTypeCode.ok THEN Fail ELSE
+    LET expirationDate == ReadBytes(etfReplicationMethodsTypeCode.rest, 8) IN IF ~expirationDate.ok THEN Fail ELSE
+    LET distributionTypeCode == ReadBytes(expirationDate.rest, 2) IN IF ~distributionTypeCode.ok THEN Fail ELSE
+    LET calculationOfRedemptionPriceStartDate == ReadBytes(distributionTypeCode.rest, 8) IN IF ~calculationOfRedemptionPriceStartDate.ok THEN Fail ELSE
+    LET calculationOfRedemptionPriceEndDate == ReadBytes(calculationOfRedemptionPriceStartDate.rest, 8) IN IF ~calculationOfRedemptionPriceEndDate.ok THEN Fail ELSE
+    LET etpProductTypeCode == ReadBytes(calculationOfRedemptionPriceEndDate.rest, 1) IN IF ~etpProductTypeCode.ok THEN Fail ELSE
+    LET indexCalculationInstitutionTypeCode == ReadBytes(etpProductTypeCode.rest, 2) IN IF ~indexCalculationInstitutionTypeCode.ok THEN Fail ELSE
+    LET indexMarketClassificationId == ReadBytes(indexCalculationInstitutionTypeCode.rest, 6) IN IF ~indexMarketClassificationId.ok THEN Fail ELSE
+    LET indexSequenceNumber == ReadBytes(indexMarketClassificationId.rest, 3) IN IF ~indexSequenceNumber.ok THEN Fail ELSE
+    LET trackingIndexLeverageInverseTypeCode == ReadBytes(indexSequenceNumber.rest, 2) IN IF ~trackingIndexLeverageInverseTypeCode.ok THEN Fail ELSE
+    LET referenceIndexLeverageInverseTypeCode == ReadBytes(trackingIndexLeverageInverseTypeCode.rest, 2) IN IF ~referenceIndexLeverageInverseTypeCode.ok THEN Fail ELSE
+    LET indexAssetClassificationId1 == ReadBytes(referenceIndexLeverageInverseTypeCode.rest, 6) IN IF ~indexAssetClassificationId1.ok THEN Fail ELSE
+    LET indexAssetClassificationId2 == ReadBytes(indexAssetClassificationId1.rest, 6) IN IF ~indexAssetClassificationId2.ok THEN Fail ELSE
+    LET ipoUnderwriterMemberNumber == ReadBytes(indexAssetClassificationId2.rest, 5) IN IF ~ipoUnderwriterMemberNumber.ok THEN Fail ELSE
+    LET lpOrder == ReadBytes(ipoUnderwriterMemberNumber.rest, 1) IN IF ~lpOrder.ok THEN Fail ELSE
+    LET lowLiquidity == ReadBytes(lpOrder.rest, 1) IN IF ~lowLiquidity.ok THEN Fail ELSE
+    LET abnormalRise == ReadBytes(lowLiquidity.rest, 1) IN IF ~abnormalRise.ok THEN Fail ELSE
+    LET upperLimitQuantity == ReadBytes(abnormalRise.rest, 16) IN IF ~upperLimitQuantity.ok THEN Fail ELSE
+    LET investmentPrecautionIssue == ReadBytes(upperLimitQuantity.rest, 1) IN IF ~investmentPrecautionIssue.ok THEN Fail ELSE
+    LET preferredStocksWithLesserShares == ReadBytes(investmentPrecautionIssue.rest, 1) IN IF ~preferredStocksWithLesserShares.ok THEN Fail ELSE
+    LET spacMerger == ReadBytes(preferredStocksWithLesserShares.rest, 1) IN IF ~spacMerger.ok THEN Fail ELSE
+    LET segmentTypeCode == ReadBytes(spacMerger.rest, 1) IN IF ~segmentTypeCode.ok THEN Fail ELSE
+    LET afterMarketPossibility == ReadBytes(segmentTypeCode.rest, 1) IN IF ~afterMarketPossibility.ok THEN Fail ELSE
+    LET choiceOnCompetitiveTrading == ReadBytes(afterMarketPossibility.rest, 1) IN IF ~choiceOnCompetitiveTrading.ok THEN Fail ELSE
+    LET limitOnCompetitiveTradingVolume == ReadBytes(choiceOnCompetitiveTrading.rest, 1) IN IF ~limitOnCompetitiveTradingVolume.ok THEN Fail ELSE
+    LET occurrenceOfReasonsProhibitingCompetitiveTrading == ReadBytes(limitOnCompetitiveTradingVolume.rest, 1) IN IF ~occurrenceOfReasonsProhibitingCompetitiveTrading.ok THEN Fail ELSE
+    LET approvalOnCompetitiveTrading == ReadBytes(occurrenceOfReasonsProhibitingCompetitiveTrading.rest, 1) IN IF ~approvalOnCompetitiveTrading.ok THEN Fail ELSE
+    LET approvalOnNegotiationTrading == ReadBytes(approvalOnCompetitiveTrading.rest, 1) IN IF ~approvalOnNegotiationTrading.ok THEN Fail ELSE
+    LET yesterdaysClosingPriceTypeCodeNxt == ReadBytes(approvalOnNegotiationTrading.rest, 1) IN IF ~yesterdaysClosingPriceTypeCodeNxt.ok THEN Fail ELSE
+    LET yesterdaysClosingPriceNxt == ReadBytes(yesterdaysClosingPriceTypeCodeNxt.rest, 8) IN IF ~yesterdaysClosingPriceNxt.ok THEN Fail ELSE
+    LET competitionBoardTradePermissionCode == ReadBytes(yesterdaysClosingPriceNxt.rest, 4) IN IF ~competitionBoardTradePermissionCode.ok THEN Fail ELSE
+    LET negotiationPossibleOrNotBeforeMainMarket == ReadBytes(competitionBoardTradePermissionCode.rest, 1) IN IF ~negotiationPossibleOrNotBeforeMainMarket.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(negotiationPossibleOrNotBeforeMainMarket.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ messageSequenceNumber                                  |-> messageSequenceNumber.value,
+         totalNumberOfInstrumentsOfTheContract                  |-> totalNumberOfInstrumentsOfTheContract.value,
+         businessDate                                           |-> businessDate.value,
+         isinCode                                               |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx                     |-> aDesignatedNumberForAnIssueFromKrx.value,
+         abbreviatedIssueCode                                   |-> abbreviatedIssueCode.value,
+         abbreviatedIssueName                                   |-> abbreviatedIssueName.value,
+         abbreviatedIssueNameInEn                               |-> abbreviatedIssueNameInEn.value,
+         groupNumber                                            |-> groupNumber.value,
+         marketOperationProductId                               |-> marketOperationProductId.value,
+         securityGroupId                                        |-> securityGroupId.value,
+         unitTrading                                            |-> unitTrading.value,
+         rightsTypeCode                                         |-> rightsTypeCode.value,
+         parValueTypeCode                                       |-> parValueTypeCode.value,
+         anIssueOfWhichBasePriceIsSettledWithATodaysSinglePrice |-> anIssueOfWhichBasePriceIsSettledWithATodaysSinglePrice.value,
+         reevaluationReasonCode                                 |-> reevaluationReasonCode.value,
+         basePriceChange                                        |-> basePriceChange.value,
+         randomEndTriggerCode                                   |-> randomEndTriggerCode.value,
+         marketAlert                                            |-> marketAlert.value,
+         marketAlertTypeCode                                    |-> marketAlertTypeCode.value,
+         koreaCorporateGovernanceStockPriceIndexKogi            |-> koreaCorporateGovernanceStockPriceIndexKogi.value,
+         issueForAdministration                                 |-> issueForAdministration.value,
+         unfaithfulDisclosure                                   |-> unfaithfulDisclosure.value,
+         backDoorListing                                        |-> backDoorListing.value,
+         tradingHalt                                            |-> tradingHalt.value,
+         industryId                                             |-> industryId.value,
+         smallMediumSizedBusiness                               |-> smallMediumSizedBusiness.value,
+         sectionTypeCode                                        |-> sectionTypeCode.value,
+         investmentInstitutionTypeCode                          |-> investmentInstitutionTypeCode.value,
+         basePrice                                              |-> basePrice.value,
+         yesterdaysClosingPriceTypeCodeKrx                      |-> yesterdaysClosingPriceTypeCodeKrx.value,
+         yesterdaysClosingPriceKrx                              |-> yesterdaysClosingPriceKrx.value,
+         yesterdaysAccumulatedTradingAmount                     |-> yesterdaysAccumulatedTradingAmount.value,
+         yesterdaysAccumulatedTradingValue                      |-> yesterdaysAccumulatedTradingValue.value,
+         upperLimitPrice                                        |-> upperLimitPrice.value,
+         lowerLimitPrice                                        |-> lowerLimitPrice.value,
+         substitutePriceOfSecurities                            |-> substitutePriceOfSecurities.value,
+         parValue                                               |-> parValue.value,
+         issuingPrice                                           |-> issuingPrice.value,
+         listingDate                                            |-> listingDate.value,
+         numberOfListedShares                                   |-> numberOfListedShares.value,
+         liquidationTrade                                       |-> liquidationTrade.value,
+         theEstablishmentDate                                   |-> theEstablishmentDate.value,
+         maturityDate                                           |-> maturityDate.value,
+         exercisingPeriod                                       |-> exercisingPeriod.value,
+         expirationDateForRight                                 |-> expirationDateForRight.value,
+         exercisePriceOfElwOrBw                                 |-> exercisePriceOfElwOrBw.value,
+         capital                                                |-> capital.value,
+         creditOrderPossibility                                 |-> creditOrderPossibility.value,
+         limitOrderPermissionTypeCode                           |-> limitOrderPermissionTypeCode.value,
+         marketPriceOrderPermissionTypeCode                     |-> marketPriceOrderPermissionTypeCode.value,
+         conditionedOrderPermissionTypeCode                     |-> conditionedOrderPermissionTypeCode.value,
+         bestFavorableOrderPermissionTypeCode                   |-> bestFavorableOrderPermissionTypeCode.value,
+         firstBestOrderPermissionType                           |-> firstBestOrderPermissionType.value,
+         midPriceOrderPermissionTypeCode                        |-> midPriceOrderPermissionTypeCode.value,
+         stopLimitPriceOrderPermissionTypeCode                  |-> stopLimitPriceOrderPermissionTypeCode.value,
+         capitalIncreaseTypeCode                                |-> capitalIncreaseTypeCode.value,
+         otherStockTypeCode                                     |-> otherStockTypeCode.value,
+         nationalStock                                          |-> nationalStock.value,
+         appraisedPrice                                         |-> appraisedPrice.value,
+         lowestOrderPrice                                       |-> lowestOrderPrice.value,
+         highestOrderPrice                                      |-> highestOrderPrice.value,
+         unitOfVolumeInMainBoard                                |-> unitOfVolumeInMainBoard.value,
+         lotSizeAfterHoursTrading                               |-> lotSizeAfterHoursTrading.value,
+         reiTsTypeCode                                          |-> reiTsTypeCode.value,
+         targetStockIsinCode                                    |-> targetStockIsinCode.value,
+         currencyIsoCode                                        |-> currencyIsoCode.value,
+         countryCode                                            |-> countryCode.value,
+         marketMakingPossibility                                |-> marketMakingPossibility.value,
+         closingPriceTradingPossibilityInTheAfterHours          |-> closingPriceTradingPossibilityInTheAfterHours.value,
+         closingPriceTradingInThePreOpeningMarket               |-> closingPriceTradingInThePreOpeningMarket.value,
+         blockTradingInThePreOpeningMarket                      |-> blockTradingInThePreOpeningMarket.value,
+         basketTradingInThePreOpeningMarket                     |-> basketTradingInThePreOpeningMarket.value,
+         announcementOfEstimatedTradingPrice                    |-> announcementOfEstimatedTradingPrice.value,
+         shortSelling                                           |-> shortSelling.value,
+         etfTrackingDifference                                  |-> etfTrackingDifference.value,
+         regs                                                   |-> regs.value,
+         spac                                                   |-> spac.value,
+         taxTypeCode                                            |-> taxTypeCode.value,
+         appraisalRatioOfSubstitutePrice                        |-> appraisalRatioOfSubstitutePrice.value,
+         investmentCautionIssue                                 |-> investmentCautionIssue.value,
+         delistingDate                                          |-> delistingDate.value,
+         shortTermOverheatIssueTypeCode                         |-> shortTermOverheatIssueTypeCode.value,
+         etfReplicationMethodsTypeCode                          |-> etfReplicationMethodsTypeCode.value,
+         expirationDate                                         |-> expirationDate.value,
+         distributionTypeCode                                   |-> distributionTypeCode.value,
+         calculationOfRedemptionPriceStartDate                  |-> calculationOfRedemptionPriceStartDate.value,
+         calculationOfRedemptionPriceEndDate                    |-> calculationOfRedemptionPriceEndDate.value,
+         etpProductTypeCode                                     |-> etpProductTypeCode.value,
+         indexCalculationInstitutionTypeCode                    |-> indexCalculationInstitutionTypeCode.value,
+         indexMarketClassificationId                            |-> indexMarketClassificationId.value,
+         indexSequenceNumber                                    |-> indexSequenceNumber.value,
+         trackingIndexLeverageInverseTypeCode                   |-> trackingIndexLeverageInverseTypeCode.value,
+         referenceIndexLeverageInverseTypeCode                  |-> referenceIndexLeverageInverseTypeCode.value,
+         indexAssetClassificationId1                            |-> indexAssetClassificationId1.value,
+         indexAssetClassificationId2                            |-> indexAssetClassificationId2.value,
+         ipoUnderwriterMemberNumber                             |-> ipoUnderwriterMemberNumber.value,
+         lpOrder                                                |-> lpOrder.value,
+         lowLiquidity                                           |-> lowLiquidity.value,
+         abnormalRise                                           |-> abnormalRise.value,
+         upperLimitQuantity                                     |-> upperLimitQuantity.value,
+         investmentPrecautionIssue                              |-> investmentPrecautionIssue.value,
+         preferredStocksWithLesserShares                        |-> preferredStocksWithLesserShares.value,
+         spacMerger                                             |-> spacMerger.value,
+         segmentTypeCode                                        |-> segmentTypeCode.value,
+         afterMarketPossibility                                 |-> afterMarketPossibility.value,
+         choiceOnCompetitiveTrading                             |-> choiceOnCompetitiveTrading.value,
+         limitOnCompetitiveTradingVolume                        |-> limitOnCompetitiveTradingVolume.value,
+         occurrenceOfReasonsProhibitingCompetitiveTrading       |-> occurrenceOfReasonsProhibitingCompetitiveTrading.value,
+         approvalOnCompetitiveTrading                           |-> approvalOnCompetitiveTrading.value,
+         approvalOnNegotiationTrading                           |-> approvalOnNegotiationTrading.value,
+         yesterdaysClosingPriceTypeCodeNxt                      |-> yesterdaysClosingPriceTypeCodeNxt.value,
+         yesterdaysClosingPriceNxt                              |-> yesterdaysClosingPriceNxt.value,
+         competitionBoardTradePermissionCode                    |-> competitionBoardTradePermissionCode.value,
+         negotiationPossibleOrNotBeforeMainMarket               |-> negotiationPossibleOrNotBeforeMainMarket.value,
+         endKeyword                                             |-> endKeyword.value ], endKeyword.rest)
+
+ZeroEquitiesBatchDataMessage ==
+    [ messageSequenceNumber                                  |-> [i \in 1 .. 4 |-> 0],
+      totalNumberOfInstrumentsOfTheContract                  |-> [i \in 1 .. 4 |-> 0],
+      businessDate                                           |-> [i \in 1 .. 8 |-> 0],
+      isinCode                                               |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx                     |-> [i \in 1 .. 4 |-> 0],
+      abbreviatedIssueCode                                   |-> [i \in 1 .. 9 |-> 0],
+      abbreviatedIssueName                                   |-> [i \in 1 .. 40 |-> 0],
+      abbreviatedIssueNameInEn                               |-> [i \in 1 .. 40 |-> 0],
+      groupNumber                                            |-> [i \in 1 .. 5 |-> 0],
+      marketOperationProductId                               |-> [i \in 1 .. 3 |-> 0],
+      securityGroupId                                        |-> [i \in 1 .. 2 |-> 0],
+      unitTrading                                            |-> [i \in 1 .. 1 |-> 0],
+      rightsTypeCode                                         |-> [i \in 1 .. 2 |-> 0],
+      parValueTypeCode                                       |-> [i \in 1 .. 2 |-> 0],
+      anIssueOfWhichBasePriceIsSettledWithATodaysSinglePrice |-> [i \in 1 .. 1 |-> 0],
+      reevaluationReasonCode                                 |-> [i \in 1 .. 2 |-> 0],
+      basePriceChange                                        |-> [i \in 1 .. 1 |-> 0],
+      randomEndTriggerCode                                   |-> [i \in 1 .. 1 |-> 0],
+      marketAlert                                            |-> [i \in 1 .. 1 |-> 0],
+      marketAlertTypeCode                                    |-> [i \in 1 .. 2 |-> 0],
+      koreaCorporateGovernanceStockPriceIndexKogi            |-> [i \in 1 .. 1 |-> 0],
+      issueForAdministration                                 |-> [i \in 1 .. 1 |-> 0],
+      unfaithfulDisclosure                                   |-> [i \in 1 .. 1 |-> 0],
+      backDoorListing                                        |-> [i \in 1 .. 1 |-> 0],
+      tradingHalt                                            |-> [i \in 1 .. 1 |-> 0],
+      industryId                                             |-> [i \in 1 .. 10 |-> 0],
+      smallMediumSizedBusiness                               |-> [i \in 1 .. 1 |-> 0],
+      sectionTypeCode                                        |-> [i \in 1 .. 1 |-> 0],
+      investmentInstitutionTypeCode                          |-> [i \in 1 .. 1 |-> 0],
+      basePrice                                              |-> [i \in 1 .. 8 |-> 0],
+      yesterdaysClosingPriceTypeCodeKrx                      |-> [i \in 1 .. 1 |-> 0],
+      yesterdaysClosingPriceKrx                              |-> [i \in 1 .. 8 |-> 0],
+      yesterdaysAccumulatedTradingAmount                     |-> [i \in 1 .. 8 |-> 0],
+      yesterdaysAccumulatedTradingValue                      |-> [i \in 1 .. 16 |-> 0],
+      upperLimitPrice                                        |-> [i \in 1 .. 8 |-> 0],
+      lowerLimitPrice                                        |-> [i \in 1 .. 8 |-> 0],
+      substitutePriceOfSecurities                            |-> [i \in 1 .. 8 |-> 0],
+      parValue                                               |-> [i \in 1 .. 8 |-> 0],
+      issuingPrice                                           |-> [i \in 1 .. 8 |-> 0],
+      listingDate                                            |-> [i \in 1 .. 8 |-> 0],
+      numberOfListedShares                                   |-> [i \in 1 .. 8 |-> 0],
+      liquidationTrade                                       |-> [i \in 1 .. 1 |-> 0],
+      theEstablishmentDate                                   |-> [i \in 1 .. 8 |-> 0],
+      maturityDate                                           |-> [i \in 1 .. 8 |-> 0],
+      exercisingPeriod                                       |-> [i \in 1 .. 8 |-> 0],
+      expirationDateForRight                                 |-> [i \in 1 .. 8 |-> 0],
+      exercisePriceOfElwOrBw                                 |-> [i \in 1 .. 8 |-> 0],
+      capital                                                |-> [i \in 1 .. 16 |-> 0],
+      creditOrderPossibility                                 |-> [i \in 1 .. 1 |-> 0],
+      limitOrderPermissionTypeCode                           |-> [i \in 1 .. 4 |-> 0],
+      marketPriceOrderPermissionTypeCode                     |-> [i \in 1 .. 4 |-> 0],
+      conditionedOrderPermissionTypeCode                     |-> [i \in 1 .. 4 |-> 0],
+      bestFavorableOrderPermissionTypeCode                   |-> [i \in 1 .. 4 |-> 0],
+      firstBestOrderPermissionType                           |-> [i \in 1 .. 4 |-> 0],
+      midPriceOrderPermissionTypeCode                        |-> [i \in 1 .. 4 |-> 0],
+      stopLimitPriceOrderPermissionTypeCode                  |-> [i \in 1 .. 4 |-> 0],
+      capitalIncreaseTypeCode                                |-> [i \in 1 .. 2 |-> 0],
+      otherStockTypeCode                                     |-> [i \in 1 .. 1 |-> 0],
+      nationalStock                                          |-> [i \in 1 .. 1 |-> 0],
+      appraisedPrice                                         |-> [i \in 1 .. 8 |-> 0],
+      lowestOrderPrice                                       |-> [i \in 1 .. 8 |-> 0],
+      highestOrderPrice                                      |-> [i \in 1 .. 8 |-> 0],
+      unitOfVolumeInMainBoard                                |-> [i \in 1 .. 8 |-> 0],
+      lotSizeAfterHoursTrading                               |-> [i \in 1 .. 8 |-> 0],
+      reiTsTypeCode                                          |-> [i \in 1 .. 1 |-> 0],
+      targetStockIsinCode                                    |-> [i \in 1 .. 12 |-> 0],
+      currencyIsoCode                                        |-> [i \in 1 .. 3 |-> 0],
+      countryCode                                            |-> [i \in 1 .. 3 |-> 0],
+      marketMakingPossibility                                |-> [i \in 1 .. 1 |-> 0],
+      closingPriceTradingPossibilityInTheAfterHours          |-> [i \in 1 .. 1 |-> 0],
+      closingPriceTradingInThePreOpeningMarket               |-> [i \in 1 .. 1 |-> 0],
+      blockTradingInThePreOpeningMarket                      |-> [i \in 1 .. 1 |-> 0],
+      basketTradingInThePreOpeningMarket                     |-> [i \in 1 .. 1 |-> 0],
+      announcementOfEstimatedTradingPrice                    |-> [i \in 1 .. 1 |-> 0],
+      shortSelling                                           |-> [i \in 1 .. 1 |-> 0],
+      etfTrackingDifference                                  |-> [i \in 1 .. 8 |-> 0],
+      regs                                                   |-> [i \in 1 .. 1 |-> 0],
+      spac                                                   |-> [i \in 1 .. 1 |-> 0],
+      taxTypeCode                                            |-> [i \in 1 .. 1 |-> 0],
+      appraisalRatioOfSubstitutePrice                        |-> [i \in 1 .. 8 |-> 0],
+      investmentCautionIssue                                 |-> [i \in 1 .. 1 |-> 0],
+      delistingDate                                          |-> [i \in 1 .. 8 |-> 0],
+      shortTermOverheatIssueTypeCode                         |-> [i \in 1 .. 1 |-> 0],
+      etfReplicationMethodsTypeCode                          |-> [i \in 1 .. 1 |-> 0],
+      expirationDate                                         |-> [i \in 1 .. 8 |-> 0],
+      distributionTypeCode                                   |-> [i \in 1 .. 2 |-> 0],
+      calculationOfRedemptionPriceStartDate                  |-> [i \in 1 .. 8 |-> 0],
+      calculationOfRedemptionPriceEndDate                    |-> [i \in 1 .. 8 |-> 0],
+      etpProductTypeCode                                     |-> [i \in 1 .. 1 |-> 0],
+      indexCalculationInstitutionTypeCode                    |-> [i \in 1 .. 2 |-> 0],
+      indexMarketClassificationId                            |-> [i \in 1 .. 6 |-> 0],
+      indexSequenceNumber                                    |-> [i \in 1 .. 3 |-> 0],
+      trackingIndexLeverageInverseTypeCode                   |-> [i \in 1 .. 2 |-> 0],
+      referenceIndexLeverageInverseTypeCode                  |-> [i \in 1 .. 2 |-> 0],
+      indexAssetClassificationId1                            |-> [i \in 1 .. 6 |-> 0],
+      indexAssetClassificationId2                            |-> [i \in 1 .. 6 |-> 0],
+      ipoUnderwriterMemberNumber                             |-> [i \in 1 .. 5 |-> 0],
+      lpOrder                                                |-> [i \in 1 .. 1 |-> 0],
+      lowLiquidity                                           |-> [i \in 1 .. 1 |-> 0],
+      abnormalRise                                           |-> [i \in 1 .. 1 |-> 0],
+      upperLimitQuantity                                     |-> [i \in 1 .. 16 |-> 0],
+      investmentPrecautionIssue                              |-> [i \in 1 .. 1 |-> 0],
+      preferredStocksWithLesserShares                        |-> [i \in 1 .. 1 |-> 0],
+      spacMerger                                             |-> [i \in 1 .. 1 |-> 0],
+      segmentTypeCode                                        |-> [i \in 1 .. 1 |-> 0],
+      afterMarketPossibility                                 |-> [i \in 1 .. 1 |-> 0],
+      choiceOnCompetitiveTrading                             |-> [i \in 1 .. 1 |-> 0],
+      limitOnCompetitiveTradingVolume                        |-> [i \in 1 .. 1 |-> 0],
+      occurrenceOfReasonsProhibitingCompetitiveTrading       |-> [i \in 1 .. 1 |-> 0],
+      approvalOnCompetitiveTrading                           |-> [i \in 1 .. 1 |-> 0],
+      approvalOnNegotiationTrading                           |-> [i \in 1 .. 1 |-> 0],
+      yesterdaysClosingPriceTypeCodeNxt                      |-> [i \in 1 .. 1 |-> 0],
+      yesterdaysClosingPriceNxt                              |-> [i \in 1 .. 8 |-> 0],
+      competitionBoardTradePermissionCode                    |-> [i \in 1 .. 4 |-> 0],
+      negotiationPossibleOrNotBeforeMainMarket               |-> [i \in 1 .. 1 |-> 0],
+      endKeyword                                             |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Equities Batch Data Message at zero, then each field in turn at the values it is checked at *)
+CheckedEquitiesBatchDataMessage ==
+    { ZeroEquitiesBatchDataMessage }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.totalNumberOfInstrumentsOfTheContract = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.businessDate = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.abbreviatedIssueCode = one] : one \in Sample(9) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.abbreviatedIssueName = one] : one \in Sample(40) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.abbreviatedIssueNameInEn = one] : one \in Sample(40) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.groupNumber = one] : one \in Sample(5) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.marketOperationProductId = one] : one \in Sample(3) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.securityGroupId = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.unitTrading = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.rightsTypeCode = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.parValueTypeCode = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.anIssueOfWhichBasePriceIsSettledWithATodaysSinglePrice = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.reevaluationReasonCode = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.basePriceChange = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.randomEndTriggerCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.marketAlert = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.marketAlertTypeCode = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.koreaCorporateGovernanceStockPriceIndexKogi = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.issueForAdministration = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.unfaithfulDisclosure = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.backDoorListing = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.tradingHalt = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.industryId = one] : one \in Sample(10) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.smallMediumSizedBusiness = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.sectionTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.investmentInstitutionTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.basePrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.yesterdaysClosingPriceTypeCodeKrx = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.yesterdaysClosingPriceKrx = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.yesterdaysAccumulatedTradingAmount = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.yesterdaysAccumulatedTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.upperLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.lowerLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.substitutePriceOfSecurities = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.parValue = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.issuingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.listingDate = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.numberOfListedShares = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.liquidationTrade = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.theEstablishmentDate = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.maturityDate = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.exercisingPeriod = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.expirationDateForRight = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.exercisePriceOfElwOrBw = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.capital = one] : one \in Sample(16) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.creditOrderPossibility = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.limitOrderPermissionTypeCode = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.marketPriceOrderPermissionTypeCode = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.conditionedOrderPermissionTypeCode = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.bestFavorableOrderPermissionTypeCode = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.firstBestOrderPermissionType = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.midPriceOrderPermissionTypeCode = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.stopLimitPriceOrderPermissionTypeCode = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.capitalIncreaseTypeCode = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.otherStockTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.nationalStock = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.appraisedPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.lowestOrderPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.highestOrderPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.unitOfVolumeInMainBoard = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.lotSizeAfterHoursTrading = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.reiTsTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.targetStockIsinCode = one] : one \in Sample(12) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.currencyIsoCode = one] : one \in Sample(3) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.countryCode = one] : one \in Sample(3) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.marketMakingPossibility = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.closingPriceTradingPossibilityInTheAfterHours = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.closingPriceTradingInThePreOpeningMarket = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.blockTradingInThePreOpeningMarket = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.basketTradingInThePreOpeningMarket = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.announcementOfEstimatedTradingPrice = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.shortSelling = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.etfTrackingDifference = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.regs = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.spac = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.taxTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.appraisalRatioOfSubstitutePrice = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.investmentCautionIssue = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.delistingDate = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.shortTermOverheatIssueTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.etfReplicationMethodsTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.expirationDate = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.distributionTypeCode = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.calculationOfRedemptionPriceStartDate = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.calculationOfRedemptionPriceEndDate = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.etpProductTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.indexCalculationInstitutionTypeCode = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.indexMarketClassificationId = one] : one \in Sample(6) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.indexSequenceNumber = one] : one \in Sample(3) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.trackingIndexLeverageInverseTypeCode = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.referenceIndexLeverageInverseTypeCode = one] : one \in Sample(2) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.indexAssetClassificationId1 = one] : one \in Sample(6) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.indexAssetClassificationId2 = one] : one \in Sample(6) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.ipoUnderwriterMemberNumber = one] : one \in Sample(5) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.lpOrder = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.lowLiquidity = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.abnormalRise = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.upperLimitQuantity = one] : one \in Sample(16) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.investmentPrecautionIssue = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.preferredStocksWithLesserShares = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.spacMerger = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.segmentTypeCode = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.afterMarketPossibility = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.choiceOnCompetitiveTrading = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.limitOnCompetitiveTradingVolume = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.occurrenceOfReasonsProhibitingCompetitiveTrading = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.approvalOnCompetitiveTrading = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.approvalOnNegotiationTrading = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.yesterdaysClosingPriceTypeCodeNxt = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.yesterdaysClosingPriceNxt = one] : one \in Sample(8) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.competitionBoardTradePermissionCode = one] : one \in Sample(4) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.negotiationPossibleOrNotBeforeMainMarket = one] : one \in Sample(1) }
+        \cup { [ZeroEquitiesBatchDataMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Member Information Message: 201 bytes                                   *)
+(***************************************************************************)
+
+MemberInformationMessage ==
+    [ messageSequenceNumber                     : Sample(4),
+      businessDate                              : Sample(8),
+      marketParticipantNumber                   : Sample(5),
+      nameOfAMarketParticipantInKr              : Sample(80),
+      nameOfAMarketParticipantInEn              : Sample(80),
+      anAbbreviatedNameOfAMarketParticipantInKr : Sample(20),
+      endKeyword                                : Sample(4) ]
+
+EncodeMemberInformationMessage(message) ==
+    message.messageSequenceNumber
+        \o message.businessDate
+        \o message.marketParticipantNumber
+        \o message.nameOfAMarketParticipantInKr
+        \o message.nameOfAMarketParticipantInEn
+        \o message.anAbbreviatedNameOfAMarketParticipantInKr
+        \o message.endKeyword
+
+DecodeMemberInformationMessage(bytes) ==
+    LET messageSequenceNumber == ReadBytes(bytes, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET businessDate == ReadBytes(messageSequenceNumber.rest, 8) IN IF ~businessDate.ok THEN Fail ELSE
+    LET marketParticipantNumber == ReadBytes(businessDate.rest, 5) IN IF ~marketParticipantNumber.ok THEN Fail ELSE
+    LET nameOfAMarketParticipantInKr == ReadBytes(marketParticipantNumber.rest, 80) IN IF ~nameOfAMarketParticipantInKr.ok THEN Fail ELSE
+    LET nameOfAMarketParticipantInEn == ReadBytes(nameOfAMarketParticipantInKr.rest, 80) IN IF ~nameOfAMarketParticipantInEn.ok THEN Fail ELSE
+    LET anAbbreviatedNameOfAMarketParticipantInKr == ReadBytes(nameOfAMarketParticipantInEn.rest, 20) IN IF ~anAbbreviatedNameOfAMarketParticipantInKr.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(anAbbreviatedNameOfAMarketParticipantInKr.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ messageSequenceNumber                     |-> messageSequenceNumber.value,
+         businessDate                              |-> businessDate.value,
+         marketParticipantNumber                   |-> marketParticipantNumber.value,
+         nameOfAMarketParticipantInKr              |-> nameOfAMarketParticipantInKr.value,
+         nameOfAMarketParticipantInEn              |-> nameOfAMarketParticipantInEn.value,
+         anAbbreviatedNameOfAMarketParticipantInKr |-> anAbbreviatedNameOfAMarketParticipantInKr.value,
+         endKeyword                                |-> endKeyword.value ], endKeyword.rest)
+
+ZeroMemberInformationMessage ==
+    [ messageSequenceNumber                     |-> [i \in 1 .. 4 |-> 0],
+      businessDate                              |-> [i \in 1 .. 8 |-> 0],
+      marketParticipantNumber                   |-> [i \in 1 .. 5 |-> 0],
+      nameOfAMarketParticipantInKr              |-> [i \in 1 .. 80 |-> 0],
+      nameOfAMarketParticipantInEn              |-> [i \in 1 .. 80 |-> 0],
+      anAbbreviatedNameOfAMarketParticipantInKr |-> [i \in 1 .. 20 |-> 0],
+      endKeyword                                |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Member Information Message at zero, then each field in turn at the values it is checked at *)
+CheckedMemberInformationMessage ==
+    { ZeroMemberInformationMessage }
+        \cup { [ZeroMemberInformationMessage EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroMemberInformationMessage EXCEPT !.businessDate = one] : one \in Sample(8) }
+        \cup { [ZeroMemberInformationMessage EXCEPT !.marketParticipantNumber = one] : one \in Sample(5) }
+        \cup { [ZeroMemberInformationMessage EXCEPT !.nameOfAMarketParticipantInKr = one] : one \in Sample(80) }
+        \cup { [ZeroMemberInformationMessage EXCEPT !.nameOfAMarketParticipantInEn = one] : one \in Sample(80) }
+        \cup { [ZeroMemberInformationMessage EXCEPT !.anAbbreviatedNameOfAMarketParticipantInKr = one] : one \in Sample(20) }
+        \cup { [ZeroMemberInformationMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Issue Event Message: 42 bytes                                           *)
+(***************************************************************************)
+
+IssueEventMessage ==
+    [ messageSequenceNumber : Sample(4),
+      isinCode              : Sample(12),
+      eventTypeCode         : Sample(2),
+      eventReasonCode       : Sample(4),
+      eventStartDate        : Sample(8),
+      eventEndDate          : Sample(8),
+      endKeyword            : Sample(4) ]
+
+EncodeIssueEventMessage(message) ==
+    message.messageSequenceNumber
+        \o message.isinCode
+        \o message.eventTypeCode
+        \o message.eventReasonCode
+        \o message.eventStartDate
+        \o message.eventEndDate
+        \o message.endKeyword
+
+DecodeIssueEventMessage(bytes) ==
+    LET messageSequenceNumber == ReadBytes(bytes, 4) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(messageSequenceNumber.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET eventTypeCode == ReadBytes(isinCode.rest, 2) IN IF ~eventTypeCode.ok THEN Fail ELSE
+    LET eventReasonCode == ReadBytes(eventTypeCode.rest, 4) IN IF ~eventReasonCode.ok THEN Fail ELSE
+    LET eventStartDate == ReadBytes(eventReasonCode.rest, 8) IN IF ~eventStartDate.ok THEN Fail ELSE
+    LET eventEndDate == ReadBytes(eventStartDate.rest, 8) IN IF ~eventEndDate.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(eventEndDate.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ messageSequenceNumber |-> messageSequenceNumber.value,
+         isinCode              |-> isinCode.value,
+         eventTypeCode         |-> eventTypeCode.value,
+         eventReasonCode       |-> eventReasonCode.value,
+         eventStartDate        |-> eventStartDate.value,
+         eventEndDate          |-> eventEndDate.value,
+         endKeyword            |-> endKeyword.value ], endKeyword.rest)
+
+ZeroIssueEventMessage ==
+    [ messageSequenceNumber |-> [i \in 1 .. 4 |-> 0],
+      isinCode              |-> [i \in 1 .. 12 |-> 0],
+      eventTypeCode         |-> [i \in 1 .. 2 |-> 0],
+      eventReasonCode       |-> [i \in 1 .. 4 |-> 0],
+      eventStartDate        |-> [i \in 1 .. 8 |-> 0],
+      eventEndDate          |-> [i \in 1 .. 8 |-> 0],
+      endKeyword            |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Issue Event Message at zero, then each field in turn at the values it is checked at *)
+CheckedIssueEventMessage ==
+    { ZeroIssueEventMessage }
+        \cup { [ZeroIssueEventMessage EXCEPT !.messageSequenceNumber = one] : one \in Sample(4) }
+        \cup { [ZeroIssueEventMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroIssueEventMessage EXCEPT !.eventTypeCode = one] : one \in Sample(2) }
+        \cup { [ZeroIssueEventMessage EXCEPT !.eventReasonCode = one] : one \in Sample(4) }
+        \cup { [ZeroIssueEventMessage EXCEPT !.eventStartDate = one] : one \in Sample(8) }
+        \cup { [ZeroIssueEventMessage EXCEPT !.eventEndDate = one] : one \in Sample(8) }
+        \cup { [ZeroIssueEventMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Block Basket Trade Data Message: 46 bytes                               *)
+(***************************************************************************)
+
+BlockBasketTradeDataMessage ==
+    [ boardId                            : Sample(2),
+      isinCode                           : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx : Sample(4),
+      accumulatedTradingVolume           : Sample(8),
+      accumulatedTradingValue            : Sample(16),
+      endKeyword                         : Sample(4) ]
+
+EncodeBlockBasketTradeDataMessage(message) ==
+    message.boardId
+        \o message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.accumulatedTradingVolume
+        \o message.accumulatedTradingValue
+        \o message.endKeyword
+
+DecodeBlockBasketTradeDataMessage(bytes) ==
+    LET boardId == ReadBytes(bytes, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET isinCode == ReadBytes(boardId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET accumulatedTradingVolume == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 8) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
+    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 16) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(accumulatedTradingValue.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ boardId                            |-> boardId.value,
+         isinCode                           |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx |-> aDesignatedNumberForAnIssueFromKrx.value,
+         accumulatedTradingVolume           |-> accumulatedTradingVolume.value,
+         accumulatedTradingValue            |-> accumulatedTradingValue.value,
+         endKeyword                         |-> endKeyword.value ], endKeyword.rest)
+
+ZeroBlockBasketTradeDataMessage ==
+    [ boardId                            |-> [i \in 1 .. 2 |-> 0],
+      isinCode                           |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx |-> [i \in 1 .. 4 |-> 0],
+      accumulatedTradingVolume           |-> [i \in 1 .. 8 |-> 0],
+      accumulatedTradingValue            |-> [i \in 1 .. 16 |-> 0],
+      endKeyword                         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Block Basket Trade Data Message at zero, then each field in turn at the values it is checked at *)
+CheckedBlockBasketTradeDataMessage ==
+    { ZeroBlockBasketTradeDataMessage }
+        \cup { [ZeroBlockBasketTradeDataMessage EXCEPT !.boardId = one] : one \in Sample(2) }
+        \cup { [ZeroBlockBasketTradeDataMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroBlockBasketTradeDataMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroBlockBasketTradeDataMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroBlockBasketTradeDataMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroBlockBasketTradeDataMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Investor Activities Per An Issue Eod Message: 72 bytes                  *)
+(***************************************************************************)
+
+InvestorActivitiesPerAnIssueEodMessage ==
+    [ isinCode                           : Sample(12),
+      aDesignatedNumberForAnIssueFromKrx : Sample(4),
+      investorCode                       : Sample(4),
+      accumulatedAskTradingVolume        : Sample(8),
+      accumulatedAskTradingValue         : Sample(16),
+      accumulatedBidTradingVolume        : Sample(8),
+      accumulatedBidTradingValue         : Sample(16),
+      endKeyword                         : Sample(4) ]
+
+EncodeInvestorActivitiesPerAnIssueEodMessage(message) ==
+    message.isinCode
+        \o message.aDesignatedNumberForAnIssueFromKrx
+        \o message.investorCode
+        \o message.accumulatedAskTradingVolume
+        \o message.accumulatedAskTradingValue
+        \o message.accumulatedBidTradingVolume
+        \o message.accumulatedBidTradingValue
+        \o message.endKeyword
+
+DecodeInvestorActivitiesPerAnIssueEodMessage(bytes) ==
+    LET isinCode == ReadBytes(bytes, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET aDesignatedNumberForAnIssueFromKrx == ReadBytes(isinCode.rest, 4) IN IF ~aDesignatedNumberForAnIssueFromKrx.ok THEN Fail ELSE
+    LET investorCode == ReadBytes(aDesignatedNumberForAnIssueFromKrx.rest, 4) IN IF ~investorCode.ok THEN Fail ELSE
+    LET accumulatedAskTradingVolume == ReadBytes(investorCode.rest, 8) IN IF ~accumulatedAskTradingVolume.ok THEN Fail ELSE
+    LET accumulatedAskTradingValue == ReadBytes(accumulatedAskTradingVolume.rest, 16) IN IF ~accumulatedAskTradingValue.ok THEN Fail ELSE
+    LET accumulatedBidTradingVolume == ReadBytes(accumulatedAskTradingValue.rest, 8) IN IF ~accumulatedBidTradingVolume.ok THEN Fail ELSE
+    LET accumulatedBidTradingValue == ReadBytes(accumulatedBidTradingVolume.rest, 16) IN IF ~accumulatedBidTradingValue.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(accumulatedBidTradingValue.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ isinCode                           |-> isinCode.value,
+         aDesignatedNumberForAnIssueFromKrx |-> aDesignatedNumberForAnIssueFromKrx.value,
+         investorCode                       |-> investorCode.value,
+         accumulatedAskTradingVolume        |-> accumulatedAskTradingVolume.value,
+         accumulatedAskTradingValue         |-> accumulatedAskTradingValue.value,
+         accumulatedBidTradingVolume        |-> accumulatedBidTradingVolume.value,
+         accumulatedBidTradingValue         |-> accumulatedBidTradingValue.value,
+         endKeyword                         |-> endKeyword.value ], endKeyword.rest)
+
+ZeroInvestorActivitiesPerAnIssueEodMessage ==
+    [ isinCode                           |-> [i \in 1 .. 12 |-> 0],
+      aDesignatedNumberForAnIssueFromKrx |-> [i \in 1 .. 4 |-> 0],
+      investorCode                       |-> [i \in 1 .. 4 |-> 0],
+      accumulatedAskTradingVolume        |-> [i \in 1 .. 8 |-> 0],
+      accumulatedAskTradingValue         |-> [i \in 1 .. 16 |-> 0],
+      accumulatedBidTradingVolume        |-> [i \in 1 .. 8 |-> 0],
+      accumulatedBidTradingValue         |-> [i \in 1 .. 16 |-> 0],
+      endKeyword                         |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Investor Activities Per An Issue Eod Message at zero, then each field in turn at the values it is checked at *)
+CheckedInvestorActivitiesPerAnIssueEodMessage ==
+    { ZeroInvestorActivitiesPerAnIssueEodMessage }
+        \cup { [ZeroInvestorActivitiesPerAnIssueEodMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroInvestorActivitiesPerAnIssueEodMessage EXCEPT !.aDesignatedNumberForAnIssueFromKrx = one] : one \in Sample(4) }
+        \cup { [ZeroInvestorActivitiesPerAnIssueEodMessage EXCEPT !.investorCode = one] : one \in Sample(4) }
+        \cup { [ZeroInvestorActivitiesPerAnIssueEodMessage EXCEPT !.accumulatedAskTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroInvestorActivitiesPerAnIssueEodMessage EXCEPT !.accumulatedAskTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroInvestorActivitiesPerAnIssueEodMessage EXCEPT !.accumulatedBidTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroInvestorActivitiesPerAnIssueEodMessage EXCEPT !.accumulatedBidTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroInvestorActivitiesPerAnIssueEodMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Short Selling Message: 88 bytes                                         *)
+(***************************************************************************)
+
+ShortSellingMessage ==
+    [ isinCode                                            : Sample(12),
+      coveredShortSellingTradingVolume                    : Sample(8),
+      coveredShortSellingTradingValue                     : Sample(16),
+      uptickRuleAppliedCoveredShortSellingTradingVolume   : Sample(8),
+      uptickRuleAppliedCoveredShortSellingTradingValue    : Sample(16),
+      uptickRuleUnappliedCoveredShortSellingTradingVolume : Sample(8),
+      uptickRuleUnappliedCoveredShortSellingTradingValue  : Sample(16),
+      endKeyword                                          : Sample(4) ]
+
+EncodeShortSellingMessage(message) ==
+    message.isinCode
+        \o message.coveredShortSellingTradingVolume
+        \o message.coveredShortSellingTradingValue
+        \o message.uptickRuleAppliedCoveredShortSellingTradingVolume
+        \o message.uptickRuleAppliedCoveredShortSellingTradingValue
+        \o message.uptickRuleUnappliedCoveredShortSellingTradingVolume
+        \o message.uptickRuleUnappliedCoveredShortSellingTradingValue
+        \o message.endKeyword
+
+DecodeShortSellingMessage(bytes) ==
+    LET isinCode == ReadBytes(bytes, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET coveredShortSellingTradingVolume == ReadBytes(isinCode.rest, 8) IN IF ~coveredShortSellingTradingVolume.ok THEN Fail ELSE
+    LET coveredShortSellingTradingValue == ReadBytes(coveredShortSellingTradingVolume.rest, 16) IN IF ~coveredShortSellingTradingValue.ok THEN Fail ELSE
+    LET uptickRuleAppliedCoveredShortSellingTradingVolume == ReadBytes(coveredShortSellingTradingValue.rest, 8) IN IF ~uptickRuleAppliedCoveredShortSellingTradingVolume.ok THEN Fail ELSE
+    LET uptickRuleAppliedCoveredShortSellingTradingValue == ReadBytes(uptickRuleAppliedCoveredShortSellingTradingVolume.rest, 16) IN IF ~uptickRuleAppliedCoveredShortSellingTradingValue.ok THEN Fail ELSE
+    LET uptickRuleUnappliedCoveredShortSellingTradingVolume == ReadBytes(uptickRuleAppliedCoveredShortSellingTradingValue.rest, 8) IN IF ~uptickRuleUnappliedCoveredShortSellingTradingVolume.ok THEN Fail ELSE
+    LET uptickRuleUnappliedCoveredShortSellingTradingValue == ReadBytes(uptickRuleUnappliedCoveredShortSellingTradingVolume.rest, 16) IN IF ~uptickRuleUnappliedCoveredShortSellingTradingValue.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(uptickRuleUnappliedCoveredShortSellingTradingValue.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ isinCode                                            |-> isinCode.value,
+         coveredShortSellingTradingVolume                    |-> coveredShortSellingTradingVolume.value,
+         coveredShortSellingTradingValue                     |-> coveredShortSellingTradingValue.value,
+         uptickRuleAppliedCoveredShortSellingTradingVolume   |-> uptickRuleAppliedCoveredShortSellingTradingVolume.value,
+         uptickRuleAppliedCoveredShortSellingTradingValue    |-> uptickRuleAppliedCoveredShortSellingTradingValue.value,
+         uptickRuleUnappliedCoveredShortSellingTradingVolume |-> uptickRuleUnappliedCoveredShortSellingTradingVolume.value,
+         uptickRuleUnappliedCoveredShortSellingTradingValue  |-> uptickRuleUnappliedCoveredShortSellingTradingValue.value,
+         endKeyword                                          |-> endKeyword.value ], endKeyword.rest)
+
+ZeroShortSellingMessage ==
+    [ isinCode                                            |-> [i \in 1 .. 12 |-> 0],
+      coveredShortSellingTradingVolume                    |-> [i \in 1 .. 8 |-> 0],
+      coveredShortSellingTradingValue                     |-> [i \in 1 .. 16 |-> 0],
+      uptickRuleAppliedCoveredShortSellingTradingVolume   |-> [i \in 1 .. 8 |-> 0],
+      uptickRuleAppliedCoveredShortSellingTradingValue    |-> [i \in 1 .. 16 |-> 0],
+      uptickRuleUnappliedCoveredShortSellingTradingVolume |-> [i \in 1 .. 8 |-> 0],
+      uptickRuleUnappliedCoveredShortSellingTradingValue  |-> [i \in 1 .. 16 |-> 0],
+      endKeyword                                          |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Short Selling Message at zero, then each field in turn at the values it is checked at *)
+CheckedShortSellingMessage ==
+    { ZeroShortSellingMessage }
+        \cup { [ZeroShortSellingMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroShortSellingMessage EXCEPT !.coveredShortSellingTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroShortSellingMessage EXCEPT !.coveredShortSellingTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroShortSellingMessage EXCEPT !.uptickRuleAppliedCoveredShortSellingTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroShortSellingMessage EXCEPT !.uptickRuleAppliedCoveredShortSellingTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroShortSellingMessage EXCEPT !.uptickRuleUnappliedCoveredShortSellingTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroShortSellingMessage EXCEPT !.uptickRuleUnappliedCoveredShortSellingTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroShortSellingMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Brokers Acitity Information Message: 69 bytes                           *)
+(***************************************************************************)
+
+BrokersAcitityInformationMessage ==
+    [ isinCode                    : Sample(12),
+      memberNumber                : Sample(5),
+      accumulatedAskTradingVolume : Sample(8),
+      accumulatedAskTradingValue  : Sample(16),
+      accumulatedBidTradingVolume : Sample(8),
+      accumulatedBidTradingValue  : Sample(16),
+      endKeyword                  : Sample(4) ]
+
+EncodeBrokersAcitityInformationMessage(message) ==
+    message.isinCode
+        \o message.memberNumber
+        \o message.accumulatedAskTradingVolume
+        \o message.accumulatedAskTradingValue
+        \o message.accumulatedBidTradingVolume
+        \o message.accumulatedBidTradingValue
+        \o message.endKeyword
+
+DecodeBrokersAcitityInformationMessage(bytes) ==
+    LET isinCode == ReadBytes(bytes, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET memberNumber == ReadBytes(isinCode.rest, 5) IN IF ~memberNumber.ok THEN Fail ELSE
+    LET accumulatedAskTradingVolume == ReadBytes(memberNumber.rest, 8) IN IF ~accumulatedAskTradingVolume.ok THEN Fail ELSE
+    LET accumulatedAskTradingValue == ReadBytes(accumulatedAskTradingVolume.rest, 16) IN IF ~accumulatedAskTradingValue.ok THEN Fail ELSE
+    LET accumulatedBidTradingVolume == ReadBytes(accumulatedAskTradingValue.rest, 8) IN IF ~accumulatedBidTradingVolume.ok THEN Fail ELSE
+    LET accumulatedBidTradingValue == ReadBytes(accumulatedBidTradingVolume.rest, 16) IN IF ~accumulatedBidTradingValue.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(accumulatedBidTradingValue.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ isinCode                    |-> isinCode.value,
+         memberNumber                |-> memberNumber.value,
+         accumulatedAskTradingVolume |-> accumulatedAskTradingVolume.value,
+         accumulatedAskTradingValue  |-> accumulatedAskTradingValue.value,
+         accumulatedBidTradingVolume |-> accumulatedBidTradingVolume.value,
+         accumulatedBidTradingValue  |-> accumulatedBidTradingValue.value,
+         endKeyword                  |-> endKeyword.value ], endKeyword.rest)
+
+ZeroBrokersAcitityInformationMessage ==
+    [ isinCode                    |-> [i \in 1 .. 12 |-> 0],
+      memberNumber                |-> [i \in 1 .. 5 |-> 0],
+      accumulatedAskTradingVolume |-> [i \in 1 .. 8 |-> 0],
+      accumulatedAskTradingValue  |-> [i \in 1 .. 16 |-> 0],
+      accumulatedBidTradingVolume |-> [i \in 1 .. 8 |-> 0],
+      accumulatedBidTradingValue  |-> [i \in 1 .. 16 |-> 0],
+      endKeyword                  |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Brokers Acitity Information Message at zero, then each field in turn at the values it is checked at *)
+CheckedBrokersAcitityInformationMessage ==
+    { ZeroBrokersAcitityInformationMessage }
+        \cup { [ZeroBrokersAcitityInformationMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroBrokersAcitityInformationMessage EXCEPT !.memberNumber = one] : one \in Sample(5) }
+        \cup { [ZeroBrokersAcitityInformationMessage EXCEPT !.accumulatedAskTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroBrokersAcitityInformationMessage EXCEPT !.accumulatedAskTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroBrokersAcitityInformationMessage EXCEPT !.accumulatedBidTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroBrokersAcitityInformationMessage EXCEPT !.accumulatedBidTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroBrokersAcitityInformationMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Trading Activity By Session Per An Issue Message: 92 bytes              *)
+(***************************************************************************)
+
+TradingActivityBySessionPerAnIssueMessage ==
+    [ isinCode                                        : Sample(12),
+      totalNumberOfTradableIssuesOnCompetitiveTrading : Sample(4),
+      preMarketAccumulatedTradingVolume               : Sample(8),
+      preMarketAccumulatedTradingValue                : Sample(16),
+      mainMarketAccumulatedTradingVolume              : Sample(8),
+      mainMarketAccumulatedTradingValue               : Sample(16),
+      afterMarketAccumulatedTradingVolume             : Sample(8),
+      afterMarketAccumulatedTradingValue              : Sample(16),
+      endKeyword                                      : Sample(4) ]
+
+EncodeTradingActivityBySessionPerAnIssueMessage(message) ==
+    message.isinCode
+        \o message.totalNumberOfTradableIssuesOnCompetitiveTrading
+        \o message.preMarketAccumulatedTradingVolume
+        \o message.preMarketAccumulatedTradingValue
+        \o message.mainMarketAccumulatedTradingVolume
+        \o message.mainMarketAccumulatedTradingValue
+        \o message.afterMarketAccumulatedTradingVolume
+        \o message.afterMarketAccumulatedTradingValue
+        \o message.endKeyword
+
+DecodeTradingActivityBySessionPerAnIssueMessage(bytes) ==
+    LET isinCode == ReadBytes(bytes, 12) IN IF ~isinCode.ok THEN Fail ELSE
+    LET totalNumberOfTradableIssuesOnCompetitiveTrading == ReadBytes(isinCode.rest, 4) IN IF ~totalNumberOfTradableIssuesOnCompetitiveTrading.ok THEN Fail ELSE
+    LET preMarketAccumulatedTradingVolume == ReadBytes(totalNumberOfTradableIssuesOnCompetitiveTrading.rest, 8) IN IF ~preMarketAccumulatedTradingVolume.ok THEN Fail ELSE
+    LET preMarketAccumulatedTradingValue == ReadBytes(preMarketAccumulatedTradingVolume.rest, 16) IN IF ~preMarketAccumulatedTradingValue.ok THEN Fail ELSE
+    LET mainMarketAccumulatedTradingVolume == ReadBytes(preMarketAccumulatedTradingValue.rest, 8) IN IF ~mainMarketAccumulatedTradingVolume.ok THEN Fail ELSE
+    LET mainMarketAccumulatedTradingValue == ReadBytes(mainMarketAccumulatedTradingVolume.rest, 16) IN IF ~mainMarketAccumulatedTradingValue.ok THEN Fail ELSE
+    LET afterMarketAccumulatedTradingVolume == ReadBytes(mainMarketAccumulatedTradingValue.rest, 8) IN IF ~afterMarketAccumulatedTradingVolume.ok THEN Fail ELSE
+    LET afterMarketAccumulatedTradingValue == ReadBytes(afterMarketAccumulatedTradingVolume.rest, 16) IN IF ~afterMarketAccumulatedTradingValue.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(afterMarketAccumulatedTradingValue.rest, 4) IN IF ~endKeyword.ok THEN Fail ELSE
+    Ok([ isinCode                                        |-> isinCode.value,
+         totalNumberOfTradableIssuesOnCompetitiveTrading |-> totalNumberOfTradableIssuesOnCompetitiveTrading.value,
+         preMarketAccumulatedTradingVolume               |-> preMarketAccumulatedTradingVolume.value,
+         preMarketAccumulatedTradingValue                |-> preMarketAccumulatedTradingValue.value,
+         mainMarketAccumulatedTradingVolume              |-> mainMarketAccumulatedTradingVolume.value,
+         mainMarketAccumulatedTradingValue               |-> mainMarketAccumulatedTradingValue.value,
+         afterMarketAccumulatedTradingVolume             |-> afterMarketAccumulatedTradingVolume.value,
+         afterMarketAccumulatedTradingValue              |-> afterMarketAccumulatedTradingValue.value,
+         endKeyword                                      |-> endKeyword.value ], endKeyword.rest)
+
+ZeroTradingActivityBySessionPerAnIssueMessage ==
+    [ isinCode                                        |-> [i \in 1 .. 12 |-> 0],
+      totalNumberOfTradableIssuesOnCompetitiveTrading |-> [i \in 1 .. 4 |-> 0],
+      preMarketAccumulatedTradingVolume               |-> [i \in 1 .. 8 |-> 0],
+      preMarketAccumulatedTradingValue                |-> [i \in 1 .. 16 |-> 0],
+      mainMarketAccumulatedTradingVolume              |-> [i \in 1 .. 8 |-> 0],
+      mainMarketAccumulatedTradingValue               |-> [i \in 1 .. 16 |-> 0],
+      afterMarketAccumulatedTradingVolume             |-> [i \in 1 .. 8 |-> 0],
+      afterMarketAccumulatedTradingValue              |-> [i \in 1 .. 16 |-> 0],
+      endKeyword                                      |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Trading Activity By Session Per An Issue Message at zero, then each field in turn at the values it is checked at *)
+CheckedTradingActivityBySessionPerAnIssueMessage ==
+    { ZeroTradingActivityBySessionPerAnIssueMessage }
+        \cup { [ZeroTradingActivityBySessionPerAnIssueMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
+        \cup { [ZeroTradingActivityBySessionPerAnIssueMessage EXCEPT !.totalNumberOfTradableIssuesOnCompetitiveTrading = one] : one \in Sample(4) }
+        \cup { [ZeroTradingActivityBySessionPerAnIssueMessage EXCEPT !.preMarketAccumulatedTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroTradingActivityBySessionPerAnIssueMessage EXCEPT !.preMarketAccumulatedTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroTradingActivityBySessionPerAnIssueMessage EXCEPT !.mainMarketAccumulatedTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroTradingActivityBySessionPerAnIssueMessage EXCEPT !.mainMarketAccumulatedTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroTradingActivityBySessionPerAnIssueMessage EXCEPT !.afterMarketAccumulatedTradingVolume = one] : one \in Sample(8) }
+        \cup { [ZeroTradingActivityBySessionPerAnIssueMessage EXCEPT !.afterMarketAccumulatedTradingValue = one] : one \in Sample(16) }
+        \cup { [ZeroTradingActivityBySessionPerAnIssueMessage EXCEPT !.endKeyword = one] : one \in Sample(4) }
+
+(***************************************************************************)
+(* Payload, selected by TR Code                                            *)
+(***************************************************************************)
+
+PollingDataMessageCode == <<73, 50, 53, 48, 48>>  \* "I2500"
+SecuritiesQuote10LevelMessageCode == <<66, 54, 53, 49, 83>>  \* "B651S"
+SecuritiesQuote10LevelMessageCode2 == <<66, 54, 53, 49, 81>>  \* "B651Q"
+SecuritiesOrderFilledMessageCode == <<65, 51, 53, 49, 83>>  \* "A351S"
+SecuritiesOrderFilledMessageCode2 == <<65, 51, 53, 49, 81>>  \* "A351Q"
+MarketOperationTsMessageCode == <<65, 55, 53, 49, 83>>  \* "A751S"
+MarketOperationTsMessageCode2 == <<65, 55, 53, 49, 81>>  \* "A751Q"
+IssueClosingMessageCode == <<65, 54, 53, 49, 83>>  \* "A651S"
+IssueClosingMessageCode2 == <<65, 54, 53, 49, 81>>  \* "A651Q"
+TriggeringRemovingViMessageCode == <<82, 56, 53, 49, 83>>  \* "R851S"
+TriggeringRemovingViMessageCode2 == <<82, 56, 53, 49, 81>>  \* "R851Q"
+ClosingPriceTradingQuoteMessageCode == <<69, 49, 53, 49, 83>>  \* "E151S"
+ClosingPriceTradingQuoteMessageCode2 == <<69, 49, 53, 49, 81>>  \* "E151Q"
+EquitiesSnapshot10LevelMessageCode == <<66, 50, 53, 49, 83>>  \* "B251S"
+EquitiesSnapshot10LevelMessageCode2 == <<66, 50, 53, 49, 81>>  \* "B251Q"
+InvestorActivitiesPerAnIndustryMessageCode == <<67, 48, 53, 49, 83>>  \* "C051S"
+InvestorActivitiesPerAnIndustryMessageCode2 == <<67, 48, 53, 49, 81>>  \* "C051Q"
+CurrentMovementMessageCode == <<66, 53, 53, 49, 83>>  \* "B551S"
+CurrentMovementMessageCode2 == <<66, 53, 53, 49, 81>>  \* "B551Q"
+ProgramTradingActivityPerInvestorMessageCode == <<80, 48, 53, 49, 83>>  \* "P051S"
+ProgramTradingActivityPerInvestorMessageCode2 == <<80, 48, 53, 49, 81>>  \* "P051Q"
+ProgramTradingInformationPerIssueAggregatedInformationMessageCode == <<67, 51, 53, 49, 83>>  \* "C351S"
+ProgramTradingInformationPerIssueAggregatedInformationMessageCode2 == <<67, 51, 53, 49, 81>>  \* "C351Q"
+ProgramTradingInformationOfTotalAggregatedInformationMessageCode == <<74, 48, 53, 49, 83>>  \* "J051S"
+ProgramTradingInformationOfTotalAggregatedInformationMessageCode2 == <<74, 48, 53, 49, 81>>  \* "J051Q"
+MarketOperationScheduleMessageCode == <<77, 52, 53, 49, 83>>  \* "M451S"
+MarketOperationScheduleMessageCode2 == <<77, 52, 53, 49, 81>>  \* "M451Q"
+MemberFirmImposingLiftingSanctionsMessageCode == <<82, 51, 53, 49, 84>>  \* "R351T"
+TopFiveTradersActivitiesMessageCode == <<66, 57, 53, 49, 83>>  \* "B951S"
+TopFiveTradersActivitiesMessageCode2 == <<66, 57, 53, 49, 81>>  \* "B951Q"
+EquitiesBatchDataMessageCode == <<65, 48, 53, 49, 83>>  \* "A051S"
+EquitiesBatchDataMessageCode2 == <<69, 48, 53, 49, 83>>  \* "E051S"
+EquitiesBatchDataMessageCode3 == <<65, 48, 53, 49, 81>>  \* "A051Q"
+EquitiesBatchDataMessageCode4 == <<69, 48, 53, 49, 81>>  \* "E051Q"
+MemberInformationMessageCode == <<77, 57, 53, 49, 84>>  \* "M951T"
+MemberInformationMessageCode2 == <<69, 56, 53, 49, 84>>  \* "E851T"
+IssueEventMessageCode == <<73, 54, 53, 49, 83>>  \* "I651S"
+IssueEventMessageCode2 == <<69, 54, 53, 49, 83>>  \* "E651S"
+IssueEventMessageCode3 == <<73, 54, 53, 49, 81>>  \* "I651Q"
+IssueEventMessageCode4 == <<69, 54, 53, 49, 81>>  \* "E651Q"
+BlockBasketTradeDataMessageCode == <<67, 52, 53, 49, 83>>  \* "C451S"
+BlockBasketTradeDataMessageCode2 == <<67, 52, 53, 49, 81>>  \* "C451Q"
+InvestorActivitiesPerAnIssueEodMessageCode == <<67, 49, 53, 49, 83>>  \* "C151S"
+InvestorActivitiesPerAnIssueEodMessageCode2 == <<67, 49, 53, 49, 81>>  \* "C151Q"
+ShortSellingMessageCode == <<73, 56, 53, 49, 83>>  \* "I851S"
+ShortSellingMessageCode2 == <<73, 56, 53, 49, 81>>  \* "I851Q"
+BrokersAcitityInformationMessageCode == <<69, 50, 53, 49, 83>>  \* "E251S"
+BrokersAcitityInformationMessageCode2 == <<69, 50, 53, 49, 81>>  \* "E251Q"
+TradingActivityBySessionPerAnIssueMessageCode == <<69, 51, 53, 49, 83>>  \* "E351S"
+TradingActivityBySessionPerAnIssueMessageCode2 == <<69, 51, 53, 49, 81>>  \* "E351Q"
+
+Payload ==
+    [ tag : {PollingDataMessageCode}, body : PollingDataMessage ]
+        \cup [ tag : {SecuritiesQuote10LevelMessageCode}, body : SecuritiesQuote10LevelMessage ]
+        \cup [ tag : {SecuritiesQuote10LevelMessageCode2}, body : SecuritiesQuote10LevelMessage ]
+        \cup [ tag : {SecuritiesOrderFilledMessageCode}, body : SecuritiesOrderFilledMessage ]
+        \cup [ tag : {SecuritiesOrderFilledMessageCode2}, body : SecuritiesOrderFilledMessage ]
+        \cup [ tag : {MarketOperationTsMessageCode}, body : MarketOperationTsMessage ]
+        \cup [ tag : {MarketOperationTsMessageCode2}, body : MarketOperationTsMessage ]
+        \cup [ tag : {IssueClosingMessageCode}, body : IssueClosingMessage ]
+        \cup [ tag : {IssueClosingMessageCode2}, body : IssueClosingMessage ]
+        \cup [ tag : {TriggeringRemovingViMessageCode}, body : TriggeringRemovingViMessage ]
+        \cup [ tag : {TriggeringRemovingViMessageCode2}, body : TriggeringRemovingViMessage ]
+        \cup [ tag : {ClosingPriceTradingQuoteMessageCode}, body : ClosingPriceTradingQuoteMessage ]
+        \cup [ tag : {ClosingPriceTradingQuoteMessageCode2}, body : ClosingPriceTradingQuoteMessage ]
+        \cup [ tag : {EquitiesSnapshot10LevelMessageCode}, body : EquitiesSnapshot10LevelMessage ]
+        \cup [ tag : {EquitiesSnapshot10LevelMessageCode2}, body : EquitiesSnapshot10LevelMessage ]
+        \cup [ tag : {InvestorActivitiesPerAnIndustryMessageCode}, body : InvestorActivitiesPerAnIndustryMessage ]
+        \cup [ tag : {InvestorActivitiesPerAnIndustryMessageCode2}, body : InvestorActivitiesPerAnIndustryMessage ]
+        \cup [ tag : {CurrentMovementMessageCode}, body : CurrentMovementMessage ]
+        \cup [ tag : {CurrentMovementMessageCode2}, body : CurrentMovementMessage ]
+        \cup [ tag : {ProgramTradingActivityPerInvestorMessageCode}, body : ProgramTradingActivityPerInvestorMessage ]
+        \cup [ tag : {ProgramTradingActivityPerInvestorMessageCode2}, body : ProgramTradingActivityPerInvestorMessage ]
+        \cup [ tag : {ProgramTradingInformationPerIssueAggregatedInformationMessageCode}, body : ProgramTradingInformationPerIssueAggregatedInformationMessage ]
+        \cup [ tag : {ProgramTradingInformationPerIssueAggregatedInformationMessageCode2}, body : ProgramTradingInformationPerIssueAggregatedInformationMessage ]
+        \cup [ tag : {ProgramTradingInformationOfTotalAggregatedInformationMessageCode}, body : ProgramTradingInformationOfTotalAggregatedInformationMessage ]
+        \cup [ tag : {ProgramTradingInformationOfTotalAggregatedInformationMessageCode2}, body : ProgramTradingInformationOfTotalAggregatedInformationMessage ]
+        \cup [ tag : {MarketOperationScheduleMessageCode}, body : MarketOperationScheduleMessage ]
+        \cup [ tag : {MarketOperationScheduleMessageCode2}, body : MarketOperationScheduleMessage ]
+        \cup [ tag : {MemberFirmImposingLiftingSanctionsMessageCode}, body : MemberFirmImposingLiftingSanctionsMessage ]
+        \cup [ tag : {TopFiveTradersActivitiesMessageCode}, body : TopFiveTradersActivitiesMessage ]
+        \cup [ tag : {TopFiveTradersActivitiesMessageCode2}, body : TopFiveTradersActivitiesMessage ]
+        \cup [ tag : {EquitiesBatchDataMessageCode}, body : EquitiesBatchDataMessage ]
+        \cup [ tag : {EquitiesBatchDataMessageCode2}, body : EquitiesBatchDataMessage ]
+        \cup [ tag : {EquitiesBatchDataMessageCode3}, body : EquitiesBatchDataMessage ]
+        \cup [ tag : {EquitiesBatchDataMessageCode4}, body : EquitiesBatchDataMessage ]
+        \cup [ tag : {MemberInformationMessageCode}, body : MemberInformationMessage ]
+        \cup [ tag : {MemberInformationMessageCode2}, body : MemberInformationMessage ]
+        \cup [ tag : {IssueEventMessageCode}, body : IssueEventMessage ]
+        \cup [ tag : {IssueEventMessageCode2}, body : IssueEventMessage ]
+        \cup [ tag : {IssueEventMessageCode3}, body : IssueEventMessage ]
+        \cup [ tag : {IssueEventMessageCode4}, body : IssueEventMessage ]
+        \cup [ tag : {BlockBasketTradeDataMessageCode}, body : BlockBasketTradeDataMessage ]
+        \cup [ tag : {BlockBasketTradeDataMessageCode2}, body : BlockBasketTradeDataMessage ]
+        \cup [ tag : {InvestorActivitiesPerAnIssueEodMessageCode}, body : InvestorActivitiesPerAnIssueEodMessage ]
+        \cup [ tag : {InvestorActivitiesPerAnIssueEodMessageCode2}, body : InvestorActivitiesPerAnIssueEodMessage ]
+        \cup [ tag : {ShortSellingMessageCode}, body : ShortSellingMessage ]
+        \cup [ tag : {ShortSellingMessageCode2}, body : ShortSellingMessage ]
+        \cup [ tag : {BrokersAcitityInformationMessageCode}, body : BrokersAcitityInformationMessage ]
+        \cup [ tag : {BrokersAcitityInformationMessageCode2}, body : BrokersAcitityInformationMessage ]
+        \cup [ tag : {TradingActivityBySessionPerAnIssueMessageCode}, body : TradingActivityBySessionPerAnIssueMessage ]
+        \cup [ tag : {TradingActivityBySessionPerAnIssueMessageCode2}, body : TradingActivityBySessionPerAnIssueMessage ]
+
+EncodePayload(message) ==
+    CASE message.tag = PollingDataMessageCode -> EncodePollingDataMessage(message.body)
+      [] message.tag = SecuritiesQuote10LevelMessageCode -> EncodeSecuritiesQuote10LevelMessage(message.body)
+      [] message.tag = SecuritiesQuote10LevelMessageCode2 -> EncodeSecuritiesQuote10LevelMessage(message.body)
+      [] message.tag = SecuritiesOrderFilledMessageCode -> EncodeSecuritiesOrderFilledMessage(message.body)
+      [] message.tag = SecuritiesOrderFilledMessageCode2 -> EncodeSecuritiesOrderFilledMessage(message.body)
+      [] message.tag = MarketOperationTsMessageCode -> EncodeMarketOperationTsMessage(message.body)
+      [] message.tag = MarketOperationTsMessageCode2 -> EncodeMarketOperationTsMessage(message.body)
+      [] message.tag = IssueClosingMessageCode -> EncodeIssueClosingMessage(message.body)
+      [] message.tag = IssueClosingMessageCode2 -> EncodeIssueClosingMessage(message.body)
+      [] message.tag = TriggeringRemovingViMessageCode -> EncodeTriggeringRemovingViMessage(message.body)
+      [] message.tag = TriggeringRemovingViMessageCode2 -> EncodeTriggeringRemovingViMessage(message.body)
+      [] message.tag = ClosingPriceTradingQuoteMessageCode -> EncodeClosingPriceTradingQuoteMessage(message.body)
+      [] message.tag = ClosingPriceTradingQuoteMessageCode2 -> EncodeClosingPriceTradingQuoteMessage(message.body)
+      [] message.tag = EquitiesSnapshot10LevelMessageCode -> EncodeEquitiesSnapshot10LevelMessage(message.body)
+      [] message.tag = EquitiesSnapshot10LevelMessageCode2 -> EncodeEquitiesSnapshot10LevelMessage(message.body)
+      [] message.tag = InvestorActivitiesPerAnIndustryMessageCode -> EncodeInvestorActivitiesPerAnIndustryMessage(message.body)
+      [] message.tag = InvestorActivitiesPerAnIndustryMessageCode2 -> EncodeInvestorActivitiesPerAnIndustryMessage(message.body)
+      [] message.tag = CurrentMovementMessageCode -> EncodeCurrentMovementMessage(message.body)
+      [] message.tag = CurrentMovementMessageCode2 -> EncodeCurrentMovementMessage(message.body)
+      [] message.tag = ProgramTradingActivityPerInvestorMessageCode -> EncodeProgramTradingActivityPerInvestorMessage(message.body)
+      [] message.tag = ProgramTradingActivityPerInvestorMessageCode2 -> EncodeProgramTradingActivityPerInvestorMessage(message.body)
+      [] message.tag = ProgramTradingInformationPerIssueAggregatedInformationMessageCode -> EncodeProgramTradingInformationPerIssueAggregatedInformationMessage(message.body)
+      [] message.tag = ProgramTradingInformationPerIssueAggregatedInformationMessageCode2 -> EncodeProgramTradingInformationPerIssueAggregatedInformationMessage(message.body)
+      [] message.tag = ProgramTradingInformationOfTotalAggregatedInformationMessageCode -> EncodeProgramTradingInformationOfTotalAggregatedInformationMessage(message.body)
+      [] message.tag = ProgramTradingInformationOfTotalAggregatedInformationMessageCode2 -> EncodeProgramTradingInformationOfTotalAggregatedInformationMessage(message.body)
+      [] message.tag = MarketOperationScheduleMessageCode -> EncodeMarketOperationScheduleMessage(message.body)
+      [] message.tag = MarketOperationScheduleMessageCode2 -> EncodeMarketOperationScheduleMessage(message.body)
+      [] message.tag = MemberFirmImposingLiftingSanctionsMessageCode -> EncodeMemberFirmImposingLiftingSanctionsMessage(message.body)
+      [] message.tag = TopFiveTradersActivitiesMessageCode -> EncodeTopFiveTradersActivitiesMessage(message.body)
+      [] message.tag = TopFiveTradersActivitiesMessageCode2 -> EncodeTopFiveTradersActivitiesMessage(message.body)
+      [] message.tag = EquitiesBatchDataMessageCode -> EncodeEquitiesBatchDataMessage(message.body)
+      [] message.tag = EquitiesBatchDataMessageCode2 -> EncodeEquitiesBatchDataMessage(message.body)
+      [] message.tag = EquitiesBatchDataMessageCode3 -> EncodeEquitiesBatchDataMessage(message.body)
+      [] message.tag = EquitiesBatchDataMessageCode4 -> EncodeEquitiesBatchDataMessage(message.body)
+      [] message.tag = MemberInformationMessageCode -> EncodeMemberInformationMessage(message.body)
+      [] message.tag = MemberInformationMessageCode2 -> EncodeMemberInformationMessage(message.body)
+      [] message.tag = IssueEventMessageCode -> EncodeIssueEventMessage(message.body)
+      [] message.tag = IssueEventMessageCode2 -> EncodeIssueEventMessage(message.body)
+      [] message.tag = IssueEventMessageCode3 -> EncodeIssueEventMessage(message.body)
+      [] message.tag = IssueEventMessageCode4 -> EncodeIssueEventMessage(message.body)
+      [] message.tag = BlockBasketTradeDataMessageCode -> EncodeBlockBasketTradeDataMessage(message.body)
+      [] message.tag = BlockBasketTradeDataMessageCode2 -> EncodeBlockBasketTradeDataMessage(message.body)
+      [] message.tag = InvestorActivitiesPerAnIssueEodMessageCode -> EncodeInvestorActivitiesPerAnIssueEodMessage(message.body)
+      [] message.tag = InvestorActivitiesPerAnIssueEodMessageCode2 -> EncodeInvestorActivitiesPerAnIssueEodMessage(message.body)
+      [] message.tag = ShortSellingMessageCode -> EncodeShortSellingMessage(message.body)
+      [] message.tag = ShortSellingMessageCode2 -> EncodeShortSellingMessage(message.body)
+      [] message.tag = BrokersAcitityInformationMessageCode -> EncodeBrokersAcitityInformationMessage(message.body)
+      [] message.tag = BrokersAcitityInformationMessageCode2 -> EncodeBrokersAcitityInformationMessage(message.body)
+      [] message.tag = TradingActivityBySessionPerAnIssueMessageCode -> EncodeTradingActivityBySessionPerAnIssueMessage(message.body)
+      [] message.tag = TradingActivityBySessionPerAnIssueMessageCode2 -> EncodeTradingActivityBySessionPerAnIssueMessage(message.body)
+
+DecodePayload(tag, bytes) ==
+    LET read ==
+            CASE tag = PollingDataMessageCode -> DecodePollingDataMessage(bytes)
+              [] tag = SecuritiesQuote10LevelMessageCode -> DecodeSecuritiesQuote10LevelMessage(bytes)
+              [] tag = SecuritiesQuote10LevelMessageCode2 -> DecodeSecuritiesQuote10LevelMessage(bytes)
+              [] tag = SecuritiesOrderFilledMessageCode -> DecodeSecuritiesOrderFilledMessage(bytes)
+              [] tag = SecuritiesOrderFilledMessageCode2 -> DecodeSecuritiesOrderFilledMessage(bytes)
+              [] tag = MarketOperationTsMessageCode -> DecodeMarketOperationTsMessage(bytes)
+              [] tag = MarketOperationTsMessageCode2 -> DecodeMarketOperationTsMessage(bytes)
+              [] tag = IssueClosingMessageCode -> DecodeIssueClosingMessage(bytes)
+              [] tag = IssueClosingMessageCode2 -> DecodeIssueClosingMessage(bytes)
+              [] tag = TriggeringRemovingViMessageCode -> DecodeTriggeringRemovingViMessage(bytes)
+              [] tag = TriggeringRemovingViMessageCode2 -> DecodeTriggeringRemovingViMessage(bytes)
+              [] tag = ClosingPriceTradingQuoteMessageCode -> DecodeClosingPriceTradingQuoteMessage(bytes)
+              [] tag = ClosingPriceTradingQuoteMessageCode2 -> DecodeClosingPriceTradingQuoteMessage(bytes)
+              [] tag = EquitiesSnapshot10LevelMessageCode -> DecodeEquitiesSnapshot10LevelMessage(bytes)
+              [] tag = EquitiesSnapshot10LevelMessageCode2 -> DecodeEquitiesSnapshot10LevelMessage(bytes)
+              [] tag = InvestorActivitiesPerAnIndustryMessageCode -> DecodeInvestorActivitiesPerAnIndustryMessage(bytes)
+              [] tag = InvestorActivitiesPerAnIndustryMessageCode2 -> DecodeInvestorActivitiesPerAnIndustryMessage(bytes)
+              [] tag = CurrentMovementMessageCode -> DecodeCurrentMovementMessage(bytes)
+              [] tag = CurrentMovementMessageCode2 -> DecodeCurrentMovementMessage(bytes)
+              [] tag = ProgramTradingActivityPerInvestorMessageCode -> DecodeProgramTradingActivityPerInvestorMessage(bytes)
+              [] tag = ProgramTradingActivityPerInvestorMessageCode2 -> DecodeProgramTradingActivityPerInvestorMessage(bytes)
+              [] tag = ProgramTradingInformationPerIssueAggregatedInformationMessageCode -> DecodeProgramTradingInformationPerIssueAggregatedInformationMessage(bytes)
+              [] tag = ProgramTradingInformationPerIssueAggregatedInformationMessageCode2 -> DecodeProgramTradingInformationPerIssueAggregatedInformationMessage(bytes)
+              [] tag = ProgramTradingInformationOfTotalAggregatedInformationMessageCode -> DecodeProgramTradingInformationOfTotalAggregatedInformationMessage(bytes)
+              [] tag = ProgramTradingInformationOfTotalAggregatedInformationMessageCode2 -> DecodeProgramTradingInformationOfTotalAggregatedInformationMessage(bytes)
+              [] tag = MarketOperationScheduleMessageCode -> DecodeMarketOperationScheduleMessage(bytes)
+              [] tag = MarketOperationScheduleMessageCode2 -> DecodeMarketOperationScheduleMessage(bytes)
+              [] tag = MemberFirmImposingLiftingSanctionsMessageCode -> DecodeMemberFirmImposingLiftingSanctionsMessage(bytes)
+              [] tag = TopFiveTradersActivitiesMessageCode -> DecodeTopFiveTradersActivitiesMessage(bytes)
+              [] tag = TopFiveTradersActivitiesMessageCode2 -> DecodeTopFiveTradersActivitiesMessage(bytes)
+              [] tag = EquitiesBatchDataMessageCode -> DecodeEquitiesBatchDataMessage(bytes)
+              [] tag = EquitiesBatchDataMessageCode2 -> DecodeEquitiesBatchDataMessage(bytes)
+              [] tag = EquitiesBatchDataMessageCode3 -> DecodeEquitiesBatchDataMessage(bytes)
+              [] tag = EquitiesBatchDataMessageCode4 -> DecodeEquitiesBatchDataMessage(bytes)
+              [] tag = MemberInformationMessageCode -> DecodeMemberInformationMessage(bytes)
+              [] tag = MemberInformationMessageCode2 -> DecodeMemberInformationMessage(bytes)
+              [] tag = IssueEventMessageCode -> DecodeIssueEventMessage(bytes)
+              [] tag = IssueEventMessageCode2 -> DecodeIssueEventMessage(bytes)
+              [] tag = IssueEventMessageCode3 -> DecodeIssueEventMessage(bytes)
+              [] tag = IssueEventMessageCode4 -> DecodeIssueEventMessage(bytes)
+              [] tag = BlockBasketTradeDataMessageCode -> DecodeBlockBasketTradeDataMessage(bytes)
+              [] tag = BlockBasketTradeDataMessageCode2 -> DecodeBlockBasketTradeDataMessage(bytes)
+              [] tag = InvestorActivitiesPerAnIssueEodMessageCode -> DecodeInvestorActivitiesPerAnIssueEodMessage(bytes)
+              [] tag = InvestorActivitiesPerAnIssueEodMessageCode2 -> DecodeInvestorActivitiesPerAnIssueEodMessage(bytes)
+              [] tag = ShortSellingMessageCode -> DecodeShortSellingMessage(bytes)
+              [] tag = ShortSellingMessageCode2 -> DecodeShortSellingMessage(bytes)
+              [] tag = BrokersAcitityInformationMessageCode -> DecodeBrokersAcitityInformationMessage(bytes)
+              [] tag = BrokersAcitityInformationMessageCode2 -> DecodeBrokersAcitityInformationMessage(bytes)
+              [] tag = TradingActivityBySessionPerAnIssueMessageCode -> DecodeTradingActivityBySessionPerAnIssueMessage(bytes)
+              [] tag = TradingActivityBySessionPerAnIssueMessageCode2 -> DecodeTradingActivityBySessionPerAnIssueMessage(bytes)
+              [] OTHER -> Fail
+    IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
+
+ZeroPayload == [tag |-> PollingDataMessageCode, body |-> ZeroPollingDataMessage]
+
+(* Each Payload in turn, at the values the message it names is checked at *)
+CheckedPayload ==
+    { [tag |-> PollingDataMessageCode, body |-> one] : one \in CheckedPollingDataMessage }
+        \cup { [tag |-> SecuritiesQuote10LevelMessageCode, body |-> one] : one \in CheckedSecuritiesQuote10LevelMessage }
+        \cup { [tag |-> SecuritiesQuote10LevelMessageCode2, body |-> one] : one \in CheckedSecuritiesQuote10LevelMessage }
+        \cup { [tag |-> SecuritiesOrderFilledMessageCode, body |-> one] : one \in CheckedSecuritiesOrderFilledMessage }
+        \cup { [tag |-> SecuritiesOrderFilledMessageCode2, body |-> one] : one \in CheckedSecuritiesOrderFilledMessage }
+        \cup { [tag |-> MarketOperationTsMessageCode, body |-> one] : one \in CheckedMarketOperationTsMessage }
+        \cup { [tag |-> MarketOperationTsMessageCode2, body |-> one] : one \in CheckedMarketOperationTsMessage }
+        \cup { [tag |-> IssueClosingMessageCode, body |-> one] : one \in CheckedIssueClosingMessage }
+        \cup { [tag |-> IssueClosingMessageCode2, body |-> one] : one \in CheckedIssueClosingMessage }
+        \cup { [tag |-> TriggeringRemovingViMessageCode, body |-> one] : one \in CheckedTriggeringRemovingViMessage }
+        \cup { [tag |-> TriggeringRemovingViMessageCode2, body |-> one] : one \in CheckedTriggeringRemovingViMessage }
+        \cup { [tag |-> ClosingPriceTradingQuoteMessageCode, body |-> one] : one \in CheckedClosingPriceTradingQuoteMessage }
+        \cup { [tag |-> ClosingPriceTradingQuoteMessageCode2, body |-> one] : one \in CheckedClosingPriceTradingQuoteMessage }
+        \cup { [tag |-> EquitiesSnapshot10LevelMessageCode, body |-> one] : one \in CheckedEquitiesSnapshot10LevelMessage }
+        \cup { [tag |-> EquitiesSnapshot10LevelMessageCode2, body |-> one] : one \in CheckedEquitiesSnapshot10LevelMessage }
+        \cup { [tag |-> InvestorActivitiesPerAnIndustryMessageCode, body |-> one] : one \in CheckedInvestorActivitiesPerAnIndustryMessage }
+        \cup { [tag |-> InvestorActivitiesPerAnIndustryMessageCode2, body |-> one] : one \in CheckedInvestorActivitiesPerAnIndustryMessage }
+        \cup { [tag |-> CurrentMovementMessageCode, body |-> one] : one \in CheckedCurrentMovementMessage }
+        \cup { [tag |-> CurrentMovementMessageCode2, body |-> one] : one \in CheckedCurrentMovementMessage }
+        \cup { [tag |-> ProgramTradingActivityPerInvestorMessageCode, body |-> one] : one \in CheckedProgramTradingActivityPerInvestorMessage }
+        \cup { [tag |-> ProgramTradingActivityPerInvestorMessageCode2, body |-> one] : one \in CheckedProgramTradingActivityPerInvestorMessage }
+        \cup { [tag |-> ProgramTradingInformationPerIssueAggregatedInformationMessageCode, body |-> one] : one \in CheckedProgramTradingInformationPerIssueAggregatedInformationMessage }
+        \cup { [tag |-> ProgramTradingInformationPerIssueAggregatedInformationMessageCode2, body |-> one] : one \in CheckedProgramTradingInformationPerIssueAggregatedInformationMessage }
+        \cup { [tag |-> ProgramTradingInformationOfTotalAggregatedInformationMessageCode, body |-> one] : one \in CheckedProgramTradingInformationOfTotalAggregatedInformationMessage }
+        \cup { [tag |-> ProgramTradingInformationOfTotalAggregatedInformationMessageCode2, body |-> one] : one \in CheckedProgramTradingInformationOfTotalAggregatedInformationMessage }
+        \cup { [tag |-> MarketOperationScheduleMessageCode, body |-> one] : one \in CheckedMarketOperationScheduleMessage }
+        \cup { [tag |-> MarketOperationScheduleMessageCode2, body |-> one] : one \in CheckedMarketOperationScheduleMessage }
+        \cup { [tag |-> MemberFirmImposingLiftingSanctionsMessageCode, body |-> one] : one \in CheckedMemberFirmImposingLiftingSanctionsMessage }
+        \cup { [tag |-> TopFiveTradersActivitiesMessageCode, body |-> one] : one \in CheckedTopFiveTradersActivitiesMessage }
+        \cup { [tag |-> TopFiveTradersActivitiesMessageCode2, body |-> one] : one \in CheckedTopFiveTradersActivitiesMessage }
+        \cup { [tag |-> EquitiesBatchDataMessageCode, body |-> one] : one \in CheckedEquitiesBatchDataMessage }
+        \cup { [tag |-> EquitiesBatchDataMessageCode2, body |-> one] : one \in CheckedEquitiesBatchDataMessage }
+        \cup { [tag |-> EquitiesBatchDataMessageCode3, body |-> one] : one \in CheckedEquitiesBatchDataMessage }
+        \cup { [tag |-> EquitiesBatchDataMessageCode4, body |-> one] : one \in CheckedEquitiesBatchDataMessage }
+        \cup { [tag |-> MemberInformationMessageCode, body |-> one] : one \in CheckedMemberInformationMessage }
+        \cup { [tag |-> MemberInformationMessageCode2, body |-> one] : one \in CheckedMemberInformationMessage }
+        \cup { [tag |-> IssueEventMessageCode, body |-> one] : one \in CheckedIssueEventMessage }
+        \cup { [tag |-> IssueEventMessageCode2, body |-> one] : one \in CheckedIssueEventMessage }
+        \cup { [tag |-> IssueEventMessageCode3, body |-> one] : one \in CheckedIssueEventMessage }
+        \cup { [tag |-> IssueEventMessageCode4, body |-> one] : one \in CheckedIssueEventMessage }
+        \cup { [tag |-> BlockBasketTradeDataMessageCode, body |-> one] : one \in CheckedBlockBasketTradeDataMessage }
+        \cup { [tag |-> BlockBasketTradeDataMessageCode2, body |-> one] : one \in CheckedBlockBasketTradeDataMessage }
+        \cup { [tag |-> InvestorActivitiesPerAnIssueEodMessageCode, body |-> one] : one \in CheckedInvestorActivitiesPerAnIssueEodMessage }
+        \cup { [tag |-> InvestorActivitiesPerAnIssueEodMessageCode2, body |-> one] : one \in CheckedInvestorActivitiesPerAnIssueEodMessage }
+        \cup { [tag |-> ShortSellingMessageCode, body |-> one] : one \in CheckedShortSellingMessage }
+        \cup { [tag |-> ShortSellingMessageCode2, body |-> one] : one \in CheckedShortSellingMessage }
+        \cup { [tag |-> BrokersAcitityInformationMessageCode, body |-> one] : one \in CheckedBrokersAcitityInformationMessage }
+        \cup { [tag |-> BrokersAcitityInformationMessageCode2, body |-> one] : one \in CheckedBrokersAcitityInformationMessage }
+        \cup { [tag |-> TradingActivityBySessionPerAnIssueMessageCode, body |-> one] : one \in CheckedTradingActivityBySessionPerAnIssueMessage }
+        \cup { [tag |-> TradingActivityBySessionPerAnIssueMessageCode2, body |-> one] : one \in CheckedTradingActivityBySessionPerAnIssueMessage }
+
+(***************************************************************************)
+(* Packet                                                                  *)
+(***************************************************************************)
+
+Packet ==
+    [ payload : Payload ]
+
+EncodePacket(message) ==
+    message.payload.tag
+        \o EncodePayload(message.payload)
+
+DecodePacket(bytes) ==
+    LET trCode == ReadBytes(bytes, 5) IN IF ~trCode.ok THEN Fail ELSE
+    LET payload == DecodePayload(trCode.value, trCode.rest) IN IF ~payload.ok THEN Fail ELSE
+    Ok([ payload |-> payload.value ], payload.rest)
+
+ZeroPacket ==
+    [ payload |-> ZeroPayload ]
+
+(* Packet at zero, then each field in turn at the values it is checked at *)
+CheckedPacket ==
+    { ZeroPacket }
+        \cup { [ZeroPacket EXCEPT !.payload = one] : one \in CheckedPayload }
+
+(* A run of Packet, written one after another *)
+RECURSIVE EncodePacketList(_)
+EncodePacketList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodePacket(Head(messages)) \o EncodePacketList(Tail(messages))
+
+(* As many Packet as the bytes hold, which is what its payload rule states. *)
+(* Each one takes bytes off the reader, so the run ends where the data does. *)
+RECURSIVE ReadPacketAll(_)
+ReadPacketAll(bytes) ==
+    IF bytes = << >>
+    THEN Ok(<< >>, << >>)
+    ELSE LET one == DecodePacket(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadPacketAll(one.rest)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Packet of each kind, for the lists that carry them *)
+OnePacket ==
+    { [ZeroPacket EXCEPT !.payload = [tag |-> PollingDataMessageCode, body |-> ZeroPollingDataMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> SecuritiesQuote10LevelMessageCode, body |-> ZeroSecuritiesQuote10LevelMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> SecuritiesQuote10LevelMessageCode2, body |-> ZeroSecuritiesQuote10LevelMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> SecuritiesOrderFilledMessageCode, body |-> ZeroSecuritiesOrderFilledMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> SecuritiesOrderFilledMessageCode2, body |-> ZeroSecuritiesOrderFilledMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> MarketOperationTsMessageCode, body |-> ZeroMarketOperationTsMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> MarketOperationTsMessageCode2, body |-> ZeroMarketOperationTsMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> IssueClosingMessageCode, body |-> ZeroIssueClosingMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> IssueClosingMessageCode2, body |-> ZeroIssueClosingMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> TriggeringRemovingViMessageCode, body |-> ZeroTriggeringRemovingViMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> TriggeringRemovingViMessageCode2, body |-> ZeroTriggeringRemovingViMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> ClosingPriceTradingQuoteMessageCode, body |-> ZeroClosingPriceTradingQuoteMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> ClosingPriceTradingQuoteMessageCode2, body |-> ZeroClosingPriceTradingQuoteMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> EquitiesSnapshot10LevelMessageCode, body |-> ZeroEquitiesSnapshot10LevelMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> EquitiesSnapshot10LevelMessageCode2, body |-> ZeroEquitiesSnapshot10LevelMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> InvestorActivitiesPerAnIndustryMessageCode, body |-> ZeroInvestorActivitiesPerAnIndustryMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> InvestorActivitiesPerAnIndustryMessageCode2, body |-> ZeroInvestorActivitiesPerAnIndustryMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> CurrentMovementMessageCode, body |-> ZeroCurrentMovementMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> CurrentMovementMessageCode2, body |-> ZeroCurrentMovementMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> ProgramTradingActivityPerInvestorMessageCode, body |-> ZeroProgramTradingActivityPerInvestorMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> ProgramTradingActivityPerInvestorMessageCode2, body |-> ZeroProgramTradingActivityPerInvestorMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> ProgramTradingInformationPerIssueAggregatedInformationMessageCode, body |-> ZeroProgramTradingInformationPerIssueAggregatedInformationMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> ProgramTradingInformationPerIssueAggregatedInformationMessageCode2, body |-> ZeroProgramTradingInformationPerIssueAggregatedInformationMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> ProgramTradingInformationOfTotalAggregatedInformationMessageCode, body |-> ZeroProgramTradingInformationOfTotalAggregatedInformationMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> ProgramTradingInformationOfTotalAggregatedInformationMessageCode2, body |-> ZeroProgramTradingInformationOfTotalAggregatedInformationMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> MarketOperationScheduleMessageCode, body |-> ZeroMarketOperationScheduleMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> MarketOperationScheduleMessageCode2, body |-> ZeroMarketOperationScheduleMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> MemberFirmImposingLiftingSanctionsMessageCode, body |-> ZeroMemberFirmImposingLiftingSanctionsMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> TopFiveTradersActivitiesMessageCode, body |-> ZeroTopFiveTradersActivitiesMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> TopFiveTradersActivitiesMessageCode2, body |-> ZeroTopFiveTradersActivitiesMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> EquitiesBatchDataMessageCode, body |-> ZeroEquitiesBatchDataMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> EquitiesBatchDataMessageCode2, body |-> ZeroEquitiesBatchDataMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> EquitiesBatchDataMessageCode3, body |-> ZeroEquitiesBatchDataMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> EquitiesBatchDataMessageCode4, body |-> ZeroEquitiesBatchDataMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> MemberInformationMessageCode, body |-> ZeroMemberInformationMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> MemberInformationMessageCode2, body |-> ZeroMemberInformationMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> IssueEventMessageCode, body |-> ZeroIssueEventMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> IssueEventMessageCode2, body |-> ZeroIssueEventMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> IssueEventMessageCode3, body |-> ZeroIssueEventMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> IssueEventMessageCode4, body |-> ZeroIssueEventMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> BlockBasketTradeDataMessageCode, body |-> ZeroBlockBasketTradeDataMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> BlockBasketTradeDataMessageCode2, body |-> ZeroBlockBasketTradeDataMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> InvestorActivitiesPerAnIssueEodMessageCode, body |-> ZeroInvestorActivitiesPerAnIssueEodMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> InvestorActivitiesPerAnIssueEodMessageCode2, body |-> ZeroInvestorActivitiesPerAnIssueEodMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> ShortSellingMessageCode, body |-> ZeroShortSellingMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> ShortSellingMessageCode2, body |-> ZeroShortSellingMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> BrokersAcitityInformationMessageCode, body |-> ZeroBrokersAcitityInformationMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> BrokersAcitityInformationMessageCode2, body |-> ZeroBrokersAcitityInformationMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> TradingActivityBySessionPerAnIssueMessageCode, body |-> ZeroTradingActivityBySessionPerAnIssueMessage]],
+      [ZeroPacket EXCEPT !.payload = [tag |-> TradingActivityBySessionPerAnIssueMessageCode2, body |-> ZeroTradingActivityBySessionPerAnIssueMessage]] }
+
+(***************************************************************************)
+(* What TLC checks                                                         *)
+(***************************************************************************)
+
+(* An integer a rule depends on writes its width and reads back what was written *)
+RoundTripUIntLE ==
+    \A width \in 1 .. 3 :
+        \A value \in {0, 1, 255, 256, 65535} :
+            (value < 256 ^ width) =>
+                /\ Len(EncodeUIntLE(value, width)) = width
+                /\ DecodeUIntLE(EncodeUIntLE(value, width)) = value
+                /\ Len(EncodeUIntBE(value, width)) = width
+                /\ DecodeUIntBE(EncodeUIntBE(value, width)) = value
+                /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
+                /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
+
+(* Every Polling Data Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripPollingDataMessage ==
+    \A message \in CheckedPollingDataMessage :
+        LET read == DecodePollingDataMessage(EncodePollingDataMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Securities Quote 10 Level Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripSecuritiesQuote10LevelMessage ==
+    \A message \in CheckedSecuritiesQuote10LevelMessage :
+        LET read == DecodeSecuritiesQuote10LevelMessage(EncodeSecuritiesQuote10LevelMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Securities Order Filled Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripSecuritiesOrderFilledMessage ==
+    \A message \in CheckedSecuritiesOrderFilledMessage :
+        LET read == DecodeSecuritiesOrderFilledMessage(EncodeSecuritiesOrderFilledMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Market Operation Ts Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMarketOperationTsMessage ==
+    \A message \in CheckedMarketOperationTsMessage :
+        LET read == DecodeMarketOperationTsMessage(EncodeMarketOperationTsMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Issue Closing Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripIssueClosingMessage ==
+    \A message \in CheckedIssueClosingMessage :
+        LET read == DecodeIssueClosingMessage(EncodeIssueClosingMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Triggering Removing Vi Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTriggeringRemovingViMessage ==
+    \A message \in CheckedTriggeringRemovingViMessage :
+        LET read == DecodeTriggeringRemovingViMessage(EncodeTriggeringRemovingViMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Closing Price Trading Quote Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripClosingPriceTradingQuoteMessage ==
+    \A message \in CheckedClosingPriceTradingQuoteMessage :
+        LET read == DecodeClosingPriceTradingQuoteMessage(EncodeClosingPriceTradingQuoteMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Equities Snapshot 10 Level Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripEquitiesSnapshot10LevelMessage ==
+    \A message \in CheckedEquitiesSnapshot10LevelMessage :
+        LET read == DecodeEquitiesSnapshot10LevelMessage(EncodeEquitiesSnapshot10LevelMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Investor Activities Per An Industry Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripInvestorActivitiesPerAnIndustryMessage ==
+    \A message \in CheckedInvestorActivitiesPerAnIndustryMessage :
+        LET read == DecodeInvestorActivitiesPerAnIndustryMessage(EncodeInvestorActivitiesPerAnIndustryMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Current Movement Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripCurrentMovementMessage ==
+    \A message \in CheckedCurrentMovementMessage :
+        LET read == DecodeCurrentMovementMessage(EncodeCurrentMovementMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Program Trading Activity Per Investor Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripProgramTradingActivityPerInvestorMessage ==
+    \A message \in CheckedProgramTradingActivityPerInvestorMessage :
+        LET read == DecodeProgramTradingActivityPerInvestorMessage(EncodeProgramTradingActivityPerInvestorMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Program Trading Information Per Issue Aggregated Information Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripProgramTradingInformationPerIssueAggregatedInformationMessage ==
+    \A message \in CheckedProgramTradingInformationPerIssueAggregatedInformationMessage :
+        LET read == DecodeProgramTradingInformationPerIssueAggregatedInformationMessage(EncodeProgramTradingInformationPerIssueAggregatedInformationMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Program Trading Information Of Total Aggregated Information Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripProgramTradingInformationOfTotalAggregatedInformationMessage ==
+    \A message \in CheckedProgramTradingInformationOfTotalAggregatedInformationMessage :
+        LET read == DecodeProgramTradingInformationOfTotalAggregatedInformationMessage(EncodeProgramTradingInformationOfTotalAggregatedInformationMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Market Operation Schedule Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMarketOperationScheduleMessage ==
+    \A message \in CheckedMarketOperationScheduleMessage :
+        LET read == DecodeMarketOperationScheduleMessage(EncodeMarketOperationScheduleMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Member Firm Imposing Lifting Sanctions Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMemberFirmImposingLiftingSanctionsMessage ==
+    \A message \in CheckedMemberFirmImposingLiftingSanctionsMessage :
+        LET read == DecodeMemberFirmImposingLiftingSanctionsMessage(EncodeMemberFirmImposingLiftingSanctionsMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Top Five Traders Activities Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTopFiveTradersActivitiesMessage ==
+    \A message \in CheckedTopFiveTradersActivitiesMessage :
+        LET read == DecodeTopFiveTradersActivitiesMessage(EncodeTopFiveTradersActivitiesMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Equities Batch Data Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripEquitiesBatchDataMessage ==
+    \A message \in CheckedEquitiesBatchDataMessage :
+        LET read == DecodeEquitiesBatchDataMessage(EncodeEquitiesBatchDataMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Member Information Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMemberInformationMessage ==
+    \A message \in CheckedMemberInformationMessage :
+        LET read == DecodeMemberInformationMessage(EncodeMemberInformationMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Issue Event Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripIssueEventMessage ==
+    \A message \in CheckedIssueEventMessage :
+        LET read == DecodeIssueEventMessage(EncodeIssueEventMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Block Basket Trade Data Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripBlockBasketTradeDataMessage ==
+    \A message \in CheckedBlockBasketTradeDataMessage :
+        LET read == DecodeBlockBasketTradeDataMessage(EncodeBlockBasketTradeDataMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Investor Activities Per An Issue Eod Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripInvestorActivitiesPerAnIssueEodMessage ==
+    \A message \in CheckedInvestorActivitiesPerAnIssueEodMessage :
+        LET read == DecodeInvestorActivitiesPerAnIssueEodMessage(EncodeInvestorActivitiesPerAnIssueEodMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Short Selling Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripShortSellingMessage ==
+    \A message \in CheckedShortSellingMessage :
+        LET read == DecodeShortSellingMessage(EncodeShortSellingMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Brokers Acitity Information Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripBrokersAcitityInformationMessage ==
+    \A message \in CheckedBrokersAcitityInformationMessage :
+        LET read == DecodeBrokersAcitityInformationMessage(EncodeBrokersAcitityInformationMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Trading Activity By Session Per An Issue Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTradingActivityBySessionPerAnIssueMessage ==
+    \A message \in CheckedTradingActivityBySessionPerAnIssueMessage :
+        LET read == DecodeTradingActivityBySessionPerAnIssueMessage(EncodeTradingActivityBySessionPerAnIssueMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Packet decodes back to what was encoded, and leaves nothing over *)
+RoundTripPacket ==
+    \A message \in CheckedPacket :
+        LET read == DecodePacket(EncodePacket(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* A Payload is selected by the TR Code it is written under *)
+SelectsPayload ==
+    \A message \in CheckedPayload :
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
+        IN  read.ok /\ read.value.tag = message.tag
+
+-----------------------------------------------------------------------------
+(* The state the session machine will run over. It stands still until there are *)
+(* transitions to take. *)
+
+VARIABLE parsed
+
+Init == parsed = << >>
+Next == UNCHANGED parsed
+Spec == Init /\ [][Next]_parsed
+
+=============================================================================

@@ -23076,7 +23076,8 @@ RoundTripServerPacket ==
 (* A Server Message Payload is selected by the Transaction Code it is written under *)
 SelectsServerMessagePayload ==
     \A message \in CheckedServerMessagePayload :
-        LET read == DecodeServerMessagePayload(message.tag, EncodeServerMessagePayload(message))
+        LET sent == EncodeServerMessagePayload(message)
+            read == DecodeServerMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

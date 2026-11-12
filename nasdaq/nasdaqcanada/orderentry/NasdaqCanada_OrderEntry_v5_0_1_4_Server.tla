@@ -5022,73 +5022,85 @@ RoundTripServerPacket ==
 (* A Order Accepted Optional Value is selected by the Order Accepted Optional Field it is written under *)
 SelectsOrderAcceptedOptionalValue ==
     \A message \in CheckedOrderAcceptedOptionalValue :
-        LET read == DecodeOrderAcceptedOptionalValue(message.tag, EncodeOrderAcceptedOptionalValue(message))
+        LET sent == EncodeOrderAcceptedOptionalValue(message)
+            read == DecodeOrderAcceptedOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Order Replaced Optional Value is selected by the Order Replaced Optional Field it is written under *)
 SelectsOrderReplacedOptionalValue ==
     \A message \in CheckedOrderReplacedOptionalValue :
-        LET read == DecodeOrderReplacedOptionalValue(message.tag, EncodeOrderReplacedOptionalValue(message))
+        LET sent == EncodeOrderReplacedOptionalValue(message)
+            read == DecodeOrderReplacedOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Order Canceled Optional Value is selected by the Order Canceled Optional Field it is written under *)
 SelectsOrderCanceledOptionalValue ==
     \A message \in CheckedOrderCanceledOptionalValue :
-        LET read == DecodeOrderCanceledOptionalValue(message.tag, EncodeOrderCanceledOptionalValue(message))
+        LET sent == EncodeOrderCanceledOptionalValue(message)
+            read == DecodeOrderCanceledOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Stp Canceled Optional Value is selected by the Stp Canceled Optional Field it is written under *)
 SelectsStpCanceledOptionalValue ==
     \A message \in CheckedStpCanceledOptionalValue :
-        LET read == DecodeStpCanceledOptionalValue(message.tag, EncodeStpCanceledOptionalValue(message))
+        LET sent == EncodeStpCanceledOptionalValue(message)
+            read == DecodeStpCanceledOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Order Executed Optional Value is selected by the Order Executed Optional Field it is written under *)
 SelectsOrderExecutedOptionalValue ==
     \A message \in CheckedOrderExecutedOptionalValue :
-        LET read == DecodeOrderExecutedOptionalValue(message.tag, EncodeOrderExecutedOptionalValue(message))
+        LET sent == EncodeOrderExecutedOptionalValue(message)
+            read == DecodeOrderExecutedOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Corrected Trade Optional Value is selected by the Corrected Trade Optional Field it is written under *)
 SelectsCorrectedTradeOptionalValue ==
     \A message \in CheckedCorrectedTradeOptionalValue :
-        LET read == DecodeCorrectedTradeOptionalValue(message.tag, EncodeCorrectedTradeOptionalValue(message))
+        LET sent == EncodeCorrectedTradeOptionalValue(message)
+            read == DecodeCorrectedTradeOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Rejected Order Optional Value is selected by the Rejected Order Optional Field it is written under *)
 SelectsRejectedOrderOptionalValue ==
     \A message \in CheckedRejectedOrderOptionalValue :
-        LET read == DecodeRejectedOrderOptionalValue(message.tag, EncodeRejectedOrderOptionalValue(message))
+        LET sent == EncodeRejectedOrderOptionalValue(message)
+            read == DecodeRejectedOrderOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Cancel Reject Optional Value is selected by the Cancel Reject Optional Field it is written under *)
 SelectsCancelRejectOptionalValue ==
     \A message \in CheckedCancelRejectOptionalValue :
-        LET read == DecodeCancelRejectOptionalValue(message.tag, EncodeCancelRejectOptionalValue(message))
+        LET sent == EncodeCancelRejectOptionalValue(message)
+            read == DecodeCancelRejectOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Order Restated Optional Value is selected by the Order Restated Optional Field it is written under *)
 SelectsOrderRestatedOptionalValue ==
     \A message \in CheckedOrderRestatedOptionalValue :
-        LET read == DecodeOrderRestatedOptionalValue(message.tag, EncodeOrderRestatedOptionalValue(message))
+        LET sent == EncodeOrderRestatedOptionalValue(message)
+            read == DecodeOrderRestatedOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Account Query Response Optional Value is selected by the Account Query Response Optional Field it is written under *)
 SelectsAccountQueryResponseOptionalValue ==
     \A message \in CheckedAccountQueryResponseOptionalValue :
-        LET read == DecodeAccountQueryResponseOptionalValue(message.tag, EncodeAccountQueryResponseOptionalValue(message))
+        LET sent == EncodeAccountQueryResponseOptionalValue(message)
+            read == DecodeAccountQueryResponseOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Sequenced Message is selected by the Sequenced Message Type it is written under *)
 SelectsSequencedMessage ==
     \A message \in CheckedSequencedMessage :
-        LET read == DecodeSequencedMessage(message.tag, EncodeSequencedMessage(message))
+        LET sent == EncodeSequencedMessage(message)
+            read == DecodeSequencedMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Server Payload is selected by the Server Packet Type it is written under *)
 SelectsServerPayload ==
     \A message \in CheckedServerPayload :
-        LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
+        LET sent == EncodeServerPayload(message)
+            read == DecodeServerPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Optional Field Length is written from the bytes it frames *)

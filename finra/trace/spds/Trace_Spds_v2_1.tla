@@ -5561,25 +5561,29 @@ RoundTripPacket ==
 (* A Trade Message Payload is selected by the Trade Message Type it is written under *)
 SelectsTradeMessagePayload ==
     \A message \in CheckedTradeMessagePayload :
-        LET read == DecodeTradeMessagePayload(message.tag, EncodeTradeMessagePayload(message))
+        LET sent == EncodeTradeMessagePayload(message)
+            read == DecodeTradeMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Administrative Message Payload is selected by the Administrative Message Type it is written under *)
 SelectsAdministrativeMessagePayload ==
     \A message \in CheckedAdministrativeMessagePayload :
-        LET read == DecodeAdministrativeMessagePayload(message.tag, EncodeAdministrativeMessagePayload(message))
+        LET sent == EncodeAdministrativeMessagePayload(message)
+            read == DecodeAdministrativeMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Control Message Payload is selected by the Control Message Type it is written under *)
 SelectsControlMessagePayload ==
     \A message \in CheckedControlMessagePayload :
-        LET read == DecodeControlMessagePayload(message.tag, EncodeControlMessagePayload(message))
+        LET sent == EncodeControlMessagePayload(message)
+            read == DecodeControlMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Payload is selected by the Message Category it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Length is written from the bytes it frames *)

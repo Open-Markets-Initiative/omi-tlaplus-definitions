@@ -3335,19 +3335,22 @@ RoundTripPacket ==
 (* A Sequenced Message is selected by the Sequenced Message Type it is written under *)
 SelectsSequencedMessage ==
     \A message \in CheckedSequencedMessage :
-        LET read == DecodeSequencedMessage(message.tag, EncodeSequencedMessage(message))
+        LET sent == EncodeSequencedMessage(message)
+            read == DecodeSequencedMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Unsequenced Message is selected by the Unsequenced Message Type it is written under *)
 SelectsUnsequencedMessage ==
     \A message \in CheckedUnsequencedMessage :
-        LET read == DecodeUnsequencedMessage(message.tag, EncodeUnsequencedMessage(message))
+        LET sent == EncodeUnsequencedMessage(message)
+            read == DecodeUnsequencedMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Esesm Payload is selected by the Esesm Packet Type it is written under *)
 SelectsEsesmPayload ==
     \A message \in CheckedEsesmPayload :
-        LET read == DecodeEsesmPayload(message.tag, EncodeEsesmPayload(message))
+        LET sent == EncodeEsesmPayload(message)
+            read == DecodeEsesmPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Esesm Packet Length is written from the bytes it frames *)

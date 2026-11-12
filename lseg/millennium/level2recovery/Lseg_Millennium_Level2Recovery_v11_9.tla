@@ -255,6 +255,28 @@ CheckedSnapshotCompleteMessage ==
         \cup { [ZeroSnapshotCompleteMessage EXCEPT !.snapshotCompleteFlags = one] : one \in Sample(1) }
 
 (***************************************************************************)
+(* Time Message: 4 bytes                                                   *)
+(***************************************************************************)
+
+TimeMessage ==
+    [ seconds : Sample(4) ]
+
+EncodeTimeMessage(message) ==
+    message.seconds
+
+DecodeTimeMessage(bytes) ==
+    LET seconds == ReadBytes(bytes, 4) IN IF ~seconds.ok THEN Fail ELSE
+    Ok([ seconds |-> seconds.value ], seconds.rest)
+
+ZeroTimeMessage ==
+    [ seconds |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Time Message at zero, then each field in turn at the values it is checked at *)
+CheckedTimeMessage ==
+    { ZeroTimeMessage }
+        \cup { [ZeroTimeMessage EXCEPT !.seconds = one] : one \in Sample(4) }
+
+(***************************************************************************)
 (* Symbol Status Message: 26 bytes                                         *)
 (***************************************************************************)
 
@@ -492,6 +514,7 @@ SnapshotRequestMessageCode == 129  \* 0x81
 SnapshotResponseMessageCode == 130  \* 0x82
 SnapshotCompleteMessageCode == 131  \* 0x83
 LogoutRequestMessageCode == 5  \* 0x05
+TimeMessageCode == 84  \* 0x54
 SymbolStatusMessageCode == 72  \* 0x48
 AddOrderMessageCode == 65  \* 0x41
 AddAttributedOrderMessageCode == 70  \* 0x46
@@ -503,6 +526,7 @@ Payload ==
         \cup [ tag : {SnapshotResponseMessageCode}, body : SnapshotResponseMessage ]
         \cup [ tag : {SnapshotCompleteMessageCode}, body : SnapshotCompleteMessage ]
         \cup [ tag : {LogoutRequestMessageCode}, body : {[empty |-> 0]} ]
+        \cup [ tag : {TimeMessageCode}, body : TimeMessage ]
         \cup [ tag : {SymbolStatusMessageCode}, body : SymbolStatusMessage ]
         \cup [ tag : {AddOrderMessageCode}, body : AddOrderMessage ]
         \cup [ tag : {AddAttributedOrderMessageCode}, body : AddAttributedOrderMessage ]
@@ -514,6 +538,7 @@ EncodePayload(message) ==
       [] message.tag = SnapshotResponseMessageCode -> EncodeSnapshotResponseMessage(message.body)
       [] message.tag = SnapshotCompleteMessageCode -> EncodeSnapshotCompleteMessage(message.body)
       [] message.tag = LogoutRequestMessageCode -> << >>
+      [] message.tag = TimeMessageCode -> EncodeTimeMessage(message.body)
       [] message.tag = SymbolStatusMessageCode -> EncodeSymbolStatusMessage(message.body)
       [] message.tag = AddOrderMessageCode -> EncodeAddOrderMessage(message.body)
       [] message.tag = AddAttributedOrderMessageCode -> EncodeAddAttributedOrderMessage(message.body)
@@ -526,6 +551,7 @@ DecodePayload(tag, bytes) ==
               [] tag = SnapshotResponseMessageCode -> DecodeSnapshotResponseMessage(bytes)
               [] tag = SnapshotCompleteMessageCode -> DecodeSnapshotCompleteMessage(bytes)
               [] tag = LogoutRequestMessageCode -> Ok([empty |-> 0], bytes)
+              [] tag = TimeMessageCode -> DecodeTimeMessage(bytes)
               [] tag = SymbolStatusMessageCode -> DecodeSymbolStatusMessage(bytes)
               [] tag = AddOrderMessageCode -> DecodeAddOrderMessage(bytes)
               [] tag = AddAttributedOrderMessageCode -> DecodeAddAttributedOrderMessage(bytes)
@@ -542,6 +568,7 @@ CheckedPayload ==
         \cup { [tag |-> SnapshotResponseMessageCode, body |-> one] : one \in CheckedSnapshotResponseMessage }
         \cup { [tag |-> SnapshotCompleteMessageCode, body |-> one] : one \in CheckedSnapshotCompleteMessage }
         \cup { [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]] }
+        \cup { [tag |-> TimeMessageCode, body |-> one] : one \in CheckedTimeMessage }
         \cup { [tag |-> SymbolStatusMessageCode, body |-> one] : one \in CheckedSymbolStatusMessage }
         \cup { [tag |-> AddOrderMessageCode, body |-> one] : one \in CheckedAddOrderMessage }
         \cup { [tag |-> AddAttributedOrderMessageCode, body |-> one] : one \in CheckedAddAttributedOrderMessage }
@@ -611,6 +638,7 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotResponseMessageCode, body |-> ZeroSnapshotResponseMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotCompleteMessageCode, body |-> ZeroSnapshotCompleteMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> LogoutRequestMessageCode, body |-> [empty |-> 0]]],
+      [ZeroMessage EXCEPT !.payload = [tag |-> TimeMessageCode, body |-> ZeroTimeMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> SymbolStatusMessageCode, body |-> ZeroSymbolStatusMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> AddOrderMessageCode, body |-> ZeroAddOrderMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> AddAttributedOrderMessageCode, body |-> ZeroAddAttributedOrderMessage]] }
@@ -766,6 +794,14 @@ RoundTripSnapshotCompleteMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Time Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripTimeMessage ==
+    \A message \in CheckedTimeMessage :
+        LET read == DecodeTimeMessage(EncodeTimeMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Symbol Status Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripSymbolStatusMessage ==
     \A message \in CheckedSymbolStatusMessage :
@@ -817,7 +853,8 @@ RoundTripPacket ==
 (* A Payload is selected by the Message Type it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

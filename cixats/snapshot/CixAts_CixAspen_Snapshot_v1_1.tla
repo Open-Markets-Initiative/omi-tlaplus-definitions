@@ -927,13 +927,15 @@ RoundTripPacket ==
 (* A Payload is selected by the Message Type it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Packet Payload is selected by the Packet Type it is written under *)
 SelectsPacketPayload ==
     \A message \in CheckedPacketPayload :
-        LET read == DecodePacketPayload(message.tag, EncodePacketPayload(message))
+        LET sent == EncodePacketPayload(message)
+            read == DecodePacketPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Length is written from the bytes it frames *)

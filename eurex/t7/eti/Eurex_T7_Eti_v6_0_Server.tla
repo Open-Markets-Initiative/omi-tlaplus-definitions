@@ -16286,7 +16286,8 @@ RoundTripServerPacket ==
 (* A Server Payload is selected by the Template Id it is written under *)
 SelectsServerPayload ==
     \A message \in CheckedServerPayload :
-        LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
+        LET sent == EncodeServerPayload(message)
+            read == DecodeServerPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Body Len is written from the bytes it frames *)

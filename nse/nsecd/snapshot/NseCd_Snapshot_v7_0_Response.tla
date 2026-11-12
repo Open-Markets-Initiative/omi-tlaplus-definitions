@@ -280,7 +280,8 @@ RoundTripResponsePacket ==
 (* A Response Payload is selected by the Response Message Type it is written under *)
 SelectsResponsePayload ==
     \A message \in CheckedResponsePayload :
-        LET read == DecodeResponsePayload(message.tag, EncodeResponsePayload(message))
+        LET sent == EncodeResponsePayload(message)
+            read == DecodeResponsePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

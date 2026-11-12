@@ -1186,13 +1186,15 @@ RoundTripPacket ==
 (* A Payload is selected by the Template Id it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Sequenced Messages is selected by the Message Type it is written under *)
 SelectsSequencedMessages ==
     \A message \in CheckedSequencedMessages :
-        LET read == DecodeSequencedMessages(message.tag, EncodeSequencedMessages(message))
+        LET sent == EncodeSequencedMessages(message)
+            read == DecodeSequencedMessages(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

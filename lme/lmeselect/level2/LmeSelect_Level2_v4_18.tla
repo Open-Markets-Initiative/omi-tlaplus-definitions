@@ -1051,7 +1051,8 @@ RoundTripPacket ==
 (* A Payload is selected by the Msg Type it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

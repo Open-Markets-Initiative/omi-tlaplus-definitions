@@ -398,7 +398,8 @@ RoundTripPacket ==
 (* A Datagram Body is selected by the Msg Type it is written under *)
 SelectsDatagramBody ==
     \A message \in CheckedDatagramBody :
-        LET read == DecodeDatagramBody(message.tag, EncodeDatagramBody(message))
+        LET sent == EncodeDatagramBody(message)
+            read == DecodeDatagramBody(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

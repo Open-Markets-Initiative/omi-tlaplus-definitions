@@ -726,13 +726,15 @@ RoundTripClientPacket ==
 (* A Unsequenced Message is selected by the Unsequenced Message Type it is written under *)
 SelectsUnsequencedMessage ==
     \A message \in CheckedUnsequencedMessage :
-        LET read == DecodeUnsequencedMessage(message.tag, EncodeUnsequencedMessage(message))
+        LET sent == EncodeUnsequencedMessage(message)
+            read == DecodeUnsequencedMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Client Payload is selected by the Client Packet Type it is written under *)
 SelectsClientPayload ==
     \A message \in CheckedClientPayload :
-        LET read == DecodeClientPayload(message.tag, EncodeClientPayload(message))
+        LET sent == EncodeClientPayload(message)
+            read == DecodeClientPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)

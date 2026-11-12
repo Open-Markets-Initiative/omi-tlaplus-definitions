@@ -3738,7 +3738,8 @@ RoundTripPacket ==
 (* A Payload is selected by the Template Id it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Frame Length is written from the bytes it frames *)

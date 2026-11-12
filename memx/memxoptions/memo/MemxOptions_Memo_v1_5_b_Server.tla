@@ -3400,13 +3400,15 @@ RoundTripServerPacket ==
 (* A Server Payload is selected by the Template Id it is written under *)
 SelectsServerPayload ==
     \A message \in CheckedServerPayload :
-        LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
+        LET sent == EncodeServerPayload(message)
+            read == DecodeServerPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Server Data is selected by the Message Type it is written under *)
 SelectsServerData ==
     \A message \in CheckedServerData :
-        LET read == DecodeServerData(message.tag, EncodeServerData(message))
+        LET sent == EncodeServerData(message)
+            read == DecodeServerData(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

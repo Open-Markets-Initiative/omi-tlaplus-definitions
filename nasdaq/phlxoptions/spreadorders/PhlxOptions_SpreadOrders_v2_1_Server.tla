@@ -1097,13 +1097,15 @@ RoundTripServerPacket ==
 (* A Sequenced Message is selected by the Sequenced Message Type it is written under *)
 SelectsSequencedMessage ==
     \A message \in CheckedSequencedMessage :
-        LET read == DecodeSequencedMessage(message.tag, EncodeSequencedMessage(message))
+        LET sent == EncodeSequencedMessage(message)
+            read == DecodeSequencedMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Server Payload is selected by the Server Packet Type it is written under *)
 SelectsServerPayload ==
     \A message \in CheckedServerPayload :
-        LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
+        LET sent == EncodeServerPayload(message)
+            read == DecodeServerPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)

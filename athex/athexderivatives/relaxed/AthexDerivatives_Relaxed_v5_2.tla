@@ -759,7 +759,8 @@ RoundTripPacket ==
 (* A Message Text is selected by the Message Category it is written under *)
 SelectsMessageText ==
     \A message \in CheckedMessageText :
-        LET read == DecodeMessageText(message.tag, EncodeMessageText(message))
+        LET sent == EncodeMessageText(message)
+            read == DecodeMessageText(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

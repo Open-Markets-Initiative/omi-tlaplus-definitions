@@ -3272,37 +3272,43 @@ RoundTripClientPacket ==
 (* A Enter Order Optional Value is selected by the Enter Order Optional Field it is written under *)
 SelectsEnterOrderOptionalValue ==
     \A message \in CheckedEnterOrderOptionalValue :
-        LET read == DecodeEnterOrderOptionalValue(message.tag, EncodeEnterOrderOptionalValue(message))
+        LET sent == EncodeEnterOrderOptionalValue(message)
+            read == DecodeEnterOrderOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Replace Order Request Optional Value is selected by the Replace Order Request Optional Field it is written under *)
 SelectsReplaceOrderRequestOptionalValue ==
     \A message \in CheckedReplaceOrderRequestOptionalValue :
-        LET read == DecodeReplaceOrderRequestOptionalValue(message.tag, EncodeReplaceOrderRequestOptionalValue(message))
+        LET sent == EncodeReplaceOrderRequestOptionalValue(message)
+            read == DecodeReplaceOrderRequestOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Cancel Order Request Optional Value is selected by the Cancel Order Request Optional Field it is written under *)
 SelectsCancelOrderRequestOptionalValue ==
     \A message \in CheckedCancelOrderRequestOptionalValue :
-        LET read == DecodeCancelOrderRequestOptionalValue(message.tag, EncodeCancelOrderRequestOptionalValue(message))
+        LET sent == EncodeCancelOrderRequestOptionalValue(message)
+            read == DecodeCancelOrderRequestOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Account Query Request Optional Value is selected by the Account Query Request Optional Field it is written under *)
 SelectsAccountQueryRequestOptionalValue ==
     \A message \in CheckedAccountQueryRequestOptionalValue :
-        LET read == DecodeAccountQueryRequestOptionalValue(message.tag, EncodeAccountQueryRequestOptionalValue(message))
+        LET sent == EncodeAccountQueryRequestOptionalValue(message)
+            read == DecodeAccountQueryRequestOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Unsequenced Message is selected by the Unsequenced Message Type it is written under *)
 SelectsUnsequencedMessage ==
     \A message \in CheckedUnsequencedMessage :
-        LET read == DecodeUnsequencedMessage(message.tag, EncodeUnsequencedMessage(message))
+        LET sent == EncodeUnsequencedMessage(message)
+            read == DecodeUnsequencedMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Client Payload is selected by the Client Packet Type it is written under *)
 SelectsClientPayload ==
     \A message \in CheckedClientPayload :
-        LET read == DecodeClientPayload(message.tag, EncodeClientPayload(message))
+        LET sent == EncodeClientPayload(message)
+            read == DecodeClientPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Optional Field Length is written from the bytes it frames *)

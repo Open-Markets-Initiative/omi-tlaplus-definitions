@@ -5582,31 +5582,36 @@ RoundTripServerPacket ==
 (* A Value Payload is selected by the Tag it is written under *)
 SelectsValuePayload ==
     \A message \in CheckedValuePayload :
-        LET read == DecodeValuePayload(message.tag, EncodeValuePayload(message))
+        LET sent == EncodeValuePayload(message)
+            read == DecodeValuePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Value Payload is selected by the Tag it is written under *)
 SelectsValuePayload2 ==
     \A message \in CheckedValuePayload2 :
-        LET read == DecodeValuePayload2(message.tag, EncodeValuePayload2(message))
+        LET sent == EncodeValuePayload2(message)
+            read == DecodeValuePayload2(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Value Payload is selected by the Tag it is written under *)
 SelectsValuePayload3 ==
     \A message \in CheckedValuePayload3 :
-        LET read == DecodeValuePayload3(message.tag, EncodeValuePayload3(message))
+        LET sent == EncodeValuePayload3(message)
+            read == DecodeValuePayload3(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Sequenced Message is selected by the Sequenced Message Type it is written under *)
 SelectsSequencedMessage ==
     \A message \in CheckedSequencedMessage :
-        LET read == DecodeSequencedMessage(message.tag, EncodeSequencedMessage(message))
+        LET sent == EncodeSequencedMessage(message)
+            read == DecodeSequencedMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Server Payload is selected by the Server Packet Type it is written under *)
 SelectsServerPayload ==
     \A message \in CheckedServerPayload :
-        LET read == DecodeServerPayload(message.tag, EncodeServerPayload(message))
+        LET sent == EncodeServerPayload(message)
+            read == DecodeServerPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Length is written from the bytes it frames *)

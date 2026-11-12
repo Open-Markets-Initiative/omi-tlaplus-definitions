@@ -1931,7 +1931,8 @@ RoundTripFile ==
 (* A File Payload is selected by the Message Type it is written under *)
 SelectsFilePayload ==
     \A message \in CheckedFilePayload :
-        LET read == DecodeFilePayload(message.tag, EncodeFilePayload(message))
+        LET sent == EncodeFilePayload(message)
+            read == DecodeFilePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

@@ -1088,7 +1088,8 @@ RoundTripPacket ==
 (* A Message Data is selected by the Message Type it is written under *)
 SelectsMessageData ==
     \A message \in CheckedMessageData :
-        LET read == DecodeMessageData(message.tag, EncodeMessageData(message))
+        LET sent == EncodeMessageData(message)
+            read == DecodeMessageData(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

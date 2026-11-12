@@ -1412,7 +1412,8 @@ RoundTripPacket ==
 (* A Message Body is selected by the Message Type it is written under *)
 SelectsMessageBody ==
     \A message \in CheckedMessageBody :
-        LET read == DecodeMessageBody(message.tag, EncodeMessageBody(message))
+        LET sent == EncodeMessageBody(message)
+            read == DecodeMessageBody(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

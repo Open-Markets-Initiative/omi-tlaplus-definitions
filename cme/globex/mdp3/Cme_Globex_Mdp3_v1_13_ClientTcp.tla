@@ -1123,7 +1123,8 @@ RoundTripClientTcpPacket ==
 (* A Client Payload is selected by the Template Id it is written under *)
 SelectsClientPayload ==
     \A message \in CheckedClientPayload :
-        LET read == DecodeClientPayload(message.tag, EncodeClientPayload(message))
+        LET sent == EncodeClientPayload(message)
+            read == DecodeClientPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Size is written from the bytes it frames *)

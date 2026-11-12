@@ -1028,13 +1028,15 @@ RoundTripPacket ==
 (* A Snapshot Message Payload is selected by the Snapshot Message Type it is written under *)
 SelectsSnapshotMessagePayload ==
     \A message \in CheckedSnapshotMessagePayload :
-        LET read == DecodeSnapshotMessagePayload(message.tag, EncodeSnapshotMessagePayload(message))
+        LET sent == EncodeSnapshotMessagePayload(message)
+            read == DecodeSnapshotMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Category Payload is selected by the Message Category it is written under *)
 SelectsCategoryPayload ==
     \A message \in CheckedCategoryPayload :
-        LET read == DecodeCategoryPayload(message.tag, EncodeCategoryPayload(message))
+        LET sent == EncodeCategoryPayload(message)
+            read == DecodeCategoryPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

@@ -8450,49 +8450,57 @@ RoundTripPacket ==
 (* A Administrative Message Payload is selected by the Administrative Message Type it is written under *)
 SelectsAdministrativeMessagePayload ==
     \A message \in CheckedAdministrativeMessagePayload :
-        LET read == DecodeAdministrativeMessagePayload(message.tag, EncodeAdministrativeMessagePayload(message))
+        LET sent == EncodeAdministrativeMessagePayload(message)
+            read == DecodeAdministrativeMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Control Message Payload is selected by the Control Message Type it is written under *)
 SelectsControlMessagePayload ==
     \A message \in CheckedControlMessagePayload :
-        LET read == DecodeControlMessagePayload(message.tag, EncodeControlMessagePayload(message))
+        LET sent == EncodeControlMessagePayload(message)
+            read == DecodeControlMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Indices Message Payload is selected by the Indices Message Type it is written under *)
 SelectsIndicesMessagePayload ==
     \A message \in CheckedIndicesMessagePayload :
-        LET read == DecodeIndicesMessagePayload(message.tag, EncodeIndicesMessagePayload(message))
+        LET sent == EncodeIndicesMessagePayload(message)
+            read == DecodeIndicesMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Market Status Message Payload is selected by the Market Status Message Type it is written under *)
 SelectsMarketStatusMessagePayload ==
     \A message \in CheckedMarketStatusMessagePayload :
-        LET read == DecodeMarketStatusMessagePayload(message.tag, EncodeMarketStatusMessagePayload(message))
+        LET sent == EncodeMarketStatusMessagePayload(message)
+            read == DecodeMarketStatusMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Prior Day Message Payload is selected by the Prior Day Message Type it is written under *)
 SelectsPriorDayMessagePayload ==
     \A message \in CheckedPriorDayMessagePayload :
-        LET read == DecodePriorDayMessagePayload(message.tag, EncodePriorDayMessagePayload(message))
+        LET sent == EncodePriorDayMessagePayload(message)
+            read == DecodePriorDayMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Summary Message Payload is selected by the Summary Message Type it is written under *)
 SelectsSummaryMessagePayload ==
     \A message \in CheckedSummaryMessagePayload :
-        LET read == DecodeSummaryMessagePayload(message.tag, EncodeSummaryMessagePayload(message))
+        LET sent == EncodeSummaryMessagePayload(message)
+            read == DecodeSummaryMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Trade Message Payload is selected by the Trade Message Type it is written under *)
 SelectsTradeMessagePayload ==
     \A message \in CheckedTradeMessagePayload :
-        LET read == DecodeTradeMessagePayload(message.tag, EncodeTradeMessagePayload(message))
+        LET sent == EncodeTradeMessagePayload(message)
+            read == DecodeTradeMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Category Payload is selected by the Message Category it is written under *)
 SelectsCategoryPayload ==
     \A message \in CheckedCategoryPayload :
-        LET read == DecodeCategoryPayload(message.tag, EncodeCategoryPayload(message))
+        LET sent == EncodeCategoryPayload(message)
+            read == DecodeCategoryPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

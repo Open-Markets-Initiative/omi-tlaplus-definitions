@@ -4925,49 +4925,57 @@ RoundTripServerPacket ==
 (* A Inbound Quote Messages Message Payload is selected by the Inbound Quote Messages Message Type it is written under *)
 SelectsInboundQuoteMessagesMessagePayload ==
     \A message \in CheckedInboundQuoteMessagesMessagePayload :
-        LET read == DecodeInboundQuoteMessagesMessagePayload(message.tag, EncodeInboundQuoteMessagesMessagePayload(message))
+        LET sent == EncodeInboundQuoteMessagesMessagePayload(message)
+            read == DecodeInboundQuoteMessagesMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Inbound Trade Messages Message Payload is selected by the Inbound Trade Messages Message Type it is written under *)
 SelectsInboundTradeMessagesMessagePayload ==
     \A message \in CheckedInboundTradeMessagesMessagePayload :
-        LET read == DecodeInboundTradeMessagesMessagePayload(message.tag, EncodeInboundTradeMessagesMessagePayload(message))
+        LET sent == EncodeInboundTradeMessagesMessagePayload(message)
+            read == DecodeInboundTradeMessagesMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Inbound Administrative Messages Message Payload is selected by the Inbound Administrative Messages Message Type it is written under *)
 SelectsInboundAdministrativeMessagesMessagePayload ==
     \A message \in CheckedInboundAdministrativeMessagesMessagePayload :
-        LET read == DecodeInboundAdministrativeMessagesMessagePayload(message.tag, EncodeInboundAdministrativeMessagesMessagePayload(message))
+        LET sent == EncodeInboundAdministrativeMessagesMessagePayload(message)
+            read == DecodeInboundAdministrativeMessagesMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Inbound Control Messages Message Payload is selected by the Inbound Control Messages Message Type it is written under *)
 SelectsInboundControlMessagesMessagePayload ==
     \A message \in CheckedInboundControlMessagesMessagePayload :
-        LET read == DecodeInboundControlMessagesMessagePayload(message.tag, EncodeInboundControlMessagesMessagePayload(message))
+        LET sent == EncodeInboundControlMessagesMessagePayload(message)
+            read == DecodeInboundControlMessagesMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Return Administrative Messages Message Payload is selected by the Return Administrative Messages Message Type it is written under *)
 SelectsReturnAdministrativeMessagesMessagePayload ==
     \A message \in CheckedReturnAdministrativeMessagesMessagePayload :
-        LET read == DecodeReturnAdministrativeMessagesMessagePayload(message.tag, EncodeReturnAdministrativeMessagesMessagePayload(message))
+        LET sent == EncodeReturnAdministrativeMessagesMessagePayload(message)
+            read == DecodeReturnAdministrativeMessagesMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Return Control Messages Message Payload is selected by the Return Control Messages Message Type it is written under *)
 SelectsReturnControlMessagesMessagePayload ==
     \A message \in CheckedReturnControlMessagesMessagePayload :
-        LET read == DecodeReturnControlMessagesMessagePayload(message.tag, EncodeReturnControlMessagesMessagePayload(message))
+        LET sent == EncodeReturnControlMessagesMessagePayload(message)
+            read == DecodeReturnControlMessagesMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Category Payload is selected by the Message Category it is written under *)
 SelectsCategoryPayload ==
     \A message \in CheckedCategoryPayload :
-        LET read == DecodeCategoryPayload(message.tag, EncodeCategoryPayload(message))
+        LET sent == EncodeCategoryPayload(message)
+            read == DecodeCategoryPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Server Tcp Payload is selected by the Server Packet Type it is written under *)
 SelectsServerTcpPayload ==
     \A message \in CheckedServerTcpPayload :
-        LET read == DecodeServerTcpPayload(message.tag, EncodeServerTcpPayload(message))
+        LET sent == EncodeServerTcpPayload(message)
+            read == DecodeServerTcpPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)

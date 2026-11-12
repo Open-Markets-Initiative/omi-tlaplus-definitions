@@ -3043,7 +3043,8 @@ RoundTripFirmPacket ==
 (* A Firm Message is selected by the Message Type it is written under *)
 SelectsFirmMessage ==
     \A message \in CheckedFirmMessage :
-        LET read == DecodeFirmMessage(message.tag, EncodeFirmMessage(message))
+        LET sent == EncodeFirmMessage(message)
+            read == DecodeFirmMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

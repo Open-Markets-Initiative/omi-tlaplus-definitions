@@ -1230,13 +1230,15 @@ RoundTripPacket ==
 (* A Iex Tp Message Data is selected by the Iex Tp Message Type it is written under *)
 SelectsIexTpMessageData ==
     \A message \in CheckedIexTpMessageData :
-        LET read == DecodeIexTpMessageData(message.tag, EncodeIexTpMessageData(message))
+        LET sent == EncodeIexTpMessageData(message)
+            read == DecodeIexTpMessageData(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Message Data is selected by the Message Type it is written under *)
 SelectsMessageData ==
     \A message \in CheckedMessageData :
-        LET read == DecodeMessageData(message.tag, EncodeMessageData(message))
+        LET sent == EncodeMessageData(message)
+            read == DecodeMessageData(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Iex Tp Message Block Length is written from the bytes it frames *)

@@ -1030,7 +1030,8 @@ RoundTripPacket ==
 (* A Udp Payload is selected by the Message Type it is written under *)
 SelectsUdpPayload ==
     \A message \in CheckedUdpPayload :
-        LET read == DecodeUdpPayload(message.tag, EncodeUdpPayload(message))
+        LET sent == EncodeUdpPayload(message)
+            read == DecodeUdpPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

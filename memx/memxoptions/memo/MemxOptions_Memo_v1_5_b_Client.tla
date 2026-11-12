@@ -2602,13 +2602,15 @@ RoundTripClientPacket ==
 (* A Client Payload is selected by the Template Id it is written under *)
 SelectsClientPayload ==
     \A message \in CheckedClientPayload :
-        LET read == DecodeClientPayload(message.tag, EncodeClientPayload(message))
+        LET sent == EncodeClientPayload(message)
+            read == DecodeClientPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Client Data is selected by the Message Type it is written under *)
 SelectsClientData ==
     \A message \in CheckedClientData :
-        LET read == DecodeClientData(message.tag, EncodeClientData(message))
+        LET sent == EncodeClientData(message)
+            read == DecodeClientData(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

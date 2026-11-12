@@ -5003,103 +5003,120 @@ RoundTripPacket ==
 (* A Nbbo Appendage Indicator is selected by the Nbbo Appendage Indicator it is written under *)
 SelectsNbboAppendageIndicatorChoice ==
     \A message \in CheckedNbboAppendageIndicatorChoice :
-        LET read == DecodeNbboAppendageIndicatorChoice(message.tag, EncodeNbboAppendageIndicatorChoice(message))
+        LET sent == EncodeNbboAppendageIndicatorChoice(message)
+            read == DecodeNbboAppendageIndicatorChoice(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Nbbo Appendage Indicator is selected by the Nbbo Appendage Indicator it is written under *)
 SelectsNbboAppendageIndicatorChoice2 ==
     \A message \in CheckedNbboAppendageIndicatorChoice2 :
-        LET read == DecodeNbboAppendageIndicatorChoice2(message.tag, EncodeNbboAppendageIndicatorChoice2(message))
+        LET sent == EncodeNbboAppendageIndicatorChoice2(message)
+            read == DecodeNbboAppendageIndicatorChoice2(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Nbbo Appendage Indicator is selected by the Nbbo Appendage Indicator it is written under *)
 SelectsNbboAppendageIndicatorChoice3 ==
     \A message \in CheckedNbboAppendageIndicatorChoice3 :
-        LET read == DecodeNbboAppendageIndicatorChoice3(message.tag, EncodeNbboAppendageIndicatorChoice3(message))
+        LET sent == EncodeNbboAppendageIndicatorChoice3(message)
+            read == DecodeNbboAppendageIndicatorChoice3(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Bolo Appendage Indicator is selected by the Bolo Appendage Indicator it is written under *)
 SelectsBoloAppendageIndicatorChoice ==
     \A message \in CheckedBoloAppendageIndicatorChoice :
-        LET read == DecodeBoloAppendageIndicatorChoice(message.tag, EncodeBoloAppendageIndicatorChoice(message))
+        LET sent == EncodeBoloAppendageIndicatorChoice(message)
+            read == DecodeBoloAppendageIndicatorChoice(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Odd Lot Attachment Type is selected by the Odd Lot Attachment Type it is written under *)
 SelectsOddLotAttachmentTypeChoice ==
     \A message \in CheckedOddLotAttachmentTypeChoice :
-        LET read == DecodeOddLotAttachmentTypeChoice(message.tag, EncodeOddLotAttachmentTypeChoice(message))
+        LET sent == EncodeOddLotAttachmentTypeChoice(message)
+            read == DecodeOddLotAttachmentTypeChoice(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Nbbo Appendage Indicator is selected by the Nbbo Appendage Indicator it is written under *)
 SelectsNbboAppendageIndicatorChoice4 ==
     \A message \in CheckedNbboAppendageIndicatorChoice4 :
-        LET read == DecodeNbboAppendageIndicatorChoice4(message.tag, EncodeNbboAppendageIndicatorChoice4(message))
+        LET sent == EncodeNbboAppendageIndicatorChoice4(message)
+            read == DecodeNbboAppendageIndicatorChoice4(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Finra Adf Mpid Appendage Indicator is selected by the Finra Adf Mpid Appendage Indicator it is written under *)
 SelectsFinraAdfMpidAppendageIndicatorChoice ==
     \A message \in CheckedFinraAdfMpidAppendageIndicatorChoice :
-        LET read == DecodeFinraAdfMpidAppendageIndicatorChoice(message.tag, EncodeFinraAdfMpidAppendageIndicatorChoice(message))
+        LET sent == EncodeFinraAdfMpidAppendageIndicatorChoice(message)
+            read == DecodeFinraAdfMpidAppendageIndicatorChoice(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Bolo Appendage Indicator is selected by the Bolo Appendage Indicator it is written under *)
 SelectsBoloAppendageIndicatorChoice2 ==
     \A message \in CheckedBoloAppendageIndicatorChoice2 :
-        LET read == DecodeBoloAppendageIndicatorChoice2(message.tag, EncodeBoloAppendageIndicatorChoice2(message))
+        LET sent == EncodeBoloAppendageIndicatorChoice2(message)
+            read == DecodeBoloAppendageIndicatorChoice2(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Odd Lot Attachment Type is selected by the Odd Lot Attachment Type it is written under *)
 SelectsOddLotAttachmentTypeChoice2 ==
     \A message \in CheckedOddLotAttachmentTypeChoice2 :
-        LET read == DecodeOddLotAttachmentTypeChoice2(message.tag, EncodeOddLotAttachmentTypeChoice2(message))
+        LET sent == EncodeOddLotAttachmentTypeChoice2(message)
+            read == DecodeOddLotAttachmentTypeChoice2(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Bolo Appendage Indicator is selected by the Bolo Appendage Indicator it is written under *)
 SelectsBoloAppendageIndicatorChoice3 ==
     \A message \in CheckedBoloAppendageIndicatorChoice3 :
-        LET read == DecodeBoloAppendageIndicatorChoice3(message.tag, EncodeBoloAppendageIndicatorChoice3(message))
+        LET sent == EncodeBoloAppendageIndicatorChoice3(message)
+            read == DecodeBoloAppendageIndicatorChoice3(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Odd Lot Attachment Type is selected by the Odd Lot Attachment Type it is written under *)
 SelectsOddLotAttachmentTypeChoice3 ==
     \A message \in CheckedOddLotAttachmentTypeChoice3 :
-        LET read == DecodeOddLotAttachmentTypeChoice3(message.tag, EncodeOddLotAttachmentTypeChoice3(message))
+        LET sent == EncodeOddLotAttachmentTypeChoice3(message)
+            read == DecodeOddLotAttachmentTypeChoice3(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Bolo Appendage Indicator is selected by the Bolo Appendage Indicator it is written under *)
 SelectsBoloAppendageIndicatorChoice4 ==
     \A message \in CheckedBoloAppendageIndicatorChoice4 :
-        LET read == DecodeBoloAppendageIndicatorChoice4(message.tag, EncodeBoloAppendageIndicatorChoice4(message))
+        LET sent == EncodeBoloAppendageIndicatorChoice4(message)
+            read == DecodeBoloAppendageIndicatorChoice4(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Odd Lot Attachment Type is selected by the Odd Lot Attachment Type it is written under *)
 SelectsOddLotAttachmentTypeChoice4 ==
     \A message \in CheckedOddLotAttachmentTypeChoice4 :
-        LET read == DecodeOddLotAttachmentTypeChoice4(message.tag, EncodeOddLotAttachmentTypeChoice4(message))
+        LET sent == EncodeOddLotAttachmentTypeChoice4(message)
+            read == DecodeOddLotAttachmentTypeChoice4(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Quote Message Payload is selected by the Quote Message Type it is written under *)
 SelectsQuoteMessagePayload ==
     \A message \in CheckedQuoteMessagePayload :
-        LET read == DecodeQuoteMessagePayload(message.tag, EncodeQuoteMessagePayload(message))
+        LET sent == EncodeQuoteMessagePayload(message)
+            read == DecodeQuoteMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Administrative Message Payload is selected by the Administrative Message Type it is written under *)
 SelectsAdministrativeMessagePayload ==
     \A message \in CheckedAdministrativeMessagePayload :
-        LET read == DecodeAdministrativeMessagePayload(message.tag, EncodeAdministrativeMessagePayload(message))
+        LET sent == EncodeAdministrativeMessagePayload(message)
+            read == DecodeAdministrativeMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Control Message Payload is selected by the Control Message Type it is written under *)
 SelectsControlMessagePayload ==
     \A message \in CheckedControlMessagePayload :
-        LET read == DecodeControlMessagePayload(message.tag, EncodeControlMessagePayload(message))
+        LET sent == EncodeControlMessagePayload(message)
+            read == DecodeControlMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Category Payload is selected by the Message Category it is written under *)
 SelectsCategoryPayload ==
     \A message \in CheckedCategoryPayload :
-        LET read == DecodeCategoryPayload(message.tag, EncodeCategoryPayload(message))
+        LET sent == EncodeCategoryPayload(message)
+            read == DecodeCategoryPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

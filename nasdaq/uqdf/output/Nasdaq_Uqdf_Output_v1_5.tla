@@ -3068,43 +3068,50 @@ RoundTripPacket ==
 (* A Nbbo Appendage Indicator is selected by the Nbbo Appendage Indicator it is written under *)
 SelectsNbboAppendageIndicatorChoice ==
     \A message \in CheckedNbboAppendageIndicatorChoice :
-        LET read == DecodeNbboAppendageIndicatorChoice(message.tag, EncodeNbboAppendageIndicatorChoice(message))
+        LET sent == EncodeNbboAppendageIndicatorChoice(message)
+            read == DecodeNbboAppendageIndicatorChoice(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Nbbo Appendage Indicator is selected by the Nbbo Appendage Indicator it is written under *)
 SelectsNbboAppendageIndicatorChoice2 ==
     \A message \in CheckedNbboAppendageIndicatorChoice2 :
-        LET read == DecodeNbboAppendageIndicatorChoice2(message.tag, EncodeNbboAppendageIndicatorChoice2(message))
+        LET sent == EncodeNbboAppendageIndicatorChoice2(message)
+            read == DecodeNbboAppendageIndicatorChoice2(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Finra Adf Mpid Appendage Indicator is selected by the Finra Adf Mpid Appendage Indicator it is written under *)
 SelectsFinraAdfMpidAppendageIndicatorChoice ==
     \A message \in CheckedFinraAdfMpidAppendageIndicatorChoice :
-        LET read == DecodeFinraAdfMpidAppendageIndicatorChoice(message.tag, EncodeFinraAdfMpidAppendageIndicatorChoice(message))
+        LET sent == EncodeFinraAdfMpidAppendageIndicatorChoice(message)
+            read == DecodeFinraAdfMpidAppendageIndicatorChoice(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Quote Message Payload is selected by the Quote Message Type it is written under *)
 SelectsQuoteMessagePayload ==
     \A message \in CheckedQuoteMessagePayload :
-        LET read == DecodeQuoteMessagePayload(message.tag, EncodeQuoteMessagePayload(message))
+        LET sent == EncodeQuoteMessagePayload(message)
+            read == DecodeQuoteMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Administrative Message Payload is selected by the Administrative Message Type it is written under *)
 SelectsAdministrativeMessagePayload ==
     \A message \in CheckedAdministrativeMessagePayload :
-        LET read == DecodeAdministrativeMessagePayload(message.tag, EncodeAdministrativeMessagePayload(message))
+        LET sent == EncodeAdministrativeMessagePayload(message)
+            read == DecodeAdministrativeMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Control Message Payload is selected by the Control Message Type it is written under *)
 SelectsControlMessagePayload ==
     \A message \in CheckedControlMessagePayload :
-        LET read == DecodeControlMessagePayload(message.tag, EncodeControlMessagePayload(message))
+        LET sent == EncodeControlMessagePayload(message)
+            read == DecodeControlMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Payload is selected by the Message Category it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

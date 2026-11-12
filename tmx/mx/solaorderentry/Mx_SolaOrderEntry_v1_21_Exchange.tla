@@ -4684,7 +4684,8 @@ RoundTripExchangePacket ==
 (* A Exchange Message is selected by the Message Type it is written under *)
 SelectsExchangeMessage ==
     \A message \in CheckedExchangeMessage :
-        LET read == DecodeExchangeMessage(message.tag, EncodeExchangeMessage(message))
+        LET sent == EncodeExchangeMessage(message)
+            read == DecodeExchangeMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 -----------------------------------------------------------------------------

@@ -815,22 +815,22 @@ CheckedEqTradeBreakMessage ==
 (***************************************************************************)
 
 EqEndOfSession ==
-    [ timestamp : Sample(4) ]
+    [ timeOffset : Sample(4) ]
 
 EncodeEqEndOfSession(message) ==
-    message.timestamp
+    message.timeOffset
 
 DecodeEqEndOfSession(bytes) ==
-    LET timestamp == ReadBytes(bytes, 4) IN IF ~timestamp.ok THEN Fail ELSE
-    Ok([ timestamp |-> timestamp.value ], timestamp.rest)
+    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    Ok([ timeOffset |-> timeOffset.value ], timeOffset.rest)
 
 ZeroEqEndOfSession ==
-    [ timestamp |-> [i \in 1 .. 4 |-> 0] ]
+    [ timeOffset |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Eq End Of Session at zero, then each field in turn at the values it is checked at *)
 CheckedEqEndOfSession ==
     { ZeroEqEndOfSession }
-        \cup { [ZeroEqEndOfSession EXCEPT !.timestamp = one] : one \in Sample(4) }
+        \cup { [ZeroEqEndOfSession EXCEPT !.timeOffset = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Eq Trading Status Message: 16 bytes                                     *)
@@ -1478,7 +1478,8 @@ RoundTripPacket ==
 (* A Payload is selected by the Message Type it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)

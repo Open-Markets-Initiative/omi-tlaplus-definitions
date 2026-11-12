@@ -1799,7 +1799,8 @@ RoundTripClientPacket ==
 (* A Client Message Payload is selected by the Transaction Code it is written under *)
 SelectsClientMessagePayload ==
     \A message \in CheckedClientMessagePayload :
-        LET read == DecodeClientMessagePayload(message.tag, EncodeClientMessagePayload(message))
+        LET sent == EncodeClientMessagePayload(message)
+            read == DecodeClientMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)

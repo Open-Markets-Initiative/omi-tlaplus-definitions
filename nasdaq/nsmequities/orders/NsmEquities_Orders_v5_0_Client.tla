@@ -3500,61 +3500,71 @@ RoundTripClientPacket ==
 (* A Enter Order Optional Value is selected by the Enter Order Optional Field it is written under *)
 SelectsEnterOrderOptionalValue ==
     \A message \in CheckedEnterOrderOptionalValue :
-        LET read == DecodeEnterOrderOptionalValue(message.tag, EncodeEnterOrderOptionalValue(message))
+        LET sent == EncodeEnterOrderOptionalValue(message)
+            read == DecodeEnterOrderOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Replace Order Optional Value is selected by the Replace Order Optional Field it is written under *)
 SelectsReplaceOrderOptionalValue ==
     \A message \in CheckedReplaceOrderOptionalValue :
-        LET read == DecodeReplaceOrderOptionalValue(message.tag, EncodeReplaceOrderOptionalValue(message))
+        LET sent == EncodeReplaceOrderOptionalValue(message)
+            read == DecodeReplaceOrderOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Cancel Order Optional Value is selected by the Cancel Order Optional Field it is written under *)
 SelectsCancelOrderOptionalValue ==
     \A message \in CheckedCancelOrderOptionalValue :
-        LET read == DecodeCancelOrderOptionalValue(message.tag, EncodeCancelOrderOptionalValue(message))
+        LET sent == EncodeCancelOrderOptionalValue(message)
+            read == DecodeCancelOrderOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Modify Order Optional Value is selected by the Modify Order Optional Field it is written under *)
 SelectsModifyOrderOptionalValue ==
     \A message \in CheckedModifyOrderOptionalValue :
-        LET read == DecodeModifyOrderOptionalValue(message.tag, EncodeModifyOrderOptionalValue(message))
+        LET sent == EncodeModifyOrderOptionalValue(message)
+            read == DecodeModifyOrderOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Account Query Optional Value is selected by the Account Query Optional Field it is written under *)
 SelectsAccountQueryOptionalValue ==
     \A message \in CheckedAccountQueryOptionalValue :
-        LET read == DecodeAccountQueryOptionalValue(message.tag, EncodeAccountQueryOptionalValue(message))
+        LET sent == EncodeAccountQueryOptionalValue(message)
+            read == DecodeAccountQueryOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Mass Cancel Request Optional Value is selected by the Mass Cancel Request Optional Field it is written under *)
 SelectsMassCancelRequestOptionalValue ==
     \A message \in CheckedMassCancelRequestOptionalValue :
-        LET read == DecodeMassCancelRequestOptionalValue(message.tag, EncodeMassCancelRequestOptionalValue(message))
+        LET sent == EncodeMassCancelRequestOptionalValue(message)
+            read == DecodeMassCancelRequestOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Disable Order Entry Request Optional Value is selected by the Disable Order Entry Request Optional Field it is written under *)
 SelectsDisableOrderEntryRequestOptionalValue ==
     \A message \in CheckedDisableOrderEntryRequestOptionalValue :
-        LET read == DecodeDisableOrderEntryRequestOptionalValue(message.tag, EncodeDisableOrderEntryRequestOptionalValue(message))
+        LET sent == EncodeDisableOrderEntryRequestOptionalValue(message)
+            read == DecodeDisableOrderEntryRequestOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Enable Order Entry Request Optional Value is selected by the Enable Order Entry Request Optional Field it is written under *)
 SelectsEnableOrderEntryRequestOptionalValue ==
     \A message \in CheckedEnableOrderEntryRequestOptionalValue :
-        LET read == DecodeEnableOrderEntryRequestOptionalValue(message.tag, EncodeEnableOrderEntryRequestOptionalValue(message))
+        LET sent == EncodeEnableOrderEntryRequestOptionalValue(message)
+            read == DecodeEnableOrderEntryRequestOptionalValue(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Unsequenced Message is selected by the Unsequenced Message Type it is written under *)
 SelectsUnsequencedMessage ==
     \A message \in CheckedUnsequencedMessage :
-        LET read == DecodeUnsequencedMessage(message.tag, EncodeUnsequencedMessage(message))
+        LET sent == EncodeUnsequencedMessage(message)
+            read == DecodeUnsequencedMessage(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Client Payload is selected by the Client Packet Type it is written under *)
 SelectsClientPayload ==
     \A message \in CheckedClientPayload :
-        LET read == DecodeClientPayload(message.tag, EncodeClientPayload(message))
+        LET sent == EncodeClientPayload(message)
+            read == DecodeClientPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Optional Field Length is written from the bytes it frames *)

@@ -1409,7 +1409,8 @@ RoundTripClientPacket ==
 (* A Client Payload is selected by the Schema Id it is written under *)
 SelectsClientPayload ==
     \A message \in CheckedClientPayload :
-        LET read == DecodeClientPayload(message.tag[1], message.tag[2], EncodeClientPayload(message))
+        LET sent == EncodeClientPayload(message)
+            read == DecodeClientPayload(message.tag[1], message.tag[2], sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)

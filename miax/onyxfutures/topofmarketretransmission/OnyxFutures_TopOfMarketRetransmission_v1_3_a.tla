@@ -2933,25 +2933,29 @@ RoundTripPacket ==
 (* A Data is selected by the Message Type it is written under *)
 SelectsData ==
     \A message \in CheckedData :
-        LET read == DecodeData(message.tag, EncodeData(message))
+        LET sent == EncodeData(message)
+            read == DecodeData(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Data is selected by the Message Type it is written under *)
 SelectsData2 ==
     \A message \in CheckedData2 :
-        LET read == DecodeData2(message.tag, EncodeData2(message))
+        LET sent == EncodeData2(message)
+            read == DecodeData2(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Refresh Payload is selected by the Refresh Type it is written under *)
 SelectsRefreshPayload ==
     \A message \in CheckedRefreshPayload :
-        LET read == DecodeRefreshPayload(message.tag, EncodeRefreshPayload(message))
+        LET sent == EncodeRefreshPayload(message)
+            read == DecodeRefreshPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Sesm Payload is selected by the Sesm Packet Type it is written under *)
 SelectsSesmPayload ==
     \A message \in CheckedSesmPayload :
-        LET read == DecodeSesmPayload(message.tag, EncodeSesmPayload(message))
+        LET sent == EncodeSesmPayload(message)
+            read == DecodeSesmPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Sesm Packet Length is written from the bytes it frames *)

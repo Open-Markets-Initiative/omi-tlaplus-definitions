@@ -1826,55 +1826,64 @@ RoundTripPacket ==
 (* A Equity And Index Last Sale Message Payload is selected by the Equity And Index Last Sale Message Type it is written under *)
 SelectsEquityAndIndexLastSaleMessagePayload ==
     \A message \in CheckedEquityAndIndexLastSaleMessagePayload :
-        LET read == DecodeEquityAndIndexLastSaleMessagePayload(message.tag, EncodeEquityAndIndexLastSaleMessagePayload(message))
+        LET sent == EncodeEquityAndIndexLastSaleMessagePayload(message)
+            read == DecodeEquityAndIndexLastSaleMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Equity And Index End Of Day Summary Message Payload is selected by the Equity And Index End Of Day Summary Message Type it is written under *)
 SelectsEquityAndIndexEndOfDaySummaryMessagePayload ==
     \A message \in CheckedEquityAndIndexEndOfDaySummaryMessagePayload :
-        LET read == DecodeEquityAndIndexEndOfDaySummaryMessagePayload(message.tag, EncodeEquityAndIndexEndOfDaySummaryMessagePayload(message))
+        LET sent == EncodeEquityAndIndexEndOfDaySummaryMessagePayload(message)
+            read == DecodeEquityAndIndexEndOfDaySummaryMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Long Equity And Index Quote Message Payload is selected by the Long Equity And Index Quote Message Type it is written under *)
 SelectsLongEquityAndIndexQuoteMessagePayload ==
     \A message \in CheckedLongEquityAndIndexQuoteMessagePayload :
-        LET read == DecodeLongEquityAndIndexQuoteMessagePayload(message.tag, EncodeLongEquityAndIndexQuoteMessagePayload(message))
+        LET sent == EncodeLongEquityAndIndexQuoteMessagePayload(message)
+            read == DecodeLongEquityAndIndexQuoteMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Short Equity And Index Quote Message Payload is selected by the Short Equity And Index Quote Message Type it is written under *)
 SelectsShortEquityAndIndexQuoteMessagePayload ==
     \A message \in CheckedShortEquityAndIndexQuoteMessagePayload :
-        LET read == DecodeShortEquityAndIndexQuoteMessagePayload(message.tag, EncodeShortEquityAndIndexQuoteMessagePayload(message))
+        LET sent == EncodeShortEquityAndIndexQuoteMessagePayload(message)
+            read == DecodeShortEquityAndIndexQuoteMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Administrative Message Payload is selected by the Administrative Message Type it is written under *)
 SelectsAdministrativeMessagePayload ==
     \A message \in CheckedAdministrativeMessagePayload :
-        LET read == DecodeAdministrativeMessagePayload(message.tag, EncodeAdministrativeMessagePayload(message))
+        LET sent == EncodeAdministrativeMessagePayload(message)
+            read == DecodeAdministrativeMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Control Message Payload is selected by the Control Message Type it is written under *)
 SelectsControlMessagePayload ==
     \A message \in CheckedControlMessagePayload :
-        LET read == DecodeControlMessagePayload(message.tag, EncodeControlMessagePayload(message))
+        LET sent == EncodeControlMessagePayload(message)
+            read == DecodeControlMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Sequence Number Status Message Payload is selected by the Sequence Number Status Message Type it is written under *)
 SelectsSequenceNumberStatusMessagePayload ==
     \A message \in CheckedSequenceNumberStatusMessagePayload :
-        LET read == DecodeSequenceNumberStatusMessagePayload(message.tag, EncodeSequenceNumberStatusMessagePayload(message))
+        LET sent == EncodeSequenceNumberStatusMessagePayload(message)
+            read == DecodeSequenceNumberStatusMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Underlying Value Message Message Payload is selected by the Underlying Value Message Message Type it is written under *)
 SelectsUnderlyingValueMessageMessagePayload ==
     \A message \in CheckedUnderlyingValueMessageMessagePayload :
-        LET read == DecodeUnderlyingValueMessageMessagePayload(message.tag, EncodeUnderlyingValueMessageMessagePayload(message))
+        LET sent == EncodeUnderlyingValueMessageMessagePayload(message)
+            read == DecodeUnderlyingValueMessageMessagePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* A Payload is selected by the Message Category it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Data Length is written from the bytes it frames *)

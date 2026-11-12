@@ -332,7 +332,8 @@ RoundTripClientPacket ==
 (* A Client Tcp Payload is selected by the Client Packet Type it is written under *)
 SelectsClientTcpPayload ==
     \A message \in CheckedClientTcpPayload :
-        LET read == DecodeClientTcpPayload(message.tag, EncodeClientTcpPayload(message))
+        LET sent == EncodeClientTcpPayload(message)
+            read == DecodeClientTcpPayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)

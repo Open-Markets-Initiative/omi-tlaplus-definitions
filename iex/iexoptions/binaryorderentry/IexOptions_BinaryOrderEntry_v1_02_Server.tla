@@ -2836,7 +2836,8 @@ RoundTripServerPacket ==
 (* A Server Payload is selected by the Schema Id it is written under *)
 SelectsServerPayload ==
     \A message \in CheckedServerPayload :
-        LET read == DecodeServerPayload(message.tag[1], message.tag[2], EncodeServerPayload(message))
+        LET sent == EncodeServerPayload(message)
+            read == DecodeServerPayload(message.tag[1], message.tag[2], sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Packet Length is written from the bytes it frames *)

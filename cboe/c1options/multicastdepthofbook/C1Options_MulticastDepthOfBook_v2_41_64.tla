@@ -104,29 +104,29 @@ SampleLists(entries) ==
 
 OxTimeReferenceMessage ==
     [ midnightReference : Sample(4),
-      timeReference     : Sample(4),
+      time              : Sample(4),
       timeOffset        : Sample(4),
       tradeDate         : Sample(4) ]
 
 EncodeOxTimeReferenceMessage(message) ==
     message.midnightReference
-        \o message.timeReference
+        \o message.time
         \o message.timeOffset
         \o message.tradeDate
 
 DecodeOxTimeReferenceMessage(bytes) ==
     LET midnightReference == ReadBytes(bytes, 4) IN IF ~midnightReference.ok THEN Fail ELSE
-    LET timeReference == ReadBytes(midnightReference.rest, 4) IN IF ~timeReference.ok THEN Fail ELSE
-    LET timeOffset == ReadBytes(timeReference.rest, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    LET time == ReadBytes(midnightReference.rest, 4) IN IF ~time.ok THEN Fail ELSE
+    LET timeOffset == ReadBytes(time.rest, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET tradeDate == ReadBytes(timeOffset.rest, 4) IN IF ~tradeDate.ok THEN Fail ELSE
     Ok([ midnightReference |-> midnightReference.value,
-         timeReference     |-> timeReference.value,
+         time              |-> time.value,
          timeOffset        |-> timeOffset.value,
          tradeDate         |-> tradeDate.value ], tradeDate.rest)
 
 ZeroOxTimeReferenceMessage ==
     [ midnightReference |-> [i \in 1 .. 4 |-> 0],
-      timeReference     |-> [i \in 1 .. 4 |-> 0],
+      time              |-> [i \in 1 .. 4 |-> 0],
       timeOffset        |-> [i \in 1 .. 4 |-> 0],
       tradeDate         |-> [i \in 1 .. 4 |-> 0] ]
 
@@ -134,7 +134,7 @@ ZeroOxTimeReferenceMessage ==
 CheckedOxTimeReferenceMessage ==
     { ZeroOxTimeReferenceMessage }
         \cup { [ZeroOxTimeReferenceMessage EXCEPT !.midnightReference = one] : one \in Sample(4) }
-        \cup { [ZeroOxTimeReferenceMessage EXCEPT !.timeReference = one] : one \in Sample(4) }
+        \cup { [ZeroOxTimeReferenceMessage EXCEPT !.time = one] : one \in Sample(4) }
         \cup { [ZeroOxTimeReferenceMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroOxTimeReferenceMessage EXCEPT !.tradeDate = one] : one \in Sample(4) }
 
@@ -2048,7 +2048,8 @@ RoundTripPacket ==
 (* A Payload is selected by the Message Type it is written under *)
 SelectsPayload ==
     \A message \in CheckedPayload :
-        LET read == DecodePayload(message.tag, EncodePayload(message))
+        LET sent == EncodePayload(message)
+            read == DecodePayload(message.tag, sent)
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Length is written from the bytes it frames *)
