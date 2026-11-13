@@ -1528,13 +1528,13 @@ AuctionLiquidityMessage ==
 EncodeAuctionLiquidityMessage(message) ==
     message.timeOffset
         \o message.auctionId
-        \o EncodeUIntLE(Len(message.priceLevelGroup), 1)
+        \o EncodeUIntBE(Len(message.priceLevelGroup), 1)
         \o EncodePriceLevelGroupList(message.priceLevelGroup)
 
 DecodeAuctionLiquidityMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET auctionId == ReadBytes(timeOffset.rest, 8) IN IF ~auctionId.ok THEN Fail ELSE
-    LET priceLevelCount == ReadUIntLE(auctionId.rest, 1) IN IF ~priceLevelCount.ok THEN Fail ELSE
+    LET priceLevelCount == ReadUIntBE(auctionId.rest, 1) IN IF ~priceLevelCount.ok THEN Fail ELSE
     LET priceLevelGroup == ReadPriceLevelGroupList(priceLevelCount.rest, priceLevelCount.value) IN IF ~priceLevelGroup.ok THEN Fail ELSE
     Ok([ timeOffset      |-> timeOffset.value,
          auctionId       |-> auctionId.value,
@@ -1783,14 +1783,14 @@ EncodeComplexInstrumentDefinitionMessage(message) ==
     message.timeOffset
         \o message.complexInstrumentId
         \o message.referencePrice
-        \o EncodeUIntLE(Len(message.legGroup), 1)
+        \o EncodeUIntBE(Len(message.legGroup), 1)
         \o EncodeLegGroupList(message.legGroup)
 
 DecodeComplexInstrumentDefinitionMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET complexInstrumentId == ReadBytes(timeOffset.rest, 6) IN IF ~complexInstrumentId.ok THEN Fail ELSE
     LET referencePrice == ReadBytes(complexInstrumentId.rest, 8) IN IF ~referencePrice.ok THEN Fail ELSE
-    LET legCount == ReadUIntLE(referencePrice.rest, 1) IN IF ~legCount.ok THEN Fail ELSE
+    LET legCount == ReadUIntBE(referencePrice.rest, 1) IN IF ~legCount.ok THEN Fail ELSE
     LET legGroup == ReadLegGroupList(legCount.rest, legCount.value) IN IF ~legGroup.ok THEN Fail ELSE
     Ok([ timeOffset          |-> timeOffset.value,
          complexInstrumentId |-> complexInstrumentId.value,
@@ -2160,21 +2160,21 @@ Message ==
     [ payload : Payload ]
 
 EncodeMessageBody(message) ==
-    EncodeUIntLE(message.payload.tag, 1)
+    EncodeUIntBE(message.payload.tag, 1)
         \o EncodePayload(message.payload)
 
 (* Message Length counts the bytes it frames, so it is written from them *)
 EncodeMessage(message) ==
     LET body == EncodeMessageBody(message)
-    IN  EncodeUIntLE(Len(body) + 1, 1) \o body
+    IN  EncodeUIntBE(Len(body) + 1, 1) \o body
 
 DecodeMessageBody(bytes) ==
-    LET messageType == ReadUIntLE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
+    LET messageType == ReadUIntBE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
     LET payload == DecodePayload(messageType.value, messageType.rest) IN IF ~payload.ok THEN Fail ELSE
     Ok([ payload |-> payload.value ], payload.rest)
 
 DecodeMessage(bytes) ==
-    LET length == ReadUIntLE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
     LET size == length.value - 1 IN
     IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, size)
@@ -2256,14 +2256,14 @@ Packet ==
 
 EncodePacket(message) ==
     message.length
-        \o EncodeUIntLE(Len(message.message), 1)
+        \o EncodeUIntBE(Len(message.message), 1)
         \o message.unit
         \o message.sequence
         \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
     LET length == ReadBytes(bytes, 2) IN IF ~length.ok THEN Fail ELSE
-    LET messageCount == ReadUIntLE(length.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(length.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
     LET unit == ReadBytes(messageCount.rest, 1) IN IF ~unit.ok THEN Fail ELSE
     LET sequence == ReadBytes(unit.rest, 4) IN IF ~sequence.ok THEN Fail ELSE
     LET message == ReadMessageList(sequence.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
@@ -2649,7 +2649,7 @@ SelectsPayload ==
 FramesMessage ==
     \A message \in CheckedMessage :
         LET bytes == EncodeMessage(message)
-        IN  DecodeUIntLE(SubSeq(bytes, 1, 1)) = Len(bytes) - 0
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 0
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

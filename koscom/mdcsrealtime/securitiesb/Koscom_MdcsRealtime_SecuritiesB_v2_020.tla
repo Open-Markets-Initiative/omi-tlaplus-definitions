@@ -152,7 +152,7 @@ CheckedPollingDataMessage ==
         \cup { [ZeroPollingDataMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Krx Index Message: 82 bytes                                             *)
+(* Krx Index Message: 72 bytes                                             *)
 (***************************************************************************)
 
 KrxIndexMessage ==
@@ -163,7 +163,7 @@ KrxIndexMessage ==
       indexChangeSignAgainstThePreviousDay : Sample(1),
       indexChangeAgainstThePreviousDay     : Sample(9),
       accumulatedTradingVolume             : Sample(12),
-      accumulatedTradingValue              : Sample(22),
+      indexAccumulatedTradingValue         : Sample(12),
       filler4                              : Sample(4),
       endKeyword                           : Sample(1) ]
 
@@ -175,7 +175,7 @@ EncodeKrxIndexMessage(message) ==
         \o message.indexChangeSignAgainstThePreviousDay
         \o message.indexChangeAgainstThePreviousDay
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.indexAccumulatedTradingValue
         \o message.filler4
         \o message.endKeyword
 
@@ -187,8 +187,8 @@ DecodeKrxIndexMessage(bytes) ==
     LET indexChangeSignAgainstThePreviousDay == ReadBytes(index.rest, 1) IN IF ~indexChangeSignAgainstThePreviousDay.ok THEN Fail ELSE
     LET indexChangeAgainstThePreviousDay == ReadBytes(indexChangeSignAgainstThePreviousDay.rest, 9) IN IF ~indexChangeAgainstThePreviousDay.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(indexChangeAgainstThePreviousDay.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET filler4 == ReadBytes(accumulatedTradingValue.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
+    LET indexAccumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 12) IN IF ~indexAccumulatedTradingValue.ok THEN Fail ELSE
+    LET filler4 == ReadBytes(indexAccumulatedTradingValue.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(filler4.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
     Ok([ indexId                              |-> indexId.value,
          isinCode                             |-> isinCode.value,
@@ -197,7 +197,7 @@ DecodeKrxIndexMessage(bytes) ==
          indexChangeSignAgainstThePreviousDay |-> indexChangeSignAgainstThePreviousDay.value,
          indexChangeAgainstThePreviousDay     |-> indexChangeAgainstThePreviousDay.value,
          accumulatedTradingVolume             |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue              |-> accumulatedTradingValue.value,
+         indexAccumulatedTradingValue         |-> indexAccumulatedTradingValue.value,
          filler4                              |-> filler4.value,
          endKeyword                           |-> endKeyword.value ], endKeyword.rest)
 
@@ -209,7 +209,7 @@ ZeroKrxIndexMessage ==
       indexChangeSignAgainstThePreviousDay |-> [i \in 1 .. 1 |-> 0],
       indexChangeAgainstThePreviousDay     |-> [i \in 1 .. 9 |-> 0],
       accumulatedTradingVolume             |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue              |-> [i \in 1 .. 22 |-> 0],
+      indexAccumulatedTradingValue         |-> [i \in 1 .. 12 |-> 0],
       filler4                              |-> [i \in 1 .. 4 |-> 0],
       endKeyword                           |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -223,12 +223,12 @@ CheckedKrxIndexMessage ==
         \cup { [ZeroKrxIndexMessage EXCEPT !.indexChangeSignAgainstThePreviousDay = one] : one \in Sample(1) }
         \cup { [ZeroKrxIndexMessage EXCEPT !.indexChangeAgainstThePreviousDay = one] : one \in Sample(9) }
         \cup { [ZeroKrxIndexMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroKrxIndexMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroKrxIndexMessage EXCEPT !.indexAccumulatedTradingValue = one] : one \in Sample(12) }
         \cup { [ZeroKrxIndexMessage EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroKrxIndexMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Krx Estimated Index Message: 82 bytes                                   *)
+(* Krx Estimated Index Message: 72 bytes                                   *)
 (***************************************************************************)
 
 KrxEstimatedIndexMessage ==
@@ -239,7 +239,7 @@ KrxEstimatedIndexMessage ==
       indexChangeSignAgainstThePreviousDay : Sample(1),
       indexChangeAgainstThePreviousDay     : Sample(9),
       accumulatedTradingVolume             : Sample(12),
-      accumulatedTradingValue              : Sample(22),
+      indexAccumulatedTradingValue         : Sample(12),
       filler4                              : Sample(4),
       endKeyword                           : Sample(1) ]
 
@@ -251,7 +251,7 @@ EncodeKrxEstimatedIndexMessage(message) ==
         \o message.indexChangeSignAgainstThePreviousDay
         \o message.indexChangeAgainstThePreviousDay
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.indexAccumulatedTradingValue
         \o message.filler4
         \o message.endKeyword
 
@@ -263,8 +263,8 @@ DecodeKrxEstimatedIndexMessage(bytes) ==
     LET indexChangeSignAgainstThePreviousDay == ReadBytes(index.rest, 1) IN IF ~indexChangeSignAgainstThePreviousDay.ok THEN Fail ELSE
     LET indexChangeAgainstThePreviousDay == ReadBytes(indexChangeSignAgainstThePreviousDay.rest, 9) IN IF ~indexChangeAgainstThePreviousDay.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(indexChangeAgainstThePreviousDay.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET filler4 == ReadBytes(accumulatedTradingValue.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
+    LET indexAccumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 12) IN IF ~indexAccumulatedTradingValue.ok THEN Fail ELSE
+    LET filler4 == ReadBytes(indexAccumulatedTradingValue.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(filler4.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
     Ok([ indexId                              |-> indexId.value,
          isinCode                             |-> isinCode.value,
@@ -273,7 +273,7 @@ DecodeKrxEstimatedIndexMessage(bytes) ==
          indexChangeSignAgainstThePreviousDay |-> indexChangeSignAgainstThePreviousDay.value,
          indexChangeAgainstThePreviousDay     |-> indexChangeAgainstThePreviousDay.value,
          accumulatedTradingVolume             |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue              |-> accumulatedTradingValue.value,
+         indexAccumulatedTradingValue         |-> indexAccumulatedTradingValue.value,
          filler4                              |-> filler4.value,
          endKeyword                           |-> endKeyword.value ], endKeyword.rest)
 
@@ -285,7 +285,7 @@ ZeroKrxEstimatedIndexMessage ==
       indexChangeSignAgainstThePreviousDay |-> [i \in 1 .. 1 |-> 0],
       indexChangeAgainstThePreviousDay     |-> [i \in 1 .. 9 |-> 0],
       accumulatedTradingVolume             |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue              |-> [i \in 1 .. 22 |-> 0],
+      indexAccumulatedTradingValue         |-> [i \in 1 .. 12 |-> 0],
       filler4                              |-> [i \in 1 .. 4 |-> 0],
       endKeyword                           |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -299,7 +299,7 @@ CheckedKrxEstimatedIndexMessage ==
         \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.indexChangeSignAgainstThePreviousDay = one] : one \in Sample(1) }
         \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.indexChangeAgainstThePreviousDay = one] : one \in Sample(9) }
         \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.indexAccumulatedTradingValue = one] : one \in Sample(12) }
         \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
@@ -4320,13 +4320,15 @@ CheckedSecuritiesClosingDateMessage ==
         \cup { [ZeroSecuritiesClosingDateMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Securities Mm Lp Information Message: 192 bytes                         *)
+(* Securities Mm Lp Information Message: 195 bytes                         *)
 (***************************************************************************)
 
 SecuritiesMmLpInformationMessage ==
     [ messageSequenceNumber                  : Sample(8),
       isinCode                               : Sample(12),
       marketParticipantNumber                : Sample(5),
+      boardId                                : Sample(2),
+      marketMakingLpTypeCode                 : Sample(1),
       lpStartDate                            : Sample(8),
       lpEndDate                              : Sample(8),
       minimumOrderVolume                     : Sample(11),
@@ -4345,6 +4347,8 @@ EncodeSecuritiesMmLpInformationMessage(message) ==
     message.messageSequenceNumber
         \o message.isinCode
         \o message.marketParticipantNumber
+        \o message.boardId
+        \o message.marketMakingLpTypeCode
         \o message.lpStartDate
         \o message.lpEndDate
         \o message.minimumOrderVolume
@@ -4363,7 +4367,9 @@ DecodeSecuritiesMmLpInformationMessage(bytes) ==
     LET messageSequenceNumber == ReadBytes(bytes, 8) IN IF ~messageSequenceNumber.ok THEN Fail ELSE
     LET isinCode == ReadBytes(messageSequenceNumber.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
     LET marketParticipantNumber == ReadBytes(isinCode.rest, 5) IN IF ~marketParticipantNumber.ok THEN Fail ELSE
-    LET lpStartDate == ReadBytes(marketParticipantNumber.rest, 8) IN IF ~lpStartDate.ok THEN Fail ELSE
+    LET boardId == ReadBytes(marketParticipantNumber.rest, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET marketMakingLpTypeCode == ReadBytes(boardId.rest, 1) IN IF ~marketMakingLpTypeCode.ok THEN Fail ELSE
+    LET lpStartDate == ReadBytes(marketMakingLpTypeCode.rest, 8) IN IF ~lpStartDate.ok THEN Fail ELSE
     LET lpEndDate == ReadBytes(lpStartDate.rest, 8) IN IF ~lpEndDate.ok THEN Fail ELSE
     LET minimumOrderVolume == ReadBytes(lpEndDate.rest, 11) IN IF ~minimumOrderVolume.ok THEN Fail ELSE
     LET maximumVolumeOfMultipleOrder == ReadBytes(minimumOrderVolume.rest, 11) IN IF ~maximumVolumeOfMultipleOrder.ok THEN Fail ELSE
@@ -4379,6 +4385,8 @@ DecodeSecuritiesMmLpInformationMessage(bytes) ==
     Ok([ messageSequenceNumber                  |-> messageSequenceNumber.value,
          isinCode                               |-> isinCode.value,
          marketParticipantNumber                |-> marketParticipantNumber.value,
+         boardId                                |-> boardId.value,
+         marketMakingLpTypeCode                 |-> marketMakingLpTypeCode.value,
          lpStartDate                            |-> lpStartDate.value,
          lpEndDate                              |-> lpEndDate.value,
          minimumOrderVolume                     |-> minimumOrderVolume.value,
@@ -4397,6 +4405,8 @@ ZeroSecuritiesMmLpInformationMessage ==
     [ messageSequenceNumber                  |-> [i \in 1 .. 8 |-> 0],
       isinCode                               |-> [i \in 1 .. 12 |-> 0],
       marketParticipantNumber                |-> [i \in 1 .. 5 |-> 0],
+      boardId                                |-> [i \in 1 .. 2 |-> 0],
+      marketMakingLpTypeCode                 |-> [i \in 1 .. 1 |-> 0],
       lpStartDate                            |-> [i \in 1 .. 8 |-> 0],
       lpEndDate                              |-> [i \in 1 .. 8 |-> 0],
       minimumOrderVolume                     |-> [i \in 1 .. 11 |-> 0],
@@ -4417,6 +4427,8 @@ CheckedSecuritiesMmLpInformationMessage ==
         \cup { [ZeroSecuritiesMmLpInformationMessage EXCEPT !.messageSequenceNumber = one] : one \in Sample(8) }
         \cup { [ZeroSecuritiesMmLpInformationMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesMmLpInformationMessage EXCEPT !.marketParticipantNumber = one] : one \in Sample(5) }
+        \cup { [ZeroSecuritiesMmLpInformationMessage EXCEPT !.boardId = one] : one \in Sample(2) }
+        \cup { [ZeroSecuritiesMmLpInformationMessage EXCEPT !.marketMakingLpTypeCode = one] : one \in Sample(1) }
         \cup { [ZeroSecuritiesMmLpInformationMessage EXCEPT !.lpStartDate = one] : one \in Sample(8) }
         \cup { [ZeroSecuritiesMmLpInformationMessage EXCEPT !.lpEndDate = one] : one \in Sample(8) }
         \cup { [ZeroSecuritiesMmLpInformationMessage EXCEPT !.minimumOrderVolume = one] : one \in Sample(11) }
@@ -5854,8 +5866,8 @@ SecuritiesKnockOutUnderlyingMessage ==
       ampmTypeCode                 : Sample(1),
       underlyingIsinCode           : Sample(12),
       indexId                      : Sample(6),
-      todaysHigh                   : Sample(11),
-      todaysLow                    : Sample(11),
+      underlyingTodaysHigh         : Sample(11),
+      underlyingTodaysLow          : Sample(11),
       filler4                      : Sample(4),
       endKeyword                   : Sample(1) ]
 
@@ -5868,8 +5880,8 @@ EncodeSecuritiesKnockOutUnderlyingMessage(message) ==
         \o message.ampmTypeCode
         \o message.underlyingIsinCode
         \o message.indexId
-        \o message.todaysHigh
-        \o message.todaysLow
+        \o message.underlyingTodaysHigh
+        \o message.underlyingTodaysLow
         \o message.filler4
         \o message.endKeyword
 
@@ -5882,9 +5894,9 @@ DecodeSecuritiesKnockOutUnderlyingMessage(bytes) ==
     LET ampmTypeCode == ReadBytes(theDateKnockOutOccurred.rest, 1) IN IF ~ampmTypeCode.ok THEN Fail ELSE
     LET underlyingIsinCode == ReadBytes(ampmTypeCode.rest, 12) IN IF ~underlyingIsinCode.ok THEN Fail ELSE
     LET indexId == ReadBytes(underlyingIsinCode.rest, 6) IN IF ~indexId.ok THEN Fail ELSE
-    LET todaysHigh == ReadBytes(indexId.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
-    LET todaysLow == ReadBytes(todaysHigh.rest, 11) IN IF ~todaysLow.ok THEN Fail ELSE
-    LET filler4 == ReadBytes(todaysLow.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
+    LET underlyingTodaysHigh == ReadBytes(indexId.rest, 11) IN IF ~underlyingTodaysHigh.ok THEN Fail ELSE
+    LET underlyingTodaysLow == ReadBytes(underlyingTodaysHigh.rest, 11) IN IF ~underlyingTodaysLow.ok THEN Fail ELSE
+    LET filler4 == ReadBytes(underlyingTodaysLow.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(filler4.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
     Ok([ isinCode                     |-> isinCode.value,
          messageSequenceNumber        |-> messageSequenceNumber.value,
@@ -5894,8 +5906,8 @@ DecodeSecuritiesKnockOutUnderlyingMessage(bytes) ==
          ampmTypeCode                 |-> ampmTypeCode.value,
          underlyingIsinCode           |-> underlyingIsinCode.value,
          indexId                      |-> indexId.value,
-         todaysHigh                   |-> todaysHigh.value,
-         todaysLow                    |-> todaysLow.value,
+         underlyingTodaysHigh         |-> underlyingTodaysHigh.value,
+         underlyingTodaysLow          |-> underlyingTodaysLow.value,
          filler4                      |-> filler4.value,
          endKeyword                   |-> endKeyword.value ], endKeyword.rest)
 
@@ -5908,8 +5920,8 @@ ZeroSecuritiesKnockOutUnderlyingMessage ==
       ampmTypeCode                 |-> [i \in 1 .. 1 |-> 0],
       underlyingIsinCode           |-> [i \in 1 .. 12 |-> 0],
       indexId                      |-> [i \in 1 .. 6 |-> 0],
-      todaysHigh                   |-> [i \in 1 .. 11 |-> 0],
-      todaysLow                    |-> [i \in 1 .. 11 |-> 0],
+      underlyingTodaysHigh         |-> [i \in 1 .. 11 |-> 0],
+      underlyingTodaysLow          |-> [i \in 1 .. 11 |-> 0],
       filler4                      |-> [i \in 1 .. 4 |-> 0],
       endKeyword                   |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -5924,8 +5936,8 @@ CheckedSecuritiesKnockOutUnderlyingMessage ==
         \cup { [ZeroSecuritiesKnockOutUnderlyingMessage EXCEPT !.ampmTypeCode = one] : one \in Sample(1) }
         \cup { [ZeroSecuritiesKnockOutUnderlyingMessage EXCEPT !.underlyingIsinCode = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesKnockOutUnderlyingMessage EXCEPT !.indexId = one] : one \in Sample(6) }
-        \cup { [ZeroSecuritiesKnockOutUnderlyingMessage EXCEPT !.todaysHigh = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesKnockOutUnderlyingMessage EXCEPT !.todaysLow = one] : one \in Sample(11) }
+        \cup { [ZeroSecuritiesKnockOutUnderlyingMessage EXCEPT !.underlyingTodaysHigh = one] : one \in Sample(11) }
+        \cup { [ZeroSecuritiesKnockOutUnderlyingMessage EXCEPT !.underlyingTodaysLow = one] : one \in Sample(11) }
         \cup { [ZeroSecuritiesKnockOutUnderlyingMessage EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroSecuritiesKnockOutUnderlyingMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
@@ -6572,11 +6584,12 @@ CheckedSecuritiesTopFiveTradersActivitiesMessage ==
         \cup { [ZeroSecuritiesTopFiveTradersActivitiesMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Securities Current Movement Message: 51 bytes                           *)
+(* Securities Current Movement Message: 53 bytes                           *)
 (***************************************************************************)
 
 SecuritiesCurrentMovementMessage ==
-    [ totalNumberOfIssues                      : Sample(5),
+    [ boardId                                  : Sample(2),
+      totalNumberOfIssues                      : Sample(5),
       numberOfIssuesForMovementCalculation     : Sample(5),
       numberOfIssuesOfUpperLimit               : Sample(5),
       numberOfIssuesOfGoingUp                  : Sample(5),
@@ -6589,7 +6602,8 @@ SecuritiesCurrentMovementMessage ==
       endKeyword                               : Sample(1) ]
 
 EncodeSecuritiesCurrentMovementMessage(message) ==
-    message.totalNumberOfIssues
+    message.boardId
+        \o message.totalNumberOfIssues
         \o message.numberOfIssuesForMovementCalculation
         \o message.numberOfIssuesOfUpperLimit
         \o message.numberOfIssuesOfGoingUp
@@ -6602,7 +6616,8 @@ EncodeSecuritiesCurrentMovementMessage(message) ==
         \o message.endKeyword
 
 DecodeSecuritiesCurrentMovementMessage(bytes) ==
-    LET totalNumberOfIssues == ReadBytes(bytes, 5) IN IF ~totalNumberOfIssues.ok THEN Fail ELSE
+    LET boardId == ReadBytes(bytes, 2) IN IF ~boardId.ok THEN Fail ELSE
+    LET totalNumberOfIssues == ReadBytes(boardId.rest, 5) IN IF ~totalNumberOfIssues.ok THEN Fail ELSE
     LET numberOfIssuesForMovementCalculation == ReadBytes(totalNumberOfIssues.rest, 5) IN IF ~numberOfIssuesForMovementCalculation.ok THEN Fail ELSE
     LET numberOfIssuesOfUpperLimit == ReadBytes(numberOfIssuesForMovementCalculation.rest, 5) IN IF ~numberOfIssuesOfUpperLimit.ok THEN Fail ELSE
     LET numberOfIssuesOfGoingUp == ReadBytes(numberOfIssuesOfUpperLimit.rest, 5) IN IF ~numberOfIssuesOfGoingUp.ok THEN Fail ELSE
@@ -6613,7 +6628,8 @@ DecodeSecuritiesCurrentMovementMessage(bytes) ==
     LET numberOfIssuesOfWhichQuotesAreIncreasing == ReadBytes(numberOfIssuesHavingQuotes.rest, 5) IN IF ~numberOfIssuesOfWhichQuotesAreIncreasing.ok THEN Fail ELSE
     LET numberOfIssuesOfWhichQuotesAreDecreasing == ReadBytes(numberOfIssuesOfWhichQuotesAreIncreasing.rest, 5) IN IF ~numberOfIssuesOfWhichQuotesAreDecreasing.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(numberOfIssuesOfWhichQuotesAreDecreasing.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
-    Ok([ totalNumberOfIssues                      |-> totalNumberOfIssues.value,
+    Ok([ boardId                                  |-> boardId.value,
+         totalNumberOfIssues                      |-> totalNumberOfIssues.value,
          numberOfIssuesForMovementCalculation     |-> numberOfIssuesForMovementCalculation.value,
          numberOfIssuesOfUpperLimit               |-> numberOfIssuesOfUpperLimit.value,
          numberOfIssuesOfGoingUp                  |-> numberOfIssuesOfGoingUp.value,
@@ -6626,7 +6642,8 @@ DecodeSecuritiesCurrentMovementMessage(bytes) ==
          endKeyword                               |-> endKeyword.value ], endKeyword.rest)
 
 ZeroSecuritiesCurrentMovementMessage ==
-    [ totalNumberOfIssues                      |-> [i \in 1 .. 5 |-> 0],
+    [ boardId                                  |-> [i \in 1 .. 2 |-> 0],
+      totalNumberOfIssues                      |-> [i \in 1 .. 5 |-> 0],
       numberOfIssuesForMovementCalculation     |-> [i \in 1 .. 5 |-> 0],
       numberOfIssuesOfUpperLimit               |-> [i \in 1 .. 5 |-> 0],
       numberOfIssuesOfGoingUp                  |-> [i \in 1 .. 5 |-> 0],
@@ -6641,6 +6658,7 @@ ZeroSecuritiesCurrentMovementMessage ==
 (* Securities Current Movement Message at zero, then each field in turn at the values it is checked at *)
 CheckedSecuritiesCurrentMovementMessage ==
     { ZeroSecuritiesCurrentMovementMessage }
+        \cup { [ZeroSecuritiesCurrentMovementMessage EXCEPT !.boardId = one] : one \in Sample(2) }
         \cup { [ZeroSecuritiesCurrentMovementMessage EXCEPT !.totalNumberOfIssues = one] : one \in Sample(5) }
         \cup { [ZeroSecuritiesCurrentMovementMessage EXCEPT !.numberOfIssuesForMovementCalculation = one] : one \in Sample(5) }
         \cup { [ZeroSecuritiesCurrentMovementMessage EXCEPT !.numberOfIssuesOfUpperLimit = one] : one \in Sample(5) }

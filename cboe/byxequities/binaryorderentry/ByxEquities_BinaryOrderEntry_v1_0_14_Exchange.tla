@@ -159,14 +159,14 @@ EncodeLoginResponseMessage(message) ==
     message.loginResponseStatus
         \o message.loginResponseText
         \o message.clientSequence
-        \o EncodeUIntLE(Len(message.unitSequence), 1)
+        \o EncodeUIntBE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
 DecodeLoginResponseMessage(bytes) ==
     LET loginResponseStatus == ReadBytes(bytes, 1) IN IF ~loginResponseStatus.ok THEN Fail ELSE
     LET loginResponseText == ReadBytes(loginResponseStatus.rest, 60) IN IF ~loginResponseText.ok THEN Fail ELSE
     LET clientSequence == ReadBytes(loginResponseText.rest, 4) IN IF ~clientSequence.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(clientSequence.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntBE(clientSequence.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
     Ok([ loginResponseStatus |-> loginResponseStatus.value,
          loginResponseText   |-> loginResponseText.value,

@@ -1231,14 +1231,14 @@ Packet ==
 
 EncodePacket(message) ==
     message.length
-        \o EncodeUIntLE(Len(message.message), 1)
+        \o EncodeUIntBE(Len(message.message), 1)
         \o message.marketDataGroup
         \o message.sequenceNumber
         \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
     LET length == ReadBytes(bytes, 2) IN IF ~length.ok THEN Fail ELSE
-    LET messageCount == ReadUIntLE(length.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(length.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
     LET marketDataGroup == ReadBytes(messageCount.rest, 1) IN IF ~marketDataGroup.ok THEN Fail ELSE
     LET sequenceNumber == ReadBytes(marketDataGroup.rest, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET message == ReadMessageList(sequenceNumber.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE

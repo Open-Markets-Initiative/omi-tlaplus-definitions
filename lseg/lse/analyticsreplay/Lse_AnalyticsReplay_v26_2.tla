@@ -743,7 +743,7 @@ TcpUnit ==
       message         : SampleLists(OneMessage) ]
 
 EncodeTcpUnitBody(message) ==
-    EncodeUIntLE(Len(message.message), 1)
+    EncodeUIntBE(Len(message.message), 1)
         \o message.marketDataGroup
         \o message.sequenceNumber
         \o EncodeMessageList(message.message)
@@ -754,7 +754,7 @@ EncodeTcpUnit(message) ==
     IN  EncodeUIntLE(Len(body) + 2, 2) \o body
 
 DecodeTcpUnitBody(bytes) ==
-    LET messageCount == ReadUIntLE(bytes, 1) IN IF ~messageCount.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(bytes, 1) IN IF ~messageCount.ok THEN Fail ELSE
     LET marketDataGroup == ReadBytes(messageCount.rest, 1) IN IF ~marketDataGroup.ok THEN Fail ELSE
     LET sequenceNumber == ReadBytes(marketDataGroup.rest, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET message == ReadMessageList(sequenceNumber.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE

@@ -435,7 +435,7 @@ EncodeInstrumentSummaryMessage(message) ==
         \o message.securityStatus
         \o message.securityTradingStatus
         \o message.fastMarketIndicator
-        \o EncodeUIntLE(message.noMdEntries, 1)
+        \o EncodeUIntBE(message.noMdEntries, 1)
         \o message.tradeVolume
         \o message.noOfTrades
         \o message.pad4
@@ -449,7 +449,7 @@ DecodeInstrumentSummaryMessage(bytes) ==
     LET securityStatus == ReadBytes(totNoOrders.rest, 1) IN IF ~securityStatus.ok THEN Fail ELSE
     LET securityTradingStatus == ReadBytes(securityStatus.rest, 1) IN IF ~securityTradingStatus.ok THEN Fail ELSE
     LET fastMarketIndicator == ReadBytes(securityTradingStatus.rest, 1) IN IF ~fastMarketIndicator.ok THEN Fail ELSE
-    LET noMdEntries == ReadUIntLE(fastMarketIndicator.rest, 1) IN IF ~noMdEntries.ok THEN Fail ELSE
+    LET noMdEntries == ReadUIntBE(fastMarketIndicator.rest, 1) IN IF ~noMdEntries.ok THEN Fail ELSE
     LET tradeVolume == ReadBytes(noMdEntries.rest, 8) IN IF ~tradeVolume.ok THEN Fail ELSE
     LET noOfTrades == ReadBytes(tradeVolume.rest, 4) IN IF ~noOfTrades.ok THEN Fail ELSE
     LET pad4 == ReadBytes(noOfTrades.rest, 4) IN IF ~pad4.ok THEN Fail ELSE
@@ -1229,7 +1229,7 @@ EncodeTradeReversalMessage(message) ==
         \o message.lastQty
         \o message.lastPx
         \o message.trdRegTsExecutionTime
-        \o EncodeUIntLE(message.noMdEntries, 1)
+        \o EncodeUIntBE(message.noMdEntries, 1)
         \o message.pad7
         \o EncodeMdTradeEntryGrpList(message.mdTradeEntryGrp)
 
@@ -1241,7 +1241,7 @@ DecodeTradeReversalMessage(bytes) ==
     LET lastQty == ReadBytes(pad4.rest, 8) IN IF ~lastQty.ok THEN Fail ELSE
     LET lastPx == ReadBytes(lastQty.rest, 8) IN IF ~lastPx.ok THEN Fail ELSE
     LET trdRegTsExecutionTime == ReadBytes(lastPx.rest, 8) IN IF ~trdRegTsExecutionTime.ok THEN Fail ELSE
-    LET noMdEntries == ReadUIntLE(trdRegTsExecutionTime.rest, 1) IN IF ~noMdEntries.ok THEN Fail ELSE
+    LET noMdEntries == ReadUIntBE(trdRegTsExecutionTime.rest, 1) IN IF ~noMdEntries.ok THEN Fail ELSE
     LET pad7 == ReadBytes(noMdEntries.rest, 7) IN IF ~pad7.ok THEN Fail ELSE
     LET mdTradeEntryGrp == ReadMdTradeEntryGrpList(pad7.rest, 15) IN IF ~mdTradeEntryGrp.ok THEN Fail ELSE
     Ok([ securityId            |-> securityId.value,
@@ -1619,7 +1619,7 @@ EncodeAddComplexInstrumentMessage(message) ==
         \o message.securitySubType
         \o message.productComplex
         \o message.impliedMarketIndicator
-        \o EncodeUIntLE(message.noLegs, 1)
+        \o EncodeUIntBE(message.noLegs, 1)
         \o message.pad1
         \o EncodeInstrmtLegGrpList(message.instrmtLegGrp)
 
@@ -1629,7 +1629,7 @@ DecodeAddComplexInstrumentMessage(bytes) ==
     LET securitySubType == ReadBytes(transactTime.rest, 4) IN IF ~securitySubType.ok THEN Fail ELSE
     LET productComplex == ReadBytes(securitySubType.rest, 1) IN IF ~productComplex.ok THEN Fail ELSE
     LET impliedMarketIndicator == ReadBytes(productComplex.rest, 1) IN IF ~impliedMarketIndicator.ok THEN Fail ELSE
-    LET noLegs == ReadUIntLE(impliedMarketIndicator.rest, 1) IN IF ~noLegs.ok THEN Fail ELSE
+    LET noLegs == ReadUIntBE(impliedMarketIndicator.rest, 1) IN IF ~noLegs.ok THEN Fail ELSE
     LET pad1 == ReadBytes(noLegs.rest, 1) IN IF ~pad1.ok THEN Fail ELSE
     LET instrmtLegGrp == ReadInstrmtLegGrpList(pad1.rest, 5) IN IF ~instrmtLegGrp.ok THEN Fail ELSE
     Ok([ securityId             |-> securityId.value,

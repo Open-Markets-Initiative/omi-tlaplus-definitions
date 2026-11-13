@@ -380,7 +380,7 @@ EncodeComplexInstrumentDefinitionMessage(message) ==
         \o message.tradingCollarVariationType
         \o message.tradingCollarVariation
         \o message.reserved16
-        \o EncodeUIntLE(Len(message.instrumentLeg), 1)
+        \o EncodeUIntBE(Len(message.instrumentLeg), 1)
         \o EncodeInstrumentLegList(message.instrumentLeg)
 
 DecodeComplexInstrumentDefinitionMessage(bytes) ==
@@ -404,7 +404,7 @@ DecodeComplexInstrumentDefinitionMessage(bytes) ==
     LET tradingCollarVariationType == ReadBytes(unitOfMeasureQuantity.rest, 1) IN IF ~tradingCollarVariationType.ok THEN Fail ELSE
     LET tradingCollarVariation == ReadBytes(tradingCollarVariationType.rest, 8) IN IF ~tradingCollarVariation.ok THEN Fail ELSE
     LET reserved16 == ReadBytes(tradingCollarVariation.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntLE(reserved16.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadUIntBE(reserved16.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET instrumentLeg == ReadInstrumentLegList(numberOfLegs.rest, numberOfLegs.value) IN IF ~instrumentLeg.ok THEN Fail ELSE
     Ok([ timestamp                  |-> timestamp.value,
          strategyId                 |-> strategyId.value,

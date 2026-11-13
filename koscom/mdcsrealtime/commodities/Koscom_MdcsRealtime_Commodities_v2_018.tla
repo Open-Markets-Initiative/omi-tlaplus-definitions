@@ -152,7 +152,7 @@ CheckedPollingDataMessage ==
         \cup { [ZeroPollingDataMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Krx Index Message: 82 bytes                                             *)
+(* Krx Index Message: 72 bytes                                             *)
 (***************************************************************************)
 
 KrxIndexMessage ==
@@ -163,7 +163,7 @@ KrxIndexMessage ==
       indexChangeSignAgainstThePreviousDay : Sample(1),
       indexChangeAgainstThePreviousDay     : Sample(9),
       accumulatedTradingVolume             : Sample(12),
-      accumulatedTradingValue              : Sample(22),
+      accumulatedTradingValueShort         : Sample(12),
       filler4                              : Sample(4),
       endKeyword                           : Sample(1) ]
 
@@ -175,7 +175,7 @@ EncodeKrxIndexMessage(message) ==
         \o message.indexChangeSignAgainstThePreviousDay
         \o message.indexChangeAgainstThePreviousDay
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.accumulatedTradingValueShort
         \o message.filler4
         \o message.endKeyword
 
@@ -187,8 +187,8 @@ DecodeKrxIndexMessage(bytes) ==
     LET indexChangeSignAgainstThePreviousDay == ReadBytes(index.rest, 1) IN IF ~indexChangeSignAgainstThePreviousDay.ok THEN Fail ELSE
     LET indexChangeAgainstThePreviousDay == ReadBytes(indexChangeSignAgainstThePreviousDay.rest, 9) IN IF ~indexChangeAgainstThePreviousDay.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(indexChangeAgainstThePreviousDay.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET filler4 == ReadBytes(accumulatedTradingValue.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
+    LET accumulatedTradingValueShort == ReadBytes(accumulatedTradingVolume.rest, 12) IN IF ~accumulatedTradingValueShort.ok THEN Fail ELSE
+    LET filler4 == ReadBytes(accumulatedTradingValueShort.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(filler4.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
     Ok([ indexId                              |-> indexId.value,
          isinCode                             |-> isinCode.value,
@@ -197,7 +197,7 @@ DecodeKrxIndexMessage(bytes) ==
          indexChangeSignAgainstThePreviousDay |-> indexChangeSignAgainstThePreviousDay.value,
          indexChangeAgainstThePreviousDay     |-> indexChangeAgainstThePreviousDay.value,
          accumulatedTradingVolume             |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue              |-> accumulatedTradingValue.value,
+         accumulatedTradingValueShort         |-> accumulatedTradingValueShort.value,
          filler4                              |-> filler4.value,
          endKeyword                           |-> endKeyword.value ], endKeyword.rest)
 
@@ -209,7 +209,7 @@ ZeroKrxIndexMessage ==
       indexChangeSignAgainstThePreviousDay |-> [i \in 1 .. 1 |-> 0],
       indexChangeAgainstThePreviousDay     |-> [i \in 1 .. 9 |-> 0],
       accumulatedTradingVolume             |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue              |-> [i \in 1 .. 22 |-> 0],
+      accumulatedTradingValueShort         |-> [i \in 1 .. 12 |-> 0],
       filler4                              |-> [i \in 1 .. 4 |-> 0],
       endKeyword                           |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -223,12 +223,12 @@ CheckedKrxIndexMessage ==
         \cup { [ZeroKrxIndexMessage EXCEPT !.indexChangeSignAgainstThePreviousDay = one] : one \in Sample(1) }
         \cup { [ZeroKrxIndexMessage EXCEPT !.indexChangeAgainstThePreviousDay = one] : one \in Sample(9) }
         \cup { [ZeroKrxIndexMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroKrxIndexMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroKrxIndexMessage EXCEPT !.accumulatedTradingValueShort = one] : one \in Sample(12) }
         \cup { [ZeroKrxIndexMessage EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroKrxIndexMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Krx Estimated Index Message: 82 bytes                                   *)
+(* Krx Estimated Index Message: 72 bytes                                   *)
 (***************************************************************************)
 
 KrxEstimatedIndexMessage ==
@@ -239,7 +239,7 @@ KrxEstimatedIndexMessage ==
       indexChangeSignAgainstThePreviousDay : Sample(1),
       indexChangeAgainstThePreviousDay     : Sample(9),
       accumulatedTradingVolume             : Sample(12),
-      accumulatedTradingValue              : Sample(22),
+      accumulatedTradingValueShort         : Sample(12),
       filler4                              : Sample(4),
       endKeyword                           : Sample(1) ]
 
@@ -251,7 +251,7 @@ EncodeKrxEstimatedIndexMessage(message) ==
         \o message.indexChangeSignAgainstThePreviousDay
         \o message.indexChangeAgainstThePreviousDay
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.accumulatedTradingValueShort
         \o message.filler4
         \o message.endKeyword
 
@@ -263,8 +263,8 @@ DecodeKrxEstimatedIndexMessage(bytes) ==
     LET indexChangeSignAgainstThePreviousDay == ReadBytes(index.rest, 1) IN IF ~indexChangeSignAgainstThePreviousDay.ok THEN Fail ELSE
     LET indexChangeAgainstThePreviousDay == ReadBytes(indexChangeSignAgainstThePreviousDay.rest, 9) IN IF ~indexChangeAgainstThePreviousDay.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(indexChangeAgainstThePreviousDay.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET filler4 == ReadBytes(accumulatedTradingValue.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
+    LET accumulatedTradingValueShort == ReadBytes(accumulatedTradingVolume.rest, 12) IN IF ~accumulatedTradingValueShort.ok THEN Fail ELSE
+    LET filler4 == ReadBytes(accumulatedTradingValueShort.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(filler4.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
     Ok([ indexId                              |-> indexId.value,
          isinCode                             |-> isinCode.value,
@@ -273,7 +273,7 @@ DecodeKrxEstimatedIndexMessage(bytes) ==
          indexChangeSignAgainstThePreviousDay |-> indexChangeSignAgainstThePreviousDay.value,
          indexChangeAgainstThePreviousDay     |-> indexChangeAgainstThePreviousDay.value,
          accumulatedTradingVolume             |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue              |-> accumulatedTradingValue.value,
+         accumulatedTradingValueShort         |-> accumulatedTradingValueShort.value,
          filler4                              |-> filler4.value,
          endKeyword                           |-> endKeyword.value ], endKeyword.rest)
 
@@ -285,7 +285,7 @@ ZeroKrxEstimatedIndexMessage ==
       indexChangeSignAgainstThePreviousDay |-> [i \in 1 .. 1 |-> 0],
       indexChangeAgainstThePreviousDay     |-> [i \in 1 .. 9 |-> 0],
       accumulatedTradingVolume             |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue              |-> [i \in 1 .. 22 |-> 0],
+      accumulatedTradingValueShort         |-> [i \in 1 .. 12 |-> 0],
       filler4                              |-> [i \in 1 .. 4 |-> 0],
       endKeyword                           |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -299,12 +299,12 @@ CheckedKrxEstimatedIndexMessage ==
         \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.indexChangeSignAgainstThePreviousDay = one] : one \in Sample(1) }
         \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.indexChangeAgainstThePreviousDay = one] : one \in Sample(9) }
         \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.accumulatedTradingValueShort = one] : one \in Sample(12) }
         \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroKrxEstimatedIndexMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Global Index Message: 62 bytes                                          *)
+(* Global Index Message: 59 bytes                                          *)
 (***************************************************************************)
 
 GlobalIndexMessage ==
@@ -315,7 +315,7 @@ GlobalIndexMessage ==
       index                                : Sample(9),
       indexChangeSignAgainstThePreviousDay : Sample(1),
       indexChangeAgainstThePreviousDay     : Sample(9),
-      currencyCode                         : Sample(6),
+      currencyCodeShort                    : Sample(3),
       filler4                              : Sample(4),
       endKeyword                           : Sample(1) ]
 
@@ -327,7 +327,7 @@ EncodeGlobalIndexMessage(message) ==
         \o message.index
         \o message.indexChangeSignAgainstThePreviousDay
         \o message.indexChangeAgainstThePreviousDay
-        \o message.currencyCode
+        \o message.currencyCodeShort
         \o message.filler4
         \o message.endKeyword
 
@@ -339,8 +339,8 @@ DecodeGlobalIndexMessage(bytes) ==
     LET index == ReadBytes(calculationTime.rest, 9) IN IF ~index.ok THEN Fail ELSE
     LET indexChangeSignAgainstThePreviousDay == ReadBytes(index.rest, 1) IN IF ~indexChangeSignAgainstThePreviousDay.ok THEN Fail ELSE
     LET indexChangeAgainstThePreviousDay == ReadBytes(indexChangeSignAgainstThePreviousDay.rest, 9) IN IF ~indexChangeAgainstThePreviousDay.ok THEN Fail ELSE
-    LET currencyCode == ReadBytes(indexChangeAgainstThePreviousDay.rest, 6) IN IF ~currencyCode.ok THEN Fail ELSE
-    LET filler4 == ReadBytes(currencyCode.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
+    LET currencyCodeShort == ReadBytes(indexChangeAgainstThePreviousDay.rest, 3) IN IF ~currencyCodeShort.ok THEN Fail ELSE
+    LET filler4 == ReadBytes(currencyCodeShort.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(filler4.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
     Ok([ indexId                              |-> indexId.value,
          isinCode                             |-> isinCode.value,
@@ -349,7 +349,7 @@ DecodeGlobalIndexMessage(bytes) ==
          index                                |-> index.value,
          indexChangeSignAgainstThePreviousDay |-> indexChangeSignAgainstThePreviousDay.value,
          indexChangeAgainstThePreviousDay     |-> indexChangeAgainstThePreviousDay.value,
-         currencyCode                         |-> currencyCode.value,
+         currencyCodeShort                    |-> currencyCodeShort.value,
          filler4                              |-> filler4.value,
          endKeyword                           |-> endKeyword.value ], endKeyword.rest)
 
@@ -361,7 +361,7 @@ ZeroGlobalIndexMessage ==
       index                                |-> [i \in 1 .. 9 |-> 0],
       indexChangeSignAgainstThePreviousDay |-> [i \in 1 .. 1 |-> 0],
       indexChangeAgainstThePreviousDay     |-> [i \in 1 .. 9 |-> 0],
-      currencyCode                         |-> [i \in 1 .. 6 |-> 0],
+      currencyCodeShort                    |-> [i \in 1 .. 3 |-> 0],
       filler4                              |-> [i \in 1 .. 4 |-> 0],
       endKeyword                           |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -375,7 +375,7 @@ CheckedGlobalIndexMessage ==
         \cup { [ZeroGlobalIndexMessage EXCEPT !.index = one] : one \in Sample(9) }
         \cup { [ZeroGlobalIndexMessage EXCEPT !.indexChangeSignAgainstThePreviousDay = one] : one \in Sample(1) }
         \cup { [ZeroGlobalIndexMessage EXCEPT !.indexChangeAgainstThePreviousDay = one] : one \in Sample(9) }
-        \cup { [ZeroGlobalIndexMessage EXCEPT !.currencyCode = one] : one \in Sample(6) }
+        \cup { [ZeroGlobalIndexMessage EXCEPT !.currencyCodeShort = one] : one \in Sample(3) }
         \cup { [ZeroGlobalIndexMessage EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroGlobalIndexMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
@@ -1318,7 +1318,7 @@ CheckedSpotGoldQuoteMessage ==
         \cup { [ZeroSpotGoldQuoteMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Spot Gold Order Filled Message: 156 bytes                               *)
+(* Spot Gold Order Filled Message: 158 bytes                               *)
 (***************************************************************************)
 
 SpotGoldOrderFilledMessage ==
@@ -1330,12 +1330,12 @@ SpotGoldOrderFilledMessage ==
       processingTimeOfTradingSystem : Sample(12),
       tradingPrice                  : Sample(11),
       tradingVolume                 : Sample(10),
-      openingPrice                  : Sample(9),
+      openingPriceLong              : Sample(11),
       todaysHigh                    : Sample(11),
       todaysLow                     : Sample(11),
       previousPrice                 : Sample(11),
       accumulatedTradingVolume      : Sample(12),
-      accumulatedTradingValue       : Sample(22),
+      accumulatedTradingValueLong   : Sample(22),
       finalAskBidTypeCode           : Sample(1),
       lpHoldingQuantity             : Sample(15),
       endKeyword                    : Sample(1) ]
@@ -1349,12 +1349,12 @@ EncodeSpotGoldOrderFilledMessage(message) ==
         \o message.processingTimeOfTradingSystem
         \o message.tradingPrice
         \o message.tradingVolume
-        \o message.openingPrice
+        \o message.openingPriceLong
         \o message.todaysHigh
         \o message.todaysLow
         \o message.previousPrice
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.accumulatedTradingValueLong
         \o message.finalAskBidTypeCode
         \o message.lpHoldingQuantity
         \o message.endKeyword
@@ -1368,13 +1368,13 @@ DecodeSpotGoldOrderFilledMessage(bytes) ==
     LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssue.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
     LET tradingPrice == ReadBytes(processingTimeOfTradingSystem.rest, 11) IN IF ~tradingPrice.ok THEN Fail ELSE
     LET tradingVolume == ReadBytes(tradingPrice.rest, 10) IN IF ~tradingVolume.ok THEN Fail ELSE
-    LET openingPrice == ReadBytes(tradingVolume.rest, 9) IN IF ~openingPrice.ok THEN Fail ELSE
-    LET todaysHigh == ReadBytes(openingPrice.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
+    LET openingPriceLong == ReadBytes(tradingVolume.rest, 11) IN IF ~openingPriceLong.ok THEN Fail ELSE
+    LET todaysHigh == ReadBytes(openingPriceLong.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
     LET todaysLow == ReadBytes(todaysHigh.rest, 11) IN IF ~todaysLow.ok THEN Fail ELSE
     LET previousPrice == ReadBytes(todaysLow.rest, 11) IN IF ~previousPrice.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(previousPrice.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
+    LET accumulatedTradingValueLong == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValueLong.ok THEN Fail ELSE
+    LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValueLong.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
     LET lpHoldingQuantity == ReadBytes(finalAskBidTypeCode.rest, 15) IN IF ~lpHoldingQuantity.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(lpHoldingQuantity.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
     Ok([ messageSequenceNumber         |-> messageSequenceNumber.value,
@@ -1385,12 +1385,12 @@ DecodeSpotGoldOrderFilledMessage(bytes) ==
          processingTimeOfTradingSystem |-> processingTimeOfTradingSystem.value,
          tradingPrice                  |-> tradingPrice.value,
          tradingVolume                 |-> tradingVolume.value,
-         openingPrice                  |-> openingPrice.value,
+         openingPriceLong              |-> openingPriceLong.value,
          todaysHigh                    |-> todaysHigh.value,
          todaysLow                     |-> todaysLow.value,
          previousPrice                 |-> previousPrice.value,
          accumulatedTradingVolume      |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue       |-> accumulatedTradingValue.value,
+         accumulatedTradingValueLong   |-> accumulatedTradingValueLong.value,
          finalAskBidTypeCode           |-> finalAskBidTypeCode.value,
          lpHoldingQuantity             |-> lpHoldingQuantity.value,
          endKeyword                    |-> endKeyword.value ], endKeyword.rest)
@@ -1404,12 +1404,12 @@ ZeroSpotGoldOrderFilledMessage ==
       processingTimeOfTradingSystem |-> [i \in 1 .. 12 |-> 0],
       tradingPrice                  |-> [i \in 1 .. 11 |-> 0],
       tradingVolume                 |-> [i \in 1 .. 10 |-> 0],
-      openingPrice                  |-> [i \in 1 .. 9 |-> 0],
+      openingPriceLong              |-> [i \in 1 .. 11 |-> 0],
       todaysHigh                    |-> [i \in 1 .. 11 |-> 0],
       todaysLow                     |-> [i \in 1 .. 11 |-> 0],
       previousPrice                 |-> [i \in 1 .. 11 |-> 0],
       accumulatedTradingVolume      |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue       |-> [i \in 1 .. 22 |-> 0],
+      accumulatedTradingValueLong   |-> [i \in 1 .. 22 |-> 0],
       finalAskBidTypeCode           |-> [i \in 1 .. 1 |-> 0],
       lpHoldingQuantity             |-> [i \in 1 .. 15 |-> 0],
       endKeyword                    |-> [i \in 1 .. 1 |-> 0] ]
@@ -1425,18 +1425,18 @@ CheckedSpotGoldOrderFilledMessage ==
         \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
         \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.tradingPrice = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.tradingVolume = one] : one \in Sample(10) }
-        \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.openingPrice = one] : one \in Sample(9) }
+        \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.openingPriceLong = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.todaysHigh = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.todaysLow = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.previousPrice = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.accumulatedTradingValueLong = one] : one \in Sample(22) }
         \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
         \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.lpHoldingQuantity = one] : one \in Sample(15) }
         \cup { [ZeroSpotGoldOrderFilledMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Spot Gold Order Filled Plus Quote Message: 880 bytes                    *)
+(* Spot Gold Order Filled Plus Quote Message: 882 bytes                    *)
 (***************************************************************************)
 
 SpotGoldOrderFilledPlusQuoteMessage ==
@@ -1448,12 +1448,12 @@ SpotGoldOrderFilledPlusQuoteMessage ==
       processingTimeOfTradingSystem : Sample(12),
       tradingPrice                  : Sample(11),
       tradingVolume                 : Sample(10),
-      openingPrice                  : Sample(9),
+      openingPriceLong              : Sample(11),
       todaysHigh                    : Sample(11),
       todaysLow                     : Sample(11),
       previousPrice                 : Sample(11),
       accumulatedTradingVolume      : Sample(12),
-      accumulatedTradingValue       : Sample(22),
+      accumulatedTradingValueLong   : Sample(22),
       finalAskBidTypeCode           : Sample(1),
       lpHoldingQuantity             : Sample(15),
       askLevel1Price                : Sample(11),
@@ -1529,12 +1529,12 @@ EncodeSpotGoldOrderFilledPlusQuoteMessage(message) ==
         \o message.processingTimeOfTradingSystem
         \o message.tradingPrice
         \o message.tradingVolume
-        \o message.openingPrice
+        \o message.openingPriceLong
         \o message.todaysHigh
         \o message.todaysLow
         \o message.previousPrice
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.accumulatedTradingValueLong
         \o message.finalAskBidTypeCode
         \o message.lpHoldingQuantity
         \o message.askLevel1Price
@@ -1610,13 +1610,13 @@ DecodeSpotGoldOrderFilledPlusQuoteMessage(bytes) ==
     LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssue.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
     LET tradingPrice == ReadBytes(processingTimeOfTradingSystem.rest, 11) IN IF ~tradingPrice.ok THEN Fail ELSE
     LET tradingVolume == ReadBytes(tradingPrice.rest, 10) IN IF ~tradingVolume.ok THEN Fail ELSE
-    LET openingPrice == ReadBytes(tradingVolume.rest, 9) IN IF ~openingPrice.ok THEN Fail ELSE
-    LET todaysHigh == ReadBytes(openingPrice.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
+    LET openingPriceLong == ReadBytes(tradingVolume.rest, 11) IN IF ~openingPriceLong.ok THEN Fail ELSE
+    LET todaysHigh == ReadBytes(openingPriceLong.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
     LET todaysLow == ReadBytes(todaysHigh.rest, 11) IN IF ~todaysLow.ok THEN Fail ELSE
     LET previousPrice == ReadBytes(todaysLow.rest, 11) IN IF ~previousPrice.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(previousPrice.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
+    LET accumulatedTradingValueLong == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValueLong.ok THEN Fail ELSE
+    LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValueLong.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
     LET lpHoldingQuantity == ReadBytes(finalAskBidTypeCode.rest, 15) IN IF ~lpHoldingQuantity.ok THEN Fail ELSE
     LET askLevel1Price == ReadBytes(lpHoldingQuantity.rest, 11) IN IF ~askLevel1Price.ok THEN Fail ELSE
     LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 11) IN IF ~bidLevel1Price.ok THEN Fail ELSE
@@ -1689,12 +1689,12 @@ DecodeSpotGoldOrderFilledPlusQuoteMessage(bytes) ==
          processingTimeOfTradingSystem |-> processingTimeOfTradingSystem.value,
          tradingPrice                  |-> tradingPrice.value,
          tradingVolume                 |-> tradingVolume.value,
-         openingPrice                  |-> openingPrice.value,
+         openingPriceLong              |-> openingPriceLong.value,
          todaysHigh                    |-> todaysHigh.value,
          todaysLow                     |-> todaysLow.value,
          previousPrice                 |-> previousPrice.value,
          accumulatedTradingVolume      |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue       |-> accumulatedTradingValue.value,
+         accumulatedTradingValueLong   |-> accumulatedTradingValueLong.value,
          finalAskBidTypeCode           |-> finalAskBidTypeCode.value,
          lpHoldingQuantity             |-> lpHoldingQuantity.value,
          askLevel1Price                |-> askLevel1Price.value,
@@ -1770,12 +1770,12 @@ ZeroSpotGoldOrderFilledPlusQuoteMessage ==
       processingTimeOfTradingSystem |-> [i \in 1 .. 12 |-> 0],
       tradingPrice                  |-> [i \in 1 .. 11 |-> 0],
       tradingVolume                 |-> [i \in 1 .. 10 |-> 0],
-      openingPrice                  |-> [i \in 1 .. 9 |-> 0],
+      openingPriceLong              |-> [i \in 1 .. 11 |-> 0],
       todaysHigh                    |-> [i \in 1 .. 11 |-> 0],
       todaysLow                     |-> [i \in 1 .. 11 |-> 0],
       previousPrice                 |-> [i \in 1 .. 11 |-> 0],
       accumulatedTradingVolume      |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue       |-> [i \in 1 .. 22 |-> 0],
+      accumulatedTradingValueLong   |-> [i \in 1 .. 22 |-> 0],
       finalAskBidTypeCode           |-> [i \in 1 .. 1 |-> 0],
       lpHoldingQuantity             |-> [i \in 1 .. 15 |-> 0],
       askLevel1Price                |-> [i \in 1 .. 11 |-> 0],
@@ -1853,12 +1853,12 @@ CheckedSpotGoldOrderFilledPlusQuoteMessage ==
         \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
         \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.tradingPrice = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.tradingVolume = one] : one \in Sample(10) }
-        \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.openingPrice = one] : one \in Sample(9) }
+        \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.openingPriceLong = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.todaysHigh = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.todaysLow = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.previousPrice = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.accumulatedTradingValueLong = one] : one \in Sample(22) }
         \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
         \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.lpHoldingQuantity = one] : one \in Sample(15) }
         \cup { [ZeroSpotGoldOrderFilledPlusQuoteMessage EXCEPT !.askLevel1Price = one] : one \in Sample(11) }
@@ -2392,7 +2392,7 @@ CheckedSpotGoldMarketOperationTsPlusQuoteMessage ==
         \cup { [ZeroSpotGoldMarketOperationTsPlusQuoteMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Spot Gold Snapshot Message: 847 bytes                                   *)
+(* Spot Gold Snapshot Message: 849 bytes                                   *)
 (***************************************************************************)
 
 SpotGoldSnapshotMessage ==
@@ -2401,11 +2401,11 @@ SpotGoldSnapshotMessage ==
       isinCode                    : Sample(12),
       aDesignatedNumberForAnIssue : Sample(6),
       currentPrice                : Sample(11),
-      openingPrice                : Sample(9),
+      openingPriceLong            : Sample(11),
       todaysHigh                  : Sample(11),
       todaysLow                   : Sample(11),
       accumulatedTradingVolume    : Sample(12),
-      accumulatedTradingValue     : Sample(22),
+      accumulatedTradingValueLong : Sample(22),
       tradingHalt                 : Sample(1),
       askLevel1Price              : Sample(11),
       bidLevel1Price              : Sample(11),
@@ -2479,11 +2479,11 @@ EncodeSpotGoldSnapshotMessage(message) ==
         \o message.isinCode
         \o message.aDesignatedNumberForAnIssue
         \o message.currentPrice
-        \o message.openingPrice
+        \o message.openingPriceLong
         \o message.todaysHigh
         \o message.todaysLow
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.accumulatedTradingValueLong
         \o message.tradingHalt
         \o message.askLevel1Price
         \o message.bidLevel1Price
@@ -2557,12 +2557,12 @@ DecodeSpotGoldSnapshotMessage(bytes) ==
     LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
     LET aDesignatedNumberForAnIssue == ReadBytes(isinCode.rest, 6) IN IF ~aDesignatedNumberForAnIssue.ok THEN Fail ELSE
     LET currentPrice == ReadBytes(aDesignatedNumberForAnIssue.rest, 11) IN IF ~currentPrice.ok THEN Fail ELSE
-    LET openingPrice == ReadBytes(currentPrice.rest, 9) IN IF ~openingPrice.ok THEN Fail ELSE
-    LET todaysHigh == ReadBytes(openingPrice.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
+    LET openingPriceLong == ReadBytes(currentPrice.rest, 11) IN IF ~openingPriceLong.ok THEN Fail ELSE
+    LET todaysHigh == ReadBytes(openingPriceLong.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
     LET todaysLow == ReadBytes(todaysHigh.rest, 11) IN IF ~todaysLow.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(todaysLow.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET tradingHalt == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~tradingHalt.ok THEN Fail ELSE
+    LET accumulatedTradingValueLong == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValueLong.ok THEN Fail ELSE
+    LET tradingHalt == ReadBytes(accumulatedTradingValueLong.rest, 1) IN IF ~tradingHalt.ok THEN Fail ELSE
     LET askLevel1Price == ReadBytes(tradingHalt.rest, 11) IN IF ~askLevel1Price.ok THEN Fail ELSE
     LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 11) IN IF ~bidLevel1Price.ok THEN Fail ELSE
     LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 12) IN IF ~askLevel1Volume.ok THEN Fail ELSE
@@ -2633,11 +2633,11 @@ DecodeSpotGoldSnapshotMessage(bytes) ==
          isinCode                    |-> isinCode.value,
          aDesignatedNumberForAnIssue |-> aDesignatedNumberForAnIssue.value,
          currentPrice                |-> currentPrice.value,
-         openingPrice                |-> openingPrice.value,
+         openingPriceLong            |-> openingPriceLong.value,
          todaysHigh                  |-> todaysHigh.value,
          todaysLow                   |-> todaysLow.value,
          accumulatedTradingVolume    |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue     |-> accumulatedTradingValue.value,
+         accumulatedTradingValueLong |-> accumulatedTradingValueLong.value,
          tradingHalt                 |-> tradingHalt.value,
          askLevel1Price              |-> askLevel1Price.value,
          bidLevel1Price              |-> bidLevel1Price.value,
@@ -2711,11 +2711,11 @@ ZeroSpotGoldSnapshotMessage ==
       isinCode                    |-> [i \in 1 .. 12 |-> 0],
       aDesignatedNumberForAnIssue |-> [i \in 1 .. 6 |-> 0],
       currentPrice                |-> [i \in 1 .. 11 |-> 0],
-      openingPrice                |-> [i \in 1 .. 9 |-> 0],
+      openingPriceLong            |-> [i \in 1 .. 11 |-> 0],
       todaysHigh                  |-> [i \in 1 .. 11 |-> 0],
       todaysLow                   |-> [i \in 1 .. 11 |-> 0],
       accumulatedTradingVolume    |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue     |-> [i \in 1 .. 22 |-> 0],
+      accumulatedTradingValueLong |-> [i \in 1 .. 22 |-> 0],
       tradingHalt                 |-> [i \in 1 .. 1 |-> 0],
       askLevel1Price              |-> [i \in 1 .. 11 |-> 0],
       bidLevel1Price              |-> [i \in 1 .. 11 |-> 0],
@@ -2791,11 +2791,11 @@ CheckedSpotGoldSnapshotMessage ==
         \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
         \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.aDesignatedNumberForAnIssue = one] : one \in Sample(6) }
         \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.currentPrice = one] : one \in Sample(11) }
-        \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.openingPrice = one] : one \in Sample(9) }
+        \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.openingPriceLong = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.todaysHigh = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.todaysLow = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.accumulatedTradingValueLong = one] : one \in Sample(22) }
         \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.tradingHalt = one] : one \in Sample(1) }
         \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.askLevel1Price = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldSnapshotMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(11) }
@@ -3124,7 +3124,7 @@ CheckedEmissionsQuoteMessage ==
         \cup { [ZeroEmissionsQuoteMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Emissions Order Filled Message: 141 bytes                               *)
+(* Emissions Order Filled Message: 143 bytes                               *)
 (***************************************************************************)
 
 EmissionsOrderFilledMessage ==
@@ -3136,12 +3136,12 @@ EmissionsOrderFilledMessage ==
       processingTimeOfTradingSystem : Sample(12),
       tradingPrice                  : Sample(11),
       tradingVolume                 : Sample(10),
-      openingPrice                  : Sample(9),
+      openingPriceLong              : Sample(11),
       todaysHigh                    : Sample(11),
       todaysLow                     : Sample(11),
       previousPrice                 : Sample(11),
       accumulatedTradingVolume      : Sample(12),
-      accumulatedTradingValue       : Sample(22),
+      accumulatedTradingValueLong   : Sample(22),
       finalAskBidTypeCode           : Sample(1),
       endKeyword                    : Sample(1) ]
 
@@ -3154,12 +3154,12 @@ EncodeEmissionsOrderFilledMessage(message) ==
         \o message.processingTimeOfTradingSystem
         \o message.tradingPrice
         \o message.tradingVolume
-        \o message.openingPrice
+        \o message.openingPriceLong
         \o message.todaysHigh
         \o message.todaysLow
         \o message.previousPrice
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.accumulatedTradingValueLong
         \o message.finalAskBidTypeCode
         \o message.endKeyword
 
@@ -3172,13 +3172,13 @@ DecodeEmissionsOrderFilledMessage(bytes) ==
     LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssue.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
     LET tradingPrice == ReadBytes(processingTimeOfTradingSystem.rest, 11) IN IF ~tradingPrice.ok THEN Fail ELSE
     LET tradingVolume == ReadBytes(tradingPrice.rest, 10) IN IF ~tradingVolume.ok THEN Fail ELSE
-    LET openingPrice == ReadBytes(tradingVolume.rest, 9) IN IF ~openingPrice.ok THEN Fail ELSE
-    LET todaysHigh == ReadBytes(openingPrice.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
+    LET openingPriceLong == ReadBytes(tradingVolume.rest, 11) IN IF ~openingPriceLong.ok THEN Fail ELSE
+    LET todaysHigh == ReadBytes(openingPriceLong.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
     LET todaysLow == ReadBytes(todaysHigh.rest, 11) IN IF ~todaysLow.ok THEN Fail ELSE
     LET previousPrice == ReadBytes(todaysLow.rest, 11) IN IF ~previousPrice.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(previousPrice.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
+    LET accumulatedTradingValueLong == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValueLong.ok THEN Fail ELSE
+    LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValueLong.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(finalAskBidTypeCode.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
     Ok([ messageSequenceNumber         |-> messageSequenceNumber.value,
          boardId                       |-> boardId.value,
@@ -3188,12 +3188,12 @@ DecodeEmissionsOrderFilledMessage(bytes) ==
          processingTimeOfTradingSystem |-> processingTimeOfTradingSystem.value,
          tradingPrice                  |-> tradingPrice.value,
          tradingVolume                 |-> tradingVolume.value,
-         openingPrice                  |-> openingPrice.value,
+         openingPriceLong              |-> openingPriceLong.value,
          todaysHigh                    |-> todaysHigh.value,
          todaysLow                     |-> todaysLow.value,
          previousPrice                 |-> previousPrice.value,
          accumulatedTradingVolume      |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue       |-> accumulatedTradingValue.value,
+         accumulatedTradingValueLong   |-> accumulatedTradingValueLong.value,
          finalAskBidTypeCode           |-> finalAskBidTypeCode.value,
          endKeyword                    |-> endKeyword.value ], endKeyword.rest)
 
@@ -3206,12 +3206,12 @@ ZeroEmissionsOrderFilledMessage ==
       processingTimeOfTradingSystem |-> [i \in 1 .. 12 |-> 0],
       tradingPrice                  |-> [i \in 1 .. 11 |-> 0],
       tradingVolume                 |-> [i \in 1 .. 10 |-> 0],
-      openingPrice                  |-> [i \in 1 .. 9 |-> 0],
+      openingPriceLong              |-> [i \in 1 .. 11 |-> 0],
       todaysHigh                    |-> [i \in 1 .. 11 |-> 0],
       todaysLow                     |-> [i \in 1 .. 11 |-> 0],
       previousPrice                 |-> [i \in 1 .. 11 |-> 0],
       accumulatedTradingVolume      |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue       |-> [i \in 1 .. 22 |-> 0],
+      accumulatedTradingValueLong   |-> [i \in 1 .. 22 |-> 0],
       finalAskBidTypeCode           |-> [i \in 1 .. 1 |-> 0],
       endKeyword                    |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -3226,17 +3226,17 @@ CheckedEmissionsOrderFilledMessage ==
         \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
         \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.tradingPrice = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.tradingVolume = one] : one \in Sample(10) }
-        \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.openingPrice = one] : one \in Sample(9) }
+        \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.openingPriceLong = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.todaysHigh = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.todaysLow = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.previousPrice = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.accumulatedTradingValueLong = one] : one \in Sample(22) }
         \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
         \cup { [ZeroEmissionsOrderFilledMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Emissions Order Filled Plus Quote Message: 395 bytes                    *)
+(* Emissions Order Filled Plus Quote Message: 397 bytes                    *)
 (***************************************************************************)
 
 EmissionsOrderFilledPlusQuoteMessage ==
@@ -3248,12 +3248,12 @@ EmissionsOrderFilledPlusQuoteMessage ==
       processingTimeOfTradingSystem : Sample(12),
       tradingPrice                  : Sample(11),
       tradingVolume                 : Sample(10),
-      openingPrice                  : Sample(9),
+      openingPriceLong              : Sample(11),
       todaysHigh                    : Sample(11),
       todaysLow                     : Sample(11),
       previousPrice                 : Sample(11),
       accumulatedTradingVolume      : Sample(12),
-      accumulatedTradingValue       : Sample(22),
+      accumulatedTradingValueLong   : Sample(22),
       finalAskBidTypeCode           : Sample(1),
       askLevel1Price                : Sample(11),
       bidLevel1Price                : Sample(11),
@@ -3288,12 +3288,12 @@ EncodeEmissionsOrderFilledPlusQuoteMessage(message) ==
         \o message.processingTimeOfTradingSystem
         \o message.tradingPrice
         \o message.tradingVolume
-        \o message.openingPrice
+        \o message.openingPriceLong
         \o message.todaysHigh
         \o message.todaysLow
         \o message.previousPrice
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.accumulatedTradingValueLong
         \o message.finalAskBidTypeCode
         \o message.askLevel1Price
         \o message.bidLevel1Price
@@ -3328,13 +3328,13 @@ DecodeEmissionsOrderFilledPlusQuoteMessage(bytes) ==
     LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssue.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
     LET tradingPrice == ReadBytes(processingTimeOfTradingSystem.rest, 11) IN IF ~tradingPrice.ok THEN Fail ELSE
     LET tradingVolume == ReadBytes(tradingPrice.rest, 10) IN IF ~tradingVolume.ok THEN Fail ELSE
-    LET openingPrice == ReadBytes(tradingVolume.rest, 9) IN IF ~openingPrice.ok THEN Fail ELSE
-    LET todaysHigh == ReadBytes(openingPrice.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
+    LET openingPriceLong == ReadBytes(tradingVolume.rest, 11) IN IF ~openingPriceLong.ok THEN Fail ELSE
+    LET todaysHigh == ReadBytes(openingPriceLong.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
     LET todaysLow == ReadBytes(todaysHigh.rest, 11) IN IF ~todaysLow.ok THEN Fail ELSE
     LET previousPrice == ReadBytes(todaysLow.rest, 11) IN IF ~previousPrice.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(previousPrice.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
+    LET accumulatedTradingValueLong == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValueLong.ok THEN Fail ELSE
+    LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValueLong.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
     LET askLevel1Price == ReadBytes(finalAskBidTypeCode.rest, 11) IN IF ~askLevel1Price.ok THEN Fail ELSE
     LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 11) IN IF ~bidLevel1Price.ok THEN Fail ELSE
     LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 12) IN IF ~askLevel1Volume.ok THEN Fail ELSE
@@ -3366,12 +3366,12 @@ DecodeEmissionsOrderFilledPlusQuoteMessage(bytes) ==
          processingTimeOfTradingSystem |-> processingTimeOfTradingSystem.value,
          tradingPrice                  |-> tradingPrice.value,
          tradingVolume                 |-> tradingVolume.value,
-         openingPrice                  |-> openingPrice.value,
+         openingPriceLong              |-> openingPriceLong.value,
          todaysHigh                    |-> todaysHigh.value,
          todaysLow                     |-> todaysLow.value,
          previousPrice                 |-> previousPrice.value,
          accumulatedTradingVolume      |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue       |-> accumulatedTradingValue.value,
+         accumulatedTradingValueLong   |-> accumulatedTradingValueLong.value,
          finalAskBidTypeCode           |-> finalAskBidTypeCode.value,
          askLevel1Price                |-> askLevel1Price.value,
          bidLevel1Price                |-> bidLevel1Price.value,
@@ -3406,12 +3406,12 @@ ZeroEmissionsOrderFilledPlusQuoteMessage ==
       processingTimeOfTradingSystem |-> [i \in 1 .. 12 |-> 0],
       tradingPrice                  |-> [i \in 1 .. 11 |-> 0],
       tradingVolume                 |-> [i \in 1 .. 10 |-> 0],
-      openingPrice                  |-> [i \in 1 .. 9 |-> 0],
+      openingPriceLong              |-> [i \in 1 .. 11 |-> 0],
       todaysHigh                    |-> [i \in 1 .. 11 |-> 0],
       todaysLow                     |-> [i \in 1 .. 11 |-> 0],
       previousPrice                 |-> [i \in 1 .. 11 |-> 0],
       accumulatedTradingVolume      |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue       |-> [i \in 1 .. 22 |-> 0],
+      accumulatedTradingValueLong   |-> [i \in 1 .. 22 |-> 0],
       finalAskBidTypeCode           |-> [i \in 1 .. 1 |-> 0],
       askLevel1Price                |-> [i \in 1 .. 11 |-> 0],
       bidLevel1Price                |-> [i \in 1 .. 11 |-> 0],
@@ -3448,12 +3448,12 @@ CheckedEmissionsOrderFilledPlusQuoteMessage ==
         \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
         \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.tradingPrice = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.tradingVolume = one] : one \in Sample(10) }
-        \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.openingPrice = one] : one \in Sample(9) }
+        \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.openingPriceLong = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.todaysHigh = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.todaysLow = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.previousPrice = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.accumulatedTradingValueLong = one] : one \in Sample(22) }
         \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
         \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.askLevel1Price = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsOrderFilledPlusQuoteMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(11) }
@@ -3706,7 +3706,7 @@ CheckedEmissionsMarketOperationTsPlusQuoteMessage ==
         \cup { [ZeroEmissionsMarketOperationTsPlusQuoteMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Emissions Snapshot Message: 411 bytes                                   *)
+(* Emissions Snapshot Message: 413 bytes                                   *)
 (***************************************************************************)
 
 EmissionsSnapshotMessage ==
@@ -3715,11 +3715,11 @@ EmissionsSnapshotMessage ==
       isinCode                          : Sample(12),
       aDesignatedNumberForAnIssue       : Sample(6),
       currentPrice                      : Sample(11),
-      openingPrice                      : Sample(9),
+      openingPriceLong                  : Sample(11),
       todaysHigh                        : Sample(11),
       todaysLow                         : Sample(11),
       accumulatedTradingVolume          : Sample(12),
-      accumulatedTradingValue           : Sample(22),
+      accumulatedTradingValueLong       : Sample(22),
       negotiatedBlockTradeTradingVolume : Sample(12),
       negotiatedBlockTradeTradingValue  : Sample(22),
       tradingHalt                       : Sample(1),
@@ -3755,11 +3755,11 @@ EncodeEmissionsSnapshotMessage(message) ==
         \o message.isinCode
         \o message.aDesignatedNumberForAnIssue
         \o message.currentPrice
-        \o message.openingPrice
+        \o message.openingPriceLong
         \o message.todaysHigh
         \o message.todaysLow
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.accumulatedTradingValueLong
         \o message.negotiatedBlockTradeTradingVolume
         \o message.negotiatedBlockTradeTradingValue
         \o message.tradingHalt
@@ -3795,12 +3795,12 @@ DecodeEmissionsSnapshotMessage(bytes) ==
     LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
     LET aDesignatedNumberForAnIssue == ReadBytes(isinCode.rest, 6) IN IF ~aDesignatedNumberForAnIssue.ok THEN Fail ELSE
     LET currentPrice == ReadBytes(aDesignatedNumberForAnIssue.rest, 11) IN IF ~currentPrice.ok THEN Fail ELSE
-    LET openingPrice == ReadBytes(currentPrice.rest, 9) IN IF ~openingPrice.ok THEN Fail ELSE
-    LET todaysHigh == ReadBytes(openingPrice.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
+    LET openingPriceLong == ReadBytes(currentPrice.rest, 11) IN IF ~openingPriceLong.ok THEN Fail ELSE
+    LET todaysHigh == ReadBytes(openingPriceLong.rest, 11) IN IF ~todaysHigh.ok THEN Fail ELSE
     LET todaysLow == ReadBytes(todaysHigh.rest, 11) IN IF ~todaysLow.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(todaysLow.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET negotiatedBlockTradeTradingVolume == ReadBytes(accumulatedTradingValue.rest, 12) IN IF ~negotiatedBlockTradeTradingVolume.ok THEN Fail ELSE
+    LET accumulatedTradingValueLong == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValueLong.ok THEN Fail ELSE
+    LET negotiatedBlockTradeTradingVolume == ReadBytes(accumulatedTradingValueLong.rest, 12) IN IF ~negotiatedBlockTradeTradingVolume.ok THEN Fail ELSE
     LET negotiatedBlockTradeTradingValue == ReadBytes(negotiatedBlockTradeTradingVolume.rest, 22) IN IF ~negotiatedBlockTradeTradingValue.ok THEN Fail ELSE
     LET tradingHalt == ReadBytes(negotiatedBlockTradeTradingValue.rest, 1) IN IF ~tradingHalt.ok THEN Fail ELSE
     LET askLevel1Price == ReadBytes(tradingHalt.rest, 11) IN IF ~askLevel1Price.ok THEN Fail ELSE
@@ -3833,11 +3833,11 @@ DecodeEmissionsSnapshotMessage(bytes) ==
          isinCode                          |-> isinCode.value,
          aDesignatedNumberForAnIssue       |-> aDesignatedNumberForAnIssue.value,
          currentPrice                      |-> currentPrice.value,
-         openingPrice                      |-> openingPrice.value,
+         openingPriceLong                  |-> openingPriceLong.value,
          todaysHigh                        |-> todaysHigh.value,
          todaysLow                         |-> todaysLow.value,
          accumulatedTradingVolume          |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue           |-> accumulatedTradingValue.value,
+         accumulatedTradingValueLong       |-> accumulatedTradingValueLong.value,
          negotiatedBlockTradeTradingVolume |-> negotiatedBlockTradeTradingVolume.value,
          negotiatedBlockTradeTradingValue  |-> negotiatedBlockTradeTradingValue.value,
          tradingHalt                       |-> tradingHalt.value,
@@ -3873,11 +3873,11 @@ ZeroEmissionsSnapshotMessage ==
       isinCode                          |-> [i \in 1 .. 12 |-> 0],
       aDesignatedNumberForAnIssue       |-> [i \in 1 .. 6 |-> 0],
       currentPrice                      |-> [i \in 1 .. 11 |-> 0],
-      openingPrice                      |-> [i \in 1 .. 9 |-> 0],
+      openingPriceLong                  |-> [i \in 1 .. 11 |-> 0],
       todaysHigh                        |-> [i \in 1 .. 11 |-> 0],
       todaysLow                         |-> [i \in 1 .. 11 |-> 0],
       accumulatedTradingVolume          |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue           |-> [i \in 1 .. 22 |-> 0],
+      accumulatedTradingValueLong       |-> [i \in 1 .. 22 |-> 0],
       negotiatedBlockTradeTradingVolume |-> [i \in 1 .. 12 |-> 0],
       negotiatedBlockTradeTradingValue  |-> [i \in 1 .. 22 |-> 0],
       tradingHalt                       |-> [i \in 1 .. 1 |-> 0],
@@ -3915,11 +3915,11 @@ CheckedEmissionsSnapshotMessage ==
         \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
         \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.aDesignatedNumberForAnIssue = one] : one \in Sample(6) }
         \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.currentPrice = one] : one \in Sample(11) }
-        \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.openingPrice = one] : one \in Sample(9) }
+        \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.openingPriceLong = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.todaysHigh = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.todaysLow = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.accumulatedTradingValueLong = one] : one \in Sample(22) }
         \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.negotiatedBlockTradeTradingVolume = one] : one \in Sample(12) }
         \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.negotiatedBlockTradeTradingValue = one] : one \in Sample(22) }
         \cup { [ZeroEmissionsSnapshotMessage EXCEPT !.tradingHalt = one] : one \in Sample(1) }
@@ -3960,7 +3960,7 @@ EmissionsNegotiatedTradeMessage ==
       tradingPrice                : Sample(11),
       tradingVolume               : Sample(10),
       accumulatedTradingVolume    : Sample(12),
-      accumulatedTradingValue     : Sample(22),
+      accumulatedTradingValueLong : Sample(22),
       endKeyword                  : Sample(1) ]
 
 EncodeEmissionsNegotiatedTradeMessage(message) ==
@@ -3970,7 +3970,7 @@ EncodeEmissionsNegotiatedTradeMessage(message) ==
         \o message.tradingPrice
         \o message.tradingVolume
         \o message.accumulatedTradingVolume
-        \o message.accumulatedTradingValue
+        \o message.accumulatedTradingValueLong
         \o message.endKeyword
 
 DecodeEmissionsNegotiatedTradeMessage(bytes) ==
@@ -3980,15 +3980,15 @@ DecodeEmissionsNegotiatedTradeMessage(bytes) ==
     LET tradingPrice == ReadBytes(aDesignatedNumberForAnIssue.rest, 11) IN IF ~tradingPrice.ok THEN Fail ELSE
     LET tradingVolume == ReadBytes(tradingPrice.rest, 10) IN IF ~tradingVolume.ok THEN Fail ELSE
     LET accumulatedTradingVolume == ReadBytes(tradingVolume.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
-    LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
-    LET endKeyword == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
+    LET accumulatedTradingValueLong == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValueLong.ok THEN Fail ELSE
+    LET endKeyword == ReadBytes(accumulatedTradingValueLong.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
     Ok([ boardId                     |-> boardId.value,
          isinCode                    |-> isinCode.value,
          aDesignatedNumberForAnIssue |-> aDesignatedNumberForAnIssue.value,
          tradingPrice                |-> tradingPrice.value,
          tradingVolume               |-> tradingVolume.value,
          accumulatedTradingVolume    |-> accumulatedTradingVolume.value,
-         accumulatedTradingValue     |-> accumulatedTradingValue.value,
+         accumulatedTradingValueLong |-> accumulatedTradingValueLong.value,
          endKeyword                  |-> endKeyword.value ], endKeyword.rest)
 
 ZeroEmissionsNegotiatedTradeMessage ==
@@ -3998,7 +3998,7 @@ ZeroEmissionsNegotiatedTradeMessage ==
       tradingPrice                |-> [i \in 1 .. 11 |-> 0],
       tradingVolume               |-> [i \in 1 .. 10 |-> 0],
       accumulatedTradingVolume    |-> [i \in 1 .. 12 |-> 0],
-      accumulatedTradingValue     |-> [i \in 1 .. 22 |-> 0],
+      accumulatedTradingValueLong |-> [i \in 1 .. 22 |-> 0],
       endKeyword                  |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Emissions Negotiated Trade Message at zero, then each field in turn at the values it is checked at *)
@@ -4010,7 +4010,7 @@ CheckedEmissionsNegotiatedTradeMessage ==
         \cup { [ZeroEmissionsNegotiatedTradeMessage EXCEPT !.tradingPrice = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsNegotiatedTradeMessage EXCEPT !.tradingVolume = one] : one \in Sample(10) }
         \cup { [ZeroEmissionsNegotiatedTradeMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
-        \cup { [ZeroEmissionsNegotiatedTradeMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
+        \cup { [ZeroEmissionsNegotiatedTradeMessage EXCEPT !.accumulatedTradingValueLong = one] : one \in Sample(22) }
         \cup { [ZeroEmissionsNegotiatedTradeMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -4522,7 +4522,7 @@ CheckedEmissionsBatchDataMessage ==
         \cup { [ZeroEmissionsBatchDataMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* External Gold Spot Closing Price Message: 122 bytes                     *)
+(* External Gold Spot Closing Price Message: 120 bytes                     *)
 (***************************************************************************)
 
 ExternalGoldSpotClosingPriceMessage ==
@@ -4530,16 +4530,16 @@ ExternalGoldSpotClosingPriceMessage ==
       jobCodeSymbol               : Sample(16),
       tradingDate                 : Sample(8),
       tradingTime                 : Sample(6),
-      openingPrice                : Sample(9),
+      openingPriceShort           : Sample(9),
       highPrice                   : Sample(9),
       lowPrice                    : Sample(9),
-      closingPrice                : Sample(11),
+      closingPriceShort           : Sample(9),
       changeFromPreviousDaySign   : Sample(1),
       changeFromPreviousDay       : Sample(9),
       fluctuatingRate             : Sample(9),
       bidQuote                    : Sample(9),
       askQuote                    : Sample(9),
-      currencyCode                : Sample(6),
+      currencyCodeLong            : Sample(6),
       conversionBasicExchangeRate : Sample(9),
       endKeyword                  : Sample(1) ]
 
@@ -4548,16 +4548,16 @@ EncodeExternalGoldSpotClosingPriceMessage(message) ==
         \o message.jobCodeSymbol
         \o message.tradingDate
         \o message.tradingTime
-        \o message.openingPrice
+        \o message.openingPriceShort
         \o message.highPrice
         \o message.lowPrice
-        \o message.closingPrice
+        \o message.closingPriceShort
         \o message.changeFromPreviousDaySign
         \o message.changeFromPreviousDay
         \o message.fluctuatingRate
         \o message.bidQuote
         \o message.askQuote
-        \o message.currencyCode
+        \o message.currencyCodeLong
         \o message.conversionBasicExchangeRate
         \o message.endKeyword
 
@@ -4566,32 +4566,32 @@ DecodeExternalGoldSpotClosingPriceMessage(bytes) ==
     LET jobCodeSymbol == ReadBytes(dataType.rest, 16) IN IF ~jobCodeSymbol.ok THEN Fail ELSE
     LET tradingDate == ReadBytes(jobCodeSymbol.rest, 8) IN IF ~tradingDate.ok THEN Fail ELSE
     LET tradingTime == ReadBytes(tradingDate.rest, 6) IN IF ~tradingTime.ok THEN Fail ELSE
-    LET openingPrice == ReadBytes(tradingTime.rest, 9) IN IF ~openingPrice.ok THEN Fail ELSE
-    LET highPrice == ReadBytes(openingPrice.rest, 9) IN IF ~highPrice.ok THEN Fail ELSE
+    LET openingPriceShort == ReadBytes(tradingTime.rest, 9) IN IF ~openingPriceShort.ok THEN Fail ELSE
+    LET highPrice == ReadBytes(openingPriceShort.rest, 9) IN IF ~highPrice.ok THEN Fail ELSE
     LET lowPrice == ReadBytes(highPrice.rest, 9) IN IF ~lowPrice.ok THEN Fail ELSE
-    LET closingPrice == ReadBytes(lowPrice.rest, 11) IN IF ~closingPrice.ok THEN Fail ELSE
-    LET changeFromPreviousDaySign == ReadBytes(closingPrice.rest, 1) IN IF ~changeFromPreviousDaySign.ok THEN Fail ELSE
+    LET closingPriceShort == ReadBytes(lowPrice.rest, 9) IN IF ~closingPriceShort.ok THEN Fail ELSE
+    LET changeFromPreviousDaySign == ReadBytes(closingPriceShort.rest, 1) IN IF ~changeFromPreviousDaySign.ok THEN Fail ELSE
     LET changeFromPreviousDay == ReadBytes(changeFromPreviousDaySign.rest, 9) IN IF ~changeFromPreviousDay.ok THEN Fail ELSE
     LET fluctuatingRate == ReadBytes(changeFromPreviousDay.rest, 9) IN IF ~fluctuatingRate.ok THEN Fail ELSE
     LET bidQuote == ReadBytes(fluctuatingRate.rest, 9) IN IF ~bidQuote.ok THEN Fail ELSE
     LET askQuote == ReadBytes(bidQuote.rest, 9) IN IF ~askQuote.ok THEN Fail ELSE
-    LET currencyCode == ReadBytes(askQuote.rest, 6) IN IF ~currencyCode.ok THEN Fail ELSE
-    LET conversionBasicExchangeRate == ReadBytes(currencyCode.rest, 9) IN IF ~conversionBasicExchangeRate.ok THEN Fail ELSE
+    LET currencyCodeLong == ReadBytes(askQuote.rest, 6) IN IF ~currencyCodeLong.ok THEN Fail ELSE
+    LET conversionBasicExchangeRate == ReadBytes(currencyCodeLong.rest, 9) IN IF ~conversionBasicExchangeRate.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(conversionBasicExchangeRate.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
     Ok([ dataType                    |-> dataType.value,
          jobCodeSymbol               |-> jobCodeSymbol.value,
          tradingDate                 |-> tradingDate.value,
          tradingTime                 |-> tradingTime.value,
-         openingPrice                |-> openingPrice.value,
+         openingPriceShort           |-> openingPriceShort.value,
          highPrice                   |-> highPrice.value,
          lowPrice                    |-> lowPrice.value,
-         closingPrice                |-> closingPrice.value,
+         closingPriceShort           |-> closingPriceShort.value,
          changeFromPreviousDaySign   |-> changeFromPreviousDaySign.value,
          changeFromPreviousDay       |-> changeFromPreviousDay.value,
          fluctuatingRate             |-> fluctuatingRate.value,
          bidQuote                    |-> bidQuote.value,
          askQuote                    |-> askQuote.value,
-         currencyCode                |-> currencyCode.value,
+         currencyCodeLong            |-> currencyCodeLong.value,
          conversionBasicExchangeRate |-> conversionBasicExchangeRate.value,
          endKeyword                  |-> endKeyword.value ], endKeyword.rest)
 
@@ -4600,16 +4600,16 @@ ZeroExternalGoldSpotClosingPriceMessage ==
       jobCodeSymbol               |-> [i \in 1 .. 16 |-> 0],
       tradingDate                 |-> [i \in 1 .. 8 |-> 0],
       tradingTime                 |-> [i \in 1 .. 6 |-> 0],
-      openingPrice                |-> [i \in 1 .. 9 |-> 0],
+      openingPriceShort           |-> [i \in 1 .. 9 |-> 0],
       highPrice                   |-> [i \in 1 .. 9 |-> 0],
       lowPrice                    |-> [i \in 1 .. 9 |-> 0],
-      closingPrice                |-> [i \in 1 .. 11 |-> 0],
+      closingPriceShort           |-> [i \in 1 .. 9 |-> 0],
       changeFromPreviousDaySign   |-> [i \in 1 .. 1 |-> 0],
       changeFromPreviousDay       |-> [i \in 1 .. 9 |-> 0],
       fluctuatingRate             |-> [i \in 1 .. 9 |-> 0],
       bidQuote                    |-> [i \in 1 .. 9 |-> 0],
       askQuote                    |-> [i \in 1 .. 9 |-> 0],
-      currencyCode                |-> [i \in 1 .. 6 |-> 0],
+      currencyCodeLong            |-> [i \in 1 .. 6 |-> 0],
       conversionBasicExchangeRate |-> [i \in 1 .. 9 |-> 0],
       endKeyword                  |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -4620,16 +4620,16 @@ CheckedExternalGoldSpotClosingPriceMessage ==
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.jobCodeSymbol = one] : one \in Sample(16) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.tradingDate = one] : one \in Sample(8) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.tradingTime = one] : one \in Sample(6) }
-        \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.openingPrice = one] : one \in Sample(9) }
+        \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.openingPriceShort = one] : one \in Sample(9) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.highPrice = one] : one \in Sample(9) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.lowPrice = one] : one \in Sample(9) }
-        \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.closingPrice = one] : one \in Sample(11) }
+        \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.closingPriceShort = one] : one \in Sample(9) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.changeFromPreviousDaySign = one] : one \in Sample(1) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.changeFromPreviousDay = one] : one \in Sample(9) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.fluctuatingRate = one] : one \in Sample(9) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.bidQuote = one] : one \in Sample(9) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.askQuote = one] : one \in Sample(9) }
-        \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.currencyCode = one] : one \in Sample(6) }
+        \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.currencyCodeLong = one] : one \in Sample(6) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.conversionBasicExchangeRate = one] : one \in Sample(9) }
         \cup { [ZeroExternalGoldSpotClosingPriceMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
@@ -4724,7 +4724,7 @@ SpotGoldIssueClosingMessage ==
       boardId                               : Sample(2),
       isinCode                              : Sample(12),
       aDesignatedNumberForAnIssue           : Sample(6),
-      closingPrice                          : Sample(11),
+      closingPriceLong                      : Sample(11),
       closingPriceTypeCode                  : Sample(1),
       filler11                              : Sample(11),
       secondFiller11                        : Sample(11),
@@ -4739,7 +4739,7 @@ EncodeSpotGoldIssueClosingMessage(message) ==
         \o message.boardId
         \o message.isinCode
         \o message.aDesignatedNumberForAnIssue
-        \o message.closingPrice
+        \o message.closingPriceLong
         \o message.closingPriceTypeCode
         \o message.filler11
         \o message.secondFiller11
@@ -4754,8 +4754,8 @@ DecodeSpotGoldIssueClosingMessage(bytes) ==
     LET boardId == ReadBytes(messageSequenceNumber.rest, 2) IN IF ~boardId.ok THEN Fail ELSE
     LET isinCode == ReadBytes(boardId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
     LET aDesignatedNumberForAnIssue == ReadBytes(isinCode.rest, 6) IN IF ~aDesignatedNumberForAnIssue.ok THEN Fail ELSE
-    LET closingPrice == ReadBytes(aDesignatedNumberForAnIssue.rest, 11) IN IF ~closingPrice.ok THEN Fail ELSE
-    LET closingPriceTypeCode == ReadBytes(closingPrice.rest, 1) IN IF ~closingPriceTypeCode.ok THEN Fail ELSE
+    LET closingPriceLong == ReadBytes(aDesignatedNumberForAnIssue.rest, 11) IN IF ~closingPriceLong.ok THEN Fail ELSE
+    LET closingPriceTypeCode == ReadBytes(closingPriceLong.rest, 1) IN IF ~closingPriceTypeCode.ok THEN Fail ELSE
     LET filler11 == ReadBytes(closingPriceTypeCode.rest, 11) IN IF ~filler11.ok THEN Fail ELSE
     LET secondFiller11 == ReadBytes(filler11.rest, 11) IN IF ~secondFiller11.ok THEN Fail ELSE
     LET closingPriceWeightedStockPriceAverage == ReadBytes(secondFiller11.rest, 11) IN IF ~closingPriceWeightedStockPriceAverage.ok THEN Fail ELSE
@@ -4767,7 +4767,7 @@ DecodeSpotGoldIssueClosingMessage(bytes) ==
          boardId                               |-> boardId.value,
          isinCode                              |-> isinCode.value,
          aDesignatedNumberForAnIssue           |-> aDesignatedNumberForAnIssue.value,
-         closingPrice                          |-> closingPrice.value,
+         closingPriceLong                      |-> closingPriceLong.value,
          closingPriceTypeCode                  |-> closingPriceTypeCode.value,
          filler11                              |-> filler11.value,
          secondFiller11                        |-> secondFiller11.value,
@@ -4782,7 +4782,7 @@ ZeroSpotGoldIssueClosingMessage ==
       boardId                               |-> [i \in 1 .. 2 |-> 0],
       isinCode                              |-> [i \in 1 .. 12 |-> 0],
       aDesignatedNumberForAnIssue           |-> [i \in 1 .. 6 |-> 0],
-      closingPrice                          |-> [i \in 1 .. 11 |-> 0],
+      closingPriceLong                      |-> [i \in 1 .. 11 |-> 0],
       closingPriceTypeCode                  |-> [i \in 1 .. 1 |-> 0],
       filler11                              |-> [i \in 1 .. 11 |-> 0],
       secondFiller11                        |-> [i \in 1 .. 11 |-> 0],
@@ -4799,7 +4799,7 @@ CheckedSpotGoldIssueClosingMessage ==
         \cup { [ZeroSpotGoldIssueClosingMessage EXCEPT !.boardId = one] : one \in Sample(2) }
         \cup { [ZeroSpotGoldIssueClosingMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
         \cup { [ZeroSpotGoldIssueClosingMessage EXCEPT !.aDesignatedNumberForAnIssue = one] : one \in Sample(6) }
-        \cup { [ZeroSpotGoldIssueClosingMessage EXCEPT !.closingPrice = one] : one \in Sample(11) }
+        \cup { [ZeroSpotGoldIssueClosingMessage EXCEPT !.closingPriceLong = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldIssueClosingMessage EXCEPT !.closingPriceTypeCode = one] : one \in Sample(1) }
         \cup { [ZeroSpotGoldIssueClosingMessage EXCEPT !.filler11 = one] : one \in Sample(11) }
         \cup { [ZeroSpotGoldIssueClosingMessage EXCEPT !.secondFiller11 = one] : one \in Sample(11) }
@@ -5012,7 +5012,7 @@ EmissionsIssueClosingMessage ==
       boardId                               : Sample(2),
       isinCode                              : Sample(12),
       aDesignatedNumberForAnIssue           : Sample(6),
-      closingPrice                          : Sample(11),
+      closingPriceLong                      : Sample(11),
       closingPriceTypeCode                  : Sample(1),
       filler11                              : Sample(11),
       secondFiller11                        : Sample(11),
@@ -5027,7 +5027,7 @@ EncodeEmissionsIssueClosingMessage(message) ==
         \o message.boardId
         \o message.isinCode
         \o message.aDesignatedNumberForAnIssue
-        \o message.closingPrice
+        \o message.closingPriceLong
         \o message.closingPriceTypeCode
         \o message.filler11
         \o message.secondFiller11
@@ -5042,8 +5042,8 @@ DecodeEmissionsIssueClosingMessage(bytes) ==
     LET boardId == ReadBytes(messageSequenceNumber.rest, 2) IN IF ~boardId.ok THEN Fail ELSE
     LET isinCode == ReadBytes(boardId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
     LET aDesignatedNumberForAnIssue == ReadBytes(isinCode.rest, 6) IN IF ~aDesignatedNumberForAnIssue.ok THEN Fail ELSE
-    LET closingPrice == ReadBytes(aDesignatedNumberForAnIssue.rest, 11) IN IF ~closingPrice.ok THEN Fail ELSE
-    LET closingPriceTypeCode == ReadBytes(closingPrice.rest, 1) IN IF ~closingPriceTypeCode.ok THEN Fail ELSE
+    LET closingPriceLong == ReadBytes(aDesignatedNumberForAnIssue.rest, 11) IN IF ~closingPriceLong.ok THEN Fail ELSE
+    LET closingPriceTypeCode == ReadBytes(closingPriceLong.rest, 1) IN IF ~closingPriceTypeCode.ok THEN Fail ELSE
     LET filler11 == ReadBytes(closingPriceTypeCode.rest, 11) IN IF ~filler11.ok THEN Fail ELSE
     LET secondFiller11 == ReadBytes(filler11.rest, 11) IN IF ~secondFiller11.ok THEN Fail ELSE
     LET closingPriceWeightedStockPriceAverage == ReadBytes(secondFiller11.rest, 11) IN IF ~closingPriceWeightedStockPriceAverage.ok THEN Fail ELSE
@@ -5055,7 +5055,7 @@ DecodeEmissionsIssueClosingMessage(bytes) ==
          boardId                               |-> boardId.value,
          isinCode                              |-> isinCode.value,
          aDesignatedNumberForAnIssue           |-> aDesignatedNumberForAnIssue.value,
-         closingPrice                          |-> closingPrice.value,
+         closingPriceLong                      |-> closingPriceLong.value,
          closingPriceTypeCode                  |-> closingPriceTypeCode.value,
          filler11                              |-> filler11.value,
          secondFiller11                        |-> secondFiller11.value,
@@ -5070,7 +5070,7 @@ ZeroEmissionsIssueClosingMessage ==
       boardId                               |-> [i \in 1 .. 2 |-> 0],
       isinCode                              |-> [i \in 1 .. 12 |-> 0],
       aDesignatedNumberForAnIssue           |-> [i \in 1 .. 6 |-> 0],
-      closingPrice                          |-> [i \in 1 .. 11 |-> 0],
+      closingPriceLong                      |-> [i \in 1 .. 11 |-> 0],
       closingPriceTypeCode                  |-> [i \in 1 .. 1 |-> 0],
       filler11                              |-> [i \in 1 .. 11 |-> 0],
       secondFiller11                        |-> [i \in 1 .. 11 |-> 0],
@@ -5087,7 +5087,7 @@ CheckedEmissionsIssueClosingMessage ==
         \cup { [ZeroEmissionsIssueClosingMessage EXCEPT !.boardId = one] : one \in Sample(2) }
         \cup { [ZeroEmissionsIssueClosingMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
         \cup { [ZeroEmissionsIssueClosingMessage EXCEPT !.aDesignatedNumberForAnIssue = one] : one \in Sample(6) }
-        \cup { [ZeroEmissionsIssueClosingMessage EXCEPT !.closingPrice = one] : one \in Sample(11) }
+        \cup { [ZeroEmissionsIssueClosingMessage EXCEPT !.closingPriceLong = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsIssueClosingMessage EXCEPT !.closingPriceTypeCode = one] : one \in Sample(1) }
         \cup { [ZeroEmissionsIssueClosingMessage EXCEPT !.filler11 = one] : one \in Sample(11) }
         \cup { [ZeroEmissionsIssueClosingMessage EXCEPT !.secondFiller11 = one] : one \in Sample(11) }

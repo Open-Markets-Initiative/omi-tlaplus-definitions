@@ -871,7 +871,7 @@ EncodeOrderbookSnapshotMessage(message) ==
         \o message.tradingStatus
         \o message.remainingCount
         \o message.mpv
-        \o EncodeUIntLE(Len(message.snapshotPricePoint), 1)
+        \o EncodeUIntBE(Len(message.snapshotPricePoint), 1)
         \o EncodeSnapshotPricePointList(message.snapshotPricePoint)
 
 DecodeOrderbookSnapshotMessage(bytes) ==
@@ -884,7 +884,7 @@ DecodeOrderbookSnapshotMessage(bytes) ==
     LET tradingStatus == ReadBytes(priceScaleCode.rest, 1) IN IF ~tradingStatus.ok THEN Fail ELSE
     LET remainingCount == ReadBytes(tradingStatus.rest, 2) IN IF ~remainingCount.ok THEN Fail ELSE
     LET mpv == ReadBytes(remainingCount.rest, 2) IN IF ~mpv.ok THEN Fail ELSE
-    LET updateCount == ReadUIntLE(mpv.rest, 1) IN IF ~updateCount.ok THEN Fail ELSE
+    LET updateCount == ReadUIntBE(mpv.rest, 1) IN IF ~updateCount.ok THEN Fail ELSE
     LET snapshotPricePoint == ReadSnapshotPricePointList(updateCount.rest, updateCount.value) IN IF ~snapshotPricePoint.ok THEN Fail ELSE
     Ok([ sourceTime         |-> sourceTime.value,
          sourceTimeNs       |-> sourceTimeNs.value,
@@ -1004,7 +1004,7 @@ EncodeOrderbookDeltaUpdateMessage(message) ==
         \o message.ultraLastSeqNum
         \o message.tradingStatus
         \o message.remainingCount
-        \o EncodeUIntLE(Len(message.deltaPricePoint), 1)
+        \o EncodeUIntBE(Len(message.deltaPricePoint), 1)
         \o EncodeDeltaPricePointList(message.deltaPricePoint)
 
 DecodeOrderbookDeltaUpdateMessage(bytes) ==
@@ -1014,7 +1014,7 @@ DecodeOrderbookDeltaUpdateMessage(bytes) ==
     LET ultraLastSeqNum == ReadBytes(symbolIndex.rest, 4) IN IF ~ultraLastSeqNum.ok THEN Fail ELSE
     LET tradingStatus == ReadBytes(ultraLastSeqNum.rest, 1) IN IF ~tradingStatus.ok THEN Fail ELSE
     LET remainingCount == ReadBytes(tradingStatus.rest, 2) IN IF ~remainingCount.ok THEN Fail ELSE
-    LET updateCount == ReadUIntLE(remainingCount.rest, 1) IN IF ~updateCount.ok THEN Fail ELSE
+    LET updateCount == ReadUIntBE(remainingCount.rest, 1) IN IF ~updateCount.ok THEN Fail ELSE
     LET deltaPricePoint == ReadDeltaPricePointList(updateCount.rest, updateCount.value) IN IF ~deltaPricePoint.ok THEN Fail ELSE
     Ok([ sourceTime      |-> sourceTime.value,
          sourceTimeNs    |-> sourceTimeNs.value,
@@ -1221,7 +1221,7 @@ Packet ==
 EncodePacket(message) ==
     message.packetSize
         \o message.deliveryFlag
-        \o EncodeUIntLE(Len(message.message), 1)
+        \o EncodeUIntBE(Len(message.message), 1)
         \o message.sequenceNumber
         \o EncodeSendTime(message.sendTime)
         \o EncodeMessageList(message.message)
@@ -1229,7 +1229,7 @@ EncodePacket(message) ==
 DecodePacket(bytes) ==
     LET packetSize == ReadBytes(bytes, 2) IN IF ~packetSize.ok THEN Fail ELSE
     LET deliveryFlag == ReadBytes(packetSize.rest, 1) IN IF ~deliveryFlag.ok THEN Fail ELSE
-    LET messageCount == ReadUIntLE(deliveryFlag.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(deliveryFlag.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
     LET sequenceNumber == ReadBytes(messageCount.rest, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET sendTime == DecodeSendTime(sequenceNumber.rest) IN IF ~sendTime.ok THEN Fail ELSE
     LET message == ReadMessageList(sendTime.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE

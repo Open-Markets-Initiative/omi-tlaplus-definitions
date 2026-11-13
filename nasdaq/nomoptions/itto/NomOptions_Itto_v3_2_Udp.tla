@@ -1,7 +1,7 @@
 --------------------- MODULE NomOptions_Itto_v3_2_Udp ----------------------
 (***************************************************************************)
 (* National Association of Securities Dealers Automated Quotations         *)
-(* (Nasdaq) Nom Itto Top Order Market Data v3.2                            *)
+(* (Nasdaq) Itch to Trade Options v3.2                                     *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)

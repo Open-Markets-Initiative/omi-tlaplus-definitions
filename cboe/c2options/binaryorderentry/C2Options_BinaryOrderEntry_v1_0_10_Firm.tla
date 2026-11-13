@@ -161,7 +161,7 @@ EncodeLoginRequestMessage(message) ==
         \o message.sessionSubId
         \o message.password
         \o message.replayInstruction
-        \o EncodeUIntLE(Len(message.unitSequence), 1)
+        \o EncodeUIntBE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
 DecodeLoginRequestMessage(bytes) ==
@@ -169,7 +169,7 @@ DecodeLoginRequestMessage(bytes) ==
     LET sessionSubId == ReadBytes(sessionId.rest, 4) IN IF ~sessionSubId.ok THEN Fail ELSE
     LET password == ReadBytes(sessionSubId.rest, 10) IN IF ~password.ok THEN Fail ELSE
     LET replayInstruction == ReadBytes(password.rest, 1) IN IF ~replayInstruction.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(replayInstruction.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntBE(replayInstruction.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
     Ok([ sessionId         |-> sessionId.value,
          sessionSubId      |-> sessionSubId.value,
@@ -812,14 +812,14 @@ EncodeNewComplexInstrumentMessage(message) ==
     message.clOrdId
         \o message.clearingFirm
         \o message.scratchPad
-        \o EncodeUIntLE(Len(message.complexLeg), 1)
+        \o EncodeUIntBE(Len(message.complexLeg), 1)
         \o EncodeComplexLegList(message.complexLeg)
 
 DecodeNewComplexInstrumentMessage(bytes) ==
     LET clOrdId == ReadBytes(bytes, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(clOrdId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
     LET scratchPad == ReadBytes(clearingFirm.rest, 2) IN IF ~scratchPad.ok THEN Fail ELSE
-    LET legCnt == ReadUIntLE(scratchPad.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
+    LET legCnt == ReadUIntBE(scratchPad.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
     LET complexLeg == ReadComplexLegList(legCnt.rest, legCnt.value) IN IF ~complexLeg.ok THEN Fail ELSE
     Ok([ clOrdId      |-> clOrdId.value,
          clearingFirm |-> clearingFirm.value,
@@ -967,7 +967,7 @@ EncodeNewComplexOrderMessage(message) ==
         \o message.tiedHedge
         \o message.held
         \o message.scratchPad
-        \o EncodeUIntLE(message.legCnt, 1)
+        \o EncodeUIntBE(message.legCnt, 1)
         \o message.legPositionEffect
 
 DecodeNewComplexOrderMessage(bytes) ==
@@ -1013,7 +1013,7 @@ DecodeNewComplexOrderMessage(bytes) ==
     LET tiedHedge == ReadBytes(strategyId.rest, 1) IN IF ~tiedHedge.ok THEN Fail ELSE
     LET held == ReadBytes(tiedHedge.rest, 1) IN IF ~held.ok THEN Fail ELSE
     LET scratchPad == ReadBytes(held.rest, 2) IN IF ~scratchPad.ok THEN Fail ELSE
-    LET legCnt == ReadUIntLE(scratchPad.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
+    LET legCnt == ReadUIntBE(scratchPad.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
     LET legPositionEffect == ReadBytes(legCnt.rest, 1) IN IF ~legPositionEffect.ok THEN Fail ELSE
     Ok([ clOrdId              |-> clOrdId.value,
          side                 |-> side.value,
@@ -1249,7 +1249,7 @@ EncodeNewComplexOrderShortMessage(message) ==
         \o message.floorDestination
         \o message.floorRoutingInst
         \o message.scratchPad
-        \o EncodeUIntLE(message.legCnt, 1)
+        \o EncodeUIntBE(message.legCnt, 1)
         \o message.legPositionEffect
 
 DecodeNewComplexOrderShortMessage(bytes) ==
@@ -1279,7 +1279,7 @@ DecodeNewComplexOrderShortMessage(bytes) ==
     LET floorDestination == ReadBytes(maxFloor.rest, 4) IN IF ~floorDestination.ok THEN Fail ELSE
     LET floorRoutingInst == ReadBytes(floorDestination.rest, 1) IN IF ~floorRoutingInst.ok THEN Fail ELSE
     LET scratchPad == ReadBytes(floorRoutingInst.rest, 2) IN IF ~scratchPad.ok THEN Fail ELSE
-    LET legCnt == ReadUIntLE(scratchPad.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
+    LET legCnt == ReadUIntBE(scratchPad.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
     LET legPositionEffect == ReadBytes(legCnt.rest, 1) IN IF ~legPositionEffect.ok THEN Fail ELSE
     Ok([ clOrdId            |-> clOrdId.value,
          side               |-> side.value,
@@ -1713,7 +1713,7 @@ EncodeQuoteUpdateMessage(message) ==
         \o message.sessionEligibility
         \o message.sizeModifier
         \o message.scratchPad
-        \o EncodeUIntLE(Len(message.quote), 1)
+        \o EncodeUIntBE(Len(message.quote), 1)
         \o EncodeQuoteList(message.quote)
 
 DecodeQuoteUpdateMessage(bytes) ==
@@ -1728,7 +1728,7 @@ DecodeQuoteUpdateMessage(bytes) ==
     LET sessionEligibility == ReadBytes(postingInstruction.rest, 1) IN IF ~sessionEligibility.ok THEN Fail ELSE
     LET sizeModifier == ReadBytes(sessionEligibility.rest, 1) IN IF ~sizeModifier.ok THEN Fail ELSE
     LET scratchPad == ReadBytes(sizeModifier.rest, 2) IN IF ~scratchPad.ok THEN Fail ELSE
-    LET quoteCnt == ReadUIntLE(scratchPad.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
+    LET quoteCnt == ReadUIntBE(scratchPad.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
     LET quote == ReadQuoteList(quoteCnt.rest, quoteCnt.value) IN IF ~quote.ok THEN Fail ELSE
     Ok([ quoteUpdateId      |-> quoteUpdateId.value,
          clearingFirm       |-> clearingFirm.value,
@@ -1872,7 +1872,7 @@ EncodeQuoteUpdateShortMessage(message) ==
         \o message.sessionEligibility
         \o message.sizeModifier
         \o message.scratchPad
-        \o EncodeUIntLE(Len(message.quoteShort), 1)
+        \o EncodeUIntBE(Len(message.quoteShort), 1)
         \o EncodeQuoteShortList(message.quoteShort)
 
 DecodeQuoteUpdateShortMessage(bytes) ==
@@ -1885,7 +1885,7 @@ DecodeQuoteUpdateShortMessage(bytes) ==
     LET sessionEligibility == ReadBytes(postingInstruction.rest, 1) IN IF ~sessionEligibility.ok THEN Fail ELSE
     LET sizeModifier == ReadBytes(sessionEligibility.rest, 1) IN IF ~sizeModifier.ok THEN Fail ELSE
     LET scratchPad == ReadBytes(sizeModifier.rest, 2) IN IF ~scratchPad.ok THEN Fail ELSE
-    LET quoteCnt == ReadUIntLE(scratchPad.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
+    LET quoteCnt == ReadUIntBE(scratchPad.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
     LET quoteShort == ReadQuoteShortList(quoteCnt.rest, quoteCnt.value) IN IF ~quoteShort.ok THEN Fail ELSE
     Ok([ quoteUpdateId      |-> quoteUpdateId.value,
          clearingFirm       |-> clearingFirm.value,
@@ -1999,7 +1999,7 @@ EncodePurgeOrdersMessage(message) ==
         \o EncodeMassCancelInst2(message.massCancelInst)
         \o message.sendTime
         \o message.scratchPad
-        \o EncodeUIntLE(message.customGroupIdCnt, 1)
+        \o EncodeUIntBE(message.customGroupIdCnt, 1)
         \o message.customGroupId
 
 DecodePurgeOrdersMessage(bytes) ==
@@ -2010,7 +2010,7 @@ DecodePurgeOrdersMessage(bytes) ==
     LET massCancelInst == DecodeMassCancelInst2(riskRoot.rest) IN IF ~massCancelInst.ok THEN Fail ELSE
     LET sendTime == ReadBytes(massCancelInst.rest, 8) IN IF ~sendTime.ok THEN Fail ELSE
     LET scratchPad == ReadBytes(sendTime.rest, 2) IN IF ~scratchPad.ok THEN Fail ELSE
-    LET customGroupIdCnt == ReadUIntLE(scratchPad.rest, 1) IN IF ~customGroupIdCnt.ok THEN Fail ELSE
+    LET customGroupIdCnt == ReadUIntBE(scratchPad.rest, 1) IN IF ~customGroupIdCnt.ok THEN Fail ELSE
     LET customGroupId == ReadBytes(customGroupIdCnt.rest, 2) IN IF ~customGroupId.ok THEN Fail ELSE
     Ok([ massCancelId     |-> massCancelId.value,
          clearingFirm     |-> clearingFirm.value,

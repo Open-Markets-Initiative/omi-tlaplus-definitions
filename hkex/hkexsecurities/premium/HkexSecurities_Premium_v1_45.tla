@@ -187,13 +187,13 @@ AggregateOrderBookUpdateMessage ==
 EncodeAggregateOrderBookUpdateMessage(message) ==
     message.securityCode
         \o message.filler3
-        \o EncodeUIntLE(Len(message.bookEntry), 1)
+        \o EncodeUIntBE(Len(message.bookEntry), 1)
         \o EncodeBookEntryList(message.bookEntry)
 
 DecodeAggregateOrderBookUpdateMessage(bytes) ==
     LET securityCode == ReadBytes(bytes, 4) IN IF ~securityCode.ok THEN Fail ELSE
     LET filler3 == ReadBytes(securityCode.rest, 3) IN IF ~filler3.ok THEN Fail ELSE
-    LET noEntries == ReadUIntLE(filler3.rest, 1) IN IF ~noEntries.ok THEN Fail ELSE
+    LET noEntries == ReadUIntBE(filler3.rest, 1) IN IF ~noEntries.ok THEN Fail ELSE
     LET bookEntry == ReadBookEntryList(noEntries.rest, noEntries.value) IN IF ~bookEntry.ok THEN Fail ELSE
     Ok([ securityCode |-> securityCode.value,
          filler3      |-> filler3.value,

@@ -254,7 +254,7 @@ ServerRakeTcpMessage ==
     [ serverPayload : ServerPayload ]
 
 EncodeServerRakeTcpMessageBody(message) ==
-    EncodeUIntLE(message.serverPayload.tag, 1)
+    EncodeUIntBE(message.serverPayload.tag, 1)
         \o EncodeServerPayload(message.serverPayload)
 
 (* Message Length counts the bytes it frames, so it is written from them *)
@@ -263,7 +263,7 @@ EncodeServerRakeTcpMessage(message) ==
     IN  EncodeUIntLE(Len(body), 2) \o body
 
 DecodeServerRakeTcpMessageBody(bytes) ==
-    LET packetType == ReadUIntLE(bytes, 1) IN IF ~packetType.ok THEN Fail ELSE
+    LET packetType == ReadUIntBE(bytes, 1) IN IF ~packetType.ok THEN Fail ELSE
     LET serverPayload == DecodeServerPayload(packetType.value, packetType.rest) IN IF ~serverPayload.ok THEN Fail ELSE
     Ok([ serverPayload |-> serverPayload.value ], serverPayload.rest)
 

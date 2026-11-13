@@ -17,6 +17,9 @@
 (* License: MIT No Attribution                                             *)
 (*                                                                         *)
 (* Note: a Message Count of 0 marks Heartbeat and carries no Message.      *)
+(*                                                                         *)
+(* Note: a Message that ends the session is the last of its Packet:        *)
+(* nothing may follow it.                                                  *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -1154,21 +1157,21 @@ Message ==
     [ payload : Payload ]
 
 EncodeMessageBody(message) ==
-    EncodeUIntLE(message.payload.tag, 1)
+    EncodeUIntBE(message.payload.tag, 1)
         \o EncodePayload(message.payload)
 
 (* Message Length counts the bytes it frames, so it is written from them *)
 EncodeMessage(message) ==
     LET body == EncodeMessageBody(message)
-    IN  EncodeUIntLE(Len(body) + 1, 1) \o body
+    IN  EncodeUIntBE(Len(body) + 1, 1) \o body
 
 DecodeMessageBody(bytes) ==
-    LET messageType == ReadUIntLE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
+    LET messageType == ReadUIntBE(bytes, 1) IN IF ~messageType.ok THEN Fail ELSE
     LET payload == DecodePayload(messageType.value, messageType.rest) IN IF ~payload.ok THEN Fail ELSE
     Ok([ payload |-> payload.value ], payload.rest)
 
 DecodeMessage(bytes) ==
-    LET length == ReadUIntLE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
+    LET length == ReadUIntBE(bytes, 1) IN IF ~length.ok THEN Fail ELSE
     LET size == length.value - 1 IN
     IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, size)
@@ -1185,6 +1188,9 @@ CheckedMessage ==
     { ZeroMessage }
         \cup { [ZeroMessage EXCEPT !.payload = one] : one \in CheckedPayload }
 
+(* Does a Message end the session? Nothing may follow one that does *)
+EndsSessionMessage(message) == message.payload.tag \in {EndOfSessionMessageCode}
+
 (* A run of Message, written one after another *)
 RECURSIVE EncodeMessageList(_)
 EncodeMessageList(messages) ==
@@ -1193,12 +1199,14 @@ EncodeMessageList(messages) ==
     ELSE EncodeMessage(Head(messages)) \o EncodeMessageList(Tail(messages))
 
 (* As many Message as the field that counts them says *)
+(* Only the last of them may end the session, so one that does with more of them counted fails *)
 RECURSIVE ReadMessageList(_, _)
 ReadMessageList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
     ELSE LET one == DecodeMessage(bytes)
          IN  IF ~one.ok THEN Fail
+             ELSE IF EndsSessionMessage(one.value) /\ count > 1 THEN Fail
              ELSE LET more == ReadMessageList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
@@ -1227,6 +1235,12 @@ OneMessage ==
       [ZeroMessage EXCEPT !.payload = [tag |-> AuctionSummaryMessageCode, body |-> ZeroAuctionSummaryMessage]],
       [ZeroMessage EXCEPT !.payload = [tag |-> RetailPriceImprovementMessageCode, body |-> ZeroRetailPriceImprovementMessage]] }
 
+(* The runs of Message checked: none, one, two of a kind and each kind followed by *)
+(* another, keeping those in which only the last may end the session *)
+SampleMessageLists ==
+    { run \in SampleLists(OneMessage) \cup { <<one, other>> : one \in OneMessage, other \in OneMessage } :
+          \A at \in 1 .. Len(run) - 1 : ~EndsSessionMessage(run[at]) }
+
 (***************************************************************************)
 (* Packet                                                                  *)
 (***************************************************************************)
@@ -1235,18 +1249,18 @@ Packet ==
     [ length   : Sample(2),
       unit     : Sample(1),
       sequence : Sample(4),
-      message  : SampleLists(OneMessage) ]
+      message  : SampleMessageLists ]
 
 EncodePacket(message) ==
     message.length
-        \o EncodeUIntLE(Len(message.message), 1)
+        \o EncodeUIntBE(Len(message.message), 1)
         \o message.unit
         \o message.sequence
         \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
     LET length == ReadBytes(bytes, 2) IN IF ~length.ok THEN Fail ELSE
-    LET messageCount == ReadUIntLE(length.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(length.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
     LET unit == ReadBytes(messageCount.rest, 1) IN IF ~unit.ok THEN Fail ELSE
     LET sequence == ReadBytes(unit.rest, 4) IN IF ~sequence.ok THEN Fail ELSE
     LET message == ReadMessageList(sequence.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE
@@ -1267,7 +1281,7 @@ CheckedPacket ==
         \cup { [ZeroPacket EXCEPT !.length = one] : one \in Sample(2) }
         \cup { [ZeroPacket EXCEPT !.unit = one] : one \in Sample(1) }
         \cup { [ZeroPacket EXCEPT !.sequence = one] : one \in Sample(4) }
-        \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
+        \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleMessageLists }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -1480,7 +1494,13 @@ SelectsPayload ==
 FramesMessage ==
     \A message \in CheckedMessage :
         LET bytes == EncodeMessage(message)
-        IN  DecodeUIntLE(SubSeq(bytes, 1, 1)) = Len(bytes) - 0
+        IN  DecodeUIntBE(SubSeq(bytes, 1, 1)) = Len(bytes) - 0
+
+(* A Message that ends the session is the last of its Packet: a run with one after it does not decode *)
+EndsSessionLastMessage ==
+    \A last \in { one \in OneMessage : EndsSessionMessage(one) } :
+        \A after \in OneMessage :
+            ~ReadMessageList(EncodeMessageList(<<last, after>>), 2).ok
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

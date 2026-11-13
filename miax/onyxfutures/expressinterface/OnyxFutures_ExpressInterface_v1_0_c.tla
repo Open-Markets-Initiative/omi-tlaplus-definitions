@@ -1926,7 +1926,7 @@ EncodeStrategyCreationRequest(message) ==
         \o message.operatorLocation
         \o message.clientOrderId
         \o message.reserved16
-        \o EncodeUIntLE(Len(message.strategyLeg), 1)
+        \o EncodeUIntBE(Len(message.strategyLeg), 1)
         \o EncodeStrategyLegList(message.strategyLeg)
 
 DecodeStrategyCreationRequest(bytes) ==
@@ -1936,7 +1936,7 @@ DecodeStrategyCreationRequest(bytes) ==
     LET operatorLocation == ReadBytes(operatorId.rest, 6) IN IF ~operatorLocation.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(operatorLocation.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
     LET reserved16 == ReadBytes(clientOrderId.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntLE(reserved16.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadUIntBE(reserved16.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET strategyLeg == ReadStrategyLegList(numberOfLegs.rest, numberOfLegs.value) IN IF ~strategyLeg.ok THEN Fail ELSE
     Ok([ clientSendTime   |-> clientSendTime.value,
          mpId             |-> mpId.value,

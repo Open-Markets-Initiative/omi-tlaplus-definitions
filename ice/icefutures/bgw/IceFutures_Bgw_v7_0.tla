@@ -587,74 +587,74 @@ CheckedSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups ==
 (***************************************************************************)
 
 SecurityDefinitionReportStrategyMessageNoLegsGroup ==
-    [ legSymbolInt32              : Sample(4),
-      legSecurityType             : Sample(1),
-      legSecuritySubType          : Sample(2),
-      legSide                     : Sample(1),
-      legPrice                    : Sample(8),
-      legOptionDelta              : Sample(4),
-      legRatioQtyDenominatorInt16 : Sample(2),
-      legRatioQtyNumeratorInt16   : Sample(2),
-      legRatioPriceDenominator    : Sample(2),
-      legRatioPriceNumerator      : Sample(2) ]
+    [ legSymbol                : Sample(4),
+      legSecurityType          : Sample(1),
+      legSecuritySubType       : Sample(2),
+      legSide                  : Sample(1),
+      legPrice                 : Sample(8),
+      legOptionDelta           : Sample(4),
+      legRatioQtyDenominator   : Sample(2),
+      legRatioQtyNumerator     : Sample(2),
+      legRatioPriceDenominator : Sample(2),
+      legRatioPriceNumerator   : Sample(2) ]
 
 EncodeSecurityDefinitionReportStrategyMessageNoLegsGroup(message) ==
-    message.legSymbolInt32
+    message.legSymbol
         \o message.legSecurityType
         \o message.legSecuritySubType
         \o message.legSide
         \o message.legPrice
         \o message.legOptionDelta
-        \o message.legRatioQtyDenominatorInt16
-        \o message.legRatioQtyNumeratorInt16
+        \o message.legRatioQtyDenominator
+        \o message.legRatioQtyNumerator
         \o message.legRatioPriceDenominator
         \o message.legRatioPriceNumerator
 
 DecodeSecurityDefinitionReportStrategyMessageNoLegsGroup(bytes) ==
-    LET legSymbolInt32 == ReadBytes(bytes, 4) IN IF ~legSymbolInt32.ok THEN Fail ELSE
-    LET legSecurityType == ReadBytes(legSymbolInt32.rest, 1) IN IF ~legSecurityType.ok THEN Fail ELSE
+    LET legSymbol == ReadBytes(bytes, 4) IN IF ~legSymbol.ok THEN Fail ELSE
+    LET legSecurityType == ReadBytes(legSymbol.rest, 1) IN IF ~legSecurityType.ok THEN Fail ELSE
     LET legSecuritySubType == ReadBytes(legSecurityType.rest, 2) IN IF ~legSecuritySubType.ok THEN Fail ELSE
     LET legSide == ReadBytes(legSecuritySubType.rest, 1) IN IF ~legSide.ok THEN Fail ELSE
     LET legPrice == ReadBytes(legSide.rest, 8) IN IF ~legPrice.ok THEN Fail ELSE
     LET legOptionDelta == ReadBytes(legPrice.rest, 4) IN IF ~legOptionDelta.ok THEN Fail ELSE
-    LET legRatioQtyDenominatorInt16 == ReadBytes(legOptionDelta.rest, 2) IN IF ~legRatioQtyDenominatorInt16.ok THEN Fail ELSE
-    LET legRatioQtyNumeratorInt16 == ReadBytes(legRatioQtyDenominatorInt16.rest, 2) IN IF ~legRatioQtyNumeratorInt16.ok THEN Fail ELSE
-    LET legRatioPriceDenominator == ReadBytes(legRatioQtyNumeratorInt16.rest, 2) IN IF ~legRatioPriceDenominator.ok THEN Fail ELSE
+    LET legRatioQtyDenominator == ReadBytes(legOptionDelta.rest, 2) IN IF ~legRatioQtyDenominator.ok THEN Fail ELSE
+    LET legRatioQtyNumerator == ReadBytes(legRatioQtyDenominator.rest, 2) IN IF ~legRatioQtyNumerator.ok THEN Fail ELSE
+    LET legRatioPriceDenominator == ReadBytes(legRatioQtyNumerator.rest, 2) IN IF ~legRatioPriceDenominator.ok THEN Fail ELSE
     LET legRatioPriceNumerator == ReadBytes(legRatioPriceDenominator.rest, 2) IN IF ~legRatioPriceNumerator.ok THEN Fail ELSE
-    Ok([ legSymbolInt32              |-> legSymbolInt32.value,
-         legSecurityType             |-> legSecurityType.value,
-         legSecuritySubType          |-> legSecuritySubType.value,
-         legSide                     |-> legSide.value,
-         legPrice                    |-> legPrice.value,
-         legOptionDelta              |-> legOptionDelta.value,
-         legRatioQtyDenominatorInt16 |-> legRatioQtyDenominatorInt16.value,
-         legRatioQtyNumeratorInt16   |-> legRatioQtyNumeratorInt16.value,
-         legRatioPriceDenominator    |-> legRatioPriceDenominator.value,
-         legRatioPriceNumerator      |-> legRatioPriceNumerator.value ], legRatioPriceNumerator.rest)
+    Ok([ legSymbol                |-> legSymbol.value,
+         legSecurityType          |-> legSecurityType.value,
+         legSecuritySubType       |-> legSecuritySubType.value,
+         legSide                  |-> legSide.value,
+         legPrice                 |-> legPrice.value,
+         legOptionDelta           |-> legOptionDelta.value,
+         legRatioQtyDenominator   |-> legRatioQtyDenominator.value,
+         legRatioQtyNumerator     |-> legRatioQtyNumerator.value,
+         legRatioPriceDenominator |-> legRatioPriceDenominator.value,
+         legRatioPriceNumerator   |-> legRatioPriceNumerator.value ], legRatioPriceNumerator.rest)
 
 ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup ==
-    [ legSymbolInt32              |-> [i \in 1 .. 4 |-> 0],
-      legSecurityType             |-> [i \in 1 .. 1 |-> 0],
-      legSecuritySubType          |-> [i \in 1 .. 2 |-> 0],
-      legSide                     |-> [i \in 1 .. 1 |-> 0],
-      legPrice                    |-> [i \in 1 .. 8 |-> 0],
-      legOptionDelta              |-> [i \in 1 .. 4 |-> 0],
-      legRatioQtyDenominatorInt16 |-> [i \in 1 .. 2 |-> 0],
-      legRatioQtyNumeratorInt16   |-> [i \in 1 .. 2 |-> 0],
-      legRatioPriceDenominator    |-> [i \in 1 .. 2 |-> 0],
-      legRatioPriceNumerator      |-> [i \in 1 .. 2 |-> 0] ]
+    [ legSymbol                |-> [i \in 1 .. 4 |-> 0],
+      legSecurityType          |-> [i \in 1 .. 1 |-> 0],
+      legSecuritySubType       |-> [i \in 1 .. 2 |-> 0],
+      legSide                  |-> [i \in 1 .. 1 |-> 0],
+      legPrice                 |-> [i \in 1 .. 8 |-> 0],
+      legOptionDelta           |-> [i \in 1 .. 4 |-> 0],
+      legRatioQtyDenominator   |-> [i \in 1 .. 2 |-> 0],
+      legRatioQtyNumerator     |-> [i \in 1 .. 2 |-> 0],
+      legRatioPriceDenominator |-> [i \in 1 .. 2 |-> 0],
+      legRatioPriceNumerator   |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Security Definition Report Strategy Message no Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportStrategyMessageNoLegsGroup ==
     { ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legSymbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legSymbol = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legSecurityType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legSecuritySubType = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legPrice = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legOptionDelta = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legRatioQtyDenominatorInt16 = one] : one \in Sample(2) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legRatioQtyNumeratorInt16 = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legRatioQtyDenominator = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legRatioQtyNumerator = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legRatioPriceDenominator = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legRatioPriceNumerator = one] : one \in Sample(2) }
 
@@ -1005,16 +1005,16 @@ SecurityDefinitionReportStrategyMessage ==
     [ securityReqId                                                : Sample(4),
       securityResponseType                                         : Sample(1),
       securityResponseId                                           : Sample(4),
-      marketTypeIDInt32                                            : Sample(4),
+      marketTypeId                                                 : Sample(4),
       noRpts                                                       : Sample(4),
       listSeqNo                                                    : Sample(4),
-      symbolInt32                                                  : Sample(4),
+      symbol                                                       : Sample(4),
       underlyingStrategySymbol                                     : Sample(4),
       maturityDate                                                 : Sample(2),
       securityTradingStatus                                        : Sample(1),
-      securitySubTypeInt16                                         : Sample(2),
+      securitySubType                                              : Sample(2),
       exchangeSilo                                                 : Sample(1),
-      transactTimeUtcTimestamp                                     : Sample(8),
+      transactTime                                                 : Sample(8),
       legDealsSuppressed                                           : Sample(1),
       incrementPrice                                               : Sample(8),
       incrementQty                                                 : Sample(8),
@@ -1022,23 +1022,23 @@ SecurityDefinitionReportStrategyMessage ==
       maxPrice                                                     : Sample(8),
       numOfDecimalPrice                                            : Sample(1),
       numOfDecimalQty                                              : Sample(1),
-      productIDInt32                                               : Sample(4),
+      productId                                                    : Sample(4),
       baseNumLots                                                  : Sample(4),
       denominator                                                  : Sample(4),
       impliedType                                                  : Sample(1),
-      offExchangeIncrementPriceDecimal9Null                        : Sample(8),
-      offExchangeIncrementQtyDecimal9Null                          : Sample(8),
+      offExchangeIncrementPriceOptional                            : Sample(8),
+      offExchangeIncrementQtyOptional                              : Sample(8),
       numOfDecimalStrikePrice                                      : Sample(1),
-      numOfCyclesInt16Null                                         : Sample(2),
-      lotSizeMultiplierDecimal9Null                                : Sample(8),
+      numOfCyclesOptional                                          : Sample(2),
+      lotSizeMultiplierOptional                                    : Sample(8),
       blockOnly                                                    : Sample(1),
       flexAllowed                                                  : Sample(1),
       gtAllowed                                                    : Sample(1),
-      mifidRegulatedMarketBooleanEnum                              : Sample(1),
+      mifidRegulatedMarket                                         : Sample(1),
       stripType                                                    : Sample(2),
       hubId                                                        : Sample(4),
       overrideBlockMin                                             : Sample(1),
-      testMarketIndicatorBooleanEnum                               : Sample(1),
+      testMarketIndicator                                          : Sample(1),
       screenTickValue                                              : Sample(8),
       blockTickValue                                               : Sample(8),
       securityDefinitionReportStrategyMessageNoBlockDetailsGroups  : SecurityDefinitionReportStrategyMessageNoBlockDetailsGroups,
@@ -1061,16 +1061,16 @@ EncodeSecurityDefinitionReportStrategyMessage(message) ==
     message.securityReqId
         \o message.securityResponseType
         \o message.securityResponseId
-        \o message.marketTypeIDInt32
+        \o message.marketTypeId
         \o message.noRpts
         \o message.listSeqNo
-        \o message.symbolInt32
+        \o message.symbol
         \o message.underlyingStrategySymbol
         \o message.maturityDate
         \o message.securityTradingStatus
-        \o message.securitySubTypeInt16
+        \o message.securitySubType
         \o message.exchangeSilo
-        \o message.transactTimeUtcTimestamp
+        \o message.transactTime
         \o message.legDealsSuppressed
         \o message.incrementPrice
         \o message.incrementQty
@@ -1078,23 +1078,23 @@ EncodeSecurityDefinitionReportStrategyMessage(message) ==
         \o message.maxPrice
         \o message.numOfDecimalPrice
         \o message.numOfDecimalQty
-        \o message.productIDInt32
+        \o message.productId
         \o message.baseNumLots
         \o message.denominator
         \o message.impliedType
-        \o message.offExchangeIncrementPriceDecimal9Null
-        \o message.offExchangeIncrementQtyDecimal9Null
+        \o message.offExchangeIncrementPriceOptional
+        \o message.offExchangeIncrementQtyOptional
         \o message.numOfDecimalStrikePrice
-        \o message.numOfCyclesInt16Null
-        \o message.lotSizeMultiplierDecimal9Null
+        \o message.numOfCyclesOptional
+        \o message.lotSizeMultiplierOptional
         \o message.blockOnly
         \o message.flexAllowed
         \o message.gtAllowed
-        \o message.mifidRegulatedMarketBooleanEnum
+        \o message.mifidRegulatedMarket
         \o message.stripType
         \o message.hubId
         \o message.overrideBlockMin
-        \o message.testMarketIndicatorBooleanEnum
+        \o message.testMarketIndicator
         \o message.screenTickValue
         \o message.blockTickValue
         \o EncodeSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups(message.securityDefinitionReportStrategyMessageNoBlockDetailsGroups)
@@ -1117,41 +1117,41 @@ DecodeSecurityDefinitionReportStrategyMessage(bytes) ==
     LET securityReqId == ReadBytes(bytes, 4) IN IF ~securityReqId.ok THEN Fail ELSE
     LET securityResponseType == ReadBytes(securityReqId.rest, 1) IN IF ~securityResponseType.ok THEN Fail ELSE
     LET securityResponseId == ReadBytes(securityResponseType.rest, 4) IN IF ~securityResponseId.ok THEN Fail ELSE
-    LET marketTypeIDInt32 == ReadBytes(securityResponseId.rest, 4) IN IF ~marketTypeIDInt32.ok THEN Fail ELSE
-    LET noRpts == ReadBytes(marketTypeIDInt32.rest, 4) IN IF ~noRpts.ok THEN Fail ELSE
+    LET marketTypeId == ReadBytes(securityResponseId.rest, 4) IN IF ~marketTypeId.ok THEN Fail ELSE
+    LET noRpts == ReadBytes(marketTypeId.rest, 4) IN IF ~noRpts.ok THEN Fail ELSE
     LET listSeqNo == ReadBytes(noRpts.rest, 4) IN IF ~listSeqNo.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(listSeqNo.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET underlyingStrategySymbol == ReadBytes(symbolInt32.rest, 4) IN IF ~underlyingStrategySymbol.ok THEN Fail ELSE
+    LET symbol == ReadBytes(listSeqNo.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET underlyingStrategySymbol == ReadBytes(symbol.rest, 4) IN IF ~underlyingStrategySymbol.ok THEN Fail ELSE
     LET maturityDate == ReadBytes(underlyingStrategySymbol.rest, 2) IN IF ~maturityDate.ok THEN Fail ELSE
     LET securityTradingStatus == ReadBytes(maturityDate.rest, 1) IN IF ~securityTradingStatus.ok THEN Fail ELSE
-    LET securitySubTypeInt16 == ReadBytes(securityTradingStatus.rest, 2) IN IF ~securitySubTypeInt16.ok THEN Fail ELSE
-    LET exchangeSilo == ReadBytes(securitySubTypeInt16.rest, 1) IN IF ~exchangeSilo.ok THEN Fail ELSE
-    LET transactTimeUtcTimestamp == ReadBytes(exchangeSilo.rest, 8) IN IF ~transactTimeUtcTimestamp.ok THEN Fail ELSE
-    LET legDealsSuppressed == ReadBytes(transactTimeUtcTimestamp.rest, 1) IN IF ~legDealsSuppressed.ok THEN Fail ELSE
+    LET securitySubType == ReadBytes(securityTradingStatus.rest, 2) IN IF ~securitySubType.ok THEN Fail ELSE
+    LET exchangeSilo == ReadBytes(securitySubType.rest, 1) IN IF ~exchangeSilo.ok THEN Fail ELSE
+    LET transactTime == ReadBytes(exchangeSilo.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET legDealsSuppressed == ReadBytes(transactTime.rest, 1) IN IF ~legDealsSuppressed.ok THEN Fail ELSE
     LET incrementPrice == ReadBytes(legDealsSuppressed.rest, 8) IN IF ~incrementPrice.ok THEN Fail ELSE
     LET incrementQty == ReadBytes(incrementPrice.rest, 8) IN IF ~incrementQty.ok THEN Fail ELSE
     LET minPrice == ReadBytes(incrementQty.rest, 8) IN IF ~minPrice.ok THEN Fail ELSE
     LET maxPrice == ReadBytes(minPrice.rest, 8) IN IF ~maxPrice.ok THEN Fail ELSE
     LET numOfDecimalPrice == ReadBytes(maxPrice.rest, 1) IN IF ~numOfDecimalPrice.ok THEN Fail ELSE
     LET numOfDecimalQty == ReadBytes(numOfDecimalPrice.rest, 1) IN IF ~numOfDecimalQty.ok THEN Fail ELSE
-    LET productIDInt32 == ReadBytes(numOfDecimalQty.rest, 4) IN IF ~productIDInt32.ok THEN Fail ELSE
-    LET baseNumLots == ReadBytes(productIDInt32.rest, 4) IN IF ~baseNumLots.ok THEN Fail ELSE
+    LET productId == ReadBytes(numOfDecimalQty.rest, 4) IN IF ~productId.ok THEN Fail ELSE
+    LET baseNumLots == ReadBytes(productId.rest, 4) IN IF ~baseNumLots.ok THEN Fail ELSE
     LET denominator == ReadBytes(baseNumLots.rest, 4) IN IF ~denominator.ok THEN Fail ELSE
     LET impliedType == ReadBytes(denominator.rest, 1) IN IF ~impliedType.ok THEN Fail ELSE
-    LET offExchangeIncrementPriceDecimal9Null == ReadBytes(impliedType.rest, 8) IN IF ~offExchangeIncrementPriceDecimal9Null.ok THEN Fail ELSE
-    LET offExchangeIncrementQtyDecimal9Null == ReadBytes(offExchangeIncrementPriceDecimal9Null.rest, 8) IN IF ~offExchangeIncrementQtyDecimal9Null.ok THEN Fail ELSE
-    LET numOfDecimalStrikePrice == ReadBytes(offExchangeIncrementQtyDecimal9Null.rest, 1) IN IF ~numOfDecimalStrikePrice.ok THEN Fail ELSE
-    LET numOfCyclesInt16Null == ReadBytes(numOfDecimalStrikePrice.rest, 2) IN IF ~numOfCyclesInt16Null.ok THEN Fail ELSE
-    LET lotSizeMultiplierDecimal9Null == ReadBytes(numOfCyclesInt16Null.rest, 8) IN IF ~lotSizeMultiplierDecimal9Null.ok THEN Fail ELSE
-    LET blockOnly == ReadBytes(lotSizeMultiplierDecimal9Null.rest, 1) IN IF ~blockOnly.ok THEN Fail ELSE
+    LET offExchangeIncrementPriceOptional == ReadBytes(impliedType.rest, 8) IN IF ~offExchangeIncrementPriceOptional.ok THEN Fail ELSE
+    LET offExchangeIncrementQtyOptional == ReadBytes(offExchangeIncrementPriceOptional.rest, 8) IN IF ~offExchangeIncrementQtyOptional.ok THEN Fail ELSE
+    LET numOfDecimalStrikePrice == ReadBytes(offExchangeIncrementQtyOptional.rest, 1) IN IF ~numOfDecimalStrikePrice.ok THEN Fail ELSE
+    LET numOfCyclesOptional == ReadBytes(numOfDecimalStrikePrice.rest, 2) IN IF ~numOfCyclesOptional.ok THEN Fail ELSE
+    LET lotSizeMultiplierOptional == ReadBytes(numOfCyclesOptional.rest, 8) IN IF ~lotSizeMultiplierOptional.ok THEN Fail ELSE
+    LET blockOnly == ReadBytes(lotSizeMultiplierOptional.rest, 1) IN IF ~blockOnly.ok THEN Fail ELSE
     LET flexAllowed == ReadBytes(blockOnly.rest, 1) IN IF ~flexAllowed.ok THEN Fail ELSE
     LET gtAllowed == ReadBytes(flexAllowed.rest, 1) IN IF ~gtAllowed.ok THEN Fail ELSE
-    LET mifidRegulatedMarketBooleanEnum == ReadBytes(gtAllowed.rest, 1) IN IF ~mifidRegulatedMarketBooleanEnum.ok THEN Fail ELSE
-    LET stripType == ReadBytes(mifidRegulatedMarketBooleanEnum.rest, 2) IN IF ~stripType.ok THEN Fail ELSE
+    LET mifidRegulatedMarket == ReadBytes(gtAllowed.rest, 1) IN IF ~mifidRegulatedMarket.ok THEN Fail ELSE
+    LET stripType == ReadBytes(mifidRegulatedMarket.rest, 2) IN IF ~stripType.ok THEN Fail ELSE
     LET hubId == ReadBytes(stripType.rest, 4) IN IF ~hubId.ok THEN Fail ELSE
     LET overrideBlockMin == ReadBytes(hubId.rest, 1) IN IF ~overrideBlockMin.ok THEN Fail ELSE
-    LET testMarketIndicatorBooleanEnum == ReadBytes(overrideBlockMin.rest, 1) IN IF ~testMarketIndicatorBooleanEnum.ok THEN Fail ELSE
-    LET screenTickValue == ReadBytes(testMarketIndicatorBooleanEnum.rest, 8) IN IF ~screenTickValue.ok THEN Fail ELSE
+    LET testMarketIndicator == ReadBytes(overrideBlockMin.rest, 1) IN IF ~testMarketIndicator.ok THEN Fail ELSE
+    LET screenTickValue == ReadBytes(testMarketIndicator.rest, 8) IN IF ~screenTickValue.ok THEN Fail ELSE
     LET blockTickValue == ReadBytes(screenTickValue.rest, 8) IN IF ~blockTickValue.ok THEN Fail ELSE
     LET securityDefinitionReportStrategyMessageNoBlockDetailsGroups == DecodeSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups(blockTickValue.rest) IN IF ~securityDefinitionReportStrategyMessageNoBlockDetailsGroups.ok THEN Fail ELSE
     LET securityDefinitionReportStrategyMessageNoSecurityAltIDGroups == DecodeSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups(securityDefinitionReportStrategyMessageNoBlockDetailsGroups.rest) IN IF ~securityDefinitionReportStrategyMessageNoSecurityAltIDGroups.ok THEN Fail ELSE
@@ -1171,16 +1171,16 @@ DecodeSecurityDefinitionReportStrategyMessage(bytes) ==
     Ok([ securityReqId                                                |-> securityReqId.value,
          securityResponseType                                         |-> securityResponseType.value,
          securityResponseId                                           |-> securityResponseId.value,
-         marketTypeIDInt32                                            |-> marketTypeIDInt32.value,
+         marketTypeId                                                 |-> marketTypeId.value,
          noRpts                                                       |-> noRpts.value,
          listSeqNo                                                    |-> listSeqNo.value,
-         symbolInt32                                                  |-> symbolInt32.value,
+         symbol                                                       |-> symbol.value,
          underlyingStrategySymbol                                     |-> underlyingStrategySymbol.value,
          maturityDate                                                 |-> maturityDate.value,
          securityTradingStatus                                        |-> securityTradingStatus.value,
-         securitySubTypeInt16                                         |-> securitySubTypeInt16.value,
+         securitySubType                                              |-> securitySubType.value,
          exchangeSilo                                                 |-> exchangeSilo.value,
-         transactTimeUtcTimestamp                                     |-> transactTimeUtcTimestamp.value,
+         transactTime                                                 |-> transactTime.value,
          legDealsSuppressed                                           |-> legDealsSuppressed.value,
          incrementPrice                                               |-> incrementPrice.value,
          incrementQty                                                 |-> incrementQty.value,
@@ -1188,23 +1188,23 @@ DecodeSecurityDefinitionReportStrategyMessage(bytes) ==
          maxPrice                                                     |-> maxPrice.value,
          numOfDecimalPrice                                            |-> numOfDecimalPrice.value,
          numOfDecimalQty                                              |-> numOfDecimalQty.value,
-         productIDInt32                                               |-> productIDInt32.value,
+         productId                                                    |-> productId.value,
          baseNumLots                                                  |-> baseNumLots.value,
          denominator                                                  |-> denominator.value,
          impliedType                                                  |-> impliedType.value,
-         offExchangeIncrementPriceDecimal9Null                        |-> offExchangeIncrementPriceDecimal9Null.value,
-         offExchangeIncrementQtyDecimal9Null                          |-> offExchangeIncrementQtyDecimal9Null.value,
+         offExchangeIncrementPriceOptional                            |-> offExchangeIncrementPriceOptional.value,
+         offExchangeIncrementQtyOptional                              |-> offExchangeIncrementQtyOptional.value,
          numOfDecimalStrikePrice                                      |-> numOfDecimalStrikePrice.value,
-         numOfCyclesInt16Null                                         |-> numOfCyclesInt16Null.value,
-         lotSizeMultiplierDecimal9Null                                |-> lotSizeMultiplierDecimal9Null.value,
+         numOfCyclesOptional                                          |-> numOfCyclesOptional.value,
+         lotSizeMultiplierOptional                                    |-> lotSizeMultiplierOptional.value,
          blockOnly                                                    |-> blockOnly.value,
          flexAllowed                                                  |-> flexAllowed.value,
          gtAllowed                                                    |-> gtAllowed.value,
-         mifidRegulatedMarketBooleanEnum                              |-> mifidRegulatedMarketBooleanEnum.value,
+         mifidRegulatedMarket                                         |-> mifidRegulatedMarket.value,
          stripType                                                    |-> stripType.value,
          hubId                                                        |-> hubId.value,
          overrideBlockMin                                             |-> overrideBlockMin.value,
-         testMarketIndicatorBooleanEnum                               |-> testMarketIndicatorBooleanEnum.value,
+         testMarketIndicator                                          |-> testMarketIndicator.value,
          screenTickValue                                              |-> screenTickValue.value,
          blockTickValue                                               |-> blockTickValue.value,
          securityDefinitionReportStrategyMessageNoBlockDetailsGroups  |-> securityDefinitionReportStrategyMessageNoBlockDetailsGroups.value,
@@ -1227,16 +1227,16 @@ ZeroSecurityDefinitionReportStrategyMessage ==
     [ securityReqId                                                |-> [i \in 1 .. 4 |-> 0],
       securityResponseType                                         |-> [i \in 1 .. 1 |-> 0],
       securityResponseId                                           |-> [i \in 1 .. 4 |-> 0],
-      marketTypeIDInt32                                            |-> [i \in 1 .. 4 |-> 0],
+      marketTypeId                                                 |-> [i \in 1 .. 4 |-> 0],
       noRpts                                                       |-> [i \in 1 .. 4 |-> 0],
       listSeqNo                                                    |-> [i \in 1 .. 4 |-> 0],
-      symbolInt32                                                  |-> [i \in 1 .. 4 |-> 0],
+      symbol                                                       |-> [i \in 1 .. 4 |-> 0],
       underlyingStrategySymbol                                     |-> [i \in 1 .. 4 |-> 0],
       maturityDate                                                 |-> [i \in 1 .. 2 |-> 0],
       securityTradingStatus                                        |-> [i \in 1 .. 1 |-> 0],
-      securitySubTypeInt16                                         |-> [i \in 1 .. 2 |-> 0],
+      securitySubType                                              |-> [i \in 1 .. 2 |-> 0],
       exchangeSilo                                                 |-> [i \in 1 .. 1 |-> 0],
-      transactTimeUtcTimestamp                                     |-> [i \in 1 .. 8 |-> 0],
+      transactTime                                                 |-> [i \in 1 .. 8 |-> 0],
       legDealsSuppressed                                           |-> [i \in 1 .. 1 |-> 0],
       incrementPrice                                               |-> [i \in 1 .. 8 |-> 0],
       incrementQty                                                 |-> [i \in 1 .. 8 |-> 0],
@@ -1244,23 +1244,23 @@ ZeroSecurityDefinitionReportStrategyMessage ==
       maxPrice                                                     |-> [i \in 1 .. 8 |-> 0],
       numOfDecimalPrice                                            |-> [i \in 1 .. 1 |-> 0],
       numOfDecimalQty                                              |-> [i \in 1 .. 1 |-> 0],
-      productIDInt32                                               |-> [i \in 1 .. 4 |-> 0],
+      productId                                                    |-> [i \in 1 .. 4 |-> 0],
       baseNumLots                                                  |-> [i \in 1 .. 4 |-> 0],
       denominator                                                  |-> [i \in 1 .. 4 |-> 0],
       impliedType                                                  |-> [i \in 1 .. 1 |-> 0],
-      offExchangeIncrementPriceDecimal9Null                        |-> [i \in 1 .. 8 |-> 0],
-      offExchangeIncrementQtyDecimal9Null                          |-> [i \in 1 .. 8 |-> 0],
+      offExchangeIncrementPriceOptional                            |-> [i \in 1 .. 8 |-> 0],
+      offExchangeIncrementQtyOptional                              |-> [i \in 1 .. 8 |-> 0],
       numOfDecimalStrikePrice                                      |-> [i \in 1 .. 1 |-> 0],
-      numOfCyclesInt16Null                                         |-> [i \in 1 .. 2 |-> 0],
-      lotSizeMultiplierDecimal9Null                                |-> [i \in 1 .. 8 |-> 0],
+      numOfCyclesOptional                                          |-> [i \in 1 .. 2 |-> 0],
+      lotSizeMultiplierOptional                                    |-> [i \in 1 .. 8 |-> 0],
       blockOnly                                                    |-> [i \in 1 .. 1 |-> 0],
       flexAllowed                                                  |-> [i \in 1 .. 1 |-> 0],
       gtAllowed                                                    |-> [i \in 1 .. 1 |-> 0],
-      mifidRegulatedMarketBooleanEnum                              |-> [i \in 1 .. 1 |-> 0],
+      mifidRegulatedMarket                                         |-> [i \in 1 .. 1 |-> 0],
       stripType                                                    |-> [i \in 1 .. 2 |-> 0],
       hubId                                                        |-> [i \in 1 .. 4 |-> 0],
       overrideBlockMin                                             |-> [i \in 1 .. 1 |-> 0],
-      testMarketIndicatorBooleanEnum                               |-> [i \in 1 .. 1 |-> 0],
+      testMarketIndicator                                          |-> [i \in 1 .. 1 |-> 0],
       screenTickValue                                              |-> [i \in 1 .. 8 |-> 0],
       blockTickValue                                               |-> [i \in 1 .. 8 |-> 0],
       securityDefinitionReportStrategyMessageNoBlockDetailsGroups  |-> ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups,
@@ -1285,16 +1285,16 @@ CheckedSecurityDefinitionReportStrategyMessage ==
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.securityReqId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.securityResponseType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.securityResponseId = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.marketTypeIDInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.marketTypeId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.noRpts = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.listSeqNo = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.symbol = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.underlyingStrategySymbol = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.maturityDate = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.securityTradingStatus = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.securitySubTypeInt16 = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.securitySubType = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.exchangeSilo = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.transactTimeUtcTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.transactTime = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.legDealsSuppressed = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.incrementPrice = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.incrementQty = one] : one \in Sample(8) }
@@ -1302,23 +1302,23 @@ CheckedSecurityDefinitionReportStrategyMessage ==
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.maxPrice = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.numOfDecimalPrice = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.numOfDecimalQty = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.productIDInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.productId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.baseNumLots = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.denominator = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.impliedType = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.offExchangeIncrementPriceDecimal9Null = one] : one \in Sample(8) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.offExchangeIncrementQtyDecimal9Null = one] : one \in Sample(8) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.offExchangeIncrementPriceOptional = one] : one \in Sample(8) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.offExchangeIncrementQtyOptional = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.numOfDecimalStrikePrice = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.numOfCyclesInt16Null = one] : one \in Sample(2) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.lotSizeMultiplierDecimal9Null = one] : one \in Sample(8) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.numOfCyclesOptional = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.lotSizeMultiplierOptional = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.blockOnly = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.flexAllowed = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.gtAllowed = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.mifidRegulatedMarketBooleanEnum = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.mifidRegulatedMarket = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.stripType = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.hubId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.overrideBlockMin = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.testMarketIndicatorBooleanEnum = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.testMarketIndicator = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.screenTickValue = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.blockTickValue = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.securityDefinitionReportStrategyMessageNoBlockDetailsGroups = one] : one \in CheckedSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups }
@@ -1797,14 +1797,14 @@ SecurityDefinitionReportMessage ==
     [ securityReqId                                        : Sample(4),
       securityResponseType                                 : Sample(1),
       securityResponseId                                   : Sample(4),
-      marketTypeIDInt32                                    : Sample(4),
-      symbolInt32                                          : Sample(4),
+      marketTypeId                                         : Sample(4),
+      symbol                                               : Sample(4),
       exchangeSilo                                         : Sample(1),
       noRpts                                               : Sample(4),
       listSeqNo                                            : Sample(4),
-      underlyingSymbolInt32                                : Sample(4),
+      underlyingSymbol                                     : Sample(4),
       cfiCode                                              : Sample(12),
-      securitySubTypeInt16Null                             : Sample(2),
+      securitySubTypeOptional                              : Sample(2),
       maturityDate                                         : Sample(2),
       screenLastTradeDate                                  : Sample(2),
       contractMultiplier                                   : Sample(4),
@@ -1820,8 +1820,8 @@ SecurityDefinitionReportMessage ==
       incrementPrice                                       : Sample(8),
       minPrice                                             : Sample(8),
       maxPrice                                             : Sample(8),
-      offExchangeIncrementPriceDecimal9                    : Sample(8),
-      offExchangeIncrementQtyDecimal9                      : Sample(8),
+      offExchangeIncrementPrice                            : Sample(8),
+      offExchangeIncrementQty                              : Sample(8),
       screenTickValue                                      : Sample(8),
       blockTickValue                                       : Sample(8),
       lotSize                                              : Sample(4),
@@ -1831,7 +1831,7 @@ SecurityDefinitionReportMessage ==
       granularity                                          : Sample(12),
       baseNumLots                                          : Sample(4),
       tickValue                                            : Sample(8),
-      productIDInt32                                       : Sample(4),
+      productId                                            : Sample(4),
       clearable                                            : Sample(1),
       hedgeProductId                                       : Sample(4),
       hedgeMarketId                                        : Sample(4),
@@ -1841,19 +1841,19 @@ SecurityDefinitionReportMessage ==
       initialMargin                                        : Sample(4),
       impliedType                                          : Sample(1),
       numOfDecimalStrikePrice                              : Sample(1),
-      numOfCyclesInt16                                     : Sample(2),
-      lotSizeMultiplierDecimal9                            : Sample(8),
+      numOfCycles                                          : Sample(2),
+      lotSizeMultiplier                                    : Sample(8),
       stripType                                            : Sample(2),
       stripId                                              : Sample(4),
       blockOnly                                            : Sample(1),
       flexAllowed                                          : Sample(1),
       gtAllowed                                            : Sample(1),
       aonAllowed                                           : Sample(1),
-      mifidRegulatedMarketBooleanEnumNull                  : Sample(1),
+      mifidRegulatedMarketOptional                         : Sample(1),
       flexStrikeAllowed                                    : Sample(1),
       hubId                                                : Sample(4),
       overrideBlockMin                                     : Sample(1),
-      testMarketIndicatorBooleanEnumNull                   : Sample(1),
+      testMarketIndicatorOptional                          : Sample(1),
       refSprdProductId                                     : Sample(4),
       marketTransparencyType                               : Sample(1),
       nonCommoditizedMarket                                : Sample(1),
@@ -1876,14 +1876,14 @@ EncodeSecurityDefinitionReportMessage(message) ==
     message.securityReqId
         \o message.securityResponseType
         \o message.securityResponseId
-        \o message.marketTypeIDInt32
-        \o message.symbolInt32
+        \o message.marketTypeId
+        \o message.symbol
         \o message.exchangeSilo
         \o message.noRpts
         \o message.listSeqNo
-        \o message.underlyingSymbolInt32
+        \o message.underlyingSymbol
         \o message.cfiCode
-        \o message.securitySubTypeInt16Null
+        \o message.securitySubTypeOptional
         \o message.maturityDate
         \o message.screenLastTradeDate
         \o message.contractMultiplier
@@ -1899,8 +1899,8 @@ EncodeSecurityDefinitionReportMessage(message) ==
         \o message.incrementPrice
         \o message.minPrice
         \o message.maxPrice
-        \o message.offExchangeIncrementPriceDecimal9
-        \o message.offExchangeIncrementQtyDecimal9
+        \o message.offExchangeIncrementPrice
+        \o message.offExchangeIncrementQty
         \o message.screenTickValue
         \o message.blockTickValue
         \o message.lotSize
@@ -1910,7 +1910,7 @@ EncodeSecurityDefinitionReportMessage(message) ==
         \o message.granularity
         \o message.baseNumLots
         \o message.tickValue
-        \o message.productIDInt32
+        \o message.productId
         \o message.clearable
         \o message.hedgeProductId
         \o message.hedgeMarketId
@@ -1920,19 +1920,19 @@ EncodeSecurityDefinitionReportMessage(message) ==
         \o message.initialMargin
         \o message.impliedType
         \o message.numOfDecimalStrikePrice
-        \o message.numOfCyclesInt16
-        \o message.lotSizeMultiplierDecimal9
+        \o message.numOfCycles
+        \o message.lotSizeMultiplier
         \o message.stripType
         \o message.stripId
         \o message.blockOnly
         \o message.flexAllowed
         \o message.gtAllowed
         \o message.aonAllowed
-        \o message.mifidRegulatedMarketBooleanEnumNull
+        \o message.mifidRegulatedMarketOptional
         \o message.flexStrikeAllowed
         \o message.hubId
         \o message.overrideBlockMin
-        \o message.testMarketIndicatorBooleanEnumNull
+        \o message.testMarketIndicatorOptional
         \o message.refSprdProductId
         \o message.marketTransparencyType
         \o message.nonCommoditizedMarket
@@ -1955,15 +1955,15 @@ DecodeSecurityDefinitionReportMessage(bytes) ==
     LET securityReqId == ReadBytes(bytes, 4) IN IF ~securityReqId.ok THEN Fail ELSE
     LET securityResponseType == ReadBytes(securityReqId.rest, 1) IN IF ~securityResponseType.ok THEN Fail ELSE
     LET securityResponseId == ReadBytes(securityResponseType.rest, 4) IN IF ~securityResponseId.ok THEN Fail ELSE
-    LET marketTypeIDInt32 == ReadBytes(securityResponseId.rest, 4) IN IF ~marketTypeIDInt32.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(marketTypeIDInt32.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET exchangeSilo == ReadBytes(symbolInt32.rest, 1) IN IF ~exchangeSilo.ok THEN Fail ELSE
+    LET marketTypeId == ReadBytes(securityResponseId.rest, 4) IN IF ~marketTypeId.ok THEN Fail ELSE
+    LET symbol == ReadBytes(marketTypeId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET exchangeSilo == ReadBytes(symbol.rest, 1) IN IF ~exchangeSilo.ok THEN Fail ELSE
     LET noRpts == ReadBytes(exchangeSilo.rest, 4) IN IF ~noRpts.ok THEN Fail ELSE
     LET listSeqNo == ReadBytes(noRpts.rest, 4) IN IF ~listSeqNo.ok THEN Fail ELSE
-    LET underlyingSymbolInt32 == ReadBytes(listSeqNo.rest, 4) IN IF ~underlyingSymbolInt32.ok THEN Fail ELSE
-    LET cfiCode == ReadBytes(underlyingSymbolInt32.rest, 12) IN IF ~cfiCode.ok THEN Fail ELSE
-    LET securitySubTypeInt16Null == ReadBytes(cfiCode.rest, 2) IN IF ~securitySubTypeInt16Null.ok THEN Fail ELSE
-    LET maturityDate == ReadBytes(securitySubTypeInt16Null.rest, 2) IN IF ~maturityDate.ok THEN Fail ELSE
+    LET underlyingSymbol == ReadBytes(listSeqNo.rest, 4) IN IF ~underlyingSymbol.ok THEN Fail ELSE
+    LET cfiCode == ReadBytes(underlyingSymbol.rest, 12) IN IF ~cfiCode.ok THEN Fail ELSE
+    LET securitySubTypeOptional == ReadBytes(cfiCode.rest, 2) IN IF ~securitySubTypeOptional.ok THEN Fail ELSE
+    LET maturityDate == ReadBytes(securitySubTypeOptional.rest, 2) IN IF ~maturityDate.ok THEN Fail ELSE
     LET screenLastTradeDate == ReadBytes(maturityDate.rest, 2) IN IF ~screenLastTradeDate.ok THEN Fail ELSE
     LET contractMultiplier == ReadBytes(screenLastTradeDate.rest, 4) IN IF ~contractMultiplier.ok THEN Fail ELSE
     LET startDate == ReadBytes(contractMultiplier.rest, 2) IN IF ~startDate.ok THEN Fail ELSE
@@ -1978,9 +1978,9 @@ DecodeSecurityDefinitionReportMessage(bytes) ==
     LET incrementPrice == ReadBytes(incrementQty.rest, 8) IN IF ~incrementPrice.ok THEN Fail ELSE
     LET minPrice == ReadBytes(incrementPrice.rest, 8) IN IF ~minPrice.ok THEN Fail ELSE
     LET maxPrice == ReadBytes(minPrice.rest, 8) IN IF ~maxPrice.ok THEN Fail ELSE
-    LET offExchangeIncrementPriceDecimal9 == ReadBytes(maxPrice.rest, 8) IN IF ~offExchangeIncrementPriceDecimal9.ok THEN Fail ELSE
-    LET offExchangeIncrementQtyDecimal9 == ReadBytes(offExchangeIncrementPriceDecimal9.rest, 8) IN IF ~offExchangeIncrementQtyDecimal9.ok THEN Fail ELSE
-    LET screenTickValue == ReadBytes(offExchangeIncrementQtyDecimal9.rest, 8) IN IF ~screenTickValue.ok THEN Fail ELSE
+    LET offExchangeIncrementPrice == ReadBytes(maxPrice.rest, 8) IN IF ~offExchangeIncrementPrice.ok THEN Fail ELSE
+    LET offExchangeIncrementQty == ReadBytes(offExchangeIncrementPrice.rest, 8) IN IF ~offExchangeIncrementQty.ok THEN Fail ELSE
+    LET screenTickValue == ReadBytes(offExchangeIncrementQty.rest, 8) IN IF ~screenTickValue.ok THEN Fail ELSE
     LET blockTickValue == ReadBytes(screenTickValue.rest, 8) IN IF ~blockTickValue.ok THEN Fail ELSE
     LET lotSize == ReadBytes(blockTickValue.rest, 4) IN IF ~lotSize.ok THEN Fail ELSE
     LET contractSize == ReadBytes(lotSize.rest, 4) IN IF ~contractSize.ok THEN Fail ELSE
@@ -1989,8 +1989,8 @@ DecodeSecurityDefinitionReportMessage(bytes) ==
     LET granularity == ReadBytes(numOfDecimalQty.rest, 12) IN IF ~granularity.ok THEN Fail ELSE
     LET baseNumLots == ReadBytes(granularity.rest, 4) IN IF ~baseNumLots.ok THEN Fail ELSE
     LET tickValue == ReadBytes(baseNumLots.rest, 8) IN IF ~tickValue.ok THEN Fail ELSE
-    LET productIDInt32 == ReadBytes(tickValue.rest, 4) IN IF ~productIDInt32.ok THEN Fail ELSE
-    LET clearable == ReadBytes(productIDInt32.rest, 1) IN IF ~clearable.ok THEN Fail ELSE
+    LET productId == ReadBytes(tickValue.rest, 4) IN IF ~productId.ok THEN Fail ELSE
+    LET clearable == ReadBytes(productId.rest, 1) IN IF ~clearable.ok THEN Fail ELSE
     LET hedgeProductId == ReadBytes(clearable.rest, 4) IN IF ~hedgeProductId.ok THEN Fail ELSE
     LET hedgeMarketId == ReadBytes(hedgeProductId.rest, 4) IN IF ~hedgeMarketId.ok THEN Fail ELSE
     LET hedgeOnly == ReadBytes(hedgeMarketId.rest, 1) IN IF ~hedgeOnly.ok THEN Fail ELSE
@@ -1999,20 +1999,20 @@ DecodeSecurityDefinitionReportMessage(bytes) ==
     LET initialMargin == ReadBytes(denominator.rest, 4) IN IF ~initialMargin.ok THEN Fail ELSE
     LET impliedType == ReadBytes(initialMargin.rest, 1) IN IF ~impliedType.ok THEN Fail ELSE
     LET numOfDecimalStrikePrice == ReadBytes(impliedType.rest, 1) IN IF ~numOfDecimalStrikePrice.ok THEN Fail ELSE
-    LET numOfCyclesInt16 == ReadBytes(numOfDecimalStrikePrice.rest, 2) IN IF ~numOfCyclesInt16.ok THEN Fail ELSE
-    LET lotSizeMultiplierDecimal9 == ReadBytes(numOfCyclesInt16.rest, 8) IN IF ~lotSizeMultiplierDecimal9.ok THEN Fail ELSE
-    LET stripType == ReadBytes(lotSizeMultiplierDecimal9.rest, 2) IN IF ~stripType.ok THEN Fail ELSE
+    LET numOfCycles == ReadBytes(numOfDecimalStrikePrice.rest, 2) IN IF ~numOfCycles.ok THEN Fail ELSE
+    LET lotSizeMultiplier == ReadBytes(numOfCycles.rest, 8) IN IF ~lotSizeMultiplier.ok THEN Fail ELSE
+    LET stripType == ReadBytes(lotSizeMultiplier.rest, 2) IN IF ~stripType.ok THEN Fail ELSE
     LET stripId == ReadBytes(stripType.rest, 4) IN IF ~stripId.ok THEN Fail ELSE
     LET blockOnly == ReadBytes(stripId.rest, 1) IN IF ~blockOnly.ok THEN Fail ELSE
     LET flexAllowed == ReadBytes(blockOnly.rest, 1) IN IF ~flexAllowed.ok THEN Fail ELSE
     LET gtAllowed == ReadBytes(flexAllowed.rest, 1) IN IF ~gtAllowed.ok THEN Fail ELSE
     LET aonAllowed == ReadBytes(gtAllowed.rest, 1) IN IF ~aonAllowed.ok THEN Fail ELSE
-    LET mifidRegulatedMarketBooleanEnumNull == ReadBytes(aonAllowed.rest, 1) IN IF ~mifidRegulatedMarketBooleanEnumNull.ok THEN Fail ELSE
-    LET flexStrikeAllowed == ReadBytes(mifidRegulatedMarketBooleanEnumNull.rest, 1) IN IF ~flexStrikeAllowed.ok THEN Fail ELSE
+    LET mifidRegulatedMarketOptional == ReadBytes(aonAllowed.rest, 1) IN IF ~mifidRegulatedMarketOptional.ok THEN Fail ELSE
+    LET flexStrikeAllowed == ReadBytes(mifidRegulatedMarketOptional.rest, 1) IN IF ~flexStrikeAllowed.ok THEN Fail ELSE
     LET hubId == ReadBytes(flexStrikeAllowed.rest, 4) IN IF ~hubId.ok THEN Fail ELSE
     LET overrideBlockMin == ReadBytes(hubId.rest, 1) IN IF ~overrideBlockMin.ok THEN Fail ELSE
-    LET testMarketIndicatorBooleanEnumNull == ReadBytes(overrideBlockMin.rest, 1) IN IF ~testMarketIndicatorBooleanEnumNull.ok THEN Fail ELSE
-    LET refSprdProductId == ReadBytes(testMarketIndicatorBooleanEnumNull.rest, 4) IN IF ~refSprdProductId.ok THEN Fail ELSE
+    LET testMarketIndicatorOptional == ReadBytes(overrideBlockMin.rest, 1) IN IF ~testMarketIndicatorOptional.ok THEN Fail ELSE
+    LET refSprdProductId == ReadBytes(testMarketIndicatorOptional.rest, 4) IN IF ~refSprdProductId.ok THEN Fail ELSE
     LET marketTransparencyType == ReadBytes(refSprdProductId.rest, 1) IN IF ~marketTransparencyType.ok THEN Fail ELSE
     LET nonCommoditizedMarket == ReadBytes(marketTransparencyType.rest, 1) IN IF ~nonCommoditizedMarket.ok THEN Fail ELSE
     LET securityDefinitionReportMessageNoBlockDetailsGroups == DecodeSecurityDefinitionReportMessageNoBlockDetailsGroups(nonCommoditizedMarket.rest) IN IF ~securityDefinitionReportMessageNoBlockDetailsGroups.ok THEN Fail ELSE
@@ -2032,14 +2032,14 @@ DecodeSecurityDefinitionReportMessage(bytes) ==
     Ok([ securityReqId                                        |-> securityReqId.value,
          securityResponseType                                 |-> securityResponseType.value,
          securityResponseId                                   |-> securityResponseId.value,
-         marketTypeIDInt32                                    |-> marketTypeIDInt32.value,
-         symbolInt32                                          |-> symbolInt32.value,
+         marketTypeId                                         |-> marketTypeId.value,
+         symbol                                               |-> symbol.value,
          exchangeSilo                                         |-> exchangeSilo.value,
          noRpts                                               |-> noRpts.value,
          listSeqNo                                            |-> listSeqNo.value,
-         underlyingSymbolInt32                                |-> underlyingSymbolInt32.value,
+         underlyingSymbol                                     |-> underlyingSymbol.value,
          cfiCode                                              |-> cfiCode.value,
-         securitySubTypeInt16Null                             |-> securitySubTypeInt16Null.value,
+         securitySubTypeOptional                              |-> securitySubTypeOptional.value,
          maturityDate                                         |-> maturityDate.value,
          screenLastTradeDate                                  |-> screenLastTradeDate.value,
          contractMultiplier                                   |-> contractMultiplier.value,
@@ -2055,8 +2055,8 @@ DecodeSecurityDefinitionReportMessage(bytes) ==
          incrementPrice                                       |-> incrementPrice.value,
          minPrice                                             |-> minPrice.value,
          maxPrice                                             |-> maxPrice.value,
-         offExchangeIncrementPriceDecimal9                    |-> offExchangeIncrementPriceDecimal9.value,
-         offExchangeIncrementQtyDecimal9                      |-> offExchangeIncrementQtyDecimal9.value,
+         offExchangeIncrementPrice                            |-> offExchangeIncrementPrice.value,
+         offExchangeIncrementQty                              |-> offExchangeIncrementQty.value,
          screenTickValue                                      |-> screenTickValue.value,
          blockTickValue                                       |-> blockTickValue.value,
          lotSize                                              |-> lotSize.value,
@@ -2066,7 +2066,7 @@ DecodeSecurityDefinitionReportMessage(bytes) ==
          granularity                                          |-> granularity.value,
          baseNumLots                                          |-> baseNumLots.value,
          tickValue                                            |-> tickValue.value,
-         productIDInt32                                       |-> productIDInt32.value,
+         productId                                            |-> productId.value,
          clearable                                            |-> clearable.value,
          hedgeProductId                                       |-> hedgeProductId.value,
          hedgeMarketId                                        |-> hedgeMarketId.value,
@@ -2076,19 +2076,19 @@ DecodeSecurityDefinitionReportMessage(bytes) ==
          initialMargin                                        |-> initialMargin.value,
          impliedType                                          |-> impliedType.value,
          numOfDecimalStrikePrice                              |-> numOfDecimalStrikePrice.value,
-         numOfCyclesInt16                                     |-> numOfCyclesInt16.value,
-         lotSizeMultiplierDecimal9                            |-> lotSizeMultiplierDecimal9.value,
+         numOfCycles                                          |-> numOfCycles.value,
+         lotSizeMultiplier                                    |-> lotSizeMultiplier.value,
          stripType                                            |-> stripType.value,
          stripId                                              |-> stripId.value,
          blockOnly                                            |-> blockOnly.value,
          flexAllowed                                          |-> flexAllowed.value,
          gtAllowed                                            |-> gtAllowed.value,
          aonAllowed                                           |-> aonAllowed.value,
-         mifidRegulatedMarketBooleanEnumNull                  |-> mifidRegulatedMarketBooleanEnumNull.value,
+         mifidRegulatedMarketOptional                         |-> mifidRegulatedMarketOptional.value,
          flexStrikeAllowed                                    |-> flexStrikeAllowed.value,
          hubId                                                |-> hubId.value,
          overrideBlockMin                                     |-> overrideBlockMin.value,
-         testMarketIndicatorBooleanEnumNull                   |-> testMarketIndicatorBooleanEnumNull.value,
+         testMarketIndicatorOptional                          |-> testMarketIndicatorOptional.value,
          refSprdProductId                                     |-> refSprdProductId.value,
          marketTransparencyType                               |-> marketTransparencyType.value,
          nonCommoditizedMarket                                |-> nonCommoditizedMarket.value,
@@ -2111,14 +2111,14 @@ ZeroSecurityDefinitionReportMessage ==
     [ securityReqId                                        |-> [i \in 1 .. 4 |-> 0],
       securityResponseType                                 |-> [i \in 1 .. 1 |-> 0],
       securityResponseId                                   |-> [i \in 1 .. 4 |-> 0],
-      marketTypeIDInt32                                    |-> [i \in 1 .. 4 |-> 0],
-      symbolInt32                                          |-> [i \in 1 .. 4 |-> 0],
+      marketTypeId                                         |-> [i \in 1 .. 4 |-> 0],
+      symbol                                               |-> [i \in 1 .. 4 |-> 0],
       exchangeSilo                                         |-> [i \in 1 .. 1 |-> 0],
       noRpts                                               |-> [i \in 1 .. 4 |-> 0],
       listSeqNo                                            |-> [i \in 1 .. 4 |-> 0],
-      underlyingSymbolInt32                                |-> [i \in 1 .. 4 |-> 0],
+      underlyingSymbol                                     |-> [i \in 1 .. 4 |-> 0],
       cfiCode                                              |-> [i \in 1 .. 12 |-> 0],
-      securitySubTypeInt16Null                             |-> [i \in 1 .. 2 |-> 0],
+      securitySubTypeOptional                              |-> [i \in 1 .. 2 |-> 0],
       maturityDate                                         |-> [i \in 1 .. 2 |-> 0],
       screenLastTradeDate                                  |-> [i \in 1 .. 2 |-> 0],
       contractMultiplier                                   |-> [i \in 1 .. 4 |-> 0],
@@ -2134,8 +2134,8 @@ ZeroSecurityDefinitionReportMessage ==
       incrementPrice                                       |-> [i \in 1 .. 8 |-> 0],
       minPrice                                             |-> [i \in 1 .. 8 |-> 0],
       maxPrice                                             |-> [i \in 1 .. 8 |-> 0],
-      offExchangeIncrementPriceDecimal9                    |-> [i \in 1 .. 8 |-> 0],
-      offExchangeIncrementQtyDecimal9                      |-> [i \in 1 .. 8 |-> 0],
+      offExchangeIncrementPrice                            |-> [i \in 1 .. 8 |-> 0],
+      offExchangeIncrementQty                              |-> [i \in 1 .. 8 |-> 0],
       screenTickValue                                      |-> [i \in 1 .. 8 |-> 0],
       blockTickValue                                       |-> [i \in 1 .. 8 |-> 0],
       lotSize                                              |-> [i \in 1 .. 4 |-> 0],
@@ -2145,7 +2145,7 @@ ZeroSecurityDefinitionReportMessage ==
       granularity                                          |-> [i \in 1 .. 12 |-> 0],
       baseNumLots                                          |-> [i \in 1 .. 4 |-> 0],
       tickValue                                            |-> [i \in 1 .. 8 |-> 0],
-      productIDInt32                                       |-> [i \in 1 .. 4 |-> 0],
+      productId                                            |-> [i \in 1 .. 4 |-> 0],
       clearable                                            |-> [i \in 1 .. 1 |-> 0],
       hedgeProductId                                       |-> [i \in 1 .. 4 |-> 0],
       hedgeMarketId                                        |-> [i \in 1 .. 4 |-> 0],
@@ -2155,19 +2155,19 @@ ZeroSecurityDefinitionReportMessage ==
       initialMargin                                        |-> [i \in 1 .. 4 |-> 0],
       impliedType                                          |-> [i \in 1 .. 1 |-> 0],
       numOfDecimalStrikePrice                              |-> [i \in 1 .. 1 |-> 0],
-      numOfCyclesInt16                                     |-> [i \in 1 .. 2 |-> 0],
-      lotSizeMultiplierDecimal9                            |-> [i \in 1 .. 8 |-> 0],
+      numOfCycles                                          |-> [i \in 1 .. 2 |-> 0],
+      lotSizeMultiplier                                    |-> [i \in 1 .. 8 |-> 0],
       stripType                                            |-> [i \in 1 .. 2 |-> 0],
       stripId                                              |-> [i \in 1 .. 4 |-> 0],
       blockOnly                                            |-> [i \in 1 .. 1 |-> 0],
       flexAllowed                                          |-> [i \in 1 .. 1 |-> 0],
       gtAllowed                                            |-> [i \in 1 .. 1 |-> 0],
       aonAllowed                                           |-> [i \in 1 .. 1 |-> 0],
-      mifidRegulatedMarketBooleanEnumNull                  |-> [i \in 1 .. 1 |-> 0],
+      mifidRegulatedMarketOptional                         |-> [i \in 1 .. 1 |-> 0],
       flexStrikeAllowed                                    |-> [i \in 1 .. 1 |-> 0],
       hubId                                                |-> [i \in 1 .. 4 |-> 0],
       overrideBlockMin                                     |-> [i \in 1 .. 1 |-> 0],
-      testMarketIndicatorBooleanEnumNull                   |-> [i \in 1 .. 1 |-> 0],
+      testMarketIndicatorOptional                          |-> [i \in 1 .. 1 |-> 0],
       refSprdProductId                                     |-> [i \in 1 .. 4 |-> 0],
       marketTransparencyType                               |-> [i \in 1 .. 1 |-> 0],
       nonCommoditizedMarket                                |-> [i \in 1 .. 1 |-> 0],
@@ -2192,14 +2192,14 @@ CheckedSecurityDefinitionReportMessage ==
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.securityReqId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.securityResponseType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.securityResponseId = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.marketTypeIDInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.marketTypeId = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.symbol = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.exchangeSilo = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.noRpts = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.listSeqNo = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.underlyingSymbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.underlyingSymbol = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.cfiCode = one] : one \in Sample(12) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.securitySubTypeInt16Null = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.securitySubTypeOptional = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.maturityDate = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.screenLastTradeDate = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.contractMultiplier = one] : one \in Sample(4) }
@@ -2215,8 +2215,8 @@ CheckedSecurityDefinitionReportMessage ==
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.incrementPrice = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.minPrice = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.maxPrice = one] : one \in Sample(8) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.offExchangeIncrementPriceDecimal9 = one] : one \in Sample(8) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.offExchangeIncrementQtyDecimal9 = one] : one \in Sample(8) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.offExchangeIncrementPrice = one] : one \in Sample(8) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.offExchangeIncrementQty = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.screenTickValue = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.blockTickValue = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.lotSize = one] : one \in Sample(4) }
@@ -2226,7 +2226,7 @@ CheckedSecurityDefinitionReportMessage ==
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.granularity = one] : one \in Sample(12) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.baseNumLots = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.tickValue = one] : one \in Sample(8) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.productIDInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.productId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.clearable = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.hedgeProductId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.hedgeMarketId = one] : one \in Sample(4) }
@@ -2236,19 +2236,19 @@ CheckedSecurityDefinitionReportMessage ==
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.initialMargin = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.impliedType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.numOfDecimalStrikePrice = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.numOfCyclesInt16 = one] : one \in Sample(2) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.lotSizeMultiplierDecimal9 = one] : one \in Sample(8) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.numOfCycles = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.lotSizeMultiplier = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.stripType = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.stripId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.blockOnly = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.flexAllowed = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.gtAllowed = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.aonAllowed = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.mifidRegulatedMarketBooleanEnumNull = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.mifidRegulatedMarketOptional = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.flexStrikeAllowed = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.hubId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.overrideBlockMin = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.testMarketIndicatorBooleanEnumNull = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.testMarketIndicatorOptional = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.refSprdProductId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.marketTransparencyType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessage EXCEPT !.nonCommoditizedMarket = one] : one \in Sample(1) }
@@ -2272,20 +2272,20 @@ CheckedSecurityDefinitionReportMessage ==
 (***************************************************************************)
 
 SecurityDefinitionRejectMessage ==
-    [ securityReqId                    : Sample(4),
-      securityResponseType             : Sample(1),
-      securityRequestType              : Sample(1),
-      marketTypeIDInt32                : Sample(4),
-      securityTypeSecurityTypeEnumNull : Sample(1),
-      exchangeCode                     : Sample(4),
-      text                             : Sample(100) ]
+    [ securityReqId        : Sample(4),
+      securityResponseType : Sample(1),
+      securityRequestType  : Sample(1),
+      marketTypeId         : Sample(4),
+      securityTypeOptional : Sample(1),
+      exchangeCode         : Sample(4),
+      text                 : Sample(100) ]
 
 EncodeSecurityDefinitionRejectMessage(message) ==
     message.securityReqId
         \o message.securityResponseType
         \o message.securityRequestType
-        \o message.marketTypeIDInt32
-        \o message.securityTypeSecurityTypeEnumNull
+        \o message.marketTypeId
+        \o message.securityTypeOptional
         \o message.exchangeCode
         \o message.text
 
@@ -2293,26 +2293,26 @@ DecodeSecurityDefinitionRejectMessage(bytes) ==
     LET securityReqId == ReadBytes(bytes, 4) IN IF ~securityReqId.ok THEN Fail ELSE
     LET securityResponseType == ReadBytes(securityReqId.rest, 1) IN IF ~securityResponseType.ok THEN Fail ELSE
     LET securityRequestType == ReadBytes(securityResponseType.rest, 1) IN IF ~securityRequestType.ok THEN Fail ELSE
-    LET marketTypeIDInt32 == ReadBytes(securityRequestType.rest, 4) IN IF ~marketTypeIDInt32.ok THEN Fail ELSE
-    LET securityTypeSecurityTypeEnumNull == ReadBytes(marketTypeIDInt32.rest, 1) IN IF ~securityTypeSecurityTypeEnumNull.ok THEN Fail ELSE
-    LET exchangeCode == ReadBytes(securityTypeSecurityTypeEnumNull.rest, 4) IN IF ~exchangeCode.ok THEN Fail ELSE
+    LET marketTypeId == ReadBytes(securityRequestType.rest, 4) IN IF ~marketTypeId.ok THEN Fail ELSE
+    LET securityTypeOptional == ReadBytes(marketTypeId.rest, 1) IN IF ~securityTypeOptional.ok THEN Fail ELSE
+    LET exchangeCode == ReadBytes(securityTypeOptional.rest, 4) IN IF ~exchangeCode.ok THEN Fail ELSE
     LET text == ReadBytes(exchangeCode.rest, 100) IN IF ~text.ok THEN Fail ELSE
-    Ok([ securityReqId                    |-> securityReqId.value,
-         securityResponseType             |-> securityResponseType.value,
-         securityRequestType              |-> securityRequestType.value,
-         marketTypeIDInt32                |-> marketTypeIDInt32.value,
-         securityTypeSecurityTypeEnumNull |-> securityTypeSecurityTypeEnumNull.value,
-         exchangeCode                     |-> exchangeCode.value,
-         text                             |-> text.value ], text.rest)
+    Ok([ securityReqId        |-> securityReqId.value,
+         securityResponseType |-> securityResponseType.value,
+         securityRequestType  |-> securityRequestType.value,
+         marketTypeId         |-> marketTypeId.value,
+         securityTypeOptional |-> securityTypeOptional.value,
+         exchangeCode         |-> exchangeCode.value,
+         text                 |-> text.value ], text.rest)
 
 ZeroSecurityDefinitionRejectMessage ==
-    [ securityReqId                    |-> [i \in 1 .. 4 |-> 0],
-      securityResponseType             |-> [i \in 1 .. 1 |-> 0],
-      securityRequestType              |-> [i \in 1 .. 1 |-> 0],
-      marketTypeIDInt32                |-> [i \in 1 .. 4 |-> 0],
-      securityTypeSecurityTypeEnumNull |-> [i \in 1 .. 1 |-> 0],
-      exchangeCode                     |-> [i \in 1 .. 4 |-> 0],
-      text                             |-> [i \in 1 .. 100 |-> 0] ]
+    [ securityReqId        |-> [i \in 1 .. 4 |-> 0],
+      securityResponseType |-> [i \in 1 .. 1 |-> 0],
+      securityRequestType  |-> [i \in 1 .. 1 |-> 0],
+      marketTypeId         |-> [i \in 1 .. 4 |-> 0],
+      securityTypeOptional |-> [i \in 1 .. 1 |-> 0],
+      exchangeCode         |-> [i \in 1 .. 4 |-> 0],
+      text                 |-> [i \in 1 .. 100 |-> 0] ]
 
 (* Security Definition Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionRejectMessage ==
@@ -2320,8 +2320,8 @@ CheckedSecurityDefinitionRejectMessage ==
         \cup { [ZeroSecurityDefinitionRejectMessage EXCEPT !.securityReqId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionRejectMessage EXCEPT !.securityResponseType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionRejectMessage EXCEPT !.securityRequestType = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionRejectMessage EXCEPT !.marketTypeIDInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionRejectMessage EXCEPT !.securityTypeSecurityTypeEnumNull = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityDefinitionRejectMessage EXCEPT !.marketTypeId = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionRejectMessage EXCEPT !.securityTypeOptional = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionRejectMessage EXCEPT !.exchangeCode = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionRejectMessage EXCEPT !.text = one] : one \in Sample(100) }
 
@@ -2332,32 +2332,32 @@ CheckedSecurityDefinitionRejectMessage ==
 SecurityDefinitionRequestMessage ==
     [ securityReqId       : Sample(4),
       securityRequestType : Sample(1),
-      marketTypeIDInt32   : Sample(4) ]
+      marketTypeId        : Sample(4) ]
 
 EncodeSecurityDefinitionRequestMessage(message) ==
     message.securityReqId
         \o message.securityRequestType
-        \o message.marketTypeIDInt32
+        \o message.marketTypeId
 
 DecodeSecurityDefinitionRequestMessage(bytes) ==
     LET securityReqId == ReadBytes(bytes, 4) IN IF ~securityReqId.ok THEN Fail ELSE
     LET securityRequestType == ReadBytes(securityReqId.rest, 1) IN IF ~securityRequestType.ok THEN Fail ELSE
-    LET marketTypeIDInt32 == ReadBytes(securityRequestType.rest, 4) IN IF ~marketTypeIDInt32.ok THEN Fail ELSE
+    LET marketTypeId == ReadBytes(securityRequestType.rest, 4) IN IF ~marketTypeId.ok THEN Fail ELSE
     Ok([ securityReqId       |-> securityReqId.value,
          securityRequestType |-> securityRequestType.value,
-         marketTypeIDInt32   |-> marketTypeIDInt32.value ], marketTypeIDInt32.rest)
+         marketTypeId        |-> marketTypeId.value ], marketTypeId.rest)
 
 ZeroSecurityDefinitionRequestMessage ==
     [ securityReqId       |-> [i \in 1 .. 4 |-> 0],
       securityRequestType |-> [i \in 1 .. 1 |-> 0],
-      marketTypeIDInt32   |-> [i \in 1 .. 4 |-> 0] ]
+      marketTypeId        |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Security Definition Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionRequestMessage ==
     { ZeroSecurityDefinitionRequestMessage }
         \cup { [ZeroSecurityDefinitionRequestMessage EXCEPT !.securityReqId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionRequestMessage EXCEPT !.securityRequestType = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionRequestMessage EXCEPT !.marketTypeIDInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionRequestMessage EXCEPT !.marketTypeId = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Product Name                                                            *)
@@ -2436,41 +2436,41 @@ CheckedProductGroup ==
 (***************************************************************************)
 
 SecurityDefinitionReportProductMessage ==
-    [ securityReqId                   : Sample(4),
-      securityResponseType            : Sample(1),
-      securityResponseId              : Sample(4),
-      marketTypeIDInt32               : Sample(4),
-      noRpts                          : Sample(4),
-      listSeqNo                       : Sample(4),
-      productIDInt32                  : Sample(4),
-      productType                     : Sample(12),
-      mifidRegulatedMarketBooleanEnum : Sample(1),
-      testMarketIndicatorBooleanEnum  : Sample(1),
-      stopsAllowed                    : Sample(1),
-      optionsAllowed                  : Sample(1),
-      udsOptionsAllowed               : Sample(1),
-      udsFuturesAllowed               : Sample(1),
-      massQuotesAllowed               : Sample(1),
-      rfqFuturesAllowed               : Sample(1),
-      rfqOptionsAllowed               : Sample(1),
-      crossingOrderFuturesAllowed     : Sample(1),
-      crossingOrderOptionsAllowed     : Sample(1),
-      selfBlockAllowed                : Sample(1),
-      productName                     : ProductName,
-      productDesc                     : ProductDesc,
-      productGroup                    : ProductGroup ]
+    [ securityReqId               : Sample(4),
+      securityResponseType        : Sample(1),
+      securityResponseId          : Sample(4),
+      marketTypeId                : Sample(4),
+      noRpts                      : Sample(4),
+      listSeqNo                   : Sample(4),
+      productId                   : Sample(4),
+      productType                 : Sample(12),
+      mifidRegulatedMarket        : Sample(1),
+      testMarketIndicator         : Sample(1),
+      stopsAllowed                : Sample(1),
+      optionsAllowed              : Sample(1),
+      udsOptionsAllowed           : Sample(1),
+      udsFuturesAllowed           : Sample(1),
+      massQuotesAllowed           : Sample(1),
+      rfqFuturesAllowed           : Sample(1),
+      rfqOptionsAllowed           : Sample(1),
+      crossingOrderFuturesAllowed : Sample(1),
+      crossingOrderOptionsAllowed : Sample(1),
+      selfBlockAllowed            : Sample(1),
+      productName                 : ProductName,
+      productDesc                 : ProductDesc,
+      productGroup                : ProductGroup ]
 
 EncodeSecurityDefinitionReportProductMessage(message) ==
     message.securityReqId
         \o message.securityResponseType
         \o message.securityResponseId
-        \o message.marketTypeIDInt32
+        \o message.marketTypeId
         \o message.noRpts
         \o message.listSeqNo
-        \o message.productIDInt32
+        \o message.productId
         \o message.productType
-        \o message.mifidRegulatedMarketBooleanEnum
-        \o message.testMarketIndicatorBooleanEnum
+        \o message.mifidRegulatedMarket
+        \o message.testMarketIndicator
         \o message.stopsAllowed
         \o message.optionsAllowed
         \o message.udsOptionsAllowed
@@ -2489,14 +2489,14 @@ DecodeSecurityDefinitionReportProductMessage(bytes) ==
     LET securityReqId == ReadBytes(bytes, 4) IN IF ~securityReqId.ok THEN Fail ELSE
     LET securityResponseType == ReadBytes(securityReqId.rest, 1) IN IF ~securityResponseType.ok THEN Fail ELSE
     LET securityResponseId == ReadBytes(securityResponseType.rest, 4) IN IF ~securityResponseId.ok THEN Fail ELSE
-    LET marketTypeIDInt32 == ReadBytes(securityResponseId.rest, 4) IN IF ~marketTypeIDInt32.ok THEN Fail ELSE
-    LET noRpts == ReadBytes(marketTypeIDInt32.rest, 4) IN IF ~noRpts.ok THEN Fail ELSE
+    LET marketTypeId == ReadBytes(securityResponseId.rest, 4) IN IF ~marketTypeId.ok THEN Fail ELSE
+    LET noRpts == ReadBytes(marketTypeId.rest, 4) IN IF ~noRpts.ok THEN Fail ELSE
     LET listSeqNo == ReadBytes(noRpts.rest, 4) IN IF ~listSeqNo.ok THEN Fail ELSE
-    LET productIDInt32 == ReadBytes(listSeqNo.rest, 4) IN IF ~productIDInt32.ok THEN Fail ELSE
-    LET productType == ReadBytes(productIDInt32.rest, 12) IN IF ~productType.ok THEN Fail ELSE
-    LET mifidRegulatedMarketBooleanEnum == ReadBytes(productType.rest, 1) IN IF ~mifidRegulatedMarketBooleanEnum.ok THEN Fail ELSE
-    LET testMarketIndicatorBooleanEnum == ReadBytes(mifidRegulatedMarketBooleanEnum.rest, 1) IN IF ~testMarketIndicatorBooleanEnum.ok THEN Fail ELSE
-    LET stopsAllowed == ReadBytes(testMarketIndicatorBooleanEnum.rest, 1) IN IF ~stopsAllowed.ok THEN Fail ELSE
+    LET productId == ReadBytes(listSeqNo.rest, 4) IN IF ~productId.ok THEN Fail ELSE
+    LET productType == ReadBytes(productId.rest, 12) IN IF ~productType.ok THEN Fail ELSE
+    LET mifidRegulatedMarket == ReadBytes(productType.rest, 1) IN IF ~mifidRegulatedMarket.ok THEN Fail ELSE
+    LET testMarketIndicator == ReadBytes(mifidRegulatedMarket.rest, 1) IN IF ~testMarketIndicator.ok THEN Fail ELSE
+    LET stopsAllowed == ReadBytes(testMarketIndicator.rest, 1) IN IF ~stopsAllowed.ok THEN Fail ELSE
     LET optionsAllowed == ReadBytes(stopsAllowed.rest, 1) IN IF ~optionsAllowed.ok THEN Fail ELSE
     LET udsOptionsAllowed == ReadBytes(optionsAllowed.rest, 1) IN IF ~udsOptionsAllowed.ok THEN Fail ELSE
     LET udsFuturesAllowed == ReadBytes(udsOptionsAllowed.rest, 1) IN IF ~udsFuturesAllowed.ok THEN Fail ELSE
@@ -2509,54 +2509,54 @@ DecodeSecurityDefinitionReportProductMessage(bytes) ==
     LET productName == DecodeProductName(selfBlockAllowed.rest) IN IF ~productName.ok THEN Fail ELSE
     LET productDesc == DecodeProductDesc(productName.rest) IN IF ~productDesc.ok THEN Fail ELSE
     LET productGroup == DecodeProductGroup(productDesc.rest) IN IF ~productGroup.ok THEN Fail ELSE
-    Ok([ securityReqId                   |-> securityReqId.value,
-         securityResponseType            |-> securityResponseType.value,
-         securityResponseId              |-> securityResponseId.value,
-         marketTypeIDInt32               |-> marketTypeIDInt32.value,
-         noRpts                          |-> noRpts.value,
-         listSeqNo                       |-> listSeqNo.value,
-         productIDInt32                  |-> productIDInt32.value,
-         productType                     |-> productType.value,
-         mifidRegulatedMarketBooleanEnum |-> mifidRegulatedMarketBooleanEnum.value,
-         testMarketIndicatorBooleanEnum  |-> testMarketIndicatorBooleanEnum.value,
-         stopsAllowed                    |-> stopsAllowed.value,
-         optionsAllowed                  |-> optionsAllowed.value,
-         udsOptionsAllowed               |-> udsOptionsAllowed.value,
-         udsFuturesAllowed               |-> udsFuturesAllowed.value,
-         massQuotesAllowed               |-> massQuotesAllowed.value,
-         rfqFuturesAllowed               |-> rfqFuturesAllowed.value,
-         rfqOptionsAllowed               |-> rfqOptionsAllowed.value,
-         crossingOrderFuturesAllowed     |-> crossingOrderFuturesAllowed.value,
-         crossingOrderOptionsAllowed     |-> crossingOrderOptionsAllowed.value,
-         selfBlockAllowed                |-> selfBlockAllowed.value,
-         productName                     |-> productName.value,
-         productDesc                     |-> productDesc.value,
-         productGroup                    |-> productGroup.value ], productGroup.rest)
+    Ok([ securityReqId               |-> securityReqId.value,
+         securityResponseType        |-> securityResponseType.value,
+         securityResponseId          |-> securityResponseId.value,
+         marketTypeId                |-> marketTypeId.value,
+         noRpts                      |-> noRpts.value,
+         listSeqNo                   |-> listSeqNo.value,
+         productId                   |-> productId.value,
+         productType                 |-> productType.value,
+         mifidRegulatedMarket        |-> mifidRegulatedMarket.value,
+         testMarketIndicator         |-> testMarketIndicator.value,
+         stopsAllowed                |-> stopsAllowed.value,
+         optionsAllowed              |-> optionsAllowed.value,
+         udsOptionsAllowed           |-> udsOptionsAllowed.value,
+         udsFuturesAllowed           |-> udsFuturesAllowed.value,
+         massQuotesAllowed           |-> massQuotesAllowed.value,
+         rfqFuturesAllowed           |-> rfqFuturesAllowed.value,
+         rfqOptionsAllowed           |-> rfqOptionsAllowed.value,
+         crossingOrderFuturesAllowed |-> crossingOrderFuturesAllowed.value,
+         crossingOrderOptionsAllowed |-> crossingOrderOptionsAllowed.value,
+         selfBlockAllowed            |-> selfBlockAllowed.value,
+         productName                 |-> productName.value,
+         productDesc                 |-> productDesc.value,
+         productGroup                |-> productGroup.value ], productGroup.rest)
 
 ZeroSecurityDefinitionReportProductMessage ==
-    [ securityReqId                   |-> [i \in 1 .. 4 |-> 0],
-      securityResponseType            |-> [i \in 1 .. 1 |-> 0],
-      securityResponseId              |-> [i \in 1 .. 4 |-> 0],
-      marketTypeIDInt32               |-> [i \in 1 .. 4 |-> 0],
-      noRpts                          |-> [i \in 1 .. 4 |-> 0],
-      listSeqNo                       |-> [i \in 1 .. 4 |-> 0],
-      productIDInt32                  |-> [i \in 1 .. 4 |-> 0],
-      productType                     |-> [i \in 1 .. 12 |-> 0],
-      mifidRegulatedMarketBooleanEnum |-> [i \in 1 .. 1 |-> 0],
-      testMarketIndicatorBooleanEnum  |-> [i \in 1 .. 1 |-> 0],
-      stopsAllowed                    |-> [i \in 1 .. 1 |-> 0],
-      optionsAllowed                  |-> [i \in 1 .. 1 |-> 0],
-      udsOptionsAllowed               |-> [i \in 1 .. 1 |-> 0],
-      udsFuturesAllowed               |-> [i \in 1 .. 1 |-> 0],
-      massQuotesAllowed               |-> [i \in 1 .. 1 |-> 0],
-      rfqFuturesAllowed               |-> [i \in 1 .. 1 |-> 0],
-      rfqOptionsAllowed               |-> [i \in 1 .. 1 |-> 0],
-      crossingOrderFuturesAllowed     |-> [i \in 1 .. 1 |-> 0],
-      crossingOrderOptionsAllowed     |-> [i \in 1 .. 1 |-> 0],
-      selfBlockAllowed                |-> [i \in 1 .. 1 |-> 0],
-      productName                     |-> ZeroProductName,
-      productDesc                     |-> ZeroProductDesc,
-      productGroup                    |-> ZeroProductGroup ]
+    [ securityReqId               |-> [i \in 1 .. 4 |-> 0],
+      securityResponseType        |-> [i \in 1 .. 1 |-> 0],
+      securityResponseId          |-> [i \in 1 .. 4 |-> 0],
+      marketTypeId                |-> [i \in 1 .. 4 |-> 0],
+      noRpts                      |-> [i \in 1 .. 4 |-> 0],
+      listSeqNo                   |-> [i \in 1 .. 4 |-> 0],
+      productId                   |-> [i \in 1 .. 4 |-> 0],
+      productType                 |-> [i \in 1 .. 12 |-> 0],
+      mifidRegulatedMarket        |-> [i \in 1 .. 1 |-> 0],
+      testMarketIndicator         |-> [i \in 1 .. 1 |-> 0],
+      stopsAllowed                |-> [i \in 1 .. 1 |-> 0],
+      optionsAllowed              |-> [i \in 1 .. 1 |-> 0],
+      udsOptionsAllowed           |-> [i \in 1 .. 1 |-> 0],
+      udsFuturesAllowed           |-> [i \in 1 .. 1 |-> 0],
+      massQuotesAllowed           |-> [i \in 1 .. 1 |-> 0],
+      rfqFuturesAllowed           |-> [i \in 1 .. 1 |-> 0],
+      rfqOptionsAllowed           |-> [i \in 1 .. 1 |-> 0],
+      crossingOrderFuturesAllowed |-> [i \in 1 .. 1 |-> 0],
+      crossingOrderOptionsAllowed |-> [i \in 1 .. 1 |-> 0],
+      selfBlockAllowed            |-> [i \in 1 .. 1 |-> 0],
+      productName                 |-> ZeroProductName,
+      productDesc                 |-> ZeroProductDesc,
+      productGroup                |-> ZeroProductGroup ]
 
 (* Security Definition Report Product Message at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportProductMessage ==
@@ -2564,13 +2564,13 @@ CheckedSecurityDefinitionReportProductMessage ==
         \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.securityReqId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.securityResponseType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.securityResponseId = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.marketTypeIDInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.marketTypeId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.noRpts = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.listSeqNo = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.productIDInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.productId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.productType = one] : one \in Sample(12) }
-        \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.mifidRegulatedMarketBooleanEnum = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.testMarketIndicatorBooleanEnum = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.mifidRegulatedMarket = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.testMarketIndicator = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.stopsAllowed = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.optionsAllowed = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.udsOptionsAllowed = one] : one \in Sample(1) }
@@ -2994,19 +2994,19 @@ CheckedTraderLogoutReportMessage ==
 (***************************************************************************)
 
 NewOrderRequestMessage ==
-    [ priceDecimal9Null              : Sample(8),
-      orderQtyDecimal9               : Sample(8),
-      symbolInt32                    : Sample(4),
-      timeInForceTimeInForceEnum     : Sample(1),
-      sideSideEnum                   : Sample(1),
+    [ priceOptional                  : Sample(8),
+      orderQty                       : Sample(8),
+      symbol                         : Sample(4),
+      timeInForce                    : Sample(1),
+      side                           : Sample(1),
       originatorUserId               : Sample(20),
-      ordTypeOrderTypeEnum           : Sample(1),
+      ordType                        : Sample(1),
       manualOrderIndicator           : Sample(1),
       clOrdId                        : Sample(8),
       maxShow                        : Sample(8),
       stopPx                         : Sample(8),
       giveUpClearingFirm             : Sample(4),
-      clearingFirmInt32              : Sample(4),
+      clearingFirm                   : Sample(4),
       selfMatchPreventionId          : Sample(8),
       expireDate                     : Sample(2),
       selfMatchPreventionInstruction : Sample(1),
@@ -3023,28 +3023,28 @@ NewOrderRequestMessage ==
       positionEffect                 : Sample(1),
       allocHandlInst                 : Sample(1),
       priceType                      : Sample(1),
-      clearingAccountString14        : Sample(14),
+      clearingAccount                : Sample(14),
       customerAccountRefId           : Sample(12),
       memo                           : Sample(30),
       allocationAccount              : Sample(20),
       onBehalfOfCompId               : Sample(41),
-      onBehalfOfSubIDString41        : Sample(41),
-      onBehalfOfLocationIDString41   : Sample(41) ]
+      onBehalfOfSubId                : Sample(41),
+      onBehalfOfLocationId           : Sample(41) ]
 
 EncodeNewOrderRequestMessage(message) ==
-    message.priceDecimal9Null
-        \o message.orderQtyDecimal9
-        \o message.symbolInt32
-        \o message.timeInForceTimeInForceEnum
-        \o message.sideSideEnum
+    message.priceOptional
+        \o message.orderQty
+        \o message.symbol
+        \o message.timeInForce
+        \o message.side
         \o message.originatorUserId
-        \o message.ordTypeOrderTypeEnum
+        \o message.ordType
         \o message.manualOrderIndicator
         \o message.clOrdId
         \o message.maxShow
         \o message.stopPx
         \o message.giveUpClearingFirm
-        \o message.clearingFirmInt32
+        \o message.clearingFirm
         \o message.selfMatchPreventionId
         \o message.expireDate
         \o message.selfMatchPreventionInstruction
@@ -3061,29 +3061,29 @@ EncodeNewOrderRequestMessage(message) ==
         \o message.positionEffect
         \o message.allocHandlInst
         \o message.priceType
-        \o message.clearingAccountString14
+        \o message.clearingAccount
         \o message.customerAccountRefId
         \o message.memo
         \o message.allocationAccount
         \o message.onBehalfOfCompId
-        \o message.onBehalfOfSubIDString41
-        \o message.onBehalfOfLocationIDString41
+        \o message.onBehalfOfSubId
+        \o message.onBehalfOfLocationId
 
 DecodeNewOrderRequestMessage(bytes) ==
-    LET priceDecimal9Null == ReadBytes(bytes, 8) IN IF ~priceDecimal9Null.ok THEN Fail ELSE
-    LET orderQtyDecimal9 == ReadBytes(priceDecimal9Null.rest, 8) IN IF ~orderQtyDecimal9.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(orderQtyDecimal9.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET timeInForceTimeInForceEnum == ReadBytes(symbolInt32.rest, 1) IN IF ~timeInForceTimeInForceEnum.ok THEN Fail ELSE
-    LET sideSideEnum == ReadBytes(timeInForceTimeInForceEnum.rest, 1) IN IF ~sideSideEnum.ok THEN Fail ELSE
-    LET originatorUserId == ReadBytes(sideSideEnum.rest, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
-    LET ordTypeOrderTypeEnum == ReadBytes(originatorUserId.rest, 1) IN IF ~ordTypeOrderTypeEnum.ok THEN Fail ELSE
-    LET manualOrderIndicator == ReadBytes(ordTypeOrderTypeEnum.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
+    LET priceOptional == ReadBytes(bytes, 8) IN IF ~priceOptional.ok THEN Fail ELSE
+    LET orderQty == ReadBytes(priceOptional.rest, 8) IN IF ~orderQty.ok THEN Fail ELSE
+    LET symbol == ReadBytes(orderQty.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET timeInForce == ReadBytes(symbol.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
+    LET side == ReadBytes(timeInForce.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET originatorUserId == ReadBytes(side.rest, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
+    LET ordType == ReadBytes(originatorUserId.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
+    LET manualOrderIndicator == ReadBytes(ordType.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(manualOrderIndicator.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
     LET maxShow == ReadBytes(clOrdId.rest, 8) IN IF ~maxShow.ok THEN Fail ELSE
     LET stopPx == ReadBytes(maxShow.rest, 8) IN IF ~stopPx.ok THEN Fail ELSE
     LET giveUpClearingFirm == ReadBytes(stopPx.rest, 4) IN IF ~giveUpClearingFirm.ok THEN Fail ELSE
-    LET clearingFirmInt32 == ReadBytes(giveUpClearingFirm.rest, 4) IN IF ~clearingFirmInt32.ok THEN Fail ELSE
-    LET selfMatchPreventionId == ReadBytes(clearingFirmInt32.rest, 8) IN IF ~selfMatchPreventionId.ok THEN Fail ELSE
+    LET clearingFirm == ReadBytes(giveUpClearingFirm.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
+    LET selfMatchPreventionId == ReadBytes(clearingFirm.rest, 8) IN IF ~selfMatchPreventionId.ok THEN Fail ELSE
     LET expireDate == ReadBytes(selfMatchPreventionId.rest, 2) IN IF ~expireDate.ok THEN Fail ELSE
     LET selfMatchPreventionInstruction == ReadBytes(expireDate.rest, 1) IN IF ~selfMatchPreventionInstruction.ok THEN Fail ELSE
     LET execInst == ReadBytes(selfMatchPreventionInstruction.rest, 1) IN IF ~execInst.ok THEN Fail ELSE
@@ -3099,26 +3099,26 @@ DecodeNewOrderRequestMessage(bytes) ==
     LET positionEffect == ReadBytes(custOrderHandlingInst.rest, 1) IN IF ~positionEffect.ok THEN Fail ELSE
     LET allocHandlInst == ReadBytes(positionEffect.rest, 1) IN IF ~allocHandlInst.ok THEN Fail ELSE
     LET priceType == ReadBytes(allocHandlInst.rest, 1) IN IF ~priceType.ok THEN Fail ELSE
-    LET clearingAccountString14 == ReadBytes(priceType.rest, 14) IN IF ~clearingAccountString14.ok THEN Fail ELSE
-    LET customerAccountRefId == ReadBytes(clearingAccountString14.rest, 12) IN IF ~customerAccountRefId.ok THEN Fail ELSE
+    LET clearingAccount == ReadBytes(priceType.rest, 14) IN IF ~clearingAccount.ok THEN Fail ELSE
+    LET customerAccountRefId == ReadBytes(clearingAccount.rest, 12) IN IF ~customerAccountRefId.ok THEN Fail ELSE
     LET memo == ReadBytes(customerAccountRefId.rest, 30) IN IF ~memo.ok THEN Fail ELSE
     LET allocationAccount == ReadBytes(memo.rest, 20) IN IF ~allocationAccount.ok THEN Fail ELSE
     LET onBehalfOfCompId == ReadBytes(allocationAccount.rest, 41) IN IF ~onBehalfOfCompId.ok THEN Fail ELSE
-    LET onBehalfOfSubIDString41 == ReadBytes(onBehalfOfCompId.rest, 41) IN IF ~onBehalfOfSubIDString41.ok THEN Fail ELSE
-    LET onBehalfOfLocationIDString41 == ReadBytes(onBehalfOfSubIDString41.rest, 41) IN IF ~onBehalfOfLocationIDString41.ok THEN Fail ELSE
-    Ok([ priceDecimal9Null              |-> priceDecimal9Null.value,
-         orderQtyDecimal9               |-> orderQtyDecimal9.value,
-         symbolInt32                    |-> symbolInt32.value,
-         timeInForceTimeInForceEnum     |-> timeInForceTimeInForceEnum.value,
-         sideSideEnum                   |-> sideSideEnum.value,
+    LET onBehalfOfSubId == ReadBytes(onBehalfOfCompId.rest, 41) IN IF ~onBehalfOfSubId.ok THEN Fail ELSE
+    LET onBehalfOfLocationId == ReadBytes(onBehalfOfSubId.rest, 41) IN IF ~onBehalfOfLocationId.ok THEN Fail ELSE
+    Ok([ priceOptional                  |-> priceOptional.value,
+         orderQty                       |-> orderQty.value,
+         symbol                         |-> symbol.value,
+         timeInForce                    |-> timeInForce.value,
+         side                           |-> side.value,
          originatorUserId               |-> originatorUserId.value,
-         ordTypeOrderTypeEnum           |-> ordTypeOrderTypeEnum.value,
+         ordType                        |-> ordType.value,
          manualOrderIndicator           |-> manualOrderIndicator.value,
          clOrdId                        |-> clOrdId.value,
          maxShow                        |-> maxShow.value,
          stopPx                         |-> stopPx.value,
          giveUpClearingFirm             |-> giveUpClearingFirm.value,
-         clearingFirmInt32              |-> clearingFirmInt32.value,
+         clearingFirm                   |-> clearingFirm.value,
          selfMatchPreventionId          |-> selfMatchPreventionId.value,
          expireDate                     |-> expireDate.value,
          selfMatchPreventionInstruction |-> selfMatchPreventionInstruction.value,
@@ -3135,28 +3135,28 @@ DecodeNewOrderRequestMessage(bytes) ==
          positionEffect                 |-> positionEffect.value,
          allocHandlInst                 |-> allocHandlInst.value,
          priceType                      |-> priceType.value,
-         clearingAccountString14        |-> clearingAccountString14.value,
+         clearingAccount                |-> clearingAccount.value,
          customerAccountRefId           |-> customerAccountRefId.value,
          memo                           |-> memo.value,
          allocationAccount              |-> allocationAccount.value,
          onBehalfOfCompId               |-> onBehalfOfCompId.value,
-         onBehalfOfSubIDString41        |-> onBehalfOfSubIDString41.value,
-         onBehalfOfLocationIDString41   |-> onBehalfOfLocationIDString41.value ], onBehalfOfLocationIDString41.rest)
+         onBehalfOfSubId                |-> onBehalfOfSubId.value,
+         onBehalfOfLocationId           |-> onBehalfOfLocationId.value ], onBehalfOfLocationId.rest)
 
 ZeroNewOrderRequestMessage ==
-    [ priceDecimal9Null              |-> [i \in 1 .. 8 |-> 0],
-      orderQtyDecimal9               |-> [i \in 1 .. 8 |-> 0],
-      symbolInt32                    |-> [i \in 1 .. 4 |-> 0],
-      timeInForceTimeInForceEnum     |-> [i \in 1 .. 1 |-> 0],
-      sideSideEnum                   |-> [i \in 1 .. 1 |-> 0],
+    [ priceOptional                  |-> [i \in 1 .. 8 |-> 0],
+      orderQty                       |-> [i \in 1 .. 8 |-> 0],
+      symbol                         |-> [i \in 1 .. 4 |-> 0],
+      timeInForce                    |-> [i \in 1 .. 1 |-> 0],
+      side                           |-> [i \in 1 .. 1 |-> 0],
       originatorUserId               |-> [i \in 1 .. 20 |-> 0],
-      ordTypeOrderTypeEnum           |-> [i \in 1 .. 1 |-> 0],
+      ordType                        |-> [i \in 1 .. 1 |-> 0],
       manualOrderIndicator           |-> [i \in 1 .. 1 |-> 0],
       clOrdId                        |-> [i \in 1 .. 8 |-> 0],
       maxShow                        |-> [i \in 1 .. 8 |-> 0],
       stopPx                         |-> [i \in 1 .. 8 |-> 0],
       giveUpClearingFirm             |-> [i \in 1 .. 4 |-> 0],
-      clearingFirmInt32              |-> [i \in 1 .. 4 |-> 0],
+      clearingFirm                   |-> [i \in 1 .. 4 |-> 0],
       selfMatchPreventionId          |-> [i \in 1 .. 8 |-> 0],
       expireDate                     |-> [i \in 1 .. 2 |-> 0],
       selfMatchPreventionInstruction |-> [i \in 1 .. 1 |-> 0],
@@ -3173,30 +3173,30 @@ ZeroNewOrderRequestMessage ==
       positionEffect                 |-> [i \in 1 .. 1 |-> 0],
       allocHandlInst                 |-> [i \in 1 .. 1 |-> 0],
       priceType                      |-> [i \in 1 .. 1 |-> 0],
-      clearingAccountString14        |-> [i \in 1 .. 14 |-> 0],
+      clearingAccount                |-> [i \in 1 .. 14 |-> 0],
       customerAccountRefId           |-> [i \in 1 .. 12 |-> 0],
       memo                           |-> [i \in 1 .. 30 |-> 0],
       allocationAccount              |-> [i \in 1 .. 20 |-> 0],
       onBehalfOfCompId               |-> [i \in 1 .. 41 |-> 0],
-      onBehalfOfSubIDString41        |-> [i \in 1 .. 41 |-> 0],
-      onBehalfOfLocationIDString41   |-> [i \in 1 .. 41 |-> 0] ]
+      onBehalfOfSubId                |-> [i \in 1 .. 41 |-> 0],
+      onBehalfOfLocationId           |-> [i \in 1 .. 41 |-> 0] ]
 
 (* New Order Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderRequestMessage ==
     { ZeroNewOrderRequestMessage }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.priceDecimal9Null = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.orderQtyDecimal9 = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.timeInForceTimeInForceEnum = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.sideSideEnum = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.priceOptional = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.orderQty = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.symbol = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.timeInForce = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.ordTypeOrderTypeEnum = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.ordType = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.maxShow = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.stopPx = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.giveUpClearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.clearingFirmInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.selfMatchPreventionId = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.expireDate = one] : one \in Sample(2) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.selfMatchPreventionInstruction = one] : one \in Sample(1) }
@@ -3213,33 +3213,33 @@ CheckedNewOrderRequestMessage ==
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.positionEffect = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.allocHandlInst = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.priceType = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.clearingAccountString14 = one] : one \in Sample(14) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.clearingAccount = one] : one \in Sample(14) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.customerAccountRefId = one] : one \in Sample(12) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.memo = one] : one \in Sample(30) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.allocationAccount = one] : one \in Sample(20) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.onBehalfOfCompId = one] : one \in Sample(41) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.onBehalfOfSubIDString41 = one] : one \in Sample(41) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.onBehalfOfLocationIDString41 = one] : one \in Sample(41) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.onBehalfOfSubId = one] : one \in Sample(41) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.onBehalfOfLocationId = one] : one \in Sample(41) }
 
 (***************************************************************************)
 (* Cancel Replace Request Message: 333 bytes                               *)
 (***************************************************************************)
 
 CancelReplaceRequestMessage ==
-    [ priceDecimal9Null              : Sample(8),
-      orderQtyDecimal9               : Sample(8),
-      symbolInt32                    : Sample(4),
-      timeInForceTimeInForceEnum     : Sample(1),
-      sideSideEnum                   : Sample(1),
+    [ priceOptional                  : Sample(8),
+      orderQty                       : Sample(8),
+      symbol                         : Sample(4),
+      timeInForce                    : Sample(1),
+      side                           : Sample(1),
       originatorUserId               : Sample(20),
-      ordTypeOrderTypeEnum           : Sample(1),
+      ordType                        : Sample(1),
       manualOrderIndicator           : Sample(1),
       clOrdId                        : Sample(8),
-      origClOrdIDInt64               : Sample(8),
+      origClOrdId                    : Sample(8),
       maxShow                        : Sample(8),
       stopPx                         : Sample(8),
       giveUpClearingFirm             : Sample(4),
-      clearingFirmInt32              : Sample(4),
+      clearingFirm                   : Sample(4),
       selfMatchPreventionId          : Sample(8),
       expireDate                     : Sample(2),
       selfMatchPreventionInstruction : Sample(1),
@@ -3254,29 +3254,29 @@ CancelReplaceRequestMessage ==
       mifidId                        : Sample(8),
       allocHandlInst                 : Sample(1),
       priceType                      : Sample(1),
-      clearingAccountString14        : Sample(14),
+      clearingAccount                : Sample(14),
       customerAccountRefId           : Sample(12),
       memo                           : Sample(30),
       allocationAccount              : Sample(20),
       onBehalfOfCompId               : Sample(41),
-      onBehalfOfSubIDString41        : Sample(41),
-      onBehalfOfLocationIDString41   : Sample(41) ]
+      onBehalfOfSubId                : Sample(41),
+      onBehalfOfLocationId           : Sample(41) ]
 
 EncodeCancelReplaceRequestMessage(message) ==
-    message.priceDecimal9Null
-        \o message.orderQtyDecimal9
-        \o message.symbolInt32
-        \o message.timeInForceTimeInForceEnum
-        \o message.sideSideEnum
+    message.priceOptional
+        \o message.orderQty
+        \o message.symbol
+        \o message.timeInForce
+        \o message.side
         \o message.originatorUserId
-        \o message.ordTypeOrderTypeEnum
+        \o message.ordType
         \o message.manualOrderIndicator
         \o message.clOrdId
-        \o message.origClOrdIDInt64
+        \o message.origClOrdId
         \o message.maxShow
         \o message.stopPx
         \o message.giveUpClearingFirm
-        \o message.clearingFirmInt32
+        \o message.clearingFirm
         \o message.selfMatchPreventionId
         \o message.expireDate
         \o message.selfMatchPreventionInstruction
@@ -3291,30 +3291,30 @@ EncodeCancelReplaceRequestMessage(message) ==
         \o message.mifidId
         \o message.allocHandlInst
         \o message.priceType
-        \o message.clearingAccountString14
+        \o message.clearingAccount
         \o message.customerAccountRefId
         \o message.memo
         \o message.allocationAccount
         \o message.onBehalfOfCompId
-        \o message.onBehalfOfSubIDString41
-        \o message.onBehalfOfLocationIDString41
+        \o message.onBehalfOfSubId
+        \o message.onBehalfOfLocationId
 
 DecodeCancelReplaceRequestMessage(bytes) ==
-    LET priceDecimal9Null == ReadBytes(bytes, 8) IN IF ~priceDecimal9Null.ok THEN Fail ELSE
-    LET orderQtyDecimal9 == ReadBytes(priceDecimal9Null.rest, 8) IN IF ~orderQtyDecimal9.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(orderQtyDecimal9.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET timeInForceTimeInForceEnum == ReadBytes(symbolInt32.rest, 1) IN IF ~timeInForceTimeInForceEnum.ok THEN Fail ELSE
-    LET sideSideEnum == ReadBytes(timeInForceTimeInForceEnum.rest, 1) IN IF ~sideSideEnum.ok THEN Fail ELSE
-    LET originatorUserId == ReadBytes(sideSideEnum.rest, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
-    LET ordTypeOrderTypeEnum == ReadBytes(originatorUserId.rest, 1) IN IF ~ordTypeOrderTypeEnum.ok THEN Fail ELSE
-    LET manualOrderIndicator == ReadBytes(ordTypeOrderTypeEnum.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
+    LET priceOptional == ReadBytes(bytes, 8) IN IF ~priceOptional.ok THEN Fail ELSE
+    LET orderQty == ReadBytes(priceOptional.rest, 8) IN IF ~orderQty.ok THEN Fail ELSE
+    LET symbol == ReadBytes(orderQty.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET timeInForce == ReadBytes(symbol.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
+    LET side == ReadBytes(timeInForce.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET originatorUserId == ReadBytes(side.rest, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
+    LET ordType == ReadBytes(originatorUserId.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
+    LET manualOrderIndicator == ReadBytes(ordType.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(manualOrderIndicator.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
-    LET origClOrdIDInt64 == ReadBytes(clOrdId.rest, 8) IN IF ~origClOrdIDInt64.ok THEN Fail ELSE
-    LET maxShow == ReadBytes(origClOrdIDInt64.rest, 8) IN IF ~maxShow.ok THEN Fail ELSE
+    LET origClOrdId == ReadBytes(clOrdId.rest, 8) IN IF ~origClOrdId.ok THEN Fail ELSE
+    LET maxShow == ReadBytes(origClOrdId.rest, 8) IN IF ~maxShow.ok THEN Fail ELSE
     LET stopPx == ReadBytes(maxShow.rest, 8) IN IF ~stopPx.ok THEN Fail ELSE
     LET giveUpClearingFirm == ReadBytes(stopPx.rest, 4) IN IF ~giveUpClearingFirm.ok THEN Fail ELSE
-    LET clearingFirmInt32 == ReadBytes(giveUpClearingFirm.rest, 4) IN IF ~clearingFirmInt32.ok THEN Fail ELSE
-    LET selfMatchPreventionId == ReadBytes(clearingFirmInt32.rest, 8) IN IF ~selfMatchPreventionId.ok THEN Fail ELSE
+    LET clearingFirm == ReadBytes(giveUpClearingFirm.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
+    LET selfMatchPreventionId == ReadBytes(clearingFirm.rest, 8) IN IF ~selfMatchPreventionId.ok THEN Fail ELSE
     LET expireDate == ReadBytes(selfMatchPreventionId.rest, 2) IN IF ~expireDate.ok THEN Fail ELSE
     LET selfMatchPreventionInstruction == ReadBytes(expireDate.rest, 1) IN IF ~selfMatchPreventionInstruction.ok THEN Fail ELSE
     LET execInst == ReadBytes(selfMatchPreventionInstruction.rest, 1) IN IF ~execInst.ok THEN Fail ELSE
@@ -3328,27 +3328,27 @@ DecodeCancelReplaceRequestMessage(bytes) ==
     LET mifidId == ReadBytes(clientIdCode.rest, 8) IN IF ~mifidId.ok THEN Fail ELSE
     LET allocHandlInst == ReadBytes(mifidId.rest, 1) IN IF ~allocHandlInst.ok THEN Fail ELSE
     LET priceType == ReadBytes(allocHandlInst.rest, 1) IN IF ~priceType.ok THEN Fail ELSE
-    LET clearingAccountString14 == ReadBytes(priceType.rest, 14) IN IF ~clearingAccountString14.ok THEN Fail ELSE
-    LET customerAccountRefId == ReadBytes(clearingAccountString14.rest, 12) IN IF ~customerAccountRefId.ok THEN Fail ELSE
+    LET clearingAccount == ReadBytes(priceType.rest, 14) IN IF ~clearingAccount.ok THEN Fail ELSE
+    LET customerAccountRefId == ReadBytes(clearingAccount.rest, 12) IN IF ~customerAccountRefId.ok THEN Fail ELSE
     LET memo == ReadBytes(customerAccountRefId.rest, 30) IN IF ~memo.ok THEN Fail ELSE
     LET allocationAccount == ReadBytes(memo.rest, 20) IN IF ~allocationAccount.ok THEN Fail ELSE
     LET onBehalfOfCompId == ReadBytes(allocationAccount.rest, 41) IN IF ~onBehalfOfCompId.ok THEN Fail ELSE
-    LET onBehalfOfSubIDString41 == ReadBytes(onBehalfOfCompId.rest, 41) IN IF ~onBehalfOfSubIDString41.ok THEN Fail ELSE
-    LET onBehalfOfLocationIDString41 == ReadBytes(onBehalfOfSubIDString41.rest, 41) IN IF ~onBehalfOfLocationIDString41.ok THEN Fail ELSE
-    Ok([ priceDecimal9Null              |-> priceDecimal9Null.value,
-         orderQtyDecimal9               |-> orderQtyDecimal9.value,
-         symbolInt32                    |-> symbolInt32.value,
-         timeInForceTimeInForceEnum     |-> timeInForceTimeInForceEnum.value,
-         sideSideEnum                   |-> sideSideEnum.value,
+    LET onBehalfOfSubId == ReadBytes(onBehalfOfCompId.rest, 41) IN IF ~onBehalfOfSubId.ok THEN Fail ELSE
+    LET onBehalfOfLocationId == ReadBytes(onBehalfOfSubId.rest, 41) IN IF ~onBehalfOfLocationId.ok THEN Fail ELSE
+    Ok([ priceOptional                  |-> priceOptional.value,
+         orderQty                       |-> orderQty.value,
+         symbol                         |-> symbol.value,
+         timeInForce                    |-> timeInForce.value,
+         side                           |-> side.value,
          originatorUserId               |-> originatorUserId.value,
-         ordTypeOrderTypeEnum           |-> ordTypeOrderTypeEnum.value,
+         ordType                        |-> ordType.value,
          manualOrderIndicator           |-> manualOrderIndicator.value,
          clOrdId                        |-> clOrdId.value,
-         origClOrdIDInt64               |-> origClOrdIDInt64.value,
+         origClOrdId                    |-> origClOrdId.value,
          maxShow                        |-> maxShow.value,
          stopPx                         |-> stopPx.value,
          giveUpClearingFirm             |-> giveUpClearingFirm.value,
-         clearingFirmInt32              |-> clearingFirmInt32.value,
+         clearingFirm                   |-> clearingFirm.value,
          selfMatchPreventionId          |-> selfMatchPreventionId.value,
          expireDate                     |-> expireDate.value,
          selfMatchPreventionInstruction |-> selfMatchPreventionInstruction.value,
@@ -3363,29 +3363,29 @@ DecodeCancelReplaceRequestMessage(bytes) ==
          mifidId                        |-> mifidId.value,
          allocHandlInst                 |-> allocHandlInst.value,
          priceType                      |-> priceType.value,
-         clearingAccountString14        |-> clearingAccountString14.value,
+         clearingAccount                |-> clearingAccount.value,
          customerAccountRefId           |-> customerAccountRefId.value,
          memo                           |-> memo.value,
          allocationAccount              |-> allocationAccount.value,
          onBehalfOfCompId               |-> onBehalfOfCompId.value,
-         onBehalfOfSubIDString41        |-> onBehalfOfSubIDString41.value,
-         onBehalfOfLocationIDString41   |-> onBehalfOfLocationIDString41.value ], onBehalfOfLocationIDString41.rest)
+         onBehalfOfSubId                |-> onBehalfOfSubId.value,
+         onBehalfOfLocationId           |-> onBehalfOfLocationId.value ], onBehalfOfLocationId.rest)
 
 ZeroCancelReplaceRequestMessage ==
-    [ priceDecimal9Null              |-> [i \in 1 .. 8 |-> 0],
-      orderQtyDecimal9               |-> [i \in 1 .. 8 |-> 0],
-      symbolInt32                    |-> [i \in 1 .. 4 |-> 0],
-      timeInForceTimeInForceEnum     |-> [i \in 1 .. 1 |-> 0],
-      sideSideEnum                   |-> [i \in 1 .. 1 |-> 0],
+    [ priceOptional                  |-> [i \in 1 .. 8 |-> 0],
+      orderQty                       |-> [i \in 1 .. 8 |-> 0],
+      symbol                         |-> [i \in 1 .. 4 |-> 0],
+      timeInForce                    |-> [i \in 1 .. 1 |-> 0],
+      side                           |-> [i \in 1 .. 1 |-> 0],
       originatorUserId               |-> [i \in 1 .. 20 |-> 0],
-      ordTypeOrderTypeEnum           |-> [i \in 1 .. 1 |-> 0],
+      ordType                        |-> [i \in 1 .. 1 |-> 0],
       manualOrderIndicator           |-> [i \in 1 .. 1 |-> 0],
       clOrdId                        |-> [i \in 1 .. 8 |-> 0],
-      origClOrdIDInt64               |-> [i \in 1 .. 8 |-> 0],
+      origClOrdId                    |-> [i \in 1 .. 8 |-> 0],
       maxShow                        |-> [i \in 1 .. 8 |-> 0],
       stopPx                         |-> [i \in 1 .. 8 |-> 0],
       giveUpClearingFirm             |-> [i \in 1 .. 4 |-> 0],
-      clearingFirmInt32              |-> [i \in 1 .. 4 |-> 0],
+      clearingFirm                   |-> [i \in 1 .. 4 |-> 0],
       selfMatchPreventionId          |-> [i \in 1 .. 8 |-> 0],
       expireDate                     |-> [i \in 1 .. 2 |-> 0],
       selfMatchPreventionInstruction |-> [i \in 1 .. 1 |-> 0],
@@ -3400,31 +3400,31 @@ ZeroCancelReplaceRequestMessage ==
       mifidId                        |-> [i \in 1 .. 8 |-> 0],
       allocHandlInst                 |-> [i \in 1 .. 1 |-> 0],
       priceType                      |-> [i \in 1 .. 1 |-> 0],
-      clearingAccountString14        |-> [i \in 1 .. 14 |-> 0],
+      clearingAccount                |-> [i \in 1 .. 14 |-> 0],
       customerAccountRefId           |-> [i \in 1 .. 12 |-> 0],
       memo                           |-> [i \in 1 .. 30 |-> 0],
       allocationAccount              |-> [i \in 1 .. 20 |-> 0],
       onBehalfOfCompId               |-> [i \in 1 .. 41 |-> 0],
-      onBehalfOfSubIDString41        |-> [i \in 1 .. 41 |-> 0],
-      onBehalfOfLocationIDString41   |-> [i \in 1 .. 41 |-> 0] ]
+      onBehalfOfSubId                |-> [i \in 1 .. 41 |-> 0],
+      onBehalfOfLocationId           |-> [i \in 1 .. 41 |-> 0] ]
 
 (* Cancel Replace Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedCancelReplaceRequestMessage ==
     { ZeroCancelReplaceRequestMessage }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.priceDecimal9Null = one] : one \in Sample(8) }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.orderQtyDecimal9 = one] : one \in Sample(8) }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.timeInForceTimeInForceEnum = one] : one \in Sample(1) }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.sideSideEnum = one] : one \in Sample(1) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.priceOptional = one] : one \in Sample(8) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.orderQty = one] : one \in Sample(8) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.symbol = one] : one \in Sample(4) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.timeInForce = one] : one \in Sample(1) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.ordTypeOrderTypeEnum = one] : one \in Sample(1) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.ordType = one] : one \in Sample(1) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.origClOrdIDInt64 = one] : one \in Sample(8) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.origClOrdId = one] : one \in Sample(8) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.maxShow = one] : one \in Sample(8) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.stopPx = one] : one \in Sample(8) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.giveUpClearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.clearingFirmInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.selfMatchPreventionId = one] : one \in Sample(8) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.expireDate = one] : one \in Sample(2) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.selfMatchPreventionInstruction = one] : one \in Sample(1) }
@@ -3439,145 +3439,145 @@ CheckedCancelReplaceRequestMessage ==
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.mifidId = one] : one \in Sample(8) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.allocHandlInst = one] : one \in Sample(1) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.priceType = one] : one \in Sample(1) }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.clearingAccountString14 = one] : one \in Sample(14) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.clearingAccount = one] : one \in Sample(14) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.customerAccountRefId = one] : one \in Sample(12) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.memo = one] : one \in Sample(30) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.allocationAccount = one] : one \in Sample(20) }
         \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.onBehalfOfCompId = one] : one \in Sample(41) }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.onBehalfOfSubIDString41 = one] : one \in Sample(41) }
-        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.onBehalfOfLocationIDString41 = one] : one \in Sample(41) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.onBehalfOfSubId = one] : one \in Sample(41) }
+        \cup { [ZeroCancelReplaceRequestMessage EXCEPT !.onBehalfOfLocationId = one] : one \in Sample(41) }
 
 (***************************************************************************)
 (* Cancel Request Message: 41 bytes                                        *)
 (***************************************************************************)
 
 CancelRequestMessage ==
-    [ symbolInt32      : Sample(4),
+    [ symbol           : Sample(4),
       originatorUserId : Sample(20),
       clOrdId          : Sample(8),
-      origClOrdIDInt64 : Sample(8),
-      sideSideEnum     : Sample(1) ]
+      origClOrdId      : Sample(8),
+      side             : Sample(1) ]
 
 EncodeCancelRequestMessage(message) ==
-    message.symbolInt32
+    message.symbol
         \o message.originatorUserId
         \o message.clOrdId
-        \o message.origClOrdIDInt64
-        \o message.sideSideEnum
+        \o message.origClOrdId
+        \o message.side
 
 DecodeCancelRequestMessage(bytes) ==
-    LET symbolInt32 == ReadBytes(bytes, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET originatorUserId == ReadBytes(symbolInt32.rest, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
+    LET symbol == ReadBytes(bytes, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET originatorUserId == ReadBytes(symbol.rest, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(originatorUserId.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
-    LET origClOrdIDInt64 == ReadBytes(clOrdId.rest, 8) IN IF ~origClOrdIDInt64.ok THEN Fail ELSE
-    LET sideSideEnum == ReadBytes(origClOrdIDInt64.rest, 1) IN IF ~sideSideEnum.ok THEN Fail ELSE
-    Ok([ symbolInt32      |-> symbolInt32.value,
+    LET origClOrdId == ReadBytes(clOrdId.rest, 8) IN IF ~origClOrdId.ok THEN Fail ELSE
+    LET side == ReadBytes(origClOrdId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    Ok([ symbol           |-> symbol.value,
          originatorUserId |-> originatorUserId.value,
          clOrdId          |-> clOrdId.value,
-         origClOrdIDInt64 |-> origClOrdIDInt64.value,
-         sideSideEnum     |-> sideSideEnum.value ], sideSideEnum.rest)
+         origClOrdId      |-> origClOrdId.value,
+         side             |-> side.value ], side.rest)
 
 ZeroCancelRequestMessage ==
-    [ symbolInt32      |-> [i \in 1 .. 4 |-> 0],
+    [ symbol           |-> [i \in 1 .. 4 |-> 0],
       originatorUserId |-> [i \in 1 .. 20 |-> 0],
       clOrdId          |-> [i \in 1 .. 8 |-> 0],
-      origClOrdIDInt64 |-> [i \in 1 .. 8 |-> 0],
-      sideSideEnum     |-> [i \in 1 .. 1 |-> 0] ]
+      origClOrdId      |-> [i \in 1 .. 8 |-> 0],
+      side             |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Cancel Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedCancelRequestMessage ==
     { ZeroCancelRequestMessage }
-        \cup { [ZeroCancelRequestMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroCancelRequestMessage EXCEPT !.symbol = one] : one \in Sample(4) }
         \cup { [ZeroCancelRequestMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
         \cup { [ZeroCancelRequestMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
-        \cup { [ZeroCancelRequestMessage EXCEPT !.origClOrdIDInt64 = one] : one \in Sample(8) }
-        \cup { [ZeroCancelRequestMessage EXCEPT !.sideSideEnum = one] : one \in Sample(1) }
+        \cup { [ZeroCancelRequestMessage EXCEPT !.origClOrdId = one] : one \in Sample(8) }
+        \cup { [ZeroCancelRequestMessage EXCEPT !.side = one] : one \in Sample(1) }
 
 (***************************************************************************)
 (* Quote Request Message: 182 bytes                                        *)
 (***************************************************************************)
 
 QuoteRequestMessage ==
-    [ originatorUserId             : Sample(20),
-      sideSideEnumNull             : Sample(1),
-      orderQtyDecimal9Null         : Sample(8),
-      rfqReqId                     : Sample(8),
-      symbolInt32                  : Sample(4),
-      clearingFirmInt32Null        : Sample(4),
-      clearingAccountString14Null  : Sample(14),
-      onBehalfOfCompId             : Sample(41),
-      onBehalfOfSubIDString41      : Sample(41),
-      onBehalfOfLocationIDString41 : Sample(41) ]
+    [ originatorUserId        : Sample(20),
+      sideOptional            : Sample(1),
+      orderQtyOptional        : Sample(8),
+      rfqReqId                : Sample(8),
+      symbol                  : Sample(4),
+      clearingFirmOptional    : Sample(4),
+      clearingAccountOptional : Sample(14),
+      onBehalfOfCompId        : Sample(41),
+      onBehalfOfSubId         : Sample(41),
+      onBehalfOfLocationId    : Sample(41) ]
 
 EncodeQuoteRequestMessage(message) ==
     message.originatorUserId
-        \o message.sideSideEnumNull
-        \o message.orderQtyDecimal9Null
+        \o message.sideOptional
+        \o message.orderQtyOptional
         \o message.rfqReqId
-        \o message.symbolInt32
-        \o message.clearingFirmInt32Null
-        \o message.clearingAccountString14Null
+        \o message.symbol
+        \o message.clearingFirmOptional
+        \o message.clearingAccountOptional
         \o message.onBehalfOfCompId
-        \o message.onBehalfOfSubIDString41
-        \o message.onBehalfOfLocationIDString41
+        \o message.onBehalfOfSubId
+        \o message.onBehalfOfLocationId
 
 DecodeQuoteRequestMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
-    LET sideSideEnumNull == ReadBytes(originatorUserId.rest, 1) IN IF ~sideSideEnumNull.ok THEN Fail ELSE
-    LET orderQtyDecimal9Null == ReadBytes(sideSideEnumNull.rest, 8) IN IF ~orderQtyDecimal9Null.ok THEN Fail ELSE
-    LET rfqReqId == ReadBytes(orderQtyDecimal9Null.rest, 8) IN IF ~rfqReqId.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(rfqReqId.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET clearingFirmInt32Null == ReadBytes(symbolInt32.rest, 4) IN IF ~clearingFirmInt32Null.ok THEN Fail ELSE
-    LET clearingAccountString14Null == ReadBytes(clearingFirmInt32Null.rest, 14) IN IF ~clearingAccountString14Null.ok THEN Fail ELSE
-    LET onBehalfOfCompId == ReadBytes(clearingAccountString14Null.rest, 41) IN IF ~onBehalfOfCompId.ok THEN Fail ELSE
-    LET onBehalfOfSubIDString41 == ReadBytes(onBehalfOfCompId.rest, 41) IN IF ~onBehalfOfSubIDString41.ok THEN Fail ELSE
-    LET onBehalfOfLocationIDString41 == ReadBytes(onBehalfOfSubIDString41.rest, 41) IN IF ~onBehalfOfLocationIDString41.ok THEN Fail ELSE
-    Ok([ originatorUserId             |-> originatorUserId.value,
-         sideSideEnumNull             |-> sideSideEnumNull.value,
-         orderQtyDecimal9Null         |-> orderQtyDecimal9Null.value,
-         rfqReqId                     |-> rfqReqId.value,
-         symbolInt32                  |-> symbolInt32.value,
-         clearingFirmInt32Null        |-> clearingFirmInt32Null.value,
-         clearingAccountString14Null  |-> clearingAccountString14Null.value,
-         onBehalfOfCompId             |-> onBehalfOfCompId.value,
-         onBehalfOfSubIDString41      |-> onBehalfOfSubIDString41.value,
-         onBehalfOfLocationIDString41 |-> onBehalfOfLocationIDString41.value ], onBehalfOfLocationIDString41.rest)
+    LET sideOptional == ReadBytes(originatorUserId.rest, 1) IN IF ~sideOptional.ok THEN Fail ELSE
+    LET orderQtyOptional == ReadBytes(sideOptional.rest, 8) IN IF ~orderQtyOptional.ok THEN Fail ELSE
+    LET rfqReqId == ReadBytes(orderQtyOptional.rest, 8) IN IF ~rfqReqId.ok THEN Fail ELSE
+    LET symbol == ReadBytes(rfqReqId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET clearingFirmOptional == ReadBytes(symbol.rest, 4) IN IF ~clearingFirmOptional.ok THEN Fail ELSE
+    LET clearingAccountOptional == ReadBytes(clearingFirmOptional.rest, 14) IN IF ~clearingAccountOptional.ok THEN Fail ELSE
+    LET onBehalfOfCompId == ReadBytes(clearingAccountOptional.rest, 41) IN IF ~onBehalfOfCompId.ok THEN Fail ELSE
+    LET onBehalfOfSubId == ReadBytes(onBehalfOfCompId.rest, 41) IN IF ~onBehalfOfSubId.ok THEN Fail ELSE
+    LET onBehalfOfLocationId == ReadBytes(onBehalfOfSubId.rest, 41) IN IF ~onBehalfOfLocationId.ok THEN Fail ELSE
+    Ok([ originatorUserId        |-> originatorUserId.value,
+         sideOptional            |-> sideOptional.value,
+         orderQtyOptional        |-> orderQtyOptional.value,
+         rfqReqId                |-> rfqReqId.value,
+         symbol                  |-> symbol.value,
+         clearingFirmOptional    |-> clearingFirmOptional.value,
+         clearingAccountOptional |-> clearingAccountOptional.value,
+         onBehalfOfCompId        |-> onBehalfOfCompId.value,
+         onBehalfOfSubId         |-> onBehalfOfSubId.value,
+         onBehalfOfLocationId    |-> onBehalfOfLocationId.value ], onBehalfOfLocationId.rest)
 
 ZeroQuoteRequestMessage ==
-    [ originatorUserId             |-> [i \in 1 .. 20 |-> 0],
-      sideSideEnumNull             |-> [i \in 1 .. 1 |-> 0],
-      orderQtyDecimal9Null         |-> [i \in 1 .. 8 |-> 0],
-      rfqReqId                     |-> [i \in 1 .. 8 |-> 0],
-      symbolInt32                  |-> [i \in 1 .. 4 |-> 0],
-      clearingFirmInt32Null        |-> [i \in 1 .. 4 |-> 0],
-      clearingAccountString14Null  |-> [i \in 1 .. 14 |-> 0],
-      onBehalfOfCompId             |-> [i \in 1 .. 41 |-> 0],
-      onBehalfOfSubIDString41      |-> [i \in 1 .. 41 |-> 0],
-      onBehalfOfLocationIDString41 |-> [i \in 1 .. 41 |-> 0] ]
+    [ originatorUserId        |-> [i \in 1 .. 20 |-> 0],
+      sideOptional            |-> [i \in 1 .. 1 |-> 0],
+      orderQtyOptional        |-> [i \in 1 .. 8 |-> 0],
+      rfqReqId                |-> [i \in 1 .. 8 |-> 0],
+      symbol                  |-> [i \in 1 .. 4 |-> 0],
+      clearingFirmOptional    |-> [i \in 1 .. 4 |-> 0],
+      clearingAccountOptional |-> [i \in 1 .. 14 |-> 0],
+      onBehalfOfCompId        |-> [i \in 1 .. 41 |-> 0],
+      onBehalfOfSubId         |-> [i \in 1 .. 41 |-> 0],
+      onBehalfOfLocationId    |-> [i \in 1 .. 41 |-> 0] ]
 
 (* Quote Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedQuoteRequestMessage ==
     { ZeroQuoteRequestMessage }
         \cup { [ZeroQuoteRequestMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
-        \cup { [ZeroQuoteRequestMessage EXCEPT !.sideSideEnumNull = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteRequestMessage EXCEPT !.orderQtyDecimal9Null = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteRequestMessage EXCEPT !.sideOptional = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteRequestMessage EXCEPT !.orderQtyOptional = one] : one \in Sample(8) }
         \cup { [ZeroQuoteRequestMessage EXCEPT !.rfqReqId = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteRequestMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroQuoteRequestMessage EXCEPT !.clearingFirmInt32Null = one] : one \in Sample(4) }
-        \cup { [ZeroQuoteRequestMessage EXCEPT !.clearingAccountString14Null = one] : one \in Sample(14) }
+        \cup { [ZeroQuoteRequestMessage EXCEPT !.symbol = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteRequestMessage EXCEPT !.clearingFirmOptional = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteRequestMessage EXCEPT !.clearingAccountOptional = one] : one \in Sample(14) }
         \cup { [ZeroQuoteRequestMessage EXCEPT !.onBehalfOfCompId = one] : one \in Sample(41) }
-        \cup { [ZeroQuoteRequestMessage EXCEPT !.onBehalfOfSubIDString41 = one] : one \in Sample(41) }
-        \cup { [ZeroQuoteRequestMessage EXCEPT !.onBehalfOfLocationIDString41 = one] : one \in Sample(41) }
+        \cup { [ZeroQuoteRequestMessage EXCEPT !.onBehalfOfSubId = one] : one \in Sample(41) }
+        \cup { [ZeroQuoteRequestMessage EXCEPT !.onBehalfOfLocationId = one] : one \in Sample(41) }
 
 (***************************************************************************)
 (* New Order Cross Request Message no Sides Group: 265 bytes               *)
 (***************************************************************************)
 
 NewOrderCrossRequestMessageNoSidesGroup ==
-    [ sideSideEnum                   : Sample(1),
+    [ side                           : Sample(1),
       clOrdId                        : Sample(8),
       giveUpClearingFirm             : Sample(4),
-      clearingFirmInt32              : Sample(4),
+      clearingFirm                   : Sample(4),
       directElectronicAccess         : Sample(1),
       tradingCapacity                : Sample(1),
       liquidityProvision             : Sample(1),
@@ -3592,19 +3592,19 @@ NewOrderCrossRequestMessageNoSidesGroup ==
       custOrderHandlingInst          : Sample(1),
       positionEffect                 : Sample(1),
       allocHandlInst                 : Sample(1),
-      clearingAccountString14        : Sample(14),
+      clearingAccount                : Sample(14),
       customerAccountRefId           : Sample(12),
       memo                           : Sample(30),
       allocationAccount              : Sample(20),
       onBehalfOfCompId               : Sample(41),
-      onBehalfOfSubIDString41        : Sample(41),
-      onBehalfOfLocationIDString41   : Sample(41) ]
+      onBehalfOfSubId                : Sample(41),
+      onBehalfOfLocationId           : Sample(41) ]
 
 EncodeNewOrderCrossRequestMessageNoSidesGroup(message) ==
-    message.sideSideEnum
+    message.side
         \o message.clOrdId
         \o message.giveUpClearingFirm
-        \o message.clearingFirmInt32
+        \o message.clearingFirm
         \o message.directElectronicAccess
         \o message.tradingCapacity
         \o message.liquidityProvision
@@ -3619,20 +3619,20 @@ EncodeNewOrderCrossRequestMessageNoSidesGroup(message) ==
         \o message.custOrderHandlingInst
         \o message.positionEffect
         \o message.allocHandlInst
-        \o message.clearingAccountString14
+        \o message.clearingAccount
         \o message.customerAccountRefId
         \o message.memo
         \o message.allocationAccount
         \o message.onBehalfOfCompId
-        \o message.onBehalfOfSubIDString41
-        \o message.onBehalfOfLocationIDString41
+        \o message.onBehalfOfSubId
+        \o message.onBehalfOfLocationId
 
 DecodeNewOrderCrossRequestMessageNoSidesGroup(bytes) ==
-    LET sideSideEnum == ReadBytes(bytes, 1) IN IF ~sideSideEnum.ok THEN Fail ELSE
-    LET clOrdId == ReadBytes(sideSideEnum.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET side == ReadBytes(bytes, 1) IN IF ~side.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(side.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
     LET giveUpClearingFirm == ReadBytes(clOrdId.rest, 4) IN IF ~giveUpClearingFirm.ok THEN Fail ELSE
-    LET clearingFirmInt32 == ReadBytes(giveUpClearingFirm.rest, 4) IN IF ~clearingFirmInt32.ok THEN Fail ELSE
-    LET directElectronicAccess == ReadBytes(clearingFirmInt32.rest, 1) IN IF ~directElectronicAccess.ok THEN Fail ELSE
+    LET clearingFirm == ReadBytes(giveUpClearingFirm.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
+    LET directElectronicAccess == ReadBytes(clearingFirm.rest, 1) IN IF ~directElectronicAccess.ok THEN Fail ELSE
     LET tradingCapacity == ReadBytes(directElectronicAccess.rest, 1) IN IF ~tradingCapacity.ok THEN Fail ELSE
     LET liquidityProvision == ReadBytes(tradingCapacity.rest, 1) IN IF ~liquidityProvision.ok THEN Fail ELSE
     LET commodityDerivIndicator == ReadBytes(liquidityProvision.rest, 1) IN IF ~commodityDerivIndicator.ok THEN Fail ELSE
@@ -3646,17 +3646,17 @@ DecodeNewOrderCrossRequestMessageNoSidesGroup(bytes) ==
     LET custOrderHandlingInst == ReadBytes(manualOrderIndicator.rest, 1) IN IF ~custOrderHandlingInst.ok THEN Fail ELSE
     LET positionEffect == ReadBytes(custOrderHandlingInst.rest, 1) IN IF ~positionEffect.ok THEN Fail ELSE
     LET allocHandlInst == ReadBytes(positionEffect.rest, 1) IN IF ~allocHandlInst.ok THEN Fail ELSE
-    LET clearingAccountString14 == ReadBytes(allocHandlInst.rest, 14) IN IF ~clearingAccountString14.ok THEN Fail ELSE
-    LET customerAccountRefId == ReadBytes(clearingAccountString14.rest, 12) IN IF ~customerAccountRefId.ok THEN Fail ELSE
+    LET clearingAccount == ReadBytes(allocHandlInst.rest, 14) IN IF ~clearingAccount.ok THEN Fail ELSE
+    LET customerAccountRefId == ReadBytes(clearingAccount.rest, 12) IN IF ~customerAccountRefId.ok THEN Fail ELSE
     LET memo == ReadBytes(customerAccountRefId.rest, 30) IN IF ~memo.ok THEN Fail ELSE
     LET allocationAccount == ReadBytes(memo.rest, 20) IN IF ~allocationAccount.ok THEN Fail ELSE
     LET onBehalfOfCompId == ReadBytes(allocationAccount.rest, 41) IN IF ~onBehalfOfCompId.ok THEN Fail ELSE
-    LET onBehalfOfSubIDString41 == ReadBytes(onBehalfOfCompId.rest, 41) IN IF ~onBehalfOfSubIDString41.ok THEN Fail ELSE
-    LET onBehalfOfLocationIDString41 == ReadBytes(onBehalfOfSubIDString41.rest, 41) IN IF ~onBehalfOfLocationIDString41.ok THEN Fail ELSE
-    Ok([ sideSideEnum                   |-> sideSideEnum.value,
+    LET onBehalfOfSubId == ReadBytes(onBehalfOfCompId.rest, 41) IN IF ~onBehalfOfSubId.ok THEN Fail ELSE
+    LET onBehalfOfLocationId == ReadBytes(onBehalfOfSubId.rest, 41) IN IF ~onBehalfOfLocationId.ok THEN Fail ELSE
+    Ok([ side                           |-> side.value,
          clOrdId                        |-> clOrdId.value,
          giveUpClearingFirm             |-> giveUpClearingFirm.value,
-         clearingFirmInt32              |-> clearingFirmInt32.value,
+         clearingFirm                   |-> clearingFirm.value,
          directElectronicAccess         |-> directElectronicAccess.value,
          tradingCapacity                |-> tradingCapacity.value,
          liquidityProvision             |-> liquidityProvision.value,
@@ -3671,19 +3671,19 @@ DecodeNewOrderCrossRequestMessageNoSidesGroup(bytes) ==
          custOrderHandlingInst          |-> custOrderHandlingInst.value,
          positionEffect                 |-> positionEffect.value,
          allocHandlInst                 |-> allocHandlInst.value,
-         clearingAccountString14        |-> clearingAccountString14.value,
+         clearingAccount                |-> clearingAccount.value,
          customerAccountRefId           |-> customerAccountRefId.value,
          memo                           |-> memo.value,
          allocationAccount              |-> allocationAccount.value,
          onBehalfOfCompId               |-> onBehalfOfCompId.value,
-         onBehalfOfSubIDString41        |-> onBehalfOfSubIDString41.value,
-         onBehalfOfLocationIDString41   |-> onBehalfOfLocationIDString41.value ], onBehalfOfLocationIDString41.rest)
+         onBehalfOfSubId                |-> onBehalfOfSubId.value,
+         onBehalfOfLocationId           |-> onBehalfOfLocationId.value ], onBehalfOfLocationId.rest)
 
 ZeroNewOrderCrossRequestMessageNoSidesGroup ==
-    [ sideSideEnum                   |-> [i \in 1 .. 1 |-> 0],
+    [ side                           |-> [i \in 1 .. 1 |-> 0],
       clOrdId                        |-> [i \in 1 .. 8 |-> 0],
       giveUpClearingFirm             |-> [i \in 1 .. 4 |-> 0],
-      clearingFirmInt32              |-> [i \in 1 .. 4 |-> 0],
+      clearingFirm                   |-> [i \in 1 .. 4 |-> 0],
       directElectronicAccess         |-> [i \in 1 .. 1 |-> 0],
       tradingCapacity                |-> [i \in 1 .. 1 |-> 0],
       liquidityProvision             |-> [i \in 1 .. 1 |-> 0],
@@ -3698,21 +3698,21 @@ ZeroNewOrderCrossRequestMessageNoSidesGroup ==
       custOrderHandlingInst          |-> [i \in 1 .. 1 |-> 0],
       positionEffect                 |-> [i \in 1 .. 1 |-> 0],
       allocHandlInst                 |-> [i \in 1 .. 1 |-> 0],
-      clearingAccountString14        |-> [i \in 1 .. 14 |-> 0],
+      clearingAccount                |-> [i \in 1 .. 14 |-> 0],
       customerAccountRefId           |-> [i \in 1 .. 12 |-> 0],
       memo                           |-> [i \in 1 .. 30 |-> 0],
       allocationAccount              |-> [i \in 1 .. 20 |-> 0],
       onBehalfOfCompId               |-> [i \in 1 .. 41 |-> 0],
-      onBehalfOfSubIDString41        |-> [i \in 1 .. 41 |-> 0],
-      onBehalfOfLocationIDString41   |-> [i \in 1 .. 41 |-> 0] ]
+      onBehalfOfSubId                |-> [i \in 1 .. 41 |-> 0],
+      onBehalfOfLocationId           |-> [i \in 1 .. 41 |-> 0] ]
 
 (* New Order Cross Request Message no Sides Group at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderCrossRequestMessageNoSidesGroup ==
     { ZeroNewOrderCrossRequestMessageNoSidesGroup }
-        \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.sideSideEnum = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.giveUpClearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.clearingFirmInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.clearingFirm = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.directElectronicAccess = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.tradingCapacity = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.liquidityProvision = one] : one \in Sample(1) }
@@ -3727,13 +3727,13 @@ CheckedNewOrderCrossRequestMessageNoSidesGroup ==
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.custOrderHandlingInst = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.positionEffect = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.allocHandlInst = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.clearingAccountString14 = one] : one \in Sample(14) }
+        \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.clearingAccount = one] : one \in Sample(14) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.customerAccountRefId = one] : one \in Sample(12) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.memo = one] : one \in Sample(30) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.allocationAccount = one] : one \in Sample(20) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.onBehalfOfCompId = one] : one \in Sample(41) }
-        \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.onBehalfOfSubIDString41 = one] : one \in Sample(41) }
-        \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.onBehalfOfLocationIDString41 = one] : one \in Sample(41) }
+        \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.onBehalfOfSubId = one] : one \in Sample(41) }
+        \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.onBehalfOfLocationId = one] : one \in Sample(41) }
 
 (* A run of New Order Cross Request Message no Sides Group, written one after another *)
 RECURSIVE EncodeNewOrderCrossRequestMessageNoSidesGroupList(_)
@@ -3791,7 +3791,7 @@ CheckedNewOrderCrossRequestMessageNoSidesGroups ==
 (***************************************************************************)
 
 NewOrderCrossRequestMessageNoLegsGroup ==
-    [ legSymbolInt32Null  : Sample(4),
+    [ legSymbolOptional   : Sample(4),
       legSecurityIdSource : Sample(1),
       legOptAttribute     : Sample(4),
       legQty              : Sample(8),
@@ -3801,7 +3801,7 @@ NewOrderCrossRequestMessageNoLegsGroup ==
       legSecurityId       : Sample(75) ]
 
 EncodeNewOrderCrossRequestMessageNoLegsGroup(message) ==
-    message.legSymbolInt32Null
+    message.legSymbolOptional
         \o message.legSecurityIdSource
         \o message.legOptAttribute
         \o message.legQty
@@ -3811,15 +3811,15 @@ EncodeNewOrderCrossRequestMessageNoLegsGroup(message) ==
         \o message.legSecurityId
 
 DecodeNewOrderCrossRequestMessageNoLegsGroup(bytes) ==
-    LET legSymbolInt32Null == ReadBytes(bytes, 4) IN IF ~legSymbolInt32Null.ok THEN Fail ELSE
-    LET legSecurityIdSource == ReadBytes(legSymbolInt32Null.rest, 1) IN IF ~legSecurityIdSource.ok THEN Fail ELSE
+    LET legSymbolOptional == ReadBytes(bytes, 4) IN IF ~legSymbolOptional.ok THEN Fail ELSE
+    LET legSecurityIdSource == ReadBytes(legSymbolOptional.rest, 1) IN IF ~legSecurityIdSource.ok THEN Fail ELSE
     LET legOptAttribute == ReadBytes(legSecurityIdSource.rest, 4) IN IF ~legOptAttribute.ok THEN Fail ELSE
     LET legQty == ReadBytes(legOptAttribute.rest, 8) IN IF ~legQty.ok THEN Fail ELSE
     LET legPrice == ReadBytes(legQty.rest, 8) IN IF ~legPrice.ok THEN Fail ELSE
     LET legSecurityType == ReadBytes(legPrice.rest, 1) IN IF ~legSecurityType.ok THEN Fail ELSE
     LET legMemoField == ReadBytes(legSecurityType.rest, 12) IN IF ~legMemoField.ok THEN Fail ELSE
     LET legSecurityId == ReadBytes(legMemoField.rest, 75) IN IF ~legSecurityId.ok THEN Fail ELSE
-    Ok([ legSymbolInt32Null  |-> legSymbolInt32Null.value,
+    Ok([ legSymbolOptional   |-> legSymbolOptional.value,
          legSecurityIdSource |-> legSecurityIdSource.value,
          legOptAttribute     |-> legOptAttribute.value,
          legQty              |-> legQty.value,
@@ -3829,7 +3829,7 @@ DecodeNewOrderCrossRequestMessageNoLegsGroup(bytes) ==
          legSecurityId       |-> legSecurityId.value ], legSecurityId.rest)
 
 ZeroNewOrderCrossRequestMessageNoLegsGroup ==
-    [ legSymbolInt32Null  |-> [i \in 1 .. 4 |-> 0],
+    [ legSymbolOptional   |-> [i \in 1 .. 4 |-> 0],
       legSecurityIdSource |-> [i \in 1 .. 1 |-> 0],
       legOptAttribute     |-> [i \in 1 .. 4 |-> 0],
       legQty              |-> [i \in 1 .. 8 |-> 0],
@@ -3841,7 +3841,7 @@ ZeroNewOrderCrossRequestMessageNoLegsGroup ==
 (* New Order Cross Request Message no Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderCrossRequestMessageNoLegsGroup ==
     { ZeroNewOrderCrossRequestMessageNoLegsGroup }
-        \cup { [ZeroNewOrderCrossRequestMessageNoLegsGroup EXCEPT !.legSymbolInt32Null = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderCrossRequestMessageNoLegsGroup EXCEPT !.legSymbolOptional = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderCrossRequestMessageNoLegsGroup EXCEPT !.legSecurityIdSource = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossRequestMessageNoLegsGroup EXCEPT !.legOptAttribute = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderCrossRequestMessageNoLegsGroup EXCEPT !.legQty = one] : one \in Sample(8) }
@@ -3906,13 +3906,13 @@ CheckedNewOrderCrossRequestMessageNoLegsGroups ==
 (***************************************************************************)
 
 NewOrderCrossRequestMessage ==
-    [ priceDecimal9                            : Sample(8),
-      orderQtyDecimal9                         : Sample(8),
-      symbolInt32                              : Sample(4),
+    [ price                                    : Sample(8),
+      orderQty                                 : Sample(8),
+      symbol                                   : Sample(4),
       originatorUserId                         : Sample(20),
-      ordTypeOrderTypeEnum                     : Sample(1),
-      crossIDInt64                             : Sample(8),
-      crossTypeCrossTypeEnum                   : Sample(1),
+      ordType                                  : Sample(1),
+      crossId                                  : Sample(8),
+      crossType                                : Sample(1),
       tradeType                                : Sample(3),
       execInst                                 : Sample(1),
       priceType                                : Sample(1),
@@ -3920,20 +3920,20 @@ NewOrderCrossRequestMessage ==
       hedgeOnly                                : Sample(1),
       benchmarkPrice                           : Sample(8),
       benchMarkPriceType                       : Sample(1),
-      timeInForceTimeInForceEnum               : Sample(1),
+      timeInForce                              : Sample(1),
       transactDetails                          : Sample(100),
-      transactTimeUtcTimestamp                 : Sample(8),
+      transactTime                             : Sample(8),
       newOrderCrossRequestMessageNoSidesGroups : NewOrderCrossRequestMessageNoSidesGroups,
       newOrderCrossRequestMessageNoLegsGroups  : NewOrderCrossRequestMessageNoLegsGroups ]
 
 EncodeNewOrderCrossRequestMessage(message) ==
-    message.priceDecimal9
-        \o message.orderQtyDecimal9
-        \o message.symbolInt32
+    message.price
+        \o message.orderQty
+        \o message.symbol
         \o message.originatorUserId
-        \o message.ordTypeOrderTypeEnum
-        \o message.crossIDInt64
-        \o message.crossTypeCrossTypeEnum
+        \o message.ordType
+        \o message.crossId
+        \o message.crossType
         \o message.tradeType
         \o message.execInst
         \o message.priceType
@@ -3941,39 +3941,39 @@ EncodeNewOrderCrossRequestMessage(message) ==
         \o message.hedgeOnly
         \o message.benchmarkPrice
         \o message.benchMarkPriceType
-        \o message.timeInForceTimeInForceEnum
+        \o message.timeInForce
         \o message.transactDetails
-        \o message.transactTimeUtcTimestamp
+        \o message.transactTime
         \o EncodeNewOrderCrossRequestMessageNoSidesGroups(message.newOrderCrossRequestMessageNoSidesGroups)
         \o EncodeNewOrderCrossRequestMessageNoLegsGroups(message.newOrderCrossRequestMessageNoLegsGroups)
 
 DecodeNewOrderCrossRequestMessage(bytes) ==
-    LET priceDecimal9 == ReadBytes(bytes, 8) IN IF ~priceDecimal9.ok THEN Fail ELSE
-    LET orderQtyDecimal9 == ReadBytes(priceDecimal9.rest, 8) IN IF ~orderQtyDecimal9.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(orderQtyDecimal9.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET originatorUserId == ReadBytes(symbolInt32.rest, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
-    LET ordTypeOrderTypeEnum == ReadBytes(originatorUserId.rest, 1) IN IF ~ordTypeOrderTypeEnum.ok THEN Fail ELSE
-    LET crossIDInt64 == ReadBytes(ordTypeOrderTypeEnum.rest, 8) IN IF ~crossIDInt64.ok THEN Fail ELSE
-    LET crossTypeCrossTypeEnum == ReadBytes(crossIDInt64.rest, 1) IN IF ~crossTypeCrossTypeEnum.ok THEN Fail ELSE
-    LET tradeType == ReadBytes(crossTypeCrossTypeEnum.rest, 3) IN IF ~tradeType.ok THEN Fail ELSE
+    LET price == ReadBytes(bytes, 8) IN IF ~price.ok THEN Fail ELSE
+    LET orderQty == ReadBytes(price.rest, 8) IN IF ~orderQty.ok THEN Fail ELSE
+    LET symbol == ReadBytes(orderQty.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET originatorUserId == ReadBytes(symbol.rest, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
+    LET ordType == ReadBytes(originatorUserId.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
+    LET crossId == ReadBytes(ordType.rest, 8) IN IF ~crossId.ok THEN Fail ELSE
+    LET crossType == ReadBytes(crossId.rest, 1) IN IF ~crossType.ok THEN Fail ELSE
+    LET tradeType == ReadBytes(crossType.rest, 3) IN IF ~tradeType.ok THEN Fail ELSE
     LET execInst == ReadBytes(tradeType.rest, 1) IN IF ~execInst.ok THEN Fail ELSE
     LET priceType == ReadBytes(execInst.rest, 1) IN IF ~priceType.ok THEN Fail ELSE
     LET bypassMqr == ReadBytes(priceType.rest, 1) IN IF ~bypassMqr.ok THEN Fail ELSE
     LET hedgeOnly == ReadBytes(bypassMqr.rest, 1) IN IF ~hedgeOnly.ok THEN Fail ELSE
     LET benchmarkPrice == ReadBytes(hedgeOnly.rest, 8) IN IF ~benchmarkPrice.ok THEN Fail ELSE
     LET benchMarkPriceType == ReadBytes(benchmarkPrice.rest, 1) IN IF ~benchMarkPriceType.ok THEN Fail ELSE
-    LET timeInForceTimeInForceEnum == ReadBytes(benchMarkPriceType.rest, 1) IN IF ~timeInForceTimeInForceEnum.ok THEN Fail ELSE
-    LET transactDetails == ReadBytes(timeInForceTimeInForceEnum.rest, 100) IN IF ~transactDetails.ok THEN Fail ELSE
-    LET transactTimeUtcTimestamp == ReadBytes(transactDetails.rest, 8) IN IF ~transactTimeUtcTimestamp.ok THEN Fail ELSE
-    LET newOrderCrossRequestMessageNoSidesGroups == DecodeNewOrderCrossRequestMessageNoSidesGroups(transactTimeUtcTimestamp.rest) IN IF ~newOrderCrossRequestMessageNoSidesGroups.ok THEN Fail ELSE
+    LET timeInForce == ReadBytes(benchMarkPriceType.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
+    LET transactDetails == ReadBytes(timeInForce.rest, 100) IN IF ~transactDetails.ok THEN Fail ELSE
+    LET transactTime == ReadBytes(transactDetails.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET newOrderCrossRequestMessageNoSidesGroups == DecodeNewOrderCrossRequestMessageNoSidesGroups(transactTime.rest) IN IF ~newOrderCrossRequestMessageNoSidesGroups.ok THEN Fail ELSE
     LET newOrderCrossRequestMessageNoLegsGroups == DecodeNewOrderCrossRequestMessageNoLegsGroups(newOrderCrossRequestMessageNoSidesGroups.rest) IN IF ~newOrderCrossRequestMessageNoLegsGroups.ok THEN Fail ELSE
-    Ok([ priceDecimal9                            |-> priceDecimal9.value,
-         orderQtyDecimal9                         |-> orderQtyDecimal9.value,
-         symbolInt32                              |-> symbolInt32.value,
+    Ok([ price                                    |-> price.value,
+         orderQty                                 |-> orderQty.value,
+         symbol                                   |-> symbol.value,
          originatorUserId                         |-> originatorUserId.value,
-         ordTypeOrderTypeEnum                     |-> ordTypeOrderTypeEnum.value,
-         crossIDInt64                             |-> crossIDInt64.value,
-         crossTypeCrossTypeEnum                   |-> crossTypeCrossTypeEnum.value,
+         ordType                                  |-> ordType.value,
+         crossId                                  |-> crossId.value,
+         crossType                                |-> crossType.value,
          tradeType                                |-> tradeType.value,
          execInst                                 |-> execInst.value,
          priceType                                |-> priceType.value,
@@ -3981,20 +3981,20 @@ DecodeNewOrderCrossRequestMessage(bytes) ==
          hedgeOnly                                |-> hedgeOnly.value,
          benchmarkPrice                           |-> benchmarkPrice.value,
          benchMarkPriceType                       |-> benchMarkPriceType.value,
-         timeInForceTimeInForceEnum               |-> timeInForceTimeInForceEnum.value,
+         timeInForce                              |-> timeInForce.value,
          transactDetails                          |-> transactDetails.value,
-         transactTimeUtcTimestamp                 |-> transactTimeUtcTimestamp.value,
+         transactTime                             |-> transactTime.value,
          newOrderCrossRequestMessageNoSidesGroups |-> newOrderCrossRequestMessageNoSidesGroups.value,
          newOrderCrossRequestMessageNoLegsGroups  |-> newOrderCrossRequestMessageNoLegsGroups.value ], newOrderCrossRequestMessageNoLegsGroups.rest)
 
 ZeroNewOrderCrossRequestMessage ==
-    [ priceDecimal9                            |-> [i \in 1 .. 8 |-> 0],
-      orderQtyDecimal9                         |-> [i \in 1 .. 8 |-> 0],
-      symbolInt32                              |-> [i \in 1 .. 4 |-> 0],
+    [ price                                    |-> [i \in 1 .. 8 |-> 0],
+      orderQty                                 |-> [i \in 1 .. 8 |-> 0],
+      symbol                                   |-> [i \in 1 .. 4 |-> 0],
       originatorUserId                         |-> [i \in 1 .. 20 |-> 0],
-      ordTypeOrderTypeEnum                     |-> [i \in 1 .. 1 |-> 0],
-      crossIDInt64                             |-> [i \in 1 .. 8 |-> 0],
-      crossTypeCrossTypeEnum                   |-> [i \in 1 .. 1 |-> 0],
+      ordType                                  |-> [i \in 1 .. 1 |-> 0],
+      crossId                                  |-> [i \in 1 .. 8 |-> 0],
+      crossType                                |-> [i \in 1 .. 1 |-> 0],
       tradeType                                |-> [i \in 1 .. 3 |-> 0],
       execInst                                 |-> [i \in 1 .. 1 |-> 0],
       priceType                                |-> [i \in 1 .. 1 |-> 0],
@@ -4002,22 +4002,22 @@ ZeroNewOrderCrossRequestMessage ==
       hedgeOnly                                |-> [i \in 1 .. 1 |-> 0],
       benchmarkPrice                           |-> [i \in 1 .. 8 |-> 0],
       benchMarkPriceType                       |-> [i \in 1 .. 1 |-> 0],
-      timeInForceTimeInForceEnum               |-> [i \in 1 .. 1 |-> 0],
+      timeInForce                              |-> [i \in 1 .. 1 |-> 0],
       transactDetails                          |-> [i \in 1 .. 100 |-> 0],
-      transactTimeUtcTimestamp                 |-> [i \in 1 .. 8 |-> 0],
+      transactTime                             |-> [i \in 1 .. 8 |-> 0],
       newOrderCrossRequestMessageNoSidesGroups |-> ZeroNewOrderCrossRequestMessageNoSidesGroups,
       newOrderCrossRequestMessageNoLegsGroups  |-> ZeroNewOrderCrossRequestMessageNoLegsGroups ]
 
 (* New Order Cross Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderCrossRequestMessage ==
     { ZeroNewOrderCrossRequestMessage }
-        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.priceDecimal9 = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.orderQtyDecimal9 = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.orderQty = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.symbol = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
-        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.ordTypeOrderTypeEnum = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.crossIDInt64 = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.crossTypeCrossTypeEnum = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.ordType = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.crossId = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.crossType = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.tradeType = one] : one \in Sample(3) }
         \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.execInst = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.priceType = one] : one \in Sample(1) }
@@ -4025,9 +4025,9 @@ CheckedNewOrderCrossRequestMessage ==
         \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.hedgeOnly = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.benchmarkPrice = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.benchMarkPriceType = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.timeInForceTimeInForceEnum = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.timeInForce = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.transactDetails = one] : one \in Sample(100) }
-        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.transactTimeUtcTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.transactTime = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.newOrderCrossRequestMessageNoSidesGroups = one] : one \in CheckedNewOrderCrossRequestMessageNoSidesGroups }
         \cup { [ZeroNewOrderCrossRequestMessage EXCEPT !.newOrderCrossRequestMessageNoLegsGroups = one] : one \in CheckedNewOrderCrossRequestMessageNoLegsGroups }
 
@@ -4036,96 +4036,96 @@ CheckedNewOrderCrossRequestMessage ==
 (***************************************************************************)
 
 OrderMassCancelRequestMessage ==
-    [ originatorUserId               : Sample(20),
-      ordTypeOrderTypeEnumNull       : Sample(1),
-      sideSideEnumNull               : Sample(1),
-      symbolInt32Null                : Sample(4),
-      clOrdId                        : Sample(8),
-      marketTypeIDInt32Null          : Sample(4),
-      priceDecimal9Null              : Sample(8),
-      massCancelRequestType          : Sample(1),
-      timeInForceTimeInForceEnumNull : Sample(1),
-      onBehalfOfSubIDString41Null    : Sample(41) ]
+    [ originatorUserId        : Sample(20),
+      ordTypeOptional         : Sample(1),
+      sideOptional            : Sample(1),
+      symbolOptional          : Sample(4),
+      clOrdId                 : Sample(8),
+      marketTypeIDOptional    : Sample(4),
+      priceOptional           : Sample(8),
+      massCancelRequestType   : Sample(1),
+      timeInForceOptional     : Sample(1),
+      onBehalfOfSubIDOptional : Sample(41) ]
 
 EncodeOrderMassCancelRequestMessage(message) ==
     message.originatorUserId
-        \o message.ordTypeOrderTypeEnumNull
-        \o message.sideSideEnumNull
-        \o message.symbolInt32Null
+        \o message.ordTypeOptional
+        \o message.sideOptional
+        \o message.symbolOptional
         \o message.clOrdId
-        \o message.marketTypeIDInt32Null
-        \o message.priceDecimal9Null
+        \o message.marketTypeIDOptional
+        \o message.priceOptional
         \o message.massCancelRequestType
-        \o message.timeInForceTimeInForceEnumNull
-        \o message.onBehalfOfSubIDString41Null
+        \o message.timeInForceOptional
+        \o message.onBehalfOfSubIDOptional
 
 DecodeOrderMassCancelRequestMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
-    LET ordTypeOrderTypeEnumNull == ReadBytes(originatorUserId.rest, 1) IN IF ~ordTypeOrderTypeEnumNull.ok THEN Fail ELSE
-    LET sideSideEnumNull == ReadBytes(ordTypeOrderTypeEnumNull.rest, 1) IN IF ~sideSideEnumNull.ok THEN Fail ELSE
-    LET symbolInt32Null == ReadBytes(sideSideEnumNull.rest, 4) IN IF ~symbolInt32Null.ok THEN Fail ELSE
-    LET clOrdId == ReadBytes(symbolInt32Null.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
-    LET marketTypeIDInt32Null == ReadBytes(clOrdId.rest, 4) IN IF ~marketTypeIDInt32Null.ok THEN Fail ELSE
-    LET priceDecimal9Null == ReadBytes(marketTypeIDInt32Null.rest, 8) IN IF ~priceDecimal9Null.ok THEN Fail ELSE
-    LET massCancelRequestType == ReadBytes(priceDecimal9Null.rest, 1) IN IF ~massCancelRequestType.ok THEN Fail ELSE
-    LET timeInForceTimeInForceEnumNull == ReadBytes(massCancelRequestType.rest, 1) IN IF ~timeInForceTimeInForceEnumNull.ok THEN Fail ELSE
-    LET onBehalfOfSubIDString41Null == ReadBytes(timeInForceTimeInForceEnumNull.rest, 41) IN IF ~onBehalfOfSubIDString41Null.ok THEN Fail ELSE
-    Ok([ originatorUserId               |-> originatorUserId.value,
-         ordTypeOrderTypeEnumNull       |-> ordTypeOrderTypeEnumNull.value,
-         sideSideEnumNull               |-> sideSideEnumNull.value,
-         symbolInt32Null                |-> symbolInt32Null.value,
-         clOrdId                        |-> clOrdId.value,
-         marketTypeIDInt32Null          |-> marketTypeIDInt32Null.value,
-         priceDecimal9Null              |-> priceDecimal9Null.value,
-         massCancelRequestType          |-> massCancelRequestType.value,
-         timeInForceTimeInForceEnumNull |-> timeInForceTimeInForceEnumNull.value,
-         onBehalfOfSubIDString41Null    |-> onBehalfOfSubIDString41Null.value ], onBehalfOfSubIDString41Null.rest)
+    LET ordTypeOptional == ReadBytes(originatorUserId.rest, 1) IN IF ~ordTypeOptional.ok THEN Fail ELSE
+    LET sideOptional == ReadBytes(ordTypeOptional.rest, 1) IN IF ~sideOptional.ok THEN Fail ELSE
+    LET symbolOptional == ReadBytes(sideOptional.rest, 4) IN IF ~symbolOptional.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(symbolOptional.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET marketTypeIDOptional == ReadBytes(clOrdId.rest, 4) IN IF ~marketTypeIDOptional.ok THEN Fail ELSE
+    LET priceOptional == ReadBytes(marketTypeIDOptional.rest, 8) IN IF ~priceOptional.ok THEN Fail ELSE
+    LET massCancelRequestType == ReadBytes(priceOptional.rest, 1) IN IF ~massCancelRequestType.ok THEN Fail ELSE
+    LET timeInForceOptional == ReadBytes(massCancelRequestType.rest, 1) IN IF ~timeInForceOptional.ok THEN Fail ELSE
+    LET onBehalfOfSubIDOptional == ReadBytes(timeInForceOptional.rest, 41) IN IF ~onBehalfOfSubIDOptional.ok THEN Fail ELSE
+    Ok([ originatorUserId        |-> originatorUserId.value,
+         ordTypeOptional         |-> ordTypeOptional.value,
+         sideOptional            |-> sideOptional.value,
+         symbolOptional          |-> symbolOptional.value,
+         clOrdId                 |-> clOrdId.value,
+         marketTypeIDOptional    |-> marketTypeIDOptional.value,
+         priceOptional           |-> priceOptional.value,
+         massCancelRequestType   |-> massCancelRequestType.value,
+         timeInForceOptional     |-> timeInForceOptional.value,
+         onBehalfOfSubIDOptional |-> onBehalfOfSubIDOptional.value ], onBehalfOfSubIDOptional.rest)
 
 ZeroOrderMassCancelRequestMessage ==
-    [ originatorUserId               |-> [i \in 1 .. 20 |-> 0],
-      ordTypeOrderTypeEnumNull       |-> [i \in 1 .. 1 |-> 0],
-      sideSideEnumNull               |-> [i \in 1 .. 1 |-> 0],
-      symbolInt32Null                |-> [i \in 1 .. 4 |-> 0],
-      clOrdId                        |-> [i \in 1 .. 8 |-> 0],
-      marketTypeIDInt32Null          |-> [i \in 1 .. 4 |-> 0],
-      priceDecimal9Null              |-> [i \in 1 .. 8 |-> 0],
-      massCancelRequestType          |-> [i \in 1 .. 1 |-> 0],
-      timeInForceTimeInForceEnumNull |-> [i \in 1 .. 1 |-> 0],
-      onBehalfOfSubIDString41Null    |-> [i \in 1 .. 41 |-> 0] ]
+    [ originatorUserId        |-> [i \in 1 .. 20 |-> 0],
+      ordTypeOptional         |-> [i \in 1 .. 1 |-> 0],
+      sideOptional            |-> [i \in 1 .. 1 |-> 0],
+      symbolOptional          |-> [i \in 1 .. 4 |-> 0],
+      clOrdId                 |-> [i \in 1 .. 8 |-> 0],
+      marketTypeIDOptional    |-> [i \in 1 .. 4 |-> 0],
+      priceOptional           |-> [i \in 1 .. 8 |-> 0],
+      massCancelRequestType   |-> [i \in 1 .. 1 |-> 0],
+      timeInForceOptional     |-> [i \in 1 .. 1 |-> 0],
+      onBehalfOfSubIDOptional |-> [i \in 1 .. 41 |-> 0] ]
 
 (* Order Mass Cancel Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderMassCancelRequestMessage ==
     { ZeroOrderMassCancelRequestMessage }
         \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
-        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.ordTypeOrderTypeEnumNull = one] : one \in Sample(1) }
-        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.sideSideEnumNull = one] : one \in Sample(1) }
-        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.symbolInt32Null = one] : one \in Sample(4) }
+        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.ordTypeOptional = one] : one \in Sample(1) }
+        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.sideOptional = one] : one \in Sample(1) }
+        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.symbolOptional = one] : one \in Sample(4) }
         \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
-        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.marketTypeIDInt32Null = one] : one \in Sample(4) }
-        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.priceDecimal9Null = one] : one \in Sample(8) }
+        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.marketTypeIDOptional = one] : one \in Sample(4) }
+        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.priceOptional = one] : one \in Sample(8) }
         \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.massCancelRequestType = one] : one \in Sample(1) }
-        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.timeInForceTimeInForceEnumNull = one] : one \in Sample(1) }
-        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.onBehalfOfSubIDString41Null = one] : one \in Sample(41) }
+        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.timeInForceOptional = one] : one \in Sample(1) }
+        \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.onBehalfOfSubIDOptional = one] : one \in Sample(41) }
 
 (***************************************************************************)
 (* Mass Quote Request Message no Quote Sets Group: 48 bytes                *)
 (***************************************************************************)
 
 MassQuoteRequestMessageNoQuoteSetsGroup ==
-    [ quoteSetId            : Sample(4),
-      underlyingSymbolInt32 : Sample(4),
-      quoteEntryId          : Sample(4),
-      symbolInt32           : Sample(4),
-      bidPx                 : Sample(8),
-      offerPx               : Sample(8),
-      bidSz                 : Sample(8),
-      offerSz               : Sample(8) ]
+    [ quoteSetId       : Sample(4),
+      underlyingSymbol : Sample(4),
+      quoteEntryId     : Sample(4),
+      symbol           : Sample(4),
+      bidPx            : Sample(8),
+      offerPx          : Sample(8),
+      bidSz            : Sample(8),
+      offerSz          : Sample(8) ]
 
 EncodeMassQuoteRequestMessageNoQuoteSetsGroup(message) ==
     message.quoteSetId
-        \o message.underlyingSymbolInt32
+        \o message.underlyingSymbol
         \o message.quoteEntryId
-        \o message.symbolInt32
+        \o message.symbol
         \o message.bidPx
         \o message.offerPx
         \o message.bidSz
@@ -4133,39 +4133,39 @@ EncodeMassQuoteRequestMessageNoQuoteSetsGroup(message) ==
 
 DecodeMassQuoteRequestMessageNoQuoteSetsGroup(bytes) ==
     LET quoteSetId == ReadBytes(bytes, 4) IN IF ~quoteSetId.ok THEN Fail ELSE
-    LET underlyingSymbolInt32 == ReadBytes(quoteSetId.rest, 4) IN IF ~underlyingSymbolInt32.ok THEN Fail ELSE
-    LET quoteEntryId == ReadBytes(underlyingSymbolInt32.rest, 4) IN IF ~quoteEntryId.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(quoteEntryId.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET bidPx == ReadBytes(symbolInt32.rest, 8) IN IF ~bidPx.ok THEN Fail ELSE
+    LET underlyingSymbol == ReadBytes(quoteSetId.rest, 4) IN IF ~underlyingSymbol.ok THEN Fail ELSE
+    LET quoteEntryId == ReadBytes(underlyingSymbol.rest, 4) IN IF ~quoteEntryId.ok THEN Fail ELSE
+    LET symbol == ReadBytes(quoteEntryId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET bidPx == ReadBytes(symbol.rest, 8) IN IF ~bidPx.ok THEN Fail ELSE
     LET offerPx == ReadBytes(bidPx.rest, 8) IN IF ~offerPx.ok THEN Fail ELSE
     LET bidSz == ReadBytes(offerPx.rest, 8) IN IF ~bidSz.ok THEN Fail ELSE
     LET offerSz == ReadBytes(bidSz.rest, 8) IN IF ~offerSz.ok THEN Fail ELSE
-    Ok([ quoteSetId            |-> quoteSetId.value,
-         underlyingSymbolInt32 |-> underlyingSymbolInt32.value,
-         quoteEntryId          |-> quoteEntryId.value,
-         symbolInt32           |-> symbolInt32.value,
-         bidPx                 |-> bidPx.value,
-         offerPx               |-> offerPx.value,
-         bidSz                 |-> bidSz.value,
-         offerSz               |-> offerSz.value ], offerSz.rest)
+    Ok([ quoteSetId       |-> quoteSetId.value,
+         underlyingSymbol |-> underlyingSymbol.value,
+         quoteEntryId     |-> quoteEntryId.value,
+         symbol           |-> symbol.value,
+         bidPx            |-> bidPx.value,
+         offerPx          |-> offerPx.value,
+         bidSz            |-> bidSz.value,
+         offerSz          |-> offerSz.value ], offerSz.rest)
 
 ZeroMassQuoteRequestMessageNoQuoteSetsGroup ==
-    [ quoteSetId            |-> [i \in 1 .. 4 |-> 0],
-      underlyingSymbolInt32 |-> [i \in 1 .. 4 |-> 0],
-      quoteEntryId          |-> [i \in 1 .. 4 |-> 0],
-      symbolInt32           |-> [i \in 1 .. 4 |-> 0],
-      bidPx                 |-> [i \in 1 .. 8 |-> 0],
-      offerPx               |-> [i \in 1 .. 8 |-> 0],
-      bidSz                 |-> [i \in 1 .. 8 |-> 0],
-      offerSz               |-> [i \in 1 .. 8 |-> 0] ]
+    [ quoteSetId       |-> [i \in 1 .. 4 |-> 0],
+      underlyingSymbol |-> [i \in 1 .. 4 |-> 0],
+      quoteEntryId     |-> [i \in 1 .. 4 |-> 0],
+      symbol           |-> [i \in 1 .. 4 |-> 0],
+      bidPx            |-> [i \in 1 .. 8 |-> 0],
+      offerPx          |-> [i \in 1 .. 8 |-> 0],
+      bidSz            |-> [i \in 1 .. 8 |-> 0],
+      offerSz          |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Mass Quote Request Message no Quote Sets Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteRequestMessageNoQuoteSetsGroup ==
     { ZeroMassQuoteRequestMessageNoQuoteSetsGroup }
         \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.quoteSetId = one] : one \in Sample(4) }
-        \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.underlyingSymbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.underlyingSymbol = one] : one \in Sample(4) }
         \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.quoteEntryId = one] : one \in Sample(4) }
-        \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.symbol = one] : one \in Sample(4) }
         \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.bidPx = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.offerPx = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.bidSz = one] : one \in Sample(8) }
@@ -4327,32 +4327,32 @@ CheckedMassQuoteRequestMessage ==
 (***************************************************************************)
 
 QuoteCancelRequestMessageNoQuoteEntriesGroup ==
-    [ underlyingSymbolInt32Null : Sample(4),
-      underlyingSecurityId      : Sample(4),
-      underlyingProduct         : Sample(4) ]
+    [ underlyingSymbolOptional : Sample(4),
+      underlyingSecurityId     : Sample(4),
+      underlyingProduct        : Sample(4) ]
 
 EncodeQuoteCancelRequestMessageNoQuoteEntriesGroup(message) ==
-    message.underlyingSymbolInt32Null
+    message.underlyingSymbolOptional
         \o message.underlyingSecurityId
         \o message.underlyingProduct
 
 DecodeQuoteCancelRequestMessageNoQuoteEntriesGroup(bytes) ==
-    LET underlyingSymbolInt32Null == ReadBytes(bytes, 4) IN IF ~underlyingSymbolInt32Null.ok THEN Fail ELSE
-    LET underlyingSecurityId == ReadBytes(underlyingSymbolInt32Null.rest, 4) IN IF ~underlyingSecurityId.ok THEN Fail ELSE
+    LET underlyingSymbolOptional == ReadBytes(bytes, 4) IN IF ~underlyingSymbolOptional.ok THEN Fail ELSE
+    LET underlyingSecurityId == ReadBytes(underlyingSymbolOptional.rest, 4) IN IF ~underlyingSecurityId.ok THEN Fail ELSE
     LET underlyingProduct == ReadBytes(underlyingSecurityId.rest, 4) IN IF ~underlyingProduct.ok THEN Fail ELSE
-    Ok([ underlyingSymbolInt32Null |-> underlyingSymbolInt32Null.value,
-         underlyingSecurityId      |-> underlyingSecurityId.value,
-         underlyingProduct         |-> underlyingProduct.value ], underlyingProduct.rest)
+    Ok([ underlyingSymbolOptional |-> underlyingSymbolOptional.value,
+         underlyingSecurityId     |-> underlyingSecurityId.value,
+         underlyingProduct        |-> underlyingProduct.value ], underlyingProduct.rest)
 
 ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup ==
-    [ underlyingSymbolInt32Null |-> [i \in 1 .. 4 |-> 0],
-      underlyingSecurityId      |-> [i \in 1 .. 4 |-> 0],
-      underlyingProduct         |-> [i \in 1 .. 4 |-> 0] ]
+    [ underlyingSymbolOptional |-> [i \in 1 .. 4 |-> 0],
+      underlyingSecurityId     |-> [i \in 1 .. 4 |-> 0],
+      underlyingProduct        |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Quote Cancel Request Message no Quote Entries Group at zero, then each field in turn at the values it is checked at *)
 CheckedQuoteCancelRequestMessageNoQuoteEntriesGroup ==
     { ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup }
-        \cup { [ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup EXCEPT !.underlyingSymbolInt32Null = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup EXCEPT !.underlyingSymbolOptional = one] : one \in Sample(4) }
         \cup { [ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup EXCEPT !.underlyingSecurityId = one] : one \in Sample(4) }
         \cup { [ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup EXCEPT !.underlyingProduct = one] : one \in Sample(4) }
 
@@ -4453,56 +4453,56 @@ CheckedQuoteCancelRequestMessage ==
 (***************************************************************************)
 
 SecurityDefinitionRequestCreateStrategyMessageNoLegsGroup ==
-    [ legSymbolInt32                  : Sample(4),
-      legSecurityType                 : Sample(1),
-      legSide                         : Sample(1),
-      legRatioQtyDenominatorInt16Null : Sample(2),
-      legRatioQtyNumeratorInt16Null   : Sample(2),
-      legPrice                        : Sample(8),
-      legOptionDelta                  : Sample(4) ]
+    [ legSymbol                      : Sample(4),
+      legSecurityType                : Sample(1),
+      legSide                        : Sample(1),
+      legRatioQtyDenominatorOptional : Sample(2),
+      legRatioQtyNumeratorOptional   : Sample(2),
+      legPrice                       : Sample(8),
+      legOptionDelta                 : Sample(4) ]
 
 EncodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup(message) ==
-    message.legSymbolInt32
+    message.legSymbol
         \o message.legSecurityType
         \o message.legSide
-        \o message.legRatioQtyDenominatorInt16Null
-        \o message.legRatioQtyNumeratorInt16Null
+        \o message.legRatioQtyDenominatorOptional
+        \o message.legRatioQtyNumeratorOptional
         \o message.legPrice
         \o message.legOptionDelta
 
 DecodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup(bytes) ==
-    LET legSymbolInt32 == ReadBytes(bytes, 4) IN IF ~legSymbolInt32.ok THEN Fail ELSE
-    LET legSecurityType == ReadBytes(legSymbolInt32.rest, 1) IN IF ~legSecurityType.ok THEN Fail ELSE
+    LET legSymbol == ReadBytes(bytes, 4) IN IF ~legSymbol.ok THEN Fail ELSE
+    LET legSecurityType == ReadBytes(legSymbol.rest, 1) IN IF ~legSecurityType.ok THEN Fail ELSE
     LET legSide == ReadBytes(legSecurityType.rest, 1) IN IF ~legSide.ok THEN Fail ELSE
-    LET legRatioQtyDenominatorInt16Null == ReadBytes(legSide.rest, 2) IN IF ~legRatioQtyDenominatorInt16Null.ok THEN Fail ELSE
-    LET legRatioQtyNumeratorInt16Null == ReadBytes(legRatioQtyDenominatorInt16Null.rest, 2) IN IF ~legRatioQtyNumeratorInt16Null.ok THEN Fail ELSE
-    LET legPrice == ReadBytes(legRatioQtyNumeratorInt16Null.rest, 8) IN IF ~legPrice.ok THEN Fail ELSE
+    LET legRatioQtyDenominatorOptional == ReadBytes(legSide.rest, 2) IN IF ~legRatioQtyDenominatorOptional.ok THEN Fail ELSE
+    LET legRatioQtyNumeratorOptional == ReadBytes(legRatioQtyDenominatorOptional.rest, 2) IN IF ~legRatioQtyNumeratorOptional.ok THEN Fail ELSE
+    LET legPrice == ReadBytes(legRatioQtyNumeratorOptional.rest, 8) IN IF ~legPrice.ok THEN Fail ELSE
     LET legOptionDelta == ReadBytes(legPrice.rest, 4) IN IF ~legOptionDelta.ok THEN Fail ELSE
-    Ok([ legSymbolInt32                  |-> legSymbolInt32.value,
-         legSecurityType                 |-> legSecurityType.value,
-         legSide                         |-> legSide.value,
-         legRatioQtyDenominatorInt16Null |-> legRatioQtyDenominatorInt16Null.value,
-         legRatioQtyNumeratorInt16Null   |-> legRatioQtyNumeratorInt16Null.value,
-         legPrice                        |-> legPrice.value,
-         legOptionDelta                  |-> legOptionDelta.value ], legOptionDelta.rest)
+    Ok([ legSymbol                      |-> legSymbol.value,
+         legSecurityType                |-> legSecurityType.value,
+         legSide                        |-> legSide.value,
+         legRatioQtyDenominatorOptional |-> legRatioQtyDenominatorOptional.value,
+         legRatioQtyNumeratorOptional   |-> legRatioQtyNumeratorOptional.value,
+         legPrice                       |-> legPrice.value,
+         legOptionDelta                 |-> legOptionDelta.value ], legOptionDelta.rest)
 
 ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup ==
-    [ legSymbolInt32                  |-> [i \in 1 .. 4 |-> 0],
-      legSecurityType                 |-> [i \in 1 .. 1 |-> 0],
-      legSide                         |-> [i \in 1 .. 1 |-> 0],
-      legRatioQtyDenominatorInt16Null |-> [i \in 1 .. 2 |-> 0],
-      legRatioQtyNumeratorInt16Null   |-> [i \in 1 .. 2 |-> 0],
-      legPrice                        |-> [i \in 1 .. 8 |-> 0],
-      legOptionDelta                  |-> [i \in 1 .. 4 |-> 0] ]
+    [ legSymbol                      |-> [i \in 1 .. 4 |-> 0],
+      legSecurityType                |-> [i \in 1 .. 1 |-> 0],
+      legSide                        |-> [i \in 1 .. 1 |-> 0],
+      legRatioQtyDenominatorOptional |-> [i \in 1 .. 2 |-> 0],
+      legRatioQtyNumeratorOptional   |-> [i \in 1 .. 2 |-> 0],
+      legPrice                       |-> [i \in 1 .. 8 |-> 0],
+      legOptionDelta                 |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Security Definition Request Create Strategy Message no Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup ==
     { ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup }
-        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legSymbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legSymbol = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legSecurityType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legRatioQtyDenominatorInt16Null = one] : one \in Sample(2) }
-        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legRatioQtyNumeratorInt16Null = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legRatioQtyDenominatorOptional = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legRatioQtyNumeratorOptional = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legPrice = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legOptionDelta = one] : one \in Sample(4) }
 
@@ -4564,54 +4564,54 @@ CheckedSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups ==
 SecurityDefinitionRequestCreateStrategyMessage ==
     [ securityReqId                                              : Sample(4),
       securityRequestType                                        : Sample(1),
-      marketTypeIDInt32                                          : Sample(4),
-      securitySubTypeInt16Null                                   : Sample(2),
-      productIDInt32Null                                         : Sample(4),
+      marketTypeId                                               : Sample(4),
+      securitySubTypeOptional                                    : Sample(2),
+      productIDOptional                                          : Sample(4),
       startDate                                                  : Sample(2),
       endDate                                                    : Sample(2),
-      securityTypeSecurityTypeEnum                               : Sample(1),
+      securityType                                               : Sample(1),
       securityDefinitionRequestCreateStrategyMessageNoLegsGroups : SecurityDefinitionRequestCreateStrategyMessageNoLegsGroups ]
 
 EncodeSecurityDefinitionRequestCreateStrategyMessage(message) ==
     message.securityReqId
         \o message.securityRequestType
-        \o message.marketTypeIDInt32
-        \o message.securitySubTypeInt16Null
-        \o message.productIDInt32Null
+        \o message.marketTypeId
+        \o message.securitySubTypeOptional
+        \o message.productIDOptional
         \o message.startDate
         \o message.endDate
-        \o message.securityTypeSecurityTypeEnum
+        \o message.securityType
         \o EncodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups(message.securityDefinitionRequestCreateStrategyMessageNoLegsGroups)
 
 DecodeSecurityDefinitionRequestCreateStrategyMessage(bytes) ==
     LET securityReqId == ReadBytes(bytes, 4) IN IF ~securityReqId.ok THEN Fail ELSE
     LET securityRequestType == ReadBytes(securityReqId.rest, 1) IN IF ~securityRequestType.ok THEN Fail ELSE
-    LET marketTypeIDInt32 == ReadBytes(securityRequestType.rest, 4) IN IF ~marketTypeIDInt32.ok THEN Fail ELSE
-    LET securitySubTypeInt16Null == ReadBytes(marketTypeIDInt32.rest, 2) IN IF ~securitySubTypeInt16Null.ok THEN Fail ELSE
-    LET productIDInt32Null == ReadBytes(securitySubTypeInt16Null.rest, 4) IN IF ~productIDInt32Null.ok THEN Fail ELSE
-    LET startDate == ReadBytes(productIDInt32Null.rest, 2) IN IF ~startDate.ok THEN Fail ELSE
+    LET marketTypeId == ReadBytes(securityRequestType.rest, 4) IN IF ~marketTypeId.ok THEN Fail ELSE
+    LET securitySubTypeOptional == ReadBytes(marketTypeId.rest, 2) IN IF ~securitySubTypeOptional.ok THEN Fail ELSE
+    LET productIDOptional == ReadBytes(securitySubTypeOptional.rest, 4) IN IF ~productIDOptional.ok THEN Fail ELSE
+    LET startDate == ReadBytes(productIDOptional.rest, 2) IN IF ~startDate.ok THEN Fail ELSE
     LET endDate == ReadBytes(startDate.rest, 2) IN IF ~endDate.ok THEN Fail ELSE
-    LET securityTypeSecurityTypeEnum == ReadBytes(endDate.rest, 1) IN IF ~securityTypeSecurityTypeEnum.ok THEN Fail ELSE
-    LET securityDefinitionRequestCreateStrategyMessageNoLegsGroups == DecodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups(securityTypeSecurityTypeEnum.rest) IN IF ~securityDefinitionRequestCreateStrategyMessageNoLegsGroups.ok THEN Fail ELSE
+    LET securityType == ReadBytes(endDate.rest, 1) IN IF ~securityType.ok THEN Fail ELSE
+    LET securityDefinitionRequestCreateStrategyMessageNoLegsGroups == DecodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups(securityType.rest) IN IF ~securityDefinitionRequestCreateStrategyMessageNoLegsGroups.ok THEN Fail ELSE
     Ok([ securityReqId                                              |-> securityReqId.value,
          securityRequestType                                        |-> securityRequestType.value,
-         marketTypeIDInt32                                          |-> marketTypeIDInt32.value,
-         securitySubTypeInt16Null                                   |-> securitySubTypeInt16Null.value,
-         productIDInt32Null                                         |-> productIDInt32Null.value,
+         marketTypeId                                               |-> marketTypeId.value,
+         securitySubTypeOptional                                    |-> securitySubTypeOptional.value,
+         productIDOptional                                          |-> productIDOptional.value,
          startDate                                                  |-> startDate.value,
          endDate                                                    |-> endDate.value,
-         securityTypeSecurityTypeEnum                               |-> securityTypeSecurityTypeEnum.value,
+         securityType                                               |-> securityType.value,
          securityDefinitionRequestCreateStrategyMessageNoLegsGroups |-> securityDefinitionRequestCreateStrategyMessageNoLegsGroups.value ], securityDefinitionRequestCreateStrategyMessageNoLegsGroups.rest)
 
 ZeroSecurityDefinitionRequestCreateStrategyMessage ==
     [ securityReqId                                              |-> [i \in 1 .. 4 |-> 0],
       securityRequestType                                        |-> [i \in 1 .. 1 |-> 0],
-      marketTypeIDInt32                                          |-> [i \in 1 .. 4 |-> 0],
-      securitySubTypeInt16Null                                   |-> [i \in 1 .. 2 |-> 0],
-      productIDInt32Null                                         |-> [i \in 1 .. 4 |-> 0],
+      marketTypeId                                               |-> [i \in 1 .. 4 |-> 0],
+      securitySubTypeOptional                                    |-> [i \in 1 .. 2 |-> 0],
+      productIDOptional                                          |-> [i \in 1 .. 4 |-> 0],
       startDate                                                  |-> [i \in 1 .. 2 |-> 0],
       endDate                                                    |-> [i \in 1 .. 2 |-> 0],
-      securityTypeSecurityTypeEnum                               |-> [i \in 1 .. 1 |-> 0],
+      securityType                                               |-> [i \in 1 .. 1 |-> 0],
       securityDefinitionRequestCreateStrategyMessageNoLegsGroups |-> ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups ]
 
 (* Security Definition Request Create Strategy Message at zero, then each field in turn at the values it is checked at *)
@@ -4619,12 +4619,12 @@ CheckedSecurityDefinitionRequestCreateStrategyMessage ==
     { ZeroSecurityDefinitionRequestCreateStrategyMessage }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.securityReqId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.securityRequestType = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.marketTypeIDInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.securitySubTypeInt16Null = one] : one \in Sample(2) }
-        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.productIDInt32Null = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.marketTypeId = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.securitySubTypeOptional = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.productIDOptional = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.startDate = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.endDate = one] : one \in Sample(2) }
-        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.securityTypeSecurityTypeEnum = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.securityType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessage EXCEPT !.securityDefinitionRequestCreateStrategyMessageNoLegsGroups = one] : one \in CheckedSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups }
 
 (***************************************************************************)
@@ -4632,63 +4632,63 @@ CheckedSecurityDefinitionRequestCreateStrategyMessage ==
 (***************************************************************************)
 
 SecurityDefinitionRequestCreateFlexMessage ==
-    [ securityReqId                : Sample(4),
-      securityRequestType          : Sample(1),
-      marketTypeIDInt32            : Sample(4),
-      securityTypeSecurityTypeEnum : Sample(1),
-      maturityDate                 : Sample(2),
-      productIDInt32Null           : Sample(4),
-      symbolInt32Null              : Sample(4),
-      strikePrice                  : Sample(8) ]
+    [ securityReqId       : Sample(4),
+      securityRequestType : Sample(1),
+      marketTypeId        : Sample(4),
+      securityType        : Sample(1),
+      maturityDate        : Sample(2),
+      productIDOptional   : Sample(4),
+      symbolOptional      : Sample(4),
+      strikePrice         : Sample(8) ]
 
 EncodeSecurityDefinitionRequestCreateFlexMessage(message) ==
     message.securityReqId
         \o message.securityRequestType
-        \o message.marketTypeIDInt32
-        \o message.securityTypeSecurityTypeEnum
+        \o message.marketTypeId
+        \o message.securityType
         \o message.maturityDate
-        \o message.productIDInt32Null
-        \o message.symbolInt32Null
+        \o message.productIDOptional
+        \o message.symbolOptional
         \o message.strikePrice
 
 DecodeSecurityDefinitionRequestCreateFlexMessage(bytes) ==
     LET securityReqId == ReadBytes(bytes, 4) IN IF ~securityReqId.ok THEN Fail ELSE
     LET securityRequestType == ReadBytes(securityReqId.rest, 1) IN IF ~securityRequestType.ok THEN Fail ELSE
-    LET marketTypeIDInt32 == ReadBytes(securityRequestType.rest, 4) IN IF ~marketTypeIDInt32.ok THEN Fail ELSE
-    LET securityTypeSecurityTypeEnum == ReadBytes(marketTypeIDInt32.rest, 1) IN IF ~securityTypeSecurityTypeEnum.ok THEN Fail ELSE
-    LET maturityDate == ReadBytes(securityTypeSecurityTypeEnum.rest, 2) IN IF ~maturityDate.ok THEN Fail ELSE
-    LET productIDInt32Null == ReadBytes(maturityDate.rest, 4) IN IF ~productIDInt32Null.ok THEN Fail ELSE
-    LET symbolInt32Null == ReadBytes(productIDInt32Null.rest, 4) IN IF ~symbolInt32Null.ok THEN Fail ELSE
-    LET strikePrice == ReadBytes(symbolInt32Null.rest, 8) IN IF ~strikePrice.ok THEN Fail ELSE
-    Ok([ securityReqId                |-> securityReqId.value,
-         securityRequestType          |-> securityRequestType.value,
-         marketTypeIDInt32            |-> marketTypeIDInt32.value,
-         securityTypeSecurityTypeEnum |-> securityTypeSecurityTypeEnum.value,
-         maturityDate                 |-> maturityDate.value,
-         productIDInt32Null           |-> productIDInt32Null.value,
-         symbolInt32Null              |-> symbolInt32Null.value,
-         strikePrice                  |-> strikePrice.value ], strikePrice.rest)
+    LET marketTypeId == ReadBytes(securityRequestType.rest, 4) IN IF ~marketTypeId.ok THEN Fail ELSE
+    LET securityType == ReadBytes(marketTypeId.rest, 1) IN IF ~securityType.ok THEN Fail ELSE
+    LET maturityDate == ReadBytes(securityType.rest, 2) IN IF ~maturityDate.ok THEN Fail ELSE
+    LET productIDOptional == ReadBytes(maturityDate.rest, 4) IN IF ~productIDOptional.ok THEN Fail ELSE
+    LET symbolOptional == ReadBytes(productIDOptional.rest, 4) IN IF ~symbolOptional.ok THEN Fail ELSE
+    LET strikePrice == ReadBytes(symbolOptional.rest, 8) IN IF ~strikePrice.ok THEN Fail ELSE
+    Ok([ securityReqId       |-> securityReqId.value,
+         securityRequestType |-> securityRequestType.value,
+         marketTypeId        |-> marketTypeId.value,
+         securityType        |-> securityType.value,
+         maturityDate        |-> maturityDate.value,
+         productIDOptional   |-> productIDOptional.value,
+         symbolOptional      |-> symbolOptional.value,
+         strikePrice         |-> strikePrice.value ], strikePrice.rest)
 
 ZeroSecurityDefinitionRequestCreateFlexMessage ==
-    [ securityReqId                |-> [i \in 1 .. 4 |-> 0],
-      securityRequestType          |-> [i \in 1 .. 1 |-> 0],
-      marketTypeIDInt32            |-> [i \in 1 .. 4 |-> 0],
-      securityTypeSecurityTypeEnum |-> [i \in 1 .. 1 |-> 0],
-      maturityDate                 |-> [i \in 1 .. 2 |-> 0],
-      productIDInt32Null           |-> [i \in 1 .. 4 |-> 0],
-      symbolInt32Null              |-> [i \in 1 .. 4 |-> 0],
-      strikePrice                  |-> [i \in 1 .. 8 |-> 0] ]
+    [ securityReqId       |-> [i \in 1 .. 4 |-> 0],
+      securityRequestType |-> [i \in 1 .. 1 |-> 0],
+      marketTypeId        |-> [i \in 1 .. 4 |-> 0],
+      securityType        |-> [i \in 1 .. 1 |-> 0],
+      maturityDate        |-> [i \in 1 .. 2 |-> 0],
+      productIDOptional   |-> [i \in 1 .. 4 |-> 0],
+      symbolOptional      |-> [i \in 1 .. 4 |-> 0],
+      strikePrice         |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Security Definition Request Create Flex Message at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionRequestCreateFlexMessage ==
     { ZeroSecurityDefinitionRequestCreateFlexMessage }
         \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.securityReqId = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.securityRequestType = one] : one \in Sample(1) }
-        \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.marketTypeIDInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.securityTypeSecurityTypeEnum = one] : one \in Sample(1) }
+        \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.marketTypeId = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.securityType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.maturityDate = one] : one \in Sample(2) }
-        \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.productIDInt32Null = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.symbolInt32Null = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.productIDOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.symbolOptional = one] : one \in Sample(4) }
         \cup { [ZeroSecurityDefinitionRequestCreateFlexMessage EXCEPT !.strikePrice = one] : one \in Sample(8) }
 
 (***************************************************************************)
@@ -4758,31 +4758,31 @@ CheckedOrigOrderId ==
 (***************************************************************************)
 
 ExecutionReportNewMessage ==
-    [ originatorUserId             : Sample(20),
-      execIDOrderExecId            : ExecIDOrderExecId,
-      clOrdId                      : Sample(8),
-      symbolInt32                  : Sample(4),
-      ordTypeOrderTypeEnum         : Sample(1),
-      sideSideEnum                 : Sample(1),
-      origOrderId                  : OrigOrderId,
-      leavesQty                    : Sample(8),
-      priceDecimal9Null            : Sample(8),
-      meAcceptanceTimeUtcTimestamp : Sample(8),
-      timePriority                 : Sample(8),
-      orderStatus                  : Sample(1),
-      memo                         : Sample(30) ]
+    [ originatorUserId  : Sample(20),
+      execIDOrderExecId : ExecIDOrderExecId,
+      clOrdId           : Sample(8),
+      symbol            : Sample(4),
+      ordType           : Sample(1),
+      side              : Sample(1),
+      origOrderId       : OrigOrderId,
+      leavesQty         : Sample(8),
+      priceOptional     : Sample(8),
+      meAcceptanceTime  : Sample(8),
+      timePriority      : Sample(8),
+      orderStatus       : Sample(1),
+      memo              : Sample(30) ]
 
 EncodeExecutionReportNewMessage(message) ==
     message.originatorUserId
         \o EncodeExecIDOrderExecId(message.execIDOrderExecId)
         \o message.clOrdId
-        \o message.symbolInt32
-        \o message.ordTypeOrderTypeEnum
-        \o message.sideSideEnum
+        \o message.symbol
+        \o message.ordType
+        \o message.side
         \o EncodeOrigOrderId(message.origOrderId)
         \o message.leavesQty
-        \o message.priceDecimal9Null
-        \o message.meAcceptanceTimeUtcTimestamp
+        \o message.priceOptional
+        \o message.meAcceptanceTime
         \o message.timePriority
         \o message.orderStatus
         \o message.memo
@@ -4791,44 +4791,44 @@ DecodeExecutionReportNewMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
     LET execIDOrderExecId == DecodeExecIDOrderExecId(originatorUserId.rest) IN IF ~execIDOrderExecId.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(execIDOrderExecId.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(clOrdId.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET ordTypeOrderTypeEnum == ReadBytes(symbolInt32.rest, 1) IN IF ~ordTypeOrderTypeEnum.ok THEN Fail ELSE
-    LET sideSideEnum == ReadBytes(ordTypeOrderTypeEnum.rest, 1) IN IF ~sideSideEnum.ok THEN Fail ELSE
-    LET origOrderId == DecodeOrigOrderId(sideSideEnum.rest) IN IF ~origOrderId.ok THEN Fail ELSE
+    LET symbol == ReadBytes(clOrdId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET ordType == ReadBytes(symbol.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
+    LET side == ReadBytes(ordType.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET origOrderId == DecodeOrigOrderId(side.rest) IN IF ~origOrderId.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(origOrderId.rest, 8) IN IF ~leavesQty.ok THEN Fail ELSE
-    LET priceDecimal9Null == ReadBytes(leavesQty.rest, 8) IN IF ~priceDecimal9Null.ok THEN Fail ELSE
-    LET meAcceptanceTimeUtcTimestamp == ReadBytes(priceDecimal9Null.rest, 8) IN IF ~meAcceptanceTimeUtcTimestamp.ok THEN Fail ELSE
-    LET timePriority == ReadBytes(meAcceptanceTimeUtcTimestamp.rest, 8) IN IF ~timePriority.ok THEN Fail ELSE
+    LET priceOptional == ReadBytes(leavesQty.rest, 8) IN IF ~priceOptional.ok THEN Fail ELSE
+    LET meAcceptanceTime == ReadBytes(priceOptional.rest, 8) IN IF ~meAcceptanceTime.ok THEN Fail ELSE
+    LET timePriority == ReadBytes(meAcceptanceTime.rest, 8) IN IF ~timePriority.ok THEN Fail ELSE
     LET orderStatus == ReadBytes(timePriority.rest, 1) IN IF ~orderStatus.ok THEN Fail ELSE
     LET memo == ReadBytes(orderStatus.rest, 30) IN IF ~memo.ok THEN Fail ELSE
-    Ok([ originatorUserId             |-> originatorUserId.value,
-         execIDOrderExecId            |-> execIDOrderExecId.value,
-         clOrdId                      |-> clOrdId.value,
-         symbolInt32                  |-> symbolInt32.value,
-         ordTypeOrderTypeEnum         |-> ordTypeOrderTypeEnum.value,
-         sideSideEnum                 |-> sideSideEnum.value,
-         origOrderId                  |-> origOrderId.value,
-         leavesQty                    |-> leavesQty.value,
-         priceDecimal9Null            |-> priceDecimal9Null.value,
-         meAcceptanceTimeUtcTimestamp |-> meAcceptanceTimeUtcTimestamp.value,
-         timePriority                 |-> timePriority.value,
-         orderStatus                  |-> orderStatus.value,
-         memo                         |-> memo.value ], memo.rest)
+    Ok([ originatorUserId  |-> originatorUserId.value,
+         execIDOrderExecId |-> execIDOrderExecId.value,
+         clOrdId           |-> clOrdId.value,
+         symbol            |-> symbol.value,
+         ordType           |-> ordType.value,
+         side              |-> side.value,
+         origOrderId       |-> origOrderId.value,
+         leavesQty         |-> leavesQty.value,
+         priceOptional     |-> priceOptional.value,
+         meAcceptanceTime  |-> meAcceptanceTime.value,
+         timePriority      |-> timePriority.value,
+         orderStatus       |-> orderStatus.value,
+         memo              |-> memo.value ], memo.rest)
 
 ZeroExecutionReportNewMessage ==
-    [ originatorUserId             |-> [i \in 1 .. 20 |-> 0],
-      execIDOrderExecId            |-> ZeroExecIDOrderExecId,
-      clOrdId                      |-> [i \in 1 .. 8 |-> 0],
-      symbolInt32                  |-> [i \in 1 .. 4 |-> 0],
-      ordTypeOrderTypeEnum         |-> [i \in 1 .. 1 |-> 0],
-      sideSideEnum                 |-> [i \in 1 .. 1 |-> 0],
-      origOrderId                  |-> ZeroOrigOrderId,
-      leavesQty                    |-> [i \in 1 .. 8 |-> 0],
-      priceDecimal9Null            |-> [i \in 1 .. 8 |-> 0],
-      meAcceptanceTimeUtcTimestamp |-> [i \in 1 .. 8 |-> 0],
-      timePriority                 |-> [i \in 1 .. 8 |-> 0],
-      orderStatus                  |-> [i \in 1 .. 1 |-> 0],
-      memo                         |-> [i \in 1 .. 30 |-> 0] ]
+    [ originatorUserId  |-> [i \in 1 .. 20 |-> 0],
+      execIDOrderExecId |-> ZeroExecIDOrderExecId,
+      clOrdId           |-> [i \in 1 .. 8 |-> 0],
+      symbol            |-> [i \in 1 .. 4 |-> 0],
+      ordType           |-> [i \in 1 .. 1 |-> 0],
+      side              |-> [i \in 1 .. 1 |-> 0],
+      origOrderId       |-> ZeroOrigOrderId,
+      leavesQty         |-> [i \in 1 .. 8 |-> 0],
+      priceOptional     |-> [i \in 1 .. 8 |-> 0],
+      meAcceptanceTime  |-> [i \in 1 .. 8 |-> 0],
+      timePriority      |-> [i \in 1 .. 8 |-> 0],
+      orderStatus       |-> [i \in 1 .. 1 |-> 0],
+      memo              |-> [i \in 1 .. 30 |-> 0] ]
 
 (* Execution Report New Message at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionReportNewMessage ==
@@ -4836,13 +4836,13 @@ CheckedExecutionReportNewMessage ==
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.execIDOrderExecId = one] : one \in CheckedExecIDOrderExecId }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportNewMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportNewMessage EXCEPT !.ordTypeOrderTypeEnum = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportNewMessage EXCEPT !.sideSideEnum = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportNewMessage EXCEPT !.symbol = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportNewMessage EXCEPT !.ordType = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportNewMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.origOrderId = one] : one \in CheckedOrigOrderId }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.leavesQty = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportNewMessage EXCEPT !.priceDecimal9Null = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportNewMessage EXCEPT !.meAcceptanceTimeUtcTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportNewMessage EXCEPT !.priceOptional = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportNewMessage EXCEPT !.meAcceptanceTime = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.timePriority = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.orderStatus = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.memo = one] : one \in Sample(30) }
@@ -4914,39 +4914,39 @@ CheckedOrigOrderId2 ==
 (***************************************************************************)
 
 ExecutionReportModifyMessage ==
-    [ originatorUserId             : Sample(20),
-      execIDOrderExecId            : ExecIDOrderExecId2,
-      clOrdId                      : Sample(8),
-      symbolInt32                  : Sample(4),
-      ordTypeOrderTypeEnum         : Sample(1),
-      sideSideEnum                 : Sample(1),
-      origOrderId                  : OrigOrderId2,
-      origClOrdIDInt64Null         : Sample(8),
-      leavesQty                    : Sample(8),
-      cumQty                       : Sample(8),
-      priceDecimal9Null            : Sample(8),
-      meAcceptanceTimeUtcTimestamp : Sample(8),
-      timePriority                 : Sample(8),
-      execType                     : Sample(1),
-      orderStatus                  : Sample(1),
-      orderState                   : Sample(1),
-      execRestatementReason        : Sample(1),
-      orderModificationFlags       : Sample(1),
-      memo                         : Sample(30) ]
+    [ originatorUserId       : Sample(20),
+      execIDOrderExecId      : ExecIDOrderExecId2,
+      clOrdId                : Sample(8),
+      symbol                 : Sample(4),
+      ordType                : Sample(1),
+      side                   : Sample(1),
+      origOrderId            : OrigOrderId2,
+      origClOrdIDOptional    : Sample(8),
+      leavesQty              : Sample(8),
+      cumQty                 : Sample(8),
+      priceOptional          : Sample(8),
+      meAcceptanceTime       : Sample(8),
+      timePriority           : Sample(8),
+      execType               : Sample(1),
+      orderStatus            : Sample(1),
+      orderState             : Sample(1),
+      execRestatementReason  : Sample(1),
+      orderModificationFlags : Sample(1),
+      memo                   : Sample(30) ]
 
 EncodeExecutionReportModifyMessage(message) ==
     message.originatorUserId
         \o EncodeExecIDOrderExecId2(message.execIDOrderExecId)
         \o message.clOrdId
-        \o message.symbolInt32
-        \o message.ordTypeOrderTypeEnum
-        \o message.sideSideEnum
+        \o message.symbol
+        \o message.ordType
+        \o message.side
         \o EncodeOrigOrderId2(message.origOrderId)
-        \o message.origClOrdIDInt64Null
+        \o message.origClOrdIDOptional
         \o message.leavesQty
         \o message.cumQty
-        \o message.priceDecimal9Null
-        \o message.meAcceptanceTimeUtcTimestamp
+        \o message.priceOptional
+        \o message.meAcceptanceTime
         \o message.timePriority
         \o message.execType
         \o message.orderStatus
@@ -4959,62 +4959,62 @@ DecodeExecutionReportModifyMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
     LET execIDOrderExecId == DecodeExecIDOrderExecId2(originatorUserId.rest) IN IF ~execIDOrderExecId.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(execIDOrderExecId.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(clOrdId.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET ordTypeOrderTypeEnum == ReadBytes(symbolInt32.rest, 1) IN IF ~ordTypeOrderTypeEnum.ok THEN Fail ELSE
-    LET sideSideEnum == ReadBytes(ordTypeOrderTypeEnum.rest, 1) IN IF ~sideSideEnum.ok THEN Fail ELSE
-    LET origOrderId == DecodeOrigOrderId2(sideSideEnum.rest) IN IF ~origOrderId.ok THEN Fail ELSE
-    LET origClOrdIDInt64Null == ReadBytes(origOrderId.rest, 8) IN IF ~origClOrdIDInt64Null.ok THEN Fail ELSE
-    LET leavesQty == ReadBytes(origClOrdIDInt64Null.rest, 8) IN IF ~leavesQty.ok THEN Fail ELSE
+    LET symbol == ReadBytes(clOrdId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET ordType == ReadBytes(symbol.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
+    LET side == ReadBytes(ordType.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET origOrderId == DecodeOrigOrderId2(side.rest) IN IF ~origOrderId.ok THEN Fail ELSE
+    LET origClOrdIDOptional == ReadBytes(origOrderId.rest, 8) IN IF ~origClOrdIDOptional.ok THEN Fail ELSE
+    LET leavesQty == ReadBytes(origClOrdIDOptional.rest, 8) IN IF ~leavesQty.ok THEN Fail ELSE
     LET cumQty == ReadBytes(leavesQty.rest, 8) IN IF ~cumQty.ok THEN Fail ELSE
-    LET priceDecimal9Null == ReadBytes(cumQty.rest, 8) IN IF ~priceDecimal9Null.ok THEN Fail ELSE
-    LET meAcceptanceTimeUtcTimestamp == ReadBytes(priceDecimal9Null.rest, 8) IN IF ~meAcceptanceTimeUtcTimestamp.ok THEN Fail ELSE
-    LET timePriority == ReadBytes(meAcceptanceTimeUtcTimestamp.rest, 8) IN IF ~timePriority.ok THEN Fail ELSE
+    LET priceOptional == ReadBytes(cumQty.rest, 8) IN IF ~priceOptional.ok THEN Fail ELSE
+    LET meAcceptanceTime == ReadBytes(priceOptional.rest, 8) IN IF ~meAcceptanceTime.ok THEN Fail ELSE
+    LET timePriority == ReadBytes(meAcceptanceTime.rest, 8) IN IF ~timePriority.ok THEN Fail ELSE
     LET execType == ReadBytes(timePriority.rest, 1) IN IF ~execType.ok THEN Fail ELSE
     LET orderStatus == ReadBytes(execType.rest, 1) IN IF ~orderStatus.ok THEN Fail ELSE
     LET orderState == ReadBytes(orderStatus.rest, 1) IN IF ~orderState.ok THEN Fail ELSE
     LET execRestatementReason == ReadBytes(orderState.rest, 1) IN IF ~execRestatementReason.ok THEN Fail ELSE
     LET orderModificationFlags == ReadBytes(execRestatementReason.rest, 1) IN IF ~orderModificationFlags.ok THEN Fail ELSE
     LET memo == ReadBytes(orderModificationFlags.rest, 30) IN IF ~memo.ok THEN Fail ELSE
-    Ok([ originatorUserId             |-> originatorUserId.value,
-         execIDOrderExecId            |-> execIDOrderExecId.value,
-         clOrdId                      |-> clOrdId.value,
-         symbolInt32                  |-> symbolInt32.value,
-         ordTypeOrderTypeEnum         |-> ordTypeOrderTypeEnum.value,
-         sideSideEnum                 |-> sideSideEnum.value,
-         origOrderId                  |-> origOrderId.value,
-         origClOrdIDInt64Null         |-> origClOrdIDInt64Null.value,
-         leavesQty                    |-> leavesQty.value,
-         cumQty                       |-> cumQty.value,
-         priceDecimal9Null            |-> priceDecimal9Null.value,
-         meAcceptanceTimeUtcTimestamp |-> meAcceptanceTimeUtcTimestamp.value,
-         timePriority                 |-> timePriority.value,
-         execType                     |-> execType.value,
-         orderStatus                  |-> orderStatus.value,
-         orderState                   |-> orderState.value,
-         execRestatementReason        |-> execRestatementReason.value,
-         orderModificationFlags       |-> orderModificationFlags.value,
-         memo                         |-> memo.value ], memo.rest)
+    Ok([ originatorUserId       |-> originatorUserId.value,
+         execIDOrderExecId      |-> execIDOrderExecId.value,
+         clOrdId                |-> clOrdId.value,
+         symbol                 |-> symbol.value,
+         ordType                |-> ordType.value,
+         side                   |-> side.value,
+         origOrderId            |-> origOrderId.value,
+         origClOrdIDOptional    |-> origClOrdIDOptional.value,
+         leavesQty              |-> leavesQty.value,
+         cumQty                 |-> cumQty.value,
+         priceOptional          |-> priceOptional.value,
+         meAcceptanceTime       |-> meAcceptanceTime.value,
+         timePriority           |-> timePriority.value,
+         execType               |-> execType.value,
+         orderStatus            |-> orderStatus.value,
+         orderState             |-> orderState.value,
+         execRestatementReason  |-> execRestatementReason.value,
+         orderModificationFlags |-> orderModificationFlags.value,
+         memo                   |-> memo.value ], memo.rest)
 
 ZeroExecutionReportModifyMessage ==
-    [ originatorUserId             |-> [i \in 1 .. 20 |-> 0],
-      execIDOrderExecId            |-> ZeroExecIDOrderExecId2,
-      clOrdId                      |-> [i \in 1 .. 8 |-> 0],
-      symbolInt32                  |-> [i \in 1 .. 4 |-> 0],
-      ordTypeOrderTypeEnum         |-> [i \in 1 .. 1 |-> 0],
-      sideSideEnum                 |-> [i \in 1 .. 1 |-> 0],
-      origOrderId                  |-> ZeroOrigOrderId2,
-      origClOrdIDInt64Null         |-> [i \in 1 .. 8 |-> 0],
-      leavesQty                    |-> [i \in 1 .. 8 |-> 0],
-      cumQty                       |-> [i \in 1 .. 8 |-> 0],
-      priceDecimal9Null            |-> [i \in 1 .. 8 |-> 0],
-      meAcceptanceTimeUtcTimestamp |-> [i \in 1 .. 8 |-> 0],
-      timePriority                 |-> [i \in 1 .. 8 |-> 0],
-      execType                     |-> [i \in 1 .. 1 |-> 0],
-      orderStatus                  |-> [i \in 1 .. 1 |-> 0],
-      orderState                   |-> [i \in 1 .. 1 |-> 0],
-      execRestatementReason        |-> [i \in 1 .. 1 |-> 0],
-      orderModificationFlags       |-> [i \in 1 .. 1 |-> 0],
-      memo                         |-> [i \in 1 .. 30 |-> 0] ]
+    [ originatorUserId       |-> [i \in 1 .. 20 |-> 0],
+      execIDOrderExecId      |-> ZeroExecIDOrderExecId2,
+      clOrdId                |-> [i \in 1 .. 8 |-> 0],
+      symbol                 |-> [i \in 1 .. 4 |-> 0],
+      ordType                |-> [i \in 1 .. 1 |-> 0],
+      side                   |-> [i \in 1 .. 1 |-> 0],
+      origOrderId            |-> ZeroOrigOrderId2,
+      origClOrdIDOptional    |-> [i \in 1 .. 8 |-> 0],
+      leavesQty              |-> [i \in 1 .. 8 |-> 0],
+      cumQty                 |-> [i \in 1 .. 8 |-> 0],
+      priceOptional          |-> [i \in 1 .. 8 |-> 0],
+      meAcceptanceTime       |-> [i \in 1 .. 8 |-> 0],
+      timePriority           |-> [i \in 1 .. 8 |-> 0],
+      execType               |-> [i \in 1 .. 1 |-> 0],
+      orderStatus            |-> [i \in 1 .. 1 |-> 0],
+      orderState             |-> [i \in 1 .. 1 |-> 0],
+      execRestatementReason  |-> [i \in 1 .. 1 |-> 0],
+      orderModificationFlags |-> [i \in 1 .. 1 |-> 0],
+      memo                   |-> [i \in 1 .. 30 |-> 0] ]
 
 (* Execution Report Modify Message at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionReportModifyMessage ==
@@ -5022,15 +5022,15 @@ CheckedExecutionReportModifyMessage ==
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.execIDOrderExecId = one] : one \in CheckedExecIDOrderExecId2 }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.ordTypeOrderTypeEnum = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.sideSideEnum = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.symbol = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.ordType = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.origOrderId = one] : one \in CheckedOrigOrderId2 }
-        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.origClOrdIDInt64Null = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.origClOrdIDOptional = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.leavesQty = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.cumQty = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.priceDecimal9Null = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.meAcceptanceTimeUtcTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.priceOptional = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.meAcceptanceTime = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.timePriority = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.execType = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.orderStatus = one] : one \in Sample(1) }
@@ -5106,77 +5106,77 @@ CheckedOrigOrderId3 ==
 (***************************************************************************)
 
 ExecutionReportCancelMessage ==
-    [ originatorUserId             : Sample(20),
-      execIDOrderExecId            : ExecIDOrderExecId3,
-      clOrdId                      : Sample(8),
-      symbolInt32                  : Sample(4),
-      ordTypeOrderTypeEnum         : Sample(1),
-      sideSideEnum                 : Sample(1),
-      origOrderId                  : OrigOrderId3,
-      origClOrdIDInt64Null         : Sample(8),
-      meAcceptanceTimeUtcTimestamp : Sample(8),
-      exchangeCode                 : Sample(4),
-      cancelReason                 : Sample(1),
-      crossIDInt64Null             : Sample(8),
-      text                         : Sample(100) ]
+    [ originatorUserId    : Sample(20),
+      execIDOrderExecId   : ExecIDOrderExecId3,
+      clOrdId             : Sample(8),
+      symbol              : Sample(4),
+      ordType             : Sample(1),
+      side                : Sample(1),
+      origOrderId         : OrigOrderId3,
+      origClOrdIDOptional : Sample(8),
+      meAcceptanceTime    : Sample(8),
+      exchangeCode        : Sample(4),
+      cancelReason        : Sample(1),
+      crossIDOptional     : Sample(8),
+      text                : Sample(100) ]
 
 EncodeExecutionReportCancelMessage(message) ==
     message.originatorUserId
         \o EncodeExecIDOrderExecId3(message.execIDOrderExecId)
         \o message.clOrdId
-        \o message.symbolInt32
-        \o message.ordTypeOrderTypeEnum
-        \o message.sideSideEnum
+        \o message.symbol
+        \o message.ordType
+        \o message.side
         \o EncodeOrigOrderId3(message.origOrderId)
-        \o message.origClOrdIDInt64Null
-        \o message.meAcceptanceTimeUtcTimestamp
+        \o message.origClOrdIDOptional
+        \o message.meAcceptanceTime
         \o message.exchangeCode
         \o message.cancelReason
-        \o message.crossIDInt64Null
+        \o message.crossIDOptional
         \o message.text
 
 DecodeExecutionReportCancelMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
     LET execIDOrderExecId == DecodeExecIDOrderExecId3(originatorUserId.rest) IN IF ~execIDOrderExecId.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(execIDOrderExecId.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(clOrdId.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET ordTypeOrderTypeEnum == ReadBytes(symbolInt32.rest, 1) IN IF ~ordTypeOrderTypeEnum.ok THEN Fail ELSE
-    LET sideSideEnum == ReadBytes(ordTypeOrderTypeEnum.rest, 1) IN IF ~sideSideEnum.ok THEN Fail ELSE
-    LET origOrderId == DecodeOrigOrderId3(sideSideEnum.rest) IN IF ~origOrderId.ok THEN Fail ELSE
-    LET origClOrdIDInt64Null == ReadBytes(origOrderId.rest, 8) IN IF ~origClOrdIDInt64Null.ok THEN Fail ELSE
-    LET meAcceptanceTimeUtcTimestamp == ReadBytes(origClOrdIDInt64Null.rest, 8) IN IF ~meAcceptanceTimeUtcTimestamp.ok THEN Fail ELSE
-    LET exchangeCode == ReadBytes(meAcceptanceTimeUtcTimestamp.rest, 4) IN IF ~exchangeCode.ok THEN Fail ELSE
+    LET symbol == ReadBytes(clOrdId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET ordType == ReadBytes(symbol.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
+    LET side == ReadBytes(ordType.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET origOrderId == DecodeOrigOrderId3(side.rest) IN IF ~origOrderId.ok THEN Fail ELSE
+    LET origClOrdIDOptional == ReadBytes(origOrderId.rest, 8) IN IF ~origClOrdIDOptional.ok THEN Fail ELSE
+    LET meAcceptanceTime == ReadBytes(origClOrdIDOptional.rest, 8) IN IF ~meAcceptanceTime.ok THEN Fail ELSE
+    LET exchangeCode == ReadBytes(meAcceptanceTime.rest, 4) IN IF ~exchangeCode.ok THEN Fail ELSE
     LET cancelReason == ReadBytes(exchangeCode.rest, 1) IN IF ~cancelReason.ok THEN Fail ELSE
-    LET crossIDInt64Null == ReadBytes(cancelReason.rest, 8) IN IF ~crossIDInt64Null.ok THEN Fail ELSE
-    LET text == ReadBytes(crossIDInt64Null.rest, 100) IN IF ~text.ok THEN Fail ELSE
-    Ok([ originatorUserId             |-> originatorUserId.value,
-         execIDOrderExecId            |-> execIDOrderExecId.value,
-         clOrdId                      |-> clOrdId.value,
-         symbolInt32                  |-> symbolInt32.value,
-         ordTypeOrderTypeEnum         |-> ordTypeOrderTypeEnum.value,
-         sideSideEnum                 |-> sideSideEnum.value,
-         origOrderId                  |-> origOrderId.value,
-         origClOrdIDInt64Null         |-> origClOrdIDInt64Null.value,
-         meAcceptanceTimeUtcTimestamp |-> meAcceptanceTimeUtcTimestamp.value,
-         exchangeCode                 |-> exchangeCode.value,
-         cancelReason                 |-> cancelReason.value,
-         crossIDInt64Null             |-> crossIDInt64Null.value,
-         text                         |-> text.value ], text.rest)
+    LET crossIDOptional == ReadBytes(cancelReason.rest, 8) IN IF ~crossIDOptional.ok THEN Fail ELSE
+    LET text == ReadBytes(crossIDOptional.rest, 100) IN IF ~text.ok THEN Fail ELSE
+    Ok([ originatorUserId    |-> originatorUserId.value,
+         execIDOrderExecId   |-> execIDOrderExecId.value,
+         clOrdId             |-> clOrdId.value,
+         symbol              |-> symbol.value,
+         ordType             |-> ordType.value,
+         side                |-> side.value,
+         origOrderId         |-> origOrderId.value,
+         origClOrdIDOptional |-> origClOrdIDOptional.value,
+         meAcceptanceTime    |-> meAcceptanceTime.value,
+         exchangeCode        |-> exchangeCode.value,
+         cancelReason        |-> cancelReason.value,
+         crossIDOptional     |-> crossIDOptional.value,
+         text                |-> text.value ], text.rest)
 
 ZeroExecutionReportCancelMessage ==
-    [ originatorUserId             |-> [i \in 1 .. 20 |-> 0],
-      execIDOrderExecId            |-> ZeroExecIDOrderExecId3,
-      clOrdId                      |-> [i \in 1 .. 8 |-> 0],
-      symbolInt32                  |-> [i \in 1 .. 4 |-> 0],
-      ordTypeOrderTypeEnum         |-> [i \in 1 .. 1 |-> 0],
-      sideSideEnum                 |-> [i \in 1 .. 1 |-> 0],
-      origOrderId                  |-> ZeroOrigOrderId3,
-      origClOrdIDInt64Null         |-> [i \in 1 .. 8 |-> 0],
-      meAcceptanceTimeUtcTimestamp |-> [i \in 1 .. 8 |-> 0],
-      exchangeCode                 |-> [i \in 1 .. 4 |-> 0],
-      cancelReason                 |-> [i \in 1 .. 1 |-> 0],
-      crossIDInt64Null             |-> [i \in 1 .. 8 |-> 0],
-      text                         |-> [i \in 1 .. 100 |-> 0] ]
+    [ originatorUserId    |-> [i \in 1 .. 20 |-> 0],
+      execIDOrderExecId   |-> ZeroExecIDOrderExecId3,
+      clOrdId             |-> [i \in 1 .. 8 |-> 0],
+      symbol              |-> [i \in 1 .. 4 |-> 0],
+      ordType             |-> [i \in 1 .. 1 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      origOrderId         |-> ZeroOrigOrderId3,
+      origClOrdIDOptional |-> [i \in 1 .. 8 |-> 0],
+      meAcceptanceTime    |-> [i \in 1 .. 8 |-> 0],
+      exchangeCode        |-> [i \in 1 .. 4 |-> 0],
+      cancelReason        |-> [i \in 1 .. 1 |-> 0],
+      crossIDOptional     |-> [i \in 1 .. 8 |-> 0],
+      text                |-> [i \in 1 .. 100 |-> 0] ]
 
 (* Execution Report Cancel Message at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionReportCancelMessage ==
@@ -5184,15 +5184,15 @@ CheckedExecutionReportCancelMessage ==
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.execIDOrderExecId = one] : one \in CheckedExecIDOrderExecId3 }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.ordTypeOrderTypeEnum = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.sideSideEnum = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.symbol = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.ordType = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.origOrderId = one] : one \in CheckedOrigOrderId3 }
-        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.origClOrdIDInt64Null = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.meAcceptanceTimeUtcTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.origClOrdIDOptional = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.meAcceptanceTime = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.exchangeCode = one] : one \in Sample(4) }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.cancelReason = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.crossIDInt64Null = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.crossIDOptional = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.text = one] : one \in Sample(100) }
 
 (***************************************************************************)
@@ -5262,30 +5262,30 @@ CheckedOrigOrderId4 ==
 (***************************************************************************)
 
 ExecutionReportRejectMessage ==
-    [ originatorUserId         : Sample(20),
-      execIDOrderExecId        : ExecIDOrderExecId4,
-      clOrdId                  : Sample(8),
-      symbolInt32              : Sample(4),
-      ordTypeOrderTypeEnumNull : Sample(1),
-      sideSideEnum             : Sample(1),
-      origOrderId              : OrigOrderId4,
-      origClOrdIDInt64Null     : Sample(8),
-      orderStatus              : Sample(1),
-      rejectResponseTo         : Sample(1),
-      rejectReason             : Sample(1),
-      exchangeCode             : Sample(4),
-      memo                     : Sample(30),
-      text                     : Sample(100) ]
+    [ originatorUserId    : Sample(20),
+      execIDOrderExecId   : ExecIDOrderExecId4,
+      clOrdId             : Sample(8),
+      symbol              : Sample(4),
+      ordTypeOptional     : Sample(1),
+      side                : Sample(1),
+      origOrderId         : OrigOrderId4,
+      origClOrdIDOptional : Sample(8),
+      orderStatus         : Sample(1),
+      rejectResponseTo    : Sample(1),
+      rejectReason        : Sample(1),
+      exchangeCode        : Sample(4),
+      memo                : Sample(30),
+      text                : Sample(100) ]
 
 EncodeExecutionReportRejectMessage(message) ==
     message.originatorUserId
         \o EncodeExecIDOrderExecId4(message.execIDOrderExecId)
         \o message.clOrdId
-        \o message.symbolInt32
-        \o message.ordTypeOrderTypeEnumNull
-        \o message.sideSideEnum
+        \o message.symbol
+        \o message.ordTypeOptional
+        \o message.side
         \o EncodeOrigOrderId4(message.origOrderId)
-        \o message.origClOrdIDInt64Null
+        \o message.origClOrdIDOptional
         \o message.orderStatus
         \o message.rejectResponseTo
         \o message.rejectReason
@@ -5297,47 +5297,47 @@ DecodeExecutionReportRejectMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
     LET execIDOrderExecId == DecodeExecIDOrderExecId4(originatorUserId.rest) IN IF ~execIDOrderExecId.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(execIDOrderExecId.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(clOrdId.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET ordTypeOrderTypeEnumNull == ReadBytes(symbolInt32.rest, 1) IN IF ~ordTypeOrderTypeEnumNull.ok THEN Fail ELSE
-    LET sideSideEnum == ReadBytes(ordTypeOrderTypeEnumNull.rest, 1) IN IF ~sideSideEnum.ok THEN Fail ELSE
-    LET origOrderId == DecodeOrigOrderId4(sideSideEnum.rest) IN IF ~origOrderId.ok THEN Fail ELSE
-    LET origClOrdIDInt64Null == ReadBytes(origOrderId.rest, 8) IN IF ~origClOrdIDInt64Null.ok THEN Fail ELSE
-    LET orderStatus == ReadBytes(origClOrdIDInt64Null.rest, 1) IN IF ~orderStatus.ok THEN Fail ELSE
+    LET symbol == ReadBytes(clOrdId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET ordTypeOptional == ReadBytes(symbol.rest, 1) IN IF ~ordTypeOptional.ok THEN Fail ELSE
+    LET side == ReadBytes(ordTypeOptional.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET origOrderId == DecodeOrigOrderId4(side.rest) IN IF ~origOrderId.ok THEN Fail ELSE
+    LET origClOrdIDOptional == ReadBytes(origOrderId.rest, 8) IN IF ~origClOrdIDOptional.ok THEN Fail ELSE
+    LET orderStatus == ReadBytes(origClOrdIDOptional.rest, 1) IN IF ~orderStatus.ok THEN Fail ELSE
     LET rejectResponseTo == ReadBytes(orderStatus.rest, 1) IN IF ~rejectResponseTo.ok THEN Fail ELSE
     LET rejectReason == ReadBytes(rejectResponseTo.rest, 1) IN IF ~rejectReason.ok THEN Fail ELSE
     LET exchangeCode == ReadBytes(rejectReason.rest, 4) IN IF ~exchangeCode.ok THEN Fail ELSE
     LET memo == ReadBytes(exchangeCode.rest, 30) IN IF ~memo.ok THEN Fail ELSE
     LET text == ReadBytes(memo.rest, 100) IN IF ~text.ok THEN Fail ELSE
-    Ok([ originatorUserId         |-> originatorUserId.value,
-         execIDOrderExecId        |-> execIDOrderExecId.value,
-         clOrdId                  |-> clOrdId.value,
-         symbolInt32              |-> symbolInt32.value,
-         ordTypeOrderTypeEnumNull |-> ordTypeOrderTypeEnumNull.value,
-         sideSideEnum             |-> sideSideEnum.value,
-         origOrderId              |-> origOrderId.value,
-         origClOrdIDInt64Null     |-> origClOrdIDInt64Null.value,
-         orderStatus              |-> orderStatus.value,
-         rejectResponseTo         |-> rejectResponseTo.value,
-         rejectReason             |-> rejectReason.value,
-         exchangeCode             |-> exchangeCode.value,
-         memo                     |-> memo.value,
-         text                     |-> text.value ], text.rest)
+    Ok([ originatorUserId    |-> originatorUserId.value,
+         execIDOrderExecId   |-> execIDOrderExecId.value,
+         clOrdId             |-> clOrdId.value,
+         symbol              |-> symbol.value,
+         ordTypeOptional     |-> ordTypeOptional.value,
+         side                |-> side.value,
+         origOrderId         |-> origOrderId.value,
+         origClOrdIDOptional |-> origClOrdIDOptional.value,
+         orderStatus         |-> orderStatus.value,
+         rejectResponseTo    |-> rejectResponseTo.value,
+         rejectReason        |-> rejectReason.value,
+         exchangeCode        |-> exchangeCode.value,
+         memo                |-> memo.value,
+         text                |-> text.value ], text.rest)
 
 ZeroExecutionReportRejectMessage ==
-    [ originatorUserId         |-> [i \in 1 .. 20 |-> 0],
-      execIDOrderExecId        |-> ZeroExecIDOrderExecId4,
-      clOrdId                  |-> [i \in 1 .. 8 |-> 0],
-      symbolInt32              |-> [i \in 1 .. 4 |-> 0],
-      ordTypeOrderTypeEnumNull |-> [i \in 1 .. 1 |-> 0],
-      sideSideEnum             |-> [i \in 1 .. 1 |-> 0],
-      origOrderId              |-> ZeroOrigOrderId4,
-      origClOrdIDInt64Null     |-> [i \in 1 .. 8 |-> 0],
-      orderStatus              |-> [i \in 1 .. 1 |-> 0],
-      rejectResponseTo         |-> [i \in 1 .. 1 |-> 0],
-      rejectReason             |-> [i \in 1 .. 1 |-> 0],
-      exchangeCode             |-> [i \in 1 .. 4 |-> 0],
-      memo                     |-> [i \in 1 .. 30 |-> 0],
-      text                     |-> [i \in 1 .. 100 |-> 0] ]
+    [ originatorUserId    |-> [i \in 1 .. 20 |-> 0],
+      execIDOrderExecId   |-> ZeroExecIDOrderExecId4,
+      clOrdId             |-> [i \in 1 .. 8 |-> 0],
+      symbol              |-> [i \in 1 .. 4 |-> 0],
+      ordTypeOptional     |-> [i \in 1 .. 1 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      origOrderId         |-> ZeroOrigOrderId4,
+      origClOrdIDOptional |-> [i \in 1 .. 8 |-> 0],
+      orderStatus         |-> [i \in 1 .. 1 |-> 0],
+      rejectResponseTo    |-> [i \in 1 .. 1 |-> 0],
+      rejectReason        |-> [i \in 1 .. 1 |-> 0],
+      exchangeCode        |-> [i \in 1 .. 4 |-> 0],
+      memo                |-> [i \in 1 .. 30 |-> 0],
+      text                |-> [i \in 1 .. 100 |-> 0] ]
 
 (* Execution Report Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionReportRejectMessage ==
@@ -5345,11 +5345,11 @@ CheckedExecutionReportRejectMessage ==
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.execIDOrderExecId = one] : one \in CheckedExecIDOrderExecId4 }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.ordTypeOrderTypeEnumNull = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.sideSideEnum = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.symbol = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.ordTypeOptional = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.origOrderId = one] : one \in CheckedOrigOrderId4 }
-        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.origClOrdIDInt64Null = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.origClOrdIDOptional = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.orderStatus = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.rejectResponseTo = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.rejectReason = one] : one \in Sample(1) }
@@ -5424,68 +5424,68 @@ CheckedOrigOrderId5 ==
 (***************************************************************************)
 
 ExecutionReportSnapshotMessage ==
-    [ originatorUserId                 : Sample(20),
-      execIDOrderExecId                : ExecIDOrderExecId5,
-      clOrdId                          : Sample(8),
-      symbolInt32                      : Sample(4),
-      ordTypeOrderTypeEnum             : Sample(1),
-      sideSideEnum                     : Sample(1),
-      origOrderId                      : OrigOrderId5,
-      maxShow                          : Sample(8),
-      leavesQty                        : Sample(8),
-      cumQty                           : Sample(8),
-      priceDecimal9Null                : Sample(8),
-      stopPx                           : Sample(8),
-      expireDate                       : Sample(2),
-      timePriority                     : Sample(8),
-      timeInForceTimeInForceEnum       : Sample(1),
-      orderStatus                      : Sample(1),
-      orderState                       : Sample(1),
-      giveUpClearingFirm               : Sample(4),
-      clearingFirmInt32Null            : Sample(4),
-      directElectronicAccess           : Sample(1),
-      tradingCapacity                  : Sample(1),
-      liquidityProvision               : Sample(1),
-      commodityDerivIndicator          : Sample(1),
-      investmentDecision               : Sample(8),
-      executionDecision                : Sample(8),
-      clientIdCode                     : Sample(8),
-      mifidId                          : Sample(8),
-      selfMatchPreventionId            : Sample(8),
-      selfMatchPreventionInstruction   : Sample(1),
-      manualOrderIndicator             : Sample(1),
-      execInst                         : Sample(1),
-      custOrderHandlingInst            : Sample(1),
-      positionEffect                   : Sample(1),
-      allocHandlInst                   : Sample(1),
-      clearingAccountString14Null      : Sample(14),
-      customerAccountRefId             : Sample(12),
-      memo                             : Sample(30),
-      allocationAccount                : Sample(20),
-      onBehalfOfCompId                 : Sample(41),
-      onBehalfOfSubIDString41Null      : Sample(41),
-      onBehalfOfLocationIDString41Null : Sample(41) ]
+    [ originatorUserId               : Sample(20),
+      execIDOrderExecId              : ExecIDOrderExecId5,
+      clOrdId                        : Sample(8),
+      symbol                         : Sample(4),
+      ordType                        : Sample(1),
+      side                           : Sample(1),
+      origOrderId                    : OrigOrderId5,
+      maxShow                        : Sample(8),
+      leavesQty                      : Sample(8),
+      cumQty                         : Sample(8),
+      priceOptional                  : Sample(8),
+      stopPx                         : Sample(8),
+      expireDate                     : Sample(2),
+      timePriority                   : Sample(8),
+      timeInForce                    : Sample(1),
+      orderStatus                    : Sample(1),
+      orderState                     : Sample(1),
+      giveUpClearingFirm             : Sample(4),
+      clearingFirmOptional           : Sample(4),
+      directElectronicAccess         : Sample(1),
+      tradingCapacity                : Sample(1),
+      liquidityProvision             : Sample(1),
+      commodityDerivIndicator        : Sample(1),
+      investmentDecision             : Sample(8),
+      executionDecision              : Sample(8),
+      clientIdCode                   : Sample(8),
+      mifidId                        : Sample(8),
+      selfMatchPreventionId          : Sample(8),
+      selfMatchPreventionInstruction : Sample(1),
+      manualOrderIndicator           : Sample(1),
+      execInst                       : Sample(1),
+      custOrderHandlingInst          : Sample(1),
+      positionEffect                 : Sample(1),
+      allocHandlInst                 : Sample(1),
+      clearingAccountOptional        : Sample(14),
+      customerAccountRefId           : Sample(12),
+      memo                           : Sample(30),
+      allocationAccount              : Sample(20),
+      onBehalfOfCompId               : Sample(41),
+      onBehalfOfSubIDOptional        : Sample(41),
+      onBehalfOfLocationIDOptional   : Sample(41) ]
 
 EncodeExecutionReportSnapshotMessage(message) ==
     message.originatorUserId
         \o EncodeExecIDOrderExecId5(message.execIDOrderExecId)
         \o message.clOrdId
-        \o message.symbolInt32
-        \o message.ordTypeOrderTypeEnum
-        \o message.sideSideEnum
+        \o message.symbol
+        \o message.ordType
+        \o message.side
         \o EncodeOrigOrderId5(message.origOrderId)
         \o message.maxShow
         \o message.leavesQty
         \o message.cumQty
-        \o message.priceDecimal9Null
+        \o message.priceOptional
         \o message.stopPx
         \o message.expireDate
         \o message.timePriority
-        \o message.timeInForceTimeInForceEnum
+        \o message.timeInForce
         \o message.orderStatus
         \o message.orderState
         \o message.giveUpClearingFirm
-        \o message.clearingFirmInt32Null
+        \o message.clearingFirmOptional
         \o message.directElectronicAccess
         \o message.tradingCapacity
         \o message.liquidityProvision
@@ -5501,35 +5501,35 @@ EncodeExecutionReportSnapshotMessage(message) ==
         \o message.custOrderHandlingInst
         \o message.positionEffect
         \o message.allocHandlInst
-        \o message.clearingAccountString14Null
+        \o message.clearingAccountOptional
         \o message.customerAccountRefId
         \o message.memo
         \o message.allocationAccount
         \o message.onBehalfOfCompId
-        \o message.onBehalfOfSubIDString41Null
-        \o message.onBehalfOfLocationIDString41Null
+        \o message.onBehalfOfSubIDOptional
+        \o message.onBehalfOfLocationIDOptional
 
 DecodeExecutionReportSnapshotMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
     LET execIDOrderExecId == DecodeExecIDOrderExecId5(originatorUserId.rest) IN IF ~execIDOrderExecId.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(execIDOrderExecId.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(clOrdId.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET ordTypeOrderTypeEnum == ReadBytes(symbolInt32.rest, 1) IN IF ~ordTypeOrderTypeEnum.ok THEN Fail ELSE
-    LET sideSideEnum == ReadBytes(ordTypeOrderTypeEnum.rest, 1) IN IF ~sideSideEnum.ok THEN Fail ELSE
-    LET origOrderId == DecodeOrigOrderId5(sideSideEnum.rest) IN IF ~origOrderId.ok THEN Fail ELSE
+    LET symbol == ReadBytes(clOrdId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET ordType == ReadBytes(symbol.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
+    LET side == ReadBytes(ordType.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET origOrderId == DecodeOrigOrderId5(side.rest) IN IF ~origOrderId.ok THEN Fail ELSE
     LET maxShow == ReadBytes(origOrderId.rest, 8) IN IF ~maxShow.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(maxShow.rest, 8) IN IF ~leavesQty.ok THEN Fail ELSE
     LET cumQty == ReadBytes(leavesQty.rest, 8) IN IF ~cumQty.ok THEN Fail ELSE
-    LET priceDecimal9Null == ReadBytes(cumQty.rest, 8) IN IF ~priceDecimal9Null.ok THEN Fail ELSE
-    LET stopPx == ReadBytes(priceDecimal9Null.rest, 8) IN IF ~stopPx.ok THEN Fail ELSE
+    LET priceOptional == ReadBytes(cumQty.rest, 8) IN IF ~priceOptional.ok THEN Fail ELSE
+    LET stopPx == ReadBytes(priceOptional.rest, 8) IN IF ~stopPx.ok THEN Fail ELSE
     LET expireDate == ReadBytes(stopPx.rest, 2) IN IF ~expireDate.ok THEN Fail ELSE
     LET timePriority == ReadBytes(expireDate.rest, 8) IN IF ~timePriority.ok THEN Fail ELSE
-    LET timeInForceTimeInForceEnum == ReadBytes(timePriority.rest, 1) IN IF ~timeInForceTimeInForceEnum.ok THEN Fail ELSE
-    LET orderStatus == ReadBytes(timeInForceTimeInForceEnum.rest, 1) IN IF ~orderStatus.ok THEN Fail ELSE
+    LET timeInForce == ReadBytes(timePriority.rest, 1) IN IF ~timeInForce.ok THEN Fail ELSE
+    LET orderStatus == ReadBytes(timeInForce.rest, 1) IN IF ~orderStatus.ok THEN Fail ELSE
     LET orderState == ReadBytes(orderStatus.rest, 1) IN IF ~orderState.ok THEN Fail ELSE
     LET giveUpClearingFirm == ReadBytes(orderState.rest, 4) IN IF ~giveUpClearingFirm.ok THEN Fail ELSE
-    LET clearingFirmInt32Null == ReadBytes(giveUpClearingFirm.rest, 4) IN IF ~clearingFirmInt32Null.ok THEN Fail ELSE
-    LET directElectronicAccess == ReadBytes(clearingFirmInt32Null.rest, 1) IN IF ~directElectronicAccess.ok THEN Fail ELSE
+    LET clearingFirmOptional == ReadBytes(giveUpClearingFirm.rest, 4) IN IF ~clearingFirmOptional.ok THEN Fail ELSE
+    LET directElectronicAccess == ReadBytes(clearingFirmOptional.rest, 1) IN IF ~directElectronicAccess.ok THEN Fail ELSE
     LET tradingCapacity == ReadBytes(directElectronicAccess.rest, 1) IN IF ~tradingCapacity.ok THEN Fail ELSE
     LET liquidityProvision == ReadBytes(tradingCapacity.rest, 1) IN IF ~liquidityProvision.ok THEN Fail ELSE
     LET commodityDerivIndicator == ReadBytes(liquidityProvision.rest, 1) IN IF ~commodityDerivIndicator.ok THEN Fail ELSE
@@ -5544,97 +5544,97 @@ DecodeExecutionReportSnapshotMessage(bytes) ==
     LET custOrderHandlingInst == ReadBytes(execInst.rest, 1) IN IF ~custOrderHandlingInst.ok THEN Fail ELSE
     LET positionEffect == ReadBytes(custOrderHandlingInst.rest, 1) IN IF ~positionEffect.ok THEN Fail ELSE
     LET allocHandlInst == ReadBytes(positionEffect.rest, 1) IN IF ~allocHandlInst.ok THEN Fail ELSE
-    LET clearingAccountString14Null == ReadBytes(allocHandlInst.rest, 14) IN IF ~clearingAccountString14Null.ok THEN Fail ELSE
-    LET customerAccountRefId == ReadBytes(clearingAccountString14Null.rest, 12) IN IF ~customerAccountRefId.ok THEN Fail ELSE
+    LET clearingAccountOptional == ReadBytes(allocHandlInst.rest, 14) IN IF ~clearingAccountOptional.ok THEN Fail ELSE
+    LET customerAccountRefId == ReadBytes(clearingAccountOptional.rest, 12) IN IF ~customerAccountRefId.ok THEN Fail ELSE
     LET memo == ReadBytes(customerAccountRefId.rest, 30) IN IF ~memo.ok THEN Fail ELSE
     LET allocationAccount == ReadBytes(memo.rest, 20) IN IF ~allocationAccount.ok THEN Fail ELSE
     LET onBehalfOfCompId == ReadBytes(allocationAccount.rest, 41) IN IF ~onBehalfOfCompId.ok THEN Fail ELSE
-    LET onBehalfOfSubIDString41Null == ReadBytes(onBehalfOfCompId.rest, 41) IN IF ~onBehalfOfSubIDString41Null.ok THEN Fail ELSE
-    LET onBehalfOfLocationIDString41Null == ReadBytes(onBehalfOfSubIDString41Null.rest, 41) IN IF ~onBehalfOfLocationIDString41Null.ok THEN Fail ELSE
-    Ok([ originatorUserId                 |-> originatorUserId.value,
-         execIDOrderExecId                |-> execIDOrderExecId.value,
-         clOrdId                          |-> clOrdId.value,
-         symbolInt32                      |-> symbolInt32.value,
-         ordTypeOrderTypeEnum             |-> ordTypeOrderTypeEnum.value,
-         sideSideEnum                     |-> sideSideEnum.value,
-         origOrderId                      |-> origOrderId.value,
-         maxShow                          |-> maxShow.value,
-         leavesQty                        |-> leavesQty.value,
-         cumQty                           |-> cumQty.value,
-         priceDecimal9Null                |-> priceDecimal9Null.value,
-         stopPx                           |-> stopPx.value,
-         expireDate                       |-> expireDate.value,
-         timePriority                     |-> timePriority.value,
-         timeInForceTimeInForceEnum       |-> timeInForceTimeInForceEnum.value,
-         orderStatus                      |-> orderStatus.value,
-         orderState                       |-> orderState.value,
-         giveUpClearingFirm               |-> giveUpClearingFirm.value,
-         clearingFirmInt32Null            |-> clearingFirmInt32Null.value,
-         directElectronicAccess           |-> directElectronicAccess.value,
-         tradingCapacity                  |-> tradingCapacity.value,
-         liquidityProvision               |-> liquidityProvision.value,
-         commodityDerivIndicator          |-> commodityDerivIndicator.value,
-         investmentDecision               |-> investmentDecision.value,
-         executionDecision                |-> executionDecision.value,
-         clientIdCode                     |-> clientIdCode.value,
-         mifidId                          |-> mifidId.value,
-         selfMatchPreventionId            |-> selfMatchPreventionId.value,
-         selfMatchPreventionInstruction   |-> selfMatchPreventionInstruction.value,
-         manualOrderIndicator             |-> manualOrderIndicator.value,
-         execInst                         |-> execInst.value,
-         custOrderHandlingInst            |-> custOrderHandlingInst.value,
-         positionEffect                   |-> positionEffect.value,
-         allocHandlInst                   |-> allocHandlInst.value,
-         clearingAccountString14Null      |-> clearingAccountString14Null.value,
-         customerAccountRefId             |-> customerAccountRefId.value,
-         memo                             |-> memo.value,
-         allocationAccount                |-> allocationAccount.value,
-         onBehalfOfCompId                 |-> onBehalfOfCompId.value,
-         onBehalfOfSubIDString41Null      |-> onBehalfOfSubIDString41Null.value,
-         onBehalfOfLocationIDString41Null |-> onBehalfOfLocationIDString41Null.value ], onBehalfOfLocationIDString41Null.rest)
+    LET onBehalfOfSubIDOptional == ReadBytes(onBehalfOfCompId.rest, 41) IN IF ~onBehalfOfSubIDOptional.ok THEN Fail ELSE
+    LET onBehalfOfLocationIDOptional == ReadBytes(onBehalfOfSubIDOptional.rest, 41) IN IF ~onBehalfOfLocationIDOptional.ok THEN Fail ELSE
+    Ok([ originatorUserId               |-> originatorUserId.value,
+         execIDOrderExecId              |-> execIDOrderExecId.value,
+         clOrdId                        |-> clOrdId.value,
+         symbol                         |-> symbol.value,
+         ordType                        |-> ordType.value,
+         side                           |-> side.value,
+         origOrderId                    |-> origOrderId.value,
+         maxShow                        |-> maxShow.value,
+         leavesQty                      |-> leavesQty.value,
+         cumQty                         |-> cumQty.value,
+         priceOptional                  |-> priceOptional.value,
+         stopPx                         |-> stopPx.value,
+         expireDate                     |-> expireDate.value,
+         timePriority                   |-> timePriority.value,
+         timeInForce                    |-> timeInForce.value,
+         orderStatus                    |-> orderStatus.value,
+         orderState                     |-> orderState.value,
+         giveUpClearingFirm             |-> giveUpClearingFirm.value,
+         clearingFirmOptional           |-> clearingFirmOptional.value,
+         directElectronicAccess         |-> directElectronicAccess.value,
+         tradingCapacity                |-> tradingCapacity.value,
+         liquidityProvision             |-> liquidityProvision.value,
+         commodityDerivIndicator        |-> commodityDerivIndicator.value,
+         investmentDecision             |-> investmentDecision.value,
+         executionDecision              |-> executionDecision.value,
+         clientIdCode                   |-> clientIdCode.value,
+         mifidId                        |-> mifidId.value,
+         selfMatchPreventionId          |-> selfMatchPreventionId.value,
+         selfMatchPreventionInstruction |-> selfMatchPreventionInstruction.value,
+         manualOrderIndicator           |-> manualOrderIndicator.value,
+         execInst                       |-> execInst.value,
+         custOrderHandlingInst          |-> custOrderHandlingInst.value,
+         positionEffect                 |-> positionEffect.value,
+         allocHandlInst                 |-> allocHandlInst.value,
+         clearingAccountOptional        |-> clearingAccountOptional.value,
+         customerAccountRefId           |-> customerAccountRefId.value,
+         memo                           |-> memo.value,
+         allocationAccount              |-> allocationAccount.value,
+         onBehalfOfCompId               |-> onBehalfOfCompId.value,
+         onBehalfOfSubIDOptional        |-> onBehalfOfSubIDOptional.value,
+         onBehalfOfLocationIDOptional   |-> onBehalfOfLocationIDOptional.value ], onBehalfOfLocationIDOptional.rest)
 
 ZeroExecutionReportSnapshotMessage ==
-    [ originatorUserId                 |-> [i \in 1 .. 20 |-> 0],
-      execIDOrderExecId                |-> ZeroExecIDOrderExecId5,
-      clOrdId                          |-> [i \in 1 .. 8 |-> 0],
-      symbolInt32                      |-> [i \in 1 .. 4 |-> 0],
-      ordTypeOrderTypeEnum             |-> [i \in 1 .. 1 |-> 0],
-      sideSideEnum                     |-> [i \in 1 .. 1 |-> 0],
-      origOrderId                      |-> ZeroOrigOrderId5,
-      maxShow                          |-> [i \in 1 .. 8 |-> 0],
-      leavesQty                        |-> [i \in 1 .. 8 |-> 0],
-      cumQty                           |-> [i \in 1 .. 8 |-> 0],
-      priceDecimal9Null                |-> [i \in 1 .. 8 |-> 0],
-      stopPx                           |-> [i \in 1 .. 8 |-> 0],
-      expireDate                       |-> [i \in 1 .. 2 |-> 0],
-      timePriority                     |-> [i \in 1 .. 8 |-> 0],
-      timeInForceTimeInForceEnum       |-> [i \in 1 .. 1 |-> 0],
-      orderStatus                      |-> [i \in 1 .. 1 |-> 0],
-      orderState                       |-> [i \in 1 .. 1 |-> 0],
-      giveUpClearingFirm               |-> [i \in 1 .. 4 |-> 0],
-      clearingFirmInt32Null            |-> [i \in 1 .. 4 |-> 0],
-      directElectronicAccess           |-> [i \in 1 .. 1 |-> 0],
-      tradingCapacity                  |-> [i \in 1 .. 1 |-> 0],
-      liquidityProvision               |-> [i \in 1 .. 1 |-> 0],
-      commodityDerivIndicator          |-> [i \in 1 .. 1 |-> 0],
-      investmentDecision               |-> [i \in 1 .. 8 |-> 0],
-      executionDecision                |-> [i \in 1 .. 8 |-> 0],
-      clientIdCode                     |-> [i \in 1 .. 8 |-> 0],
-      mifidId                          |-> [i \in 1 .. 8 |-> 0],
-      selfMatchPreventionId            |-> [i \in 1 .. 8 |-> 0],
-      selfMatchPreventionInstruction   |-> [i \in 1 .. 1 |-> 0],
-      manualOrderIndicator             |-> [i \in 1 .. 1 |-> 0],
-      execInst                         |-> [i \in 1 .. 1 |-> 0],
-      custOrderHandlingInst            |-> [i \in 1 .. 1 |-> 0],
-      positionEffect                   |-> [i \in 1 .. 1 |-> 0],
-      allocHandlInst                   |-> [i \in 1 .. 1 |-> 0],
-      clearingAccountString14Null      |-> [i \in 1 .. 14 |-> 0],
-      customerAccountRefId             |-> [i \in 1 .. 12 |-> 0],
-      memo                             |-> [i \in 1 .. 30 |-> 0],
-      allocationAccount                |-> [i \in 1 .. 20 |-> 0],
-      onBehalfOfCompId                 |-> [i \in 1 .. 41 |-> 0],
-      onBehalfOfSubIDString41Null      |-> [i \in 1 .. 41 |-> 0],
-      onBehalfOfLocationIDString41Null |-> [i \in 1 .. 41 |-> 0] ]
+    [ originatorUserId               |-> [i \in 1 .. 20 |-> 0],
+      execIDOrderExecId              |-> ZeroExecIDOrderExecId5,
+      clOrdId                        |-> [i \in 1 .. 8 |-> 0],
+      symbol                         |-> [i \in 1 .. 4 |-> 0],
+      ordType                        |-> [i \in 1 .. 1 |-> 0],
+      side                           |-> [i \in 1 .. 1 |-> 0],
+      origOrderId                    |-> ZeroOrigOrderId5,
+      maxShow                        |-> [i \in 1 .. 8 |-> 0],
+      leavesQty                      |-> [i \in 1 .. 8 |-> 0],
+      cumQty                         |-> [i \in 1 .. 8 |-> 0],
+      priceOptional                  |-> [i \in 1 .. 8 |-> 0],
+      stopPx                         |-> [i \in 1 .. 8 |-> 0],
+      expireDate                     |-> [i \in 1 .. 2 |-> 0],
+      timePriority                   |-> [i \in 1 .. 8 |-> 0],
+      timeInForce                    |-> [i \in 1 .. 1 |-> 0],
+      orderStatus                    |-> [i \in 1 .. 1 |-> 0],
+      orderState                     |-> [i \in 1 .. 1 |-> 0],
+      giveUpClearingFirm             |-> [i \in 1 .. 4 |-> 0],
+      clearingFirmOptional           |-> [i \in 1 .. 4 |-> 0],
+      directElectronicAccess         |-> [i \in 1 .. 1 |-> 0],
+      tradingCapacity                |-> [i \in 1 .. 1 |-> 0],
+      liquidityProvision             |-> [i \in 1 .. 1 |-> 0],
+      commodityDerivIndicator        |-> [i \in 1 .. 1 |-> 0],
+      investmentDecision             |-> [i \in 1 .. 8 |-> 0],
+      executionDecision              |-> [i \in 1 .. 8 |-> 0],
+      clientIdCode                   |-> [i \in 1 .. 8 |-> 0],
+      mifidId                        |-> [i \in 1 .. 8 |-> 0],
+      selfMatchPreventionId          |-> [i \in 1 .. 8 |-> 0],
+      selfMatchPreventionInstruction |-> [i \in 1 .. 1 |-> 0],
+      manualOrderIndicator           |-> [i \in 1 .. 1 |-> 0],
+      execInst                       |-> [i \in 1 .. 1 |-> 0],
+      custOrderHandlingInst          |-> [i \in 1 .. 1 |-> 0],
+      positionEffect                 |-> [i \in 1 .. 1 |-> 0],
+      allocHandlInst                 |-> [i \in 1 .. 1 |-> 0],
+      clearingAccountOptional        |-> [i \in 1 .. 14 |-> 0],
+      customerAccountRefId           |-> [i \in 1 .. 12 |-> 0],
+      memo                           |-> [i \in 1 .. 30 |-> 0],
+      allocationAccount              |-> [i \in 1 .. 20 |-> 0],
+      onBehalfOfCompId               |-> [i \in 1 .. 41 |-> 0],
+      onBehalfOfSubIDOptional        |-> [i \in 1 .. 41 |-> 0],
+      onBehalfOfLocationIDOptional   |-> [i \in 1 .. 41 |-> 0] ]
 
 (* Execution Report Snapshot Message at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionReportSnapshotMessage ==
@@ -5642,22 +5642,22 @@ CheckedExecutionReportSnapshotMessage ==
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.execIDOrderExecId = one] : one \in CheckedExecIDOrderExecId5 }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.ordTypeOrderTypeEnum = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.sideSideEnum = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.symbol = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.ordType = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.origOrderId = one] : one \in CheckedOrigOrderId5 }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.maxShow = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.leavesQty = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.cumQty = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.priceDecimal9Null = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.priceOptional = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.stopPx = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.expireDate = one] : one \in Sample(2) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.timePriority = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.timeInForceTimeInForceEnum = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.timeInForce = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.orderStatus = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.orderState = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.giveUpClearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.clearingFirmInt32Null = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.clearingFirmOptional = one] : one \in Sample(4) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.directElectronicAccess = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.tradingCapacity = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.liquidityProvision = one] : one \in Sample(1) }
@@ -5673,13 +5673,13 @@ CheckedExecutionReportSnapshotMessage ==
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.custOrderHandlingInst = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.positionEffect = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.allocHandlInst = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.clearingAccountString14Null = one] : one \in Sample(14) }
+        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.clearingAccountOptional = one] : one \in Sample(14) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.customerAccountRefId = one] : one \in Sample(12) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.memo = one] : one \in Sample(30) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.allocationAccount = one] : one \in Sample(20) }
         \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.onBehalfOfCompId = one] : one \in Sample(41) }
-        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.onBehalfOfSubIDString41Null = one] : one \in Sample(41) }
-        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.onBehalfOfLocationIDString41Null = one] : one \in Sample(41) }
+        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.onBehalfOfSubIDOptional = one] : one \in Sample(41) }
+        \cup { [ZeroExecutionReportSnapshotMessage EXCEPT !.onBehalfOfLocationIDOptional = one] : one \in Sample(41) }
 
 (***************************************************************************)
 (* Orig Order Id: 16 bytes                                                 *)
@@ -5714,56 +5714,56 @@ CheckedOrigOrderId6 ==
 (***************************************************************************)
 
 ExecutionReportTradeMessage ==
-    [ originatorUserId            : Sample(20),
-      execIDInt64                 : Sample(8),
-      clOrdId                     : Sample(8),
-      symbolInt32                 : Sample(4),
-      ordTypeOrderTypeEnum        : Sample(1),
-      sideSideEnum                : Sample(1),
-      orderId                     : Sample(8),
-      origOrderId                 : OrigOrderId6,
-      leavesQty                   : Sample(8),
-      cumQty                      : Sample(8),
-      lastPx                      : Sample(8),
-      lastShares                  : Sample(8),
-      transactTimeUtcTimestamp    : Sample(8),
-      numOfLots                   : Sample(8),
-      execType                    : Sample(1),
-      tradeFlags                  : Sample(1),
-      clearingFirmInt32Null       : Sample(4),
-      clearingAccountString14Null : Sample(14),
-      memo                        : Sample(30),
-      execRefId                   : Sample(8),
-      noLegExecutions             : Sample(2),
-      secondaryExecId             : Sample(8),
-      linkExecId                  : Sample(8),
-      lastParPx                   : Sample(8),
-      deliveryStartDate           : Sample(8),
-      deliveryEndDate             : Sample(8),
-      crossIDInt64Null            : Sample(8),
-      crossTypeCrossTypeEnumNull  : Sample(1),
-      waiverIndicator             : Sample(1),
-      tradeType                   : Sample(3) ]
+    [ originatorUserId        : Sample(20),
+      execIDInt64             : Sample(8),
+      clOrdId                 : Sample(8),
+      symbol                  : Sample(4),
+      ordType                 : Sample(1),
+      side                    : Sample(1),
+      orderId                 : Sample(8),
+      origOrderId             : OrigOrderId6,
+      leavesQty               : Sample(8),
+      cumQty                  : Sample(8),
+      lastPx                  : Sample(8),
+      lastShares              : Sample(8),
+      transactTime            : Sample(8),
+      numOfLots               : Sample(8),
+      execType                : Sample(1),
+      tradeFlags              : Sample(1),
+      clearingFirmOptional    : Sample(4),
+      clearingAccountOptional : Sample(14),
+      memo                    : Sample(30),
+      execRefId               : Sample(8),
+      noLegExecutions         : Sample(2),
+      secondaryExecId         : Sample(8),
+      linkExecId              : Sample(8),
+      lastParPx               : Sample(8),
+      deliveryStartDate       : Sample(8),
+      deliveryEndDate         : Sample(8),
+      crossIDOptional         : Sample(8),
+      crossTypeOptional       : Sample(1),
+      waiverIndicator         : Sample(1),
+      tradeType               : Sample(3) ]
 
 EncodeExecutionReportTradeMessage(message) ==
     message.originatorUserId
         \o message.execIDInt64
         \o message.clOrdId
-        \o message.symbolInt32
-        \o message.ordTypeOrderTypeEnum
-        \o message.sideSideEnum
+        \o message.symbol
+        \o message.ordType
+        \o message.side
         \o message.orderId
         \o EncodeOrigOrderId6(message.origOrderId)
         \o message.leavesQty
         \o message.cumQty
         \o message.lastPx
         \o message.lastShares
-        \o message.transactTimeUtcTimestamp
+        \o message.transactTime
         \o message.numOfLots
         \o message.execType
         \o message.tradeFlags
-        \o message.clearingFirmInt32Null
-        \o message.clearingAccountString14Null
+        \o message.clearingFirmOptional
+        \o message.clearingAccountOptional
         \o message.memo
         \o message.execRefId
         \o message.noLegExecutions
@@ -5772,8 +5772,8 @@ EncodeExecutionReportTradeMessage(message) ==
         \o message.lastParPx
         \o message.deliveryStartDate
         \o message.deliveryEndDate
-        \o message.crossIDInt64Null
-        \o message.crossTypeCrossTypeEnumNull
+        \o message.crossIDOptional
+        \o message.crossTypeOptional
         \o message.waiverIndicator
         \o message.tradeType
 
@@ -5781,22 +5781,22 @@ DecodeExecutionReportTradeMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
     LET execIDInt64 == ReadBytes(originatorUserId.rest, 8) IN IF ~execIDInt64.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(execIDInt64.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(clOrdId.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET ordTypeOrderTypeEnum == ReadBytes(symbolInt32.rest, 1) IN IF ~ordTypeOrderTypeEnum.ok THEN Fail ELSE
-    LET sideSideEnum == ReadBytes(ordTypeOrderTypeEnum.rest, 1) IN IF ~sideSideEnum.ok THEN Fail ELSE
-    LET orderId == ReadBytes(sideSideEnum.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET symbol == ReadBytes(clOrdId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET ordType == ReadBytes(symbol.rest, 1) IN IF ~ordType.ok THEN Fail ELSE
+    LET side == ReadBytes(ordType.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET orderId == ReadBytes(side.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET origOrderId == DecodeOrigOrderId6(orderId.rest) IN IF ~origOrderId.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(origOrderId.rest, 8) IN IF ~leavesQty.ok THEN Fail ELSE
     LET cumQty == ReadBytes(leavesQty.rest, 8) IN IF ~cumQty.ok THEN Fail ELSE
     LET lastPx == ReadBytes(cumQty.rest, 8) IN IF ~lastPx.ok THEN Fail ELSE
     LET lastShares == ReadBytes(lastPx.rest, 8) IN IF ~lastShares.ok THEN Fail ELSE
-    LET transactTimeUtcTimestamp == ReadBytes(lastShares.rest, 8) IN IF ~transactTimeUtcTimestamp.ok THEN Fail ELSE
-    LET numOfLots == ReadBytes(transactTimeUtcTimestamp.rest, 8) IN IF ~numOfLots.ok THEN Fail ELSE
+    LET transactTime == ReadBytes(lastShares.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET numOfLots == ReadBytes(transactTime.rest, 8) IN IF ~numOfLots.ok THEN Fail ELSE
     LET execType == ReadBytes(numOfLots.rest, 1) IN IF ~execType.ok THEN Fail ELSE
     LET tradeFlags == ReadBytes(execType.rest, 1) IN IF ~tradeFlags.ok THEN Fail ELSE
-    LET clearingFirmInt32Null == ReadBytes(tradeFlags.rest, 4) IN IF ~clearingFirmInt32Null.ok THEN Fail ELSE
-    LET clearingAccountString14Null == ReadBytes(clearingFirmInt32Null.rest, 14) IN IF ~clearingAccountString14Null.ok THEN Fail ELSE
-    LET memo == ReadBytes(clearingAccountString14Null.rest, 30) IN IF ~memo.ok THEN Fail ELSE
+    LET clearingFirmOptional == ReadBytes(tradeFlags.rest, 4) IN IF ~clearingFirmOptional.ok THEN Fail ELSE
+    LET clearingAccountOptional == ReadBytes(clearingFirmOptional.rest, 14) IN IF ~clearingAccountOptional.ok THEN Fail ELSE
+    LET memo == ReadBytes(clearingAccountOptional.rest, 30) IN IF ~memo.ok THEN Fail ELSE
     LET execRefId == ReadBytes(memo.rest, 8) IN IF ~execRefId.ok THEN Fail ELSE
     LET noLegExecutions == ReadBytes(execRefId.rest, 2) IN IF ~noLegExecutions.ok THEN Fail ELSE
     LET secondaryExecId == ReadBytes(noLegExecutions.rest, 8) IN IF ~secondaryExecId.ok THEN Fail ELSE
@@ -5804,72 +5804,72 @@ DecodeExecutionReportTradeMessage(bytes) ==
     LET lastParPx == ReadBytes(linkExecId.rest, 8) IN IF ~lastParPx.ok THEN Fail ELSE
     LET deliveryStartDate == ReadBytes(lastParPx.rest, 8) IN IF ~deliveryStartDate.ok THEN Fail ELSE
     LET deliveryEndDate == ReadBytes(deliveryStartDate.rest, 8) IN IF ~deliveryEndDate.ok THEN Fail ELSE
-    LET crossIDInt64Null == ReadBytes(deliveryEndDate.rest, 8) IN IF ~crossIDInt64Null.ok THEN Fail ELSE
-    LET crossTypeCrossTypeEnumNull == ReadBytes(crossIDInt64Null.rest, 1) IN IF ~crossTypeCrossTypeEnumNull.ok THEN Fail ELSE
-    LET waiverIndicator == ReadBytes(crossTypeCrossTypeEnumNull.rest, 1) IN IF ~waiverIndicator.ok THEN Fail ELSE
+    LET crossIDOptional == ReadBytes(deliveryEndDate.rest, 8) IN IF ~crossIDOptional.ok THEN Fail ELSE
+    LET crossTypeOptional == ReadBytes(crossIDOptional.rest, 1) IN IF ~crossTypeOptional.ok THEN Fail ELSE
+    LET waiverIndicator == ReadBytes(crossTypeOptional.rest, 1) IN IF ~waiverIndicator.ok THEN Fail ELSE
     LET tradeType == ReadBytes(waiverIndicator.rest, 3) IN IF ~tradeType.ok THEN Fail ELSE
-    Ok([ originatorUserId            |-> originatorUserId.value,
-         execIDInt64                 |-> execIDInt64.value,
-         clOrdId                     |-> clOrdId.value,
-         symbolInt32                 |-> symbolInt32.value,
-         ordTypeOrderTypeEnum        |-> ordTypeOrderTypeEnum.value,
-         sideSideEnum                |-> sideSideEnum.value,
-         orderId                     |-> orderId.value,
-         origOrderId                 |-> origOrderId.value,
-         leavesQty                   |-> leavesQty.value,
-         cumQty                      |-> cumQty.value,
-         lastPx                      |-> lastPx.value,
-         lastShares                  |-> lastShares.value,
-         transactTimeUtcTimestamp    |-> transactTimeUtcTimestamp.value,
-         numOfLots                   |-> numOfLots.value,
-         execType                    |-> execType.value,
-         tradeFlags                  |-> tradeFlags.value,
-         clearingFirmInt32Null       |-> clearingFirmInt32Null.value,
-         clearingAccountString14Null |-> clearingAccountString14Null.value,
-         memo                        |-> memo.value,
-         execRefId                   |-> execRefId.value,
-         noLegExecutions             |-> noLegExecutions.value,
-         secondaryExecId             |-> secondaryExecId.value,
-         linkExecId                  |-> linkExecId.value,
-         lastParPx                   |-> lastParPx.value,
-         deliveryStartDate           |-> deliveryStartDate.value,
-         deliveryEndDate             |-> deliveryEndDate.value,
-         crossIDInt64Null            |-> crossIDInt64Null.value,
-         crossTypeCrossTypeEnumNull  |-> crossTypeCrossTypeEnumNull.value,
-         waiverIndicator             |-> waiverIndicator.value,
-         tradeType                   |-> tradeType.value ], tradeType.rest)
+    Ok([ originatorUserId        |-> originatorUserId.value,
+         execIDInt64             |-> execIDInt64.value,
+         clOrdId                 |-> clOrdId.value,
+         symbol                  |-> symbol.value,
+         ordType                 |-> ordType.value,
+         side                    |-> side.value,
+         orderId                 |-> orderId.value,
+         origOrderId             |-> origOrderId.value,
+         leavesQty               |-> leavesQty.value,
+         cumQty                  |-> cumQty.value,
+         lastPx                  |-> lastPx.value,
+         lastShares              |-> lastShares.value,
+         transactTime            |-> transactTime.value,
+         numOfLots               |-> numOfLots.value,
+         execType                |-> execType.value,
+         tradeFlags              |-> tradeFlags.value,
+         clearingFirmOptional    |-> clearingFirmOptional.value,
+         clearingAccountOptional |-> clearingAccountOptional.value,
+         memo                    |-> memo.value,
+         execRefId               |-> execRefId.value,
+         noLegExecutions         |-> noLegExecutions.value,
+         secondaryExecId         |-> secondaryExecId.value,
+         linkExecId              |-> linkExecId.value,
+         lastParPx               |-> lastParPx.value,
+         deliveryStartDate       |-> deliveryStartDate.value,
+         deliveryEndDate         |-> deliveryEndDate.value,
+         crossIDOptional         |-> crossIDOptional.value,
+         crossTypeOptional       |-> crossTypeOptional.value,
+         waiverIndicator         |-> waiverIndicator.value,
+         tradeType               |-> tradeType.value ], tradeType.rest)
 
 ZeroExecutionReportTradeMessage ==
-    [ originatorUserId            |-> [i \in 1 .. 20 |-> 0],
-      execIDInt64                 |-> [i \in 1 .. 8 |-> 0],
-      clOrdId                     |-> [i \in 1 .. 8 |-> 0],
-      symbolInt32                 |-> [i \in 1 .. 4 |-> 0],
-      ordTypeOrderTypeEnum        |-> [i \in 1 .. 1 |-> 0],
-      sideSideEnum                |-> [i \in 1 .. 1 |-> 0],
-      orderId                     |-> [i \in 1 .. 8 |-> 0],
-      origOrderId                 |-> ZeroOrigOrderId6,
-      leavesQty                   |-> [i \in 1 .. 8 |-> 0],
-      cumQty                      |-> [i \in 1 .. 8 |-> 0],
-      lastPx                      |-> [i \in 1 .. 8 |-> 0],
-      lastShares                  |-> [i \in 1 .. 8 |-> 0],
-      transactTimeUtcTimestamp    |-> [i \in 1 .. 8 |-> 0],
-      numOfLots                   |-> [i \in 1 .. 8 |-> 0],
-      execType                    |-> [i \in 1 .. 1 |-> 0],
-      tradeFlags                  |-> [i \in 1 .. 1 |-> 0],
-      clearingFirmInt32Null       |-> [i \in 1 .. 4 |-> 0],
-      clearingAccountString14Null |-> [i \in 1 .. 14 |-> 0],
-      memo                        |-> [i \in 1 .. 30 |-> 0],
-      execRefId                   |-> [i \in 1 .. 8 |-> 0],
-      noLegExecutions             |-> [i \in 1 .. 2 |-> 0],
-      secondaryExecId             |-> [i \in 1 .. 8 |-> 0],
-      linkExecId                  |-> [i \in 1 .. 8 |-> 0],
-      lastParPx                   |-> [i \in 1 .. 8 |-> 0],
-      deliveryStartDate           |-> [i \in 1 .. 8 |-> 0],
-      deliveryEndDate             |-> [i \in 1 .. 8 |-> 0],
-      crossIDInt64Null            |-> [i \in 1 .. 8 |-> 0],
-      crossTypeCrossTypeEnumNull  |-> [i \in 1 .. 1 |-> 0],
-      waiverIndicator             |-> [i \in 1 .. 1 |-> 0],
-      tradeType                   |-> [i \in 1 .. 3 |-> 0] ]
+    [ originatorUserId        |-> [i \in 1 .. 20 |-> 0],
+      execIDInt64             |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                 |-> [i \in 1 .. 8 |-> 0],
+      symbol                  |-> [i \in 1 .. 4 |-> 0],
+      ordType                 |-> [i \in 1 .. 1 |-> 0],
+      side                    |-> [i \in 1 .. 1 |-> 0],
+      orderId                 |-> [i \in 1 .. 8 |-> 0],
+      origOrderId             |-> ZeroOrigOrderId6,
+      leavesQty               |-> [i \in 1 .. 8 |-> 0],
+      cumQty                  |-> [i \in 1 .. 8 |-> 0],
+      lastPx                  |-> [i \in 1 .. 8 |-> 0],
+      lastShares              |-> [i \in 1 .. 8 |-> 0],
+      transactTime            |-> [i \in 1 .. 8 |-> 0],
+      numOfLots               |-> [i \in 1 .. 8 |-> 0],
+      execType                |-> [i \in 1 .. 1 |-> 0],
+      tradeFlags              |-> [i \in 1 .. 1 |-> 0],
+      clearingFirmOptional    |-> [i \in 1 .. 4 |-> 0],
+      clearingAccountOptional |-> [i \in 1 .. 14 |-> 0],
+      memo                    |-> [i \in 1 .. 30 |-> 0],
+      execRefId               |-> [i \in 1 .. 8 |-> 0],
+      noLegExecutions         |-> [i \in 1 .. 2 |-> 0],
+      secondaryExecId         |-> [i \in 1 .. 8 |-> 0],
+      linkExecId              |-> [i \in 1 .. 8 |-> 0],
+      lastParPx               |-> [i \in 1 .. 8 |-> 0],
+      deliveryStartDate       |-> [i \in 1 .. 8 |-> 0],
+      deliveryEndDate         |-> [i \in 1 .. 8 |-> 0],
+      crossIDOptional         |-> [i \in 1 .. 8 |-> 0],
+      crossTypeOptional       |-> [i \in 1 .. 1 |-> 0],
+      waiverIndicator         |-> [i \in 1 .. 1 |-> 0],
+      tradeType               |-> [i \in 1 .. 3 |-> 0] ]
 
 (* Execution Report Trade Message at zero, then each field in turn at the values it is checked at *)
 CheckedExecutionReportTradeMessage ==
@@ -5877,21 +5877,21 @@ CheckedExecutionReportTradeMessage ==
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.execIDInt64 = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.ordTypeOrderTypeEnum = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.sideSideEnum = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.symbol = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.ordType = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.origOrderId = one] : one \in CheckedOrigOrderId6 }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.leavesQty = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.cumQty = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.lastPx = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.lastShares = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.transactTimeUtcTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.transactTime = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.numOfLots = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.execType = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.tradeFlags = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.clearingFirmInt32Null = one] : one \in Sample(4) }
-        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.clearingAccountString14Null = one] : one \in Sample(14) }
+        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.clearingFirmOptional = one] : one \in Sample(4) }
+        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.clearingAccountOptional = one] : one \in Sample(14) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.memo = one] : one \in Sample(30) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.execRefId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.noLegExecutions = one] : one \in Sample(2) }
@@ -5900,8 +5900,8 @@ CheckedExecutionReportTradeMessage ==
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.lastParPx = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.deliveryStartDate = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.deliveryEndDate = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.crossIDInt64Null = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.crossTypeCrossTypeEnumNull = one] : one \in Sample(1) }
+        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.crossIDOptional = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.crossTypeOptional = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.waiverIndicator = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.tradeType = one] : one \in Sample(3) }
 
@@ -5910,68 +5910,68 @@ CheckedExecutionReportTradeMessage ==
 (***************************************************************************)
 
 QuoteReportMessage ==
-    [ originatorUserId         : Sample(20),
-      sideSideEnumNull         : Sample(1),
-      symbolInt32              : Sample(4),
-      rfqReqId                 : Sample(8),
-      rfqSystemId              : Sample(8),
-      transactTimeUtcTimestamp : Sample(8),
-      orderQtyDecimal9Null     : Sample(8),
-      quoteAckStatus           : Sample(2),
-      quoteRejectReason        : Sample(1) ]
+    [ originatorUserId  : Sample(20),
+      sideOptional      : Sample(1),
+      symbol            : Sample(4),
+      rfqReqId          : Sample(8),
+      rfqSystemId       : Sample(8),
+      transactTime      : Sample(8),
+      orderQtyOptional  : Sample(8),
+      quoteAckStatus    : Sample(2),
+      quoteRejectReason : Sample(1) ]
 
 EncodeQuoteReportMessage(message) ==
     message.originatorUserId
-        \o message.sideSideEnumNull
-        \o message.symbolInt32
+        \o message.sideOptional
+        \o message.symbol
         \o message.rfqReqId
         \o message.rfqSystemId
-        \o message.transactTimeUtcTimestamp
-        \o message.orderQtyDecimal9Null
+        \o message.transactTime
+        \o message.orderQtyOptional
         \o message.quoteAckStatus
         \o message.quoteRejectReason
 
 DecodeQuoteReportMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
-    LET sideSideEnumNull == ReadBytes(originatorUserId.rest, 1) IN IF ~sideSideEnumNull.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(sideSideEnumNull.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET rfqReqId == ReadBytes(symbolInt32.rest, 8) IN IF ~rfqReqId.ok THEN Fail ELSE
+    LET sideOptional == ReadBytes(originatorUserId.rest, 1) IN IF ~sideOptional.ok THEN Fail ELSE
+    LET symbol == ReadBytes(sideOptional.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET rfqReqId == ReadBytes(symbol.rest, 8) IN IF ~rfqReqId.ok THEN Fail ELSE
     LET rfqSystemId == ReadBytes(rfqReqId.rest, 8) IN IF ~rfqSystemId.ok THEN Fail ELSE
-    LET transactTimeUtcTimestamp == ReadBytes(rfqSystemId.rest, 8) IN IF ~transactTimeUtcTimestamp.ok THEN Fail ELSE
-    LET orderQtyDecimal9Null == ReadBytes(transactTimeUtcTimestamp.rest, 8) IN IF ~orderQtyDecimal9Null.ok THEN Fail ELSE
-    LET quoteAckStatus == ReadBytes(orderQtyDecimal9Null.rest, 2) IN IF ~quoteAckStatus.ok THEN Fail ELSE
+    LET transactTime == ReadBytes(rfqSystemId.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET orderQtyOptional == ReadBytes(transactTime.rest, 8) IN IF ~orderQtyOptional.ok THEN Fail ELSE
+    LET quoteAckStatus == ReadBytes(orderQtyOptional.rest, 2) IN IF ~quoteAckStatus.ok THEN Fail ELSE
     LET quoteRejectReason == ReadBytes(quoteAckStatus.rest, 1) IN IF ~quoteRejectReason.ok THEN Fail ELSE
-    Ok([ originatorUserId         |-> originatorUserId.value,
-         sideSideEnumNull         |-> sideSideEnumNull.value,
-         symbolInt32              |-> symbolInt32.value,
-         rfqReqId                 |-> rfqReqId.value,
-         rfqSystemId              |-> rfqSystemId.value,
-         transactTimeUtcTimestamp |-> transactTimeUtcTimestamp.value,
-         orderQtyDecimal9Null     |-> orderQtyDecimal9Null.value,
-         quoteAckStatus           |-> quoteAckStatus.value,
-         quoteRejectReason        |-> quoteRejectReason.value ], quoteRejectReason.rest)
+    Ok([ originatorUserId  |-> originatorUserId.value,
+         sideOptional      |-> sideOptional.value,
+         symbol            |-> symbol.value,
+         rfqReqId          |-> rfqReqId.value,
+         rfqSystemId       |-> rfqSystemId.value,
+         transactTime      |-> transactTime.value,
+         orderQtyOptional  |-> orderQtyOptional.value,
+         quoteAckStatus    |-> quoteAckStatus.value,
+         quoteRejectReason |-> quoteRejectReason.value ], quoteRejectReason.rest)
 
 ZeroQuoteReportMessage ==
-    [ originatorUserId         |-> [i \in 1 .. 20 |-> 0],
-      sideSideEnumNull         |-> [i \in 1 .. 1 |-> 0],
-      symbolInt32              |-> [i \in 1 .. 4 |-> 0],
-      rfqReqId                 |-> [i \in 1 .. 8 |-> 0],
-      rfqSystemId              |-> [i \in 1 .. 8 |-> 0],
-      transactTimeUtcTimestamp |-> [i \in 1 .. 8 |-> 0],
-      orderQtyDecimal9Null     |-> [i \in 1 .. 8 |-> 0],
-      quoteAckStatus           |-> [i \in 1 .. 2 |-> 0],
-      quoteRejectReason        |-> [i \in 1 .. 1 |-> 0] ]
+    [ originatorUserId  |-> [i \in 1 .. 20 |-> 0],
+      sideOptional      |-> [i \in 1 .. 1 |-> 0],
+      symbol            |-> [i \in 1 .. 4 |-> 0],
+      rfqReqId          |-> [i \in 1 .. 8 |-> 0],
+      rfqSystemId       |-> [i \in 1 .. 8 |-> 0],
+      transactTime      |-> [i \in 1 .. 8 |-> 0],
+      orderQtyOptional  |-> [i \in 1 .. 8 |-> 0],
+      quoteAckStatus    |-> [i \in 1 .. 2 |-> 0],
+      quoteRejectReason |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Quote Report Message at zero, then each field in turn at the values it is checked at *)
 CheckedQuoteReportMessage ==
     { ZeroQuoteReportMessage }
         \cup { [ZeroQuoteReportMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
-        \cup { [ZeroQuoteReportMessage EXCEPT !.sideSideEnumNull = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteReportMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteReportMessage EXCEPT !.sideOptional = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteReportMessage EXCEPT !.symbol = one] : one \in Sample(4) }
         \cup { [ZeroQuoteReportMessage EXCEPT !.rfqReqId = one] : one \in Sample(8) }
         \cup { [ZeroQuoteReportMessage EXCEPT !.rfqSystemId = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteReportMessage EXCEPT !.transactTimeUtcTimestamp = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteReportMessage EXCEPT !.orderQtyDecimal9Null = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteReportMessage EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteReportMessage EXCEPT !.orderQtyOptional = one] : one \in Sample(8) }
         \cup { [ZeroQuoteReportMessage EXCEPT !.quoteAckStatus = one] : one \in Sample(2) }
         \cup { [ZeroQuoteReportMessage EXCEPT !.quoteRejectReason = one] : one \in Sample(1) }
 
@@ -5980,55 +5980,55 @@ CheckedQuoteReportMessage ==
 (***************************************************************************)
 
 NewOrderCrossReportMessage ==
-    [ originatorUserId         : Sample(20),
-      symbolInt32              : Sample(4),
-      crossIDInt64             : Sample(8),
-      transactTimeUtcTimestamp : Sample(8),
-      rfcStatus                : Sample(1),
-      exchangeCode             : Sample(4),
-      text                     : Sample(100) ]
+    [ originatorUserId : Sample(20),
+      symbol           : Sample(4),
+      crossId          : Sample(8),
+      transactTime     : Sample(8),
+      rfcStatus        : Sample(1),
+      exchangeCode     : Sample(4),
+      text             : Sample(100) ]
 
 EncodeNewOrderCrossReportMessage(message) ==
     message.originatorUserId
-        \o message.symbolInt32
-        \o message.crossIDInt64
-        \o message.transactTimeUtcTimestamp
+        \o message.symbol
+        \o message.crossId
+        \o message.transactTime
         \o message.rfcStatus
         \o message.exchangeCode
         \o message.text
 
 DecodeNewOrderCrossReportMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(originatorUserId.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET crossIDInt64 == ReadBytes(symbolInt32.rest, 8) IN IF ~crossIDInt64.ok THEN Fail ELSE
-    LET transactTimeUtcTimestamp == ReadBytes(crossIDInt64.rest, 8) IN IF ~transactTimeUtcTimestamp.ok THEN Fail ELSE
-    LET rfcStatus == ReadBytes(transactTimeUtcTimestamp.rest, 1) IN IF ~rfcStatus.ok THEN Fail ELSE
+    LET symbol == ReadBytes(originatorUserId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET crossId == ReadBytes(symbol.rest, 8) IN IF ~crossId.ok THEN Fail ELSE
+    LET transactTime == ReadBytes(crossId.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET rfcStatus == ReadBytes(transactTime.rest, 1) IN IF ~rfcStatus.ok THEN Fail ELSE
     LET exchangeCode == ReadBytes(rfcStatus.rest, 4) IN IF ~exchangeCode.ok THEN Fail ELSE
     LET text == ReadBytes(exchangeCode.rest, 100) IN IF ~text.ok THEN Fail ELSE
-    Ok([ originatorUserId         |-> originatorUserId.value,
-         symbolInt32              |-> symbolInt32.value,
-         crossIDInt64             |-> crossIDInt64.value,
-         transactTimeUtcTimestamp |-> transactTimeUtcTimestamp.value,
-         rfcStatus                |-> rfcStatus.value,
-         exchangeCode             |-> exchangeCode.value,
-         text                     |-> text.value ], text.rest)
+    Ok([ originatorUserId |-> originatorUserId.value,
+         symbol           |-> symbol.value,
+         crossId          |-> crossId.value,
+         transactTime     |-> transactTime.value,
+         rfcStatus        |-> rfcStatus.value,
+         exchangeCode     |-> exchangeCode.value,
+         text             |-> text.value ], text.rest)
 
 ZeroNewOrderCrossReportMessage ==
-    [ originatorUserId         |-> [i \in 1 .. 20 |-> 0],
-      symbolInt32              |-> [i \in 1 .. 4 |-> 0],
-      crossIDInt64             |-> [i \in 1 .. 8 |-> 0],
-      transactTimeUtcTimestamp |-> [i \in 1 .. 8 |-> 0],
-      rfcStatus                |-> [i \in 1 .. 1 |-> 0],
-      exchangeCode             |-> [i \in 1 .. 4 |-> 0],
-      text                     |-> [i \in 1 .. 100 |-> 0] ]
+    [ originatorUserId |-> [i \in 1 .. 20 |-> 0],
+      symbol           |-> [i \in 1 .. 4 |-> 0],
+      crossId          |-> [i \in 1 .. 8 |-> 0],
+      transactTime     |-> [i \in 1 .. 8 |-> 0],
+      rfcStatus        |-> [i \in 1 .. 1 |-> 0],
+      exchangeCode     |-> [i \in 1 .. 4 |-> 0],
+      text             |-> [i \in 1 .. 100 |-> 0] ]
 
 (* New Order Cross Report Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderCrossReportMessage ==
     { ZeroNewOrderCrossReportMessage }
         \cup { [ZeroNewOrderCrossReportMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
-        \cup { [ZeroNewOrderCrossReportMessage EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
-        \cup { [ZeroNewOrderCrossReportMessage EXCEPT !.crossIDInt64 = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderCrossReportMessage EXCEPT !.transactTimeUtcTimestamp = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderCrossReportMessage EXCEPT !.symbol = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderCrossReportMessage EXCEPT !.crossId = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderCrossReportMessage EXCEPT !.transactTime = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderCrossReportMessage EXCEPT !.rfcStatus = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderCrossReportMessage EXCEPT !.exchangeCode = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderCrossReportMessage EXCEPT !.text = one] : one \in Sample(100) }
@@ -6038,23 +6038,23 @@ CheckedNewOrderCrossReportMessage ==
 (***************************************************************************)
 
 OrderMassCancelReportMessage ==
-    [ originatorUserId         : Sample(20),
-      symbolInt32Null          : Sample(4),
-      clOrdId                  : Sample(8),
-      transactTimeUtcTimestamp : Sample(8),
-      marketTypeIDInt32Null    : Sample(4),
-      massCancelRequestType    : Sample(1),
-      massCancelResponse       : Sample(1),
-      massCancelRejectReason   : Sample(1),
-      exchangeCode             : Sample(4),
-      text                     : Sample(100) ]
+    [ originatorUserId       : Sample(20),
+      symbolOptional         : Sample(4),
+      clOrdId                : Sample(8),
+      transactTime           : Sample(8),
+      marketTypeIDOptional   : Sample(4),
+      massCancelRequestType  : Sample(1),
+      massCancelResponse     : Sample(1),
+      massCancelRejectReason : Sample(1),
+      exchangeCode           : Sample(4),
+      text                   : Sample(100) ]
 
 EncodeOrderMassCancelReportMessage(message) ==
     message.originatorUserId
-        \o message.symbolInt32Null
+        \o message.symbolOptional
         \o message.clOrdId
-        \o message.transactTimeUtcTimestamp
-        \o message.marketTypeIDInt32Null
+        \o message.transactTime
+        \o message.marketTypeIDOptional
         \o message.massCancelRequestType
         \o message.massCancelResponse
         \o message.massCancelRejectReason
@@ -6063,46 +6063,46 @@ EncodeOrderMassCancelReportMessage(message) ==
 
 DecodeOrderMassCancelReportMessage(bytes) ==
     LET originatorUserId == ReadBytes(bytes, 20) IN IF ~originatorUserId.ok THEN Fail ELSE
-    LET symbolInt32Null == ReadBytes(originatorUserId.rest, 4) IN IF ~symbolInt32Null.ok THEN Fail ELSE
-    LET clOrdId == ReadBytes(symbolInt32Null.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
-    LET transactTimeUtcTimestamp == ReadBytes(clOrdId.rest, 8) IN IF ~transactTimeUtcTimestamp.ok THEN Fail ELSE
-    LET marketTypeIDInt32Null == ReadBytes(transactTimeUtcTimestamp.rest, 4) IN IF ~marketTypeIDInt32Null.ok THEN Fail ELSE
-    LET massCancelRequestType == ReadBytes(marketTypeIDInt32Null.rest, 1) IN IF ~massCancelRequestType.ok THEN Fail ELSE
+    LET symbolOptional == ReadBytes(originatorUserId.rest, 4) IN IF ~symbolOptional.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(symbolOptional.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET transactTime == ReadBytes(clOrdId.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET marketTypeIDOptional == ReadBytes(transactTime.rest, 4) IN IF ~marketTypeIDOptional.ok THEN Fail ELSE
+    LET massCancelRequestType == ReadBytes(marketTypeIDOptional.rest, 1) IN IF ~massCancelRequestType.ok THEN Fail ELSE
     LET massCancelResponse == ReadBytes(massCancelRequestType.rest, 1) IN IF ~massCancelResponse.ok THEN Fail ELSE
     LET massCancelRejectReason == ReadBytes(massCancelResponse.rest, 1) IN IF ~massCancelRejectReason.ok THEN Fail ELSE
     LET exchangeCode == ReadBytes(massCancelRejectReason.rest, 4) IN IF ~exchangeCode.ok THEN Fail ELSE
     LET text == ReadBytes(exchangeCode.rest, 100) IN IF ~text.ok THEN Fail ELSE
-    Ok([ originatorUserId         |-> originatorUserId.value,
-         symbolInt32Null          |-> symbolInt32Null.value,
-         clOrdId                  |-> clOrdId.value,
-         transactTimeUtcTimestamp |-> transactTimeUtcTimestamp.value,
-         marketTypeIDInt32Null    |-> marketTypeIDInt32Null.value,
-         massCancelRequestType    |-> massCancelRequestType.value,
-         massCancelResponse       |-> massCancelResponse.value,
-         massCancelRejectReason   |-> massCancelRejectReason.value,
-         exchangeCode             |-> exchangeCode.value,
-         text                     |-> text.value ], text.rest)
+    Ok([ originatorUserId       |-> originatorUserId.value,
+         symbolOptional         |-> symbolOptional.value,
+         clOrdId                |-> clOrdId.value,
+         transactTime           |-> transactTime.value,
+         marketTypeIDOptional   |-> marketTypeIDOptional.value,
+         massCancelRequestType  |-> massCancelRequestType.value,
+         massCancelResponse     |-> massCancelResponse.value,
+         massCancelRejectReason |-> massCancelRejectReason.value,
+         exchangeCode           |-> exchangeCode.value,
+         text                   |-> text.value ], text.rest)
 
 ZeroOrderMassCancelReportMessage ==
-    [ originatorUserId         |-> [i \in 1 .. 20 |-> 0],
-      symbolInt32Null          |-> [i \in 1 .. 4 |-> 0],
-      clOrdId                  |-> [i \in 1 .. 8 |-> 0],
-      transactTimeUtcTimestamp |-> [i \in 1 .. 8 |-> 0],
-      marketTypeIDInt32Null    |-> [i \in 1 .. 4 |-> 0],
-      massCancelRequestType    |-> [i \in 1 .. 1 |-> 0],
-      massCancelResponse       |-> [i \in 1 .. 1 |-> 0],
-      massCancelRejectReason   |-> [i \in 1 .. 1 |-> 0],
-      exchangeCode             |-> [i \in 1 .. 4 |-> 0],
-      text                     |-> [i \in 1 .. 100 |-> 0] ]
+    [ originatorUserId       |-> [i \in 1 .. 20 |-> 0],
+      symbolOptional         |-> [i \in 1 .. 4 |-> 0],
+      clOrdId                |-> [i \in 1 .. 8 |-> 0],
+      transactTime           |-> [i \in 1 .. 8 |-> 0],
+      marketTypeIDOptional   |-> [i \in 1 .. 4 |-> 0],
+      massCancelRequestType  |-> [i \in 1 .. 1 |-> 0],
+      massCancelResponse     |-> [i \in 1 .. 1 |-> 0],
+      massCancelRejectReason |-> [i \in 1 .. 1 |-> 0],
+      exchangeCode           |-> [i \in 1 .. 4 |-> 0],
+      text                   |-> [i \in 1 .. 100 |-> 0] ]
 
 (* Order Mass Cancel Report Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderMassCancelReportMessage ==
     { ZeroOrderMassCancelReportMessage }
         \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.originatorUserId = one] : one \in Sample(20) }
-        \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.symbolInt32Null = one] : one \in Sample(4) }
+        \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.symbolOptional = one] : one \in Sample(4) }
         \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
-        \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.transactTimeUtcTimestamp = one] : one \in Sample(8) }
-        \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.marketTypeIDInt32Null = one] : one \in Sample(4) }
+        \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.marketTypeIDOptional = one] : one \in Sample(4) }
         \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.massCancelRequestType = one] : one \in Sample(1) }
         \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.massCancelResponse = one] : one \in Sample(1) }
         \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.massCancelRejectReason = one] : one \in Sample(1) }
@@ -6115,43 +6115,43 @@ CheckedOrderMassCancelReportMessage ==
 
 MassQuoteReportMessageNoQuoteSetsGroup ==
     [ quoteSetId                 : Sample(4),
-      underlyingSymbolInt32      : Sample(4),
+      underlyingSymbol           : Sample(4),
       quoteEntryId               : Sample(4),
-      symbolInt32                : Sample(4),
+      symbol                     : Sample(4),
       quoteEntryRejectReason     : Sample(1),
       quoteEntryExchangeCode     : Sample(4),
       quoteEntryRejectReasonText : Sample(100) ]
 
 EncodeMassQuoteReportMessageNoQuoteSetsGroup(message) ==
     message.quoteSetId
-        \o message.underlyingSymbolInt32
+        \o message.underlyingSymbol
         \o message.quoteEntryId
-        \o message.symbolInt32
+        \o message.symbol
         \o message.quoteEntryRejectReason
         \o message.quoteEntryExchangeCode
         \o message.quoteEntryRejectReasonText
 
 DecodeMassQuoteReportMessageNoQuoteSetsGroup(bytes) ==
     LET quoteSetId == ReadBytes(bytes, 4) IN IF ~quoteSetId.ok THEN Fail ELSE
-    LET underlyingSymbolInt32 == ReadBytes(quoteSetId.rest, 4) IN IF ~underlyingSymbolInt32.ok THEN Fail ELSE
-    LET quoteEntryId == ReadBytes(underlyingSymbolInt32.rest, 4) IN IF ~quoteEntryId.ok THEN Fail ELSE
-    LET symbolInt32 == ReadBytes(quoteEntryId.rest, 4) IN IF ~symbolInt32.ok THEN Fail ELSE
-    LET quoteEntryRejectReason == ReadBytes(symbolInt32.rest, 1) IN IF ~quoteEntryRejectReason.ok THEN Fail ELSE
+    LET underlyingSymbol == ReadBytes(quoteSetId.rest, 4) IN IF ~underlyingSymbol.ok THEN Fail ELSE
+    LET quoteEntryId == ReadBytes(underlyingSymbol.rest, 4) IN IF ~quoteEntryId.ok THEN Fail ELSE
+    LET symbol == ReadBytes(quoteEntryId.rest, 4) IN IF ~symbol.ok THEN Fail ELSE
+    LET quoteEntryRejectReason == ReadBytes(symbol.rest, 1) IN IF ~quoteEntryRejectReason.ok THEN Fail ELSE
     LET quoteEntryExchangeCode == ReadBytes(quoteEntryRejectReason.rest, 4) IN IF ~quoteEntryExchangeCode.ok THEN Fail ELSE
     LET quoteEntryRejectReasonText == ReadBytes(quoteEntryExchangeCode.rest, 100) IN IF ~quoteEntryRejectReasonText.ok THEN Fail ELSE
     Ok([ quoteSetId                 |-> quoteSetId.value,
-         underlyingSymbolInt32      |-> underlyingSymbolInt32.value,
+         underlyingSymbol           |-> underlyingSymbol.value,
          quoteEntryId               |-> quoteEntryId.value,
-         symbolInt32                |-> symbolInt32.value,
+         symbol                     |-> symbol.value,
          quoteEntryRejectReason     |-> quoteEntryRejectReason.value,
          quoteEntryExchangeCode     |-> quoteEntryExchangeCode.value,
          quoteEntryRejectReasonText |-> quoteEntryRejectReasonText.value ], quoteEntryRejectReasonText.rest)
 
 ZeroMassQuoteReportMessageNoQuoteSetsGroup ==
     [ quoteSetId                 |-> [i \in 1 .. 4 |-> 0],
-      underlyingSymbolInt32      |-> [i \in 1 .. 4 |-> 0],
+      underlyingSymbol           |-> [i \in 1 .. 4 |-> 0],
       quoteEntryId               |-> [i \in 1 .. 4 |-> 0],
-      symbolInt32                |-> [i \in 1 .. 4 |-> 0],
+      symbol                     |-> [i \in 1 .. 4 |-> 0],
       quoteEntryRejectReason     |-> [i \in 1 .. 1 |-> 0],
       quoteEntryExchangeCode     |-> [i \in 1 .. 4 |-> 0],
       quoteEntryRejectReasonText |-> [i \in 1 .. 100 |-> 0] ]
@@ -6160,9 +6160,9 @@ ZeroMassQuoteReportMessageNoQuoteSetsGroup ==
 CheckedMassQuoteReportMessageNoQuoteSetsGroup ==
     { ZeroMassQuoteReportMessageNoQuoteSetsGroup }
         \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.quoteSetId = one] : one \in Sample(4) }
-        \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.underlyingSymbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.underlyingSymbol = one] : one \in Sample(4) }
         \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.quoteEntryId = one] : one \in Sample(4) }
-        \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.symbolInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.symbol = one] : one \in Sample(4) }
         \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.quoteEntryRejectReason = one] : one \in Sample(1) }
         \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.quoteEntryExchangeCode = one] : one \in Sample(4) }
         \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.quoteEntryRejectReasonText = one] : one \in Sample(100) }
@@ -6228,8 +6228,8 @@ MassQuoteReportMessage ==
       riskProtectionReset                     : Sample(1),
       quoteAckStatus                          : Sample(2),
       quoteRejectReason                       : Sample(1),
-      transactTimeUtcTimestampNull            : Sample(8),
-      meAcceptanceTimeUtcTimestampNull        : Sample(8),
+      transactTimeOptional                    : Sample(8),
+      meAcceptanceTimeOptional                : Sample(8),
       exchangeCode                            : Sample(4),
       text                                    : Sample(100),
       massQuoteReportMessageNoQuoteSetsGroups : MassQuoteReportMessageNoQuoteSetsGroups ]
@@ -6240,8 +6240,8 @@ EncodeMassQuoteReportMessage(message) ==
         \o message.riskProtectionReset
         \o message.quoteAckStatus
         \o message.quoteRejectReason
-        \o message.transactTimeUtcTimestampNull
-        \o message.meAcceptanceTimeUtcTimestampNull
+        \o message.transactTimeOptional
+        \o message.meAcceptanceTimeOptional
         \o message.exchangeCode
         \o message.text
         \o EncodeMassQuoteReportMessageNoQuoteSetsGroups(message.massQuoteReportMessageNoQuoteSetsGroups)
@@ -6252,9 +6252,9 @@ DecodeMassQuoteReportMessage(bytes) ==
     LET riskProtectionReset == ReadBytes(originatorUserId.rest, 1) IN IF ~riskProtectionReset.ok THEN Fail ELSE
     LET quoteAckStatus == ReadBytes(riskProtectionReset.rest, 2) IN IF ~quoteAckStatus.ok THEN Fail ELSE
     LET quoteRejectReason == ReadBytes(quoteAckStatus.rest, 1) IN IF ~quoteRejectReason.ok THEN Fail ELSE
-    LET transactTimeUtcTimestampNull == ReadBytes(quoteRejectReason.rest, 8) IN IF ~transactTimeUtcTimestampNull.ok THEN Fail ELSE
-    LET meAcceptanceTimeUtcTimestampNull == ReadBytes(transactTimeUtcTimestampNull.rest, 8) IN IF ~meAcceptanceTimeUtcTimestampNull.ok THEN Fail ELSE
-    LET exchangeCode == ReadBytes(meAcceptanceTimeUtcTimestampNull.rest, 4) IN IF ~exchangeCode.ok THEN Fail ELSE
+    LET transactTimeOptional == ReadBytes(quoteRejectReason.rest, 8) IN IF ~transactTimeOptional.ok THEN Fail ELSE
+    LET meAcceptanceTimeOptional == ReadBytes(transactTimeOptional.rest, 8) IN IF ~meAcceptanceTimeOptional.ok THEN Fail ELSE
+    LET exchangeCode == ReadBytes(meAcceptanceTimeOptional.rest, 4) IN IF ~exchangeCode.ok THEN Fail ELSE
     LET text == ReadBytes(exchangeCode.rest, 100) IN IF ~text.ok THEN Fail ELSE
     LET massQuoteReportMessageNoQuoteSetsGroups == DecodeMassQuoteReportMessageNoQuoteSetsGroups(text.rest) IN IF ~massQuoteReportMessageNoQuoteSetsGroups.ok THEN Fail ELSE
     Ok([ quoteId                                 |-> quoteId.value,
@@ -6262,8 +6262,8 @@ DecodeMassQuoteReportMessage(bytes) ==
          riskProtectionReset                     |-> riskProtectionReset.value,
          quoteAckStatus                          |-> quoteAckStatus.value,
          quoteRejectReason                       |-> quoteRejectReason.value,
-         transactTimeUtcTimestampNull            |-> transactTimeUtcTimestampNull.value,
-         meAcceptanceTimeUtcTimestampNull        |-> meAcceptanceTimeUtcTimestampNull.value,
+         transactTimeOptional                    |-> transactTimeOptional.value,
+         meAcceptanceTimeOptional                |-> meAcceptanceTimeOptional.value,
          exchangeCode                            |-> exchangeCode.value,
          text                                    |-> text.value,
          massQuoteReportMessageNoQuoteSetsGroups |-> massQuoteReportMessageNoQuoteSetsGroups.value ], massQuoteReportMessageNoQuoteSetsGroups.rest)
@@ -6274,8 +6274,8 @@ ZeroMassQuoteReportMessage ==
       riskProtectionReset                     |-> [i \in 1 .. 1 |-> 0],
       quoteAckStatus                          |-> [i \in 1 .. 2 |-> 0],
       quoteRejectReason                       |-> [i \in 1 .. 1 |-> 0],
-      transactTimeUtcTimestampNull            |-> [i \in 1 .. 8 |-> 0],
-      meAcceptanceTimeUtcTimestampNull        |-> [i \in 1 .. 8 |-> 0],
+      transactTimeOptional                    |-> [i \in 1 .. 8 |-> 0],
+      meAcceptanceTimeOptional                |-> [i \in 1 .. 8 |-> 0],
       exchangeCode                            |-> [i \in 1 .. 4 |-> 0],
       text                                    |-> [i \in 1 .. 100 |-> 0],
       massQuoteReportMessageNoQuoteSetsGroups |-> ZeroMassQuoteReportMessageNoQuoteSetsGroups ]
@@ -6288,8 +6288,8 @@ CheckedMassQuoteReportMessage ==
         \cup { [ZeroMassQuoteReportMessage EXCEPT !.riskProtectionReset = one] : one \in Sample(1) }
         \cup { [ZeroMassQuoteReportMessage EXCEPT !.quoteAckStatus = one] : one \in Sample(2) }
         \cup { [ZeroMassQuoteReportMessage EXCEPT !.quoteRejectReason = one] : one \in Sample(1) }
-        \cup { [ZeroMassQuoteReportMessage EXCEPT !.transactTimeUtcTimestampNull = one] : one \in Sample(8) }
-        \cup { [ZeroMassQuoteReportMessage EXCEPT !.meAcceptanceTimeUtcTimestampNull = one] : one \in Sample(8) }
+        \cup { [ZeroMassQuoteReportMessage EXCEPT !.transactTimeOptional = one] : one \in Sample(8) }
+        \cup { [ZeroMassQuoteReportMessage EXCEPT !.meAcceptanceTimeOptional = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteReportMessage EXCEPT !.exchangeCode = one] : one \in Sample(4) }
         \cup { [ZeroMassQuoteReportMessage EXCEPT !.text = one] : one \in Sample(100) }
         \cup { [ZeroMassQuoteReportMessage EXCEPT !.massQuoteReportMessageNoQuoteSetsGroups = one] : one \in CheckedMassQuoteReportMessageNoQuoteSetsGroups }

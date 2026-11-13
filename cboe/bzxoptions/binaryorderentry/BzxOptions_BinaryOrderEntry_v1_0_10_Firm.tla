@@ -161,7 +161,7 @@ EncodeLoginRequestMessage(message) ==
         \o message.sessionSubId
         \o message.password
         \o message.replayInstruction
-        \o EncodeUIntLE(Len(message.unitSequence), 1)
+        \o EncodeUIntBE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
 DecodeLoginRequestMessage(bytes) ==
@@ -169,7 +169,7 @@ DecodeLoginRequestMessage(bytes) ==
     LET sessionSubId == ReadBytes(sessionId.rest, 4) IN IF ~sessionSubId.ok THEN Fail ELSE
     LET password == ReadBytes(sessionSubId.rest, 10) IN IF ~password.ok THEN Fail ELSE
     LET replayInstruction == ReadBytes(password.rest, 1) IN IF ~replayInstruction.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(replayInstruction.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntBE(replayInstruction.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
     Ok([ sessionId         |-> sessionId.value,
          sessionSubId      |-> sessionSubId.value,
@@ -1066,7 +1066,7 @@ EncodeQuoteUpdateMessage(message) ==
         \o message.sessionEligibility
         \o message.sizeModifier
         \o message.scratchPad
-        \o EncodeUIntLE(Len(message.quote), 1)
+        \o EncodeUIntBE(Len(message.quote), 1)
         \o EncodeQuoteList(message.quote)
 
 DecodeQuoteUpdateMessage(bytes) ==
@@ -1081,7 +1081,7 @@ DecodeQuoteUpdateMessage(bytes) ==
     LET sessionEligibility == ReadBytes(postingInstruction.rest, 1) IN IF ~sessionEligibility.ok THEN Fail ELSE
     LET sizeModifier == ReadBytes(sessionEligibility.rest, 1) IN IF ~sizeModifier.ok THEN Fail ELSE
     LET scratchPad == ReadBytes(sizeModifier.rest, 2) IN IF ~scratchPad.ok THEN Fail ELSE
-    LET quoteCnt == ReadUIntLE(scratchPad.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
+    LET quoteCnt == ReadUIntBE(scratchPad.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
     LET quote == ReadQuoteList(quoteCnt.rest, quoteCnt.value) IN IF ~quote.ok THEN Fail ELSE
     Ok([ quoteUpdateId      |-> quoteUpdateId.value,
          clearingFirm       |-> clearingFirm.value,
@@ -1225,7 +1225,7 @@ EncodeQuoteUpdateShortMessage(message) ==
         \o message.sessionEligibility
         \o message.sizeModifier
         \o message.scratchPad
-        \o EncodeUIntLE(Len(message.quoteShort), 1)
+        \o EncodeUIntBE(Len(message.quoteShort), 1)
         \o EncodeQuoteShortList(message.quoteShort)
 
 DecodeQuoteUpdateShortMessage(bytes) ==
@@ -1238,7 +1238,7 @@ DecodeQuoteUpdateShortMessage(bytes) ==
     LET sessionEligibility == ReadBytes(postingInstruction.rest, 1) IN IF ~sessionEligibility.ok THEN Fail ELSE
     LET sizeModifier == ReadBytes(sessionEligibility.rest, 1) IN IF ~sizeModifier.ok THEN Fail ELSE
     LET scratchPad == ReadBytes(sizeModifier.rest, 2) IN IF ~scratchPad.ok THEN Fail ELSE
-    LET quoteCnt == ReadUIntLE(scratchPad.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
+    LET quoteCnt == ReadUIntBE(scratchPad.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
     LET quoteShort == ReadQuoteShortList(quoteCnt.rest, quoteCnt.value) IN IF ~quoteShort.ok THEN Fail ELSE
     Ok([ quoteUpdateId      |-> quoteUpdateId.value,
          clearingFirm       |-> clearingFirm.value,
@@ -1352,7 +1352,7 @@ EncodePurgeOrdersMessage(message) ==
         \o EncodeMassCancelInst2(message.massCancelInst)
         \o message.sendTime
         \o message.scratchPad
-        \o EncodeUIntLE(message.customGroupIdCnt, 1)
+        \o EncodeUIntBE(message.customGroupIdCnt, 1)
         \o message.customGroupId
 
 DecodePurgeOrdersMessage(bytes) ==
@@ -1363,7 +1363,7 @@ DecodePurgeOrdersMessage(bytes) ==
     LET massCancelInst == DecodeMassCancelInst2(riskRoot.rest) IN IF ~massCancelInst.ok THEN Fail ELSE
     LET sendTime == ReadBytes(massCancelInst.rest, 8) IN IF ~sendTime.ok THEN Fail ELSE
     LET scratchPad == ReadBytes(sendTime.rest, 2) IN IF ~scratchPad.ok THEN Fail ELSE
-    LET customGroupIdCnt == ReadUIntLE(scratchPad.rest, 1) IN IF ~customGroupIdCnt.ok THEN Fail ELSE
+    LET customGroupIdCnt == ReadUIntBE(scratchPad.rest, 1) IN IF ~customGroupIdCnt.ok THEN Fail ELSE
     LET customGroupId == ReadBytes(customGroupIdCnt.rest, 2) IN IF ~customGroupId.ok THEN Fail ELSE
     Ok([ massCancelId     |-> massCancelId.value,
          clearingFirm     |-> clearingFirm.value,

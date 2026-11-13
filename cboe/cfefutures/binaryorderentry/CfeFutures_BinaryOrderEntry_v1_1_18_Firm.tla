@@ -161,7 +161,7 @@ EncodeLoginRequestMessage(message) ==
         \o message.sessionSubId
         \o message.password
         \o message.replayUnspecifiedUnit
-        \o EncodeUIntLE(Len(message.unitSequence), 1)
+        \o EncodeUIntBE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
 DecodeLoginRequestMessage(bytes) ==
@@ -169,7 +169,7 @@ DecodeLoginRequestMessage(bytes) ==
     LET sessionSubId == ReadBytes(sessionId.rest, 4) IN IF ~sessionSubId.ok THEN Fail ELSE
     LET password == ReadBytes(sessionSubId.rest, 10) IN IF ~password.ok THEN Fail ELSE
     LET replayUnspecifiedUnit == ReadBytes(password.rest, 1) IN IF ~replayUnspecifiedUnit.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(replayUnspecifiedUnit.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntBE(replayUnspecifiedUnit.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
     Ok([ sessionId             |-> sessionId.value,
          sessionSubId          |-> sessionSubId.value,
@@ -482,7 +482,7 @@ EncodeNewOrderOption(message) ==
         \o message.frequentTraderId
         \o message.custOrderHandlingInst
         \o message.countryCode
-        \o EncodeUIntLE(message.legCnt, 1)
+        \o EncodeUIntBE(message.legCnt, 1)
         \o message.legPositionEffect
 
 DecodeNewOrderOption(bytes) ==
@@ -509,7 +509,7 @@ DecodeNewOrderOption(bytes) ==
     LET frequentTraderId == ReadBytes(oeoId.rest, 6) IN IF ~frequentTraderId.ok THEN Fail ELSE
     LET custOrderHandlingInst == ReadBytes(frequentTraderId.rest, 1) IN IF ~custOrderHandlingInst.ok THEN Fail ELSE
     LET countryCode == ReadBytes(custOrderHandlingInst.rest, 2) IN IF ~countryCode.ok THEN Fail ELSE
-    LET legCnt == ReadUIntLE(countryCode.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
+    LET legCnt == ReadUIntBE(countryCode.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
     LET legPositionEffect == ReadBytes(legCnt.rest, 1) IN IF ~legPositionEffect.ok THEN Fail ELSE
     Ok([ clOrdId               |-> clOrdId.value,
          side                  |-> side.value,
@@ -1038,7 +1038,7 @@ EncodeQuoteUpdate(message) ==
         \o message.manualOrderIndicator
         \o message.oeoId
         \o message.sizeModifier
-        \o EncodeUIntLE(Len(message.quoteUpdateGroup), 1)
+        \o EncodeUIntBE(Len(message.quoteUpdateGroup), 1)
         \o EncodeQuoteUpdateGroupList(message.quoteUpdateGroup)
 
 DecodeQuoteUpdate(bytes) ==
@@ -1053,7 +1053,7 @@ DecodeQuoteUpdate(bytes) ==
     LET manualOrderIndicator == ReadBytes(ctiCode.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
     LET oeoId == ReadBytes(manualOrderIndicator.rest, 18) IN IF ~oeoId.ok THEN Fail ELSE
     LET sizeModifier == ReadBytes(oeoId.rest, 1) IN IF ~sizeModifier.ok THEN Fail ELSE
-    LET quoteCnt == ReadUIntLE(sizeModifier.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
+    LET quoteCnt == ReadUIntBE(sizeModifier.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
     LET quoteUpdateGroup == ReadQuoteUpdateGroupList(quoteCnt.rest, quoteCnt.value) IN IF ~quoteUpdateGroup.ok THEN Fail ELSE
     Ok([ quoteUpdateId        |-> quoteUpdateId.value,
          clearingFirm         |-> clearingFirm.value,
@@ -1195,7 +1195,7 @@ EncodeQuoteUpdateOption(message) ==
         \o message.manualOrderIndicator
         \o message.oeoId
         \o message.sizeModifier
-        \o EncodeUIntLE(Len(message.quoteUpdateOptionGroup), 1)
+        \o EncodeUIntBE(Len(message.quoteUpdateOptionGroup), 1)
         \o EncodeQuoteUpdateOptionGroupList(message.quoteUpdateOptionGroup)
 
 DecodeQuoteUpdateOption(bytes) ==
@@ -1210,7 +1210,7 @@ DecodeQuoteUpdateOption(bytes) ==
     LET manualOrderIndicator == ReadBytes(ctiCode.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
     LET oeoId == ReadBytes(manualOrderIndicator.rest, 18) IN IF ~oeoId.ok THEN Fail ELSE
     LET sizeModifier == ReadBytes(oeoId.rest, 1) IN IF ~sizeModifier.ok THEN Fail ELSE
-    LET quoteCnt == ReadUIntLE(sizeModifier.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
+    LET quoteCnt == ReadUIntBE(sizeModifier.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
     LET quoteUpdateOptionGroup == ReadQuoteUpdateOptionGroupList(quoteCnt.rest, quoteCnt.value) IN IF ~quoteUpdateOptionGroup.ok THEN Fail ELSE
     Ok([ quoteUpdateId          |-> quoteUpdateId.value,
          clearingFirm           |-> clearingFirm.value,
@@ -1374,13 +1374,13 @@ NewComplexInstrumentOption ==
 EncodeNewComplexInstrumentOption(message) ==
     message.clOrdId
         \o message.clearingFirm
-        \o EncodeUIntLE(Len(message.optionAcceptedLeg), 1)
+        \o EncodeUIntBE(Len(message.optionAcceptedLeg), 1)
         \o EncodeOptionAcceptedLegList(message.optionAcceptedLeg)
 
 DecodeNewComplexInstrumentOption(bytes) ==
     LET clOrdId == ReadBytes(bytes, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(clOrdId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
-    LET legCnt == ReadUIntLE(clearingFirm.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
+    LET legCnt == ReadUIntBE(clearingFirm.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
     LET optionAcceptedLeg == ReadOptionAcceptedLegList(legCnt.rest, legCnt.value) IN IF ~optionAcceptedLeg.ok THEN Fail ELSE
     Ok([ clOrdId           |-> clOrdId.value,
          clearingFirm      |-> clearingFirm.value,

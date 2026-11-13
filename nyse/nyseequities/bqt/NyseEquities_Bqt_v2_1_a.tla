@@ -1283,7 +1283,7 @@ EncodeConsolidatedStockSummaryMessage(message) ==
         \o message.marketIdOfHighPrice
         \o message.marketIdOfLowPrice
         \o message.marketIdOfOpenPrice
-        \o EncodeUIntLE(Len(message.closePrice), 1)
+        \o EncodeUIntBE(Len(message.closePrice), 1)
         \o EncodeClosePriceList(message.closePrice)
 
 DecodeConsolidatedStockSummaryMessage(bytes) ==
@@ -1297,7 +1297,7 @@ DecodeConsolidatedStockSummaryMessage(bytes) ==
     LET marketIdOfHighPrice == ReadBytes(totalVolume.rest, 2) IN IF ~marketIdOfHighPrice.ok THEN Fail ELSE
     LET marketIdOfLowPrice == ReadBytes(marketIdOfHighPrice.rest, 2) IN IF ~marketIdOfLowPrice.ok THEN Fail ELSE
     LET marketIdOfOpenPrice == ReadBytes(marketIdOfLowPrice.rest, 2) IN IF ~marketIdOfOpenPrice.ok THEN Fail ELSE
-    LET numberOfClosePrices == ReadUIntLE(marketIdOfOpenPrice.rest, 1) IN IF ~numberOfClosePrices.ok THEN Fail ELSE
+    LET numberOfClosePrices == ReadUIntBE(marketIdOfOpenPrice.rest, 1) IN IF ~numberOfClosePrices.ok THEN Fail ELSE
     LET closePrice == ReadClosePriceList(numberOfClosePrices.rest, numberOfClosePrices.value) IN IF ~closePrice.ok THEN Fail ELSE
     Ok([ sourceTime          |-> sourceTime.value,
          sourceTimeNs        |-> sourceTimeNs.value,
@@ -1592,7 +1592,7 @@ Packet ==
 EncodePacket(message) ==
     message.packetSize
         \o message.deliveryFlag
-        \o EncodeUIntLE(Len(message.message), 1)
+        \o EncodeUIntBE(Len(message.message), 1)
         \o message.sequenceNumber
         \o EncodeSendTime(message.sendTime)
         \o EncodeMessageList(message.message)
@@ -1600,7 +1600,7 @@ EncodePacket(message) ==
 DecodePacket(bytes) ==
     LET packetSize == ReadBytes(bytes, 2) IN IF ~packetSize.ok THEN Fail ELSE
     LET deliveryFlag == ReadBytes(packetSize.rest, 1) IN IF ~deliveryFlag.ok THEN Fail ELSE
-    LET messageCount == ReadUIntLE(deliveryFlag.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(deliveryFlag.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
     LET sequenceNumber == ReadBytes(messageCount.rest, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET sendTime == DecodeSendTime(sequenceNumber.rest) IN IF ~sendTime.ok THEN Fail ELSE
     LET message == ReadMessageList(sendTime.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE

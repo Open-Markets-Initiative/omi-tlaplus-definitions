@@ -395,7 +395,7 @@ ClientPacket ==
 EncodeClientPacket(message) ==
     message.pktSize
         \o message.deliveryFlag
-        \o EncodeUIntLE(Len(message.clientMessage), 1)
+        \o EncodeUIntBE(Len(message.clientMessage), 1)
         \o message.seqNum
         \o EncodeSendTime(message.sendTime)
         \o EncodeClientMessageList(message.clientMessage)
@@ -403,7 +403,7 @@ EncodeClientPacket(message) ==
 DecodeClientPacket(bytes) ==
     LET pktSize == ReadBytes(bytes, 2) IN IF ~pktSize.ok THEN Fail ELSE
     LET deliveryFlag == ReadBytes(pktSize.rest, 1) IN IF ~deliveryFlag.ok THEN Fail ELSE
-    LET numberMsgs == ReadUIntLE(deliveryFlag.rest, 1) IN IF ~numberMsgs.ok THEN Fail ELSE
+    LET numberMsgs == ReadUIntBE(deliveryFlag.rest, 1) IN IF ~numberMsgs.ok THEN Fail ELSE
     LET seqNum == ReadBytes(numberMsgs.rest, 4) IN IF ~seqNum.ok THEN Fail ELSE
     LET sendTime == DecodeSendTime(seqNum.rest) IN IF ~sendTime.ok THEN Fail ELSE
     LET clientMessage == ReadClientMessageList(sendTime.rest, numberMsgs.value) IN IF ~clientMessage.ok THEN Fail ELSE

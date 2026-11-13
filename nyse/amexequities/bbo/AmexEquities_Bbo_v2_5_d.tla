@@ -1038,16 +1038,16 @@ Packet ==
 
 EncodePacket(message) ==
     message.pktSize
-        \o EncodeUIntLE(message.deliveryFlag, 1)
-        \o EncodeUIntLE(Len(message.message), 1)
+        \o EncodeUIntBE(message.deliveryFlag, 1)
+        \o EncodeUIntBE(Len(message.message), 1)
         \o message.seqNum
         \o EncodeSendTime(message.sendTime)
         \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
     LET pktSize == ReadBytes(bytes, 2) IN IF ~pktSize.ok THEN Fail ELSE
-    LET deliveryFlag == ReadUIntLE(pktSize.rest, 1) IN IF ~deliveryFlag.ok THEN Fail ELSE
-    LET numberMsgs == ReadUIntLE(deliveryFlag.rest, 1) IN IF ~numberMsgs.ok THEN Fail ELSE
+    LET deliveryFlag == ReadUIntBE(pktSize.rest, 1) IN IF ~deliveryFlag.ok THEN Fail ELSE
+    LET numberMsgs == ReadUIntBE(deliveryFlag.rest, 1) IN IF ~numberMsgs.ok THEN Fail ELSE
     LET seqNum == ReadBytes(numberMsgs.rest, 4) IN IF ~seqNum.ok THEN Fail ELSE
     LET sendTime == DecodeSendTime(seqNum.rest) IN IF ~sendTime.ok THEN Fail ELSE
     LET message == ReadMessageList(sendTime.rest, numberMsgs.value) IN IF ~message.ok THEN Fail ELSE

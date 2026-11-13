@@ -1,7 +1,7 @@
 -------------------- MODULE NomOptions_Bono_v3_3_Server --------------------
 (***************************************************************************)
 (* National Association of Securities Dealers Automated Quotations         *)
-(* (Nasdaq) Nom Binary Order Entry v3.3                                    *)
+(* (Nasdaq) Best Of Nasdaq Options v3.3                                    *)
 (*                                                                         *)
 (* Generated from the binary model. A field is the bytes it occupies; an   *)
 (* integer is read only where a rule depends on one - a length, a count, a *)

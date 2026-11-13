@@ -427,14 +427,14 @@ EncodeStatisticsMessage(message) ==
     message.sequenceNumber
         \o message.securityCode
         \o message.transactionDateAndTime
-        \o EncodeUIntLE(Len(message.statisticsRepeatingGroup), 1)
+        \o EncodeUIntBE(Len(message.statisticsRepeatingGroup), 1)
         \o EncodeStatisticsRepeatingGroupList(message.statisticsRepeatingGroup)
 
 DecodeStatisticsMessage(bytes) ==
     LET sequenceNumber == ReadBytes(bytes, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET securityCode == ReadBytes(sequenceNumber.rest, 4) IN IF ~securityCode.ok THEN Fail ELSE
     LET transactionDateAndTime == ReadBytes(securityCode.rest, 8) IN IF ~transactionDateAndTime.ok THEN Fail ELSE
-    LET dataCount == ReadUIntLE(transactionDateAndTime.rest, 1) IN IF ~dataCount.ok THEN Fail ELSE
+    LET dataCount == ReadUIntBE(transactionDateAndTime.rest, 1) IN IF ~dataCount.ok THEN Fail ELSE
     LET statisticsRepeatingGroup == ReadStatisticsRepeatingGroupList(dataCount.rest, dataCount.value) IN IF ~statisticsRepeatingGroup.ok THEN Fail ELSE
     Ok([ sequenceNumber           |-> sequenceNumber.value,
          securityCode             |-> securityCode.value,

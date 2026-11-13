@@ -204,7 +204,7 @@ ClientRakeTcpMessage ==
     [ clientPayload : ClientPayload ]
 
 EncodeClientRakeTcpMessageBody(message) ==
-    EncodeUIntLE(message.clientPayload.tag, 1)
+    EncodeUIntBE(message.clientPayload.tag, 1)
         \o EncodeClientPayload(message.clientPayload)
 
 (* Message Length counts the bytes it frames, so it is written from them *)
@@ -213,7 +213,7 @@ EncodeClientRakeTcpMessage(message) ==
     IN  EncodeUIntLE(Len(body), 2) \o body
 
 DecodeClientRakeTcpMessageBody(bytes) ==
-    LET packetType == ReadUIntLE(bytes, 1) IN IF ~packetType.ok THEN Fail ELSE
+    LET packetType == ReadUIntBE(bytes, 1) IN IF ~packetType.ok THEN Fail ELSE
     LET clientPayload == DecodeClientPayload(packetType.value, packetType.rest) IN IF ~clientPayload.ok THEN Fail ELSE
     Ok([ clientPayload |-> clientPayload.value ], clientPayload.rest)
 

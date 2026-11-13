@@ -770,7 +770,7 @@ MachMessage ==
       payload        : Payload ]
 
 EncodeMachMessageBody(message) ==
-    EncodeUIntLE(message.payload.tag, 1)
+    EncodeUIntBE(message.payload.tag, 1)
         \o message.sessionNumber
         \o EncodePayload(message.payload)
 
@@ -787,7 +787,7 @@ DecodeMachMessage(bytes) ==
     LET framed == SubSeq(length.rest, 1, size)
         beyond == SubSeq(length.rest, size + 1, Len(length.rest))
     IN
-    LET machPacketType == ReadUIntLE(framed, 1) IN IF ~machPacketType.ok THEN Fail ELSE
+    LET machPacketType == ReadUIntBE(framed, 1) IN IF ~machPacketType.ok THEN Fail ELSE
     LET sessionNumber == ReadBytes(machPacketType.rest, 1) IN IF ~sessionNumber.ok THEN Fail ELSE
     LET payload == DecodePayload(machPacketType.value, sessionNumber.rest) IN IF ~payload.ok THEN Fail ELSE
     IF payload.rest # << >> THEN Fail ELSE

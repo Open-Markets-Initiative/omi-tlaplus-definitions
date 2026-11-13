@@ -6900,32 +6900,32 @@ CheckedRequestAck ==
 RequestReject ==
     [ mdReqIdOptional : Sample(4),
       mdReqRejReason  : Sample(1),
-      text            : Sample(100) ]
+      sessionText     : Sample(100) ]
 
 EncodeRequestReject(message) ==
     message.mdReqIdOptional
         \o message.mdReqRejReason
-        \o message.text
+        \o message.sessionText
 
 DecodeRequestReject(bytes) ==
     LET mdReqIdOptional == ReadBytes(bytes, 4) IN IF ~mdReqIdOptional.ok THEN Fail ELSE
     LET mdReqRejReason == ReadBytes(mdReqIdOptional.rest, 1) IN IF ~mdReqRejReason.ok THEN Fail ELSE
-    LET text == ReadBytes(mdReqRejReason.rest, 100) IN IF ~text.ok THEN Fail ELSE
+    LET sessionText == ReadBytes(mdReqRejReason.rest, 100) IN IF ~sessionText.ok THEN Fail ELSE
     Ok([ mdReqIdOptional |-> mdReqIdOptional.value,
          mdReqRejReason  |-> mdReqRejReason.value,
-         text            |-> text.value ], text.rest)
+         sessionText     |-> sessionText.value ], sessionText.rest)
 
 ZeroRequestReject ==
     [ mdReqIdOptional |-> [i \in 1 .. 4 |-> 0],
       mdReqRejReason  |-> [i \in 1 .. 1 |-> 0],
-      text            |-> [i \in 1 .. 100 |-> 0] ]
+      sessionText     |-> [i \in 1 .. 100 |-> 0] ]
 
 (* Request Reject at zero, then each field in turn at the values it is checked at *)
 CheckedRequestReject ==
     { ZeroRequestReject }
         \cup { [ZeroRequestReject EXCEPT !.mdReqIdOptional = one] : one \in Sample(4) }
         \cup { [ZeroRequestReject EXCEPT !.mdReqRejReason = one] : one \in Sample(1) }
-        \cup { [ZeroRequestReject EXCEPT !.text = one] : one \in Sample(100) }
+        \cup { [ZeroRequestReject EXCEPT !.sessionText = one] : one \in Sample(100) }
 
 (***************************************************************************)
 (* Security List Request Security Group: 6 bytes                           *)

@@ -2027,7 +2027,7 @@ EncodeMassCancelResponseMessage(message) ==
     message.notificationTime
         \o message.mpid
         \o message.clientOrderId
-        \o EncodeUIntLE(Len(message.matchingEngine), 1)
+        \o EncodeUIntBE(Len(message.matchingEngine), 1)
         \o EncodeMatchingEngineList(message.matchingEngine)
         \o message.reserved10
 
@@ -2035,7 +2035,7 @@ DecodeMassCancelResponseMessage(bytes) ==
     LET notificationTime == ReadBytes(bytes, 8) IN IF ~notificationTime.ok THEN Fail ELSE
     LET mpid == ReadBytes(notificationTime.rest, 4) IN IF ~mpid.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpid.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET numberOfMatchingEngines == ReadUIntLE(clientOrderId.rest, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
+    LET numberOfMatchingEngines == ReadUIntBE(clientOrderId.rest, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
     LET matchingEngine == ReadMatchingEngineList(numberOfMatchingEngines.rest, numberOfMatchingEngines.value) IN IF ~matchingEngine.ok THEN Fail ELSE
     LET reserved10 == ReadBytes(matchingEngine.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
     Ok([ notificationTime |-> notificationTime.value,
@@ -2548,7 +2548,7 @@ EncodeLoginRequest(message) ==
         \o message.username
         \o message.computerId
         \o message.applicationProtocol
-        \o EncodeUIntLE(Len(message.requestedMatchingEngine), 1)
+        \o EncodeUIntBE(Len(message.requestedMatchingEngine), 1)
         \o EncodeRequestedMatchingEngineList(message.requestedMatchingEngine)
 
 DecodeLoginRequest(bytes) ==
@@ -2556,7 +2556,7 @@ DecodeLoginRequest(bytes) ==
     LET username == ReadBytes(esesmVersion.rest, 5) IN IF ~username.ok THEN Fail ELSE
     LET computerId == ReadBytes(username.rest, 8) IN IF ~computerId.ok THEN Fail ELSE
     LET applicationProtocol == ReadBytes(computerId.rest, 8) IN IF ~applicationProtocol.ok THEN Fail ELSE
-    LET numberOfMatchingEngines == ReadUIntLE(applicationProtocol.rest, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
+    LET numberOfMatchingEngines == ReadUIntBE(applicationProtocol.rest, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
     LET requestedMatchingEngine == ReadRequestedMatchingEngineList(numberOfMatchingEngines.rest, numberOfMatchingEngines.value) IN IF ~requestedMatchingEngine.ok THEN Fail ELSE
     Ok([ esesmVersion            |-> esesmVersion.value,
          username                |-> username.value,
@@ -2643,11 +2643,11 @@ LoginResponse ==
     [ loginMatchingEngine : SampleLists(OneLoginMatchingEngine) ]
 
 EncodeLoginResponse(message) ==
-    EncodeUIntLE(Len(message.loginMatchingEngine), 1)
+    EncodeUIntBE(Len(message.loginMatchingEngine), 1)
         \o EncodeLoginMatchingEngineList(message.loginMatchingEngine)
 
 DecodeLoginResponse(bytes) ==
-    LET numberOfMatchingEngines == ReadUIntLE(bytes, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
+    LET numberOfMatchingEngines == ReadUIntBE(bytes, 1) IN IF ~numberOfMatchingEngines.ok THEN Fail ELSE
     LET loginMatchingEngine == ReadLoginMatchingEngineList(numberOfMatchingEngines.rest, numberOfMatchingEngines.value) IN IF ~loginMatchingEngine.ok THEN Fail ELSE
     Ok([ loginMatchingEngine |-> loginMatchingEngine.value ], loginMatchingEngine.rest)
 

@@ -503,13 +503,13 @@ PricePoint ==
 EncodePricePoint(message) ==
     message.price
         \o message.side
-        \o EncodeUIntLE(Len(message.participant), 1)
+        \o EncodeUIntBE(Len(message.participant), 1)
         \o EncodeParticipantList(message.participant)
 
 DecodePricePoint(bytes) ==
     LET price == ReadBytes(bytes, 4) IN IF ~price.ok THEN Fail ELSE
     LET side == ReadBytes(price.rest, 1) IN IF ~side.ok THEN Fail ELSE
-    LET participants == ReadUIntLE(side.rest, 1) IN IF ~participants.ok THEN Fail ELSE
+    LET participants == ReadUIntBE(side.rest, 1) IN IF ~participants.ok THEN Fail ELSE
     LET participant == ReadParticipantList(participants.rest, participants.value) IN IF ~participant.ok THEN Fail ELSE
     Ok([ price       |-> price.value,
          side        |-> side.value,
@@ -564,7 +564,7 @@ EncodeDeltaMessage(message) ==
         \o message.sourceTimeNs
         \o message.symbolIndex
         \o message.symbolSeqNum
-        \o EncodeUIntLE(Len(message.pricePoint), 1)
+        \o EncodeUIntBE(Len(message.pricePoint), 1)
         \o EncodePricePointList(message.pricePoint)
 
 DecodeDeltaMessage(bytes) ==
@@ -572,7 +572,7 @@ DecodeDeltaMessage(bytes) ==
     LET sourceTimeNs == ReadBytes(sourceTime.rest, 4) IN IF ~sourceTimeNs.ok THEN Fail ELSE
     LET symbolIndex == ReadBytes(sourceTimeNs.rest, 4) IN IF ~symbolIndex.ok THEN Fail ELSE
     LET symbolSeqNum == ReadBytes(symbolIndex.rest, 4) IN IF ~symbolSeqNum.ok THEN Fail ELSE
-    LET updateCount == ReadUIntLE(symbolSeqNum.rest, 1) IN IF ~updateCount.ok THEN Fail ELSE
+    LET updateCount == ReadUIntBE(symbolSeqNum.rest, 1) IN IF ~updateCount.ok THEN Fail ELSE
     LET pricePoint == ReadPricePointList(updateCount.rest, updateCount.value) IN IF ~pricePoint.ok THEN Fail ELSE
     Ok([ sourceTime   |-> sourceTime.value,
          sourceTimeNs |-> sourceTimeNs.value,
@@ -884,16 +884,16 @@ Packet ==
 
 EncodePacket(message) ==
     message.pktSize
-        \o EncodeUIntLE(message.deliveryFlag, 1)
-        \o EncodeUIntLE(Len(message.message), 1)
+        \o EncodeUIntBE(message.deliveryFlag, 1)
+        \o EncodeUIntBE(Len(message.message), 1)
         \o message.seqNum
         \o EncodeSendTime(message.sendTime)
         \o EncodeMessageList(message.message)
 
 DecodePacket(bytes) ==
     LET pktSize == ReadBytes(bytes, 2) IN IF ~pktSize.ok THEN Fail ELSE
-    LET deliveryFlag == ReadUIntLE(pktSize.rest, 1) IN IF ~deliveryFlag.ok THEN Fail ELSE
-    LET numberMsgs == ReadUIntLE(deliveryFlag.rest, 1) IN IF ~numberMsgs.ok THEN Fail ELSE
+    LET deliveryFlag == ReadUIntBE(pktSize.rest, 1) IN IF ~deliveryFlag.ok THEN Fail ELSE
+    LET numberMsgs == ReadUIntBE(deliveryFlag.rest, 1) IN IF ~numberMsgs.ok THEN Fail ELSE
     LET seqNum == ReadBytes(numberMsgs.rest, 4) IN IF ~seqNum.ok THEN Fail ELSE
     LET sendTime == DecodeSendTime(seqNum.rest) IN IF ~sendTime.ok THEN Fail ELSE
     LET message == ReadMessageList(sendTime.rest, numberMsgs.value) IN IF ~message.ok THEN Fail ELSE

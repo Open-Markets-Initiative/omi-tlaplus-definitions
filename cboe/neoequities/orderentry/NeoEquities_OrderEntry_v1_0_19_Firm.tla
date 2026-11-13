@@ -161,7 +161,7 @@ EncodeLoginRequestMessage(message) ==
         \o message.sessionSubId
         \o message.password
         \o message.replayUnspecifiedUnit
-        \o EncodeUIntLE(Len(message.unitSequence), 1)
+        \o EncodeUIntBE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
 DecodeLoginRequestMessage(bytes) ==
@@ -169,7 +169,7 @@ DecodeLoginRequestMessage(bytes) ==
     LET sessionSubId == ReadBytes(sessionId.rest, 4) IN IF ~sessionSubId.ok THEN Fail ELSE
     LET password == ReadBytes(sessionSubId.rest, 10) IN IF ~password.ok THEN Fail ELSE
     LET replayUnspecifiedUnit == ReadBytes(password.rest, 1) IN IF ~replayUnspecifiedUnit.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(replayUnspecifiedUnit.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntBE(replayUnspecifiedUnit.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
     Ok([ sessionId             |-> sessionId.value,
          sessionSubId          |-> sessionSubId.value,

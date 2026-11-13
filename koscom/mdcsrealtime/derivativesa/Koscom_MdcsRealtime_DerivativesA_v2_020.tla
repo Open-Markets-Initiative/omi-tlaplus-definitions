@@ -16,6 +16,12 @@
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
 (*                                                                         *)
+(* Note: Five Levels is written as 5 slots, however many of them the count *)
+(* beside it says are in use.                                              *)
+(*                                                                         *)
+(* Note: Ten Levels is written as 10 slots, however many of them the count *)
+(* beside it says are in use.                                              *)
+(*                                                                         *)
 (* Note: Packet fills its datagram with as many messages as the bytes      *)
 (* hold, so it is read as a run of them.                                   *)
 (***************************************************************************)
@@ -152,7 +158,83 @@ CheckedPollingDataMessage ==
         \cup { [ZeroPollingDataMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Derivatives Quote Five Levels Message: 319 bytes                        *)
+(* Five Levels: 46 bytes                                                   *)
+(***************************************************************************)
+
+FiveLevels ==
+    [ askPrice       : Sample(9),
+      bidPrice       : Sample(9),
+      askVolume      : Sample(9),
+      bidVolume      : Sample(9),
+      askOrderCounts : Sample(5),
+      bidOrderCounts : Sample(5) ]
+
+EncodeFiveLevels(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+        \o message.askOrderCounts
+        \o message.bidOrderCounts
+
+DecodeFiveLevels(bytes) ==
+    LET askPrice == ReadBytes(bytes, 9) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 9) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 9) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 9) IN IF ~bidVolume.ok THEN Fail ELSE
+    LET askOrderCounts == ReadBytes(bidVolume.rest, 5) IN IF ~askOrderCounts.ok THEN Fail ELSE
+    LET bidOrderCounts == ReadBytes(askOrderCounts.rest, 5) IN IF ~bidOrderCounts.ok THEN Fail ELSE
+    Ok([ askPrice       |-> askPrice.value,
+         bidPrice       |-> bidPrice.value,
+         askVolume      |-> askVolume.value,
+         bidVolume      |-> bidVolume.value,
+         askOrderCounts |-> askOrderCounts.value,
+         bidOrderCounts |-> bidOrderCounts.value ], bidOrderCounts.rest)
+
+ZeroFiveLevels ==
+    [ askPrice       |-> [i \in 1 .. 9 |-> 0],
+      bidPrice       |-> [i \in 1 .. 9 |-> 0],
+      askVolume      |-> [i \in 1 .. 9 |-> 0],
+      bidVolume      |-> [i \in 1 .. 9 |-> 0],
+      askOrderCounts |-> [i \in 1 .. 5 |-> 0],
+      bidOrderCounts |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Five Levels at zero, then each field in turn at the values it is checked at *)
+CheckedFiveLevels ==
+    { ZeroFiveLevels }
+        \cup { [ZeroFiveLevels EXCEPT !.askPrice = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels EXCEPT !.bidPrice = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels EXCEPT !.askVolume = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels EXCEPT !.bidVolume = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels EXCEPT !.askOrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroFiveLevels EXCEPT !.bidOrderCounts = one] : one \in Sample(5) }
+
+(* A run of Five Levels, written one after another *)
+RECURSIVE EncodeFiveLevelsList(_)
+EncodeFiveLevelsList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeFiveLevels(Head(messages)) \o EncodeFiveLevelsList(Tail(messages))
+
+(* As many Five Levels as the field that counts them says *)
+RECURSIVE ReadFiveLevelsList(_, _)
+ReadFiveLevelsList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeFiveLevels(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadFiveLevelsList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Five Levels of each kind, for the lists that carry them *)
+OneFiveLevels == { ZeroFiveLevels }
+
+(* The 5 slots a run of Five Levels is written as, whatever the field beside it says are in use *)
+SlotsFiveLevels == { [i \in 1 .. 5 |-> one] : one \in OneFiveLevels }
+
+(***************************************************************************)
+(* Derivatives Quote Five Levels Message                                   *)
 (***************************************************************************)
 
 DerivativesQuoteFiveLevelsMessage ==
@@ -162,36 +244,7 @@ DerivativesQuoteFiveLevelsMessage ==
       isinCode                      : Sample(12),
       aDesignatedNumberForAnIssue   : Sample(6),
       processingTimeOfTradingSystem : Sample(12),
-      askLevel1Price                : Sample(9),
-      bidLevel1Price                : Sample(9),
-      askLevel1Volume               : Sample(9),
-      bidLevel1Volume               : Sample(9),
-      askLevel1OrderCounts          : Sample(5),
-      bidLevel1OrderCounts          : Sample(5),
-      askLevel2Price                : Sample(9),
-      bidLevel2Price                : Sample(9),
-      askLevel2Volume               : Sample(9),
-      bidLevel2Volume               : Sample(9),
-      askLevel2OrderCounts          : Sample(5),
-      bidLevel2OrderCounts          : Sample(5),
-      askLevel3Price                : Sample(9),
-      bidLevel3Price                : Sample(9),
-      askLevel3Volume               : Sample(9),
-      bidLevel3Volume               : Sample(9),
-      askLevel3OrderCounts          : Sample(5),
-      bidLevel3OrderCounts          : Sample(5),
-      askLevel4Price                : Sample(9),
-      bidLevel4Price                : Sample(9),
-      askLevel4Volume               : Sample(9),
-      bidLevel4Volume               : Sample(9),
-      askLevel4OrderCounts          : Sample(5),
-      bidLevel4OrderCounts          : Sample(5),
-      askLevel5Price                : Sample(9),
-      bidLevel5Price                : Sample(9),
-      askLevel5Volume               : Sample(9),
-      bidLevel5Volume               : Sample(9),
-      askLevel5OrderCounts          : Sample(5),
-      bidLevel5OrderCounts          : Sample(5),
+      fiveLevels                    : SlotsFiveLevels,
       askTotalVolume                : Sample(9),
       bidTotalVolume                : Sample(9),
       askPriceValidCounts           : Sample(5),
@@ -207,36 +260,7 @@ EncodeDerivativesQuoteFiveLevelsMessage(message) ==
         \o message.isinCode
         \o message.aDesignatedNumberForAnIssue
         \o message.processingTimeOfTradingSystem
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.askLevel1OrderCounts
-        \o message.bidLevel1OrderCounts
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.askLevel2OrderCounts
-        \o message.bidLevel2OrderCounts
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.askLevel3OrderCounts
-        \o message.bidLevel3OrderCounts
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.askLevel4OrderCounts
-        \o message.bidLevel4OrderCounts
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.askLevel5OrderCounts
-        \o message.bidLevel5OrderCounts
+        \o EncodeFiveLevelsList(message.fiveLevels)
         \o message.askTotalVolume
         \o message.bidTotalVolume
         \o message.askPriceValidCounts
@@ -252,37 +276,8 @@ DecodeDerivativesQuoteFiveLevelsMessage(bytes) ==
     LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
     LET aDesignatedNumberForAnIssue == ReadBytes(isinCode.rest, 6) IN IF ~aDesignatedNumberForAnIssue.ok THEN Fail ELSE
     LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssue.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(processingTimeOfTradingSystem.rest, 9) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 9) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 9) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 9) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel1OrderCounts == ReadBytes(bidLevel1Volume.rest, 5) IN IF ~askLevel1OrderCounts.ok THEN Fail ELSE
-    LET bidLevel1OrderCounts == ReadBytes(askLevel1OrderCounts.rest, 5) IN IF ~bidLevel1OrderCounts.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(bidLevel1OrderCounts.rest, 9) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 9) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 9) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 9) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel2OrderCounts == ReadBytes(bidLevel2Volume.rest, 5) IN IF ~askLevel2OrderCounts.ok THEN Fail ELSE
-    LET bidLevel2OrderCounts == ReadBytes(askLevel2OrderCounts.rest, 5) IN IF ~bidLevel2OrderCounts.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(bidLevel2OrderCounts.rest, 9) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 9) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 9) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 9) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel3OrderCounts == ReadBytes(bidLevel3Volume.rest, 5) IN IF ~askLevel3OrderCounts.ok THEN Fail ELSE
-    LET bidLevel3OrderCounts == ReadBytes(askLevel3OrderCounts.rest, 5) IN IF ~bidLevel3OrderCounts.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(bidLevel3OrderCounts.rest, 9) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 9) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 9) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 9) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel4OrderCounts == ReadBytes(bidLevel4Volume.rest, 5) IN IF ~askLevel4OrderCounts.ok THEN Fail ELSE
-    LET bidLevel4OrderCounts == ReadBytes(askLevel4OrderCounts.rest, 5) IN IF ~bidLevel4OrderCounts.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(bidLevel4OrderCounts.rest, 9) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 9) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 9) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 9) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel5OrderCounts == ReadBytes(bidLevel5Volume.rest, 5) IN IF ~askLevel5OrderCounts.ok THEN Fail ELSE
-    LET bidLevel5OrderCounts == ReadBytes(askLevel5OrderCounts.rest, 5) IN IF ~bidLevel5OrderCounts.ok THEN Fail ELSE
-    LET askTotalVolume == ReadBytes(bidLevel5OrderCounts.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
+    LET fiveLevels == ReadFiveLevelsList(processingTimeOfTradingSystem.rest, 5) IN IF ~fiveLevels.ok THEN Fail ELSE
+    LET askTotalVolume == ReadBytes(fiveLevels.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
     LET bidTotalVolume == ReadBytes(askTotalVolume.rest, 9) IN IF ~bidTotalVolume.ok THEN Fail ELSE
     LET askPriceValidCounts == ReadBytes(bidTotalVolume.rest, 5) IN IF ~askPriceValidCounts.ok THEN Fail ELSE
     LET bidPriceValidCounts == ReadBytes(askPriceValidCounts.rest, 5) IN IF ~bidPriceValidCounts.ok THEN Fail ELSE
@@ -295,36 +290,7 @@ DecodeDerivativesQuoteFiveLevelsMessage(bytes) ==
          isinCode                      |-> isinCode.value,
          aDesignatedNumberForAnIssue   |-> aDesignatedNumberForAnIssue.value,
          processingTimeOfTradingSystem |-> processingTimeOfTradingSystem.value,
-         askLevel1Price                |-> askLevel1Price.value,
-         bidLevel1Price                |-> bidLevel1Price.value,
-         askLevel1Volume               |-> askLevel1Volume.value,
-         bidLevel1Volume               |-> bidLevel1Volume.value,
-         askLevel1OrderCounts          |-> askLevel1OrderCounts.value,
-         bidLevel1OrderCounts          |-> bidLevel1OrderCounts.value,
-         askLevel2Price                |-> askLevel2Price.value,
-         bidLevel2Price                |-> bidLevel2Price.value,
-         askLevel2Volume               |-> askLevel2Volume.value,
-         bidLevel2Volume               |-> bidLevel2Volume.value,
-         askLevel2OrderCounts          |-> askLevel2OrderCounts.value,
-         bidLevel2OrderCounts          |-> bidLevel2OrderCounts.value,
-         askLevel3Price                |-> askLevel3Price.value,
-         bidLevel3Price                |-> bidLevel3Price.value,
-         askLevel3Volume               |-> askLevel3Volume.value,
-         bidLevel3Volume               |-> bidLevel3Volume.value,
-         askLevel3OrderCounts          |-> askLevel3OrderCounts.value,
-         bidLevel3OrderCounts          |-> bidLevel3OrderCounts.value,
-         askLevel4Price                |-> askLevel4Price.value,
-         bidLevel4Price                |-> bidLevel4Price.value,
-         askLevel4Volume               |-> askLevel4Volume.value,
-         bidLevel4Volume               |-> bidLevel4Volume.value,
-         askLevel4OrderCounts          |-> askLevel4OrderCounts.value,
-         bidLevel4OrderCounts          |-> bidLevel4OrderCounts.value,
-         askLevel5Price                |-> askLevel5Price.value,
-         bidLevel5Price                |-> bidLevel5Price.value,
-         askLevel5Volume               |-> askLevel5Volume.value,
-         bidLevel5Volume               |-> bidLevel5Volume.value,
-         askLevel5OrderCounts          |-> askLevel5OrderCounts.value,
-         bidLevel5OrderCounts          |-> bidLevel5OrderCounts.value,
+         fiveLevels                    |-> fiveLevels.value,
          askTotalVolume                |-> askTotalVolume.value,
          bidTotalVolume                |-> bidTotalVolume.value,
          askPriceValidCounts           |-> askPriceValidCounts.value,
@@ -340,36 +306,7 @@ ZeroDerivativesQuoteFiveLevelsMessage ==
       isinCode                      |-> [i \in 1 .. 12 |-> 0],
       aDesignatedNumberForAnIssue   |-> [i \in 1 .. 6 |-> 0],
       processingTimeOfTradingSystem |-> [i \in 1 .. 12 |-> 0],
-      askLevel1Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel1OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel1OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel2Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel2Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel2OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel2OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel3Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel3Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel3OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel3OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel4Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel4Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel4OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel4OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel5Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel5Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel5OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel5OrderCounts          |-> [i \in 1 .. 5 |-> 0],
+      fiveLevels                    |-> [i \in 1 .. 5 |-> ZeroFiveLevels],
       askTotalVolume                |-> [i \in 1 .. 9 |-> 0],
       bidTotalVolume                |-> [i \in 1 .. 9 |-> 0],
       askPriceValidCounts           |-> [i \in 1 .. 5 |-> 0],
@@ -387,36 +324,7 @@ CheckedDerivativesQuoteFiveLevelsMessage ==
         \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
         \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.aDesignatedNumberForAnIssue = one] : one \in Sample(6) }
         \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidLevel5OrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.fiveLevels = one] : one \in SlotsFiveLevels }
         \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.bidTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.askPriceValidCounts = one] : one \in Sample(5) }
@@ -426,7 +334,83 @@ CheckedDerivativesQuoteFiveLevelsMessage ==
         \cup { [ZeroDerivativesQuoteFiveLevelsMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Derivatives Quote Ten Levels Message: 549 bytes                         *)
+(* Ten Levels: 46 bytes                                                    *)
+(***************************************************************************)
+
+TenLevels ==
+    [ askPrice       : Sample(9),
+      bidPrice       : Sample(9),
+      askVolume      : Sample(9),
+      bidVolume      : Sample(9),
+      askOrderCounts : Sample(5),
+      bidOrderCounts : Sample(5) ]
+
+EncodeTenLevels(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+        \o message.askOrderCounts
+        \o message.bidOrderCounts
+
+DecodeTenLevels(bytes) ==
+    LET askPrice == ReadBytes(bytes, 9) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 9) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 9) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 9) IN IF ~bidVolume.ok THEN Fail ELSE
+    LET askOrderCounts == ReadBytes(bidVolume.rest, 5) IN IF ~askOrderCounts.ok THEN Fail ELSE
+    LET bidOrderCounts == ReadBytes(askOrderCounts.rest, 5) IN IF ~bidOrderCounts.ok THEN Fail ELSE
+    Ok([ askPrice       |-> askPrice.value,
+         bidPrice       |-> bidPrice.value,
+         askVolume      |-> askVolume.value,
+         bidVolume      |-> bidVolume.value,
+         askOrderCounts |-> askOrderCounts.value,
+         bidOrderCounts |-> bidOrderCounts.value ], bidOrderCounts.rest)
+
+ZeroTenLevels ==
+    [ askPrice       |-> [i \in 1 .. 9 |-> 0],
+      bidPrice       |-> [i \in 1 .. 9 |-> 0],
+      askVolume      |-> [i \in 1 .. 9 |-> 0],
+      bidVolume      |-> [i \in 1 .. 9 |-> 0],
+      askOrderCounts |-> [i \in 1 .. 5 |-> 0],
+      bidOrderCounts |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Ten Levels at zero, then each field in turn at the values it is checked at *)
+CheckedTenLevels ==
+    { ZeroTenLevels }
+        \cup { [ZeroTenLevels EXCEPT !.askPrice = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels EXCEPT !.bidPrice = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels EXCEPT !.askVolume = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels EXCEPT !.bidVolume = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels EXCEPT !.askOrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroTenLevels EXCEPT !.bidOrderCounts = one] : one \in Sample(5) }
+
+(* A run of Ten Levels, written one after another *)
+RECURSIVE EncodeTenLevelsList(_)
+EncodeTenLevelsList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeTenLevels(Head(messages)) \o EncodeTenLevelsList(Tail(messages))
+
+(* As many Ten Levels as the field that counts them says *)
+RECURSIVE ReadTenLevelsList(_, _)
+ReadTenLevelsList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeTenLevels(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadTenLevelsList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Ten Levels of each kind, for the lists that carry them *)
+OneTenLevels == { ZeroTenLevels }
+
+(* The 10 slots a run of Ten Levels is written as, whatever the field beside it says are in use *)
+SlotsTenLevels == { [i \in 1 .. 10 |-> one] : one \in OneTenLevels }
+
+(***************************************************************************)
+(* Derivatives Quote Ten Levels Message                                    *)
 (***************************************************************************)
 
 DerivativesQuoteTenLevelsMessage ==
@@ -436,66 +420,7 @@ DerivativesQuoteTenLevelsMessage ==
       isinCode                      : Sample(12),
       aDesignatedNumberForAnIssue   : Sample(6),
       processingTimeOfTradingSystem : Sample(12),
-      askLevel1Price                : Sample(9),
-      bidLevel1Price                : Sample(9),
-      askLevel1Volume               : Sample(9),
-      bidLevel1Volume               : Sample(9),
-      askLevel1OrderCounts          : Sample(5),
-      bidLevel1OrderCounts          : Sample(5),
-      askLevel2Price                : Sample(9),
-      bidLevel2Price                : Sample(9),
-      askLevel2Volume               : Sample(9),
-      bidLevel2Volume               : Sample(9),
-      askLevel2OrderCounts          : Sample(5),
-      bidLevel2OrderCounts          : Sample(5),
-      askLevel3Price                : Sample(9),
-      bidLevel3Price                : Sample(9),
-      askLevel3Volume               : Sample(9),
-      bidLevel3Volume               : Sample(9),
-      askLevel3OrderCounts          : Sample(5),
-      bidLevel3OrderCounts          : Sample(5),
-      askLevel4Price                : Sample(9),
-      bidLevel4Price                : Sample(9),
-      askLevel4Volume               : Sample(9),
-      bidLevel4Volume               : Sample(9),
-      askLevel4OrderCounts          : Sample(5),
-      bidLevel4OrderCounts          : Sample(5),
-      askLevel5Price                : Sample(9),
-      bidLevel5Price                : Sample(9),
-      askLevel5Volume               : Sample(9),
-      bidLevel5Volume               : Sample(9),
-      askLevel5OrderCounts          : Sample(5),
-      bidLevel5OrderCounts          : Sample(5),
-      askLevel6Price                : Sample(9),
-      bidLevel6Price                : Sample(9),
-      askLevel6Volume               : Sample(9),
-      bidLevel6Volume               : Sample(9),
-      askLevel6OrderCounts          : Sample(5),
-      bidLevel6OrderCounts          : Sample(5),
-      askLevel7Price                : Sample(9),
-      bidLevel7Price                : Sample(9),
-      askLevel7Volume               : Sample(9),
-      bidLevel7Volume               : Sample(9),
-      askLevel7OrderCounts          : Sample(5),
-      bidLevel7OrderCounts          : Sample(5),
-      askLevel8Price                : Sample(9),
-      bidLevel8Price                : Sample(9),
-      askLevel8Volume               : Sample(9),
-      bidLevel8Volume               : Sample(9),
-      askLevel8OrderCounts          : Sample(5),
-      bidLevel8OrderCounts          : Sample(5),
-      askLevel9Price                : Sample(9),
-      bidLevel9Price                : Sample(9),
-      askLevel9Volume               : Sample(9),
-      bidLevel9Volume               : Sample(9),
-      askLevel9OrderCounts          : Sample(5),
-      bidLevel9OrderCounts          : Sample(5),
-      askLevel10Price               : Sample(9),
-      bidLevel10Price               : Sample(9),
-      askLevel10Volume              : Sample(9),
-      bidLevel10Volume              : Sample(9),
-      askLevel10OrderCounts         : Sample(5),
-      bidLevel10OrderCounts         : Sample(5),
+      tenLevels                     : SlotsTenLevels,
       askTotalVolume                : Sample(9),
       bidTotalVolume                : Sample(9),
       askPriceValidCounts           : Sample(5),
@@ -511,66 +436,7 @@ EncodeDerivativesQuoteTenLevelsMessage(message) ==
         \o message.isinCode
         \o message.aDesignatedNumberForAnIssue
         \o message.processingTimeOfTradingSystem
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.askLevel1OrderCounts
-        \o message.bidLevel1OrderCounts
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.askLevel2OrderCounts
-        \o message.bidLevel2OrderCounts
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.askLevel3OrderCounts
-        \o message.bidLevel3OrderCounts
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.askLevel4OrderCounts
-        \o message.bidLevel4OrderCounts
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.askLevel5OrderCounts
-        \o message.bidLevel5OrderCounts
-        \o message.askLevel6Price
-        \o message.bidLevel6Price
-        \o message.askLevel6Volume
-        \o message.bidLevel6Volume
-        \o message.askLevel6OrderCounts
-        \o message.bidLevel6OrderCounts
-        \o message.askLevel7Price
-        \o message.bidLevel7Price
-        \o message.askLevel7Volume
-        \o message.bidLevel7Volume
-        \o message.askLevel7OrderCounts
-        \o message.bidLevel7OrderCounts
-        \o message.askLevel8Price
-        \o message.bidLevel8Price
-        \o message.askLevel8Volume
-        \o message.bidLevel8Volume
-        \o message.askLevel8OrderCounts
-        \o message.bidLevel8OrderCounts
-        \o message.askLevel9Price
-        \o message.bidLevel9Price
-        \o message.askLevel9Volume
-        \o message.bidLevel9Volume
-        \o message.askLevel9OrderCounts
-        \o message.bidLevel9OrderCounts
-        \o message.askLevel10Price
-        \o message.bidLevel10Price
-        \o message.askLevel10Volume
-        \o message.bidLevel10Volume
-        \o message.askLevel10OrderCounts
-        \o message.bidLevel10OrderCounts
+        \o EncodeTenLevelsList(message.tenLevels)
         \o message.askTotalVolume
         \o message.bidTotalVolume
         \o message.askPriceValidCounts
@@ -586,67 +452,8 @@ DecodeDerivativesQuoteTenLevelsMessage(bytes) ==
     LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
     LET aDesignatedNumberForAnIssue == ReadBytes(isinCode.rest, 6) IN IF ~aDesignatedNumberForAnIssue.ok THEN Fail ELSE
     LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssue.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(processingTimeOfTradingSystem.rest, 9) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 9) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 9) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 9) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel1OrderCounts == ReadBytes(bidLevel1Volume.rest, 5) IN IF ~askLevel1OrderCounts.ok THEN Fail ELSE
-    LET bidLevel1OrderCounts == ReadBytes(askLevel1OrderCounts.rest, 5) IN IF ~bidLevel1OrderCounts.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(bidLevel1OrderCounts.rest, 9) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 9) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 9) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 9) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel2OrderCounts == ReadBytes(bidLevel2Volume.rest, 5) IN IF ~askLevel2OrderCounts.ok THEN Fail ELSE
-    LET bidLevel2OrderCounts == ReadBytes(askLevel2OrderCounts.rest, 5) IN IF ~bidLevel2OrderCounts.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(bidLevel2OrderCounts.rest, 9) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 9) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 9) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 9) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel3OrderCounts == ReadBytes(bidLevel3Volume.rest, 5) IN IF ~askLevel3OrderCounts.ok THEN Fail ELSE
-    LET bidLevel3OrderCounts == ReadBytes(askLevel3OrderCounts.rest, 5) IN IF ~bidLevel3OrderCounts.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(bidLevel3OrderCounts.rest, 9) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 9) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 9) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 9) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel4OrderCounts == ReadBytes(bidLevel4Volume.rest, 5) IN IF ~askLevel4OrderCounts.ok THEN Fail ELSE
-    LET bidLevel4OrderCounts == ReadBytes(askLevel4OrderCounts.rest, 5) IN IF ~bidLevel4OrderCounts.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(bidLevel4OrderCounts.rest, 9) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 9) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 9) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 9) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel5OrderCounts == ReadBytes(bidLevel5Volume.rest, 5) IN IF ~askLevel5OrderCounts.ok THEN Fail ELSE
-    LET bidLevel5OrderCounts == ReadBytes(askLevel5OrderCounts.rest, 5) IN IF ~bidLevel5OrderCounts.ok THEN Fail ELSE
-    LET askLevel6Price == ReadBytes(bidLevel5OrderCounts.rest, 9) IN IF ~askLevel6Price.ok THEN Fail ELSE
-    LET bidLevel6Price == ReadBytes(askLevel6Price.rest, 9) IN IF ~bidLevel6Price.ok THEN Fail ELSE
-    LET askLevel6Volume == ReadBytes(bidLevel6Price.rest, 9) IN IF ~askLevel6Volume.ok THEN Fail ELSE
-    LET bidLevel6Volume == ReadBytes(askLevel6Volume.rest, 9) IN IF ~bidLevel6Volume.ok THEN Fail ELSE
-    LET askLevel6OrderCounts == ReadBytes(bidLevel6Volume.rest, 5) IN IF ~askLevel6OrderCounts.ok THEN Fail ELSE
-    LET bidLevel6OrderCounts == ReadBytes(askLevel6OrderCounts.rest, 5) IN IF ~bidLevel6OrderCounts.ok THEN Fail ELSE
-    LET askLevel7Price == ReadBytes(bidLevel6OrderCounts.rest, 9) IN IF ~askLevel7Price.ok THEN Fail ELSE
-    LET bidLevel7Price == ReadBytes(askLevel7Price.rest, 9) IN IF ~bidLevel7Price.ok THEN Fail ELSE
-    LET askLevel7Volume == ReadBytes(bidLevel7Price.rest, 9) IN IF ~askLevel7Volume.ok THEN Fail ELSE
-    LET bidLevel7Volume == ReadBytes(askLevel7Volume.rest, 9) IN IF ~bidLevel7Volume.ok THEN Fail ELSE
-    LET askLevel7OrderCounts == ReadBytes(bidLevel7Volume.rest, 5) IN IF ~askLevel7OrderCounts.ok THEN Fail ELSE
-    LET bidLevel7OrderCounts == ReadBytes(askLevel7OrderCounts.rest, 5) IN IF ~bidLevel7OrderCounts.ok THEN Fail ELSE
-    LET askLevel8Price == ReadBytes(bidLevel7OrderCounts.rest, 9) IN IF ~askLevel8Price.ok THEN Fail ELSE
-    LET bidLevel8Price == ReadBytes(askLevel8Price.rest, 9) IN IF ~bidLevel8Price.ok THEN Fail ELSE
-    LET askLevel8Volume == ReadBytes(bidLevel8Price.rest, 9) IN IF ~askLevel8Volume.ok THEN Fail ELSE
-    LET bidLevel8Volume == ReadBytes(askLevel8Volume.rest, 9) IN IF ~bidLevel8Volume.ok THEN Fail ELSE
-    LET askLevel8OrderCounts == ReadBytes(bidLevel8Volume.rest, 5) IN IF ~askLevel8OrderCounts.ok THEN Fail ELSE
-    LET bidLevel8OrderCounts == ReadBytes(askLevel8OrderCounts.rest, 5) IN IF ~bidLevel8OrderCounts.ok THEN Fail ELSE
-    LET askLevel9Price == ReadBytes(bidLevel8OrderCounts.rest, 9) IN IF ~askLevel9Price.ok THEN Fail ELSE
-    LET bidLevel9Price == ReadBytes(askLevel9Price.rest, 9) IN IF ~bidLevel9Price.ok THEN Fail ELSE
-    LET askLevel9Volume == ReadBytes(bidLevel9Price.rest, 9) IN IF ~askLevel9Volume.ok THEN Fail ELSE
-    LET bidLevel9Volume == ReadBytes(askLevel9Volume.rest, 9) IN IF ~bidLevel9Volume.ok THEN Fail ELSE
-    LET askLevel9OrderCounts == ReadBytes(bidLevel9Volume.rest, 5) IN IF ~askLevel9OrderCounts.ok THEN Fail ELSE
-    LET bidLevel9OrderCounts == ReadBytes(askLevel9OrderCounts.rest, 5) IN IF ~bidLevel9OrderCounts.ok THEN Fail ELSE
-    LET askLevel10Price == ReadBytes(bidLevel9OrderCounts.rest, 9) IN IF ~askLevel10Price.ok THEN Fail ELSE
-    LET bidLevel10Price == ReadBytes(askLevel10Price.rest, 9) IN IF ~bidLevel10Price.ok THEN Fail ELSE
-    LET askLevel10Volume == ReadBytes(bidLevel10Price.rest, 9) IN IF ~askLevel10Volume.ok THEN Fail ELSE
-    LET bidLevel10Volume == ReadBytes(askLevel10Volume.rest, 9) IN IF ~bidLevel10Volume.ok THEN Fail ELSE
-    LET askLevel10OrderCounts == ReadBytes(bidLevel10Volume.rest, 5) IN IF ~askLevel10OrderCounts.ok THEN Fail ELSE
-    LET bidLevel10OrderCounts == ReadBytes(askLevel10OrderCounts.rest, 5) IN IF ~bidLevel10OrderCounts.ok THEN Fail ELSE
-    LET askTotalVolume == ReadBytes(bidLevel10OrderCounts.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
+    LET tenLevels == ReadTenLevelsList(processingTimeOfTradingSystem.rest, 10) IN IF ~tenLevels.ok THEN Fail ELSE
+    LET askTotalVolume == ReadBytes(tenLevels.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
     LET bidTotalVolume == ReadBytes(askTotalVolume.rest, 9) IN IF ~bidTotalVolume.ok THEN Fail ELSE
     LET askPriceValidCounts == ReadBytes(bidTotalVolume.rest, 5) IN IF ~askPriceValidCounts.ok THEN Fail ELSE
     LET bidPriceValidCounts == ReadBytes(askPriceValidCounts.rest, 5) IN IF ~bidPriceValidCounts.ok THEN Fail ELSE
@@ -659,66 +466,7 @@ DecodeDerivativesQuoteTenLevelsMessage(bytes) ==
          isinCode                      |-> isinCode.value,
          aDesignatedNumberForAnIssue   |-> aDesignatedNumberForAnIssue.value,
          processingTimeOfTradingSystem |-> processingTimeOfTradingSystem.value,
-         askLevel1Price                |-> askLevel1Price.value,
-         bidLevel1Price                |-> bidLevel1Price.value,
-         askLevel1Volume               |-> askLevel1Volume.value,
-         bidLevel1Volume               |-> bidLevel1Volume.value,
-         askLevel1OrderCounts          |-> askLevel1OrderCounts.value,
-         bidLevel1OrderCounts          |-> bidLevel1OrderCounts.value,
-         askLevel2Price                |-> askLevel2Price.value,
-         bidLevel2Price                |-> bidLevel2Price.value,
-         askLevel2Volume               |-> askLevel2Volume.value,
-         bidLevel2Volume               |-> bidLevel2Volume.value,
-         askLevel2OrderCounts          |-> askLevel2OrderCounts.value,
-         bidLevel2OrderCounts          |-> bidLevel2OrderCounts.value,
-         askLevel3Price                |-> askLevel3Price.value,
-         bidLevel3Price                |-> bidLevel3Price.value,
-         askLevel3Volume               |-> askLevel3Volume.value,
-         bidLevel3Volume               |-> bidLevel3Volume.value,
-         askLevel3OrderCounts          |-> askLevel3OrderCounts.value,
-         bidLevel3OrderCounts          |-> bidLevel3OrderCounts.value,
-         askLevel4Price                |-> askLevel4Price.value,
-         bidLevel4Price                |-> bidLevel4Price.value,
-         askLevel4Volume               |-> askLevel4Volume.value,
-         bidLevel4Volume               |-> bidLevel4Volume.value,
-         askLevel4OrderCounts          |-> askLevel4OrderCounts.value,
-         bidLevel4OrderCounts          |-> bidLevel4OrderCounts.value,
-         askLevel5Price                |-> askLevel5Price.value,
-         bidLevel5Price                |-> bidLevel5Price.value,
-         askLevel5Volume               |-> askLevel5Volume.value,
-         bidLevel5Volume               |-> bidLevel5Volume.value,
-         askLevel5OrderCounts          |-> askLevel5OrderCounts.value,
-         bidLevel5OrderCounts          |-> bidLevel5OrderCounts.value,
-         askLevel6Price                |-> askLevel6Price.value,
-         bidLevel6Price                |-> bidLevel6Price.value,
-         askLevel6Volume               |-> askLevel6Volume.value,
-         bidLevel6Volume               |-> bidLevel6Volume.value,
-         askLevel6OrderCounts          |-> askLevel6OrderCounts.value,
-         bidLevel6OrderCounts          |-> bidLevel6OrderCounts.value,
-         askLevel7Price                |-> askLevel7Price.value,
-         bidLevel7Price                |-> bidLevel7Price.value,
-         askLevel7Volume               |-> askLevel7Volume.value,
-         bidLevel7Volume               |-> bidLevel7Volume.value,
-         askLevel7OrderCounts          |-> askLevel7OrderCounts.value,
-         bidLevel7OrderCounts          |-> bidLevel7OrderCounts.value,
-         askLevel8Price                |-> askLevel8Price.value,
-         bidLevel8Price                |-> bidLevel8Price.value,
-         askLevel8Volume               |-> askLevel8Volume.value,
-         bidLevel8Volume               |-> bidLevel8Volume.value,
-         askLevel8OrderCounts          |-> askLevel8OrderCounts.value,
-         bidLevel8OrderCounts          |-> bidLevel8OrderCounts.value,
-         askLevel9Price                |-> askLevel9Price.value,
-         bidLevel9Price                |-> bidLevel9Price.value,
-         askLevel9Volume               |-> askLevel9Volume.value,
-         bidLevel9Volume               |-> bidLevel9Volume.value,
-         askLevel9OrderCounts          |-> askLevel9OrderCounts.value,
-         bidLevel9OrderCounts          |-> bidLevel9OrderCounts.value,
-         askLevel10Price               |-> askLevel10Price.value,
-         bidLevel10Price               |-> bidLevel10Price.value,
-         askLevel10Volume              |-> askLevel10Volume.value,
-         bidLevel10Volume              |-> bidLevel10Volume.value,
-         askLevel10OrderCounts         |-> askLevel10OrderCounts.value,
-         bidLevel10OrderCounts         |-> bidLevel10OrderCounts.value,
+         tenLevels                     |-> tenLevels.value,
          askTotalVolume                |-> askTotalVolume.value,
          bidTotalVolume                |-> bidTotalVolume.value,
          askPriceValidCounts           |-> askPriceValidCounts.value,
@@ -734,66 +482,7 @@ ZeroDerivativesQuoteTenLevelsMessage ==
       isinCode                      |-> [i \in 1 .. 12 |-> 0],
       aDesignatedNumberForAnIssue   |-> [i \in 1 .. 6 |-> 0],
       processingTimeOfTradingSystem |-> [i \in 1 .. 12 |-> 0],
-      askLevel1Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel1OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel1OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel2Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel2Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel2OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel2OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel3Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel3Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel3OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel3OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel4Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel4Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel4OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel4OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel5Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel5Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel5OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel5OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel6Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel6Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel6Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel6Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel6OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel6OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel7Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel7Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel7Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel7Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel7OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel7OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel8Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel8Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel8Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel8Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel8OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel8OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel9Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel9Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel9Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel9Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel9OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel9OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel10Price               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel10Price               |-> [i \in 1 .. 9 |-> 0],
-      askLevel10Volume              |-> [i \in 1 .. 9 |-> 0],
-      bidLevel10Volume              |-> [i \in 1 .. 9 |-> 0],
-      askLevel10OrderCounts         |-> [i \in 1 .. 5 |-> 0],
-      bidLevel10OrderCounts         |-> [i \in 1 .. 5 |-> 0],
+      tenLevels                     |-> [i \in 1 .. 10 |-> ZeroTenLevels],
       askTotalVolume                |-> [i \in 1 .. 9 |-> 0],
       bidTotalVolume                |-> [i \in 1 .. 9 |-> 0],
       askPriceValidCounts           |-> [i \in 1 .. 5 |-> 0],
@@ -811,66 +500,7 @@ CheckedDerivativesQuoteTenLevelsMessage ==
         \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
         \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.aDesignatedNumberForAnIssue = one] : one \in Sample(6) }
         \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel6Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel6Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel6Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel6Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel6OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel6OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel7Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel7Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel7Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel7Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel7OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel7OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel8Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel8Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel8Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel8Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel8OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel8OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel9Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel9Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel9Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel9Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel9OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel9OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel10Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel10Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel10Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel10Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askLevel10OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidLevel10OrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.tenLevels = one] : one \in SlotsTenLevels }
         \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.bidTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.askPriceValidCounts = one] : one \in Sample(5) }
@@ -880,7 +510,83 @@ CheckedDerivativesQuoteTenLevelsMessage ==
         \cup { [ZeroDerivativesQuoteTenLevelsMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Derivatives Snapshot Five Levels Message: 416 bytes                     *)
+(* Five Levels: 46 bytes                                                   *)
+(***************************************************************************)
+
+FiveLevels2 ==
+    [ askPrice       : Sample(9),
+      bidPrice       : Sample(9),
+      askVolume      : Sample(9),
+      bidVolume      : Sample(9),
+      askOrderCounts : Sample(5),
+      bidOrderCounts : Sample(5) ]
+
+EncodeFiveLevels2(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+        \o message.askOrderCounts
+        \o message.bidOrderCounts
+
+DecodeFiveLevels2(bytes) ==
+    LET askPrice == ReadBytes(bytes, 9) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 9) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 9) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 9) IN IF ~bidVolume.ok THEN Fail ELSE
+    LET askOrderCounts == ReadBytes(bidVolume.rest, 5) IN IF ~askOrderCounts.ok THEN Fail ELSE
+    LET bidOrderCounts == ReadBytes(askOrderCounts.rest, 5) IN IF ~bidOrderCounts.ok THEN Fail ELSE
+    Ok([ askPrice       |-> askPrice.value,
+         bidPrice       |-> bidPrice.value,
+         askVolume      |-> askVolume.value,
+         bidVolume      |-> bidVolume.value,
+         askOrderCounts |-> askOrderCounts.value,
+         bidOrderCounts |-> bidOrderCounts.value ], bidOrderCounts.rest)
+
+ZeroFiveLevels2 ==
+    [ askPrice       |-> [i \in 1 .. 9 |-> 0],
+      bidPrice       |-> [i \in 1 .. 9 |-> 0],
+      askVolume      |-> [i \in 1 .. 9 |-> 0],
+      bidVolume      |-> [i \in 1 .. 9 |-> 0],
+      askOrderCounts |-> [i \in 1 .. 5 |-> 0],
+      bidOrderCounts |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Five Levels at zero, then each field in turn at the values it is checked at *)
+CheckedFiveLevels2 ==
+    { ZeroFiveLevels2 }
+        \cup { [ZeroFiveLevels2 EXCEPT !.askPrice = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels2 EXCEPT !.bidPrice = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels2 EXCEPT !.askVolume = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels2 EXCEPT !.bidVolume = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels2 EXCEPT !.askOrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroFiveLevels2 EXCEPT !.bidOrderCounts = one] : one \in Sample(5) }
+
+(* A run of Five Levels, written one after another *)
+RECURSIVE EncodeFiveLevels2List(_)
+EncodeFiveLevels2List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeFiveLevels2(Head(messages)) \o EncodeFiveLevels2List(Tail(messages))
+
+(* As many Five Levels as the field that counts them says *)
+RECURSIVE ReadFiveLevels2List(_, _)
+ReadFiveLevels2List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeFiveLevels2(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadFiveLevels2List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Five Levels of each kind, for the lists that carry them *)
+OneFiveLevels2 == { ZeroFiveLevels2 }
+
+(* The 5 slots a run of Five Levels is written as, whatever the field beside it says are in use *)
+SlotsFiveLevels2 == { [i \in 1 .. 5 |-> one] : one \in OneFiveLevels2 }
+
+(***************************************************************************)
+(* Derivatives Snapshot Five Levels Message                                *)
 (***************************************************************************)
 
 DerivativesSnapshotFiveLevelsMessage ==
@@ -900,36 +606,7 @@ DerivativesSnapshotFiveLevelsMessage ==
       accumulatedTradingVolume         : Sample(12),
       accumulatedTradingValue          : Sample(22),
       finalAskBidTypeCode              : Sample(1),
-      askLevel1Price                   : Sample(9),
-      bidLevel1Price                   : Sample(9),
-      askLevel1Volume                  : Sample(9),
-      bidLevel1Volume                  : Sample(9),
-      askLevel1OrderCounts             : Sample(5),
-      bidLevel1OrderCounts             : Sample(5),
-      askLevel2Price                   : Sample(9),
-      bidLevel2Price                   : Sample(9),
-      askLevel2Volume                  : Sample(9),
-      bidLevel2Volume                  : Sample(9),
-      askLevel2OrderCounts             : Sample(5),
-      bidLevel2OrderCounts             : Sample(5),
-      askLevel3Price                   : Sample(9),
-      bidLevel3Price                   : Sample(9),
-      askLevel3Volume                  : Sample(9),
-      bidLevel3Volume                  : Sample(9),
-      askLevel3OrderCounts             : Sample(5),
-      bidLevel3OrderCounts             : Sample(5),
-      askLevel4Price                   : Sample(9),
-      bidLevel4Price                   : Sample(9),
-      askLevel4Volume                  : Sample(9),
-      bidLevel4Volume                  : Sample(9),
-      askLevel4OrderCounts             : Sample(5),
-      bidLevel4OrderCounts             : Sample(5),
-      askLevel5Price                   : Sample(9),
-      bidLevel5Price                   : Sample(9),
-      askLevel5Volume                  : Sample(9),
-      bidLevel5Volume                  : Sample(9),
-      askLevel5OrderCounts             : Sample(5),
-      bidLevel5OrderCounts             : Sample(5),
+      fiveLevels                       : SlotsFiveLevels2,
       askTotalVolume                   : Sample(9),
       bidTotalVolume                   : Sample(9),
       askPriceValidCounts              : Sample(5),
@@ -955,36 +632,7 @@ EncodeDerivativesSnapshotFiveLevelsMessage(message) ==
         \o message.accumulatedTradingVolume
         \o message.accumulatedTradingValue
         \o message.finalAskBidTypeCode
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.askLevel1OrderCounts
-        \o message.bidLevel1OrderCounts
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.askLevel2OrderCounts
-        \o message.bidLevel2OrderCounts
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.askLevel3OrderCounts
-        \o message.bidLevel3OrderCounts
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.askLevel4OrderCounts
-        \o message.bidLevel4OrderCounts
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.askLevel5OrderCounts
-        \o message.bidLevel5OrderCounts
+        \o EncodeFiveLevels2List(message.fiveLevels)
         \o message.askTotalVolume
         \o message.bidTotalVolume
         \o message.askPriceValidCounts
@@ -1010,37 +658,8 @@ DecodeDerivativesSnapshotFiveLevelsMessage(bytes) ==
     LET accumulatedTradingVolume == ReadBytes(openInterest.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
     LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
     LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(finalAskBidTypeCode.rest, 9) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 9) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 9) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 9) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel1OrderCounts == ReadBytes(bidLevel1Volume.rest, 5) IN IF ~askLevel1OrderCounts.ok THEN Fail ELSE
-    LET bidLevel1OrderCounts == ReadBytes(askLevel1OrderCounts.rest, 5) IN IF ~bidLevel1OrderCounts.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(bidLevel1OrderCounts.rest, 9) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 9) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 9) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 9) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel2OrderCounts == ReadBytes(bidLevel2Volume.rest, 5) IN IF ~askLevel2OrderCounts.ok THEN Fail ELSE
-    LET bidLevel2OrderCounts == ReadBytes(askLevel2OrderCounts.rest, 5) IN IF ~bidLevel2OrderCounts.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(bidLevel2OrderCounts.rest, 9) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 9) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 9) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 9) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel3OrderCounts == ReadBytes(bidLevel3Volume.rest, 5) IN IF ~askLevel3OrderCounts.ok THEN Fail ELSE
-    LET bidLevel3OrderCounts == ReadBytes(askLevel3OrderCounts.rest, 5) IN IF ~bidLevel3OrderCounts.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(bidLevel3OrderCounts.rest, 9) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 9) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 9) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 9) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel4OrderCounts == ReadBytes(bidLevel4Volume.rest, 5) IN IF ~askLevel4OrderCounts.ok THEN Fail ELSE
-    LET bidLevel4OrderCounts == ReadBytes(askLevel4OrderCounts.rest, 5) IN IF ~bidLevel4OrderCounts.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(bidLevel4OrderCounts.rest, 9) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 9) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 9) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 9) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel5OrderCounts == ReadBytes(bidLevel5Volume.rest, 5) IN IF ~askLevel5OrderCounts.ok THEN Fail ELSE
-    LET bidLevel5OrderCounts == ReadBytes(askLevel5OrderCounts.rest, 5) IN IF ~bidLevel5OrderCounts.ok THEN Fail ELSE
-    LET askTotalVolume == ReadBytes(bidLevel5OrderCounts.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
+    LET fiveLevels == ReadFiveLevels2List(finalAskBidTypeCode.rest, 5) IN IF ~fiveLevels.ok THEN Fail ELSE
+    LET askTotalVolume == ReadBytes(fiveLevels.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
     LET bidTotalVolume == ReadBytes(askTotalVolume.rest, 9) IN IF ~bidTotalVolume.ok THEN Fail ELSE
     LET askPriceValidCounts == ReadBytes(bidTotalVolume.rest, 5) IN IF ~askPriceValidCounts.ok THEN Fail ELSE
     LET bidPriceValidCounts == ReadBytes(askPriceValidCounts.rest, 5) IN IF ~bidPriceValidCounts.ok THEN Fail ELSE
@@ -1063,36 +682,7 @@ DecodeDerivativesSnapshotFiveLevelsMessage(bytes) ==
          accumulatedTradingVolume         |-> accumulatedTradingVolume.value,
          accumulatedTradingValue          |-> accumulatedTradingValue.value,
          finalAskBidTypeCode              |-> finalAskBidTypeCode.value,
-         askLevel1Price                   |-> askLevel1Price.value,
-         bidLevel1Price                   |-> bidLevel1Price.value,
-         askLevel1Volume                  |-> askLevel1Volume.value,
-         bidLevel1Volume                  |-> bidLevel1Volume.value,
-         askLevel1OrderCounts             |-> askLevel1OrderCounts.value,
-         bidLevel1OrderCounts             |-> bidLevel1OrderCounts.value,
-         askLevel2Price                   |-> askLevel2Price.value,
-         bidLevel2Price                   |-> bidLevel2Price.value,
-         askLevel2Volume                  |-> askLevel2Volume.value,
-         bidLevel2Volume                  |-> bidLevel2Volume.value,
-         askLevel2OrderCounts             |-> askLevel2OrderCounts.value,
-         bidLevel2OrderCounts             |-> bidLevel2OrderCounts.value,
-         askLevel3Price                   |-> askLevel3Price.value,
-         bidLevel3Price                   |-> bidLevel3Price.value,
-         askLevel3Volume                  |-> askLevel3Volume.value,
-         bidLevel3Volume                  |-> bidLevel3Volume.value,
-         askLevel3OrderCounts             |-> askLevel3OrderCounts.value,
-         bidLevel3OrderCounts             |-> bidLevel3OrderCounts.value,
-         askLevel4Price                   |-> askLevel4Price.value,
-         bidLevel4Price                   |-> bidLevel4Price.value,
-         askLevel4Volume                  |-> askLevel4Volume.value,
-         bidLevel4Volume                  |-> bidLevel4Volume.value,
-         askLevel4OrderCounts             |-> askLevel4OrderCounts.value,
-         bidLevel4OrderCounts             |-> bidLevel4OrderCounts.value,
-         askLevel5Price                   |-> askLevel5Price.value,
-         bidLevel5Price                   |-> bidLevel5Price.value,
-         askLevel5Volume                  |-> askLevel5Volume.value,
-         bidLevel5Volume                  |-> bidLevel5Volume.value,
-         askLevel5OrderCounts             |-> askLevel5OrderCounts.value,
-         bidLevel5OrderCounts             |-> bidLevel5OrderCounts.value,
+         fiveLevels                       |-> fiveLevels.value,
          askTotalVolume                   |-> askTotalVolume.value,
          bidTotalVolume                   |-> bidTotalVolume.value,
          askPriceValidCounts              |-> askPriceValidCounts.value,
@@ -1118,36 +708,7 @@ ZeroDerivativesSnapshotFiveLevelsMessage ==
       accumulatedTradingVolume         |-> [i \in 1 .. 12 |-> 0],
       accumulatedTradingValue          |-> [i \in 1 .. 22 |-> 0],
       finalAskBidTypeCode              |-> [i \in 1 .. 1 |-> 0],
-      askLevel1Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel1OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel1OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel2Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel2Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel2OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel2OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel3Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel3Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel3OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel3OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel4Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel4Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel4OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel4OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel5Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel5Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel5OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel5OrderCounts             |-> [i \in 1 .. 5 |-> 0],
+      fiveLevels                       |-> [i \in 1 .. 5 |-> ZeroFiveLevels2],
       askTotalVolume                   |-> [i \in 1 .. 9 |-> 0],
       bidTotalVolume                   |-> [i \in 1 .. 9 |-> 0],
       askPriceValidCounts              |-> [i \in 1 .. 5 |-> 0],
@@ -1175,36 +736,7 @@ CheckedDerivativesSnapshotFiveLevelsMessage ==
         \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
         \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
         \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidLevel5OrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.fiveLevels = one] : one \in SlotsFiveLevels2 }
         \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.bidTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.askPriceValidCounts = one] : one \in Sample(5) }
@@ -1214,7 +746,83 @@ CheckedDerivativesSnapshotFiveLevelsMessage ==
         \cup { [ZeroDerivativesSnapshotFiveLevelsMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Derivatives Snapshot Ten Levels Message: 646 bytes                      *)
+(* Ten Levels: 46 bytes                                                    *)
+(***************************************************************************)
+
+TenLevels2 ==
+    [ askPrice       : Sample(9),
+      bidPrice       : Sample(9),
+      askVolume      : Sample(9),
+      bidVolume      : Sample(9),
+      askOrderCounts : Sample(5),
+      bidOrderCounts : Sample(5) ]
+
+EncodeTenLevels2(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+        \o message.askOrderCounts
+        \o message.bidOrderCounts
+
+DecodeTenLevels2(bytes) ==
+    LET askPrice == ReadBytes(bytes, 9) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 9) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 9) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 9) IN IF ~bidVolume.ok THEN Fail ELSE
+    LET askOrderCounts == ReadBytes(bidVolume.rest, 5) IN IF ~askOrderCounts.ok THEN Fail ELSE
+    LET bidOrderCounts == ReadBytes(askOrderCounts.rest, 5) IN IF ~bidOrderCounts.ok THEN Fail ELSE
+    Ok([ askPrice       |-> askPrice.value,
+         bidPrice       |-> bidPrice.value,
+         askVolume      |-> askVolume.value,
+         bidVolume      |-> bidVolume.value,
+         askOrderCounts |-> askOrderCounts.value,
+         bidOrderCounts |-> bidOrderCounts.value ], bidOrderCounts.rest)
+
+ZeroTenLevels2 ==
+    [ askPrice       |-> [i \in 1 .. 9 |-> 0],
+      bidPrice       |-> [i \in 1 .. 9 |-> 0],
+      askVolume      |-> [i \in 1 .. 9 |-> 0],
+      bidVolume      |-> [i \in 1 .. 9 |-> 0],
+      askOrderCounts |-> [i \in 1 .. 5 |-> 0],
+      bidOrderCounts |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Ten Levels at zero, then each field in turn at the values it is checked at *)
+CheckedTenLevels2 ==
+    { ZeroTenLevels2 }
+        \cup { [ZeroTenLevels2 EXCEPT !.askPrice = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels2 EXCEPT !.bidPrice = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels2 EXCEPT !.askVolume = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels2 EXCEPT !.bidVolume = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels2 EXCEPT !.askOrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroTenLevels2 EXCEPT !.bidOrderCounts = one] : one \in Sample(5) }
+
+(* A run of Ten Levels, written one after another *)
+RECURSIVE EncodeTenLevels2List(_)
+EncodeTenLevels2List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeTenLevels2(Head(messages)) \o EncodeTenLevels2List(Tail(messages))
+
+(* As many Ten Levels as the field that counts them says *)
+RECURSIVE ReadTenLevels2List(_, _)
+ReadTenLevels2List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeTenLevels2(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadTenLevels2List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Ten Levels of each kind, for the lists that carry them *)
+OneTenLevels2 == { ZeroTenLevels2 }
+
+(* The 10 slots a run of Ten Levels is written as, whatever the field beside it says are in use *)
+SlotsTenLevels2 == { [i \in 1 .. 10 |-> one] : one \in OneTenLevels2 }
+
+(***************************************************************************)
+(* Derivatives Snapshot Ten Levels Message                                 *)
 (***************************************************************************)
 
 DerivativesSnapshotTenLevelsMessage ==
@@ -1234,66 +842,7 @@ DerivativesSnapshotTenLevelsMessage ==
       accumulatedTradingVolume         : Sample(12),
       accumulatedTradingValue          : Sample(22),
       finalAskBidTypeCode              : Sample(1),
-      askLevel1Price                   : Sample(9),
-      bidLevel1Price                   : Sample(9),
-      askLevel1Volume                  : Sample(9),
-      bidLevel1Volume                  : Sample(9),
-      askLevel1OrderCounts             : Sample(5),
-      bidLevel1OrderCounts             : Sample(5),
-      askLevel2Price                   : Sample(9),
-      bidLevel2Price                   : Sample(9),
-      askLevel2Volume                  : Sample(9),
-      bidLevel2Volume                  : Sample(9),
-      askLevel2OrderCounts             : Sample(5),
-      bidLevel2OrderCounts             : Sample(5),
-      askLevel3Price                   : Sample(9),
-      bidLevel3Price                   : Sample(9),
-      askLevel3Volume                  : Sample(9),
-      bidLevel3Volume                  : Sample(9),
-      askLevel3OrderCounts             : Sample(5),
-      bidLevel3OrderCounts             : Sample(5),
-      askLevel4Price                   : Sample(9),
-      bidLevel4Price                   : Sample(9),
-      askLevel4Volume                  : Sample(9),
-      bidLevel4Volume                  : Sample(9),
-      askLevel4OrderCounts             : Sample(5),
-      bidLevel4OrderCounts             : Sample(5),
-      askLevel5Price                   : Sample(9),
-      bidLevel5Price                   : Sample(9),
-      askLevel5Volume                  : Sample(9),
-      bidLevel5Volume                  : Sample(9),
-      askLevel5OrderCounts             : Sample(5),
-      bidLevel5OrderCounts             : Sample(5),
-      askLevel6Price                   : Sample(9),
-      bidLevel6Price                   : Sample(9),
-      askLevel6Volume                  : Sample(9),
-      bidLevel6Volume                  : Sample(9),
-      askLevel6OrderCounts             : Sample(5),
-      bidLevel6OrderCounts             : Sample(5),
-      askLevel7Price                   : Sample(9),
-      bidLevel7Price                   : Sample(9),
-      askLevel7Volume                  : Sample(9),
-      bidLevel7Volume                  : Sample(9),
-      askLevel7OrderCounts             : Sample(5),
-      bidLevel7OrderCounts             : Sample(5),
-      askLevel8Price                   : Sample(9),
-      bidLevel8Price                   : Sample(9),
-      askLevel8Volume                  : Sample(9),
-      bidLevel8Volume                  : Sample(9),
-      askLevel8OrderCounts             : Sample(5),
-      bidLevel8OrderCounts             : Sample(5),
-      askLevel9Price                   : Sample(9),
-      bidLevel9Price                   : Sample(9),
-      askLevel9Volume                  : Sample(9),
-      bidLevel9Volume                  : Sample(9),
-      askLevel9OrderCounts             : Sample(5),
-      bidLevel9OrderCounts             : Sample(5),
-      askLevel10Price                  : Sample(9),
-      bidLevel10Price                  : Sample(9),
-      askLevel10Volume                 : Sample(9),
-      bidLevel10Volume                 : Sample(9),
-      askLevel10OrderCounts            : Sample(5),
-      bidLevel10OrderCounts            : Sample(5),
+      tenLevels                        : SlotsTenLevels2,
       askTotalVolume                   : Sample(9),
       bidTotalVolume                   : Sample(9),
       askPriceValidCounts              : Sample(5),
@@ -1319,66 +868,7 @@ EncodeDerivativesSnapshotTenLevelsMessage(message) ==
         \o message.accumulatedTradingVolume
         \o message.accumulatedTradingValue
         \o message.finalAskBidTypeCode
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.askLevel1OrderCounts
-        \o message.bidLevel1OrderCounts
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.askLevel2OrderCounts
-        \o message.bidLevel2OrderCounts
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.askLevel3OrderCounts
-        \o message.bidLevel3OrderCounts
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.askLevel4OrderCounts
-        \o message.bidLevel4OrderCounts
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.askLevel5OrderCounts
-        \o message.bidLevel5OrderCounts
-        \o message.askLevel6Price
-        \o message.bidLevel6Price
-        \o message.askLevel6Volume
-        \o message.bidLevel6Volume
-        \o message.askLevel6OrderCounts
-        \o message.bidLevel6OrderCounts
-        \o message.askLevel7Price
-        \o message.bidLevel7Price
-        \o message.askLevel7Volume
-        \o message.bidLevel7Volume
-        \o message.askLevel7OrderCounts
-        \o message.bidLevel7OrderCounts
-        \o message.askLevel8Price
-        \o message.bidLevel8Price
-        \o message.askLevel8Volume
-        \o message.bidLevel8Volume
-        \o message.askLevel8OrderCounts
-        \o message.bidLevel8OrderCounts
-        \o message.askLevel9Price
-        \o message.bidLevel9Price
-        \o message.askLevel9Volume
-        \o message.bidLevel9Volume
-        \o message.askLevel9OrderCounts
-        \o message.bidLevel9OrderCounts
-        \o message.askLevel10Price
-        \o message.bidLevel10Price
-        \o message.askLevel10Volume
-        \o message.bidLevel10Volume
-        \o message.askLevel10OrderCounts
-        \o message.bidLevel10OrderCounts
+        \o EncodeTenLevels2List(message.tenLevels)
         \o message.askTotalVolume
         \o message.bidTotalVolume
         \o message.askPriceValidCounts
@@ -1404,67 +894,8 @@ DecodeDerivativesSnapshotTenLevelsMessage(bytes) ==
     LET accumulatedTradingVolume == ReadBytes(openInterest.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
     LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
     LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(finalAskBidTypeCode.rest, 9) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 9) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 9) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 9) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel1OrderCounts == ReadBytes(bidLevel1Volume.rest, 5) IN IF ~askLevel1OrderCounts.ok THEN Fail ELSE
-    LET bidLevel1OrderCounts == ReadBytes(askLevel1OrderCounts.rest, 5) IN IF ~bidLevel1OrderCounts.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(bidLevel1OrderCounts.rest, 9) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 9) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 9) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 9) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel2OrderCounts == ReadBytes(bidLevel2Volume.rest, 5) IN IF ~askLevel2OrderCounts.ok THEN Fail ELSE
-    LET bidLevel2OrderCounts == ReadBytes(askLevel2OrderCounts.rest, 5) IN IF ~bidLevel2OrderCounts.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(bidLevel2OrderCounts.rest, 9) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 9) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 9) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 9) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel3OrderCounts == ReadBytes(bidLevel3Volume.rest, 5) IN IF ~askLevel3OrderCounts.ok THEN Fail ELSE
-    LET bidLevel3OrderCounts == ReadBytes(askLevel3OrderCounts.rest, 5) IN IF ~bidLevel3OrderCounts.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(bidLevel3OrderCounts.rest, 9) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 9) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 9) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 9) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel4OrderCounts == ReadBytes(bidLevel4Volume.rest, 5) IN IF ~askLevel4OrderCounts.ok THEN Fail ELSE
-    LET bidLevel4OrderCounts == ReadBytes(askLevel4OrderCounts.rest, 5) IN IF ~bidLevel4OrderCounts.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(bidLevel4OrderCounts.rest, 9) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 9) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 9) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 9) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel5OrderCounts == ReadBytes(bidLevel5Volume.rest, 5) IN IF ~askLevel5OrderCounts.ok THEN Fail ELSE
-    LET bidLevel5OrderCounts == ReadBytes(askLevel5OrderCounts.rest, 5) IN IF ~bidLevel5OrderCounts.ok THEN Fail ELSE
-    LET askLevel6Price == ReadBytes(bidLevel5OrderCounts.rest, 9) IN IF ~askLevel6Price.ok THEN Fail ELSE
-    LET bidLevel6Price == ReadBytes(askLevel6Price.rest, 9) IN IF ~bidLevel6Price.ok THEN Fail ELSE
-    LET askLevel6Volume == ReadBytes(bidLevel6Price.rest, 9) IN IF ~askLevel6Volume.ok THEN Fail ELSE
-    LET bidLevel6Volume == ReadBytes(askLevel6Volume.rest, 9) IN IF ~bidLevel6Volume.ok THEN Fail ELSE
-    LET askLevel6OrderCounts == ReadBytes(bidLevel6Volume.rest, 5) IN IF ~askLevel6OrderCounts.ok THEN Fail ELSE
-    LET bidLevel6OrderCounts == ReadBytes(askLevel6OrderCounts.rest, 5) IN IF ~bidLevel6OrderCounts.ok THEN Fail ELSE
-    LET askLevel7Price == ReadBytes(bidLevel6OrderCounts.rest, 9) IN IF ~askLevel7Price.ok THEN Fail ELSE
-    LET bidLevel7Price == ReadBytes(askLevel7Price.rest, 9) IN IF ~bidLevel7Price.ok THEN Fail ELSE
-    LET askLevel7Volume == ReadBytes(bidLevel7Price.rest, 9) IN IF ~askLevel7Volume.ok THEN Fail ELSE
-    LET bidLevel7Volume == ReadBytes(askLevel7Volume.rest, 9) IN IF ~bidLevel7Volume.ok THEN Fail ELSE
-    LET askLevel7OrderCounts == ReadBytes(bidLevel7Volume.rest, 5) IN IF ~askLevel7OrderCounts.ok THEN Fail ELSE
-    LET bidLevel7OrderCounts == ReadBytes(askLevel7OrderCounts.rest, 5) IN IF ~bidLevel7OrderCounts.ok THEN Fail ELSE
-    LET askLevel8Price == ReadBytes(bidLevel7OrderCounts.rest, 9) IN IF ~askLevel8Price.ok THEN Fail ELSE
-    LET bidLevel8Price == ReadBytes(askLevel8Price.rest, 9) IN IF ~bidLevel8Price.ok THEN Fail ELSE
-    LET askLevel8Volume == ReadBytes(bidLevel8Price.rest, 9) IN IF ~askLevel8Volume.ok THEN Fail ELSE
-    LET bidLevel8Volume == ReadBytes(askLevel8Volume.rest, 9) IN IF ~bidLevel8Volume.ok THEN Fail ELSE
-    LET askLevel8OrderCounts == ReadBytes(bidLevel8Volume.rest, 5) IN IF ~askLevel8OrderCounts.ok THEN Fail ELSE
-    LET bidLevel8OrderCounts == ReadBytes(askLevel8OrderCounts.rest, 5) IN IF ~bidLevel8OrderCounts.ok THEN Fail ELSE
-    LET askLevel9Price == ReadBytes(bidLevel8OrderCounts.rest, 9) IN IF ~askLevel9Price.ok THEN Fail ELSE
-    LET bidLevel9Price == ReadBytes(askLevel9Price.rest, 9) IN IF ~bidLevel9Price.ok THEN Fail ELSE
-    LET askLevel9Volume == ReadBytes(bidLevel9Price.rest, 9) IN IF ~askLevel9Volume.ok THEN Fail ELSE
-    LET bidLevel9Volume == ReadBytes(askLevel9Volume.rest, 9) IN IF ~bidLevel9Volume.ok THEN Fail ELSE
-    LET askLevel9OrderCounts == ReadBytes(bidLevel9Volume.rest, 5) IN IF ~askLevel9OrderCounts.ok THEN Fail ELSE
-    LET bidLevel9OrderCounts == ReadBytes(askLevel9OrderCounts.rest, 5) IN IF ~bidLevel9OrderCounts.ok THEN Fail ELSE
-    LET askLevel10Price == ReadBytes(bidLevel9OrderCounts.rest, 9) IN IF ~askLevel10Price.ok THEN Fail ELSE
-    LET bidLevel10Price == ReadBytes(askLevel10Price.rest, 9) IN IF ~bidLevel10Price.ok THEN Fail ELSE
-    LET askLevel10Volume == ReadBytes(bidLevel10Price.rest, 9) IN IF ~askLevel10Volume.ok THEN Fail ELSE
-    LET bidLevel10Volume == ReadBytes(askLevel10Volume.rest, 9) IN IF ~bidLevel10Volume.ok THEN Fail ELSE
-    LET askLevel10OrderCounts == ReadBytes(bidLevel10Volume.rest, 5) IN IF ~askLevel10OrderCounts.ok THEN Fail ELSE
-    LET bidLevel10OrderCounts == ReadBytes(askLevel10OrderCounts.rest, 5) IN IF ~bidLevel10OrderCounts.ok THEN Fail ELSE
-    LET askTotalVolume == ReadBytes(bidLevel10OrderCounts.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
+    LET tenLevels == ReadTenLevels2List(finalAskBidTypeCode.rest, 10) IN IF ~tenLevels.ok THEN Fail ELSE
+    LET askTotalVolume == ReadBytes(tenLevels.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
     LET bidTotalVolume == ReadBytes(askTotalVolume.rest, 9) IN IF ~bidTotalVolume.ok THEN Fail ELSE
     LET askPriceValidCounts == ReadBytes(bidTotalVolume.rest, 5) IN IF ~askPriceValidCounts.ok THEN Fail ELSE
     LET bidPriceValidCounts == ReadBytes(askPriceValidCounts.rest, 5) IN IF ~bidPriceValidCounts.ok THEN Fail ELSE
@@ -1487,66 +918,7 @@ DecodeDerivativesSnapshotTenLevelsMessage(bytes) ==
          accumulatedTradingVolume         |-> accumulatedTradingVolume.value,
          accumulatedTradingValue          |-> accumulatedTradingValue.value,
          finalAskBidTypeCode              |-> finalAskBidTypeCode.value,
-         askLevel1Price                   |-> askLevel1Price.value,
-         bidLevel1Price                   |-> bidLevel1Price.value,
-         askLevel1Volume                  |-> askLevel1Volume.value,
-         bidLevel1Volume                  |-> bidLevel1Volume.value,
-         askLevel1OrderCounts             |-> askLevel1OrderCounts.value,
-         bidLevel1OrderCounts             |-> bidLevel1OrderCounts.value,
-         askLevel2Price                   |-> askLevel2Price.value,
-         bidLevel2Price                   |-> bidLevel2Price.value,
-         askLevel2Volume                  |-> askLevel2Volume.value,
-         bidLevel2Volume                  |-> bidLevel2Volume.value,
-         askLevel2OrderCounts             |-> askLevel2OrderCounts.value,
-         bidLevel2OrderCounts             |-> bidLevel2OrderCounts.value,
-         askLevel3Price                   |-> askLevel3Price.value,
-         bidLevel3Price                   |-> bidLevel3Price.value,
-         askLevel3Volume                  |-> askLevel3Volume.value,
-         bidLevel3Volume                  |-> bidLevel3Volume.value,
-         askLevel3OrderCounts             |-> askLevel3OrderCounts.value,
-         bidLevel3OrderCounts             |-> bidLevel3OrderCounts.value,
-         askLevel4Price                   |-> askLevel4Price.value,
-         bidLevel4Price                   |-> bidLevel4Price.value,
-         askLevel4Volume                  |-> askLevel4Volume.value,
-         bidLevel4Volume                  |-> bidLevel4Volume.value,
-         askLevel4OrderCounts             |-> askLevel4OrderCounts.value,
-         bidLevel4OrderCounts             |-> bidLevel4OrderCounts.value,
-         askLevel5Price                   |-> askLevel5Price.value,
-         bidLevel5Price                   |-> bidLevel5Price.value,
-         askLevel5Volume                  |-> askLevel5Volume.value,
-         bidLevel5Volume                  |-> bidLevel5Volume.value,
-         askLevel5OrderCounts             |-> askLevel5OrderCounts.value,
-         bidLevel5OrderCounts             |-> bidLevel5OrderCounts.value,
-         askLevel6Price                   |-> askLevel6Price.value,
-         bidLevel6Price                   |-> bidLevel6Price.value,
-         askLevel6Volume                  |-> askLevel6Volume.value,
-         bidLevel6Volume                  |-> bidLevel6Volume.value,
-         askLevel6OrderCounts             |-> askLevel6OrderCounts.value,
-         bidLevel6OrderCounts             |-> bidLevel6OrderCounts.value,
-         askLevel7Price                   |-> askLevel7Price.value,
-         bidLevel7Price                   |-> bidLevel7Price.value,
-         askLevel7Volume                  |-> askLevel7Volume.value,
-         bidLevel7Volume                  |-> bidLevel7Volume.value,
-         askLevel7OrderCounts             |-> askLevel7OrderCounts.value,
-         bidLevel7OrderCounts             |-> bidLevel7OrderCounts.value,
-         askLevel8Price                   |-> askLevel8Price.value,
-         bidLevel8Price                   |-> bidLevel8Price.value,
-         askLevel8Volume                  |-> askLevel8Volume.value,
-         bidLevel8Volume                  |-> bidLevel8Volume.value,
-         askLevel8OrderCounts             |-> askLevel8OrderCounts.value,
-         bidLevel8OrderCounts             |-> bidLevel8OrderCounts.value,
-         askLevel9Price                   |-> askLevel9Price.value,
-         bidLevel9Price                   |-> bidLevel9Price.value,
-         askLevel9Volume                  |-> askLevel9Volume.value,
-         bidLevel9Volume                  |-> bidLevel9Volume.value,
-         askLevel9OrderCounts             |-> askLevel9OrderCounts.value,
-         bidLevel9OrderCounts             |-> bidLevel9OrderCounts.value,
-         askLevel10Price                  |-> askLevel10Price.value,
-         bidLevel10Price                  |-> bidLevel10Price.value,
-         askLevel10Volume                 |-> askLevel10Volume.value,
-         bidLevel10Volume                 |-> bidLevel10Volume.value,
-         askLevel10OrderCounts            |-> askLevel10OrderCounts.value,
-         bidLevel10OrderCounts            |-> bidLevel10OrderCounts.value,
+         tenLevels                        |-> tenLevels.value,
          askTotalVolume                   |-> askTotalVolume.value,
          bidTotalVolume                   |-> bidTotalVolume.value,
          askPriceValidCounts              |-> askPriceValidCounts.value,
@@ -1572,66 +944,7 @@ ZeroDerivativesSnapshotTenLevelsMessage ==
       accumulatedTradingVolume         |-> [i \in 1 .. 12 |-> 0],
       accumulatedTradingValue          |-> [i \in 1 .. 22 |-> 0],
       finalAskBidTypeCode              |-> [i \in 1 .. 1 |-> 0],
-      askLevel1Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel1OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel1OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel2Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel2Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel2OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel2OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel3Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel3Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel3OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel3OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel4Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel4Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel4OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel4OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel5Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel5Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel5OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel5OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel6Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel6Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel6Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel6Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel6OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel6OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel7Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel7Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel7Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel7Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel7OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel7OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel8Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel8Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel8Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel8Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel8OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel8OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel9Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel9Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel9Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel9Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel9OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel9OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel10Price                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel10Price                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel10Volume                 |-> [i \in 1 .. 9 |-> 0],
-      bidLevel10Volume                 |-> [i \in 1 .. 9 |-> 0],
-      askLevel10OrderCounts            |-> [i \in 1 .. 5 |-> 0],
-      bidLevel10OrderCounts            |-> [i \in 1 .. 5 |-> 0],
+      tenLevels                        |-> [i \in 1 .. 10 |-> ZeroTenLevels2],
       askTotalVolume                   |-> [i \in 1 .. 9 |-> 0],
       bidTotalVolume                   |-> [i \in 1 .. 9 |-> 0],
       askPriceValidCounts              |-> [i \in 1 .. 5 |-> 0],
@@ -1659,66 +972,7 @@ CheckedDerivativesSnapshotTenLevelsMessage ==
         \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
         \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
         \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel6Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel6Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel6Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel6Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel6OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel6OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel7Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel7Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel7Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel7Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel7OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel7OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel8Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel8Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel8Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel8Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel8OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel8OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel9Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel9Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel9Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel9Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel9OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel9OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel10Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel10Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel10Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel10Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askLevel10OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidLevel10OrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.tenLevels = one] : one \in SlotsTenLevels2 }
         \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.bidTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesSnapshotTenLevelsMessage EXCEPT !.askPriceValidCounts = one] : one \in Sample(5) }
@@ -1864,7 +1118,83 @@ CheckedDerivativesOrderFilledMessage ==
         \cup { [ZeroDerivativesOrderFilledMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Derivatives Order Filled Plus Quote Five Levels Message: 426 bytes      *)
+(* Five Levels: 46 bytes                                                   *)
+(***************************************************************************)
+
+FiveLevels3 ==
+    [ askPrice       : Sample(9),
+      bidPrice       : Sample(9),
+      askVolume      : Sample(9),
+      bidVolume      : Sample(9),
+      askOrderCounts : Sample(5),
+      bidOrderCounts : Sample(5) ]
+
+EncodeFiveLevels3(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+        \o message.askOrderCounts
+        \o message.bidOrderCounts
+
+DecodeFiveLevels3(bytes) ==
+    LET askPrice == ReadBytes(bytes, 9) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 9) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 9) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 9) IN IF ~bidVolume.ok THEN Fail ELSE
+    LET askOrderCounts == ReadBytes(bidVolume.rest, 5) IN IF ~askOrderCounts.ok THEN Fail ELSE
+    LET bidOrderCounts == ReadBytes(askOrderCounts.rest, 5) IN IF ~bidOrderCounts.ok THEN Fail ELSE
+    Ok([ askPrice       |-> askPrice.value,
+         bidPrice       |-> bidPrice.value,
+         askVolume      |-> askVolume.value,
+         bidVolume      |-> bidVolume.value,
+         askOrderCounts |-> askOrderCounts.value,
+         bidOrderCounts |-> bidOrderCounts.value ], bidOrderCounts.rest)
+
+ZeroFiveLevels3 ==
+    [ askPrice       |-> [i \in 1 .. 9 |-> 0],
+      bidPrice       |-> [i \in 1 .. 9 |-> 0],
+      askVolume      |-> [i \in 1 .. 9 |-> 0],
+      bidVolume      |-> [i \in 1 .. 9 |-> 0],
+      askOrderCounts |-> [i \in 1 .. 5 |-> 0],
+      bidOrderCounts |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Five Levels at zero, then each field in turn at the values it is checked at *)
+CheckedFiveLevels3 ==
+    { ZeroFiveLevels3 }
+        \cup { [ZeroFiveLevels3 EXCEPT !.askPrice = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels3 EXCEPT !.bidPrice = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels3 EXCEPT !.askVolume = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels3 EXCEPT !.bidVolume = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels3 EXCEPT !.askOrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroFiveLevels3 EXCEPT !.bidOrderCounts = one] : one \in Sample(5) }
+
+(* A run of Five Levels, written one after another *)
+RECURSIVE EncodeFiveLevels3List(_)
+EncodeFiveLevels3List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeFiveLevels3(Head(messages)) \o EncodeFiveLevels3List(Tail(messages))
+
+(* As many Five Levels as the field that counts them says *)
+RECURSIVE ReadFiveLevels3List(_, _)
+ReadFiveLevels3List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeFiveLevels3(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadFiveLevels3List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Five Levels of each kind, for the lists that carry them *)
+OneFiveLevels3 == { ZeroFiveLevels3 }
+
+(* The 5 slots a run of Five Levels is written as, whatever the field beside it says are in use *)
+SlotsFiveLevels3 == { [i \in 1 .. 5 |-> one] : one \in OneFiveLevels3 }
+
+(***************************************************************************)
+(* Derivatives Order Filled Plus Quote Five Levels Message                 *)
 (***************************************************************************)
 
 DerivativesOrderFilledPlusQuoteFiveLevelsMessage ==
@@ -1887,36 +1217,7 @@ DerivativesOrderFilledPlusQuoteFiveLevelsMessage ==
       finalAskBidTypeCode              : Sample(1),
       upperLimitOfDynamicPriceRange    : Sample(9),
       lowerLimitOfDynamicPriceRange    : Sample(9),
-      askLevel1Price                   : Sample(9),
-      bidLevel1Price                   : Sample(9),
-      askLevel1Volume                  : Sample(9),
-      bidLevel1Volume                  : Sample(9),
-      askLevel1OrderCounts             : Sample(5),
-      bidLevel1OrderCounts             : Sample(5),
-      askLevel2Price                   : Sample(9),
-      bidLevel2Price                   : Sample(9),
-      askLevel2Volume                  : Sample(9),
-      bidLevel2Volume                  : Sample(9),
-      askLevel2OrderCounts             : Sample(5),
-      bidLevel2OrderCounts             : Sample(5),
-      askLevel3Price                   : Sample(9),
-      bidLevel3Price                   : Sample(9),
-      askLevel3Volume                  : Sample(9),
-      bidLevel3Volume                  : Sample(9),
-      askLevel3OrderCounts             : Sample(5),
-      bidLevel3OrderCounts             : Sample(5),
-      askLevel4Price                   : Sample(9),
-      bidLevel4Price                   : Sample(9),
-      askLevel4Volume                  : Sample(9),
-      bidLevel4Volume                  : Sample(9),
-      askLevel4OrderCounts             : Sample(5),
-      bidLevel4OrderCounts             : Sample(5),
-      askLevel5Price                   : Sample(9),
-      bidLevel5Price                   : Sample(9),
-      askLevel5Volume                  : Sample(9),
-      bidLevel5Volume                  : Sample(9),
-      askLevel5OrderCounts             : Sample(5),
-      bidLevel5OrderCounts             : Sample(5),
+      fiveLevels                       : SlotsFiveLevels3,
       askTotalVolume                   : Sample(9),
       bidTotalVolume                   : Sample(9),
       askPriceValidCounts              : Sample(5),
@@ -1943,36 +1244,7 @@ EncodeDerivativesOrderFilledPlusQuoteFiveLevelsMessage(message) ==
         \o message.finalAskBidTypeCode
         \o message.upperLimitOfDynamicPriceRange
         \o message.lowerLimitOfDynamicPriceRange
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.askLevel1OrderCounts
-        \o message.bidLevel1OrderCounts
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.askLevel2OrderCounts
-        \o message.bidLevel2OrderCounts
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.askLevel3OrderCounts
-        \o message.bidLevel3OrderCounts
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.askLevel4OrderCounts
-        \o message.bidLevel4OrderCounts
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.askLevel5OrderCounts
-        \o message.bidLevel5OrderCounts
+        \o EncodeFiveLevels3List(message.fiveLevels)
         \o message.askTotalVolume
         \o message.bidTotalVolume
         \o message.askPriceValidCounts
@@ -1999,37 +1271,8 @@ DecodeDerivativesOrderFilledPlusQuoteFiveLevelsMessage(bytes) ==
     LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
     LET upperLimitOfDynamicPriceRange == ReadBytes(finalAskBidTypeCode.rest, 9) IN IF ~upperLimitOfDynamicPriceRange.ok THEN Fail ELSE
     LET lowerLimitOfDynamicPriceRange == ReadBytes(upperLimitOfDynamicPriceRange.rest, 9) IN IF ~lowerLimitOfDynamicPriceRange.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(lowerLimitOfDynamicPriceRange.rest, 9) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 9) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 9) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 9) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel1OrderCounts == ReadBytes(bidLevel1Volume.rest, 5) IN IF ~askLevel1OrderCounts.ok THEN Fail ELSE
-    LET bidLevel1OrderCounts == ReadBytes(askLevel1OrderCounts.rest, 5) IN IF ~bidLevel1OrderCounts.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(bidLevel1OrderCounts.rest, 9) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 9) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 9) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 9) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel2OrderCounts == ReadBytes(bidLevel2Volume.rest, 5) IN IF ~askLevel2OrderCounts.ok THEN Fail ELSE
-    LET bidLevel2OrderCounts == ReadBytes(askLevel2OrderCounts.rest, 5) IN IF ~bidLevel2OrderCounts.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(bidLevel2OrderCounts.rest, 9) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 9) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 9) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 9) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel3OrderCounts == ReadBytes(bidLevel3Volume.rest, 5) IN IF ~askLevel3OrderCounts.ok THEN Fail ELSE
-    LET bidLevel3OrderCounts == ReadBytes(askLevel3OrderCounts.rest, 5) IN IF ~bidLevel3OrderCounts.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(bidLevel3OrderCounts.rest, 9) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 9) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 9) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 9) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel4OrderCounts == ReadBytes(bidLevel4Volume.rest, 5) IN IF ~askLevel4OrderCounts.ok THEN Fail ELSE
-    LET bidLevel4OrderCounts == ReadBytes(askLevel4OrderCounts.rest, 5) IN IF ~bidLevel4OrderCounts.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(bidLevel4OrderCounts.rest, 9) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 9) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 9) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 9) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel5OrderCounts == ReadBytes(bidLevel5Volume.rest, 5) IN IF ~askLevel5OrderCounts.ok THEN Fail ELSE
-    LET bidLevel5OrderCounts == ReadBytes(askLevel5OrderCounts.rest, 5) IN IF ~bidLevel5OrderCounts.ok THEN Fail ELSE
-    LET askTotalVolume == ReadBytes(bidLevel5OrderCounts.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
+    LET fiveLevels == ReadFiveLevels3List(lowerLimitOfDynamicPriceRange.rest, 5) IN IF ~fiveLevels.ok THEN Fail ELSE
+    LET askTotalVolume == ReadBytes(fiveLevels.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
     LET bidTotalVolume == ReadBytes(askTotalVolume.rest, 9) IN IF ~bidTotalVolume.ok THEN Fail ELSE
     LET askPriceValidCounts == ReadBytes(bidTotalVolume.rest, 5) IN IF ~askPriceValidCounts.ok THEN Fail ELSE
     LET bidPriceValidCounts == ReadBytes(askPriceValidCounts.rest, 5) IN IF ~bidPriceValidCounts.ok THEN Fail ELSE
@@ -2053,36 +1296,7 @@ DecodeDerivativesOrderFilledPlusQuoteFiveLevelsMessage(bytes) ==
          finalAskBidTypeCode              |-> finalAskBidTypeCode.value,
          upperLimitOfDynamicPriceRange    |-> upperLimitOfDynamicPriceRange.value,
          lowerLimitOfDynamicPriceRange    |-> lowerLimitOfDynamicPriceRange.value,
-         askLevel1Price                   |-> askLevel1Price.value,
-         bidLevel1Price                   |-> bidLevel1Price.value,
-         askLevel1Volume                  |-> askLevel1Volume.value,
-         bidLevel1Volume                  |-> bidLevel1Volume.value,
-         askLevel1OrderCounts             |-> askLevel1OrderCounts.value,
-         bidLevel1OrderCounts             |-> bidLevel1OrderCounts.value,
-         askLevel2Price                   |-> askLevel2Price.value,
-         bidLevel2Price                   |-> bidLevel2Price.value,
-         askLevel2Volume                  |-> askLevel2Volume.value,
-         bidLevel2Volume                  |-> bidLevel2Volume.value,
-         askLevel2OrderCounts             |-> askLevel2OrderCounts.value,
-         bidLevel2OrderCounts             |-> bidLevel2OrderCounts.value,
-         askLevel3Price                   |-> askLevel3Price.value,
-         bidLevel3Price                   |-> bidLevel3Price.value,
-         askLevel3Volume                  |-> askLevel3Volume.value,
-         bidLevel3Volume                  |-> bidLevel3Volume.value,
-         askLevel3OrderCounts             |-> askLevel3OrderCounts.value,
-         bidLevel3OrderCounts             |-> bidLevel3OrderCounts.value,
-         askLevel4Price                   |-> askLevel4Price.value,
-         bidLevel4Price                   |-> bidLevel4Price.value,
-         askLevel4Volume                  |-> askLevel4Volume.value,
-         bidLevel4Volume                  |-> bidLevel4Volume.value,
-         askLevel4OrderCounts             |-> askLevel4OrderCounts.value,
-         bidLevel4OrderCounts             |-> bidLevel4OrderCounts.value,
-         askLevel5Price                   |-> askLevel5Price.value,
-         bidLevel5Price                   |-> bidLevel5Price.value,
-         askLevel5Volume                  |-> askLevel5Volume.value,
-         bidLevel5Volume                  |-> bidLevel5Volume.value,
-         askLevel5OrderCounts             |-> askLevel5OrderCounts.value,
-         bidLevel5OrderCounts             |-> bidLevel5OrderCounts.value,
+         fiveLevels                       |-> fiveLevels.value,
          askTotalVolume                   |-> askTotalVolume.value,
          bidTotalVolume                   |-> bidTotalVolume.value,
          askPriceValidCounts              |-> askPriceValidCounts.value,
@@ -2109,36 +1323,7 @@ ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage ==
       finalAskBidTypeCode              |-> [i \in 1 .. 1 |-> 0],
       upperLimitOfDynamicPriceRange    |-> [i \in 1 .. 9 |-> 0],
       lowerLimitOfDynamicPriceRange    |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel1OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel1OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel2Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel2Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel2OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel2OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel3Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel3Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel3OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel3OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel4Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel4Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel4OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel4OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel5Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel5Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel5OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel5OrderCounts             |-> [i \in 1 .. 5 |-> 0],
+      fiveLevels                       |-> [i \in 1 .. 5 |-> ZeroFiveLevels3],
       askTotalVolume                   |-> [i \in 1 .. 9 |-> 0],
       bidTotalVolume                   |-> [i \in 1 .. 9 |-> 0],
       askPriceValidCounts              |-> [i \in 1 .. 5 |-> 0],
@@ -2167,36 +1352,7 @@ CheckedDerivativesOrderFilledPlusQuoteFiveLevelsMessage ==
         \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
         \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.upperLimitOfDynamicPriceRange = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.lowerLimitOfDynamicPriceRange = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel5OrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.fiveLevels = one] : one \in SlotsFiveLevels3 }
         \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.bidTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.askPriceValidCounts = one] : one \in Sample(5) }
@@ -2204,7 +1360,83 @@ CheckedDerivativesOrderFilledPlusQuoteFiveLevelsMessage ==
         \cup { [ZeroDerivativesOrderFilledPlusQuoteFiveLevelsMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Derivatives Order Filled Plus Quote Ten Levels Message: 656 bytes       *)
+(* Ten Levels: 46 bytes                                                    *)
+(***************************************************************************)
+
+TenLevels3 ==
+    [ askPrice       : Sample(9),
+      bidPrice       : Sample(9),
+      askVolume      : Sample(9),
+      bidVolume      : Sample(9),
+      askOrderCounts : Sample(5),
+      bidOrderCounts : Sample(5) ]
+
+EncodeTenLevels3(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+        \o message.askOrderCounts
+        \o message.bidOrderCounts
+
+DecodeTenLevels3(bytes) ==
+    LET askPrice == ReadBytes(bytes, 9) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 9) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 9) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 9) IN IF ~bidVolume.ok THEN Fail ELSE
+    LET askOrderCounts == ReadBytes(bidVolume.rest, 5) IN IF ~askOrderCounts.ok THEN Fail ELSE
+    LET bidOrderCounts == ReadBytes(askOrderCounts.rest, 5) IN IF ~bidOrderCounts.ok THEN Fail ELSE
+    Ok([ askPrice       |-> askPrice.value,
+         bidPrice       |-> bidPrice.value,
+         askVolume      |-> askVolume.value,
+         bidVolume      |-> bidVolume.value,
+         askOrderCounts |-> askOrderCounts.value,
+         bidOrderCounts |-> bidOrderCounts.value ], bidOrderCounts.rest)
+
+ZeroTenLevels3 ==
+    [ askPrice       |-> [i \in 1 .. 9 |-> 0],
+      bidPrice       |-> [i \in 1 .. 9 |-> 0],
+      askVolume      |-> [i \in 1 .. 9 |-> 0],
+      bidVolume      |-> [i \in 1 .. 9 |-> 0],
+      askOrderCounts |-> [i \in 1 .. 5 |-> 0],
+      bidOrderCounts |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Ten Levels at zero, then each field in turn at the values it is checked at *)
+CheckedTenLevels3 ==
+    { ZeroTenLevels3 }
+        \cup { [ZeroTenLevels3 EXCEPT !.askPrice = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels3 EXCEPT !.bidPrice = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels3 EXCEPT !.askVolume = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels3 EXCEPT !.bidVolume = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels3 EXCEPT !.askOrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroTenLevels3 EXCEPT !.bidOrderCounts = one] : one \in Sample(5) }
+
+(* A run of Ten Levels, written one after another *)
+RECURSIVE EncodeTenLevels3List(_)
+EncodeTenLevels3List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeTenLevels3(Head(messages)) \o EncodeTenLevels3List(Tail(messages))
+
+(* As many Ten Levels as the field that counts them says *)
+RECURSIVE ReadTenLevels3List(_, _)
+ReadTenLevels3List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeTenLevels3(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadTenLevels3List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Ten Levels of each kind, for the lists that carry them *)
+OneTenLevels3 == { ZeroTenLevels3 }
+
+(* The 10 slots a run of Ten Levels is written as, whatever the field beside it says are in use *)
+SlotsTenLevels3 == { [i \in 1 .. 10 |-> one] : one \in OneTenLevels3 }
+
+(***************************************************************************)
+(* Derivatives Order Filled Plus Quote Ten Levels Message                  *)
 (***************************************************************************)
 
 DerivativesOrderFilledPlusQuoteTenLevelsMessage ==
@@ -2227,66 +1459,7 @@ DerivativesOrderFilledPlusQuoteTenLevelsMessage ==
       finalAskBidTypeCode              : Sample(1),
       upperLimitOfDynamicPriceRange    : Sample(9),
       lowerLimitOfDynamicPriceRange    : Sample(9),
-      askLevel1Price                   : Sample(9),
-      bidLevel1Price                   : Sample(9),
-      askLevel1Volume                  : Sample(9),
-      bidLevel1Volume                  : Sample(9),
-      askLevel1OrderCounts             : Sample(5),
-      bidLevel1OrderCounts             : Sample(5),
-      askLevel2Price                   : Sample(9),
-      bidLevel2Price                   : Sample(9),
-      askLevel2Volume                  : Sample(9),
-      bidLevel2Volume                  : Sample(9),
-      askLevel2OrderCounts             : Sample(5),
-      bidLevel2OrderCounts             : Sample(5),
-      askLevel3Price                   : Sample(9),
-      bidLevel3Price                   : Sample(9),
-      askLevel3Volume                  : Sample(9),
-      bidLevel3Volume                  : Sample(9),
-      askLevel3OrderCounts             : Sample(5),
-      bidLevel3OrderCounts             : Sample(5),
-      askLevel4Price                   : Sample(9),
-      bidLevel4Price                   : Sample(9),
-      askLevel4Volume                  : Sample(9),
-      bidLevel4Volume                  : Sample(9),
-      askLevel4OrderCounts             : Sample(5),
-      bidLevel4OrderCounts             : Sample(5),
-      askLevel5Price                   : Sample(9),
-      bidLevel5Price                   : Sample(9),
-      askLevel5Volume                  : Sample(9),
-      bidLevel5Volume                  : Sample(9),
-      askLevel5OrderCounts             : Sample(5),
-      bidLevel5OrderCounts             : Sample(5),
-      askLevel6Price                   : Sample(9),
-      bidLevel6Price                   : Sample(9),
-      askLevel6Volume                  : Sample(9),
-      bidLevel6Volume                  : Sample(9),
-      askLevel6OrderCounts             : Sample(5),
-      bidLevel6OrderCounts             : Sample(5),
-      askLevel7Price                   : Sample(9),
-      bidLevel7Price                   : Sample(9),
-      askLevel7Volume                  : Sample(9),
-      bidLevel7Volume                  : Sample(9),
-      askLevel7OrderCounts             : Sample(5),
-      bidLevel7OrderCounts             : Sample(5),
-      askLevel8Price                   : Sample(9),
-      bidLevel8Price                   : Sample(9),
-      askLevel8Volume                  : Sample(9),
-      bidLevel8Volume                  : Sample(9),
-      askLevel8OrderCounts             : Sample(5),
-      bidLevel8OrderCounts             : Sample(5),
-      askLevel9Price                   : Sample(9),
-      bidLevel9Price                   : Sample(9),
-      askLevel9Volume                  : Sample(9),
-      bidLevel9Volume                  : Sample(9),
-      askLevel9OrderCounts             : Sample(5),
-      bidLevel9OrderCounts             : Sample(5),
-      askLevel10Price                  : Sample(9),
-      bidLevel10Price                  : Sample(9),
-      askLevel10Volume                 : Sample(9),
-      bidLevel10Volume                 : Sample(9),
-      askLevel10OrderCounts            : Sample(5),
-      bidLevel10OrderCounts            : Sample(5),
+      tenLevels                        : SlotsTenLevels3,
       askTotalVolume                   : Sample(9),
       bidTotalVolume                   : Sample(9),
       askPriceValidCounts              : Sample(5),
@@ -2313,66 +1486,7 @@ EncodeDerivativesOrderFilledPlusQuoteTenLevelsMessage(message) ==
         \o message.finalAskBidTypeCode
         \o message.upperLimitOfDynamicPriceRange
         \o message.lowerLimitOfDynamicPriceRange
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.askLevel1OrderCounts
-        \o message.bidLevel1OrderCounts
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.askLevel2OrderCounts
-        \o message.bidLevel2OrderCounts
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.askLevel3OrderCounts
-        \o message.bidLevel3OrderCounts
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.askLevel4OrderCounts
-        \o message.bidLevel4OrderCounts
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.askLevel5OrderCounts
-        \o message.bidLevel5OrderCounts
-        \o message.askLevel6Price
-        \o message.bidLevel6Price
-        \o message.askLevel6Volume
-        \o message.bidLevel6Volume
-        \o message.askLevel6OrderCounts
-        \o message.bidLevel6OrderCounts
-        \o message.askLevel7Price
-        \o message.bidLevel7Price
-        \o message.askLevel7Volume
-        \o message.bidLevel7Volume
-        \o message.askLevel7OrderCounts
-        \o message.bidLevel7OrderCounts
-        \o message.askLevel8Price
-        \o message.bidLevel8Price
-        \o message.askLevel8Volume
-        \o message.bidLevel8Volume
-        \o message.askLevel8OrderCounts
-        \o message.bidLevel8OrderCounts
-        \o message.askLevel9Price
-        \o message.bidLevel9Price
-        \o message.askLevel9Volume
-        \o message.bidLevel9Volume
-        \o message.askLevel9OrderCounts
-        \o message.bidLevel9OrderCounts
-        \o message.askLevel10Price
-        \o message.bidLevel10Price
-        \o message.askLevel10Volume
-        \o message.bidLevel10Volume
-        \o message.askLevel10OrderCounts
-        \o message.bidLevel10OrderCounts
+        \o EncodeTenLevels3List(message.tenLevels)
         \o message.askTotalVolume
         \o message.bidTotalVolume
         \o message.askPriceValidCounts
@@ -2399,67 +1513,8 @@ DecodeDerivativesOrderFilledPlusQuoteTenLevelsMessage(bytes) ==
     LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
     LET upperLimitOfDynamicPriceRange == ReadBytes(finalAskBidTypeCode.rest, 9) IN IF ~upperLimitOfDynamicPriceRange.ok THEN Fail ELSE
     LET lowerLimitOfDynamicPriceRange == ReadBytes(upperLimitOfDynamicPriceRange.rest, 9) IN IF ~lowerLimitOfDynamicPriceRange.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(lowerLimitOfDynamicPriceRange.rest, 9) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 9) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 9) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 9) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel1OrderCounts == ReadBytes(bidLevel1Volume.rest, 5) IN IF ~askLevel1OrderCounts.ok THEN Fail ELSE
-    LET bidLevel1OrderCounts == ReadBytes(askLevel1OrderCounts.rest, 5) IN IF ~bidLevel1OrderCounts.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(bidLevel1OrderCounts.rest, 9) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 9) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 9) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 9) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel2OrderCounts == ReadBytes(bidLevel2Volume.rest, 5) IN IF ~askLevel2OrderCounts.ok THEN Fail ELSE
-    LET bidLevel2OrderCounts == ReadBytes(askLevel2OrderCounts.rest, 5) IN IF ~bidLevel2OrderCounts.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(bidLevel2OrderCounts.rest, 9) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 9) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 9) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 9) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel3OrderCounts == ReadBytes(bidLevel3Volume.rest, 5) IN IF ~askLevel3OrderCounts.ok THEN Fail ELSE
-    LET bidLevel3OrderCounts == ReadBytes(askLevel3OrderCounts.rest, 5) IN IF ~bidLevel3OrderCounts.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(bidLevel3OrderCounts.rest, 9) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 9) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 9) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 9) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel4OrderCounts == ReadBytes(bidLevel4Volume.rest, 5) IN IF ~askLevel4OrderCounts.ok THEN Fail ELSE
-    LET bidLevel4OrderCounts == ReadBytes(askLevel4OrderCounts.rest, 5) IN IF ~bidLevel4OrderCounts.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(bidLevel4OrderCounts.rest, 9) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 9) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 9) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 9) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel5OrderCounts == ReadBytes(bidLevel5Volume.rest, 5) IN IF ~askLevel5OrderCounts.ok THEN Fail ELSE
-    LET bidLevel5OrderCounts == ReadBytes(askLevel5OrderCounts.rest, 5) IN IF ~bidLevel5OrderCounts.ok THEN Fail ELSE
-    LET askLevel6Price == ReadBytes(bidLevel5OrderCounts.rest, 9) IN IF ~askLevel6Price.ok THEN Fail ELSE
-    LET bidLevel6Price == ReadBytes(askLevel6Price.rest, 9) IN IF ~bidLevel6Price.ok THEN Fail ELSE
-    LET askLevel6Volume == ReadBytes(bidLevel6Price.rest, 9) IN IF ~askLevel6Volume.ok THEN Fail ELSE
-    LET bidLevel6Volume == ReadBytes(askLevel6Volume.rest, 9) IN IF ~bidLevel6Volume.ok THEN Fail ELSE
-    LET askLevel6OrderCounts == ReadBytes(bidLevel6Volume.rest, 5) IN IF ~askLevel6OrderCounts.ok THEN Fail ELSE
-    LET bidLevel6OrderCounts == ReadBytes(askLevel6OrderCounts.rest, 5) IN IF ~bidLevel6OrderCounts.ok THEN Fail ELSE
-    LET askLevel7Price == ReadBytes(bidLevel6OrderCounts.rest, 9) IN IF ~askLevel7Price.ok THEN Fail ELSE
-    LET bidLevel7Price == ReadBytes(askLevel7Price.rest, 9) IN IF ~bidLevel7Price.ok THEN Fail ELSE
-    LET askLevel7Volume == ReadBytes(bidLevel7Price.rest, 9) IN IF ~askLevel7Volume.ok THEN Fail ELSE
-    LET bidLevel7Volume == ReadBytes(askLevel7Volume.rest, 9) IN IF ~bidLevel7Volume.ok THEN Fail ELSE
-    LET askLevel7OrderCounts == ReadBytes(bidLevel7Volume.rest, 5) IN IF ~askLevel7OrderCounts.ok THEN Fail ELSE
-    LET bidLevel7OrderCounts == ReadBytes(askLevel7OrderCounts.rest, 5) IN IF ~bidLevel7OrderCounts.ok THEN Fail ELSE
-    LET askLevel8Price == ReadBytes(bidLevel7OrderCounts.rest, 9) IN IF ~askLevel8Price.ok THEN Fail ELSE
-    LET bidLevel8Price == ReadBytes(askLevel8Price.rest, 9) IN IF ~bidLevel8Price.ok THEN Fail ELSE
-    LET askLevel8Volume == ReadBytes(bidLevel8Price.rest, 9) IN IF ~askLevel8Volume.ok THEN Fail ELSE
-    LET bidLevel8Volume == ReadBytes(askLevel8Volume.rest, 9) IN IF ~bidLevel8Volume.ok THEN Fail ELSE
-    LET askLevel8OrderCounts == ReadBytes(bidLevel8Volume.rest, 5) IN IF ~askLevel8OrderCounts.ok THEN Fail ELSE
-    LET bidLevel8OrderCounts == ReadBytes(askLevel8OrderCounts.rest, 5) IN IF ~bidLevel8OrderCounts.ok THEN Fail ELSE
-    LET askLevel9Price == ReadBytes(bidLevel8OrderCounts.rest, 9) IN IF ~askLevel9Price.ok THEN Fail ELSE
-    LET bidLevel9Price == ReadBytes(askLevel9Price.rest, 9) IN IF ~bidLevel9Price.ok THEN Fail ELSE
-    LET askLevel9Volume == ReadBytes(bidLevel9Price.rest, 9) IN IF ~askLevel9Volume.ok THEN Fail ELSE
-    LET bidLevel9Volume == ReadBytes(askLevel9Volume.rest, 9) IN IF ~bidLevel9Volume.ok THEN Fail ELSE
-    LET askLevel9OrderCounts == ReadBytes(bidLevel9Volume.rest, 5) IN IF ~askLevel9OrderCounts.ok THEN Fail ELSE
-    LET bidLevel9OrderCounts == ReadBytes(askLevel9OrderCounts.rest, 5) IN IF ~bidLevel9OrderCounts.ok THEN Fail ELSE
-    LET askLevel10Price == ReadBytes(bidLevel9OrderCounts.rest, 9) IN IF ~askLevel10Price.ok THEN Fail ELSE
-    LET bidLevel10Price == ReadBytes(askLevel10Price.rest, 9) IN IF ~bidLevel10Price.ok THEN Fail ELSE
-    LET askLevel10Volume == ReadBytes(bidLevel10Price.rest, 9) IN IF ~askLevel10Volume.ok THEN Fail ELSE
-    LET bidLevel10Volume == ReadBytes(askLevel10Volume.rest, 9) IN IF ~bidLevel10Volume.ok THEN Fail ELSE
-    LET askLevel10OrderCounts == ReadBytes(bidLevel10Volume.rest, 5) IN IF ~askLevel10OrderCounts.ok THEN Fail ELSE
-    LET bidLevel10OrderCounts == ReadBytes(askLevel10OrderCounts.rest, 5) IN IF ~bidLevel10OrderCounts.ok THEN Fail ELSE
-    LET askTotalVolume == ReadBytes(bidLevel10OrderCounts.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
+    LET tenLevels == ReadTenLevels3List(lowerLimitOfDynamicPriceRange.rest, 10) IN IF ~tenLevels.ok THEN Fail ELSE
+    LET askTotalVolume == ReadBytes(tenLevels.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
     LET bidTotalVolume == ReadBytes(askTotalVolume.rest, 9) IN IF ~bidTotalVolume.ok THEN Fail ELSE
     LET askPriceValidCounts == ReadBytes(bidTotalVolume.rest, 5) IN IF ~askPriceValidCounts.ok THEN Fail ELSE
     LET bidPriceValidCounts == ReadBytes(askPriceValidCounts.rest, 5) IN IF ~bidPriceValidCounts.ok THEN Fail ELSE
@@ -2483,66 +1538,7 @@ DecodeDerivativesOrderFilledPlusQuoteTenLevelsMessage(bytes) ==
          finalAskBidTypeCode              |-> finalAskBidTypeCode.value,
          upperLimitOfDynamicPriceRange    |-> upperLimitOfDynamicPriceRange.value,
          lowerLimitOfDynamicPriceRange    |-> lowerLimitOfDynamicPriceRange.value,
-         askLevel1Price                   |-> askLevel1Price.value,
-         bidLevel1Price                   |-> bidLevel1Price.value,
-         askLevel1Volume                  |-> askLevel1Volume.value,
-         bidLevel1Volume                  |-> bidLevel1Volume.value,
-         askLevel1OrderCounts             |-> askLevel1OrderCounts.value,
-         bidLevel1OrderCounts             |-> bidLevel1OrderCounts.value,
-         askLevel2Price                   |-> askLevel2Price.value,
-         bidLevel2Price                   |-> bidLevel2Price.value,
-         askLevel2Volume                  |-> askLevel2Volume.value,
-         bidLevel2Volume                  |-> bidLevel2Volume.value,
-         askLevel2OrderCounts             |-> askLevel2OrderCounts.value,
-         bidLevel2OrderCounts             |-> bidLevel2OrderCounts.value,
-         askLevel3Price                   |-> askLevel3Price.value,
-         bidLevel3Price                   |-> bidLevel3Price.value,
-         askLevel3Volume                  |-> askLevel3Volume.value,
-         bidLevel3Volume                  |-> bidLevel3Volume.value,
-         askLevel3OrderCounts             |-> askLevel3OrderCounts.value,
-         bidLevel3OrderCounts             |-> bidLevel3OrderCounts.value,
-         askLevel4Price                   |-> askLevel4Price.value,
-         bidLevel4Price                   |-> bidLevel4Price.value,
-         askLevel4Volume                  |-> askLevel4Volume.value,
-         bidLevel4Volume                  |-> bidLevel4Volume.value,
-         askLevel4OrderCounts             |-> askLevel4OrderCounts.value,
-         bidLevel4OrderCounts             |-> bidLevel4OrderCounts.value,
-         askLevel5Price                   |-> askLevel5Price.value,
-         bidLevel5Price                   |-> bidLevel5Price.value,
-         askLevel5Volume                  |-> askLevel5Volume.value,
-         bidLevel5Volume                  |-> bidLevel5Volume.value,
-         askLevel5OrderCounts             |-> askLevel5OrderCounts.value,
-         bidLevel5OrderCounts             |-> bidLevel5OrderCounts.value,
-         askLevel6Price                   |-> askLevel6Price.value,
-         bidLevel6Price                   |-> bidLevel6Price.value,
-         askLevel6Volume                  |-> askLevel6Volume.value,
-         bidLevel6Volume                  |-> bidLevel6Volume.value,
-         askLevel6OrderCounts             |-> askLevel6OrderCounts.value,
-         bidLevel6OrderCounts             |-> bidLevel6OrderCounts.value,
-         askLevel7Price                   |-> askLevel7Price.value,
-         bidLevel7Price                   |-> bidLevel7Price.value,
-         askLevel7Volume                  |-> askLevel7Volume.value,
-         bidLevel7Volume                  |-> bidLevel7Volume.value,
-         askLevel7OrderCounts             |-> askLevel7OrderCounts.value,
-         bidLevel7OrderCounts             |-> bidLevel7OrderCounts.value,
-         askLevel8Price                   |-> askLevel8Price.value,
-         bidLevel8Price                   |-> bidLevel8Price.value,
-         askLevel8Volume                  |-> askLevel8Volume.value,
-         bidLevel8Volume                  |-> bidLevel8Volume.value,
-         askLevel8OrderCounts             |-> askLevel8OrderCounts.value,
-         bidLevel8OrderCounts             |-> bidLevel8OrderCounts.value,
-         askLevel9Price                   |-> askLevel9Price.value,
-         bidLevel9Price                   |-> bidLevel9Price.value,
-         askLevel9Volume                  |-> askLevel9Volume.value,
-         bidLevel9Volume                  |-> bidLevel9Volume.value,
-         askLevel9OrderCounts             |-> askLevel9OrderCounts.value,
-         bidLevel9OrderCounts             |-> bidLevel9OrderCounts.value,
-         askLevel10Price                  |-> askLevel10Price.value,
-         bidLevel10Price                  |-> bidLevel10Price.value,
-         askLevel10Volume                 |-> askLevel10Volume.value,
-         bidLevel10Volume                 |-> bidLevel10Volume.value,
-         askLevel10OrderCounts            |-> askLevel10OrderCounts.value,
-         bidLevel10OrderCounts            |-> bidLevel10OrderCounts.value,
+         tenLevels                        |-> tenLevels.value,
          askTotalVolume                   |-> askTotalVolume.value,
          bidTotalVolume                   |-> bidTotalVolume.value,
          askPriceValidCounts              |-> askPriceValidCounts.value,
@@ -2569,66 +1565,7 @@ ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage ==
       finalAskBidTypeCode              |-> [i \in 1 .. 1 |-> 0],
       upperLimitOfDynamicPriceRange    |-> [i \in 1 .. 9 |-> 0],
       lowerLimitOfDynamicPriceRange    |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel1OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel1OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel2Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel2Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel2OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel2OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel3Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel3Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel3OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel3OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel4Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel4Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel4OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel4OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel5Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel5Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel5OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel5OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel6Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel6Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel6Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel6Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel6OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel6OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel7Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel7Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel7Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel7Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel7OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel7OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel8Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel8Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel8Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel8Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel8OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel8OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel9Price                   |-> [i \in 1 .. 9 |-> 0],
-      bidLevel9Price                   |-> [i \in 1 .. 9 |-> 0],
-      askLevel9Volume                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel9Volume                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel9OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      bidLevel9OrderCounts             |-> [i \in 1 .. 5 |-> 0],
-      askLevel10Price                  |-> [i \in 1 .. 9 |-> 0],
-      bidLevel10Price                  |-> [i \in 1 .. 9 |-> 0],
-      askLevel10Volume                 |-> [i \in 1 .. 9 |-> 0],
-      bidLevel10Volume                 |-> [i \in 1 .. 9 |-> 0],
-      askLevel10OrderCounts            |-> [i \in 1 .. 5 |-> 0],
-      bidLevel10OrderCounts            |-> [i \in 1 .. 5 |-> 0],
+      tenLevels                        |-> [i \in 1 .. 10 |-> ZeroTenLevels3],
       askTotalVolume                   |-> [i \in 1 .. 9 |-> 0],
       bidTotalVolume                   |-> [i \in 1 .. 9 |-> 0],
       askPriceValidCounts              |-> [i \in 1 .. 5 |-> 0],
@@ -2657,66 +1594,7 @@ CheckedDerivativesOrderFilledPlusQuoteTenLevelsMessage ==
         \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
         \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.upperLimitOfDynamicPriceRange = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.lowerLimitOfDynamicPriceRange = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel6Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel6Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel6Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel6Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel6OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel6OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel7Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel7Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel7Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel7Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel7OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel7OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel8Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel8Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel8Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel8Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel8OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel8OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel9Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel9Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel9Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel9Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel9OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel9OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel10Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel10Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel10Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel10Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askLevel10OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidLevel10OrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.tenLevels = one] : one \in SlotsTenLevels3 }
         \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.bidTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.askPriceValidCounts = one] : one \in Sample(5) }
@@ -2724,8 +1602,83 @@ CheckedDerivativesOrderFilledPlusQuoteTenLevelsMessage ==
         \cup { [ZeroDerivativesOrderFilledPlusQuoteTenLevelsMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Derivatives Market Operation Ts Plus Quote Five Levels Message: 354     *)
-(* bytes                                                                   *)
+(* Five Levels: 46 bytes                                                   *)
+(***************************************************************************)
+
+FiveLevels4 ==
+    [ askPrice       : Sample(9),
+      bidPrice       : Sample(9),
+      askVolume      : Sample(9),
+      bidVolume      : Sample(9),
+      askOrderCounts : Sample(5),
+      bidOrderCounts : Sample(5) ]
+
+EncodeFiveLevels4(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+        \o message.askOrderCounts
+        \o message.bidOrderCounts
+
+DecodeFiveLevels4(bytes) ==
+    LET askPrice == ReadBytes(bytes, 9) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 9) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 9) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 9) IN IF ~bidVolume.ok THEN Fail ELSE
+    LET askOrderCounts == ReadBytes(bidVolume.rest, 5) IN IF ~askOrderCounts.ok THEN Fail ELSE
+    LET bidOrderCounts == ReadBytes(askOrderCounts.rest, 5) IN IF ~bidOrderCounts.ok THEN Fail ELSE
+    Ok([ askPrice       |-> askPrice.value,
+         bidPrice       |-> bidPrice.value,
+         askVolume      |-> askVolume.value,
+         bidVolume      |-> bidVolume.value,
+         askOrderCounts |-> askOrderCounts.value,
+         bidOrderCounts |-> bidOrderCounts.value ], bidOrderCounts.rest)
+
+ZeroFiveLevels4 ==
+    [ askPrice       |-> [i \in 1 .. 9 |-> 0],
+      bidPrice       |-> [i \in 1 .. 9 |-> 0],
+      askVolume      |-> [i \in 1 .. 9 |-> 0],
+      bidVolume      |-> [i \in 1 .. 9 |-> 0],
+      askOrderCounts |-> [i \in 1 .. 5 |-> 0],
+      bidOrderCounts |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Five Levels at zero, then each field in turn at the values it is checked at *)
+CheckedFiveLevels4 ==
+    { ZeroFiveLevels4 }
+        \cup { [ZeroFiveLevels4 EXCEPT !.askPrice = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels4 EXCEPT !.bidPrice = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels4 EXCEPT !.askVolume = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels4 EXCEPT !.bidVolume = one] : one \in Sample(9) }
+        \cup { [ZeroFiveLevels4 EXCEPT !.askOrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroFiveLevels4 EXCEPT !.bidOrderCounts = one] : one \in Sample(5) }
+
+(* A run of Five Levels, written one after another *)
+RECURSIVE EncodeFiveLevels4List(_)
+EncodeFiveLevels4List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeFiveLevels4(Head(messages)) \o EncodeFiveLevels4List(Tail(messages))
+
+(* As many Five Levels as the field that counts them says *)
+RECURSIVE ReadFiveLevels4List(_, _)
+ReadFiveLevels4List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeFiveLevels4(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadFiveLevels4List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Five Levels of each kind, for the lists that carry them *)
+OneFiveLevels4 == { ZeroFiveLevels4 }
+
+(* The 5 slots a run of Five Levels is written as, whatever the field beside it says are in use *)
+SlotsFiveLevels4 == { [i \in 1 .. 5 |-> one] : one \in OneFiveLevels4 }
+
+(***************************************************************************)
+(* Derivatives Market Operation Ts Plus Quote Five Levels Message          *)
 (***************************************************************************)
 
 DerivativesMarketOperationTsPlusQuoteFiveLevelsMessage ==
@@ -2740,36 +1693,7 @@ DerivativesMarketOperationTsPlusQuoteFiveLevelsMessage ==
       boardEventGroupCode           : Sample(5),
       upperLimitOfDynamicPriceRange : Sample(9),
       lowerLimitOfDynamicPriceRange : Sample(9),
-      askLevel1Price                : Sample(9),
-      bidLevel1Price                : Sample(9),
-      askLevel1Volume               : Sample(9),
-      bidLevel1Volume               : Sample(9),
-      askLevel1OrderCounts          : Sample(5),
-      bidLevel1OrderCounts          : Sample(5),
-      askLevel2Price                : Sample(9),
-      bidLevel2Price                : Sample(9),
-      askLevel2Volume               : Sample(9),
-      bidLevel2Volume               : Sample(9),
-      askLevel2OrderCounts          : Sample(5),
-      bidLevel2OrderCounts          : Sample(5),
-      askLevel3Price                : Sample(9),
-      bidLevel3Price                : Sample(9),
-      askLevel3Volume               : Sample(9),
-      bidLevel3Volume               : Sample(9),
-      askLevel3OrderCounts          : Sample(5),
-      bidLevel3OrderCounts          : Sample(5),
-      askLevel4Price                : Sample(9),
-      bidLevel4Price                : Sample(9),
-      askLevel4Volume               : Sample(9),
-      bidLevel4Volume               : Sample(9),
-      askLevel4OrderCounts          : Sample(5),
-      bidLevel4OrderCounts          : Sample(5),
-      askLevel5Price                : Sample(9),
-      bidLevel5Price                : Sample(9),
-      askLevel5Volume               : Sample(9),
-      bidLevel5Volume               : Sample(9),
-      askLevel5OrderCounts          : Sample(5),
-      bidLevel5OrderCounts          : Sample(5),
+      fiveLevels                    : SlotsFiveLevels4,
       askTotalVolume                : Sample(9),
       bidTotalVolume                : Sample(9),
       askPriceValidCounts           : Sample(5),
@@ -2790,36 +1714,7 @@ EncodeDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage(message) ==
         \o message.boardEventGroupCode
         \o message.upperLimitOfDynamicPriceRange
         \o message.lowerLimitOfDynamicPriceRange
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.askLevel1OrderCounts
-        \o message.bidLevel1OrderCounts
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.askLevel2OrderCounts
-        \o message.bidLevel2OrderCounts
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.askLevel3OrderCounts
-        \o message.bidLevel3OrderCounts
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.askLevel4OrderCounts
-        \o message.bidLevel4OrderCounts
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.askLevel5OrderCounts
-        \o message.bidLevel5OrderCounts
+        \o EncodeFiveLevels4List(message.fiveLevels)
         \o message.askTotalVolume
         \o message.bidTotalVolume
         \o message.askPriceValidCounts
@@ -2840,37 +1735,8 @@ DecodeDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage(bytes) ==
     LET boardEventGroupCode == ReadBytes(startTimeOfABoardEvent.rest, 5) IN IF ~boardEventGroupCode.ok THEN Fail ELSE
     LET upperLimitOfDynamicPriceRange == ReadBytes(boardEventGroupCode.rest, 9) IN IF ~upperLimitOfDynamicPriceRange.ok THEN Fail ELSE
     LET lowerLimitOfDynamicPriceRange == ReadBytes(upperLimitOfDynamicPriceRange.rest, 9) IN IF ~lowerLimitOfDynamicPriceRange.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(lowerLimitOfDynamicPriceRange.rest, 9) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 9) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 9) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 9) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel1OrderCounts == ReadBytes(bidLevel1Volume.rest, 5) IN IF ~askLevel1OrderCounts.ok THEN Fail ELSE
-    LET bidLevel1OrderCounts == ReadBytes(askLevel1OrderCounts.rest, 5) IN IF ~bidLevel1OrderCounts.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(bidLevel1OrderCounts.rest, 9) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 9) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 9) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 9) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel2OrderCounts == ReadBytes(bidLevel2Volume.rest, 5) IN IF ~askLevel2OrderCounts.ok THEN Fail ELSE
-    LET bidLevel2OrderCounts == ReadBytes(askLevel2OrderCounts.rest, 5) IN IF ~bidLevel2OrderCounts.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(bidLevel2OrderCounts.rest, 9) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 9) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 9) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 9) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel3OrderCounts == ReadBytes(bidLevel3Volume.rest, 5) IN IF ~askLevel3OrderCounts.ok THEN Fail ELSE
-    LET bidLevel3OrderCounts == ReadBytes(askLevel3OrderCounts.rest, 5) IN IF ~bidLevel3OrderCounts.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(bidLevel3OrderCounts.rest, 9) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 9) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 9) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 9) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel4OrderCounts == ReadBytes(bidLevel4Volume.rest, 5) IN IF ~askLevel4OrderCounts.ok THEN Fail ELSE
-    LET bidLevel4OrderCounts == ReadBytes(askLevel4OrderCounts.rest, 5) IN IF ~bidLevel4OrderCounts.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(bidLevel4OrderCounts.rest, 9) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 9) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 9) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 9) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel5OrderCounts == ReadBytes(bidLevel5Volume.rest, 5) IN IF ~askLevel5OrderCounts.ok THEN Fail ELSE
-    LET bidLevel5OrderCounts == ReadBytes(askLevel5OrderCounts.rest, 5) IN IF ~bidLevel5OrderCounts.ok THEN Fail ELSE
-    LET askTotalVolume == ReadBytes(bidLevel5OrderCounts.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
+    LET fiveLevels == ReadFiveLevels4List(lowerLimitOfDynamicPriceRange.rest, 5) IN IF ~fiveLevels.ok THEN Fail ELSE
+    LET askTotalVolume == ReadBytes(fiveLevels.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
     LET bidTotalVolume == ReadBytes(askTotalVolume.rest, 9) IN IF ~bidTotalVolume.ok THEN Fail ELSE
     LET askPriceValidCounts == ReadBytes(bidTotalVolume.rest, 5) IN IF ~askPriceValidCounts.ok THEN Fail ELSE
     LET bidPriceValidCounts == ReadBytes(askPriceValidCounts.rest, 5) IN IF ~bidPriceValidCounts.ok THEN Fail ELSE
@@ -2888,36 +1754,7 @@ DecodeDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage(bytes) ==
          boardEventGroupCode           |-> boardEventGroupCode.value,
          upperLimitOfDynamicPriceRange |-> upperLimitOfDynamicPriceRange.value,
          lowerLimitOfDynamicPriceRange |-> lowerLimitOfDynamicPriceRange.value,
-         askLevel1Price                |-> askLevel1Price.value,
-         bidLevel1Price                |-> bidLevel1Price.value,
-         askLevel1Volume               |-> askLevel1Volume.value,
-         bidLevel1Volume               |-> bidLevel1Volume.value,
-         askLevel1OrderCounts          |-> askLevel1OrderCounts.value,
-         bidLevel1OrderCounts          |-> bidLevel1OrderCounts.value,
-         askLevel2Price                |-> askLevel2Price.value,
-         bidLevel2Price                |-> bidLevel2Price.value,
-         askLevel2Volume               |-> askLevel2Volume.value,
-         bidLevel2Volume               |-> bidLevel2Volume.value,
-         askLevel2OrderCounts          |-> askLevel2OrderCounts.value,
-         bidLevel2OrderCounts          |-> bidLevel2OrderCounts.value,
-         askLevel3Price                |-> askLevel3Price.value,
-         bidLevel3Price                |-> bidLevel3Price.value,
-         askLevel3Volume               |-> askLevel3Volume.value,
-         bidLevel3Volume               |-> bidLevel3Volume.value,
-         askLevel3OrderCounts          |-> askLevel3OrderCounts.value,
-         bidLevel3OrderCounts          |-> bidLevel3OrderCounts.value,
-         askLevel4Price                |-> askLevel4Price.value,
-         bidLevel4Price                |-> bidLevel4Price.value,
-         askLevel4Volume               |-> askLevel4Volume.value,
-         bidLevel4Volume               |-> bidLevel4Volume.value,
-         askLevel4OrderCounts          |-> askLevel4OrderCounts.value,
-         bidLevel4OrderCounts          |-> bidLevel4OrderCounts.value,
-         askLevel5Price                |-> askLevel5Price.value,
-         bidLevel5Price                |-> bidLevel5Price.value,
-         askLevel5Volume               |-> askLevel5Volume.value,
-         bidLevel5Volume               |-> bidLevel5Volume.value,
-         askLevel5OrderCounts          |-> askLevel5OrderCounts.value,
-         bidLevel5OrderCounts          |-> bidLevel5OrderCounts.value,
+         fiveLevels                    |-> fiveLevels.value,
          askTotalVolume                |-> askTotalVolume.value,
          bidTotalVolume                |-> bidTotalVolume.value,
          askPriceValidCounts           |-> askPriceValidCounts.value,
@@ -2938,36 +1775,7 @@ ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage ==
       boardEventGroupCode           |-> [i \in 1 .. 5 |-> 0],
       upperLimitOfDynamicPriceRange |-> [i \in 1 .. 9 |-> 0],
       lowerLimitOfDynamicPriceRange |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel1OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel1OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel2Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel2Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel2OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel2OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel3Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel3Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel3OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel3OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel4Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel4Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel4OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel4OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel5Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel5Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel5OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel5OrderCounts          |-> [i \in 1 .. 5 |-> 0],
+      fiveLevels                    |-> [i \in 1 .. 5 |-> ZeroFiveLevels4],
       askTotalVolume                |-> [i \in 1 .. 9 |-> 0],
       bidTotalVolume                |-> [i \in 1 .. 9 |-> 0],
       askPriceValidCounts           |-> [i \in 1 .. 5 |-> 0],
@@ -2990,36 +1798,7 @@ CheckedDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage ==
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.boardEventGroupCode = one] : one \in Sample(5) }
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.upperLimitOfDynamicPriceRange = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.lowerLimitOfDynamicPriceRange = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidLevel5OrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.fiveLevels = one] : one \in SlotsFiveLevels4 }
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.bidTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.askPriceValidCounts = one] : one \in Sample(5) }
@@ -3029,8 +1808,83 @@ CheckedDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage ==
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Derivatives Market Operation Ts Plus Quote Ten Levels Message: 584      *)
-(* bytes                                                                   *)
+(* Ten Levels: 46 bytes                                                    *)
+(***************************************************************************)
+
+TenLevels4 ==
+    [ askPrice       : Sample(9),
+      bidPrice       : Sample(9),
+      askVolume      : Sample(9),
+      bidVolume      : Sample(9),
+      askOrderCounts : Sample(5),
+      bidOrderCounts : Sample(5) ]
+
+EncodeTenLevels4(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+        \o message.askOrderCounts
+        \o message.bidOrderCounts
+
+DecodeTenLevels4(bytes) ==
+    LET askPrice == ReadBytes(bytes, 9) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 9) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 9) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 9) IN IF ~bidVolume.ok THEN Fail ELSE
+    LET askOrderCounts == ReadBytes(bidVolume.rest, 5) IN IF ~askOrderCounts.ok THEN Fail ELSE
+    LET bidOrderCounts == ReadBytes(askOrderCounts.rest, 5) IN IF ~bidOrderCounts.ok THEN Fail ELSE
+    Ok([ askPrice       |-> askPrice.value,
+         bidPrice       |-> bidPrice.value,
+         askVolume      |-> askVolume.value,
+         bidVolume      |-> bidVolume.value,
+         askOrderCounts |-> askOrderCounts.value,
+         bidOrderCounts |-> bidOrderCounts.value ], bidOrderCounts.rest)
+
+ZeroTenLevels4 ==
+    [ askPrice       |-> [i \in 1 .. 9 |-> 0],
+      bidPrice       |-> [i \in 1 .. 9 |-> 0],
+      askVolume      |-> [i \in 1 .. 9 |-> 0],
+      bidVolume      |-> [i \in 1 .. 9 |-> 0],
+      askOrderCounts |-> [i \in 1 .. 5 |-> 0],
+      bidOrderCounts |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Ten Levels at zero, then each field in turn at the values it is checked at *)
+CheckedTenLevels4 ==
+    { ZeroTenLevels4 }
+        \cup { [ZeroTenLevels4 EXCEPT !.askPrice = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels4 EXCEPT !.bidPrice = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels4 EXCEPT !.askVolume = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels4 EXCEPT !.bidVolume = one] : one \in Sample(9) }
+        \cup { [ZeroTenLevels4 EXCEPT !.askOrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroTenLevels4 EXCEPT !.bidOrderCounts = one] : one \in Sample(5) }
+
+(* A run of Ten Levels, written one after another *)
+RECURSIVE EncodeTenLevels4List(_)
+EncodeTenLevels4List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeTenLevels4(Head(messages)) \o EncodeTenLevels4List(Tail(messages))
+
+(* As many Ten Levels as the field that counts them says *)
+RECURSIVE ReadTenLevels4List(_, _)
+ReadTenLevels4List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeTenLevels4(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadTenLevels4List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Ten Levels of each kind, for the lists that carry them *)
+OneTenLevels4 == { ZeroTenLevels4 }
+
+(* The 10 slots a run of Ten Levels is written as, whatever the field beside it says are in use *)
+SlotsTenLevels4 == { [i \in 1 .. 10 |-> one] : one \in OneTenLevels4 }
+
+(***************************************************************************)
+(* Derivatives Market Operation Ts Plus Quote Ten Levels Message           *)
 (***************************************************************************)
 
 DerivativesMarketOperationTsPlusQuoteTenLevelsMessage ==
@@ -3045,66 +1899,7 @@ DerivativesMarketOperationTsPlusQuoteTenLevelsMessage ==
       boardEventGroupCode           : Sample(5),
       upperLimitOfDynamicPriceRange : Sample(9),
       lowerLimitOfDynamicPriceRange : Sample(9),
-      askLevel1Price                : Sample(9),
-      bidLevel1Price                : Sample(9),
-      askLevel1Volume               : Sample(9),
-      bidLevel1Volume               : Sample(9),
-      askLevel1OrderCounts          : Sample(5),
-      bidLevel1OrderCounts          : Sample(5),
-      askLevel2Price                : Sample(9),
-      bidLevel2Price                : Sample(9),
-      askLevel2Volume               : Sample(9),
-      bidLevel2Volume               : Sample(9),
-      askLevel2OrderCounts          : Sample(5),
-      bidLevel2OrderCounts          : Sample(5),
-      askLevel3Price                : Sample(9),
-      bidLevel3Price                : Sample(9),
-      askLevel3Volume               : Sample(9),
-      bidLevel3Volume               : Sample(9),
-      askLevel3OrderCounts          : Sample(5),
-      bidLevel3OrderCounts          : Sample(5),
-      askLevel4Price                : Sample(9),
-      bidLevel4Price                : Sample(9),
-      askLevel4Volume               : Sample(9),
-      bidLevel4Volume               : Sample(9),
-      askLevel4OrderCounts          : Sample(5),
-      bidLevel4OrderCounts          : Sample(5),
-      askLevel5Price                : Sample(9),
-      bidLevel5Price                : Sample(9),
-      askLevel5Volume               : Sample(9),
-      bidLevel5Volume               : Sample(9),
-      askLevel5OrderCounts          : Sample(5),
-      bidLevel5OrderCounts          : Sample(5),
-      askLevel6Price                : Sample(9),
-      bidLevel6Price                : Sample(9),
-      askLevel6Volume               : Sample(9),
-      bidLevel6Volume               : Sample(9),
-      askLevel6OrderCounts          : Sample(5),
-      bidLevel6OrderCounts          : Sample(5),
-      askLevel7Price                : Sample(9),
-      bidLevel7Price                : Sample(9),
-      askLevel7Volume               : Sample(9),
-      bidLevel7Volume               : Sample(9),
-      askLevel7OrderCounts          : Sample(5),
-      bidLevel7OrderCounts          : Sample(5),
-      askLevel8Price                : Sample(9),
-      bidLevel8Price                : Sample(9),
-      askLevel8Volume               : Sample(9),
-      bidLevel8Volume               : Sample(9),
-      askLevel8OrderCounts          : Sample(5),
-      bidLevel8OrderCounts          : Sample(5),
-      askLevel9Price                : Sample(9),
-      bidLevel9Price                : Sample(9),
-      askLevel9Volume               : Sample(9),
-      bidLevel9Volume               : Sample(9),
-      askLevel9OrderCounts          : Sample(5),
-      bidLevel9OrderCounts          : Sample(5),
-      askLevel10Price               : Sample(9),
-      bidLevel10Price               : Sample(9),
-      askLevel10Volume              : Sample(9),
-      bidLevel10Volume              : Sample(9),
-      askLevel10OrderCounts         : Sample(5),
-      bidLevel10OrderCounts         : Sample(5),
+      tenLevels                     : SlotsTenLevels4,
       askTotalVolume                : Sample(9),
       bidTotalVolume                : Sample(9),
       askPriceValidCounts           : Sample(5),
@@ -3125,66 +1920,7 @@ EncodeDerivativesMarketOperationTsPlusQuoteTenLevelsMessage(message) ==
         \o message.boardEventGroupCode
         \o message.upperLimitOfDynamicPriceRange
         \o message.lowerLimitOfDynamicPriceRange
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.askLevel1OrderCounts
-        \o message.bidLevel1OrderCounts
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.askLevel2OrderCounts
-        \o message.bidLevel2OrderCounts
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.askLevel3OrderCounts
-        \o message.bidLevel3OrderCounts
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.askLevel4OrderCounts
-        \o message.bidLevel4OrderCounts
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.askLevel5OrderCounts
-        \o message.bidLevel5OrderCounts
-        \o message.askLevel6Price
-        \o message.bidLevel6Price
-        \o message.askLevel6Volume
-        \o message.bidLevel6Volume
-        \o message.askLevel6OrderCounts
-        \o message.bidLevel6OrderCounts
-        \o message.askLevel7Price
-        \o message.bidLevel7Price
-        \o message.askLevel7Volume
-        \o message.bidLevel7Volume
-        \o message.askLevel7OrderCounts
-        \o message.bidLevel7OrderCounts
-        \o message.askLevel8Price
-        \o message.bidLevel8Price
-        \o message.askLevel8Volume
-        \o message.bidLevel8Volume
-        \o message.askLevel8OrderCounts
-        \o message.bidLevel8OrderCounts
-        \o message.askLevel9Price
-        \o message.bidLevel9Price
-        \o message.askLevel9Volume
-        \o message.bidLevel9Volume
-        \o message.askLevel9OrderCounts
-        \o message.bidLevel9OrderCounts
-        \o message.askLevel10Price
-        \o message.bidLevel10Price
-        \o message.askLevel10Volume
-        \o message.bidLevel10Volume
-        \o message.askLevel10OrderCounts
-        \o message.bidLevel10OrderCounts
+        \o EncodeTenLevels4List(message.tenLevels)
         \o message.askTotalVolume
         \o message.bidTotalVolume
         \o message.askPriceValidCounts
@@ -3205,67 +1941,8 @@ DecodeDerivativesMarketOperationTsPlusQuoteTenLevelsMessage(bytes) ==
     LET boardEventGroupCode == ReadBytes(startTimeOfABoardEvent.rest, 5) IN IF ~boardEventGroupCode.ok THEN Fail ELSE
     LET upperLimitOfDynamicPriceRange == ReadBytes(boardEventGroupCode.rest, 9) IN IF ~upperLimitOfDynamicPriceRange.ok THEN Fail ELSE
     LET lowerLimitOfDynamicPriceRange == ReadBytes(upperLimitOfDynamicPriceRange.rest, 9) IN IF ~lowerLimitOfDynamicPriceRange.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(lowerLimitOfDynamicPriceRange.rest, 9) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 9) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 9) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 9) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel1OrderCounts == ReadBytes(bidLevel1Volume.rest, 5) IN IF ~askLevel1OrderCounts.ok THEN Fail ELSE
-    LET bidLevel1OrderCounts == ReadBytes(askLevel1OrderCounts.rest, 5) IN IF ~bidLevel1OrderCounts.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(bidLevel1OrderCounts.rest, 9) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 9) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 9) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 9) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel2OrderCounts == ReadBytes(bidLevel2Volume.rest, 5) IN IF ~askLevel2OrderCounts.ok THEN Fail ELSE
-    LET bidLevel2OrderCounts == ReadBytes(askLevel2OrderCounts.rest, 5) IN IF ~bidLevel2OrderCounts.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(bidLevel2OrderCounts.rest, 9) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 9) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 9) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 9) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel3OrderCounts == ReadBytes(bidLevel3Volume.rest, 5) IN IF ~askLevel3OrderCounts.ok THEN Fail ELSE
-    LET bidLevel3OrderCounts == ReadBytes(askLevel3OrderCounts.rest, 5) IN IF ~bidLevel3OrderCounts.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(bidLevel3OrderCounts.rest, 9) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 9) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 9) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 9) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel4OrderCounts == ReadBytes(bidLevel4Volume.rest, 5) IN IF ~askLevel4OrderCounts.ok THEN Fail ELSE
-    LET bidLevel4OrderCounts == ReadBytes(askLevel4OrderCounts.rest, 5) IN IF ~bidLevel4OrderCounts.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(bidLevel4OrderCounts.rest, 9) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 9) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 9) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 9) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel5OrderCounts == ReadBytes(bidLevel5Volume.rest, 5) IN IF ~askLevel5OrderCounts.ok THEN Fail ELSE
-    LET bidLevel5OrderCounts == ReadBytes(askLevel5OrderCounts.rest, 5) IN IF ~bidLevel5OrderCounts.ok THEN Fail ELSE
-    LET askLevel6Price == ReadBytes(bidLevel5OrderCounts.rest, 9) IN IF ~askLevel6Price.ok THEN Fail ELSE
-    LET bidLevel6Price == ReadBytes(askLevel6Price.rest, 9) IN IF ~bidLevel6Price.ok THEN Fail ELSE
-    LET askLevel6Volume == ReadBytes(bidLevel6Price.rest, 9) IN IF ~askLevel6Volume.ok THEN Fail ELSE
-    LET bidLevel6Volume == ReadBytes(askLevel6Volume.rest, 9) IN IF ~bidLevel6Volume.ok THEN Fail ELSE
-    LET askLevel6OrderCounts == ReadBytes(bidLevel6Volume.rest, 5) IN IF ~askLevel6OrderCounts.ok THEN Fail ELSE
-    LET bidLevel6OrderCounts == ReadBytes(askLevel6OrderCounts.rest, 5) IN IF ~bidLevel6OrderCounts.ok THEN Fail ELSE
-    LET askLevel7Price == ReadBytes(bidLevel6OrderCounts.rest, 9) IN IF ~askLevel7Price.ok THEN Fail ELSE
-    LET bidLevel7Price == ReadBytes(askLevel7Price.rest, 9) IN IF ~bidLevel7Price.ok THEN Fail ELSE
-    LET askLevel7Volume == ReadBytes(bidLevel7Price.rest, 9) IN IF ~askLevel7Volume.ok THEN Fail ELSE
-    LET bidLevel7Volume == ReadBytes(askLevel7Volume.rest, 9) IN IF ~bidLevel7Volume.ok THEN Fail ELSE
-    LET askLevel7OrderCounts == ReadBytes(bidLevel7Volume.rest, 5) IN IF ~askLevel7OrderCounts.ok THEN Fail ELSE
-    LET bidLevel7OrderCounts == ReadBytes(askLevel7OrderCounts.rest, 5) IN IF ~bidLevel7OrderCounts.ok THEN Fail ELSE
-    LET askLevel8Price == ReadBytes(bidLevel7OrderCounts.rest, 9) IN IF ~askLevel8Price.ok THEN Fail ELSE
-    LET bidLevel8Price == ReadBytes(askLevel8Price.rest, 9) IN IF ~bidLevel8Price.ok THEN Fail ELSE
-    LET askLevel8Volume == ReadBytes(bidLevel8Price.rest, 9) IN IF ~askLevel8Volume.ok THEN Fail ELSE
-    LET bidLevel8Volume == ReadBytes(askLevel8Volume.rest, 9) IN IF ~bidLevel8Volume.ok THEN Fail ELSE
-    LET askLevel8OrderCounts == ReadBytes(bidLevel8Volume.rest, 5) IN IF ~askLevel8OrderCounts.ok THEN Fail ELSE
-    LET bidLevel8OrderCounts == ReadBytes(askLevel8OrderCounts.rest, 5) IN IF ~bidLevel8OrderCounts.ok THEN Fail ELSE
-    LET askLevel9Price == ReadBytes(bidLevel8OrderCounts.rest, 9) IN IF ~askLevel9Price.ok THEN Fail ELSE
-    LET bidLevel9Price == ReadBytes(askLevel9Price.rest, 9) IN IF ~bidLevel9Price.ok THEN Fail ELSE
-    LET askLevel9Volume == ReadBytes(bidLevel9Price.rest, 9) IN IF ~askLevel9Volume.ok THEN Fail ELSE
-    LET bidLevel9Volume == ReadBytes(askLevel9Volume.rest, 9) IN IF ~bidLevel9Volume.ok THEN Fail ELSE
-    LET askLevel9OrderCounts == ReadBytes(bidLevel9Volume.rest, 5) IN IF ~askLevel9OrderCounts.ok THEN Fail ELSE
-    LET bidLevel9OrderCounts == ReadBytes(askLevel9OrderCounts.rest, 5) IN IF ~bidLevel9OrderCounts.ok THEN Fail ELSE
-    LET askLevel10Price == ReadBytes(bidLevel9OrderCounts.rest, 9) IN IF ~askLevel10Price.ok THEN Fail ELSE
-    LET bidLevel10Price == ReadBytes(askLevel10Price.rest, 9) IN IF ~bidLevel10Price.ok THEN Fail ELSE
-    LET askLevel10Volume == ReadBytes(bidLevel10Price.rest, 9) IN IF ~askLevel10Volume.ok THEN Fail ELSE
-    LET bidLevel10Volume == ReadBytes(askLevel10Volume.rest, 9) IN IF ~bidLevel10Volume.ok THEN Fail ELSE
-    LET askLevel10OrderCounts == ReadBytes(bidLevel10Volume.rest, 5) IN IF ~askLevel10OrderCounts.ok THEN Fail ELSE
-    LET bidLevel10OrderCounts == ReadBytes(askLevel10OrderCounts.rest, 5) IN IF ~bidLevel10OrderCounts.ok THEN Fail ELSE
-    LET askTotalVolume == ReadBytes(bidLevel10OrderCounts.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
+    LET tenLevels == ReadTenLevels4List(lowerLimitOfDynamicPriceRange.rest, 10) IN IF ~tenLevels.ok THEN Fail ELSE
+    LET askTotalVolume == ReadBytes(tenLevels.rest, 9) IN IF ~askTotalVolume.ok THEN Fail ELSE
     LET bidTotalVolume == ReadBytes(askTotalVolume.rest, 9) IN IF ~bidTotalVolume.ok THEN Fail ELSE
     LET askPriceValidCounts == ReadBytes(bidTotalVolume.rest, 5) IN IF ~askPriceValidCounts.ok THEN Fail ELSE
     LET bidPriceValidCounts == ReadBytes(askPriceValidCounts.rest, 5) IN IF ~bidPriceValidCounts.ok THEN Fail ELSE
@@ -3283,66 +1960,7 @@ DecodeDerivativesMarketOperationTsPlusQuoteTenLevelsMessage(bytes) ==
          boardEventGroupCode           |-> boardEventGroupCode.value,
          upperLimitOfDynamicPriceRange |-> upperLimitOfDynamicPriceRange.value,
          lowerLimitOfDynamicPriceRange |-> lowerLimitOfDynamicPriceRange.value,
-         askLevel1Price                |-> askLevel1Price.value,
-         bidLevel1Price                |-> bidLevel1Price.value,
-         askLevel1Volume               |-> askLevel1Volume.value,
-         bidLevel1Volume               |-> bidLevel1Volume.value,
-         askLevel1OrderCounts          |-> askLevel1OrderCounts.value,
-         bidLevel1OrderCounts          |-> bidLevel1OrderCounts.value,
-         askLevel2Price                |-> askLevel2Price.value,
-         bidLevel2Price                |-> bidLevel2Price.value,
-         askLevel2Volume               |-> askLevel2Volume.value,
-         bidLevel2Volume               |-> bidLevel2Volume.value,
-         askLevel2OrderCounts          |-> askLevel2OrderCounts.value,
-         bidLevel2OrderCounts          |-> bidLevel2OrderCounts.value,
-         askLevel3Price                |-> askLevel3Price.value,
-         bidLevel3Price                |-> bidLevel3Price.value,
-         askLevel3Volume               |-> askLevel3Volume.value,
-         bidLevel3Volume               |-> bidLevel3Volume.value,
-         askLevel3OrderCounts          |-> askLevel3OrderCounts.value,
-         bidLevel3OrderCounts          |-> bidLevel3OrderCounts.value,
-         askLevel4Price                |-> askLevel4Price.value,
-         bidLevel4Price                |-> bidLevel4Price.value,
-         askLevel4Volume               |-> askLevel4Volume.value,
-         bidLevel4Volume               |-> bidLevel4Volume.value,
-         askLevel4OrderCounts          |-> askLevel4OrderCounts.value,
-         bidLevel4OrderCounts          |-> bidLevel4OrderCounts.value,
-         askLevel5Price                |-> askLevel5Price.value,
-         bidLevel5Price                |-> bidLevel5Price.value,
-         askLevel5Volume               |-> askLevel5Volume.value,
-         bidLevel5Volume               |-> bidLevel5Volume.value,
-         askLevel5OrderCounts          |-> askLevel5OrderCounts.value,
-         bidLevel5OrderCounts          |-> bidLevel5OrderCounts.value,
-         askLevel6Price                |-> askLevel6Price.value,
-         bidLevel6Price                |-> bidLevel6Price.value,
-         askLevel6Volume               |-> askLevel6Volume.value,
-         bidLevel6Volume               |-> bidLevel6Volume.value,
-         askLevel6OrderCounts          |-> askLevel6OrderCounts.value,
-         bidLevel6OrderCounts          |-> bidLevel6OrderCounts.value,
-         askLevel7Price                |-> askLevel7Price.value,
-         bidLevel7Price                |-> bidLevel7Price.value,
-         askLevel7Volume               |-> askLevel7Volume.value,
-         bidLevel7Volume               |-> bidLevel7Volume.value,
-         askLevel7OrderCounts          |-> askLevel7OrderCounts.value,
-         bidLevel7OrderCounts          |-> bidLevel7OrderCounts.value,
-         askLevel8Price                |-> askLevel8Price.value,
-         bidLevel8Price                |-> bidLevel8Price.value,
-         askLevel8Volume               |-> askLevel8Volume.value,
-         bidLevel8Volume               |-> bidLevel8Volume.value,
-         askLevel8OrderCounts          |-> askLevel8OrderCounts.value,
-         bidLevel8OrderCounts          |-> bidLevel8OrderCounts.value,
-         askLevel9Price                |-> askLevel9Price.value,
-         bidLevel9Price                |-> bidLevel9Price.value,
-         askLevel9Volume               |-> askLevel9Volume.value,
-         bidLevel9Volume               |-> bidLevel9Volume.value,
-         askLevel9OrderCounts          |-> askLevel9OrderCounts.value,
-         bidLevel9OrderCounts          |-> bidLevel9OrderCounts.value,
-         askLevel10Price               |-> askLevel10Price.value,
-         bidLevel10Price               |-> bidLevel10Price.value,
-         askLevel10Volume              |-> askLevel10Volume.value,
-         bidLevel10Volume              |-> bidLevel10Volume.value,
-         askLevel10OrderCounts         |-> askLevel10OrderCounts.value,
-         bidLevel10OrderCounts         |-> bidLevel10OrderCounts.value,
+         tenLevels                     |-> tenLevels.value,
          askTotalVolume                |-> askTotalVolume.value,
          bidTotalVolume                |-> bidTotalVolume.value,
          askPriceValidCounts           |-> askPriceValidCounts.value,
@@ -3363,66 +1981,7 @@ ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage ==
       boardEventGroupCode           |-> [i \in 1 .. 5 |-> 0],
       upperLimitOfDynamicPriceRange |-> [i \in 1 .. 9 |-> 0],
       lowerLimitOfDynamicPriceRange |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel1Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel1Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel1OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel1OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel2Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel2Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel2Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel2OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel2OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel3Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel3Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel3Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel3OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel3OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel4Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel4Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel4Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel4OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel4OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel5Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel5Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel5Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel5OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel5OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel6Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel6Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel6Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel6Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel6OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel6OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel7Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel7Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel7Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel7Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel7OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel7OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel8Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel8Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel8Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel8Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel8OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel8OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel9Price                |-> [i \in 1 .. 9 |-> 0],
-      bidLevel9Price                |-> [i \in 1 .. 9 |-> 0],
-      askLevel9Volume               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel9Volume               |-> [i \in 1 .. 9 |-> 0],
-      askLevel9OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      bidLevel9OrderCounts          |-> [i \in 1 .. 5 |-> 0],
-      askLevel10Price               |-> [i \in 1 .. 9 |-> 0],
-      bidLevel10Price               |-> [i \in 1 .. 9 |-> 0],
-      askLevel10Volume              |-> [i \in 1 .. 9 |-> 0],
-      bidLevel10Volume              |-> [i \in 1 .. 9 |-> 0],
-      askLevel10OrderCounts         |-> [i \in 1 .. 5 |-> 0],
-      bidLevel10OrderCounts         |-> [i \in 1 .. 5 |-> 0],
+      tenLevels                     |-> [i \in 1 .. 10 |-> ZeroTenLevels4],
       askTotalVolume                |-> [i \in 1 .. 9 |-> 0],
       bidTotalVolume                |-> [i \in 1 .. 9 |-> 0],
       askPriceValidCounts           |-> [i \in 1 .. 5 |-> 0],
@@ -3445,66 +2004,7 @@ CheckedDerivativesMarketOperationTsPlusQuoteTenLevelsMessage ==
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.boardEventGroupCode = one] : one \in Sample(5) }
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.upperLimitOfDynamicPriceRange = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.lowerLimitOfDynamicPriceRange = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel1OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel2OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel3OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel4OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel5OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel6Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel6Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel6Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel6Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel6OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel6OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel7Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel7Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel7Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel7Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel7OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel7OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel8Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel8Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel8Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel8Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel8OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel8OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel9Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel9Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel9Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel9Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel9OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel9OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel10Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel10Price = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel10Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel10Volume = one] : one \in Sample(9) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askLevel10OrderCounts = one] : one \in Sample(5) }
-        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidLevel10OrderCounts = one] : one \in Sample(5) }
+        \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.tenLevels = one] : one \in SlotsTenLevels4 }
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.bidTotalVolume = one] : one \in Sample(9) }
         \cup { [ZeroDerivativesMarketOperationTsPlusQuoteTenLevelsMessage EXCEPT !.askPriceValidCounts = one] : one \in Sample(5) }
@@ -7644,10 +6144,26 @@ RoundTripPollingDataMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Five Levels decodes back to what was encoded, and leaves nothing over *)
+RoundTripFiveLevels ==
+    \A message \in CheckedFiveLevels :
+        LET read == DecodeFiveLevels(EncodeFiveLevels(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Derivatives Quote Five Levels Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripDerivativesQuoteFiveLevelsMessage ==
     \A message \in CheckedDerivativesQuoteFiveLevelsMessage :
         LET read == DecodeDerivativesQuoteFiveLevelsMessage(EncodeDerivativesQuoteFiveLevelsMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Ten Levels decodes back to what was encoded, and leaves nothing over *)
+RoundTripTenLevels ==
+    \A message \in CheckedTenLevels :
+        LET read == DecodeTenLevels(EncodeTenLevels(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -7660,10 +6176,26 @@ RoundTripDerivativesQuoteTenLevelsMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Five Levels decodes back to what was encoded, and leaves nothing over *)
+RoundTripFiveLevels2 ==
+    \A message \in CheckedFiveLevels2 :
+        LET read == DecodeFiveLevels2(EncodeFiveLevels2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Derivatives Snapshot Five Levels Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripDerivativesSnapshotFiveLevelsMessage ==
     \A message \in CheckedDerivativesSnapshotFiveLevelsMessage :
         LET read == DecodeDerivativesSnapshotFiveLevelsMessage(EncodeDerivativesSnapshotFiveLevelsMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Ten Levels decodes back to what was encoded, and leaves nothing over *)
+RoundTripTenLevels2 ==
+    \A message \in CheckedTenLevels2 :
+        LET read == DecodeTenLevels2(EncodeTenLevels2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -7684,10 +6216,26 @@ RoundTripDerivativesOrderFilledMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Five Levels decodes back to what was encoded, and leaves nothing over *)
+RoundTripFiveLevels3 ==
+    \A message \in CheckedFiveLevels3 :
+        LET read == DecodeFiveLevels3(EncodeFiveLevels3(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Derivatives Order Filled Plus Quote Five Levels Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripDerivativesOrderFilledPlusQuoteFiveLevelsMessage ==
     \A message \in CheckedDerivativesOrderFilledPlusQuoteFiveLevelsMessage :
         LET read == DecodeDerivativesOrderFilledPlusQuoteFiveLevelsMessage(EncodeDerivativesOrderFilledPlusQuoteFiveLevelsMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Ten Levels decodes back to what was encoded, and leaves nothing over *)
+RoundTripTenLevels3 ==
+    \A message \in CheckedTenLevels3 :
+        LET read == DecodeTenLevels3(EncodeTenLevels3(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -7700,10 +6248,26 @@ RoundTripDerivativesOrderFilledPlusQuoteTenLevelsMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Five Levels decodes back to what was encoded, and leaves nothing over *)
+RoundTripFiveLevels4 ==
+    \A message \in CheckedFiveLevels4 :
+        LET read == DecodeFiveLevels4(EncodeFiveLevels4(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Derivatives Market Operation Ts Plus Quote Five Levels Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage ==
     \A message \in CheckedDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage :
         LET read == DecodeDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage(EncodeDerivativesMarketOperationTsPlusQuoteFiveLevelsMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Ten Levels decodes back to what was encoded, and leaves nothing over *)
+RoundTripTenLevels4 ==
+    \A message \in CheckedTenLevels4 :
+        LET read == DecodeTenLevels4(EncodeTenLevels4(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

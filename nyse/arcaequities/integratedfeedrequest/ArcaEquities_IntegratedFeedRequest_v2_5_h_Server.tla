@@ -281,7 +281,7 @@ ServerPacket ==
 EncodeServerPacket(message) ==
     message.pktSize
         \o message.deliveryFlag
-        \o EncodeUIntLE(Len(message.serverMessage), 1)
+        \o EncodeUIntBE(Len(message.serverMessage), 1)
         \o message.seqNum
         \o EncodeSendTime(message.sendTime)
         \o EncodeServerMessageList(message.serverMessage)
@@ -289,7 +289,7 @@ EncodeServerPacket(message) ==
 DecodeServerPacket(bytes) ==
     LET pktSize == ReadBytes(bytes, 2) IN IF ~pktSize.ok THEN Fail ELSE
     LET deliveryFlag == ReadBytes(pktSize.rest, 1) IN IF ~deliveryFlag.ok THEN Fail ELSE
-    LET numberMsgs == ReadUIntLE(deliveryFlag.rest, 1) IN IF ~numberMsgs.ok THEN Fail ELSE
+    LET numberMsgs == ReadUIntBE(deliveryFlag.rest, 1) IN IF ~numberMsgs.ok THEN Fail ELSE
     LET seqNum == ReadBytes(numberMsgs.rest, 4) IN IF ~seqNum.ok THEN Fail ELSE
     LET sendTime == DecodeSendTime(seqNum.rest) IN IF ~sendTime.ok THEN Fail ELSE
     LET serverMessage == ReadServerMessageList(sendTime.rest, numberMsgs.value) IN IF ~serverMessage.ok THEN Fail ELSE

@@ -464,7 +464,7 @@ CheckedKOtcQuoteMessage ==
         \cup { [ZeroKOtcQuoteMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* K Otc Order Filled Message: 247 bytes                                   *)
+(* K Otc Order Filled Message: 245 bytes                                   *)
 (***************************************************************************)
 
 KOtcOrderFilledMessage ==
@@ -472,7 +472,7 @@ KOtcOrderFilledMessage ==
       dataSeqNumber                             : Sample(8),
       tradingNumber                             : Sample(6),
       tradingPrice                              : Sample(9),
-      tradingVolume                             : Sample(12),
+      tradingVolumeShort                        : Sample(10),
       tradingTime                               : Sample(6),
       askQuoteNumber                            : Sample(6),
       bidQuoteNumber                            : Sample(6),
@@ -499,7 +499,7 @@ EncodeKOtcOrderFilledMessage(message) ==
         \o message.dataSeqNumber
         \o message.tradingNumber
         \o message.tradingPrice
-        \o message.tradingVolume
+        \o message.tradingVolumeShort
         \o message.tradingTime
         \o message.askQuoteNumber
         \o message.bidQuoteNumber
@@ -526,8 +526,8 @@ DecodeKOtcOrderFilledMessage(bytes) ==
     LET dataSeqNumber == ReadBytes(isin.rest, 8) IN IF ~dataSeqNumber.ok THEN Fail ELSE
     LET tradingNumber == ReadBytes(dataSeqNumber.rest, 6) IN IF ~tradingNumber.ok THEN Fail ELSE
     LET tradingPrice == ReadBytes(tradingNumber.rest, 9) IN IF ~tradingPrice.ok THEN Fail ELSE
-    LET tradingVolume == ReadBytes(tradingPrice.rest, 12) IN IF ~tradingVolume.ok THEN Fail ELSE
-    LET tradingTime == ReadBytes(tradingVolume.rest, 6) IN IF ~tradingTime.ok THEN Fail ELSE
+    LET tradingVolumeShort == ReadBytes(tradingPrice.rest, 10) IN IF ~tradingVolumeShort.ok THEN Fail ELSE
+    LET tradingTime == ReadBytes(tradingVolumeShort.rest, 6) IN IF ~tradingTime.ok THEN Fail ELSE
     LET askQuoteNumber == ReadBytes(tradingTime.rest, 6) IN IF ~askQuoteNumber.ok THEN Fail ELSE
     LET bidQuoteNumber == ReadBytes(askQuoteNumber.rest, 6) IN IF ~bidQuoteNumber.ok THEN Fail ELSE
     LET highPrice == ReadBytes(bidQuoteNumber.rest, 9) IN IF ~highPrice.ok THEN Fail ELSE
@@ -551,7 +551,7 @@ DecodeKOtcOrderFilledMessage(bytes) ==
          dataSeqNumber                             |-> dataSeqNumber.value,
          tradingNumber                             |-> tradingNumber.value,
          tradingPrice                              |-> tradingPrice.value,
-         tradingVolume                             |-> tradingVolume.value,
+         tradingVolumeShort                        |-> tradingVolumeShort.value,
          tradingTime                               |-> tradingTime.value,
          askQuoteNumber                            |-> askQuoteNumber.value,
          bidQuoteNumber                            |-> bidQuoteNumber.value,
@@ -578,7 +578,7 @@ ZeroKOtcOrderFilledMessage ==
       dataSeqNumber                             |-> [i \in 1 .. 8 |-> 0],
       tradingNumber                             |-> [i \in 1 .. 6 |-> 0],
       tradingPrice                              |-> [i \in 1 .. 9 |-> 0],
-      tradingVolume                             |-> [i \in 1 .. 12 |-> 0],
+      tradingVolumeShort                        |-> [i \in 1 .. 10 |-> 0],
       tradingTime                               |-> [i \in 1 .. 6 |-> 0],
       askQuoteNumber                            |-> [i \in 1 .. 6 |-> 0],
       bidQuoteNumber                            |-> [i \in 1 .. 6 |-> 0],
@@ -607,7 +607,7 @@ CheckedKOtcOrderFilledMessage ==
         \cup { [ZeroKOtcOrderFilledMessage EXCEPT !.dataSeqNumber = one] : one \in Sample(8) }
         \cup { [ZeroKOtcOrderFilledMessage EXCEPT !.tradingNumber = one] : one \in Sample(6) }
         \cup { [ZeroKOtcOrderFilledMessage EXCEPT !.tradingPrice = one] : one \in Sample(9) }
-        \cup { [ZeroKOtcOrderFilledMessage EXCEPT !.tradingVolume = one] : one \in Sample(12) }
+        \cup { [ZeroKOtcOrderFilledMessage EXCEPT !.tradingVolumeShort = one] : one \in Sample(10) }
         \cup { [ZeroKOtcOrderFilledMessage EXCEPT !.tradingTime = one] : one \in Sample(6) }
         \cup { [ZeroKOtcOrderFilledMessage EXCEPT !.askQuoteNumber = one] : one \in Sample(6) }
         \cup { [ZeroKOtcOrderFilledMessage EXCEPT !.bidQuoteNumber = one] : one \in Sample(6) }
@@ -1064,16 +1064,16 @@ CheckedKBondMessage ==
 (***************************************************************************)
 
 MkfIndexMessage ==
-    [ indexId       : Sample(6),
-      isin          : Sample(12),
-      time          : Sample(6),
-      index         : Sample(9),
-      sign          : Sample(1),
-      comparison    : Sample(9),
-      tradingVolume : Sample(12),
-      tradingValue  : Sample(12),
-      filler4       : Sample(4),
-      endKeyword    : Sample(1) ]
+    [ indexId           : Sample(6),
+      isin              : Sample(12),
+      time              : Sample(6),
+      index             : Sample(9),
+      sign              : Sample(1),
+      comparison        : Sample(9),
+      tradingVolumeLong : Sample(12),
+      tradingValue      : Sample(12),
+      filler4           : Sample(4),
+      endKeyword        : Sample(1) ]
 
 EncodeMkfIndexMessage(message) ==
     message.indexId
@@ -1082,7 +1082,7 @@ EncodeMkfIndexMessage(message) ==
         \o message.index
         \o message.sign
         \o message.comparison
-        \o message.tradingVolume
+        \o message.tradingVolumeLong
         \o message.tradingValue
         \o message.filler4
         \o message.endKeyword
@@ -1094,32 +1094,32 @@ DecodeMkfIndexMessage(bytes) ==
     LET index == ReadBytes(time.rest, 9) IN IF ~index.ok THEN Fail ELSE
     LET sign == ReadBytes(index.rest, 1) IN IF ~sign.ok THEN Fail ELSE
     LET comparison == ReadBytes(sign.rest, 9) IN IF ~comparison.ok THEN Fail ELSE
-    LET tradingVolume == ReadBytes(comparison.rest, 12) IN IF ~tradingVolume.ok THEN Fail ELSE
-    LET tradingValue == ReadBytes(tradingVolume.rest, 12) IN IF ~tradingValue.ok THEN Fail ELSE
+    LET tradingVolumeLong == ReadBytes(comparison.rest, 12) IN IF ~tradingVolumeLong.ok THEN Fail ELSE
+    LET tradingValue == ReadBytes(tradingVolumeLong.rest, 12) IN IF ~tradingValue.ok THEN Fail ELSE
     LET filler4 == ReadBytes(tradingValue.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(filler4.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
-    Ok([ indexId       |-> indexId.value,
-         isin          |-> isin.value,
-         time          |-> time.value,
-         index         |-> index.value,
-         sign          |-> sign.value,
-         comparison    |-> comparison.value,
-         tradingVolume |-> tradingVolume.value,
-         tradingValue  |-> tradingValue.value,
-         filler4       |-> filler4.value,
-         endKeyword    |-> endKeyword.value ], endKeyword.rest)
+    Ok([ indexId           |-> indexId.value,
+         isin              |-> isin.value,
+         time              |-> time.value,
+         index             |-> index.value,
+         sign              |-> sign.value,
+         comparison        |-> comparison.value,
+         tradingVolumeLong |-> tradingVolumeLong.value,
+         tradingValue      |-> tradingValue.value,
+         filler4           |-> filler4.value,
+         endKeyword        |-> endKeyword.value ], endKeyword.rest)
 
 ZeroMkfIndexMessage ==
-    [ indexId       |-> [i \in 1 .. 6 |-> 0],
-      isin          |-> [i \in 1 .. 12 |-> 0],
-      time          |-> [i \in 1 .. 6 |-> 0],
-      index         |-> [i \in 1 .. 9 |-> 0],
-      sign          |-> [i \in 1 .. 1 |-> 0],
-      comparison    |-> [i \in 1 .. 9 |-> 0],
-      tradingVolume |-> [i \in 1 .. 12 |-> 0],
-      tradingValue  |-> [i \in 1 .. 12 |-> 0],
-      filler4       |-> [i \in 1 .. 4 |-> 0],
-      endKeyword    |-> [i \in 1 .. 1 |-> 0] ]
+    [ indexId           |-> [i \in 1 .. 6 |-> 0],
+      isin              |-> [i \in 1 .. 12 |-> 0],
+      time              |-> [i \in 1 .. 6 |-> 0],
+      index             |-> [i \in 1 .. 9 |-> 0],
+      sign              |-> [i \in 1 .. 1 |-> 0],
+      comparison        |-> [i \in 1 .. 9 |-> 0],
+      tradingVolumeLong |-> [i \in 1 .. 12 |-> 0],
+      tradingValue      |-> [i \in 1 .. 12 |-> 0],
+      filler4           |-> [i \in 1 .. 4 |-> 0],
+      endKeyword        |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Mkf Index Message at zero, then each field in turn at the values it is checked at *)
 CheckedMkfIndexMessage ==
@@ -1130,7 +1130,7 @@ CheckedMkfIndexMessage ==
         \cup { [ZeroMkfIndexMessage EXCEPT !.index = one] : one \in Sample(9) }
         \cup { [ZeroMkfIndexMessage EXCEPT !.sign = one] : one \in Sample(1) }
         \cup { [ZeroMkfIndexMessage EXCEPT !.comparison = one] : one \in Sample(9) }
-        \cup { [ZeroMkfIndexMessage EXCEPT !.tradingVolume = one] : one \in Sample(12) }
+        \cup { [ZeroMkfIndexMessage EXCEPT !.tradingVolumeLong = one] : one \in Sample(12) }
         \cup { [ZeroMkfIndexMessage EXCEPT !.tradingValue = one] : one \in Sample(12) }
         \cup { [ZeroMkfIndexMessage EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroMkfIndexMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
@@ -1140,16 +1140,16 @@ CheckedMkfIndexMessage ==
 (***************************************************************************)
 
 MkfIndexJpyMessage ==
-    [ indexId       : Sample(6),
-      isin          : Sample(12),
-      time          : Sample(6),
-      index         : Sample(9),
-      sign          : Sample(1),
-      comparison    : Sample(9),
-      tradingVolume : Sample(12),
-      tradingValue  : Sample(12),
-      filler4       : Sample(4),
-      endKeyword    : Sample(1) ]
+    [ indexId           : Sample(6),
+      isin              : Sample(12),
+      time              : Sample(6),
+      index             : Sample(9),
+      sign              : Sample(1),
+      comparison        : Sample(9),
+      tradingVolumeLong : Sample(12),
+      tradingValue      : Sample(12),
+      filler4           : Sample(4),
+      endKeyword        : Sample(1) ]
 
 EncodeMkfIndexJpyMessage(message) ==
     message.indexId
@@ -1158,7 +1158,7 @@ EncodeMkfIndexJpyMessage(message) ==
         \o message.index
         \o message.sign
         \o message.comparison
-        \o message.tradingVolume
+        \o message.tradingVolumeLong
         \o message.tradingValue
         \o message.filler4
         \o message.endKeyword
@@ -1170,32 +1170,32 @@ DecodeMkfIndexJpyMessage(bytes) ==
     LET index == ReadBytes(time.rest, 9) IN IF ~index.ok THEN Fail ELSE
     LET sign == ReadBytes(index.rest, 1) IN IF ~sign.ok THEN Fail ELSE
     LET comparison == ReadBytes(sign.rest, 9) IN IF ~comparison.ok THEN Fail ELSE
-    LET tradingVolume == ReadBytes(comparison.rest, 12) IN IF ~tradingVolume.ok THEN Fail ELSE
-    LET tradingValue == ReadBytes(tradingVolume.rest, 12) IN IF ~tradingValue.ok THEN Fail ELSE
+    LET tradingVolumeLong == ReadBytes(comparison.rest, 12) IN IF ~tradingVolumeLong.ok THEN Fail ELSE
+    LET tradingValue == ReadBytes(tradingVolumeLong.rest, 12) IN IF ~tradingValue.ok THEN Fail ELSE
     LET filler4 == ReadBytes(tradingValue.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(filler4.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
-    Ok([ indexId       |-> indexId.value,
-         isin          |-> isin.value,
-         time          |-> time.value,
-         index         |-> index.value,
-         sign          |-> sign.value,
-         comparison    |-> comparison.value,
-         tradingVolume |-> tradingVolume.value,
-         tradingValue  |-> tradingValue.value,
-         filler4       |-> filler4.value,
-         endKeyword    |-> endKeyword.value ], endKeyword.rest)
+    Ok([ indexId           |-> indexId.value,
+         isin              |-> isin.value,
+         time              |-> time.value,
+         index             |-> index.value,
+         sign              |-> sign.value,
+         comparison        |-> comparison.value,
+         tradingVolumeLong |-> tradingVolumeLong.value,
+         tradingValue      |-> tradingValue.value,
+         filler4           |-> filler4.value,
+         endKeyword        |-> endKeyword.value ], endKeyword.rest)
 
 ZeroMkfIndexJpyMessage ==
-    [ indexId       |-> [i \in 1 .. 6 |-> 0],
-      isin          |-> [i \in 1 .. 12 |-> 0],
-      time          |-> [i \in 1 .. 6 |-> 0],
-      index         |-> [i \in 1 .. 9 |-> 0],
-      sign          |-> [i \in 1 .. 1 |-> 0],
-      comparison    |-> [i \in 1 .. 9 |-> 0],
-      tradingVolume |-> [i \in 1 .. 12 |-> 0],
-      tradingValue  |-> [i \in 1 .. 12 |-> 0],
-      filler4       |-> [i \in 1 .. 4 |-> 0],
-      endKeyword    |-> [i \in 1 .. 1 |-> 0] ]
+    [ indexId           |-> [i \in 1 .. 6 |-> 0],
+      isin              |-> [i \in 1 .. 12 |-> 0],
+      time              |-> [i \in 1 .. 6 |-> 0],
+      index             |-> [i \in 1 .. 9 |-> 0],
+      sign              |-> [i \in 1 .. 1 |-> 0],
+      comparison        |-> [i \in 1 .. 9 |-> 0],
+      tradingVolumeLong |-> [i \in 1 .. 12 |-> 0],
+      tradingValue      |-> [i \in 1 .. 12 |-> 0],
+      filler4           |-> [i \in 1 .. 4 |-> 0],
+      endKeyword        |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Mkf Index Jpy Message at zero, then each field in turn at the values it is checked at *)
 CheckedMkfIndexJpyMessage ==
@@ -1206,7 +1206,7 @@ CheckedMkfIndexJpyMessage ==
         \cup { [ZeroMkfIndexJpyMessage EXCEPT !.index = one] : one \in Sample(9) }
         \cup { [ZeroMkfIndexJpyMessage EXCEPT !.sign = one] : one \in Sample(1) }
         \cup { [ZeroMkfIndexJpyMessage EXCEPT !.comparison = one] : one \in Sample(9) }
-        \cup { [ZeroMkfIndexJpyMessage EXCEPT !.tradingVolume = one] : one \in Sample(12) }
+        \cup { [ZeroMkfIndexJpyMessage EXCEPT !.tradingVolumeLong = one] : one \in Sample(12) }
         \cup { [ZeroMkfIndexJpyMessage EXCEPT !.tradingValue = one] : one \in Sample(12) }
         \cup { [ZeroMkfIndexJpyMessage EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroMkfIndexJpyMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
@@ -1216,16 +1216,16 @@ CheckedMkfIndexJpyMessage ==
 (***************************************************************************)
 
 WisefnIndexMessage ==
-    [ indexId       : Sample(6),
-      isin          : Sample(12),
-      time          : Sample(6),
-      index         : Sample(9),
-      sign          : Sample(1),
-      comparison    : Sample(9),
-      tradingVolume : Sample(12),
-      tradingValue  : Sample(12),
-      filler4       : Sample(4),
-      endKeyword    : Sample(1) ]
+    [ indexId           : Sample(6),
+      isin              : Sample(12),
+      time              : Sample(6),
+      index             : Sample(9),
+      sign              : Sample(1),
+      comparison        : Sample(9),
+      tradingVolumeLong : Sample(12),
+      tradingValue      : Sample(12),
+      filler4           : Sample(4),
+      endKeyword        : Sample(1) ]
 
 EncodeWisefnIndexMessage(message) ==
     message.indexId
@@ -1234,7 +1234,7 @@ EncodeWisefnIndexMessage(message) ==
         \o message.index
         \o message.sign
         \o message.comparison
-        \o message.tradingVolume
+        \o message.tradingVolumeLong
         \o message.tradingValue
         \o message.filler4
         \o message.endKeyword
@@ -1246,32 +1246,32 @@ DecodeWisefnIndexMessage(bytes) ==
     LET index == ReadBytes(time.rest, 9) IN IF ~index.ok THEN Fail ELSE
     LET sign == ReadBytes(index.rest, 1) IN IF ~sign.ok THEN Fail ELSE
     LET comparison == ReadBytes(sign.rest, 9) IN IF ~comparison.ok THEN Fail ELSE
-    LET tradingVolume == ReadBytes(comparison.rest, 12) IN IF ~tradingVolume.ok THEN Fail ELSE
-    LET tradingValue == ReadBytes(tradingVolume.rest, 12) IN IF ~tradingValue.ok THEN Fail ELSE
+    LET tradingVolumeLong == ReadBytes(comparison.rest, 12) IN IF ~tradingVolumeLong.ok THEN Fail ELSE
+    LET tradingValue == ReadBytes(tradingVolumeLong.rest, 12) IN IF ~tradingValue.ok THEN Fail ELSE
     LET filler4 == ReadBytes(tradingValue.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(filler4.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
-    Ok([ indexId       |-> indexId.value,
-         isin          |-> isin.value,
-         time          |-> time.value,
-         index         |-> index.value,
-         sign          |-> sign.value,
-         comparison    |-> comparison.value,
-         tradingVolume |-> tradingVolume.value,
-         tradingValue  |-> tradingValue.value,
-         filler4       |-> filler4.value,
-         endKeyword    |-> endKeyword.value ], endKeyword.rest)
+    Ok([ indexId           |-> indexId.value,
+         isin              |-> isin.value,
+         time              |-> time.value,
+         index             |-> index.value,
+         sign              |-> sign.value,
+         comparison        |-> comparison.value,
+         tradingVolumeLong |-> tradingVolumeLong.value,
+         tradingValue      |-> tradingValue.value,
+         filler4           |-> filler4.value,
+         endKeyword        |-> endKeyword.value ], endKeyword.rest)
 
 ZeroWisefnIndexMessage ==
-    [ indexId       |-> [i \in 1 .. 6 |-> 0],
-      isin          |-> [i \in 1 .. 12 |-> 0],
-      time          |-> [i \in 1 .. 6 |-> 0],
-      index         |-> [i \in 1 .. 9 |-> 0],
-      sign          |-> [i \in 1 .. 1 |-> 0],
-      comparison    |-> [i \in 1 .. 9 |-> 0],
-      tradingVolume |-> [i \in 1 .. 12 |-> 0],
-      tradingValue  |-> [i \in 1 .. 12 |-> 0],
-      filler4       |-> [i \in 1 .. 4 |-> 0],
-      endKeyword    |-> [i \in 1 .. 1 |-> 0] ]
+    [ indexId           |-> [i \in 1 .. 6 |-> 0],
+      isin              |-> [i \in 1 .. 12 |-> 0],
+      time              |-> [i \in 1 .. 6 |-> 0],
+      index             |-> [i \in 1 .. 9 |-> 0],
+      sign              |-> [i \in 1 .. 1 |-> 0],
+      comparison        |-> [i \in 1 .. 9 |-> 0],
+      tradingVolumeLong |-> [i \in 1 .. 12 |-> 0],
+      tradingValue      |-> [i \in 1 .. 12 |-> 0],
+      filler4           |-> [i \in 1 .. 4 |-> 0],
+      endKeyword        |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Wisefn Index Message at zero, then each field in turn at the values it is checked at *)
 CheckedWisefnIndexMessage ==
@@ -1282,7 +1282,7 @@ CheckedWisefnIndexMessage ==
         \cup { [ZeroWisefnIndexMessage EXCEPT !.index = one] : one \in Sample(9) }
         \cup { [ZeroWisefnIndexMessage EXCEPT !.sign = one] : one \in Sample(1) }
         \cup { [ZeroWisefnIndexMessage EXCEPT !.comparison = one] : one \in Sample(9) }
-        \cup { [ZeroWisefnIndexMessage EXCEPT !.tradingVolume = one] : one \in Sample(12) }
+        \cup { [ZeroWisefnIndexMessage EXCEPT !.tradingVolumeLong = one] : one \in Sample(12) }
         \cup { [ZeroWisefnIndexMessage EXCEPT !.tradingValue = one] : one \in Sample(12) }
         \cup { [ZeroWisefnIndexMessage EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroWisefnIndexMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
@@ -1292,16 +1292,16 @@ CheckedWisefnIndexMessage ==
 (***************************************************************************)
 
 KisIndexMessage ==
-    [ indexId       : Sample(6),
-      isin          : Sample(12),
-      time          : Sample(6),
-      index         : Sample(9),
-      sign          : Sample(1),
-      comparison    : Sample(9),
-      tradingVolume : Sample(12),
-      tradingValue  : Sample(12),
-      filler4       : Sample(4),
-      endKeyword    : Sample(1) ]
+    [ indexId           : Sample(6),
+      isin              : Sample(12),
+      time              : Sample(6),
+      index             : Sample(9),
+      sign              : Sample(1),
+      comparison        : Sample(9),
+      tradingVolumeLong : Sample(12),
+      tradingValue      : Sample(12),
+      filler4           : Sample(4),
+      endKeyword        : Sample(1) ]
 
 EncodeKisIndexMessage(message) ==
     message.indexId
@@ -1310,7 +1310,7 @@ EncodeKisIndexMessage(message) ==
         \o message.index
         \o message.sign
         \o message.comparison
-        \o message.tradingVolume
+        \o message.tradingVolumeLong
         \o message.tradingValue
         \o message.filler4
         \o message.endKeyword
@@ -1322,32 +1322,32 @@ DecodeKisIndexMessage(bytes) ==
     LET index == ReadBytes(time.rest, 9) IN IF ~index.ok THEN Fail ELSE
     LET sign == ReadBytes(index.rest, 1) IN IF ~sign.ok THEN Fail ELSE
     LET comparison == ReadBytes(sign.rest, 9) IN IF ~comparison.ok THEN Fail ELSE
-    LET tradingVolume == ReadBytes(comparison.rest, 12) IN IF ~tradingVolume.ok THEN Fail ELSE
-    LET tradingValue == ReadBytes(tradingVolume.rest, 12) IN IF ~tradingValue.ok THEN Fail ELSE
+    LET tradingVolumeLong == ReadBytes(comparison.rest, 12) IN IF ~tradingVolumeLong.ok THEN Fail ELSE
+    LET tradingValue == ReadBytes(tradingVolumeLong.rest, 12) IN IF ~tradingValue.ok THEN Fail ELSE
     LET filler4 == ReadBytes(tradingValue.rest, 4) IN IF ~filler4.ok THEN Fail ELSE
     LET endKeyword == ReadBytes(filler4.rest, 1) IN IF ~endKeyword.ok THEN Fail ELSE
-    Ok([ indexId       |-> indexId.value,
-         isin          |-> isin.value,
-         time          |-> time.value,
-         index         |-> index.value,
-         sign          |-> sign.value,
-         comparison    |-> comparison.value,
-         tradingVolume |-> tradingVolume.value,
-         tradingValue  |-> tradingValue.value,
-         filler4       |-> filler4.value,
-         endKeyword    |-> endKeyword.value ], endKeyword.rest)
+    Ok([ indexId           |-> indexId.value,
+         isin              |-> isin.value,
+         time              |-> time.value,
+         index             |-> index.value,
+         sign              |-> sign.value,
+         comparison        |-> comparison.value,
+         tradingVolumeLong |-> tradingVolumeLong.value,
+         tradingValue      |-> tradingValue.value,
+         filler4           |-> filler4.value,
+         endKeyword        |-> endKeyword.value ], endKeyword.rest)
 
 ZeroKisIndexMessage ==
-    [ indexId       |-> [i \in 1 .. 6 |-> 0],
-      isin          |-> [i \in 1 .. 12 |-> 0],
-      time          |-> [i \in 1 .. 6 |-> 0],
-      index         |-> [i \in 1 .. 9 |-> 0],
-      sign          |-> [i \in 1 .. 1 |-> 0],
-      comparison    |-> [i \in 1 .. 9 |-> 0],
-      tradingVolume |-> [i \in 1 .. 12 |-> 0],
-      tradingValue  |-> [i \in 1 .. 12 |-> 0],
-      filler4       |-> [i \in 1 .. 4 |-> 0],
-      endKeyword    |-> [i \in 1 .. 1 |-> 0] ]
+    [ indexId           |-> [i \in 1 .. 6 |-> 0],
+      isin              |-> [i \in 1 .. 12 |-> 0],
+      time              |-> [i \in 1 .. 6 |-> 0],
+      index             |-> [i \in 1 .. 9 |-> 0],
+      sign              |-> [i \in 1 .. 1 |-> 0],
+      comparison        |-> [i \in 1 .. 9 |-> 0],
+      tradingVolumeLong |-> [i \in 1 .. 12 |-> 0],
+      tradingValue      |-> [i \in 1 .. 12 |-> 0],
+      filler4           |-> [i \in 1 .. 4 |-> 0],
+      endKeyword        |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Kis Index Message at zero, then each field in turn at the values it is checked at *)
 CheckedKisIndexMessage ==
@@ -1358,7 +1358,7 @@ CheckedKisIndexMessage ==
         \cup { [ZeroKisIndexMessage EXCEPT !.index = one] : one \in Sample(9) }
         \cup { [ZeroKisIndexMessage EXCEPT !.sign = one] : one \in Sample(1) }
         \cup { [ZeroKisIndexMessage EXCEPT !.comparison = one] : one \in Sample(9) }
-        \cup { [ZeroKisIndexMessage EXCEPT !.tradingVolume = one] : one \in Sample(12) }
+        \cup { [ZeroKisIndexMessage EXCEPT !.tradingVolumeLong = one] : one \in Sample(12) }
         \cup { [ZeroKisIndexMessage EXCEPT !.tradingValue = one] : one \in Sample(12) }
         \cup { [ZeroKisIndexMessage EXCEPT !.filler4 = one] : one \in Sample(4) }
         \cup { [ZeroKisIndexMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }

@@ -478,7 +478,7 @@ EncodeComplexInstrumentDefinitionMessage(message) ==
         \o message.listingStatus
         \o message.firstTradeDate
         \o message.reserved64
-        \o EncodeUIntLE(Len(message.instrumentLeg), 1)
+        \o EncodeUIntBE(Len(message.instrumentLeg), 1)
         \o EncodeInstrumentLegList(message.instrumentLeg)
 
 DecodeComplexInstrumentDefinitionMessage(bytes) ==
@@ -506,7 +506,7 @@ DecodeComplexInstrumentDefinitionMessage(bytes) ==
     LET listingStatus == ReadBytes(tradingCollarVariation.rest, 1) IN IF ~listingStatus.ok THEN Fail ELSE
     LET firstTradeDate == ReadBytes(listingStatus.rest, 2) IN IF ~firstTradeDate.ok THEN Fail ELSE
     LET reserved64 == ReadBytes(firstTradeDate.rest, 64) IN IF ~reserved64.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntLE(reserved64.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadUIntBE(reserved64.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET instrumentLeg == ReadInstrumentLegList(numberOfLegs.rest, numberOfLegs.value) IN IF ~instrumentLeg.ok THEN Fail ELSE
     Ok([ timestamp                             |-> timestamp.value,
          instrumentIdFormerlyKnownAsStrategyId |-> instrumentIdFormerlyKnownAsStrategyId.value,
@@ -705,7 +705,7 @@ EncodeComplexInstrumentDefinitionDeprecatedMessage(message) ==
         \o message.tradingCollarVariationType
         \o message.tradingCollarVariation
         \o message.reserved16
-        \o EncodeUIntLE(Len(message.deprecatedInstrumentLeg), 1)
+        \o EncodeUIntBE(Len(message.deprecatedInstrumentLeg), 1)
         \o EncodeDeprecatedInstrumentLegList(message.deprecatedInstrumentLeg)
 
 DecodeComplexInstrumentDefinitionDeprecatedMessage(bytes) ==
@@ -729,7 +729,7 @@ DecodeComplexInstrumentDefinitionDeprecatedMessage(bytes) ==
     LET tradingCollarVariationType == ReadBytes(unitOfMeasureQuantity.rest, 1) IN IF ~tradingCollarVariationType.ok THEN Fail ELSE
     LET tradingCollarVariation == ReadBytes(tradingCollarVariationType.rest, 8) IN IF ~tradingCollarVariation.ok THEN Fail ELSE
     LET reserved16 == ReadBytes(tradingCollarVariation.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntLE(reserved16.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadUIntBE(reserved16.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET deprecatedInstrumentLeg == ReadDeprecatedInstrumentLegList(numberOfLegs.rest, numberOfLegs.value) IN IF ~deprecatedInstrumentLeg.ok THEN Fail ELSE
     Ok([ timestamp                             |-> timestamp.value,
          instrumentIdFormerlyKnownAsStrategyId |-> instrumentIdFormerlyKnownAsStrategyId.value,
@@ -1557,7 +1557,7 @@ EncodeComplexInstrumentDefinitionMessage2(message) ==
         \o message.listingStatus
         \o message.firstTradeDate
         \o message.reserved64
-        \o EncodeUIntLE(Len(message.instrumentLeg), 1)
+        \o EncodeUIntBE(Len(message.instrumentLeg), 1)
         \o EncodeInstrumentLeg2List(message.instrumentLeg)
 
 DecodeComplexInstrumentDefinitionMessage2(bytes) ==
@@ -1585,7 +1585,7 @@ DecodeComplexInstrumentDefinitionMessage2(bytes) ==
     LET listingStatus == ReadBytes(tradingCollarVariation.rest, 1) IN IF ~listingStatus.ok THEN Fail ELSE
     LET firstTradeDate == ReadBytes(listingStatus.rest, 2) IN IF ~firstTradeDate.ok THEN Fail ELSE
     LET reserved64 == ReadBytes(firstTradeDate.rest, 64) IN IF ~reserved64.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntLE(reserved64.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadUIntBE(reserved64.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET instrumentLeg == ReadInstrumentLeg2List(numberOfLegs.rest, numberOfLegs.value) IN IF ~instrumentLeg.ok THEN Fail ELSE
     Ok([ timestamp                             |-> timestamp.value,
          instrumentIdFormerlyKnownAsStrategyId |-> instrumentIdFormerlyKnownAsStrategyId.value,
@@ -1784,7 +1784,7 @@ EncodeComplexInstrumentDefinitionDeprecatedMessage2(message) ==
         \o message.tradingCollarVariationType
         \o message.tradingCollarVariation
         \o message.reserved16
-        \o EncodeUIntLE(Len(message.deprecatedInstrumentLeg), 1)
+        \o EncodeUIntBE(Len(message.deprecatedInstrumentLeg), 1)
         \o EncodeDeprecatedInstrumentLeg2List(message.deprecatedInstrumentLeg)
 
 DecodeComplexInstrumentDefinitionDeprecatedMessage2(bytes) ==
@@ -1808,7 +1808,7 @@ DecodeComplexInstrumentDefinitionDeprecatedMessage2(bytes) ==
     LET tradingCollarVariationType == ReadBytes(unitOfMeasureQuantity.rest, 1) IN IF ~tradingCollarVariationType.ok THEN Fail ELSE
     LET tradingCollarVariation == ReadBytes(tradingCollarVariationType.rest, 8) IN IF ~tradingCollarVariation.ok THEN Fail ELSE
     LET reserved16 == ReadBytes(tradingCollarVariation.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    LET numberOfLegs == ReadUIntLE(reserved16.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
+    LET numberOfLegs == ReadUIntBE(reserved16.rest, 1) IN IF ~numberOfLegs.ok THEN Fail ELSE
     LET deprecatedInstrumentLeg == ReadDeprecatedInstrumentLeg2List(numberOfLegs.rest, numberOfLegs.value) IN IF ~deprecatedInstrumentLeg.ok THEN Fail ELSE
     Ok([ timestamp                             |-> timestamp.value,
          instrumentIdFormerlyKnownAsStrategyId |-> instrumentIdFormerlyKnownAsStrategyId.value,

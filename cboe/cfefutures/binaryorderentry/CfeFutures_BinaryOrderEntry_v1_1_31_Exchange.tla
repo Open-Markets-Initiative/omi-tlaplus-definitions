@@ -159,14 +159,14 @@ EncodeLoginResponseMessage(message) ==
     message.loginResponseStatus
         \o message.loginResponseText
         \o message.clientSequence
-        \o EncodeUIntLE(Len(message.unitSequence), 1)
+        \o EncodeUIntBE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
 DecodeLoginResponseMessage(bytes) ==
     LET loginResponseStatus == ReadBytes(bytes, 1) IN IF ~loginResponseStatus.ok THEN Fail ELSE
     LET loginResponseText == ReadBytes(loginResponseStatus.rest, 60) IN IF ~loginResponseText.ok THEN Fail ELSE
     LET clientSequence == ReadBytes(loginResponseText.rest, 4) IN IF ~clientSequence.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(clientSequence.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntBE(clientSequence.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
     Ok([ loginResponseStatus |-> loginResponseStatus.value,
          loginResponseText   |-> loginResponseText.value,
@@ -546,7 +546,7 @@ EncodeOrderAcknowledgementOption(message) ==
         \o message.custOrderHandlingInst
         \o message.countryCode
         \o message.requestReceivedTime
-        \o EncodeUIntLE(message.legCnt, 1)
+        \o EncodeUIntBE(message.legCnt, 1)
         \o message.legPositionEffect
 
 DecodeOrderAcknowledgementOption(bytes) ==
@@ -579,7 +579,7 @@ DecodeOrderAcknowledgementOption(bytes) ==
     LET custOrderHandlingInst == ReadBytes(frequentTraderId.rest, 1) IN IF ~custOrderHandlingInst.ok THEN Fail ELSE
     LET countryCode == ReadBytes(custOrderHandlingInst.rest, 2) IN IF ~countryCode.ok THEN Fail ELSE
     LET requestReceivedTime == ReadBytes(countryCode.rest, 8) IN IF ~requestReceivedTime.ok THEN Fail ELSE
-    LET legCnt == ReadUIntLE(requestReceivedTime.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
+    LET legCnt == ReadUIntBE(requestReceivedTime.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
     LET legPositionEffect == ReadBytes(legCnt.rest, 1) IN IF ~legPositionEffect.ok THEN Fail ELSE
     Ok([ transactionTime        |-> transactionTime.value,
          clOrdId                |-> clOrdId.value,
@@ -1784,14 +1784,14 @@ EncodeQuoteUpdateAcknowledgement(message) ==
     message.transactionTime
         \o message.quoteUpdateId
         \o message.requestReceivedTime
-        \o EncodeUIntLE(Len(message.quoteUpdateAcknowledgementGroup), 1)
+        \o EncodeUIntBE(Len(message.quoteUpdateAcknowledgementGroup), 1)
         \o EncodeQuoteUpdateAcknowledgementGroupList(message.quoteUpdateAcknowledgementGroup)
 
 DecodeQuoteUpdateAcknowledgement(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET requestReceivedTime == ReadBytes(quoteUpdateId.rest, 8) IN IF ~requestReceivedTime.ok THEN Fail ELSE
-    LET quoteCnt == ReadUIntLE(requestReceivedTime.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
+    LET quoteCnt == ReadUIntBE(requestReceivedTime.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
     LET quoteUpdateAcknowledgementGroup == ReadQuoteUpdateAcknowledgementGroupList(quoteCnt.rest, quoteCnt.value) IN IF ~quoteUpdateAcknowledgementGroup.ok THEN Fail ELSE
     Ok([ transactionTime                 |-> transactionTime.value,
          quoteUpdateId                   |-> quoteUpdateId.value,
@@ -2213,7 +2213,7 @@ EncodeNewComplexInstrumentAcceptedOption(message) ==
         \o message.clOrdId
         \o message.symbol
         \o message.noOfComplexInstruments
-        \o EncodeUIntLE(Len(message.optionLeg), 1)
+        \o EncodeUIntBE(Len(message.optionLeg), 1)
         \o EncodeOptionLegList(message.optionLeg)
 
 DecodeNewComplexInstrumentAcceptedOption(bytes) ==
@@ -2221,7 +2221,7 @@ DecodeNewComplexInstrumentAcceptedOption(bytes) ==
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET symbol == ReadBytes(clOrdId.rest, 8) IN IF ~symbol.ok THEN Fail ELSE
     LET noOfComplexInstruments == ReadBytes(symbol.rest, 4) IN IF ~noOfComplexInstruments.ok THEN Fail ELSE
-    LET legCnt == ReadUIntLE(noOfComplexInstruments.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
+    LET legCnt == ReadUIntBE(noOfComplexInstruments.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
     LET optionLeg == ReadOptionLegList(legCnt.rest, legCnt.value) IN IF ~optionLeg.ok THEN Fail ELSE
     Ok([ transactionTime        |-> transactionTime.value,
          clOrdId                |-> clOrdId.value,

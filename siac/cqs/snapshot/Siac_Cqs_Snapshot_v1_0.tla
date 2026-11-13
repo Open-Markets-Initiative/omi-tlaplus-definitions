@@ -724,9 +724,9 @@ Packet ==
     [ version             : Sample(1),
       blockSize           : Sample(2),
       blockSequenceNumber : Sample(4),
-      deliveryFlag        : Sample(1),
-      lastSeqNum          : Sample(1),
-      totPubSeqRollover   : Sample(1),
+      deliveryflag        : Sample(1),
+      lastseqnum          : Sample(4),
+      totpubseqrollover   : Sample(1),
       sipBlockTimestamp   : SipBlockTimestamp,
       blockChecksum       : Sample(2),
       message             : SampleLists(OneMessage),
@@ -737,9 +737,9 @@ EncodePacket(message) ==
         \o message.blockSize
         \o message.blockSequenceNumber
         \o EncodeUIntBE(Len(message.message), 1)
-        \o message.deliveryFlag
-        \o message.lastSeqNum
-        \o message.totPubSeqRollover
+        \o message.deliveryflag
+        \o message.lastseqnum
+        \o message.totpubseqrollover
         \o EncodeSipBlockTimestamp(message.sipBlockTimestamp)
         \o message.blockChecksum
         \o EncodeMessageList(message.message)
@@ -750,19 +750,19 @@ DecodePacket(bytes) ==
     LET blockSize == ReadBytes(version.rest, 2) IN IF ~blockSize.ok THEN Fail ELSE
     LET blockSequenceNumber == ReadBytes(blockSize.rest, 4) IN IF ~blockSequenceNumber.ok THEN Fail ELSE
     LET messagesInBlock == ReadUIntBE(blockSequenceNumber.rest, 1) IN IF ~messagesInBlock.ok THEN Fail ELSE
-    LET deliveryFlag == ReadBytes(messagesInBlock.rest, 1) IN IF ~deliveryFlag.ok THEN Fail ELSE
-    LET lastSeqNum == ReadBytes(deliveryFlag.rest, 1) IN IF ~lastSeqNum.ok THEN Fail ELSE
-    LET totPubSeqRollover == ReadBytes(lastSeqNum.rest, 1) IN IF ~totPubSeqRollover.ok THEN Fail ELSE
-    LET sipBlockTimestamp == DecodeSipBlockTimestamp(totPubSeqRollover.rest) IN IF ~sipBlockTimestamp.ok THEN Fail ELSE
+    LET deliveryflag == ReadBytes(messagesInBlock.rest, 1) IN IF ~deliveryflag.ok THEN Fail ELSE
+    LET lastseqnum == ReadBytes(deliveryflag.rest, 4) IN IF ~lastseqnum.ok THEN Fail ELSE
+    LET totpubseqrollover == ReadBytes(lastseqnum.rest, 1) IN IF ~totpubseqrollover.ok THEN Fail ELSE
+    LET sipBlockTimestamp == DecodeSipBlockTimestamp(totpubseqrollover.rest) IN IF ~sipBlockTimestamp.ok THEN Fail ELSE
     LET blockChecksum == ReadBytes(sipBlockTimestamp.rest, 2) IN IF ~blockChecksum.ok THEN Fail ELSE
     LET message == ReadMessageList(blockChecksum.rest, messagesInBlock.value) IN IF ~message.ok THEN Fail ELSE
     LET blockPadByte == Ok(message.rest, << >>) IN IF ~blockPadByte.ok THEN Fail ELSE
     Ok([ version             |-> version.value,
          blockSize           |-> blockSize.value,
          blockSequenceNumber |-> blockSequenceNumber.value,
-         deliveryFlag        |-> deliveryFlag.value,
-         lastSeqNum          |-> lastSeqNum.value,
-         totPubSeqRollover   |-> totPubSeqRollover.value,
+         deliveryflag        |-> deliveryflag.value,
+         lastseqnum          |-> lastseqnum.value,
+         totpubseqrollover   |-> totpubseqrollover.value,
          sipBlockTimestamp   |-> sipBlockTimestamp.value,
          blockChecksum       |-> blockChecksum.value,
          message             |-> message.value,
@@ -772,9 +772,9 @@ ZeroPacket ==
     [ version             |-> [i \in 1 .. 1 |-> 0],
       blockSize           |-> [i \in 1 .. 2 |-> 0],
       blockSequenceNumber |-> [i \in 1 .. 4 |-> 0],
-      deliveryFlag        |-> [i \in 1 .. 1 |-> 0],
-      lastSeqNum          |-> [i \in 1 .. 1 |-> 0],
-      totPubSeqRollover   |-> [i \in 1 .. 1 |-> 0],
+      deliveryflag        |-> [i \in 1 .. 1 |-> 0],
+      lastseqnum          |-> [i \in 1 .. 4 |-> 0],
+      totpubseqrollover   |-> [i \in 1 .. 1 |-> 0],
       sipBlockTimestamp   |-> ZeroSipBlockTimestamp,
       blockChecksum       |-> [i \in 1 .. 2 |-> 0],
       message             |-> << >>,
@@ -786,9 +786,9 @@ CheckedPacket ==
         \cup { [ZeroPacket EXCEPT !.version = one] : one \in Sample(1) }
         \cup { [ZeroPacket EXCEPT !.blockSize = one] : one \in Sample(2) }
         \cup { [ZeroPacket EXCEPT !.blockSequenceNumber = one] : one \in Sample(4) }
-        \cup { [ZeroPacket EXCEPT !.deliveryFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPacket EXCEPT !.lastSeqNum = one] : one \in Sample(1) }
-        \cup { [ZeroPacket EXCEPT !.totPubSeqRollover = one] : one \in Sample(1) }
+        \cup { [ZeroPacket EXCEPT !.deliveryflag = one] : one \in Sample(1) }
+        \cup { [ZeroPacket EXCEPT !.lastseqnum = one] : one \in Sample(4) }
+        \cup { [ZeroPacket EXCEPT !.totpubseqrollover = one] : one \in Sample(1) }
         \cup { [ZeroPacket EXCEPT !.sipBlockTimestamp = one] : one \in CheckedSipBlockTimestamp }
         \cup { [ZeroPacket EXCEPT !.blockChecksum = one] : one \in Sample(2) }
         \cup { [ZeroPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }

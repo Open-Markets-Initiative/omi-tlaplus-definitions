@@ -1895,7 +1895,7 @@ Packet ==
 EncodePacket(message) ==
     message.packetSize
         \o message.deliveryFlag
-        \o EncodeUIntLE(Len(message.message), 1)
+        \o EncodeUIntBE(Len(message.message), 1)
         \o message.sequenceNumber
         \o EncodeSendTime(message.sendTime)
         \o EncodeMessageList(message.message)
@@ -1903,7 +1903,7 @@ EncodePacket(message) ==
 DecodePacket(bytes) ==
     LET packetSize == ReadBytes(bytes, 2) IN IF ~packetSize.ok THEN Fail ELSE
     LET deliveryFlag == ReadBytes(packetSize.rest, 1) IN IF ~deliveryFlag.ok THEN Fail ELSE
-    LET messageCount == ReadUIntLE(deliveryFlag.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
+    LET messageCount == ReadUIntBE(deliveryFlag.rest, 1) IN IF ~messageCount.ok THEN Fail ELSE
     LET sequenceNumber == ReadBytes(messageCount.rest, 4) IN IF ~sequenceNumber.ok THEN Fail ELSE
     LET sendTime == DecodeSendTime(sequenceNumber.rest) IN IF ~sendTime.ok THEN Fail ELSE
     LET message == ReadMessageList(sendTime.rest, messageCount.value) IN IF ~message.ok THEN Fail ELSE

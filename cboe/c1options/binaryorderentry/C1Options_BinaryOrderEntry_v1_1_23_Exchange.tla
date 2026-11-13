@@ -159,14 +159,14 @@ EncodeLoginResponseMessage(message) ==
     message.loginResponseStatus
         \o message.loginResponseText
         \o message.clientSequence
-        \o EncodeUIntLE(Len(message.unitSequence), 1)
+        \o EncodeUIntBE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
 DecodeLoginResponseMessage(bytes) ==
     LET loginResponseStatus == ReadBytes(bytes, 1) IN IF ~loginResponseStatus.ok THEN Fail ELSE
     LET loginResponseText == ReadBytes(loginResponseStatus.rest, 60) IN IF ~loginResponseText.ok THEN Fail ELSE
     LET clientSequence == ReadBytes(loginResponseText.rest, 4) IN IF ~clientSequence.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(clientSequence.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntBE(clientSequence.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
     Ok([ loginResponseStatus |-> loginResponseStatus.value,
          loginResponseText   |-> loginResponseText.value,
@@ -414,7 +414,7 @@ EncodeCrossOrderAcknowledgmentMessage(message) ==
         \o message.orderQty
         \o message.routingFirmId
         \o message.requestReceivedTime
-        \o EncodeUIntLE(Len(message.acknowledgementAllocation), 1)
+        \o EncodeUIntBE(Len(message.acknowledgementAllocation), 1)
         \o EncodeAcknowledgementAllocationList(message.acknowledgementAllocation)
 
 DecodeCrossOrderAcknowledgmentMessage(bytes) ==
@@ -427,7 +427,7 @@ DecodeCrossOrderAcknowledgmentMessage(bytes) ==
     LET orderQty == ReadBytes(symbol.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
     LET routingFirmId == ReadBytes(orderQty.rest, 4) IN IF ~routingFirmId.ok THEN Fail ELSE
     LET requestReceivedTime == ReadBytes(routingFirmId.rest, 8) IN IF ~requestReceivedTime.ok THEN Fail ELSE
-    LET allocCnt == ReadUIntLE(requestReceivedTime.rest, 1) IN IF ~allocCnt.ok THEN Fail ELSE
+    LET allocCnt == ReadUIntBE(requestReceivedTime.rest, 1) IN IF ~allocCnt.ok THEN Fail ELSE
     LET acknowledgementAllocation == ReadAcknowledgementAllocationList(allocCnt.rest, allocCnt.value) IN IF ~acknowledgementAllocation.ok THEN Fail ELSE
     Ok([ inFlight                  |-> inFlight.value,
          transactionTime           |-> transactionTime.value,
@@ -543,7 +543,7 @@ EncodeQuoteUpdateAcknowledgementMessage(message) ==
         \o message.transactionTime
         \o message.quoteUpdateId
         \o message.requestReceivedTime
-        \o EncodeUIntLE(Len(message.quoteAcknowledgement), 1)
+        \o EncodeUIntBE(Len(message.quoteAcknowledgement), 1)
         \o EncodeQuoteAcknowledgementList(message.quoteAcknowledgement)
 
 DecodeQuoteUpdateAcknowledgementMessage(bytes) ==
@@ -551,7 +551,7 @@ DecodeQuoteUpdateAcknowledgementMessage(bytes) ==
     LET transactionTime == ReadBytes(inFlight.rest, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET requestReceivedTime == ReadBytes(quoteUpdateId.rest, 8) IN IF ~requestReceivedTime.ok THEN Fail ELSE
-    LET quoteCnt == ReadUIntLE(requestReceivedTime.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
+    LET quoteCnt == ReadUIntBE(requestReceivedTime.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
     LET quoteAcknowledgement == ReadQuoteAcknowledgementList(quoteCnt.rest, quoteCnt.value) IN IF ~quoteAcknowledgement.ok THEN Fail ELSE
     Ok([ inFlight             |-> inFlight.value,
          transactionTime      |-> transactionTime.value,
@@ -1308,7 +1308,7 @@ EncodeCrossOrderCancelledMessage(message) ==
         \o message.crossId
         \o message.routingFirmId
         \o message.cancelReason
-        \o EncodeUIntLE(Len(message.allocationCancelled), 1)
+        \o EncodeUIntBE(Len(message.allocationCancelled), 1)
         \o EncodeAllocationCancelledList(message.allocationCancelled)
 
 DecodeCrossOrderCancelledMessage(bytes) ==
@@ -1317,7 +1317,7 @@ DecodeCrossOrderCancelledMessage(bytes) ==
     LET crossId == ReadBytes(transactionTime.rest, 20) IN IF ~crossId.ok THEN Fail ELSE
     LET routingFirmId == ReadBytes(crossId.rest, 4) IN IF ~routingFirmId.ok THEN Fail ELSE
     LET cancelReason == ReadBytes(routingFirmId.rest, 1) IN IF ~cancelReason.ok THEN Fail ELSE
-    LET allocCnt == ReadUIntLE(cancelReason.rest, 1) IN IF ~allocCnt.ok THEN Fail ELSE
+    LET allocCnt == ReadUIntBE(cancelReason.rest, 1) IN IF ~allocCnt.ok THEN Fail ELSE
     LET allocationCancelled == ReadAllocationCancelledList(allocCnt.rest, allocCnt.value) IN IF ~allocationCancelled.ok THEN Fail ELSE
     Ok([ inFlight            |-> inFlight.value,
          transactionTime     |-> transactionTime.value,
@@ -2397,7 +2397,7 @@ EncodeNewComplexInstrumentAcceptedMessage(message) ==
         \o message.clOrdId
         \o message.symbol
         \o message.noOfSecurities
-        \o EncodeUIntLE(Len(message.complexLeg), 1)
+        \o EncodeUIntBE(Len(message.complexLeg), 1)
         \o EncodeComplexLegList(message.complexLeg)
 
 DecodeNewComplexInstrumentAcceptedMessage(bytes) ==
@@ -2406,7 +2406,7 @@ DecodeNewComplexInstrumentAcceptedMessage(bytes) ==
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET symbol == ReadBytes(clOrdId.rest, 8) IN IF ~symbol.ok THEN Fail ELSE
     LET noOfSecurities == ReadBytes(symbol.rest, 4) IN IF ~noOfSecurities.ok THEN Fail ELSE
-    LET legCnt == ReadUIntLE(noOfSecurities.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
+    LET legCnt == ReadUIntBE(noOfSecurities.rest, 1) IN IF ~legCnt.ok THEN Fail ELSE
     LET complexLeg == ReadComplexLegList(legCnt.rest, legCnt.value) IN IF ~complexLeg.ok THEN Fail ELSE
     Ok([ inFlight        |-> inFlight.value,
          transactionTime |-> transactionTime.value,

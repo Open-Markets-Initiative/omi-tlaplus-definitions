@@ -161,7 +161,7 @@ EncodeLoginRequestMessage(message) ==
         \o message.sessionSubId
         \o message.password
         \o message.replayUnspecifiedUnit
-        \o EncodeUIntLE(Len(message.unitSequence), 1)
+        \o EncodeUIntBE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
 DecodeLoginRequestMessage(bytes) ==
@@ -169,7 +169,7 @@ DecodeLoginRequestMessage(bytes) ==
     LET sessionSubId == ReadBytes(sessionId.rest, 4) IN IF ~sessionSubId.ok THEN Fail ELSE
     LET password == ReadBytes(sessionSubId.rest, 10) IN IF ~password.ok THEN Fail ELSE
     LET replayUnspecifiedUnit == ReadBytes(password.rest, 1) IN IF ~replayUnspecifiedUnit.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(replayUnspecifiedUnit.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntBE(replayUnspecifiedUnit.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
     Ok([ sessionId             |-> sessionId.value,
          sessionSubId          |-> sessionSubId.value,
@@ -692,7 +692,7 @@ EncodePurgeOrdersMessage(message) ==
         \o EncodeMassCancelInst2(message.massCancelInst)
         \o message.manualOrderIndicator
         \o message.oeoId
-        \o EncodeUIntLE(message.customGroupIdCnt, 1)
+        \o EncodeUIntBE(message.customGroupIdCnt, 1)
         \o message.customGroupId
 
 DecodePurgeOrdersMessage(bytes) ==
@@ -702,7 +702,7 @@ DecodePurgeOrdersMessage(bytes) ==
     LET massCancelInst == DecodeMassCancelInst2(productName.rest) IN IF ~massCancelInst.ok THEN Fail ELSE
     LET manualOrderIndicator == ReadBytes(massCancelInst.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
     LET oeoId == ReadBytes(manualOrderIndicator.rest, 18) IN IF ~oeoId.ok THEN Fail ELSE
-    LET customGroupIdCnt == ReadUIntLE(oeoId.rest, 1) IN IF ~customGroupIdCnt.ok THEN Fail ELSE
+    LET customGroupIdCnt == ReadUIntBE(oeoId.rest, 1) IN IF ~customGroupIdCnt.ok THEN Fail ELSE
     LET customGroupId == ReadBytes(customGroupIdCnt.rest, 2) IN IF ~customGroupId.ok THEN Fail ELSE
     Ok([ massCancelId         |-> massCancelId.value,
          clearingFirm         |-> clearingFirm.value,
@@ -832,7 +832,7 @@ EncodeQuoteUpdateMessage(message) ==
         \o message.manualOrderIndicator
         \o message.oeoId
         \o message.sizeModifier
-        \o EncodeUIntLE(Len(message.quoteUpdateGroup), 1)
+        \o EncodeUIntBE(Len(message.quoteUpdateGroup), 1)
         \o EncodeQuoteUpdateGroupList(message.quoteUpdateGroup)
 
 DecodeQuoteUpdateMessage(bytes) ==
@@ -847,7 +847,7 @@ DecodeQuoteUpdateMessage(bytes) ==
     LET manualOrderIndicator == ReadBytes(ctiCode.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
     LET oeoId == ReadBytes(manualOrderIndicator.rest, 18) IN IF ~oeoId.ok THEN Fail ELSE
     LET sizeModifier == ReadBytes(oeoId.rest, 1) IN IF ~sizeModifier.ok THEN Fail ELSE
-    LET quoteCnt == ReadUIntLE(sizeModifier.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
+    LET quoteCnt == ReadUIntBE(sizeModifier.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
     LET quoteUpdateGroup == ReadQuoteUpdateGroupList(quoteCnt.rest, quoteCnt.value) IN IF ~quoteUpdateGroup.ok THEN Fail ELSE
     Ok([ quoteUpdateId        |-> quoteUpdateId.value,
          clearingFirm         |-> clearingFirm.value,

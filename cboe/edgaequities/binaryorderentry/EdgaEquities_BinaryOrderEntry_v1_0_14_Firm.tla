@@ -161,7 +161,7 @@ EncodeLoginRequestMessage(message) ==
         \o message.sessionSubId
         \o message.password
         \o message.replayInstruction
-        \o EncodeUIntLE(Len(message.unitSequence), 1)
+        \o EncodeUIntBE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
 DecodeLoginRequestMessage(bytes) ==
@@ -169,7 +169,7 @@ DecodeLoginRequestMessage(bytes) ==
     LET sessionSubId == ReadBytes(sessionId.rest, 4) IN IF ~sessionSubId.ok THEN Fail ELSE
     LET password == ReadBytes(sessionSubId.rest, 10) IN IF ~password.ok THEN Fail ELSE
     LET replayInstruction == ReadBytes(password.rest, 1) IN IF ~replayInstruction.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(replayInstruction.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntBE(replayInstruction.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
     Ok([ sessionId         |-> sessionId.value,
          sessionSubId      |-> sessionSubId.value,
@@ -654,7 +654,7 @@ EncodePurgeOrdersUsEquitiesV1(message) ==
         \o message.massCancelInst
         \o message.symbol
         \o message.targetMatchingUnit
-        \o EncodeUIntLE(message.riskGroupIdCnt, 1)
+        \o EncodeUIntBE(message.riskGroupIdCnt, 1)
         \o message.riskGroupId
 
 DecodePurgeOrdersUsEquitiesV1(bytes) ==
@@ -663,7 +663,7 @@ DecodePurgeOrdersUsEquitiesV1(bytes) ==
     LET massCancelInst == ReadBytes(clearingFirm.rest, 8) IN IF ~massCancelInst.ok THEN Fail ELSE
     LET symbol == ReadBytes(massCancelInst.rest, 8) IN IF ~symbol.ok THEN Fail ELSE
     LET targetMatchingUnit == ReadBytes(symbol.rest, 1) IN IF ~targetMatchingUnit.ok THEN Fail ELSE
-    LET riskGroupIdCnt == ReadUIntLE(targetMatchingUnit.rest, 1) IN IF ~riskGroupIdCnt.ok THEN Fail ELSE
+    LET riskGroupIdCnt == ReadUIntBE(targetMatchingUnit.rest, 1) IN IF ~riskGroupIdCnt.ok THEN Fail ELSE
     LET riskGroupId == ReadBytes(riskGroupIdCnt.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
     Ok([ massCancelId       |-> massCancelId.value,
          clearingFirm       |-> clearingFirm.value,

@@ -159,14 +159,14 @@ EncodeLoginResponseMessage(message) ==
     message.loginResponseStatus
         \o message.loginResponseText
         \o message.clientSequence
-        \o EncodeUIntLE(Len(message.unitSequence), 1)
+        \o EncodeUIntBE(Len(message.unitSequence), 1)
         \o EncodeUnitSequenceList(message.unitSequence)
 
 DecodeLoginResponseMessage(bytes) ==
     LET loginResponseStatus == ReadBytes(bytes, 1) IN IF ~loginResponseStatus.ok THEN Fail ELSE
     LET loginResponseText == ReadBytes(loginResponseStatus.rest, 60) IN IF ~loginResponseText.ok THEN Fail ELSE
     LET clientSequence == ReadBytes(loginResponseText.rest, 4) IN IF ~clientSequence.ok THEN Fail ELSE
-    LET numberOfUnits == ReadUIntLE(clientSequence.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
+    LET numberOfUnits == ReadUIntBE(clientSequence.rest, 1) IN IF ~numberOfUnits.ok THEN Fail ELSE
     LET unitSequence == ReadUnitSequenceList(numberOfUnits.rest, numberOfUnits.value) IN IF ~unitSequence.ok THEN Fail ELSE
     Ok([ loginResponseStatus |-> loginResponseStatus.value,
          loginResponseText   |-> loginResponseText.value,
@@ -398,7 +398,7 @@ EncodeQuoteUpdateAcknowledgementMessage(message) ==
         \o message.transactionTime
         \o message.quoteUpdateId
         \o message.requestReceivedTime
-        \o EncodeUIntLE(Len(message.quoteAcknowledgement), 1)
+        \o EncodeUIntBE(Len(message.quoteAcknowledgement), 1)
         \o EncodeQuoteAcknowledgementList(message.quoteAcknowledgement)
 
 DecodeQuoteUpdateAcknowledgementMessage(bytes) ==
@@ -406,7 +406,7 @@ DecodeQuoteUpdateAcknowledgementMessage(bytes) ==
     LET transactionTime == ReadBytes(inFlight.rest, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET requestReceivedTime == ReadBytes(quoteUpdateId.rest, 8) IN IF ~requestReceivedTime.ok THEN Fail ELSE
-    LET quoteCnt == ReadUIntLE(requestReceivedTime.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
+    LET quoteCnt == ReadUIntBE(requestReceivedTime.rest, 1) IN IF ~quoteCnt.ok THEN Fail ELSE
     LET quoteAcknowledgement == ReadQuoteAcknowledgementList(quoteCnt.rest, quoteCnt.value) IN IF ~quoteAcknowledgement.ok THEN Fail ELSE
     Ok([ inFlight             |-> inFlight.value,
          transactionTime      |-> transactionTime.value,
