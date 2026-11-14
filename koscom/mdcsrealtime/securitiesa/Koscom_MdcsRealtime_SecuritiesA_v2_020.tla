@@ -16,6 +16,12 @@
 (*                                                                         *)
 (* License: MIT No Attribution                                             *)
 (*                                                                         *)
+(* Note: Ten Levels is written as 10 slots, however many of them the count *)
+(* beside it says are in use.                                              *)
+(*                                                                         *)
+(* Note: Ten Levels With LP is written as 10 slots, however many of them   *)
+(* the count beside it says are in use.                                    *)
+(*                                                                         *)
 (* Note: Packet fills its datagram with as many messages as the bytes      *)
 (* hold, so it is read as a run of them.                                   *)
 (***************************************************************************)
@@ -876,7 +882,71 @@ CheckedBondIndexKrxMessage ==
         \cup { [ZeroBondIndexKrxMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Securities Quote Mm Lp Excluded Message: 585 bytes                      *)
+(* Ten Levels: 46 bytes                                                    *)
+(***************************************************************************)
+
+TenLevels ==
+    [ askPrice  : Sample(11),
+      bidPrice  : Sample(11),
+      askVolume : Sample(12),
+      bidVolume : Sample(12) ]
+
+EncodeTenLevels(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+
+DecodeTenLevels(bytes) ==
+    LET askPrice == ReadBytes(bytes, 11) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 11) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 12) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 12) IN IF ~bidVolume.ok THEN Fail ELSE
+    Ok([ askPrice  |-> askPrice.value,
+         bidPrice  |-> bidPrice.value,
+         askVolume |-> askVolume.value,
+         bidVolume |-> bidVolume.value ], bidVolume.rest)
+
+ZeroTenLevels ==
+    [ askPrice  |-> [i \in 1 .. 11 |-> 0],
+      bidPrice  |-> [i \in 1 .. 11 |-> 0],
+      askVolume |-> [i \in 1 .. 12 |-> 0],
+      bidVolume |-> [i \in 1 .. 12 |-> 0] ]
+
+(* Ten Levels at zero, then each field in turn at the values it is checked at *)
+CheckedTenLevels ==
+    { ZeroTenLevels }
+        \cup { [ZeroTenLevels EXCEPT !.askPrice = one] : one \in Sample(11) }
+        \cup { [ZeroTenLevels EXCEPT !.bidPrice = one] : one \in Sample(11) }
+        \cup { [ZeroTenLevels EXCEPT !.askVolume = one] : one \in Sample(12) }
+        \cup { [ZeroTenLevels EXCEPT !.bidVolume = one] : one \in Sample(12) }
+
+(* A run of Ten Levels, written one after another *)
+RECURSIVE EncodeTenLevelsList(_)
+EncodeTenLevelsList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeTenLevels(Head(messages)) \o EncodeTenLevelsList(Tail(messages))
+
+(* As many Ten Levels as the field that counts them says *)
+RECURSIVE ReadTenLevelsList(_, _)
+ReadTenLevelsList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeTenLevels(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadTenLevelsList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Ten Levels of each kind, for the lists that carry them *)
+OneTenLevels == { ZeroTenLevels }
+
+(* The 10 slots a run of Ten Levels is written as, whatever the field beside it says are in use *)
+SlotsTenLevels == { [i \in 1 .. 10 |-> one] : one \in OneTenLevels }
+
+(***************************************************************************)
+(* Securities Quote Mm Lp Excluded Message                                 *)
 (***************************************************************************)
 
 SecuritiesQuoteMmLpExcludedMessage ==
@@ -886,46 +956,7 @@ SecuritiesQuoteMmLpExcludedMessage ==
       isinCode                      : Sample(12),
       aDesignatedNumberForAnIssue   : Sample(6),
       processingTimeOfTradingSystem : Sample(12),
-      askLevel1Price                : Sample(11),
-      bidLevel1Price                : Sample(11),
-      askLevel1Volume               : Sample(12),
-      bidLevel1Volume               : Sample(12),
-      askLevel2Price                : Sample(11),
-      bidLevel2Price                : Sample(11),
-      askLevel2Volume               : Sample(12),
-      bidLevel2Volume               : Sample(12),
-      askLevel3Price                : Sample(11),
-      bidLevel3Price                : Sample(11),
-      askLevel3Volume               : Sample(12),
-      bidLevel3Volume               : Sample(12),
-      askLevel4Price                : Sample(11),
-      bidLevel4Price                : Sample(11),
-      askLevel4Volume               : Sample(12),
-      bidLevel4Volume               : Sample(12),
-      askLevel5Price                : Sample(11),
-      bidLevel5Price                : Sample(11),
-      askLevel5Volume               : Sample(12),
-      bidLevel5Volume               : Sample(12),
-      askLevel6Price                : Sample(11),
-      bidLevel6Price                : Sample(11),
-      askLevel6Volume               : Sample(12),
-      bidLevel6Volume               : Sample(12),
-      askLevel7Price                : Sample(11),
-      bidLevel7Price                : Sample(11),
-      askLevel7Volume               : Sample(12),
-      bidLevel7Volume               : Sample(12),
-      askLevel8Price                : Sample(11),
-      bidLevel8Price                : Sample(11),
-      askLevel8Volume               : Sample(12),
-      bidLevel8Volume               : Sample(12),
-      askLevel9Price                : Sample(11),
-      bidLevel9Price                : Sample(11),
-      askLevel9Volume               : Sample(12),
-      bidLevel9Volume               : Sample(12),
-      askLevel10Price               : Sample(11),
-      bidLevel10Price               : Sample(11),
-      askLevel10Volume              : Sample(12),
-      bidLevel10Volume              : Sample(12),
+      tenLevels                     : SlotsTenLevels,
       totalAskVolume                : Sample(12),
       totalBidVolume                : Sample(12),
       estimatedTradingPrice         : Sample(11),
@@ -942,46 +973,7 @@ EncodeSecuritiesQuoteMmLpExcludedMessage(message) ==
         \o message.isinCode
         \o message.aDesignatedNumberForAnIssue
         \o message.processingTimeOfTradingSystem
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.askLevel6Price
-        \o message.bidLevel6Price
-        \o message.askLevel6Volume
-        \o message.bidLevel6Volume
-        \o message.askLevel7Price
-        \o message.bidLevel7Price
-        \o message.askLevel7Volume
-        \o message.bidLevel7Volume
-        \o message.askLevel8Price
-        \o message.bidLevel8Price
-        \o message.askLevel8Volume
-        \o message.bidLevel8Volume
-        \o message.askLevel9Price
-        \o message.bidLevel9Price
-        \o message.askLevel9Volume
-        \o message.bidLevel9Volume
-        \o message.askLevel10Price
-        \o message.bidLevel10Price
-        \o message.askLevel10Volume
-        \o message.bidLevel10Volume
+        \o EncodeTenLevelsList(message.tenLevels)
         \o message.totalAskVolume
         \o message.totalBidVolume
         \o message.estimatedTradingPrice
@@ -998,47 +990,8 @@ DecodeSecuritiesQuoteMmLpExcludedMessage(bytes) ==
     LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
     LET aDesignatedNumberForAnIssue == ReadBytes(isinCode.rest, 6) IN IF ~aDesignatedNumberForAnIssue.ok THEN Fail ELSE
     LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssue.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(processingTimeOfTradingSystem.rest, 11) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 11) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 12) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 12) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(bidLevel1Volume.rest, 11) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 11) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 12) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 12) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(bidLevel2Volume.rest, 11) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 11) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 12) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 12) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(bidLevel3Volume.rest, 11) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 11) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 12) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 12) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(bidLevel4Volume.rest, 11) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 11) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 12) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 12) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel6Price == ReadBytes(bidLevel5Volume.rest, 11) IN IF ~askLevel6Price.ok THEN Fail ELSE
-    LET bidLevel6Price == ReadBytes(askLevel6Price.rest, 11) IN IF ~bidLevel6Price.ok THEN Fail ELSE
-    LET askLevel6Volume == ReadBytes(bidLevel6Price.rest, 12) IN IF ~askLevel6Volume.ok THEN Fail ELSE
-    LET bidLevel6Volume == ReadBytes(askLevel6Volume.rest, 12) IN IF ~bidLevel6Volume.ok THEN Fail ELSE
-    LET askLevel7Price == ReadBytes(bidLevel6Volume.rest, 11) IN IF ~askLevel7Price.ok THEN Fail ELSE
-    LET bidLevel7Price == ReadBytes(askLevel7Price.rest, 11) IN IF ~bidLevel7Price.ok THEN Fail ELSE
-    LET askLevel7Volume == ReadBytes(bidLevel7Price.rest, 12) IN IF ~askLevel7Volume.ok THEN Fail ELSE
-    LET bidLevel7Volume == ReadBytes(askLevel7Volume.rest, 12) IN IF ~bidLevel7Volume.ok THEN Fail ELSE
-    LET askLevel8Price == ReadBytes(bidLevel7Volume.rest, 11) IN IF ~askLevel8Price.ok THEN Fail ELSE
-    LET bidLevel8Price == ReadBytes(askLevel8Price.rest, 11) IN IF ~bidLevel8Price.ok THEN Fail ELSE
-    LET askLevel8Volume == ReadBytes(bidLevel8Price.rest, 12) IN IF ~askLevel8Volume.ok THEN Fail ELSE
-    LET bidLevel8Volume == ReadBytes(askLevel8Volume.rest, 12) IN IF ~bidLevel8Volume.ok THEN Fail ELSE
-    LET askLevel9Price == ReadBytes(bidLevel8Volume.rest, 11) IN IF ~askLevel9Price.ok THEN Fail ELSE
-    LET bidLevel9Price == ReadBytes(askLevel9Price.rest, 11) IN IF ~bidLevel9Price.ok THEN Fail ELSE
-    LET askLevel9Volume == ReadBytes(bidLevel9Price.rest, 12) IN IF ~askLevel9Volume.ok THEN Fail ELSE
-    LET bidLevel9Volume == ReadBytes(askLevel9Volume.rest, 12) IN IF ~bidLevel9Volume.ok THEN Fail ELSE
-    LET askLevel10Price == ReadBytes(bidLevel9Volume.rest, 11) IN IF ~askLevel10Price.ok THEN Fail ELSE
-    LET bidLevel10Price == ReadBytes(askLevel10Price.rest, 11) IN IF ~bidLevel10Price.ok THEN Fail ELSE
-    LET askLevel10Volume == ReadBytes(bidLevel10Price.rest, 12) IN IF ~askLevel10Volume.ok THEN Fail ELSE
-    LET bidLevel10Volume == ReadBytes(askLevel10Volume.rest, 12) IN IF ~bidLevel10Volume.ok THEN Fail ELSE
-    LET totalAskVolume == ReadBytes(bidLevel10Volume.rest, 12) IN IF ~totalAskVolume.ok THEN Fail ELSE
+    LET tenLevels == ReadTenLevelsList(processingTimeOfTradingSystem.rest, 10) IN IF ~tenLevels.ok THEN Fail ELSE
+    LET totalAskVolume == ReadBytes(tenLevels.rest, 12) IN IF ~totalAskVolume.ok THEN Fail ELSE
     LET totalBidVolume == ReadBytes(totalAskVolume.rest, 12) IN IF ~totalBidVolume.ok THEN Fail ELSE
     LET estimatedTradingPrice == ReadBytes(totalBidVolume.rest, 11) IN IF ~estimatedTradingPrice.ok THEN Fail ELSE
     LET estimatedTradingVolume == ReadBytes(estimatedTradingPrice.rest, 12) IN IF ~estimatedTradingVolume.ok THEN Fail ELSE
@@ -1052,46 +1005,7 @@ DecodeSecuritiesQuoteMmLpExcludedMessage(bytes) ==
          isinCode                      |-> isinCode.value,
          aDesignatedNumberForAnIssue   |-> aDesignatedNumberForAnIssue.value,
          processingTimeOfTradingSystem |-> processingTimeOfTradingSystem.value,
-         askLevel1Price                |-> askLevel1Price.value,
-         bidLevel1Price                |-> bidLevel1Price.value,
-         askLevel1Volume               |-> askLevel1Volume.value,
-         bidLevel1Volume               |-> bidLevel1Volume.value,
-         askLevel2Price                |-> askLevel2Price.value,
-         bidLevel2Price                |-> bidLevel2Price.value,
-         askLevel2Volume               |-> askLevel2Volume.value,
-         bidLevel2Volume               |-> bidLevel2Volume.value,
-         askLevel3Price                |-> askLevel3Price.value,
-         bidLevel3Price                |-> bidLevel3Price.value,
-         askLevel3Volume               |-> askLevel3Volume.value,
-         bidLevel3Volume               |-> bidLevel3Volume.value,
-         askLevel4Price                |-> askLevel4Price.value,
-         bidLevel4Price                |-> bidLevel4Price.value,
-         askLevel4Volume               |-> askLevel4Volume.value,
-         bidLevel4Volume               |-> bidLevel4Volume.value,
-         askLevel5Price                |-> askLevel5Price.value,
-         bidLevel5Price                |-> bidLevel5Price.value,
-         askLevel5Volume               |-> askLevel5Volume.value,
-         bidLevel5Volume               |-> bidLevel5Volume.value,
-         askLevel6Price                |-> askLevel6Price.value,
-         bidLevel6Price                |-> bidLevel6Price.value,
-         askLevel6Volume               |-> askLevel6Volume.value,
-         bidLevel6Volume               |-> bidLevel6Volume.value,
-         askLevel7Price                |-> askLevel7Price.value,
-         bidLevel7Price                |-> bidLevel7Price.value,
-         askLevel7Volume               |-> askLevel7Volume.value,
-         bidLevel7Volume               |-> bidLevel7Volume.value,
-         askLevel8Price                |-> askLevel8Price.value,
-         bidLevel8Price                |-> bidLevel8Price.value,
-         askLevel8Volume               |-> askLevel8Volume.value,
-         bidLevel8Volume               |-> bidLevel8Volume.value,
-         askLevel9Price                |-> askLevel9Price.value,
-         bidLevel9Price                |-> bidLevel9Price.value,
-         askLevel9Volume               |-> askLevel9Volume.value,
-         bidLevel9Volume               |-> bidLevel9Volume.value,
-         askLevel10Price               |-> askLevel10Price.value,
-         bidLevel10Price               |-> bidLevel10Price.value,
-         askLevel10Volume              |-> askLevel10Volume.value,
-         bidLevel10Volume              |-> bidLevel10Volume.value,
+         tenLevels                     |-> tenLevels.value,
          totalAskVolume                |-> totalAskVolume.value,
          totalBidVolume                |-> totalBidVolume.value,
          estimatedTradingPrice         |-> estimatedTradingPrice.value,
@@ -1108,46 +1022,7 @@ ZeroSecuritiesQuoteMmLpExcludedMessage ==
       isinCode                      |-> [i \in 1 .. 12 |-> 0],
       aDesignatedNumberForAnIssue   |-> [i \in 1 .. 6 |-> 0],
       processingTimeOfTradingSystem |-> [i \in 1 .. 12 |-> 0],
-      askLevel1Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel1Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel1Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel1Volume               |-> [i \in 1 .. 12 |-> 0],
-      askLevel2Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel2Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel2Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel2Volume               |-> [i \in 1 .. 12 |-> 0],
-      askLevel3Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel3Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel3Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel3Volume               |-> [i \in 1 .. 12 |-> 0],
-      askLevel4Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel4Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel4Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel4Volume               |-> [i \in 1 .. 12 |-> 0],
-      askLevel5Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel5Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel5Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel5Volume               |-> [i \in 1 .. 12 |-> 0],
-      askLevel6Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel6Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel6Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel6Volume               |-> [i \in 1 .. 12 |-> 0],
-      askLevel7Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel7Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel7Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel7Volume               |-> [i \in 1 .. 12 |-> 0],
-      askLevel8Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel8Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel8Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel8Volume               |-> [i \in 1 .. 12 |-> 0],
-      askLevel9Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel9Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel9Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel9Volume               |-> [i \in 1 .. 12 |-> 0],
-      askLevel10Price               |-> [i \in 1 .. 11 |-> 0],
-      bidLevel10Price               |-> [i \in 1 .. 11 |-> 0],
-      askLevel10Volume              |-> [i \in 1 .. 12 |-> 0],
-      bidLevel10Volume              |-> [i \in 1 .. 12 |-> 0],
+      tenLevels                     |-> [i \in 1 .. 10 |-> ZeroTenLevels],
       totalAskVolume                |-> [i \in 1 .. 12 |-> 0],
       totalBidVolume                |-> [i \in 1 .. 12 |-> 0],
       estimatedTradingPrice         |-> [i \in 1 .. 11 |-> 0],
@@ -1166,46 +1041,7 @@ CheckedSecuritiesQuoteMmLpExcludedMessage ==
         \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.aDesignatedNumberForAnIssue = one] : one \in Sample(6) }
         \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel1Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel2Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel3Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel4Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel5Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel6Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel6Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel7Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel7Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel8Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel8Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel9Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel9Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel10Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel10Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.askLevel10Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.bidLevel10Volume = one] : one \in Sample(12) }
+        \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.tenLevels = one] : one \in SlotsTenLevels }
         \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.totalAskVolume = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.totalBidVolume = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.estimatedTradingPrice = one] : one \in Sample(11) }
@@ -1216,7 +1052,83 @@ CheckedSecuritiesQuoteMmLpExcludedMessage ==
         \cup { [ZeroSecuritiesQuoteMmLpExcludedMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Securities Quote Mm Lp Included Message: 825 bytes                      *)
+(* Ten Levels With LP: 70 bytes                                            *)
+(***************************************************************************)
+
+TenLevelsWithLp ==
+    [ askPrice    : Sample(11),
+      bidPrice    : Sample(11),
+      askVolume   : Sample(12),
+      bidVolume   : Sample(12),
+      lpAskVolume : Sample(12),
+      lpBidVolume : Sample(12) ]
+
+EncodeTenLevelsWithLp(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+        \o message.lpAskVolume
+        \o message.lpBidVolume
+
+DecodeTenLevelsWithLp(bytes) ==
+    LET askPrice == ReadBytes(bytes, 11) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 11) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 12) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 12) IN IF ~bidVolume.ok THEN Fail ELSE
+    LET lpAskVolume == ReadBytes(bidVolume.rest, 12) IN IF ~lpAskVolume.ok THEN Fail ELSE
+    LET lpBidVolume == ReadBytes(lpAskVolume.rest, 12) IN IF ~lpBidVolume.ok THEN Fail ELSE
+    Ok([ askPrice    |-> askPrice.value,
+         bidPrice    |-> bidPrice.value,
+         askVolume   |-> askVolume.value,
+         bidVolume   |-> bidVolume.value,
+         lpAskVolume |-> lpAskVolume.value,
+         lpBidVolume |-> lpBidVolume.value ], lpBidVolume.rest)
+
+ZeroTenLevelsWithLp ==
+    [ askPrice    |-> [i \in 1 .. 11 |-> 0],
+      bidPrice    |-> [i \in 1 .. 11 |-> 0],
+      askVolume   |-> [i \in 1 .. 12 |-> 0],
+      bidVolume   |-> [i \in 1 .. 12 |-> 0],
+      lpAskVolume |-> [i \in 1 .. 12 |-> 0],
+      lpBidVolume |-> [i \in 1 .. 12 |-> 0] ]
+
+(* Ten Levels With LP at zero, then each field in turn at the values it is checked at *)
+CheckedTenLevelsWithLp ==
+    { ZeroTenLevelsWithLp }
+        \cup { [ZeroTenLevelsWithLp EXCEPT !.askPrice = one] : one \in Sample(11) }
+        \cup { [ZeroTenLevelsWithLp EXCEPT !.bidPrice = one] : one \in Sample(11) }
+        \cup { [ZeroTenLevelsWithLp EXCEPT !.askVolume = one] : one \in Sample(12) }
+        \cup { [ZeroTenLevelsWithLp EXCEPT !.bidVolume = one] : one \in Sample(12) }
+        \cup { [ZeroTenLevelsWithLp EXCEPT !.lpAskVolume = one] : one \in Sample(12) }
+        \cup { [ZeroTenLevelsWithLp EXCEPT !.lpBidVolume = one] : one \in Sample(12) }
+
+(* A run of Ten Levels With LP, written one after another *)
+RECURSIVE EncodeTenLevelsWithLpList(_)
+EncodeTenLevelsWithLpList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeTenLevelsWithLp(Head(messages)) \o EncodeTenLevelsWithLpList(Tail(messages))
+
+(* As many Ten Levels With LP as the field that counts them says *)
+RECURSIVE ReadTenLevelsWithLpList(_, _)
+ReadTenLevelsWithLpList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeTenLevelsWithLp(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadTenLevelsWithLpList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Ten Levels With LP of each kind, for the lists that carry them *)
+OneTenLevelsWithLp == { ZeroTenLevelsWithLp }
+
+(* The 10 slots a run of Ten Levels With LP is written as, whatever the field beside it says are in use *)
+SlotsTenLevelsWithLp == { [i \in 1 .. 10 |-> one] : one \in OneTenLevelsWithLp }
+
+(***************************************************************************)
+(* Securities Quote Mm Lp Included Message                                 *)
 (***************************************************************************)
 
 SecuritiesQuoteMmLpIncludedMessage ==
@@ -1226,66 +1138,7 @@ SecuritiesQuoteMmLpIncludedMessage ==
       isinCode                      : Sample(12),
       aDesignatedNumberForAnIssue   : Sample(6),
       processingTimeOfTradingSystem : Sample(12),
-      askLevel1Price                : Sample(11),
-      bidLevel1Price                : Sample(11),
-      askLevel1Volume               : Sample(12),
-      bidLevel1Volume               : Sample(12),
-      lpAskLevel1Volume             : Sample(12),
-      lpBidLevel1Volume             : Sample(12),
-      askLevel2Price                : Sample(11),
-      bidLevel2Price                : Sample(11),
-      askLevel2Volume               : Sample(12),
-      bidLevel2Volume               : Sample(12),
-      lpAskLevel2Volume             : Sample(12),
-      lpBidLevel2Volume             : Sample(12),
-      askLevel3Price                : Sample(11),
-      bidLevel3Price                : Sample(11),
-      askLevel3Volume               : Sample(12),
-      bidLevel3Volume               : Sample(12),
-      lpAskLevel3Volume             : Sample(12),
-      lpBidLevel3Volume             : Sample(12),
-      askLevel4Price                : Sample(11),
-      bidLevel4Price                : Sample(11),
-      askLevel4Volume               : Sample(12),
-      bidLevel4Volume               : Sample(12),
-      lpAskLevel4Volume             : Sample(12),
-      lpBidLevel4Volume             : Sample(12),
-      askLevel5Price                : Sample(11),
-      bidLevel5Price                : Sample(11),
-      askLevel5Volume               : Sample(12),
-      bidLevel5Volume               : Sample(12),
-      lpAskLevel5Volume             : Sample(12),
-      lpBidLevel5Volume             : Sample(12),
-      askLevel6Price                : Sample(11),
-      bidLevel6Price                : Sample(11),
-      askLevel6Volume               : Sample(12),
-      bidLevel6Volume               : Sample(12),
-      lpAskLevel6Volume             : Sample(12),
-      lpBidLevel6Volume             : Sample(12),
-      askLevel7Price                : Sample(11),
-      bidLevel7Price                : Sample(11),
-      askLevel7Volume               : Sample(12),
-      bidLevel7Volume               : Sample(12),
-      lpAskLevel7Volume             : Sample(12),
-      lpBidLevel7Volume             : Sample(12),
-      askLevel8Price                : Sample(11),
-      bidLevel8Price                : Sample(11),
-      askLevel8Volume               : Sample(12),
-      bidLevel8Volume               : Sample(12),
-      lpAskLevel8Volume             : Sample(12),
-      lpBidLevel8Volume             : Sample(12),
-      askLevel9Price                : Sample(11),
-      bidLevel9Price                : Sample(11),
-      askLevel9Volume               : Sample(12),
-      bidLevel9Volume               : Sample(12),
-      lpAskLevel9Volume             : Sample(12),
-      lpBidLevel9Volume             : Sample(12),
-      askLevel10Price               : Sample(11),
-      bidLevel10Price               : Sample(11),
-      askLevel10Volume              : Sample(12),
-      bidLevel10Volume              : Sample(12),
-      lpAskLevel10Volume            : Sample(12),
-      lpBidLevel10Volume            : Sample(12),
+      tenLevelsWithLp               : SlotsTenLevelsWithLp,
       totalAskVolume                : Sample(12),
       totalBidVolume                : Sample(12),
       estimatedTradingPrice         : Sample(11),
@@ -1302,66 +1155,7 @@ EncodeSecuritiesQuoteMmLpIncludedMessage(message) ==
         \o message.isinCode
         \o message.aDesignatedNumberForAnIssue
         \o message.processingTimeOfTradingSystem
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.lpAskLevel1Volume
-        \o message.lpBidLevel1Volume
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.lpAskLevel2Volume
-        \o message.lpBidLevel2Volume
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.lpAskLevel3Volume
-        \o message.lpBidLevel3Volume
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.lpAskLevel4Volume
-        \o message.lpBidLevel4Volume
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.lpAskLevel5Volume
-        \o message.lpBidLevel5Volume
-        \o message.askLevel6Price
-        \o message.bidLevel6Price
-        \o message.askLevel6Volume
-        \o message.bidLevel6Volume
-        \o message.lpAskLevel6Volume
-        \o message.lpBidLevel6Volume
-        \o message.askLevel7Price
-        \o message.bidLevel7Price
-        \o message.askLevel7Volume
-        \o message.bidLevel7Volume
-        \o message.lpAskLevel7Volume
-        \o message.lpBidLevel7Volume
-        \o message.askLevel8Price
-        \o message.bidLevel8Price
-        \o message.askLevel8Volume
-        \o message.bidLevel8Volume
-        \o message.lpAskLevel8Volume
-        \o message.lpBidLevel8Volume
-        \o message.askLevel9Price
-        \o message.bidLevel9Price
-        \o message.askLevel9Volume
-        \o message.bidLevel9Volume
-        \o message.lpAskLevel9Volume
-        \o message.lpBidLevel9Volume
-        \o message.askLevel10Price
-        \o message.bidLevel10Price
-        \o message.askLevel10Volume
-        \o message.bidLevel10Volume
-        \o message.lpAskLevel10Volume
-        \o message.lpBidLevel10Volume
+        \o EncodeTenLevelsWithLpList(message.tenLevelsWithLp)
         \o message.totalAskVolume
         \o message.totalBidVolume
         \o message.estimatedTradingPrice
@@ -1378,67 +1172,8 @@ DecodeSecuritiesQuoteMmLpIncludedMessage(bytes) ==
     LET isinCode == ReadBytes(sessionId.rest, 12) IN IF ~isinCode.ok THEN Fail ELSE
     LET aDesignatedNumberForAnIssue == ReadBytes(isinCode.rest, 6) IN IF ~aDesignatedNumberForAnIssue.ok THEN Fail ELSE
     LET processingTimeOfTradingSystem == ReadBytes(aDesignatedNumberForAnIssue.rest, 12) IN IF ~processingTimeOfTradingSystem.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(processingTimeOfTradingSystem.rest, 11) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 11) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 12) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 12) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET lpAskLevel1Volume == ReadBytes(bidLevel1Volume.rest, 12) IN IF ~lpAskLevel1Volume.ok THEN Fail ELSE
-    LET lpBidLevel1Volume == ReadBytes(lpAskLevel1Volume.rest, 12) IN IF ~lpBidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(lpBidLevel1Volume.rest, 11) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 11) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 12) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 12) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET lpAskLevel2Volume == ReadBytes(bidLevel2Volume.rest, 12) IN IF ~lpAskLevel2Volume.ok THEN Fail ELSE
-    LET lpBidLevel2Volume == ReadBytes(lpAskLevel2Volume.rest, 12) IN IF ~lpBidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(lpBidLevel2Volume.rest, 11) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 11) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 12) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 12) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET lpAskLevel3Volume == ReadBytes(bidLevel3Volume.rest, 12) IN IF ~lpAskLevel3Volume.ok THEN Fail ELSE
-    LET lpBidLevel3Volume == ReadBytes(lpAskLevel3Volume.rest, 12) IN IF ~lpBidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(lpBidLevel3Volume.rest, 11) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 11) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 12) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 12) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET lpAskLevel4Volume == ReadBytes(bidLevel4Volume.rest, 12) IN IF ~lpAskLevel4Volume.ok THEN Fail ELSE
-    LET lpBidLevel4Volume == ReadBytes(lpAskLevel4Volume.rest, 12) IN IF ~lpBidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(lpBidLevel4Volume.rest, 11) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 11) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 12) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 12) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET lpAskLevel5Volume == ReadBytes(bidLevel5Volume.rest, 12) IN IF ~lpAskLevel5Volume.ok THEN Fail ELSE
-    LET lpBidLevel5Volume == ReadBytes(lpAskLevel5Volume.rest, 12) IN IF ~lpBidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel6Price == ReadBytes(lpBidLevel5Volume.rest, 11) IN IF ~askLevel6Price.ok THEN Fail ELSE
-    LET bidLevel6Price == ReadBytes(askLevel6Price.rest, 11) IN IF ~bidLevel6Price.ok THEN Fail ELSE
-    LET askLevel6Volume == ReadBytes(bidLevel6Price.rest, 12) IN IF ~askLevel6Volume.ok THEN Fail ELSE
-    LET bidLevel6Volume == ReadBytes(askLevel6Volume.rest, 12) IN IF ~bidLevel6Volume.ok THEN Fail ELSE
-    LET lpAskLevel6Volume == ReadBytes(bidLevel6Volume.rest, 12) IN IF ~lpAskLevel6Volume.ok THEN Fail ELSE
-    LET lpBidLevel6Volume == ReadBytes(lpAskLevel6Volume.rest, 12) IN IF ~lpBidLevel6Volume.ok THEN Fail ELSE
-    LET askLevel7Price == ReadBytes(lpBidLevel6Volume.rest, 11) IN IF ~askLevel7Price.ok THEN Fail ELSE
-    LET bidLevel7Price == ReadBytes(askLevel7Price.rest, 11) IN IF ~bidLevel7Price.ok THEN Fail ELSE
-    LET askLevel7Volume == ReadBytes(bidLevel7Price.rest, 12) IN IF ~askLevel7Volume.ok THEN Fail ELSE
-    LET bidLevel7Volume == ReadBytes(askLevel7Volume.rest, 12) IN IF ~bidLevel7Volume.ok THEN Fail ELSE
-    LET lpAskLevel7Volume == ReadBytes(bidLevel7Volume.rest, 12) IN IF ~lpAskLevel7Volume.ok THEN Fail ELSE
-    LET lpBidLevel7Volume == ReadBytes(lpAskLevel7Volume.rest, 12) IN IF ~lpBidLevel7Volume.ok THEN Fail ELSE
-    LET askLevel8Price == ReadBytes(lpBidLevel7Volume.rest, 11) IN IF ~askLevel8Price.ok THEN Fail ELSE
-    LET bidLevel8Price == ReadBytes(askLevel8Price.rest, 11) IN IF ~bidLevel8Price.ok THEN Fail ELSE
-    LET askLevel8Volume == ReadBytes(bidLevel8Price.rest, 12) IN IF ~askLevel8Volume.ok THEN Fail ELSE
-    LET bidLevel8Volume == ReadBytes(askLevel8Volume.rest, 12) IN IF ~bidLevel8Volume.ok THEN Fail ELSE
-    LET lpAskLevel8Volume == ReadBytes(bidLevel8Volume.rest, 12) IN IF ~lpAskLevel8Volume.ok THEN Fail ELSE
-    LET lpBidLevel8Volume == ReadBytes(lpAskLevel8Volume.rest, 12) IN IF ~lpBidLevel8Volume.ok THEN Fail ELSE
-    LET askLevel9Price == ReadBytes(lpBidLevel8Volume.rest, 11) IN IF ~askLevel9Price.ok THEN Fail ELSE
-    LET bidLevel9Price == ReadBytes(askLevel9Price.rest, 11) IN IF ~bidLevel9Price.ok THEN Fail ELSE
-    LET askLevel9Volume == ReadBytes(bidLevel9Price.rest, 12) IN IF ~askLevel9Volume.ok THEN Fail ELSE
-    LET bidLevel9Volume == ReadBytes(askLevel9Volume.rest, 12) IN IF ~bidLevel9Volume.ok THEN Fail ELSE
-    LET lpAskLevel9Volume == ReadBytes(bidLevel9Volume.rest, 12) IN IF ~lpAskLevel9Volume.ok THEN Fail ELSE
-    LET lpBidLevel9Volume == ReadBytes(lpAskLevel9Volume.rest, 12) IN IF ~lpBidLevel9Volume.ok THEN Fail ELSE
-    LET askLevel10Price == ReadBytes(lpBidLevel9Volume.rest, 11) IN IF ~askLevel10Price.ok THEN Fail ELSE
-    LET bidLevel10Price == ReadBytes(askLevel10Price.rest, 11) IN IF ~bidLevel10Price.ok THEN Fail ELSE
-    LET askLevel10Volume == ReadBytes(bidLevel10Price.rest, 12) IN IF ~askLevel10Volume.ok THEN Fail ELSE
-    LET bidLevel10Volume == ReadBytes(askLevel10Volume.rest, 12) IN IF ~bidLevel10Volume.ok THEN Fail ELSE
-    LET lpAskLevel10Volume == ReadBytes(bidLevel10Volume.rest, 12) IN IF ~lpAskLevel10Volume.ok THEN Fail ELSE
-    LET lpBidLevel10Volume == ReadBytes(lpAskLevel10Volume.rest, 12) IN IF ~lpBidLevel10Volume.ok THEN Fail ELSE
-    LET totalAskVolume == ReadBytes(lpBidLevel10Volume.rest, 12) IN IF ~totalAskVolume.ok THEN Fail ELSE
+    LET tenLevelsWithLp == ReadTenLevelsWithLpList(processingTimeOfTradingSystem.rest, 10) IN IF ~tenLevelsWithLp.ok THEN Fail ELSE
+    LET totalAskVolume == ReadBytes(tenLevelsWithLp.rest, 12) IN IF ~totalAskVolume.ok THEN Fail ELSE
     LET totalBidVolume == ReadBytes(totalAskVolume.rest, 12) IN IF ~totalBidVolume.ok THEN Fail ELSE
     LET estimatedTradingPrice == ReadBytes(totalBidVolume.rest, 11) IN IF ~estimatedTradingPrice.ok THEN Fail ELSE
     LET estimatedTradingVolume == ReadBytes(estimatedTradingPrice.rest, 12) IN IF ~estimatedTradingVolume.ok THEN Fail ELSE
@@ -1452,66 +1187,7 @@ DecodeSecuritiesQuoteMmLpIncludedMessage(bytes) ==
          isinCode                      |-> isinCode.value,
          aDesignatedNumberForAnIssue   |-> aDesignatedNumberForAnIssue.value,
          processingTimeOfTradingSystem |-> processingTimeOfTradingSystem.value,
-         askLevel1Price                |-> askLevel1Price.value,
-         bidLevel1Price                |-> bidLevel1Price.value,
-         askLevel1Volume               |-> askLevel1Volume.value,
-         bidLevel1Volume               |-> bidLevel1Volume.value,
-         lpAskLevel1Volume             |-> lpAskLevel1Volume.value,
-         lpBidLevel1Volume             |-> lpBidLevel1Volume.value,
-         askLevel2Price                |-> askLevel2Price.value,
-         bidLevel2Price                |-> bidLevel2Price.value,
-         askLevel2Volume               |-> askLevel2Volume.value,
-         bidLevel2Volume               |-> bidLevel2Volume.value,
-         lpAskLevel2Volume             |-> lpAskLevel2Volume.value,
-         lpBidLevel2Volume             |-> lpBidLevel2Volume.value,
-         askLevel3Price                |-> askLevel3Price.value,
-         bidLevel3Price                |-> bidLevel3Price.value,
-         askLevel3Volume               |-> askLevel3Volume.value,
-         bidLevel3Volume               |-> bidLevel3Volume.value,
-         lpAskLevel3Volume             |-> lpAskLevel3Volume.value,
-         lpBidLevel3Volume             |-> lpBidLevel3Volume.value,
-         askLevel4Price                |-> askLevel4Price.value,
-         bidLevel4Price                |-> bidLevel4Price.value,
-         askLevel4Volume               |-> askLevel4Volume.value,
-         bidLevel4Volume               |-> bidLevel4Volume.value,
-         lpAskLevel4Volume             |-> lpAskLevel4Volume.value,
-         lpBidLevel4Volume             |-> lpBidLevel4Volume.value,
-         askLevel5Price                |-> askLevel5Price.value,
-         bidLevel5Price                |-> bidLevel5Price.value,
-         askLevel5Volume               |-> askLevel5Volume.value,
-         bidLevel5Volume               |-> bidLevel5Volume.value,
-         lpAskLevel5Volume             |-> lpAskLevel5Volume.value,
-         lpBidLevel5Volume             |-> lpBidLevel5Volume.value,
-         askLevel6Price                |-> askLevel6Price.value,
-         bidLevel6Price                |-> bidLevel6Price.value,
-         askLevel6Volume               |-> askLevel6Volume.value,
-         bidLevel6Volume               |-> bidLevel6Volume.value,
-         lpAskLevel6Volume             |-> lpAskLevel6Volume.value,
-         lpBidLevel6Volume             |-> lpBidLevel6Volume.value,
-         askLevel7Price                |-> askLevel7Price.value,
-         bidLevel7Price                |-> bidLevel7Price.value,
-         askLevel7Volume               |-> askLevel7Volume.value,
-         bidLevel7Volume               |-> bidLevel7Volume.value,
-         lpAskLevel7Volume             |-> lpAskLevel7Volume.value,
-         lpBidLevel7Volume             |-> lpBidLevel7Volume.value,
-         askLevel8Price                |-> askLevel8Price.value,
-         bidLevel8Price                |-> bidLevel8Price.value,
-         askLevel8Volume               |-> askLevel8Volume.value,
-         bidLevel8Volume               |-> bidLevel8Volume.value,
-         lpAskLevel8Volume             |-> lpAskLevel8Volume.value,
-         lpBidLevel8Volume             |-> lpBidLevel8Volume.value,
-         askLevel9Price                |-> askLevel9Price.value,
-         bidLevel9Price                |-> bidLevel9Price.value,
-         askLevel9Volume               |-> askLevel9Volume.value,
-         bidLevel9Volume               |-> bidLevel9Volume.value,
-         lpAskLevel9Volume             |-> lpAskLevel9Volume.value,
-         lpBidLevel9Volume             |-> lpBidLevel9Volume.value,
-         askLevel10Price               |-> askLevel10Price.value,
-         bidLevel10Price               |-> bidLevel10Price.value,
-         askLevel10Volume              |-> askLevel10Volume.value,
-         bidLevel10Volume              |-> bidLevel10Volume.value,
-         lpAskLevel10Volume            |-> lpAskLevel10Volume.value,
-         lpBidLevel10Volume            |-> lpBidLevel10Volume.value,
+         tenLevelsWithLp               |-> tenLevelsWithLp.value,
          totalAskVolume                |-> totalAskVolume.value,
          totalBidVolume                |-> totalBidVolume.value,
          estimatedTradingPrice         |-> estimatedTradingPrice.value,
@@ -1528,66 +1204,7 @@ ZeroSecuritiesQuoteMmLpIncludedMessage ==
       isinCode                      |-> [i \in 1 .. 12 |-> 0],
       aDesignatedNumberForAnIssue   |-> [i \in 1 .. 6 |-> 0],
       processingTimeOfTradingSystem |-> [i \in 1 .. 12 |-> 0],
-      askLevel1Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel1Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel1Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel1Volume               |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel1Volume             |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel1Volume             |-> [i \in 1 .. 12 |-> 0],
-      askLevel2Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel2Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel2Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel2Volume               |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel2Volume             |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel2Volume             |-> [i \in 1 .. 12 |-> 0],
-      askLevel3Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel3Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel3Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel3Volume               |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel3Volume             |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel3Volume             |-> [i \in 1 .. 12 |-> 0],
-      askLevel4Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel4Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel4Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel4Volume               |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel4Volume             |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel4Volume             |-> [i \in 1 .. 12 |-> 0],
-      askLevel5Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel5Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel5Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel5Volume               |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel5Volume             |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel5Volume             |-> [i \in 1 .. 12 |-> 0],
-      askLevel6Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel6Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel6Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel6Volume               |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel6Volume             |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel6Volume             |-> [i \in 1 .. 12 |-> 0],
-      askLevel7Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel7Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel7Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel7Volume               |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel7Volume             |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel7Volume             |-> [i \in 1 .. 12 |-> 0],
-      askLevel8Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel8Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel8Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel8Volume               |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel8Volume             |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel8Volume             |-> [i \in 1 .. 12 |-> 0],
-      askLevel9Price                |-> [i \in 1 .. 11 |-> 0],
-      bidLevel9Price                |-> [i \in 1 .. 11 |-> 0],
-      askLevel9Volume               |-> [i \in 1 .. 12 |-> 0],
-      bidLevel9Volume               |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel9Volume             |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel9Volume             |-> [i \in 1 .. 12 |-> 0],
-      askLevel10Price               |-> [i \in 1 .. 11 |-> 0],
-      bidLevel10Price               |-> [i \in 1 .. 11 |-> 0],
-      askLevel10Volume              |-> [i \in 1 .. 12 |-> 0],
-      bidLevel10Volume              |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel10Volume            |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel10Volume            |-> [i \in 1 .. 12 |-> 0],
+      tenLevelsWithLp               |-> [i \in 1 .. 10 |-> ZeroTenLevelsWithLp],
       totalAskVolume                |-> [i \in 1 .. 12 |-> 0],
       totalBidVolume                |-> [i \in 1 .. 12 |-> 0],
       estimatedTradingPrice         |-> [i \in 1 .. 11 |-> 0],
@@ -1606,66 +1223,7 @@ CheckedSecuritiesQuoteMmLpIncludedMessage ==
         \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.isinCode = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.aDesignatedNumberForAnIssue = one] : one \in Sample(6) }
         \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.processingTimeOfTradingSystem = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel1Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpAskLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpBidLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel2Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpAskLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpBidLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel3Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpAskLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpBidLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel4Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpAskLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpBidLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel5Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpAskLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpBidLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel6Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel6Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpAskLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpBidLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel7Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel7Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpAskLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpBidLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel8Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel8Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpAskLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpBidLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel9Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel9Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpAskLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpBidLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel10Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel10Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.askLevel10Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.bidLevel10Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpAskLevel10Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.lpBidLevel10Volume = one] : one \in Sample(12) }
+        \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.tenLevelsWithLp = one] : one \in SlotsTenLevelsWithLp }
         \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.totalAskVolume = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.totalBidVolume = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.estimatedTradingPrice = one] : one \in Sample(11) }
@@ -1676,7 +1234,71 @@ CheckedSecuritiesQuoteMmLpIncludedMessage ==
         \cup { [ZeroSecuritiesQuoteMmLpIncludedMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Securities Snapshot Mm Lp Excluded Message: 680 bytes                   *)
+(* Ten Levels: 46 bytes                                                    *)
+(***************************************************************************)
+
+TenLevels2 ==
+    [ askPrice  : Sample(11),
+      bidPrice  : Sample(11),
+      askVolume : Sample(12),
+      bidVolume : Sample(12) ]
+
+EncodeTenLevels2(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+
+DecodeTenLevels2(bytes) ==
+    LET askPrice == ReadBytes(bytes, 11) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 11) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 12) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 12) IN IF ~bidVolume.ok THEN Fail ELSE
+    Ok([ askPrice  |-> askPrice.value,
+         bidPrice  |-> bidPrice.value,
+         askVolume |-> askVolume.value,
+         bidVolume |-> bidVolume.value ], bidVolume.rest)
+
+ZeroTenLevels2 ==
+    [ askPrice  |-> [i \in 1 .. 11 |-> 0],
+      bidPrice  |-> [i \in 1 .. 11 |-> 0],
+      askVolume |-> [i \in 1 .. 12 |-> 0],
+      bidVolume |-> [i \in 1 .. 12 |-> 0] ]
+
+(* Ten Levels at zero, then each field in turn at the values it is checked at *)
+CheckedTenLevels2 ==
+    { ZeroTenLevels2 }
+        \cup { [ZeroTenLevels2 EXCEPT !.askPrice = one] : one \in Sample(11) }
+        \cup { [ZeroTenLevels2 EXCEPT !.bidPrice = one] : one \in Sample(11) }
+        \cup { [ZeroTenLevels2 EXCEPT !.askVolume = one] : one \in Sample(12) }
+        \cup { [ZeroTenLevels2 EXCEPT !.bidVolume = one] : one \in Sample(12) }
+
+(* A run of Ten Levels, written one after another *)
+RECURSIVE EncodeTenLevels2List(_)
+EncodeTenLevels2List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeTenLevels2(Head(messages)) \o EncodeTenLevels2List(Tail(messages))
+
+(* As many Ten Levels as the field that counts them says *)
+RECURSIVE ReadTenLevels2List(_, _)
+ReadTenLevels2List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeTenLevels2(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadTenLevels2List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Ten Levels of each kind, for the lists that carry them *)
+OneTenLevels2 == { ZeroTenLevels2 }
+
+(* The 10 slots a run of Ten Levels is written as, whatever the field beside it says are in use *)
+SlotsTenLevels2 == { [i \in 1 .. 10 |-> one] : one \in OneTenLevels2 }
+
+(***************************************************************************)
+(* Securities Snapshot Mm Lp Excluded Message                              *)
 (***************************************************************************)
 
 SecuritiesSnapshotMmLpExcludedMessage ==
@@ -1695,46 +1317,7 @@ SecuritiesSnapshotMmLpExcludedMessage ==
       accumulatedTradingVolume          : Sample(12),
       accumulatedTradingValue           : Sample(22),
       finalAskBidTypeCode               : Sample(1),
-      askLevel1Price                    : Sample(11),
-      bidLevel1Price                    : Sample(11),
-      askLevel1Volume                   : Sample(12),
-      bidLevel1Volume                   : Sample(12),
-      askLevel2Price                    : Sample(11),
-      bidLevel2Price                    : Sample(11),
-      askLevel2Volume                   : Sample(12),
-      bidLevel2Volume                   : Sample(12),
-      askLevel3Price                    : Sample(11),
-      bidLevel3Price                    : Sample(11),
-      askLevel3Volume                   : Sample(12),
-      bidLevel3Volume                   : Sample(12),
-      askLevel4Price                    : Sample(11),
-      bidLevel4Price                    : Sample(11),
-      askLevel4Volume                   : Sample(12),
-      bidLevel4Volume                   : Sample(12),
-      askLevel5Price                    : Sample(11),
-      bidLevel5Price                    : Sample(11),
-      askLevel5Volume                   : Sample(12),
-      bidLevel5Volume                   : Sample(12),
-      askLevel6Price                    : Sample(11),
-      bidLevel6Price                    : Sample(11),
-      askLevel6Volume                   : Sample(12),
-      bidLevel6Volume                   : Sample(12),
-      askLevel7Price                    : Sample(11),
-      bidLevel7Price                    : Sample(11),
-      askLevel7Volume                   : Sample(12),
-      bidLevel7Volume                   : Sample(12),
-      askLevel8Price                    : Sample(11),
-      bidLevel8Price                    : Sample(11),
-      askLevel8Volume                   : Sample(12),
-      bidLevel8Volume                   : Sample(12),
-      askLevel9Price                    : Sample(11),
-      bidLevel9Price                    : Sample(11),
-      askLevel9Volume                   : Sample(12),
-      bidLevel9Volume                   : Sample(12),
-      askLevel10Price                   : Sample(11),
-      bidLevel10Price                   : Sample(11),
-      askLevel10Volume                  : Sample(12),
-      bidLevel10Volume                  : Sample(12),
+      tenLevels                         : SlotsTenLevels2,
       totalAskVolume                    : Sample(12),
       totalBidVolume                    : Sample(12),
       estimatedTradingPrice             : Sample(11),
@@ -1762,46 +1345,7 @@ EncodeSecuritiesSnapshotMmLpExcludedMessage(message) ==
         \o message.accumulatedTradingVolume
         \o message.accumulatedTradingValue
         \o message.finalAskBidTypeCode
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.askLevel6Price
-        \o message.bidLevel6Price
-        \o message.askLevel6Volume
-        \o message.bidLevel6Volume
-        \o message.askLevel7Price
-        \o message.bidLevel7Price
-        \o message.askLevel7Volume
-        \o message.bidLevel7Volume
-        \o message.askLevel8Price
-        \o message.bidLevel8Price
-        \o message.askLevel8Volume
-        \o message.bidLevel8Volume
-        \o message.askLevel9Price
-        \o message.bidLevel9Price
-        \o message.askLevel9Volume
-        \o message.bidLevel9Volume
-        \o message.askLevel10Price
-        \o message.bidLevel10Price
-        \o message.askLevel10Volume
-        \o message.bidLevel10Volume
+        \o EncodeTenLevels2List(message.tenLevels)
         \o message.totalAskVolume
         \o message.totalBidVolume
         \o message.estimatedTradingPrice
@@ -1829,47 +1373,8 @@ DecodeSecuritiesSnapshotMmLpExcludedMessage(bytes) ==
     LET accumulatedTradingVolume == ReadBytes(todaysLow.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
     LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
     LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(finalAskBidTypeCode.rest, 11) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 11) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 12) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 12) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(bidLevel1Volume.rest, 11) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 11) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 12) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 12) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(bidLevel2Volume.rest, 11) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 11) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 12) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 12) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(bidLevel3Volume.rest, 11) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 11) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 12) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 12) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(bidLevel4Volume.rest, 11) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 11) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 12) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 12) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel6Price == ReadBytes(bidLevel5Volume.rest, 11) IN IF ~askLevel6Price.ok THEN Fail ELSE
-    LET bidLevel6Price == ReadBytes(askLevel6Price.rest, 11) IN IF ~bidLevel6Price.ok THEN Fail ELSE
-    LET askLevel6Volume == ReadBytes(bidLevel6Price.rest, 12) IN IF ~askLevel6Volume.ok THEN Fail ELSE
-    LET bidLevel6Volume == ReadBytes(askLevel6Volume.rest, 12) IN IF ~bidLevel6Volume.ok THEN Fail ELSE
-    LET askLevel7Price == ReadBytes(bidLevel6Volume.rest, 11) IN IF ~askLevel7Price.ok THEN Fail ELSE
-    LET bidLevel7Price == ReadBytes(askLevel7Price.rest, 11) IN IF ~bidLevel7Price.ok THEN Fail ELSE
-    LET askLevel7Volume == ReadBytes(bidLevel7Price.rest, 12) IN IF ~askLevel7Volume.ok THEN Fail ELSE
-    LET bidLevel7Volume == ReadBytes(askLevel7Volume.rest, 12) IN IF ~bidLevel7Volume.ok THEN Fail ELSE
-    LET askLevel8Price == ReadBytes(bidLevel7Volume.rest, 11) IN IF ~askLevel8Price.ok THEN Fail ELSE
-    LET bidLevel8Price == ReadBytes(askLevel8Price.rest, 11) IN IF ~bidLevel8Price.ok THEN Fail ELSE
-    LET askLevel8Volume == ReadBytes(bidLevel8Price.rest, 12) IN IF ~askLevel8Volume.ok THEN Fail ELSE
-    LET bidLevel8Volume == ReadBytes(askLevel8Volume.rest, 12) IN IF ~bidLevel8Volume.ok THEN Fail ELSE
-    LET askLevel9Price == ReadBytes(bidLevel8Volume.rest, 11) IN IF ~askLevel9Price.ok THEN Fail ELSE
-    LET bidLevel9Price == ReadBytes(askLevel9Price.rest, 11) IN IF ~bidLevel9Price.ok THEN Fail ELSE
-    LET askLevel9Volume == ReadBytes(bidLevel9Price.rest, 12) IN IF ~askLevel9Volume.ok THEN Fail ELSE
-    LET bidLevel9Volume == ReadBytes(askLevel9Volume.rest, 12) IN IF ~bidLevel9Volume.ok THEN Fail ELSE
-    LET askLevel10Price == ReadBytes(bidLevel9Volume.rest, 11) IN IF ~askLevel10Price.ok THEN Fail ELSE
-    LET bidLevel10Price == ReadBytes(askLevel10Price.rest, 11) IN IF ~bidLevel10Price.ok THEN Fail ELSE
-    LET askLevel10Volume == ReadBytes(bidLevel10Price.rest, 12) IN IF ~askLevel10Volume.ok THEN Fail ELSE
-    LET bidLevel10Volume == ReadBytes(askLevel10Volume.rest, 12) IN IF ~bidLevel10Volume.ok THEN Fail ELSE
-    LET totalAskVolume == ReadBytes(bidLevel10Volume.rest, 12) IN IF ~totalAskVolume.ok THEN Fail ELSE
+    LET tenLevels == ReadTenLevels2List(finalAskBidTypeCode.rest, 10) IN IF ~tenLevels.ok THEN Fail ELSE
+    LET totalAskVolume == ReadBytes(tenLevels.rest, 12) IN IF ~totalAskVolume.ok THEN Fail ELSE
     LET totalBidVolume == ReadBytes(totalAskVolume.rest, 12) IN IF ~totalBidVolume.ok THEN Fail ELSE
     LET estimatedTradingPrice == ReadBytes(totalBidVolume.rest, 11) IN IF ~estimatedTradingPrice.ok THEN Fail ELSE
     LET estimatedTradingVolume == ReadBytes(estimatedTradingPrice.rest, 12) IN IF ~estimatedTradingVolume.ok THEN Fail ELSE
@@ -1894,46 +1399,7 @@ DecodeSecuritiesSnapshotMmLpExcludedMessage(bytes) ==
          accumulatedTradingVolume          |-> accumulatedTradingVolume.value,
          accumulatedTradingValue           |-> accumulatedTradingValue.value,
          finalAskBidTypeCode               |-> finalAskBidTypeCode.value,
-         askLevel1Price                    |-> askLevel1Price.value,
-         bidLevel1Price                    |-> bidLevel1Price.value,
-         askLevel1Volume                   |-> askLevel1Volume.value,
-         bidLevel1Volume                   |-> bidLevel1Volume.value,
-         askLevel2Price                    |-> askLevel2Price.value,
-         bidLevel2Price                    |-> bidLevel2Price.value,
-         askLevel2Volume                   |-> askLevel2Volume.value,
-         bidLevel2Volume                   |-> bidLevel2Volume.value,
-         askLevel3Price                    |-> askLevel3Price.value,
-         bidLevel3Price                    |-> bidLevel3Price.value,
-         askLevel3Volume                   |-> askLevel3Volume.value,
-         bidLevel3Volume                   |-> bidLevel3Volume.value,
-         askLevel4Price                    |-> askLevel4Price.value,
-         bidLevel4Price                    |-> bidLevel4Price.value,
-         askLevel4Volume                   |-> askLevel4Volume.value,
-         bidLevel4Volume                   |-> bidLevel4Volume.value,
-         askLevel5Price                    |-> askLevel5Price.value,
-         bidLevel5Price                    |-> bidLevel5Price.value,
-         askLevel5Volume                   |-> askLevel5Volume.value,
-         bidLevel5Volume                   |-> bidLevel5Volume.value,
-         askLevel6Price                    |-> askLevel6Price.value,
-         bidLevel6Price                    |-> bidLevel6Price.value,
-         askLevel6Volume                   |-> askLevel6Volume.value,
-         bidLevel6Volume                   |-> bidLevel6Volume.value,
-         askLevel7Price                    |-> askLevel7Price.value,
-         bidLevel7Price                    |-> bidLevel7Price.value,
-         askLevel7Volume                   |-> askLevel7Volume.value,
-         bidLevel7Volume                   |-> bidLevel7Volume.value,
-         askLevel8Price                    |-> askLevel8Price.value,
-         bidLevel8Price                    |-> bidLevel8Price.value,
-         askLevel8Volume                   |-> askLevel8Volume.value,
-         bidLevel8Volume                   |-> bidLevel8Volume.value,
-         askLevel9Price                    |-> askLevel9Price.value,
-         bidLevel9Price                    |-> bidLevel9Price.value,
-         askLevel9Volume                   |-> askLevel9Volume.value,
-         bidLevel9Volume                   |-> bidLevel9Volume.value,
-         askLevel10Price                   |-> askLevel10Price.value,
-         bidLevel10Price                   |-> bidLevel10Price.value,
-         askLevel10Volume                  |-> askLevel10Volume.value,
-         bidLevel10Volume                  |-> bidLevel10Volume.value,
+         tenLevels                         |-> tenLevels.value,
          totalAskVolume                    |-> totalAskVolume.value,
          totalBidVolume                    |-> totalBidVolume.value,
          estimatedTradingPrice             |-> estimatedTradingPrice.value,
@@ -1961,46 +1427,7 @@ ZeroSecuritiesSnapshotMmLpExcludedMessage ==
       accumulatedTradingVolume          |-> [i \in 1 .. 12 |-> 0],
       accumulatedTradingValue           |-> [i \in 1 .. 22 |-> 0],
       finalAskBidTypeCode               |-> [i \in 1 .. 1 |-> 0],
-      askLevel1Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel1Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel1Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel1Volume                   |-> [i \in 1 .. 12 |-> 0],
-      askLevel2Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel2Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel2Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel2Volume                   |-> [i \in 1 .. 12 |-> 0],
-      askLevel3Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel3Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel3Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel3Volume                   |-> [i \in 1 .. 12 |-> 0],
-      askLevel4Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel4Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel4Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel4Volume                   |-> [i \in 1 .. 12 |-> 0],
-      askLevel5Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel5Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel5Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel5Volume                   |-> [i \in 1 .. 12 |-> 0],
-      askLevel6Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel6Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel6Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel6Volume                   |-> [i \in 1 .. 12 |-> 0],
-      askLevel7Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel7Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel7Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel7Volume                   |-> [i \in 1 .. 12 |-> 0],
-      askLevel8Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel8Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel8Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel8Volume                   |-> [i \in 1 .. 12 |-> 0],
-      askLevel9Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel9Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel9Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel9Volume                   |-> [i \in 1 .. 12 |-> 0],
-      askLevel10Price                   |-> [i \in 1 .. 11 |-> 0],
-      bidLevel10Price                   |-> [i \in 1 .. 11 |-> 0],
-      askLevel10Volume                  |-> [i \in 1 .. 12 |-> 0],
-      bidLevel10Volume                  |-> [i \in 1 .. 12 |-> 0],
+      tenLevels                         |-> [i \in 1 .. 10 |-> ZeroTenLevels2],
       totalAskVolume                    |-> [i \in 1 .. 12 |-> 0],
       totalBidVolume                    |-> [i \in 1 .. 12 |-> 0],
       estimatedTradingPrice             |-> [i \in 1 .. 11 |-> 0],
@@ -2030,46 +1457,7 @@ CheckedSecuritiesSnapshotMmLpExcludedMessage ==
         \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
         \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel1Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel2Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel3Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel4Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel5Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel6Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel6Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel7Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel7Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel8Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel8Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel9Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel9Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel10Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel10Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.askLevel10Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.bidLevel10Volume = one] : one \in Sample(12) }
+        \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.tenLevels = one] : one \in SlotsTenLevels2 }
         \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.totalAskVolume = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.totalBidVolume = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.estimatedTradingPrice = one] : one \in Sample(11) }
@@ -2082,7 +1470,83 @@ CheckedSecuritiesSnapshotMmLpExcludedMessage ==
         \cup { [ZeroSecuritiesSnapshotMmLpExcludedMessage EXCEPT !.endKeyword = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Securities Snapshot Mm Lp Included Message: 930 bytes                   *)
+(* Ten Levels With LP: 70 bytes                                            *)
+(***************************************************************************)
+
+TenLevelsWithLp2 ==
+    [ askPrice    : Sample(11),
+      bidPrice    : Sample(11),
+      askVolume   : Sample(12),
+      bidVolume   : Sample(12),
+      lpAskVolume : Sample(12),
+      lpBidVolume : Sample(12) ]
+
+EncodeTenLevelsWithLp2(message) ==
+    message.askPrice
+        \o message.bidPrice
+        \o message.askVolume
+        \o message.bidVolume
+        \o message.lpAskVolume
+        \o message.lpBidVolume
+
+DecodeTenLevelsWithLp2(bytes) ==
+    LET askPrice == ReadBytes(bytes, 11) IN IF ~askPrice.ok THEN Fail ELSE
+    LET bidPrice == ReadBytes(askPrice.rest, 11) IN IF ~bidPrice.ok THEN Fail ELSE
+    LET askVolume == ReadBytes(bidPrice.rest, 12) IN IF ~askVolume.ok THEN Fail ELSE
+    LET bidVolume == ReadBytes(askVolume.rest, 12) IN IF ~bidVolume.ok THEN Fail ELSE
+    LET lpAskVolume == ReadBytes(bidVolume.rest, 12) IN IF ~lpAskVolume.ok THEN Fail ELSE
+    LET lpBidVolume == ReadBytes(lpAskVolume.rest, 12) IN IF ~lpBidVolume.ok THEN Fail ELSE
+    Ok([ askPrice    |-> askPrice.value,
+         bidPrice    |-> bidPrice.value,
+         askVolume   |-> askVolume.value,
+         bidVolume   |-> bidVolume.value,
+         lpAskVolume |-> lpAskVolume.value,
+         lpBidVolume |-> lpBidVolume.value ], lpBidVolume.rest)
+
+ZeroTenLevelsWithLp2 ==
+    [ askPrice    |-> [i \in 1 .. 11 |-> 0],
+      bidPrice    |-> [i \in 1 .. 11 |-> 0],
+      askVolume   |-> [i \in 1 .. 12 |-> 0],
+      bidVolume   |-> [i \in 1 .. 12 |-> 0],
+      lpAskVolume |-> [i \in 1 .. 12 |-> 0],
+      lpBidVolume |-> [i \in 1 .. 12 |-> 0] ]
+
+(* Ten Levels With LP at zero, then each field in turn at the values it is checked at *)
+CheckedTenLevelsWithLp2 ==
+    { ZeroTenLevelsWithLp2 }
+        \cup { [ZeroTenLevelsWithLp2 EXCEPT !.askPrice = one] : one \in Sample(11) }
+        \cup { [ZeroTenLevelsWithLp2 EXCEPT !.bidPrice = one] : one \in Sample(11) }
+        \cup { [ZeroTenLevelsWithLp2 EXCEPT !.askVolume = one] : one \in Sample(12) }
+        \cup { [ZeroTenLevelsWithLp2 EXCEPT !.bidVolume = one] : one \in Sample(12) }
+        \cup { [ZeroTenLevelsWithLp2 EXCEPT !.lpAskVolume = one] : one \in Sample(12) }
+        \cup { [ZeroTenLevelsWithLp2 EXCEPT !.lpBidVolume = one] : one \in Sample(12) }
+
+(* A run of Ten Levels With LP, written one after another *)
+RECURSIVE EncodeTenLevelsWithLp2List(_)
+EncodeTenLevelsWithLp2List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeTenLevelsWithLp2(Head(messages)) \o EncodeTenLevelsWithLp2List(Tail(messages))
+
+(* As many Ten Levels With LP as the field that counts them says *)
+RECURSIVE ReadTenLevelsWithLp2List(_, _)
+ReadTenLevelsWithLp2List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeTenLevelsWithLp2(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadTenLevelsWithLp2List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Ten Levels With LP of each kind, for the lists that carry them *)
+OneTenLevelsWithLp2 == { ZeroTenLevelsWithLp2 }
+
+(* The 10 slots a run of Ten Levels With LP is written as, whatever the field beside it says are in use *)
+SlotsTenLevelsWithLp2 == { [i \in 1 .. 10 |-> one] : one \in OneTenLevelsWithLp2 }
+
+(***************************************************************************)
+(* Securities Snapshot Mm Lp Included Message                              *)
 (***************************************************************************)
 
 SecuritiesSnapshotMmLpIncludedMessage ==
@@ -2101,66 +1565,7 @@ SecuritiesSnapshotMmLpIncludedMessage ==
       accumulatedTradingVolume          : Sample(12),
       accumulatedTradingValue           : Sample(22),
       finalAskBidTypeCode               : Sample(1),
-      askLevel1Price                    : Sample(11),
-      bidLevel1Price                    : Sample(11),
-      askLevel1Volume                   : Sample(12),
-      bidLevel1Volume                   : Sample(12),
-      lpAskLevel1Volume                 : Sample(12),
-      lpBidLevel1Volume                 : Sample(12),
-      askLevel2Price                    : Sample(11),
-      bidLevel2Price                    : Sample(11),
-      askLevel2Volume                   : Sample(12),
-      bidLevel2Volume                   : Sample(12),
-      lpAskLevel2Volume                 : Sample(12),
-      lpBidLevel2Volume                 : Sample(12),
-      askLevel3Price                    : Sample(11),
-      bidLevel3Price                    : Sample(11),
-      askLevel3Volume                   : Sample(12),
-      bidLevel3Volume                   : Sample(12),
-      lpAskLevel3Volume                 : Sample(12),
-      lpBidLevel3Volume                 : Sample(12),
-      askLevel4Price                    : Sample(11),
-      bidLevel4Price                    : Sample(11),
-      askLevel4Volume                   : Sample(12),
-      bidLevel4Volume                   : Sample(12),
-      lpAskLevel4Volume                 : Sample(12),
-      lpBidLevel4Volume                 : Sample(12),
-      askLevel5Price                    : Sample(11),
-      bidLevel5Price                    : Sample(11),
-      askLevel5Volume                   : Sample(12),
-      bidLevel5Volume                   : Sample(12),
-      lpAskLevel5Volume                 : Sample(12),
-      lpBidLevel5Volume                 : Sample(12),
-      askLevel6Price                    : Sample(11),
-      bidLevel6Price                    : Sample(11),
-      askLevel6Volume                   : Sample(12),
-      bidLevel6Volume                   : Sample(12),
-      lpAskLevel6Volume                 : Sample(12),
-      lpBidLevel6Volume                 : Sample(12),
-      askLevel7Price                    : Sample(11),
-      bidLevel7Price                    : Sample(11),
-      askLevel7Volume                   : Sample(12),
-      bidLevel7Volume                   : Sample(12),
-      lpAskLevel7Volume                 : Sample(12),
-      lpBidLevel7Volume                 : Sample(12),
-      askLevel8Price                    : Sample(11),
-      bidLevel8Price                    : Sample(11),
-      askLevel8Volume                   : Sample(12),
-      bidLevel8Volume                   : Sample(12),
-      lpAskLevel8Volume                 : Sample(12),
-      lpBidLevel8Volume                 : Sample(12),
-      askLevel9Price                    : Sample(11),
-      bidLevel9Price                    : Sample(11),
-      askLevel9Volume                   : Sample(12),
-      bidLevel9Volume                   : Sample(12),
-      lpAskLevel9Volume                 : Sample(12),
-      lpBidLevel9Volume                 : Sample(12),
-      askLevel10Price                   : Sample(11),
-      bidLevel10Price                   : Sample(11),
-      askLevel10Volume                  : Sample(12),
-      bidLevel10Volume                  : Sample(12),
-      lpAskLevel10Volume                : Sample(12),
-      lpBidLevel10Volume                : Sample(12),
+      tenLevelsWithLp                   : SlotsTenLevelsWithLp2,
       totalAskVolume                    : Sample(12),
       totalBidVolume                    : Sample(12),
       estimatedTradingPrice             : Sample(11),
@@ -2190,66 +1595,7 @@ EncodeSecuritiesSnapshotMmLpIncludedMessage(message) ==
         \o message.accumulatedTradingVolume
         \o message.accumulatedTradingValue
         \o message.finalAskBidTypeCode
-        \o message.askLevel1Price
-        \o message.bidLevel1Price
-        \o message.askLevel1Volume
-        \o message.bidLevel1Volume
-        \o message.lpAskLevel1Volume
-        \o message.lpBidLevel1Volume
-        \o message.askLevel2Price
-        \o message.bidLevel2Price
-        \o message.askLevel2Volume
-        \o message.bidLevel2Volume
-        \o message.lpAskLevel2Volume
-        \o message.lpBidLevel2Volume
-        \o message.askLevel3Price
-        \o message.bidLevel3Price
-        \o message.askLevel3Volume
-        \o message.bidLevel3Volume
-        \o message.lpAskLevel3Volume
-        \o message.lpBidLevel3Volume
-        \o message.askLevel4Price
-        \o message.bidLevel4Price
-        \o message.askLevel4Volume
-        \o message.bidLevel4Volume
-        \o message.lpAskLevel4Volume
-        \o message.lpBidLevel4Volume
-        \o message.askLevel5Price
-        \o message.bidLevel5Price
-        \o message.askLevel5Volume
-        \o message.bidLevel5Volume
-        \o message.lpAskLevel5Volume
-        \o message.lpBidLevel5Volume
-        \o message.askLevel6Price
-        \o message.bidLevel6Price
-        \o message.askLevel6Volume
-        \o message.bidLevel6Volume
-        \o message.lpAskLevel6Volume
-        \o message.lpBidLevel6Volume
-        \o message.askLevel7Price
-        \o message.bidLevel7Price
-        \o message.askLevel7Volume
-        \o message.bidLevel7Volume
-        \o message.lpAskLevel7Volume
-        \o message.lpBidLevel7Volume
-        \o message.askLevel8Price
-        \o message.bidLevel8Price
-        \o message.askLevel8Volume
-        \o message.bidLevel8Volume
-        \o message.lpAskLevel8Volume
-        \o message.lpBidLevel8Volume
-        \o message.askLevel9Price
-        \o message.bidLevel9Price
-        \o message.askLevel9Volume
-        \o message.bidLevel9Volume
-        \o message.lpAskLevel9Volume
-        \o message.lpBidLevel9Volume
-        \o message.askLevel10Price
-        \o message.bidLevel10Price
-        \o message.askLevel10Volume
-        \o message.bidLevel10Volume
-        \o message.lpAskLevel10Volume
-        \o message.lpBidLevel10Volume
+        \o EncodeTenLevelsWithLp2List(message.tenLevelsWithLp)
         \o message.totalAskVolume
         \o message.totalBidVolume
         \o message.estimatedTradingPrice
@@ -2279,67 +1625,8 @@ DecodeSecuritiesSnapshotMmLpIncludedMessage(bytes) ==
     LET accumulatedTradingVolume == ReadBytes(todaysLow.rest, 12) IN IF ~accumulatedTradingVolume.ok THEN Fail ELSE
     LET accumulatedTradingValue == ReadBytes(accumulatedTradingVolume.rest, 22) IN IF ~accumulatedTradingValue.ok THEN Fail ELSE
     LET finalAskBidTypeCode == ReadBytes(accumulatedTradingValue.rest, 1) IN IF ~finalAskBidTypeCode.ok THEN Fail ELSE
-    LET askLevel1Price == ReadBytes(finalAskBidTypeCode.rest, 11) IN IF ~askLevel1Price.ok THEN Fail ELSE
-    LET bidLevel1Price == ReadBytes(askLevel1Price.rest, 11) IN IF ~bidLevel1Price.ok THEN Fail ELSE
-    LET askLevel1Volume == ReadBytes(bidLevel1Price.rest, 12) IN IF ~askLevel1Volume.ok THEN Fail ELSE
-    LET bidLevel1Volume == ReadBytes(askLevel1Volume.rest, 12) IN IF ~bidLevel1Volume.ok THEN Fail ELSE
-    LET lpAskLevel1Volume == ReadBytes(bidLevel1Volume.rest, 12) IN IF ~lpAskLevel1Volume.ok THEN Fail ELSE
-    LET lpBidLevel1Volume == ReadBytes(lpAskLevel1Volume.rest, 12) IN IF ~lpBidLevel1Volume.ok THEN Fail ELSE
-    LET askLevel2Price == ReadBytes(lpBidLevel1Volume.rest, 11) IN IF ~askLevel2Price.ok THEN Fail ELSE
-    LET bidLevel2Price == ReadBytes(askLevel2Price.rest, 11) IN IF ~bidLevel2Price.ok THEN Fail ELSE
-    LET askLevel2Volume == ReadBytes(bidLevel2Price.rest, 12) IN IF ~askLevel2Volume.ok THEN Fail ELSE
-    LET bidLevel2Volume == ReadBytes(askLevel2Volume.rest, 12) IN IF ~bidLevel2Volume.ok THEN Fail ELSE
-    LET lpAskLevel2Volume == ReadBytes(bidLevel2Volume.rest, 12) IN IF ~lpAskLevel2Volume.ok THEN Fail ELSE
-    LET lpBidLevel2Volume == ReadBytes(lpAskLevel2Volume.rest, 12) IN IF ~lpBidLevel2Volume.ok THEN Fail ELSE
-    LET askLevel3Price == ReadBytes(lpBidLevel2Volume.rest, 11) IN IF ~askLevel3Price.ok THEN Fail ELSE
-    LET bidLevel3Price == ReadBytes(askLevel3Price.rest, 11) IN IF ~bidLevel3Price.ok THEN Fail ELSE
-    LET askLevel3Volume == ReadBytes(bidLevel3Price.rest, 12) IN IF ~askLevel3Volume.ok THEN Fail ELSE
-    LET bidLevel3Volume == ReadBytes(askLevel3Volume.rest, 12) IN IF ~bidLevel3Volume.ok THEN Fail ELSE
-    LET lpAskLevel3Volume == ReadBytes(bidLevel3Volume.rest, 12) IN IF ~lpAskLevel3Volume.ok THEN Fail ELSE
-    LET lpBidLevel3Volume == ReadBytes(lpAskLevel3Volume.rest, 12) IN IF ~lpBidLevel3Volume.ok THEN Fail ELSE
-    LET askLevel4Price == ReadBytes(lpBidLevel3Volume.rest, 11) IN IF ~askLevel4Price.ok THEN Fail ELSE
-    LET bidLevel4Price == ReadBytes(askLevel4Price.rest, 11) IN IF ~bidLevel4Price.ok THEN Fail ELSE
-    LET askLevel4Volume == ReadBytes(bidLevel4Price.rest, 12) IN IF ~askLevel4Volume.ok THEN Fail ELSE
-    LET bidLevel4Volume == ReadBytes(askLevel4Volume.rest, 12) IN IF ~bidLevel4Volume.ok THEN Fail ELSE
-    LET lpAskLevel4Volume == ReadBytes(bidLevel4Volume.rest, 12) IN IF ~lpAskLevel4Volume.ok THEN Fail ELSE
-    LET lpBidLevel4Volume == ReadBytes(lpAskLevel4Volume.rest, 12) IN IF ~lpBidLevel4Volume.ok THEN Fail ELSE
-    LET askLevel5Price == ReadBytes(lpBidLevel4Volume.rest, 11) IN IF ~askLevel5Price.ok THEN Fail ELSE
-    LET bidLevel5Price == ReadBytes(askLevel5Price.rest, 11) IN IF ~bidLevel5Price.ok THEN Fail ELSE
-    LET askLevel5Volume == ReadBytes(bidLevel5Price.rest, 12) IN IF ~askLevel5Volume.ok THEN Fail ELSE
-    LET bidLevel5Volume == ReadBytes(askLevel5Volume.rest, 12) IN IF ~bidLevel5Volume.ok THEN Fail ELSE
-    LET lpAskLevel5Volume == ReadBytes(bidLevel5Volume.rest, 12) IN IF ~lpAskLevel5Volume.ok THEN Fail ELSE
-    LET lpBidLevel5Volume == ReadBytes(lpAskLevel5Volume.rest, 12) IN IF ~lpBidLevel5Volume.ok THEN Fail ELSE
-    LET askLevel6Price == ReadBytes(lpBidLevel5Volume.rest, 11) IN IF ~askLevel6Price.ok THEN Fail ELSE
-    LET bidLevel6Price == ReadBytes(askLevel6Price.rest, 11) IN IF ~bidLevel6Price.ok THEN Fail ELSE
-    LET askLevel6Volume == ReadBytes(bidLevel6Price.rest, 12) IN IF ~askLevel6Volume.ok THEN Fail ELSE
-    LET bidLevel6Volume == ReadBytes(askLevel6Volume.rest, 12) IN IF ~bidLevel6Volume.ok THEN Fail ELSE
-    LET lpAskLevel6Volume == ReadBytes(bidLevel6Volume.rest, 12) IN IF ~lpAskLevel6Volume.ok THEN Fail ELSE
-    LET lpBidLevel6Volume == ReadBytes(lpAskLevel6Volume.rest, 12) IN IF ~lpBidLevel6Volume.ok THEN Fail ELSE
-    LET askLevel7Price == ReadBytes(lpBidLevel6Volume.rest, 11) IN IF ~askLevel7Price.ok THEN Fail ELSE
-    LET bidLevel7Price == ReadBytes(askLevel7Price.rest, 11) IN IF ~bidLevel7Price.ok THEN Fail ELSE
-    LET askLevel7Volume == ReadBytes(bidLevel7Price.rest, 12) IN IF ~askLevel7Volume.ok THEN Fail ELSE
-    LET bidLevel7Volume == ReadBytes(askLevel7Volume.rest, 12) IN IF ~bidLevel7Volume.ok THEN Fail ELSE
-    LET lpAskLevel7Volume == ReadBytes(bidLevel7Volume.rest, 12) IN IF ~lpAskLevel7Volume.ok THEN Fail ELSE
-    LET lpBidLevel7Volume == ReadBytes(lpAskLevel7Volume.rest, 12) IN IF ~lpBidLevel7Volume.ok THEN Fail ELSE
-    LET askLevel8Price == ReadBytes(lpBidLevel7Volume.rest, 11) IN IF ~askLevel8Price.ok THEN Fail ELSE
-    LET bidLevel8Price == ReadBytes(askLevel8Price.rest, 11) IN IF ~bidLevel8Price.ok THEN Fail ELSE
-    LET askLevel8Volume == ReadBytes(bidLevel8Price.rest, 12) IN IF ~askLevel8Volume.ok THEN Fail ELSE
-    LET bidLevel8Volume == ReadBytes(askLevel8Volume.rest, 12) IN IF ~bidLevel8Volume.ok THEN Fail ELSE
-    LET lpAskLevel8Volume == ReadBytes(bidLevel8Volume.rest, 12) IN IF ~lpAskLevel8Volume.ok THEN Fail ELSE
-    LET lpBidLevel8Volume == ReadBytes(lpAskLevel8Volume.rest, 12) IN IF ~lpBidLevel8Volume.ok THEN Fail ELSE
-    LET askLevel9Price == ReadBytes(lpBidLevel8Volume.rest, 11) IN IF ~askLevel9Price.ok THEN Fail ELSE
-    LET bidLevel9Price == ReadBytes(askLevel9Price.rest, 11) IN IF ~bidLevel9Price.ok THEN Fail ELSE
-    LET askLevel9Volume == ReadBytes(bidLevel9Price.rest, 12) IN IF ~askLevel9Volume.ok THEN Fail ELSE
-    LET bidLevel9Volume == ReadBytes(askLevel9Volume.rest, 12) IN IF ~bidLevel9Volume.ok THEN Fail ELSE
-    LET lpAskLevel9Volume == ReadBytes(bidLevel9Volume.rest, 12) IN IF ~lpAskLevel9Volume.ok THEN Fail ELSE
-    LET lpBidLevel9Volume == ReadBytes(lpAskLevel9Volume.rest, 12) IN IF ~lpBidLevel9Volume.ok THEN Fail ELSE
-    LET askLevel10Price == ReadBytes(lpBidLevel9Volume.rest, 11) IN IF ~askLevel10Price.ok THEN Fail ELSE
-    LET bidLevel10Price == ReadBytes(askLevel10Price.rest, 11) IN IF ~bidLevel10Price.ok THEN Fail ELSE
-    LET askLevel10Volume == ReadBytes(bidLevel10Price.rest, 12) IN IF ~askLevel10Volume.ok THEN Fail ELSE
-    LET bidLevel10Volume == ReadBytes(askLevel10Volume.rest, 12) IN IF ~bidLevel10Volume.ok THEN Fail ELSE
-    LET lpAskLevel10Volume == ReadBytes(bidLevel10Volume.rest, 12) IN IF ~lpAskLevel10Volume.ok THEN Fail ELSE
-    LET lpBidLevel10Volume == ReadBytes(lpAskLevel10Volume.rest, 12) IN IF ~lpBidLevel10Volume.ok THEN Fail ELSE
-    LET totalAskVolume == ReadBytes(lpBidLevel10Volume.rest, 12) IN IF ~totalAskVolume.ok THEN Fail ELSE
+    LET tenLevelsWithLp == ReadTenLevelsWithLp2List(finalAskBidTypeCode.rest, 10) IN IF ~tenLevelsWithLp.ok THEN Fail ELSE
+    LET totalAskVolume == ReadBytes(tenLevelsWithLp.rest, 12) IN IF ~totalAskVolume.ok THEN Fail ELSE
     LET totalBidVolume == ReadBytes(totalAskVolume.rest, 12) IN IF ~totalBidVolume.ok THEN Fail ELSE
     LET estimatedTradingPrice == ReadBytes(totalBidVolume.rest, 11) IN IF ~estimatedTradingPrice.ok THEN Fail ELSE
     LET estimatedTradingVolume == ReadBytes(estimatedTradingPrice.rest, 12) IN IF ~estimatedTradingVolume.ok THEN Fail ELSE
@@ -2366,66 +1653,7 @@ DecodeSecuritiesSnapshotMmLpIncludedMessage(bytes) ==
          accumulatedTradingVolume          |-> accumulatedTradingVolume.value,
          accumulatedTradingValue           |-> accumulatedTradingValue.value,
          finalAskBidTypeCode               |-> finalAskBidTypeCode.value,
-         askLevel1Price                    |-> askLevel1Price.value,
-         bidLevel1Price                    |-> bidLevel1Price.value,
-         askLevel1Volume                   |-> askLevel1Volume.value,
-         bidLevel1Volume                   |-> bidLevel1Volume.value,
-         lpAskLevel1Volume                 |-> lpAskLevel1Volume.value,
-         lpBidLevel1Volume                 |-> lpBidLevel1Volume.value,
-         askLevel2Price                    |-> askLevel2Price.value,
-         bidLevel2Price                    |-> bidLevel2Price.value,
-         askLevel2Volume                   |-> askLevel2Volume.value,
-         bidLevel2Volume                   |-> bidLevel2Volume.value,
-         lpAskLevel2Volume                 |-> lpAskLevel2Volume.value,
-         lpBidLevel2Volume                 |-> lpBidLevel2Volume.value,
-         askLevel3Price                    |-> askLevel3Price.value,
-         bidLevel3Price                    |-> bidLevel3Price.value,
-         askLevel3Volume                   |-> askLevel3Volume.value,
-         bidLevel3Volume                   |-> bidLevel3Volume.value,
-         lpAskLevel3Volume                 |-> lpAskLevel3Volume.value,
-         lpBidLevel3Volume                 |-> lpBidLevel3Volume.value,
-         askLevel4Price                    |-> askLevel4Price.value,
-         bidLevel4Price                    |-> bidLevel4Price.value,
-         askLevel4Volume                   |-> askLevel4Volume.value,
-         bidLevel4Volume                   |-> bidLevel4Volume.value,
-         lpAskLevel4Volume                 |-> lpAskLevel4Volume.value,
-         lpBidLevel4Volume                 |-> lpBidLevel4Volume.value,
-         askLevel5Price                    |-> askLevel5Price.value,
-         bidLevel5Price                    |-> bidLevel5Price.value,
-         askLevel5Volume                   |-> askLevel5Volume.value,
-         bidLevel5Volume                   |-> bidLevel5Volume.value,
-         lpAskLevel5Volume                 |-> lpAskLevel5Volume.value,
-         lpBidLevel5Volume                 |-> lpBidLevel5Volume.value,
-         askLevel6Price                    |-> askLevel6Price.value,
-         bidLevel6Price                    |-> bidLevel6Price.value,
-         askLevel6Volume                   |-> askLevel6Volume.value,
-         bidLevel6Volume                   |-> bidLevel6Volume.value,
-         lpAskLevel6Volume                 |-> lpAskLevel6Volume.value,
-         lpBidLevel6Volume                 |-> lpBidLevel6Volume.value,
-         askLevel7Price                    |-> askLevel7Price.value,
-         bidLevel7Price                    |-> bidLevel7Price.value,
-         askLevel7Volume                   |-> askLevel7Volume.value,
-         bidLevel7Volume                   |-> bidLevel7Volume.value,
-         lpAskLevel7Volume                 |-> lpAskLevel7Volume.value,
-         lpBidLevel7Volume                 |-> lpBidLevel7Volume.value,
-         askLevel8Price                    |-> askLevel8Price.value,
-         bidLevel8Price                    |-> bidLevel8Price.value,
-         askLevel8Volume                   |-> askLevel8Volume.value,
-         bidLevel8Volume                   |-> bidLevel8Volume.value,
-         lpAskLevel8Volume                 |-> lpAskLevel8Volume.value,
-         lpBidLevel8Volume                 |-> lpBidLevel8Volume.value,
-         askLevel9Price                    |-> askLevel9Price.value,
-         bidLevel9Price                    |-> bidLevel9Price.value,
-         askLevel9Volume                   |-> askLevel9Volume.value,
-         bidLevel9Volume                   |-> bidLevel9Volume.value,
-         lpAskLevel9Volume                 |-> lpAskLevel9Volume.value,
-         lpBidLevel9Volume                 |-> lpBidLevel9Volume.value,
-         askLevel10Price                   |-> askLevel10Price.value,
-         bidLevel10Price                   |-> bidLevel10Price.value,
-         askLevel10Volume                  |-> askLevel10Volume.value,
-         bidLevel10Volume                  |-> bidLevel10Volume.value,
-         lpAskLevel10Volume                |-> lpAskLevel10Volume.value,
-         lpBidLevel10Volume                |-> lpBidLevel10Volume.value,
+         tenLevelsWithLp                   |-> tenLevelsWithLp.value,
          totalAskVolume                    |-> totalAskVolume.value,
          totalBidVolume                    |-> totalBidVolume.value,
          estimatedTradingPrice             |-> estimatedTradingPrice.value,
@@ -2455,66 +1683,7 @@ ZeroSecuritiesSnapshotMmLpIncludedMessage ==
       accumulatedTradingVolume          |-> [i \in 1 .. 12 |-> 0],
       accumulatedTradingValue           |-> [i \in 1 .. 22 |-> 0],
       finalAskBidTypeCode               |-> [i \in 1 .. 1 |-> 0],
-      askLevel1Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel1Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel1Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel1Volume                   |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel1Volume                 |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel1Volume                 |-> [i \in 1 .. 12 |-> 0],
-      askLevel2Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel2Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel2Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel2Volume                   |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel2Volume                 |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel2Volume                 |-> [i \in 1 .. 12 |-> 0],
-      askLevel3Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel3Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel3Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel3Volume                   |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel3Volume                 |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel3Volume                 |-> [i \in 1 .. 12 |-> 0],
-      askLevel4Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel4Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel4Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel4Volume                   |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel4Volume                 |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel4Volume                 |-> [i \in 1 .. 12 |-> 0],
-      askLevel5Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel5Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel5Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel5Volume                   |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel5Volume                 |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel5Volume                 |-> [i \in 1 .. 12 |-> 0],
-      askLevel6Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel6Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel6Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel6Volume                   |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel6Volume                 |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel6Volume                 |-> [i \in 1 .. 12 |-> 0],
-      askLevel7Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel7Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel7Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel7Volume                   |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel7Volume                 |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel7Volume                 |-> [i \in 1 .. 12 |-> 0],
-      askLevel8Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel8Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel8Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel8Volume                   |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel8Volume                 |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel8Volume                 |-> [i \in 1 .. 12 |-> 0],
-      askLevel9Price                    |-> [i \in 1 .. 11 |-> 0],
-      bidLevel9Price                    |-> [i \in 1 .. 11 |-> 0],
-      askLevel9Volume                   |-> [i \in 1 .. 12 |-> 0],
-      bidLevel9Volume                   |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel9Volume                 |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel9Volume                 |-> [i \in 1 .. 12 |-> 0],
-      askLevel10Price                   |-> [i \in 1 .. 11 |-> 0],
-      bidLevel10Price                   |-> [i \in 1 .. 11 |-> 0],
-      askLevel10Volume                  |-> [i \in 1 .. 12 |-> 0],
-      bidLevel10Volume                  |-> [i \in 1 .. 12 |-> 0],
-      lpAskLevel10Volume                |-> [i \in 1 .. 12 |-> 0],
-      lpBidLevel10Volume                |-> [i \in 1 .. 12 |-> 0],
+      tenLevelsWithLp                   |-> [i \in 1 .. 10 |-> ZeroTenLevelsWithLp2],
       totalAskVolume                    |-> [i \in 1 .. 12 |-> 0],
       totalBidVolume                    |-> [i \in 1 .. 12 |-> 0],
       estimatedTradingPrice             |-> [i \in 1 .. 11 |-> 0],
@@ -2546,66 +1715,7 @@ CheckedSecuritiesSnapshotMmLpIncludedMessage ==
         \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.accumulatedTradingVolume = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.accumulatedTradingValue = one] : one \in Sample(22) }
         \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.finalAskBidTypeCode = one] : one \in Sample(1) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel1Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel1Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpAskLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpBidLevel1Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel2Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel2Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpAskLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpBidLevel2Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel3Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel3Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpAskLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpBidLevel3Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel4Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel4Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpAskLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpBidLevel4Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel5Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel5Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpAskLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpBidLevel5Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel6Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel6Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpAskLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpBidLevel6Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel7Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel7Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpAskLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpBidLevel7Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel8Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel8Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpAskLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpBidLevel8Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel9Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel9Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpAskLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpBidLevel9Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel10Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel10Price = one] : one \in Sample(11) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.askLevel10Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.bidLevel10Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpAskLevel10Volume = one] : one \in Sample(12) }
-        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.lpBidLevel10Volume = one] : one \in Sample(12) }
+        \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.tenLevelsWithLp = one] : one \in SlotsTenLevelsWithLp2 }
         \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.totalAskVolume = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.totalBidVolume = one] : one \in Sample(12) }
         \cup { [ZeroSecuritiesSnapshotMmLpIncludedMessage EXCEPT !.estimatedTradingPrice = one] : one \in Sample(11) }
@@ -10489,10 +9599,26 @@ RoundTripBondIndexKrxMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Ten Levels decodes back to what was encoded, and leaves nothing over *)
+RoundTripTenLevels ==
+    \A message \in CheckedTenLevels :
+        LET read == DecodeTenLevels(EncodeTenLevels(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Securities Quote Mm Lp Excluded Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecuritiesQuoteMmLpExcludedMessage ==
     \A message \in CheckedSecuritiesQuoteMmLpExcludedMessage :
         LET read == DecodeSecuritiesQuoteMmLpExcludedMessage(EncodeSecuritiesQuoteMmLpExcludedMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Ten Levels With LP decodes back to what was encoded, and leaves nothing over *)
+RoundTripTenLevelsWithLp ==
+    \A message \in CheckedTenLevelsWithLp :
+        LET read == DecodeTenLevelsWithLp(EncodeTenLevelsWithLp(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -10505,10 +9631,26 @@ RoundTripSecuritiesQuoteMmLpIncludedMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
+(* Every Ten Levels decodes back to what was encoded, and leaves nothing over *)
+RoundTripTenLevels2 ==
+    \A message \in CheckedTenLevels2 :
+        LET read == DecodeTenLevels2(EncodeTenLevels2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
 (* Every Securities Snapshot Mm Lp Excluded Message decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecuritiesSnapshotMmLpExcludedMessage ==
     \A message \in CheckedSecuritiesSnapshotMmLpExcludedMessage :
         LET read == DecodeSecuritiesSnapshotMmLpExcludedMessage(EncodeSecuritiesSnapshotMmLpExcludedMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Ten Levels With LP decodes back to what was encoded, and leaves nothing over *)
+RoundTripTenLevelsWithLp2 ==
+    \A message \in CheckedTenLevelsWithLp2 :
+        LET read == DecodeTenLevelsWithLp2(EncodeTenLevelsWithLp2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
