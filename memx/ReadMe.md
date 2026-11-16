@@ -5,6 +5,7 @@
 
 | Division | [Protocol][Omi.Memx.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Transport | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Memx.Specifications] |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| [MemxEquities][MemxEquities.Exchange] | [CommonHeader][Memx.MemxEquities.CommonHeader] | [Tcp][Omi.Encoding.Tcp] | 1.2 | [Client][Memx.MemxEquities.CommonHeader.Tcp.v1.2.Client.Definition] [Server][Memx.MemxEquities.CommonHeader.Tcp.v1.2.Server.Definition] | 10/23/2025 | 961 | [Header][Omi.Glossary.Deployment.Header] | [Untested][Omi.Glossary.Testing.Untested] | [url][Memx.MemxEquities.CommonHeader.Tcp.v1.2.Url] |
 | [MemxEquities][MemxEquities.Exchange] | [CommonHeader][Memx.MemxEquities.CommonHeader] | [Udp][Omi.Encoding.Udp] | [1.1][Memx.MemxEquities.CommonHeader.Udp.v1.1.Definition] |  | 10/23/2025 | 323 | [Header][Omi.Glossary.Deployment.Header] | [Untested][Omi.Glossary.Testing.Untested] | [url][Memx.MemxEquities.CommonHeader.Udp.v1.1.Url] |
 | [MemxEquities][MemxEquities.Exchange] | [Memo][Memx.MemxEquities.Memo] | [Sbe][Omi.Encoding.Sbe] | 1.1 | [Client][Memx.MemxEquities.Memo.Sbe.v1.1.Client.Definition] [Server][Memx.MemxEquities.Memo.Sbe.v1.1.Server.Definition] | 7/27/2020 | 3,112 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Memx.MemxEquities.Memo.Sbe.v1.1.Url] |
 | [MemxEquities][MemxEquities.Exchange] | [Memo][Memx.MemxEquities.Memo] | [Sbe][Omi.Encoding.Sbe] | 1.10 | [Client][Memx.MemxEquities.Memo.Sbe.v1.10.Client.Definition] [Server][Memx.MemxEquities.Memo.Sbe.v1.10.Server.Definition] | 11/17/2022 | 3,202 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Memx.MemxEquities.Memo.Sbe.v1.10.Url] |
@@ -57,6 +58,7 @@
 [Omi.Encoding.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Protocols/ReadMe.md "Encoding Directory"
 [Omi.Memx.Protocol.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Memx/Protocols "Memx Protocol Directory"
 [Omi.Memx.Specifications]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Memx/Specifications "Memx Specifications Directory"
+[Omi.Encoding.Tcp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Tcp.md "Tcp Encoding"
 [Omi.Encoding.Udp]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Udp.md "Udp Encoding"
 [Omi.Encoding.Sbe]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Sbe.md "Sbe Encoding"
 [MemxEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Memx/Protocols/MemxEquities "Memx MemxEquities"
@@ -71,6 +73,9 @@
 [Memx.MemxOptions.MemoirTop]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Memx/Protocols/MemxOptions/MemoirTop.md "Member Order Information Record Top"
 [Memx.MemxOptions.RiskControl]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Memx/Protocols/MemxOptions/RiskControl.md "Risk Control"
 
+[Memx.MemxEquities.CommonHeader.Tcp.v1.2.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/memx/memxequities/commonheader/MemxEquities_CommonHeader_v1_2_Client.tla "Memx MemxEquities CommonHeader Tcp v1.2 Tla Definition"
+[Memx.MemxEquities.CommonHeader.Tcp.v1.2.Url]: https://info.memxtrading.com/equities-trading-resources/ "The Members Exchange 1.2 Url"
+[Memx.MemxEquities.CommonHeader.Tcp.v1.2.Server.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/memx/memxequities/commonheader/MemxEquities_CommonHeader_v1_2_Server.tla "Memx MemxEquities CommonHeader Tcp v1.2 Tla Definition"
 [Memx.MemxEquities.CommonHeader.Udp.v1.1.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/memx/memxequities/commonheader/MemxEquities_CommonHeader_v1_1.tla "Memx MemxEquities CommonHeader Udp v1.1 Tla Definition"
 [Memx.MemxEquities.CommonHeader.Udp.v1.1.Url]: https://info.memxtrading.com/equities-trading-resources/ "The Members Exchange 1.1 Url"
 [Memx.MemxEquities.Memo.Sbe.v1.1.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/memx/memxequities/memo/MemxEquities_Memo_v1_1_Client.tla "Memx MemxEquities Memo Sbe v1.1 Tla Definition"

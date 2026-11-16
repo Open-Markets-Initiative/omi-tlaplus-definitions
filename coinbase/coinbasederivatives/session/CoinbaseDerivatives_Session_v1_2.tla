@@ -301,33 +301,33 @@ CheckedGapFillMessage ==
 (***************************************************************************)
 
 RejectMessage ==
-    [ refSequenceNumber  : Sample(4),
-      reasonRejectReason : Sample(4),
-      details            : Sample(64) ]
+    [ refSequenceNumber : Sample(4),
+      rejectReason      : Sample(4),
+      details           : Sample(64) ]
 
 EncodeRejectMessage(message) ==
     message.refSequenceNumber
-        \o message.reasonRejectReason
+        \o message.rejectReason
         \o message.details
 
 DecodeRejectMessage(bytes) ==
     LET refSequenceNumber == ReadBytes(bytes, 4) IN IF ~refSequenceNumber.ok THEN Fail ELSE
-    LET reasonRejectReason == ReadBytes(refSequenceNumber.rest, 4) IN IF ~reasonRejectReason.ok THEN Fail ELSE
-    LET details == ReadBytes(reasonRejectReason.rest, 64) IN IF ~details.ok THEN Fail ELSE
-    Ok([ refSequenceNumber  |-> refSequenceNumber.value,
-         reasonRejectReason |-> reasonRejectReason.value,
-         details            |-> details.value ], details.rest)
+    LET rejectReason == ReadBytes(refSequenceNumber.rest, 4) IN IF ~rejectReason.ok THEN Fail ELSE
+    LET details == ReadBytes(rejectReason.rest, 64) IN IF ~details.ok THEN Fail ELSE
+    Ok([ refSequenceNumber |-> refSequenceNumber.value,
+         rejectReason      |-> rejectReason.value,
+         details           |-> details.value ], details.rest)
 
 ZeroRejectMessage ==
-    [ refSequenceNumber  |-> [i \in 1 .. 4 |-> 0],
-      reasonRejectReason |-> [i \in 1 .. 4 |-> 0],
-      details            |-> [i \in 1 .. 64 |-> 0] ]
+    [ refSequenceNumber |-> [i \in 1 .. 4 |-> 0],
+      rejectReason      |-> [i \in 1 .. 4 |-> 0],
+      details           |-> [i \in 1 .. 64 |-> 0] ]
 
 (* Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedRejectMessage ==
     { ZeroRejectMessage }
         \cup { [ZeroRejectMessage EXCEPT !.refSequenceNumber = one] : one \in Sample(4) }
-        \cup { [ZeroRejectMessage EXCEPT !.reasonRejectReason = one] : one \in Sample(4) }
+        \cup { [ZeroRejectMessage EXCEPT !.rejectReason = one] : one \in Sample(4) }
         \cup { [ZeroRejectMessage EXCEPT !.details = one] : one \in Sample(64) }
 
 (***************************************************************************)
@@ -400,7 +400,7 @@ CheckedPayload ==
 
 SbeMessage ==
     [ protocolId         : Sample(1),
-      flags              : Sample(1),
+      sessionFlags       : Sample(1),
       sequenceNumber     : Sample(4),
       lastProcessedSeqNo : Sample(4),
       reserved           : Sample(4),
@@ -426,12 +426,12 @@ EncodeSbeMessageBody(message) ==
 (* Message Length counts the bytes it frames, so it is written from them *)
 EncodeSbeMessage(message) ==
     LET body == EncodeSbeMessageBody(message)
-    IN  message.protocolId \o message.flags \o EncodeUIntLE(Len(body) + 4, 2) \o body
+    IN  message.protocolId \o message.sessionFlags \o EncodeUIntLE(Len(body) + 4, 2) \o body
 
 DecodeSbeMessage(bytes) ==
     LET protocolId == ReadBytes(bytes, 1) IN IF ~protocolId.ok THEN Fail ELSE
-    LET flags == ReadBytes(protocolId.rest, 1) IN IF ~flags.ok THEN Fail ELSE
-    LET length == ReadUIntLE(flags.rest, 2) IN IF ~length.ok THEN Fail ELSE
+    LET sessionFlags == ReadBytes(protocolId.rest, 1) IN IF ~sessionFlags.ok THEN Fail ELSE
+    LET length == ReadUIntLE(sessionFlags.rest, 2) IN IF ~length.ok THEN Fail ELSE
     LET size == length.value - 4 IN
     IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, size)
@@ -449,7 +449,7 @@ DecodeSbeMessage(bytes) ==
     LET padding == Ok(payload.rest, << >>) IN IF ~padding.ok THEN Fail ELSE
     IF padding.rest # << >> THEN Fail ELSE
     Ok([ protocolId         |-> protocolId.value,
-         flags              |-> flags.value,
+         sessionFlags       |-> sessionFlags.value,
          sequenceNumber     |-> sequenceNumber.value,
          lastProcessedSeqNo |-> lastProcessedSeqNo.value,
          reserved           |-> reserved.value,
@@ -462,7 +462,7 @@ DecodeSbeMessage(bytes) ==
 
 ZeroSbeMessage ==
     [ protocolId         |-> [i \in 1 .. 1 |-> 0],
-      flags              |-> [i \in 1 .. 1 |-> 0],
+      sessionFlags       |-> [i \in 1 .. 1 |-> 0],
       sequenceNumber     |-> [i \in 1 .. 4 |-> 0],
       lastProcessedSeqNo |-> [i \in 1 .. 4 |-> 0],
       reserved           |-> [i \in 1 .. 4 |-> 0],
@@ -477,7 +477,7 @@ ZeroSbeMessage ==
 CheckedSbeMessage ==
     { ZeroSbeMessage }
         \cup { [ZeroSbeMessage EXCEPT !.protocolId = one] : one \in Sample(1) }
-        \cup { [ZeroSbeMessage EXCEPT !.flags = one] : one \in Sample(1) }
+        \cup { [ZeroSbeMessage EXCEPT !.sessionFlags = one] : one \in Sample(1) }
         \cup { [ZeroSbeMessage EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
         \cup { [ZeroSbeMessage EXCEPT !.lastProcessedSeqNo = one] : one \in Sample(4) }
         \cup { [ZeroSbeMessage EXCEPT !.reserved = one] : one \in Sample(4) }

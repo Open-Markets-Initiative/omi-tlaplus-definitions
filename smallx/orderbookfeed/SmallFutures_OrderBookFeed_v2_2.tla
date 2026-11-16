@@ -270,8 +270,8 @@ TradesIncrementalMessage ==
       incrementalMessageInstructions : Sample(2),
       lastTradePrice                 : Sample(8),
       lastTradeSize                  : Sample(8),
-      lastTradeTimeTimestampOptional : Sample(8),
-      totalVolumeQuantity            : Sample(8),
+      lastTradeTimeOptional          : Sample(8),
+      totalVolume                    : Sample(8),
       incrementalTradeGroups         : IncrementalTradeGroups ]
 
 EncodeTradesIncrementalMessage(message) ==
@@ -283,8 +283,8 @@ EncodeTradesIncrementalMessage(message) ==
         \o message.incrementalMessageInstructions
         \o message.lastTradePrice
         \o message.lastTradeSize
-        \o message.lastTradeTimeTimestampOptional
-        \o message.totalVolumeQuantity
+        \o message.lastTradeTimeOptional
+        \o message.totalVolume
         \o EncodeIncrementalTradeGroups(message.incrementalTradeGroups)
 
 DecodeTradesIncrementalMessage(bytes) ==
@@ -296,9 +296,9 @@ DecodeTradesIncrementalMessage(bytes) ==
     LET incrementalMessageInstructions == ReadBytes(instrumentTradingStatus.rest, 2) IN IF ~incrementalMessageInstructions.ok THEN Fail ELSE
     LET lastTradePrice == ReadBytes(incrementalMessageInstructions.rest, 8) IN IF ~lastTradePrice.ok THEN Fail ELSE
     LET lastTradeSize == ReadBytes(lastTradePrice.rest, 8) IN IF ~lastTradeSize.ok THEN Fail ELSE
-    LET lastTradeTimeTimestampOptional == ReadBytes(lastTradeSize.rest, 8) IN IF ~lastTradeTimeTimestampOptional.ok THEN Fail ELSE
-    LET totalVolumeQuantity == ReadBytes(lastTradeTimeTimestampOptional.rest, 8) IN IF ~totalVolumeQuantity.ok THEN Fail ELSE
-    LET incrementalTradeGroups == DecodeIncrementalTradeGroups(totalVolumeQuantity.rest) IN IF ~incrementalTradeGroups.ok THEN Fail ELSE
+    LET lastTradeTimeOptional == ReadBytes(lastTradeSize.rest, 8) IN IF ~lastTradeTimeOptional.ok THEN Fail ELSE
+    LET totalVolume == ReadBytes(lastTradeTimeOptional.rest, 8) IN IF ~totalVolume.ok THEN Fail ELSE
+    LET incrementalTradeGroups == DecodeIncrementalTradeGroups(totalVolume.rest) IN IF ~incrementalTradeGroups.ok THEN Fail ELSE
     Ok([ instrumentId                   |-> instrumentId.value,
          instrumentMessageNo            |-> instrumentMessageNo.value,
          transactTime                   |-> transactTime.value,
@@ -307,8 +307,8 @@ DecodeTradesIncrementalMessage(bytes) ==
          incrementalMessageInstructions |-> incrementalMessageInstructions.value,
          lastTradePrice                 |-> lastTradePrice.value,
          lastTradeSize                  |-> lastTradeSize.value,
-         lastTradeTimeTimestampOptional |-> lastTradeTimeTimestampOptional.value,
-         totalVolumeQuantity            |-> totalVolumeQuantity.value,
+         lastTradeTimeOptional          |-> lastTradeTimeOptional.value,
+         totalVolume                    |-> totalVolume.value,
          incrementalTradeGroups         |-> incrementalTradeGroups.value ], incrementalTradeGroups.rest)
 
 ZeroTradesIncrementalMessage ==
@@ -320,8 +320,8 @@ ZeroTradesIncrementalMessage ==
       incrementalMessageInstructions |-> [i \in 1 .. 2 |-> 0],
       lastTradePrice                 |-> [i \in 1 .. 8 |-> 0],
       lastTradeSize                  |-> [i \in 1 .. 8 |-> 0],
-      lastTradeTimeTimestampOptional |-> [i \in 1 .. 8 |-> 0],
-      totalVolumeQuantity            |-> [i \in 1 .. 8 |-> 0],
+      lastTradeTimeOptional          |-> [i \in 1 .. 8 |-> 0],
+      totalVolume                    |-> [i \in 1 .. 8 |-> 0],
       incrementalTradeGroups         |-> ZeroIncrementalTradeGroups ]
 
 (* Trades Incremental Message at zero, then each field in turn at the values it is checked at *)
@@ -335,8 +335,8 @@ CheckedTradesIncrementalMessage ==
         \cup { [ZeroTradesIncrementalMessage EXCEPT !.incrementalMessageInstructions = one] : one \in Sample(2) }
         \cup { [ZeroTradesIncrementalMessage EXCEPT !.lastTradePrice = one] : one \in Sample(8) }
         \cup { [ZeroTradesIncrementalMessage EXCEPT !.lastTradeSize = one] : one \in Sample(8) }
-        \cup { [ZeroTradesIncrementalMessage EXCEPT !.lastTradeTimeTimestampOptional = one] : one \in Sample(8) }
-        \cup { [ZeroTradesIncrementalMessage EXCEPT !.totalVolumeQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroTradesIncrementalMessage EXCEPT !.lastTradeTimeOptional = one] : one \in Sample(8) }
+        \cup { [ZeroTradesIncrementalMessage EXCEPT !.totalVolume = one] : one \in Sample(8) }
         \cup { [ZeroTradesIncrementalMessage EXCEPT !.incrementalTradeGroups = one] : one \in CheckedIncrementalTradeGroups }
 
 (***************************************************************************)
@@ -473,8 +473,8 @@ TradeCorrectMessage ==
       incrementalMessageInstructions : Sample(2),
       lastTradePrice                 : Sample(8),
       lastTradeSize                  : Sample(8),
-      lastTradeTimeTimestampOptional : Sample(8),
-      totalVolumeQuantity            : Sample(8),
+      lastTradeTimeOptional          : Sample(8),
+      totalVolume                    : Sample(8),
       tradeCorrectGroups             : TradeCorrectGroups ]
 
 EncodeTradeCorrectMessage(message) ==
@@ -486,8 +486,8 @@ EncodeTradeCorrectMessage(message) ==
         \o message.incrementalMessageInstructions
         \o message.lastTradePrice
         \o message.lastTradeSize
-        \o message.lastTradeTimeTimestampOptional
-        \o message.totalVolumeQuantity
+        \o message.lastTradeTimeOptional
+        \o message.totalVolume
         \o EncodeTradeCorrectGroups(message.tradeCorrectGroups)
 
 DecodeTradeCorrectMessage(bytes) ==
@@ -499,9 +499,9 @@ DecodeTradeCorrectMessage(bytes) ==
     LET incrementalMessageInstructions == ReadBytes(instrumentTradingStatus.rest, 2) IN IF ~incrementalMessageInstructions.ok THEN Fail ELSE
     LET lastTradePrice == ReadBytes(incrementalMessageInstructions.rest, 8) IN IF ~lastTradePrice.ok THEN Fail ELSE
     LET lastTradeSize == ReadBytes(lastTradePrice.rest, 8) IN IF ~lastTradeSize.ok THEN Fail ELSE
-    LET lastTradeTimeTimestampOptional == ReadBytes(lastTradeSize.rest, 8) IN IF ~lastTradeTimeTimestampOptional.ok THEN Fail ELSE
-    LET totalVolumeQuantity == ReadBytes(lastTradeTimeTimestampOptional.rest, 8) IN IF ~totalVolumeQuantity.ok THEN Fail ELSE
-    LET tradeCorrectGroups == DecodeTradeCorrectGroups(totalVolumeQuantity.rest) IN IF ~tradeCorrectGroups.ok THEN Fail ELSE
+    LET lastTradeTimeOptional == ReadBytes(lastTradeSize.rest, 8) IN IF ~lastTradeTimeOptional.ok THEN Fail ELSE
+    LET totalVolume == ReadBytes(lastTradeTimeOptional.rest, 8) IN IF ~totalVolume.ok THEN Fail ELSE
+    LET tradeCorrectGroups == DecodeTradeCorrectGroups(totalVolume.rest) IN IF ~tradeCorrectGroups.ok THEN Fail ELSE
     Ok([ instrumentId                   |-> instrumentId.value,
          instrumentMessageNo            |-> instrumentMessageNo.value,
          transactTime                   |-> transactTime.value,
@@ -510,8 +510,8 @@ DecodeTradeCorrectMessage(bytes) ==
          incrementalMessageInstructions |-> incrementalMessageInstructions.value,
          lastTradePrice                 |-> lastTradePrice.value,
          lastTradeSize                  |-> lastTradeSize.value,
-         lastTradeTimeTimestampOptional |-> lastTradeTimeTimestampOptional.value,
-         totalVolumeQuantity            |-> totalVolumeQuantity.value,
+         lastTradeTimeOptional          |-> lastTradeTimeOptional.value,
+         totalVolume                    |-> totalVolume.value,
          tradeCorrectGroups             |-> tradeCorrectGroups.value ], tradeCorrectGroups.rest)
 
 ZeroTradeCorrectMessage ==
@@ -523,8 +523,8 @@ ZeroTradeCorrectMessage ==
       incrementalMessageInstructions |-> [i \in 1 .. 2 |-> 0],
       lastTradePrice                 |-> [i \in 1 .. 8 |-> 0],
       lastTradeSize                  |-> [i \in 1 .. 8 |-> 0],
-      lastTradeTimeTimestampOptional |-> [i \in 1 .. 8 |-> 0],
-      totalVolumeQuantity            |-> [i \in 1 .. 8 |-> 0],
+      lastTradeTimeOptional          |-> [i \in 1 .. 8 |-> 0],
+      totalVolume                    |-> [i \in 1 .. 8 |-> 0],
       tradeCorrectGroups             |-> ZeroTradeCorrectGroups ]
 
 (* Trade Correct Message at zero, then each field in turn at the values it is checked at *)
@@ -538,8 +538,8 @@ CheckedTradeCorrectMessage ==
         \cup { [ZeroTradeCorrectMessage EXCEPT !.incrementalMessageInstructions = one] : one \in Sample(2) }
         \cup { [ZeroTradeCorrectMessage EXCEPT !.lastTradePrice = one] : one \in Sample(8) }
         \cup { [ZeroTradeCorrectMessage EXCEPT !.lastTradeSize = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCorrectMessage EXCEPT !.lastTradeTimeTimestampOptional = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCorrectMessage EXCEPT !.totalVolumeQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroTradeCorrectMessage EXCEPT !.lastTradeTimeOptional = one] : one \in Sample(8) }
+        \cup { [ZeroTradeCorrectMessage EXCEPT !.totalVolume = one] : one \in Sample(8) }
         \cup { [ZeroTradeCorrectMessage EXCEPT !.tradeCorrectGroups = one] : one \in CheckedTradeCorrectGroups }
 
 (***************************************************************************)
@@ -670,8 +670,8 @@ TradeBustMessage ==
       incrementalMessageInstructions : Sample(2),
       lastTradePrice                 : Sample(8),
       lastTradeSize                  : Sample(8),
-      lastTradeTimeTimestampOptional : Sample(8),
-      totalVolumeQuantity            : Sample(8),
+      lastTradeTimeOptional          : Sample(8),
+      totalVolume                    : Sample(8),
       tradeBustGroups                : TradeBustGroups ]
 
 EncodeTradeBustMessage(message) ==
@@ -683,8 +683,8 @@ EncodeTradeBustMessage(message) ==
         \o message.incrementalMessageInstructions
         \o message.lastTradePrice
         \o message.lastTradeSize
-        \o message.lastTradeTimeTimestampOptional
-        \o message.totalVolumeQuantity
+        \o message.lastTradeTimeOptional
+        \o message.totalVolume
         \o EncodeTradeBustGroups(message.tradeBustGroups)
 
 DecodeTradeBustMessage(bytes) ==
@@ -696,9 +696,9 @@ DecodeTradeBustMessage(bytes) ==
     LET incrementalMessageInstructions == ReadBytes(instrumentTradingStatus.rest, 2) IN IF ~incrementalMessageInstructions.ok THEN Fail ELSE
     LET lastTradePrice == ReadBytes(incrementalMessageInstructions.rest, 8) IN IF ~lastTradePrice.ok THEN Fail ELSE
     LET lastTradeSize == ReadBytes(lastTradePrice.rest, 8) IN IF ~lastTradeSize.ok THEN Fail ELSE
-    LET lastTradeTimeTimestampOptional == ReadBytes(lastTradeSize.rest, 8) IN IF ~lastTradeTimeTimestampOptional.ok THEN Fail ELSE
-    LET totalVolumeQuantity == ReadBytes(lastTradeTimeTimestampOptional.rest, 8) IN IF ~totalVolumeQuantity.ok THEN Fail ELSE
-    LET tradeBustGroups == DecodeTradeBustGroups(totalVolumeQuantity.rest) IN IF ~tradeBustGroups.ok THEN Fail ELSE
+    LET lastTradeTimeOptional == ReadBytes(lastTradeSize.rest, 8) IN IF ~lastTradeTimeOptional.ok THEN Fail ELSE
+    LET totalVolume == ReadBytes(lastTradeTimeOptional.rest, 8) IN IF ~totalVolume.ok THEN Fail ELSE
+    LET tradeBustGroups == DecodeTradeBustGroups(totalVolume.rest) IN IF ~tradeBustGroups.ok THEN Fail ELSE
     Ok([ instrumentId                   |-> instrumentId.value,
          instrumentMessageNo            |-> instrumentMessageNo.value,
          transactTime                   |-> transactTime.value,
@@ -707,8 +707,8 @@ DecodeTradeBustMessage(bytes) ==
          incrementalMessageInstructions |-> incrementalMessageInstructions.value,
          lastTradePrice                 |-> lastTradePrice.value,
          lastTradeSize                  |-> lastTradeSize.value,
-         lastTradeTimeTimestampOptional |-> lastTradeTimeTimestampOptional.value,
-         totalVolumeQuantity            |-> totalVolumeQuantity.value,
+         lastTradeTimeOptional          |-> lastTradeTimeOptional.value,
+         totalVolume                    |-> totalVolume.value,
          tradeBustGroups                |-> tradeBustGroups.value ], tradeBustGroups.rest)
 
 ZeroTradeBustMessage ==
@@ -720,8 +720,8 @@ ZeroTradeBustMessage ==
       incrementalMessageInstructions |-> [i \in 1 .. 2 |-> 0],
       lastTradePrice                 |-> [i \in 1 .. 8 |-> 0],
       lastTradeSize                  |-> [i \in 1 .. 8 |-> 0],
-      lastTradeTimeTimestampOptional |-> [i \in 1 .. 8 |-> 0],
-      totalVolumeQuantity            |-> [i \in 1 .. 8 |-> 0],
+      lastTradeTimeOptional          |-> [i \in 1 .. 8 |-> 0],
+      totalVolume                    |-> [i \in 1 .. 8 |-> 0],
       tradeBustGroups                |-> ZeroTradeBustGroups ]
 
 (* Trade Bust Message at zero, then each field in turn at the values it is checked at *)
@@ -735,8 +735,8 @@ CheckedTradeBustMessage ==
         \cup { [ZeroTradeBustMessage EXCEPT !.incrementalMessageInstructions = one] : one \in Sample(2) }
         \cup { [ZeroTradeBustMessage EXCEPT !.lastTradePrice = one] : one \in Sample(8) }
         \cup { [ZeroTradeBustMessage EXCEPT !.lastTradeSize = one] : one \in Sample(8) }
-        \cup { [ZeroTradeBustMessage EXCEPT !.lastTradeTimeTimestampOptional = one] : one \in Sample(8) }
-        \cup { [ZeroTradeBustMessage EXCEPT !.totalVolumeQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroTradeBustMessage EXCEPT !.lastTradeTimeOptional = one] : one \in Sample(8) }
+        \cup { [ZeroTradeBustMessage EXCEPT !.totalVolume = one] : one \in Sample(8) }
         \cup { [ZeroTradeBustMessage EXCEPT !.tradeBustGroups = one] : one \in CheckedTradeBustGroups }
 
 (***************************************************************************)
@@ -1206,8 +1206,8 @@ MarketSummarySnapshotMessage ==
       lastIncrementalMessageSeq   : Sample(8),
       lastTradePrice              : Sample(8),
       lastTradeSize               : Sample(8),
-      lastTradeTimeTimestamp      : Sample(8),
-      totalVolumeQuantityOptional : Sample(8),
+      lastTradeTime               : Sample(8),
+      totalVolumeOptional         : Sample(8),
       openPrice                   : Sample(8),
       openPriceType               : Sample(1),
       highPrice                   : Sample(8),
@@ -1228,8 +1228,8 @@ EncodeMarketSummarySnapshotMessage(message) ==
         \o message.lastIncrementalMessageSeq
         \o message.lastTradePrice
         \o message.lastTradeSize
-        \o message.lastTradeTimeTimestamp
-        \o message.totalVolumeQuantityOptional
+        \o message.lastTradeTime
+        \o message.totalVolumeOptional
         \o message.openPrice
         \o message.openPriceType
         \o message.highPrice
@@ -1250,9 +1250,9 @@ DecodeMarketSummarySnapshotMessage(bytes) ==
     LET lastIncrementalMessageSeq == ReadBytes(snapshotInstrumentsCount.rest, 8) IN IF ~lastIncrementalMessageSeq.ok THEN Fail ELSE
     LET lastTradePrice == ReadBytes(lastIncrementalMessageSeq.rest, 8) IN IF ~lastTradePrice.ok THEN Fail ELSE
     LET lastTradeSize == ReadBytes(lastTradePrice.rest, 8) IN IF ~lastTradeSize.ok THEN Fail ELSE
-    LET lastTradeTimeTimestamp == ReadBytes(lastTradeSize.rest, 8) IN IF ~lastTradeTimeTimestamp.ok THEN Fail ELSE
-    LET totalVolumeQuantityOptional == ReadBytes(lastTradeTimeTimestamp.rest, 8) IN IF ~totalVolumeQuantityOptional.ok THEN Fail ELSE
-    LET openPrice == ReadBytes(totalVolumeQuantityOptional.rest, 8) IN IF ~openPrice.ok THEN Fail ELSE
+    LET lastTradeTime == ReadBytes(lastTradeSize.rest, 8) IN IF ~lastTradeTime.ok THEN Fail ELSE
+    LET totalVolumeOptional == ReadBytes(lastTradeTime.rest, 8) IN IF ~totalVolumeOptional.ok THEN Fail ELSE
+    LET openPrice == ReadBytes(totalVolumeOptional.rest, 8) IN IF ~openPrice.ok THEN Fail ELSE
     LET openPriceType == ReadBytes(openPrice.rest, 1) IN IF ~openPriceType.ok THEN Fail ELSE
     LET highPrice == ReadBytes(openPriceType.rest, 8) IN IF ~highPrice.ok THEN Fail ELSE
     LET lowPrice == ReadBytes(highPrice.rest, 8) IN IF ~lowPrice.ok THEN Fail ELSE
@@ -1270,8 +1270,8 @@ DecodeMarketSummarySnapshotMessage(bytes) ==
          lastIncrementalMessageSeq   |-> lastIncrementalMessageSeq.value,
          lastTradePrice              |-> lastTradePrice.value,
          lastTradeSize               |-> lastTradeSize.value,
-         lastTradeTimeTimestamp      |-> lastTradeTimeTimestamp.value,
-         totalVolumeQuantityOptional |-> totalVolumeQuantityOptional.value,
+         lastTradeTime               |-> lastTradeTime.value,
+         totalVolumeOptional         |-> totalVolumeOptional.value,
          openPrice                   |-> openPrice.value,
          openPriceType               |-> openPriceType.value,
          highPrice                   |-> highPrice.value,
@@ -1292,8 +1292,8 @@ ZeroMarketSummarySnapshotMessage ==
       lastIncrementalMessageSeq   |-> [i \in 1 .. 8 |-> 0],
       lastTradePrice              |-> [i \in 1 .. 8 |-> 0],
       lastTradeSize               |-> [i \in 1 .. 8 |-> 0],
-      lastTradeTimeTimestamp      |-> [i \in 1 .. 8 |-> 0],
-      totalVolumeQuantityOptional |-> [i \in 1 .. 8 |-> 0],
+      lastTradeTime               |-> [i \in 1 .. 8 |-> 0],
+      totalVolumeOptional         |-> [i \in 1 .. 8 |-> 0],
       openPrice                   |-> [i \in 1 .. 8 |-> 0],
       openPriceType               |-> [i \in 1 .. 1 |-> 0],
       highPrice                   |-> [i \in 1 .. 8 |-> 0],
@@ -1316,8 +1316,8 @@ CheckedMarketSummarySnapshotMessage ==
         \cup { [ZeroMarketSummarySnapshotMessage EXCEPT !.lastIncrementalMessageSeq = one] : one \in Sample(8) }
         \cup { [ZeroMarketSummarySnapshotMessage EXCEPT !.lastTradePrice = one] : one \in Sample(8) }
         \cup { [ZeroMarketSummarySnapshotMessage EXCEPT !.lastTradeSize = one] : one \in Sample(8) }
-        \cup { [ZeroMarketSummarySnapshotMessage EXCEPT !.lastTradeTimeTimestamp = one] : one \in Sample(8) }
-        \cup { [ZeroMarketSummarySnapshotMessage EXCEPT !.totalVolumeQuantityOptional = one] : one \in Sample(8) }
+        \cup { [ZeroMarketSummarySnapshotMessage EXCEPT !.lastTradeTime = one] : one \in Sample(8) }
+        \cup { [ZeroMarketSummarySnapshotMessage EXCEPT !.totalVolumeOptional = one] : one \in Sample(8) }
         \cup { [ZeroMarketSummarySnapshotMessage EXCEPT !.openPrice = one] : one \in Sample(8) }
         \cup { [ZeroMarketSummarySnapshotMessage EXCEPT !.openPriceType = one] : one \in Sample(1) }
         \cup { [ZeroMarketSummarySnapshotMessage EXCEPT !.highPrice = one] : one \in Sample(8) }

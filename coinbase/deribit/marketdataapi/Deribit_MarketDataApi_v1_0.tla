@@ -18,6 +18,12 @@
 (*                                                                         *)
 (* Note: a Message Count of 0 marks Empty Packet and carries no Md         *)
 (* Message.                                                                *)
+(*                                                                         *)
+(* Note: Execution Timestamp and what follows it are read only when the    *)
+(* message runs on past what precedes them.                                *)
+(*                                                                         *)
+(* Note: Padding 2 and what follows it are read only when the message runs *)
+(* on past what precedes them.                                             *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -100,7 +106,7 @@ SampleLists(entries) ==
         \cup { <<one, one>> : one \in entries }
 
 (***************************************************************************)
-(* Instrument Definition Message large Tick Sizes Group: 16 bytes          *)
+(* Instrument Definition Message Large Tick Sizes Group: 16 bytes          *)
 (***************************************************************************)
 
 InstrumentDefinitionMessageLargeTickSizesGroup ==
@@ -121,20 +127,20 @@ ZeroInstrumentDefinitionMessageLargeTickSizesGroup ==
     [ largeTickSize  |-> [i \in 1 .. 8 |-> 0],
       thresholdPrice |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Instrument Definition Message large Tick Sizes Group at zero, then each field in turn at the values it is checked at *)
+(* Instrument Definition Message Large Tick Sizes Group at zero, then each field in turn at the values it is checked at *)
 CheckedInstrumentDefinitionMessageLargeTickSizesGroup ==
     { ZeroInstrumentDefinitionMessageLargeTickSizesGroup }
         \cup { [ZeroInstrumentDefinitionMessageLargeTickSizesGroup EXCEPT !.largeTickSize = one] : one \in Sample(8) }
         \cup { [ZeroInstrumentDefinitionMessageLargeTickSizesGroup EXCEPT !.thresholdPrice = one] : one \in Sample(8) }
 
-(* A run of Instrument Definition Message large Tick Sizes Group, written one after another *)
+(* A run of Instrument Definition Message Large Tick Sizes Group, written one after another *)
 RECURSIVE EncodeInstrumentDefinitionMessageLargeTickSizesGroupList(_)
 EncodeInstrumentDefinitionMessageLargeTickSizesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeInstrumentDefinitionMessageLargeTickSizesGroup(Head(messages)) \o EncodeInstrumentDefinitionMessageLargeTickSizesGroupList(Tail(messages))
 
-(* As many Instrument Definition Message large Tick Sizes Group as the field that counts them says *)
+(* As many Instrument Definition Message Large Tick Sizes Group as the field that counts them says *)
 RECURSIVE ReadInstrumentDefinitionMessageLargeTickSizesGroupList(_, _)
 ReadInstrumentDefinitionMessageLargeTickSizesGroupList(bytes, count) ==
     IF count = 0
@@ -145,11 +151,11 @@ ReadInstrumentDefinitionMessageLargeTickSizesGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Instrument Definition Message large Tick Sizes Group of each kind, for the lists that carry them *)
+(* One Instrument Definition Message Large Tick Sizes Group of each kind, for the lists that carry them *)
 OneInstrumentDefinitionMessageLargeTickSizesGroup == { ZeroInstrumentDefinitionMessageLargeTickSizesGroup }
 
 (***************************************************************************)
-(* Instrument Definition Message large Tick Sizes Groups                   *)
+(* Instrument Definition Message Large Tick Sizes Groups                   *)
 (***************************************************************************)
 
 InstrumentDefinitionMessageLargeTickSizesGroups ==
@@ -172,14 +178,14 @@ ZeroInstrumentDefinitionMessageLargeTickSizesGroups ==
     [ blockLength                                    |-> [i \in 1 .. 2 |-> 0],
       instrumentDefinitionMessageLargeTickSizesGroup |-> << >> ]
 
-(* Instrument Definition Message large Tick Sizes Groups at zero, then each field in turn at the values it is checked at *)
+(* Instrument Definition Message Large Tick Sizes Groups at zero, then each field in turn at the values it is checked at *)
 CheckedInstrumentDefinitionMessageLargeTickSizesGroups ==
     { ZeroInstrumentDefinitionMessageLargeTickSizesGroups }
         \cup { [ZeroInstrumentDefinitionMessageLargeTickSizesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroInstrumentDefinitionMessageLargeTickSizesGroups EXCEPT !.instrumentDefinitionMessageLargeTickSizesGroup = one] : one \in SampleLists(OneInstrumentDefinitionMessageLargeTickSizesGroup) }
 
 (***************************************************************************)
-(* Instrument Definition Message legs Group: 9 bytes                       *)
+(* Instrument Definition Message Legs Group: 9 bytes                       *)
 (***************************************************************************)
 
 InstrumentDefinitionMessageLegsGroup ==
@@ -200,20 +206,20 @@ ZeroInstrumentDefinitionMessageLegsGroup ==
     [ legInstrumentId |-> [i \in 1 .. 8 |-> 0],
       ratio           |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Instrument Definition Message legs Group at zero, then each field in turn at the values it is checked at *)
+(* Instrument Definition Message Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedInstrumentDefinitionMessageLegsGroup ==
     { ZeroInstrumentDefinitionMessageLegsGroup }
         \cup { [ZeroInstrumentDefinitionMessageLegsGroup EXCEPT !.legInstrumentId = one] : one \in Sample(8) }
         \cup { [ZeroInstrumentDefinitionMessageLegsGroup EXCEPT !.ratio = one] : one \in Sample(1) }
 
-(* A run of Instrument Definition Message legs Group, written one after another *)
+(* A run of Instrument Definition Message Legs Group, written one after another *)
 RECURSIVE EncodeInstrumentDefinitionMessageLegsGroupList(_)
 EncodeInstrumentDefinitionMessageLegsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeInstrumentDefinitionMessageLegsGroup(Head(messages)) \o EncodeInstrumentDefinitionMessageLegsGroupList(Tail(messages))
 
-(* As many Instrument Definition Message legs Group as the field that counts them says *)
+(* As many Instrument Definition Message Legs Group as the field that counts them says *)
 RECURSIVE ReadInstrumentDefinitionMessageLegsGroupList(_, _)
 ReadInstrumentDefinitionMessageLegsGroupList(bytes, count) ==
     IF count = 0
@@ -224,11 +230,11 @@ ReadInstrumentDefinitionMessageLegsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Instrument Definition Message legs Group of each kind, for the lists that carry them *)
+(* One Instrument Definition Message Legs Group of each kind, for the lists that carry them *)
 OneInstrumentDefinitionMessageLegsGroup == { ZeroInstrumentDefinitionMessageLegsGroup }
 
 (***************************************************************************)
-(* Instrument Definition Message legs Groups                               *)
+(* Instrument Definition Message Legs Groups                               *)
 (***************************************************************************)
 
 InstrumentDefinitionMessageLegsGroups ==
@@ -251,7 +257,7 @@ ZeroInstrumentDefinitionMessageLegsGroups ==
     [ blockLength                          |-> [i \in 1 .. 2 |-> 0],
       instrumentDefinitionMessageLegsGroup |-> << >> ]
 
-(* Instrument Definition Message legs Groups at zero, then each field in turn at the values it is checked at *)
+(* Instrument Definition Message Legs Groups at zero, then each field in turn at the values it is checked at *)
 CheckedInstrumentDefinitionMessageLegsGroups ==
     { ZeroInstrumentDefinitionMessageLegsGroups }
         \cup { [ZeroInstrumentDefinitionMessageLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -398,40 +404,63 @@ CheckedIndexDefinitionMessage ==
         \cup { [ZeroIndexDefinitionMessage EXCEPT !.name = one] : one \in Sample(128) }
 
 (***************************************************************************)
-(* Instrument Info Message: 40 bytes                                       *)
+(* Index Info Message: 16 bytes                                            *)
+(***************************************************************************)
+
+IndexInfoMessage ==
+    [ indexId    : Sample(8),
+      indexPrice : Sample(8) ]
+
+EncodeIndexInfoMessage(message) ==
+    message.indexId
+        \o message.indexPrice
+
+DecodeIndexInfoMessage(bytes) ==
+    LET indexId == ReadBytes(bytes, 8) IN IF ~indexId.ok THEN Fail ELSE
+    LET indexPrice == ReadBytes(indexId.rest, 8) IN IF ~indexPrice.ok THEN Fail ELSE
+    Ok([ indexId    |-> indexId.value,
+         indexPrice |-> indexPrice.value ], indexPrice.rest)
+
+ZeroIndexInfoMessage ==
+    [ indexId    |-> [i \in 1 .. 8 |-> 0],
+      indexPrice |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Index Info Message at zero, then each field in turn at the values it is checked at *)
+CheckedIndexInfoMessage ==
+    { ZeroIndexInfoMessage }
+        \cup { [ZeroIndexInfoMessage EXCEPT !.indexId = one] : one \in Sample(8) }
+        \cup { [ZeroIndexInfoMessage EXCEPT !.indexPrice = one] : one \in Sample(8) }
+
+(***************************************************************************)
+(* Instrument Info Message: 32 bytes                                       *)
 (***************************************************************************)
 
 InstrumentInfoMessage ==
     [ instrumentId : Sample(8),
       minSellPrice : Sample(8),
       maxBuyPrice  : Sample(8),
-      indexPrice   : Sample(8),
       markPrice    : Sample(8) ]
 
 EncodeInstrumentInfoMessage(message) ==
     message.instrumentId
         \o message.minSellPrice
         \o message.maxBuyPrice
-        \o message.indexPrice
         \o message.markPrice
 
 DecodeInstrumentInfoMessage(bytes) ==
     LET instrumentId == ReadBytes(bytes, 8) IN IF ~instrumentId.ok THEN Fail ELSE
     LET minSellPrice == ReadBytes(instrumentId.rest, 8) IN IF ~minSellPrice.ok THEN Fail ELSE
     LET maxBuyPrice == ReadBytes(minSellPrice.rest, 8) IN IF ~maxBuyPrice.ok THEN Fail ELSE
-    LET indexPrice == ReadBytes(maxBuyPrice.rest, 8) IN IF ~indexPrice.ok THEN Fail ELSE
-    LET markPrice == ReadBytes(indexPrice.rest, 8) IN IF ~markPrice.ok THEN Fail ELSE
+    LET markPrice == ReadBytes(maxBuyPrice.rest, 8) IN IF ~markPrice.ok THEN Fail ELSE
     Ok([ instrumentId |-> instrumentId.value,
          minSellPrice |-> minSellPrice.value,
          maxBuyPrice  |-> maxBuyPrice.value,
-         indexPrice   |-> indexPrice.value,
          markPrice    |-> markPrice.value ], markPrice.rest)
 
 ZeroInstrumentInfoMessage ==
     [ instrumentId |-> [i \in 1 .. 8 |-> 0],
       minSellPrice |-> [i \in 1 .. 8 |-> 0],
       maxBuyPrice  |-> [i \in 1 .. 8 |-> 0],
-      indexPrice   |-> [i \in 1 .. 8 |-> 0],
       markPrice    |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Instrument Info Message at zero, then each field in turn at the values it is checked at *)
@@ -440,11 +469,10 @@ CheckedInstrumentInfoMessage ==
         \cup { [ZeroInstrumentInfoMessage EXCEPT !.instrumentId = one] : one \in Sample(8) }
         \cup { [ZeroInstrumentInfoMessage EXCEPT !.minSellPrice = one] : one \in Sample(8) }
         \cup { [ZeroInstrumentInfoMessage EXCEPT !.maxBuyPrice = one] : one \in Sample(8) }
-        \cup { [ZeroInstrumentInfoMessage EXCEPT !.indexPrice = one] : one \in Sample(8) }
         \cup { [ZeroInstrumentInfoMessage EXCEPT !.markPrice = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Instrument Ref Message: 48 bytes                                        *)
+(* Instrument Ref Message: 56 bytes                                        *)
 (***************************************************************************)
 
 InstrumentRefMessage ==
@@ -453,7 +481,8 @@ InstrumentRefMessage ==
       funding8h              : Sample(8),
       estimatedDeliveryPrice : Sample(8),
       deliveryPrice          : Sample(8),
-      settlementPrice        : Sample(8) ]
+      settlementPrice        : Sample(8),
+      openInterest           : Sample(8) ]
 
 EncodeInstrumentRefMessage(message) ==
     message.instrumentId
@@ -462,6 +491,7 @@ EncodeInstrumentRefMessage(message) ==
         \o message.estimatedDeliveryPrice
         \o message.deliveryPrice
         \o message.settlementPrice
+        \o message.openInterest
 
 DecodeInstrumentRefMessage(bytes) ==
     LET instrumentId == ReadBytes(bytes, 8) IN IF ~instrumentId.ok THEN Fail ELSE
@@ -470,12 +500,14 @@ DecodeInstrumentRefMessage(bytes) ==
     LET estimatedDeliveryPrice == ReadBytes(funding8h.rest, 8) IN IF ~estimatedDeliveryPrice.ok THEN Fail ELSE
     LET deliveryPrice == ReadBytes(estimatedDeliveryPrice.rest, 8) IN IF ~deliveryPrice.ok THEN Fail ELSE
     LET settlementPrice == ReadBytes(deliveryPrice.rest, 8) IN IF ~settlementPrice.ok THEN Fail ELSE
+    LET openInterest == ReadBytes(settlementPrice.rest, 8) IN IF ~openInterest.ok THEN Fail ELSE
     Ok([ instrumentId           |-> instrumentId.value,
          currentFunding         |-> currentFunding.value,
          funding8h              |-> funding8h.value,
          estimatedDeliveryPrice |-> estimatedDeliveryPrice.value,
          deliveryPrice          |-> deliveryPrice.value,
-         settlementPrice        |-> settlementPrice.value ], settlementPrice.rest)
+         settlementPrice        |-> settlementPrice.value,
+         openInterest           |-> openInterest.value ], openInterest.rest)
 
 ZeroInstrumentRefMessage ==
     [ instrumentId           |-> [i \in 1 .. 8 |-> 0],
@@ -483,7 +515,8 @@ ZeroInstrumentRefMessage ==
       funding8h              |-> [i \in 1 .. 8 |-> 0],
       estimatedDeliveryPrice |-> [i \in 1 .. 8 |-> 0],
       deliveryPrice          |-> [i \in 1 .. 8 |-> 0],
-      settlementPrice        |-> [i \in 1 .. 8 |-> 0] ]
+      settlementPrice        |-> [i \in 1 .. 8 |-> 0],
+      openInterest           |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Instrument Ref Message at zero, then each field in turn at the values it is checked at *)
 CheckedInstrumentRefMessage ==
@@ -494,6 +527,7 @@ CheckedInstrumentRefMessage ==
         \cup { [ZeroInstrumentRefMessage EXCEPT !.estimatedDeliveryPrice = one] : one \in Sample(8) }
         \cup { [ZeroInstrumentRefMessage EXCEPT !.deliveryPrice = one] : one \in Sample(8) }
         \cup { [ZeroInstrumentRefMessage EXCEPT !.settlementPrice = one] : one \in Sample(8) }
+        \cup { [ZeroInstrumentRefMessage EXCEPT !.openInterest = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Instrument Status Update Message: 9 bytes                               *)
@@ -856,21 +890,98 @@ CheckedTradeMessage ==
         \cup { [ZeroTradeMessage EXCEPT !.makerFlags = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Block Trade Message: 78 bytes                                           *)
+(* Block Trade Message: 8 bytes                                            *)
+(***************************************************************************)
+
+BlockTradeMessageTail2 ==
+    [ executionTimestamp : Sample(8) ]
+
+EncodeBlockTradeMessageTail2(message) ==
+    message.executionTimestamp
+
+DecodeBlockTradeMessageTail2(bytes) ==
+    LET executionTimestamp == ReadBytes(bytes, 8) IN IF ~executionTimestamp.ok THEN Fail ELSE
+    Ok([ executionTimestamp |-> executionTimestamp.value ], executionTimestamp.rest)
+
+ZeroBlockTradeMessageTail2 ==
+    [ executionTimestamp |-> [i \in 1 .. 8 |-> 0] ]
+
+(* Block Trade Message at zero, then each field in turn at the values it is checked at *)
+CheckedBlockTradeMessageTail2 ==
+    { ZeroBlockTradeMessageTail2 }
+        \cup { [ZeroBlockTradeMessageTail2 EXCEPT !.executionTimestamp = one] : one \in Sample(8) }
+
+(* Block Trade Message runs on only when bytes remain, so it is there or it is not *)
+WithoutBlockTradeMessageTail2 == [there |-> FALSE, value |-> ZeroBlockTradeMessageTail2]
+
+MaybeBlockTradeMessageTail2 ==
+    { WithoutBlockTradeMessageTail2 }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedBlockTradeMessageTail2 }
+
+ReadBlockTradeMessageTail2Maybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutBlockTradeMessageTail2, << >>)
+    ELSE LET one == DecodeBlockTradeMessageTail2(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Block Trade Message                                                     *)
+(***************************************************************************)
+
+BlockTradeMessageTail ==
+    [ padding2              : Sample(2),
+      blockTradeMessageTail : MaybeBlockTradeMessageTail2 ]
+
+EncodeBlockTradeMessageTail(message) ==
+    message.padding2
+        \o IF message.blockTradeMessageTail.there THEN EncodeBlockTradeMessageTail2(message.blockTradeMessageTail.value) ELSE << >>
+
+DecodeBlockTradeMessageTail(bytes) ==
+    LET padding2 == ReadBytes(bytes, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET blockTradeMessageTail == ReadBlockTradeMessageTail2Maybe(padding2.rest) IN IF ~blockTradeMessageTail.ok THEN Fail ELSE
+    Ok([ padding2              |-> padding2.value,
+         blockTradeMessageTail |-> blockTradeMessageTail.value ], blockTradeMessageTail.rest)
+
+ZeroBlockTradeMessageTail ==
+    [ padding2              |-> [i \in 1 .. 2 |-> 0],
+      blockTradeMessageTail |-> WithoutBlockTradeMessageTail2 ]
+
+(* Block Trade Message at zero, then each field in turn at the values it is checked at *)
+CheckedBlockTradeMessageTail ==
+    { ZeroBlockTradeMessageTail }
+        \cup { [ZeroBlockTradeMessageTail EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroBlockTradeMessageTail EXCEPT !.blockTradeMessageTail = one] : one \in MaybeBlockTradeMessageTail2 }
+
+(* Block Trade Message runs on only when bytes remain, so it is there or it is not *)
+WithoutBlockTradeMessageTail == [there |-> FALSE, value |-> ZeroBlockTradeMessageTail]
+
+MaybeBlockTradeMessageTail ==
+    { WithoutBlockTradeMessageTail }
+        \cup { [there |-> TRUE, value |-> one] : one \in CheckedBlockTradeMessageTail }
+
+ReadBlockTradeMessageTailMaybe(bytes) ==
+    IF bytes = << >> THEN Ok(WithoutBlockTradeMessageTail, << >>)
+    ELSE LET one == DecodeBlockTradeMessageTail(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE Ok([there |-> TRUE, value |-> one.value], one.rest)
+
+(***************************************************************************)
+(* Block Trade Message                                                     *)
 (***************************************************************************)
 
 BlockTradeMessage ==
-    [ matchId           : Sample(8),
-      instrumentId      : Sample(8),
-      blockTradeId      : Sample(8),
-      blockRfqId        : Sample(8),
-      fillQtyMantissa   : Sample(8),
-      fillPrice         : Sample(8),
-      markPrice         : Sample(8),
-      indexPrice        : Sample(8),
-      impliedVolatility : Sample(8),
-      takerFlags        : Sample(4),
-      numberOfLegs      : Sample(2) ]
+    [ matchId               : Sample(8),
+      instrumentId          : Sample(8),
+      blockTradeId          : Sample(8),
+      blockRfqId            : Sample(8),
+      fillQtyMantissa       : Sample(8),
+      fillPrice             : Sample(8),
+      markPrice             : Sample(8),
+      indexPrice            : Sample(8),
+      impliedVolatility     : Sample(8),
+      takerFlags            : Sample(4),
+      numberOfLegs          : Sample(2),
+      blockTradeMessageTail : MaybeBlockTradeMessageTail ]
 
 EncodeBlockTradeMessage(message) ==
     message.matchId
@@ -884,6 +995,7 @@ EncodeBlockTradeMessage(message) ==
         \o message.impliedVolatility
         \o message.takerFlags
         \o message.numberOfLegs
+        \o IF message.blockTradeMessageTail.there THEN EncodeBlockTradeMessageTail(message.blockTradeMessageTail.value) ELSE << >>
 
 DecodeBlockTradeMessage(bytes) ==
     LET matchId == ReadBytes(bytes, 8) IN IF ~matchId.ok THEN Fail ELSE
@@ -897,30 +1009,33 @@ DecodeBlockTradeMessage(bytes) ==
     LET impliedVolatility == ReadBytes(indexPrice.rest, 8) IN IF ~impliedVolatility.ok THEN Fail ELSE
     LET takerFlags == ReadBytes(impliedVolatility.rest, 4) IN IF ~takerFlags.ok THEN Fail ELSE
     LET numberOfLegs == ReadBytes(takerFlags.rest, 2) IN IF ~numberOfLegs.ok THEN Fail ELSE
-    Ok([ matchId           |-> matchId.value,
-         instrumentId      |-> instrumentId.value,
-         blockTradeId      |-> blockTradeId.value,
-         blockRfqId        |-> blockRfqId.value,
-         fillQtyMantissa   |-> fillQtyMantissa.value,
-         fillPrice         |-> fillPrice.value,
-         markPrice         |-> markPrice.value,
-         indexPrice        |-> indexPrice.value,
-         impliedVolatility |-> impliedVolatility.value,
-         takerFlags        |-> takerFlags.value,
-         numberOfLegs      |-> numberOfLegs.value ], numberOfLegs.rest)
+    LET blockTradeMessageTail == ReadBlockTradeMessageTailMaybe(numberOfLegs.rest) IN IF ~blockTradeMessageTail.ok THEN Fail ELSE
+    Ok([ matchId               |-> matchId.value,
+         instrumentId          |-> instrumentId.value,
+         blockTradeId          |-> blockTradeId.value,
+         blockRfqId            |-> blockRfqId.value,
+         fillQtyMantissa       |-> fillQtyMantissa.value,
+         fillPrice             |-> fillPrice.value,
+         markPrice             |-> markPrice.value,
+         indexPrice            |-> indexPrice.value,
+         impliedVolatility     |-> impliedVolatility.value,
+         takerFlags            |-> takerFlags.value,
+         numberOfLegs          |-> numberOfLegs.value,
+         blockTradeMessageTail |-> blockTradeMessageTail.value ], blockTradeMessageTail.rest)
 
 ZeroBlockTradeMessage ==
-    [ matchId           |-> [i \in 1 .. 8 |-> 0],
-      instrumentId      |-> [i \in 1 .. 8 |-> 0],
-      blockTradeId      |-> [i \in 1 .. 8 |-> 0],
-      blockRfqId        |-> [i \in 1 .. 8 |-> 0],
-      fillQtyMantissa   |-> [i \in 1 .. 8 |-> 0],
-      fillPrice         |-> [i \in 1 .. 8 |-> 0],
-      markPrice         |-> [i \in 1 .. 8 |-> 0],
-      indexPrice        |-> [i \in 1 .. 8 |-> 0],
-      impliedVolatility |-> [i \in 1 .. 8 |-> 0],
-      takerFlags        |-> [i \in 1 .. 4 |-> 0],
-      numberOfLegs      |-> [i \in 1 .. 2 |-> 0] ]
+    [ matchId               |-> [i \in 1 .. 8 |-> 0],
+      instrumentId          |-> [i \in 1 .. 8 |-> 0],
+      blockTradeId          |-> [i \in 1 .. 8 |-> 0],
+      blockRfqId            |-> [i \in 1 .. 8 |-> 0],
+      fillQtyMantissa       |-> [i \in 1 .. 8 |-> 0],
+      fillPrice             |-> [i \in 1 .. 8 |-> 0],
+      markPrice             |-> [i \in 1 .. 8 |-> 0],
+      indexPrice            |-> [i \in 1 .. 8 |-> 0],
+      impliedVolatility     |-> [i \in 1 .. 8 |-> 0],
+      takerFlags            |-> [i \in 1 .. 4 |-> 0],
+      numberOfLegs          |-> [i \in 1 .. 2 |-> 0],
+      blockTradeMessageTail |-> WithoutBlockTradeMessageTail ]
 
 (* Block Trade Message at zero, then each field in turn at the values it is checked at *)
 CheckedBlockTradeMessage ==
@@ -936,6 +1051,7 @@ CheckedBlockTradeMessage ==
         \cup { [ZeroBlockTradeMessage EXCEPT !.impliedVolatility = one] : one \in Sample(8) }
         \cup { [ZeroBlockTradeMessage EXCEPT !.takerFlags = one] : one \in Sample(4) }
         \cup { [ZeroBlockTradeMessage EXCEPT !.numberOfLegs = one] : one \in Sample(2) }
+        \cup { [ZeroBlockTradeMessage EXCEPT !.blockTradeMessageTail = one] : one \in MaybeBlockTradeMessageTail }
 
 (***************************************************************************)
 (* Snapshot Header Message: 24 bytes                                       *)
@@ -1095,6 +1211,7 @@ CheckedRetransmitRejectMessage ==
 
 InstrumentDefinitionMessageCode == 10  \* 0x0a
 IndexDefinitionMessageCode == 11  \* 0x0b
+IndexInfoMessageCode == 12  \* 0x0c
 InstrumentInfoMessageCode == 14  \* 0x0e
 InstrumentRefMessageCode == 15  \* 0x0f
 InstrumentStatusUpdateMessageCode == 16  \* 0x10
@@ -1116,6 +1233,7 @@ RetransmitRejectMessageCode == 202  \* 0xca
 Payload ==
     [ tag : {InstrumentDefinitionMessageCode}, body : InstrumentDefinitionMessage ]
         \cup [ tag : {IndexDefinitionMessageCode}, body : IndexDefinitionMessage ]
+        \cup [ tag : {IndexInfoMessageCode}, body : IndexInfoMessage ]
         \cup [ tag : {InstrumentInfoMessageCode}, body : InstrumentInfoMessage ]
         \cup [ tag : {InstrumentRefMessageCode}, body : InstrumentRefMessage ]
         \cup [ tag : {InstrumentStatusUpdateMessageCode}, body : InstrumentStatusUpdateMessage ]
@@ -1137,6 +1255,7 @@ Payload ==
 EncodePayload(message) ==
     CASE message.tag = InstrumentDefinitionMessageCode -> EncodeInstrumentDefinitionMessage(message.body)
       [] message.tag = IndexDefinitionMessageCode -> EncodeIndexDefinitionMessage(message.body)
+      [] message.tag = IndexInfoMessageCode -> EncodeIndexInfoMessage(message.body)
       [] message.tag = InstrumentInfoMessageCode -> EncodeInstrumentInfoMessage(message.body)
       [] message.tag = InstrumentRefMessageCode -> EncodeInstrumentRefMessage(message.body)
       [] message.tag = InstrumentStatusUpdateMessageCode -> EncodeInstrumentStatusUpdateMessage(message.body)
@@ -1159,6 +1278,7 @@ DecodePayload(tag, bytes) ==
     LET read ==
             CASE tag = InstrumentDefinitionMessageCode -> DecodeInstrumentDefinitionMessage(bytes)
               [] tag = IndexDefinitionMessageCode -> DecodeIndexDefinitionMessage(bytes)
+              [] tag = IndexInfoMessageCode -> DecodeIndexInfoMessage(bytes)
               [] tag = InstrumentInfoMessageCode -> DecodeInstrumentInfoMessage(bytes)
               [] tag = InstrumentRefMessageCode -> DecodeInstrumentRefMessage(bytes)
               [] tag = InstrumentStatusUpdateMessageCode -> DecodeInstrumentStatusUpdateMessage(bytes)
@@ -1185,6 +1305,7 @@ ZeroPayload == [tag |-> InstrumentDefinitionMessageCode, body |-> ZeroInstrument
 CheckedPayload ==
     { [tag |-> InstrumentDefinitionMessageCode, body |-> one] : one \in CheckedInstrumentDefinitionMessage }
         \cup { [tag |-> IndexDefinitionMessageCode, body |-> one] : one \in CheckedIndexDefinitionMessage }
+        \cup { [tag |-> IndexInfoMessageCode, body |-> one] : one \in CheckedIndexInfoMessage }
         \cup { [tag |-> InstrumentInfoMessageCode, body |-> one] : one \in CheckedInstrumentInfoMessage }
         \cup { [tag |-> InstrumentRefMessageCode, body |-> one] : one \in CheckedInstrumentRefMessage }
         \cup { [tag |-> InstrumentStatusUpdateMessageCode, body |-> one] : one \in CheckedInstrumentStatusUpdateMessage }
@@ -1288,6 +1409,7 @@ ReadMdMessageList(bytes, count) ==
 OneMdMessage ==
     { [ZeroMdMessage EXCEPT !.payload = [tag |-> InstrumentDefinitionMessageCode, body |-> ZeroInstrumentDefinitionMessage]],
       [ZeroMdMessage EXCEPT !.payload = [tag |-> IndexDefinitionMessageCode, body |-> ZeroIndexDefinitionMessage]],
+      [ZeroMdMessage EXCEPT !.payload = [tag |-> IndexInfoMessageCode, body |-> ZeroIndexInfoMessage]],
       [ZeroMdMessage EXCEPT !.payload = [tag |-> InstrumentInfoMessageCode, body |-> ZeroInstrumentInfoMessage]],
       [ZeroMdMessage EXCEPT !.payload = [tag |-> InstrumentRefMessageCode, body |-> ZeroInstrumentRefMessage]],
       [ZeroMdMessage EXCEPT !.payload = [tag |-> InstrumentStatusUpdateMessageCode, body |-> ZeroInstrumentStatusUpdateMessage]],
@@ -1370,7 +1492,7 @@ RoundTripUIntLE ==
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
                 /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
-(* Every Instrument Definition Message large Tick Sizes Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Instrument Definition Message Large Tick Sizes Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripInstrumentDefinitionMessageLargeTickSizesGroup ==
     \A message \in CheckedInstrumentDefinitionMessageLargeTickSizesGroup :
         LET read == DecodeInstrumentDefinitionMessageLargeTickSizesGroup(EncodeInstrumentDefinitionMessageLargeTickSizesGroup(message))
@@ -1378,7 +1500,7 @@ RoundTripInstrumentDefinitionMessageLargeTickSizesGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Instrument Definition Message large Tick Sizes Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Instrument Definition Message Large Tick Sizes Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripInstrumentDefinitionMessageLargeTickSizesGroups ==
     \A message \in CheckedInstrumentDefinitionMessageLargeTickSizesGroups :
         LET read == DecodeInstrumentDefinitionMessageLargeTickSizesGroups(EncodeInstrumentDefinitionMessageLargeTickSizesGroups(message))
@@ -1386,7 +1508,7 @@ RoundTripInstrumentDefinitionMessageLargeTickSizesGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Instrument Definition Message legs Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Instrument Definition Message Legs Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripInstrumentDefinitionMessageLegsGroup ==
     \A message \in CheckedInstrumentDefinitionMessageLegsGroup :
         LET read == DecodeInstrumentDefinitionMessageLegsGroup(EncodeInstrumentDefinitionMessageLegsGroup(message))
@@ -1394,7 +1516,7 @@ RoundTripInstrumentDefinitionMessageLegsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Instrument Definition Message legs Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Instrument Definition Message Legs Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripInstrumentDefinitionMessageLegsGroups ==
     \A message \in CheckedInstrumentDefinitionMessageLegsGroups :
         LET read == DecodeInstrumentDefinitionMessageLegsGroups(EncodeInstrumentDefinitionMessageLegsGroups(message))
@@ -1414,6 +1536,14 @@ RoundTripInstrumentDefinitionMessage ==
 RoundTripIndexDefinitionMessage ==
     \A message \in CheckedIndexDefinitionMessage :
         LET read == DecodeIndexDefinitionMessage(EncodeIndexDefinitionMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Index Info Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripIndexInfoMessage ==
+    \A message \in CheckedIndexInfoMessage :
+        LET read == DecodeIndexInfoMessage(EncodeIndexInfoMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -1502,6 +1632,22 @@ RoundTripTradeSummaryMessage ==
 RoundTripTradeMessage ==
     \A message \in CheckedTradeMessage :
         LET read == DecodeTradeMessage(EncodeTradeMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Block Trade Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripBlockTradeMessageTail2 ==
+    \A message \in CheckedBlockTradeMessageTail2 :
+        LET read == DecodeBlockTradeMessageTail2(EncodeBlockTradeMessageTail2(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Block Trade Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripBlockTradeMessageTail ==
+    \A message \in CheckedBlockTradeMessageTail :
+        LET read == DecodeBlockTradeMessageTail(EncodeBlockTradeMessageTail(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

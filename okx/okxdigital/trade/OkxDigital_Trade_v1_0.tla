@@ -267,7 +267,7 @@ CheckedPlaceOrderResponseMessage ==
         \cup { [ZeroPlaceOrderResponseMessage EXCEPT !.outTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Place Orders Message orders Group: 46 bytes                             *)
+(* Place Orders Message Orders Group: 46 bytes                             *)
 (***************************************************************************)
 
 PlaceOrdersMessageOrdersGroup ==
@@ -333,7 +333,7 @@ ZeroPlaceOrdersMessageOrdersGroup ==
       tag            |-> [i \in 1 .. 8 |-> 0],
       rpiTakerAccess |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Place Orders Message orders Group at zero, then each field in turn at the values it is checked at *)
+(* Place Orders Message Orders Group at zero, then each field in turn at the values it is checked at *)
 CheckedPlaceOrdersMessageOrdersGroup ==
     { ZeroPlaceOrdersMessageOrdersGroup }
         \cup { [ZeroPlaceOrdersMessageOrdersGroup EXCEPT !.instIdCode = one] : one \in Sample(8) }
@@ -348,14 +348,14 @@ CheckedPlaceOrdersMessageOrdersGroup ==
         \cup { [ZeroPlaceOrdersMessageOrdersGroup EXCEPT !.tag = one] : one \in Sample(8) }
         \cup { [ZeroPlaceOrdersMessageOrdersGroup EXCEPT !.rpiTakerAccess = one] : one \in Sample(1) }
 
-(* A run of Place Orders Message orders Group, written one after another *)
+(* A run of Place Orders Message Orders Group, written one after another *)
 RECURSIVE EncodePlaceOrdersMessageOrdersGroupList(_)
 EncodePlaceOrdersMessageOrdersGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodePlaceOrdersMessageOrdersGroup(Head(messages)) \o EncodePlaceOrdersMessageOrdersGroupList(Tail(messages))
 
-(* As many Place Orders Message orders Group as the field that counts them says *)
+(* As many Place Orders Message Orders Group as the field that counts them says *)
 RECURSIVE ReadPlaceOrdersMessageOrdersGroupList(_, _)
 ReadPlaceOrdersMessageOrdersGroupList(bytes, count) ==
     IF count = 0
@@ -366,11 +366,11 @@ ReadPlaceOrdersMessageOrdersGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Place Orders Message orders Group of each kind, for the lists that carry them *)
+(* One Place Orders Message Orders Group of each kind, for the lists that carry them *)
 OnePlaceOrdersMessageOrdersGroup == { ZeroPlaceOrdersMessageOrdersGroup }
 
 (***************************************************************************)
-(* Place Orders Message orders Groups                                      *)
+(* Place Orders Message Orders Groups                                      *)
 (***************************************************************************)
 
 PlaceOrdersMessageOrdersGroups ==
@@ -393,7 +393,7 @@ ZeroPlaceOrdersMessageOrdersGroups ==
     [ blockLength                   |-> [i \in 1 .. 2 |-> 0],
       placeOrdersMessageOrdersGroup |-> << >> ]
 
-(* Place Orders Message orders Groups at zero, then each field in turn at the values it is checked at *)
+(* Place Orders Message Orders Groups at zero, then each field in turn at the values it is checked at *)
 CheckedPlaceOrdersMessageOrdersGroups ==
     { ZeroPlaceOrdersMessageOrdersGroups }
         \cup { [ZeroPlaceOrdersMessageOrdersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -434,7 +434,7 @@ CheckedPlaceOrdersMessage ==
         \cup { [ZeroPlaceOrdersMessage EXCEPT !.placeOrdersMessageOrdersGroups = one] : one \in CheckedPlaceOrdersMessageOrdersGroups }
 
 (***************************************************************************)
-(* Place Orders Response Message data Group: 64 bytes                      *)
+(* Place Orders Response Message Data Group: 64 bytes                      *)
 (***************************************************************************)
 
 PlaceOrdersResponseMessageDataGroup ==
@@ -490,7 +490,7 @@ ZeroPlaceOrdersResponseMessageDataGroup ==
       inTime     |-> [i \in 1 .. 8 |-> 0],
       outTime    |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Place Orders Response Message data Group at zero, then each field in turn at the values it is checked at *)
+(* Place Orders Response Message Data Group at zero, then each field in turn at the values it is checked at *)
 CheckedPlaceOrdersResponseMessageDataGroup ==
     { ZeroPlaceOrdersResponseMessageDataGroup }
         \cup { [ZeroPlaceOrdersResponseMessageDataGroup EXCEPT !.sCode = one] : one \in Sample(4) }
@@ -503,14 +503,14 @@ CheckedPlaceOrdersResponseMessageDataGroup ==
         \cup { [ZeroPlaceOrdersResponseMessageDataGroup EXCEPT !.inTime = one] : one \in Sample(8) }
         \cup { [ZeroPlaceOrdersResponseMessageDataGroup EXCEPT !.outTime = one] : one \in Sample(8) }
 
-(* A run of Place Orders Response Message data Group, written one after another *)
+(* A run of Place Orders Response Message Data Group, written one after another *)
 RECURSIVE EncodePlaceOrdersResponseMessageDataGroupList(_)
 EncodePlaceOrdersResponseMessageDataGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodePlaceOrdersResponseMessageDataGroup(Head(messages)) \o EncodePlaceOrdersResponseMessageDataGroupList(Tail(messages))
 
-(* As many Place Orders Response Message data Group as the field that counts them says *)
+(* As many Place Orders Response Message Data Group as the field that counts them says *)
 RECURSIVE ReadPlaceOrdersResponseMessageDataGroupList(_, _)
 ReadPlaceOrdersResponseMessageDataGroupList(bytes, count) ==
     IF count = 0
@@ -521,11 +521,11 @@ ReadPlaceOrdersResponseMessageDataGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Place Orders Response Message data Group of each kind, for the lists that carry them *)
+(* One Place Orders Response Message Data Group of each kind, for the lists that carry them *)
 OnePlaceOrdersResponseMessageDataGroup == { ZeroPlaceOrdersResponseMessageDataGroup }
 
 (***************************************************************************)
-(* Place Orders Response Message data Groups                               *)
+(* Place Orders Response Message Data Groups                               *)
 (***************************************************************************)
 
 PlaceOrdersResponseMessageDataGroups ==
@@ -548,7 +548,7 @@ ZeroPlaceOrdersResponseMessageDataGroups ==
     [ blockLength                         |-> [i \in 1 .. 2 |-> 0],
       placeOrdersResponseMessageDataGroup |-> << >> ]
 
-(* Place Orders Response Message data Groups at zero, then each field in turn at the values it is checked at *)
+(* Place Orders Response Message Data Groups at zero, then each field in turn at the values it is checked at *)
 CheckedPlaceOrdersResponseMessageDataGroups ==
     { ZeroPlaceOrdersResponseMessageDataGroups }
         \cup { [ZeroPlaceOrdersResponseMessageDataGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -741,7 +741,7 @@ CheckedAmendOrderResponseMessage ==
         \cup { [ZeroAmendOrderResponseMessage EXCEPT !.outTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Amend Orders Message orders Group: 51 bytes                             *)
+(* Amend Orders Message Orders Group: 51 bytes                             *)
 (***************************************************************************)
 
 AmendOrdersMessageOrdersGroup ==
@@ -797,7 +797,7 @@ ZeroAmendOrdersMessageOrdersGroup ==
       reqId          |-> [i \in 1 .. 8 |-> 0],
       rpiTakerAccess |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Amend Orders Message orders Group at zero, then each field in turn at the values it is checked at *)
+(* Amend Orders Message Orders Group at zero, then each field in turn at the values it is checked at *)
 CheckedAmendOrdersMessageOrdersGroup ==
     { ZeroAmendOrdersMessageOrdersGroup }
         \cup { [ZeroAmendOrdersMessageOrdersGroup EXCEPT !.instIdCode = one] : one \in Sample(8) }
@@ -810,14 +810,14 @@ CheckedAmendOrdersMessageOrdersGroup ==
         \cup { [ZeroAmendOrdersMessageOrdersGroup EXCEPT !.reqId = one] : one \in Sample(8) }
         \cup { [ZeroAmendOrdersMessageOrdersGroup EXCEPT !.rpiTakerAccess = one] : one \in Sample(1) }
 
-(* A run of Amend Orders Message orders Group, written one after another *)
+(* A run of Amend Orders Message Orders Group, written one after another *)
 RECURSIVE EncodeAmendOrdersMessageOrdersGroupList(_)
 EncodeAmendOrdersMessageOrdersGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeAmendOrdersMessageOrdersGroup(Head(messages)) \o EncodeAmendOrdersMessageOrdersGroupList(Tail(messages))
 
-(* As many Amend Orders Message orders Group as the field that counts them says *)
+(* As many Amend Orders Message Orders Group as the field that counts them says *)
 RECURSIVE ReadAmendOrdersMessageOrdersGroupList(_, _)
 ReadAmendOrdersMessageOrdersGroupList(bytes, count) ==
     IF count = 0
@@ -828,11 +828,11 @@ ReadAmendOrdersMessageOrdersGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Amend Orders Message orders Group of each kind, for the lists that carry them *)
+(* One Amend Orders Message Orders Group of each kind, for the lists that carry them *)
 OneAmendOrdersMessageOrdersGroup == { ZeroAmendOrdersMessageOrdersGroup }
 
 (***************************************************************************)
-(* Amend Orders Message orders Groups                                      *)
+(* Amend Orders Message Orders Groups                                      *)
 (***************************************************************************)
 
 AmendOrdersMessageOrdersGroups ==
@@ -855,7 +855,7 @@ ZeroAmendOrdersMessageOrdersGroups ==
     [ blockLength                   |-> [i \in 1 .. 2 |-> 0],
       amendOrdersMessageOrdersGroup |-> << >> ]
 
-(* Amend Orders Message orders Groups at zero, then each field in turn at the values it is checked at *)
+(* Amend Orders Message Orders Groups at zero, then each field in turn at the values it is checked at *)
 CheckedAmendOrdersMessageOrdersGroups ==
     { ZeroAmendOrdersMessageOrdersGroups }
         \cup { [ZeroAmendOrdersMessageOrdersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -896,7 +896,7 @@ CheckedAmendOrdersMessage ==
         \cup { [ZeroAmendOrdersMessage EXCEPT !.amendOrdersMessageOrdersGroups = one] : one \in CheckedAmendOrdersMessageOrdersGroups }
 
 (***************************************************************************)
-(* Amend Orders Response Message data Group: 56 bytes                      *)
+(* Amend Orders Response Message Data Group: 56 bytes                      *)
 (***************************************************************************)
 
 AmendOrdersResponseMessageDataGroup ==
@@ -947,7 +947,7 @@ ZeroAmendOrdersResponseMessageDataGroup ==
       inTime  |-> [i \in 1 .. 8 |-> 0],
       outTime |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Amend Orders Response Message data Group at zero, then each field in turn at the values it is checked at *)
+(* Amend Orders Response Message Data Group at zero, then each field in turn at the values it is checked at *)
 CheckedAmendOrdersResponseMessageDataGroup ==
     { ZeroAmendOrdersResponseMessageDataGroup }
         \cup { [ZeroAmendOrdersResponseMessageDataGroup EXCEPT !.sCode = one] : one \in Sample(4) }
@@ -959,14 +959,14 @@ CheckedAmendOrdersResponseMessageDataGroup ==
         \cup { [ZeroAmendOrdersResponseMessageDataGroup EXCEPT !.inTime = one] : one \in Sample(8) }
         \cup { [ZeroAmendOrdersResponseMessageDataGroup EXCEPT !.outTime = one] : one \in Sample(8) }
 
-(* A run of Amend Orders Response Message data Group, written one after another *)
+(* A run of Amend Orders Response Message Data Group, written one after another *)
 RECURSIVE EncodeAmendOrdersResponseMessageDataGroupList(_)
 EncodeAmendOrdersResponseMessageDataGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeAmendOrdersResponseMessageDataGroup(Head(messages)) \o EncodeAmendOrdersResponseMessageDataGroupList(Tail(messages))
 
-(* As many Amend Orders Response Message data Group as the field that counts them says *)
+(* As many Amend Orders Response Message Data Group as the field that counts them says *)
 RECURSIVE ReadAmendOrdersResponseMessageDataGroupList(_, _)
 ReadAmendOrdersResponseMessageDataGroupList(bytes, count) ==
     IF count = 0
@@ -977,11 +977,11 @@ ReadAmendOrdersResponseMessageDataGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Amend Orders Response Message data Group of each kind, for the lists that carry them *)
+(* One Amend Orders Response Message Data Group of each kind, for the lists that carry them *)
 OneAmendOrdersResponseMessageDataGroup == { ZeroAmendOrdersResponseMessageDataGroup }
 
 (***************************************************************************)
-(* Amend Orders Response Message data Groups                               *)
+(* Amend Orders Response Message Data Groups                               *)
 (***************************************************************************)
 
 AmendOrdersResponseMessageDataGroups ==
@@ -1004,7 +1004,7 @@ ZeroAmendOrdersResponseMessageDataGroups ==
     [ blockLength                         |-> [i \in 1 .. 2 |-> 0],
       amendOrdersResponseMessageDataGroup |-> << >> ]
 
-(* Amend Orders Response Message data Groups at zero, then each field in turn at the values it is checked at *)
+(* Amend Orders Response Message Data Groups at zero, then each field in turn at the values it is checked at *)
 CheckedAmendOrdersResponseMessageDataGroups ==
     { ZeroAmendOrdersResponseMessageDataGroups }
         \cup { [ZeroAmendOrdersResponseMessageDataGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -1143,7 +1143,7 @@ CheckedCancelOrderResponseMessage ==
         \cup { [ZeroCancelOrderResponseMessage EXCEPT !.outTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Cancel Orders Message orders Group: 24 bytes                            *)
+(* Cancel Orders Message Orders Group: 24 bytes                            *)
 (***************************************************************************)
 
 CancelOrdersMessageOrdersGroup ==
@@ -1169,21 +1169,21 @@ ZeroCancelOrdersMessageOrdersGroup ==
       ordId      |-> [i \in 1 .. 8 |-> 0],
       clOrdId    |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Cancel Orders Message orders Group at zero, then each field in turn at the values it is checked at *)
+(* Cancel Orders Message Orders Group at zero, then each field in turn at the values it is checked at *)
 CheckedCancelOrdersMessageOrdersGroup ==
     { ZeroCancelOrdersMessageOrdersGroup }
         \cup { [ZeroCancelOrdersMessageOrdersGroup EXCEPT !.instIdCode = one] : one \in Sample(8) }
         \cup { [ZeroCancelOrdersMessageOrdersGroup EXCEPT !.ordId = one] : one \in Sample(8) }
         \cup { [ZeroCancelOrdersMessageOrdersGroup EXCEPT !.clOrdId = one] : one \in Sample(8) }
 
-(* A run of Cancel Orders Message orders Group, written one after another *)
+(* A run of Cancel Orders Message Orders Group, written one after another *)
 RECURSIVE EncodeCancelOrdersMessageOrdersGroupList(_)
 EncodeCancelOrdersMessageOrdersGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeCancelOrdersMessageOrdersGroup(Head(messages)) \o EncodeCancelOrdersMessageOrdersGroupList(Tail(messages))
 
-(* As many Cancel Orders Message orders Group as the field that counts them says *)
+(* As many Cancel Orders Message Orders Group as the field that counts them says *)
 RECURSIVE ReadCancelOrdersMessageOrdersGroupList(_, _)
 ReadCancelOrdersMessageOrdersGroupList(bytes, count) ==
     IF count = 0
@@ -1194,11 +1194,11 @@ ReadCancelOrdersMessageOrdersGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Cancel Orders Message orders Group of each kind, for the lists that carry them *)
+(* One Cancel Orders Message Orders Group of each kind, for the lists that carry them *)
 OneCancelOrdersMessageOrdersGroup == { ZeroCancelOrdersMessageOrdersGroup }
 
 (***************************************************************************)
-(* Cancel Orders Message orders Groups                                     *)
+(* Cancel Orders Message Orders Groups                                     *)
 (***************************************************************************)
 
 CancelOrdersMessageOrdersGroups ==
@@ -1221,7 +1221,7 @@ ZeroCancelOrdersMessageOrdersGroups ==
     [ blockLength                    |-> [i \in 1 .. 2 |-> 0],
       cancelOrdersMessageOrdersGroup |-> << >> ]
 
-(* Cancel Orders Message orders Groups at zero, then each field in turn at the values it is checked at *)
+(* Cancel Orders Message Orders Groups at zero, then each field in turn at the values it is checked at *)
 CheckedCancelOrdersMessageOrdersGroups ==
     { ZeroCancelOrdersMessageOrdersGroups }
         \cup { [ZeroCancelOrdersMessageOrdersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -1256,7 +1256,7 @@ CheckedCancelOrdersMessage ==
         \cup { [ZeroCancelOrdersMessage EXCEPT !.cancelOrdersMessageOrdersGroups = one] : one \in CheckedCancelOrdersMessageOrdersGroups }
 
 (***************************************************************************)
-(* Cancel Orders Response Message data Group: 44 bytes                     *)
+(* Cancel Orders Response Message Data Group: 44 bytes                     *)
 (***************************************************************************)
 
 CancelOrdersResponseMessageDataGroup ==
@@ -1297,7 +1297,7 @@ ZeroCancelOrdersResponseMessageDataGroup ==
       inTime     |-> [i \in 1 .. 8 |-> 0],
       outTime    |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Cancel Orders Response Message data Group at zero, then each field in turn at the values it is checked at *)
+(* Cancel Orders Response Message Data Group at zero, then each field in turn at the values it is checked at *)
 CheckedCancelOrdersResponseMessageDataGroup ==
     { ZeroCancelOrdersResponseMessageDataGroup }
         \cup { [ZeroCancelOrdersResponseMessageDataGroup EXCEPT !.sCode = one] : one \in Sample(4) }
@@ -1307,14 +1307,14 @@ CheckedCancelOrdersResponseMessageDataGroup ==
         \cup { [ZeroCancelOrdersResponseMessageDataGroup EXCEPT !.inTime = one] : one \in Sample(8) }
         \cup { [ZeroCancelOrdersResponseMessageDataGroup EXCEPT !.outTime = one] : one \in Sample(8) }
 
-(* A run of Cancel Orders Response Message data Group, written one after another *)
+(* A run of Cancel Orders Response Message Data Group, written one after another *)
 RECURSIVE EncodeCancelOrdersResponseMessageDataGroupList(_)
 EncodeCancelOrdersResponseMessageDataGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeCancelOrdersResponseMessageDataGroup(Head(messages)) \o EncodeCancelOrdersResponseMessageDataGroupList(Tail(messages))
 
-(* As many Cancel Orders Response Message data Group as the field that counts them says *)
+(* As many Cancel Orders Response Message Data Group as the field that counts them says *)
 RECURSIVE ReadCancelOrdersResponseMessageDataGroupList(_, _)
 ReadCancelOrdersResponseMessageDataGroupList(bytes, count) ==
     IF count = 0
@@ -1325,11 +1325,11 @@ ReadCancelOrdersResponseMessageDataGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Cancel Orders Response Message data Group of each kind, for the lists that carry them *)
+(* One Cancel Orders Response Message Data Group of each kind, for the lists that carry them *)
 OneCancelOrdersResponseMessageDataGroup == { ZeroCancelOrdersResponseMessageDataGroup }
 
 (***************************************************************************)
-(* Cancel Orders Response Message data Groups                              *)
+(* Cancel Orders Response Message Data Groups                              *)
 (***************************************************************************)
 
 CancelOrdersResponseMessageDataGroups ==
@@ -1352,7 +1352,7 @@ ZeroCancelOrdersResponseMessageDataGroups ==
     [ blockLength                          |-> [i \in 1 .. 2 |-> 0],
       cancelOrdersResponseMessageDataGroup |-> << >> ]
 
-(* Cancel Orders Response Message data Groups at zero, then each field in turn at the values it is checked at *)
+(* Cancel Orders Response Message Data Groups at zero, then each field in turn at the values it is checked at *)
 CheckedCancelOrdersResponseMessageDataGroups ==
     { ZeroCancelOrdersResponseMessageDataGroups }
         \cup { [ZeroCancelOrdersResponseMessageDataGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -1567,7 +1567,7 @@ RoundTripPlaceOrderResponseMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Place Orders Message orders Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Place Orders Message Orders Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripPlaceOrdersMessageOrdersGroup ==
     \A message \in CheckedPlaceOrdersMessageOrdersGroup :
         LET read == DecodePlaceOrdersMessageOrdersGroup(EncodePlaceOrdersMessageOrdersGroup(message))
@@ -1575,7 +1575,7 @@ RoundTripPlaceOrdersMessageOrdersGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Place Orders Message orders Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Place Orders Message Orders Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripPlaceOrdersMessageOrdersGroups ==
     \A message \in CheckedPlaceOrdersMessageOrdersGroups :
         LET read == DecodePlaceOrdersMessageOrdersGroups(EncodePlaceOrdersMessageOrdersGroups(message))
@@ -1591,7 +1591,7 @@ RoundTripPlaceOrdersMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Place Orders Response Message data Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Place Orders Response Message Data Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripPlaceOrdersResponseMessageDataGroup ==
     \A message \in CheckedPlaceOrdersResponseMessageDataGroup :
         LET read == DecodePlaceOrdersResponseMessageDataGroup(EncodePlaceOrdersResponseMessageDataGroup(message))
@@ -1599,7 +1599,7 @@ RoundTripPlaceOrdersResponseMessageDataGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Place Orders Response Message data Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Place Orders Response Message Data Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripPlaceOrdersResponseMessageDataGroups ==
     \A message \in CheckedPlaceOrdersResponseMessageDataGroups :
         LET read == DecodePlaceOrdersResponseMessageDataGroups(EncodePlaceOrdersResponseMessageDataGroups(message))
@@ -1631,7 +1631,7 @@ RoundTripAmendOrderResponseMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Amend Orders Message orders Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Amend Orders Message Orders Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripAmendOrdersMessageOrdersGroup ==
     \A message \in CheckedAmendOrdersMessageOrdersGroup :
         LET read == DecodeAmendOrdersMessageOrdersGroup(EncodeAmendOrdersMessageOrdersGroup(message))
@@ -1639,7 +1639,7 @@ RoundTripAmendOrdersMessageOrdersGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Amend Orders Message orders Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Amend Orders Message Orders Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripAmendOrdersMessageOrdersGroups ==
     \A message \in CheckedAmendOrdersMessageOrdersGroups :
         LET read == DecodeAmendOrdersMessageOrdersGroups(EncodeAmendOrdersMessageOrdersGroups(message))
@@ -1655,7 +1655,7 @@ RoundTripAmendOrdersMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Amend Orders Response Message data Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Amend Orders Response Message Data Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripAmendOrdersResponseMessageDataGroup ==
     \A message \in CheckedAmendOrdersResponseMessageDataGroup :
         LET read == DecodeAmendOrdersResponseMessageDataGroup(EncodeAmendOrdersResponseMessageDataGroup(message))
@@ -1663,7 +1663,7 @@ RoundTripAmendOrdersResponseMessageDataGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Amend Orders Response Message data Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Amend Orders Response Message Data Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripAmendOrdersResponseMessageDataGroups ==
     \A message \in CheckedAmendOrdersResponseMessageDataGroups :
         LET read == DecodeAmendOrdersResponseMessageDataGroups(EncodeAmendOrdersResponseMessageDataGroups(message))
@@ -1695,7 +1695,7 @@ RoundTripCancelOrderResponseMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Cancel Orders Message orders Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Cancel Orders Message Orders Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripCancelOrdersMessageOrdersGroup ==
     \A message \in CheckedCancelOrdersMessageOrdersGroup :
         LET read == DecodeCancelOrdersMessageOrdersGroup(EncodeCancelOrdersMessageOrdersGroup(message))
@@ -1703,7 +1703,7 @@ RoundTripCancelOrdersMessageOrdersGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Cancel Orders Message orders Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Cancel Orders Message Orders Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripCancelOrdersMessageOrdersGroups ==
     \A message \in CheckedCancelOrdersMessageOrdersGroups :
         LET read == DecodeCancelOrdersMessageOrdersGroups(EncodeCancelOrdersMessageOrdersGroups(message))
@@ -1719,7 +1719,7 @@ RoundTripCancelOrdersMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Cancel Orders Response Message data Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Cancel Orders Response Message Data Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripCancelOrdersResponseMessageDataGroup ==
     \A message \in CheckedCancelOrdersResponseMessageDataGroup :
         LET read == DecodeCancelOrdersResponseMessageDataGroup(EncodeCancelOrdersResponseMessageDataGroup(message))
@@ -1727,7 +1727,7 @@ RoundTripCancelOrdersResponseMessageDataGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Cancel Orders Response Message data Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Cancel Orders Response Message Data Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripCancelOrdersResponseMessageDataGroups ==
     \A message \in CheckedCancelOrdersResponseMessageDataGroups :
         LET read == DecodeCancelOrdersResponseMessageDataGroups(EncodeCancelOrdersResponseMessageDataGroups(message))

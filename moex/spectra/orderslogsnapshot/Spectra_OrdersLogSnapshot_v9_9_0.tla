@@ -167,61 +167,61 @@ CheckedSequenceResetMessage ==
 (***************************************************************************)
 
 OrderBookSnapshotMessageNoMDEntriesGroup ==
-    [ mdEntryIdInt64NullOptional    : Sample(8),
-      transactTime                  : Sample(8),
-      mdEntryPxDecimal5NullOptional : Sample(8),
-      mdEntrySizeInt64NullOptional  : Sample(8),
-      tradeIdInt64NullOptional      : Sample(8),
-      mdFlags                       : Sample(8),
-      mdFlags2                      : Sample(8),
-      mdEntryType                   : Sample(1) ]
+    [ mdEntryIdOptional   : Sample(8),
+      transactTime        : Sample(8),
+      mdEntryPxOptional   : Sample(8),
+      mdEntrySizeOptional : Sample(8),
+      tradeIdOptional     : Sample(8),
+      mdFlags             : Sample(8),
+      mdFlags2            : Sample(8),
+      mdEntryType         : Sample(1) ]
 
 EncodeOrderBookSnapshotMessageNoMDEntriesGroup(message) ==
-    message.mdEntryIdInt64NullOptional
+    message.mdEntryIdOptional
         \o message.transactTime
-        \o message.mdEntryPxDecimal5NullOptional
-        \o message.mdEntrySizeInt64NullOptional
-        \o message.tradeIdInt64NullOptional
+        \o message.mdEntryPxOptional
+        \o message.mdEntrySizeOptional
+        \o message.tradeIdOptional
         \o message.mdFlags
         \o message.mdFlags2
         \o message.mdEntryType
 
 DecodeOrderBookSnapshotMessageNoMDEntriesGroup(bytes) ==
-    LET mdEntryIdInt64NullOptional == ReadBytes(bytes, 8) IN IF ~mdEntryIdInt64NullOptional.ok THEN Fail ELSE
-    LET transactTime == ReadBytes(mdEntryIdInt64NullOptional.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET mdEntryPxDecimal5NullOptional == ReadBytes(transactTime.rest, 8) IN IF ~mdEntryPxDecimal5NullOptional.ok THEN Fail ELSE
-    LET mdEntrySizeInt64NullOptional == ReadBytes(mdEntryPxDecimal5NullOptional.rest, 8) IN IF ~mdEntrySizeInt64NullOptional.ok THEN Fail ELSE
-    LET tradeIdInt64NullOptional == ReadBytes(mdEntrySizeInt64NullOptional.rest, 8) IN IF ~tradeIdInt64NullOptional.ok THEN Fail ELSE
-    LET mdFlags == ReadBytes(tradeIdInt64NullOptional.rest, 8) IN IF ~mdFlags.ok THEN Fail ELSE
+    LET mdEntryIdOptional == ReadBytes(bytes, 8) IN IF ~mdEntryIdOptional.ok THEN Fail ELSE
+    LET transactTime == ReadBytes(mdEntryIdOptional.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET mdEntryPxOptional == ReadBytes(transactTime.rest, 8) IN IF ~mdEntryPxOptional.ok THEN Fail ELSE
+    LET mdEntrySizeOptional == ReadBytes(mdEntryPxOptional.rest, 8) IN IF ~mdEntrySizeOptional.ok THEN Fail ELSE
+    LET tradeIdOptional == ReadBytes(mdEntrySizeOptional.rest, 8) IN IF ~tradeIdOptional.ok THEN Fail ELSE
+    LET mdFlags == ReadBytes(tradeIdOptional.rest, 8) IN IF ~mdFlags.ok THEN Fail ELSE
     LET mdFlags2 == ReadBytes(mdFlags.rest, 8) IN IF ~mdFlags2.ok THEN Fail ELSE
     LET mdEntryType == ReadBytes(mdFlags2.rest, 1) IN IF ~mdEntryType.ok THEN Fail ELSE
-    Ok([ mdEntryIdInt64NullOptional    |-> mdEntryIdInt64NullOptional.value,
-         transactTime                  |-> transactTime.value,
-         mdEntryPxDecimal5NullOptional |-> mdEntryPxDecimal5NullOptional.value,
-         mdEntrySizeInt64NullOptional  |-> mdEntrySizeInt64NullOptional.value,
-         tradeIdInt64NullOptional      |-> tradeIdInt64NullOptional.value,
-         mdFlags                       |-> mdFlags.value,
-         mdFlags2                      |-> mdFlags2.value,
-         mdEntryType                   |-> mdEntryType.value ], mdEntryType.rest)
+    Ok([ mdEntryIdOptional   |-> mdEntryIdOptional.value,
+         transactTime        |-> transactTime.value,
+         mdEntryPxOptional   |-> mdEntryPxOptional.value,
+         mdEntrySizeOptional |-> mdEntrySizeOptional.value,
+         tradeIdOptional     |-> tradeIdOptional.value,
+         mdFlags             |-> mdFlags.value,
+         mdFlags2            |-> mdFlags2.value,
+         mdEntryType         |-> mdEntryType.value ], mdEntryType.rest)
 
 ZeroOrderBookSnapshotMessageNoMDEntriesGroup ==
-    [ mdEntryIdInt64NullOptional    |-> [i \in 1 .. 8 |-> 0],
-      transactTime                  |-> [i \in 1 .. 8 |-> 0],
-      mdEntryPxDecimal5NullOptional |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeInt64NullOptional  |-> [i \in 1 .. 8 |-> 0],
-      tradeIdInt64NullOptional      |-> [i \in 1 .. 8 |-> 0],
-      mdFlags                       |-> [i \in 1 .. 8 |-> 0],
-      mdFlags2                      |-> [i \in 1 .. 8 |-> 0],
-      mdEntryType                   |-> [i \in 1 .. 1 |-> 0] ]
+    [ mdEntryIdOptional   |-> [i \in 1 .. 8 |-> 0],
+      transactTime        |-> [i \in 1 .. 8 |-> 0],
+      mdEntryPxOptional   |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySizeOptional |-> [i \in 1 .. 8 |-> 0],
+      tradeIdOptional     |-> [i \in 1 .. 8 |-> 0],
+      mdFlags             |-> [i \in 1 .. 8 |-> 0],
+      mdFlags2            |-> [i \in 1 .. 8 |-> 0],
+      mdEntryType         |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Order Book Snapshot Message No M D Entries Group at zero, then each field in turn at the values it is checked at *)
 CheckedOrderBookSnapshotMessageNoMDEntriesGroup ==
     { ZeroOrderBookSnapshotMessageNoMDEntriesGroup }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntryIdInt64NullOptional = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntryIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntryPxDecimal5NullOptional = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntrySizeInt64NullOptional = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.tradeIdInt64NullOptional = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.tradeIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdFlags = one] : one \in Sample(8) }
         \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdFlags2 = one] : one \in Sample(8) }
         \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntryType = one] : one \in Sample(1) }
@@ -283,33 +283,33 @@ CheckedOrderBookSnapshotMessageNoMDEntriesGroups ==
 
 OrderBookSnapshotMessage ==
     [ securityId                                : Sample(4),
-      lastMsgSeqNumProcessedUInt32              : Sample(4),
+      lastMsgSeqNumProcessed                    : Sample(4),
       rptSeq                                    : Sample(4),
       exchangeTradingSessionId                  : Sample(4),
       orderBookSnapshotMessageNoMDEntriesGroups : OrderBookSnapshotMessageNoMDEntriesGroups ]
 
 EncodeOrderBookSnapshotMessage(message) ==
     message.securityId
-        \o message.lastMsgSeqNumProcessedUInt32
+        \o message.lastMsgSeqNumProcessed
         \o message.rptSeq
         \o message.exchangeTradingSessionId
         \o EncodeOrderBookSnapshotMessageNoMDEntriesGroups(message.orderBookSnapshotMessageNoMDEntriesGroups)
 
 DecodeOrderBookSnapshotMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET lastMsgSeqNumProcessedUInt32 == ReadBytes(securityId.rest, 4) IN IF ~lastMsgSeqNumProcessedUInt32.ok THEN Fail ELSE
-    LET rptSeq == ReadBytes(lastMsgSeqNumProcessedUInt32.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET lastMsgSeqNumProcessed == ReadBytes(securityId.rest, 4) IN IF ~lastMsgSeqNumProcessed.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(lastMsgSeqNumProcessed.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
     LET exchangeTradingSessionId == ReadBytes(rptSeq.rest, 4) IN IF ~exchangeTradingSessionId.ok THEN Fail ELSE
     LET orderBookSnapshotMessageNoMDEntriesGroups == DecodeOrderBookSnapshotMessageNoMDEntriesGroups(exchangeTradingSessionId.rest) IN IF ~orderBookSnapshotMessageNoMDEntriesGroups.ok THEN Fail ELSE
     Ok([ securityId                                |-> securityId.value,
-         lastMsgSeqNumProcessedUInt32              |-> lastMsgSeqNumProcessedUInt32.value,
+         lastMsgSeqNumProcessed                    |-> lastMsgSeqNumProcessed.value,
          rptSeq                                    |-> rptSeq.value,
          exchangeTradingSessionId                  |-> exchangeTradingSessionId.value,
          orderBookSnapshotMessageNoMDEntriesGroups |-> orderBookSnapshotMessageNoMDEntriesGroups.value ], orderBookSnapshotMessageNoMDEntriesGroups.rest)
 
 ZeroOrderBookSnapshotMessage ==
     [ securityId                                |-> [i \in 1 .. 4 |-> 0],
-      lastMsgSeqNumProcessedUInt32              |-> [i \in 1 .. 4 |-> 0],
+      lastMsgSeqNumProcessed                    |-> [i \in 1 .. 4 |-> 0],
       rptSeq                                    |-> [i \in 1 .. 4 |-> 0],
       exchangeTradingSessionId                  |-> [i \in 1 .. 4 |-> 0],
       orderBookSnapshotMessageNoMDEntriesGroups |-> ZeroOrderBookSnapshotMessageNoMDEntriesGroups ]
@@ -318,7 +318,7 @@ ZeroOrderBookSnapshotMessage ==
 CheckedOrderBookSnapshotMessage ==
     { ZeroOrderBookSnapshotMessage }
         \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.lastMsgSeqNumProcessedUInt32 = one] : one \in Sample(4) }
+        \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.lastMsgSeqNumProcessed = one] : one \in Sample(4) }
         \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.rptSeq = one] : one \in Sample(4) }
         \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.exchangeTradingSessionId = one] : one \in Sample(4) }
         \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.orderBookSnapshotMessageNoMDEntriesGroups = one] : one \in CheckedOrderBookSnapshotMessageNoMDEntriesGroups }

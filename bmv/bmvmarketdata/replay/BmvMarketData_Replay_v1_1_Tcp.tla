@@ -1876,9 +1876,9 @@ BenchmarkMessage ==
       annualPerformance              : Sample(8),
       monthlyPerformance             : Sample(8),
       last12MonthsPerformance        : Sample(8),
-      t24HoursDailyPerformance       : Sample(8),
-      t24HoursAnnualPerformance      : Sample(8),
-      t24HoursMonthlyPerformance     : Sample(8),
+      n24HoursDailyPerformance       : Sample(8),
+      n24HoursAnnualPerformance      : Sample(8),
+      n24HoursMonthlyPerformance     : Sample(8),
       last12Months24HoursPerformance : Sample(8) ]
 
 EncodeBenchmarkMessage(message) ==
@@ -1894,9 +1894,9 @@ EncodeBenchmarkMessage(message) ==
         \o message.annualPerformance
         \o message.monthlyPerformance
         \o message.last12MonthsPerformance
-        \o message.t24HoursDailyPerformance
-        \o message.t24HoursAnnualPerformance
-        \o message.t24HoursMonthlyPerformance
+        \o message.n24HoursDailyPerformance
+        \o message.n24HoursAnnualPerformance
+        \o message.n24HoursMonthlyPerformance
         \o message.last12Months24HoursPerformance
 
 DecodeBenchmarkMessage(bytes) ==
@@ -1912,10 +1912,10 @@ DecodeBenchmarkMessage(bytes) ==
     LET annualPerformance == ReadBytes(dailyPerformance.rest, 8) IN IF ~annualPerformance.ok THEN Fail ELSE
     LET monthlyPerformance == ReadBytes(annualPerformance.rest, 8) IN IF ~monthlyPerformance.ok THEN Fail ELSE
     LET last12MonthsPerformance == ReadBytes(monthlyPerformance.rest, 8) IN IF ~last12MonthsPerformance.ok THEN Fail ELSE
-    LET t24HoursDailyPerformance == ReadBytes(last12MonthsPerformance.rest, 8) IN IF ~t24HoursDailyPerformance.ok THEN Fail ELSE
-    LET t24HoursAnnualPerformance == ReadBytes(t24HoursDailyPerformance.rest, 8) IN IF ~t24HoursAnnualPerformance.ok THEN Fail ELSE
-    LET t24HoursMonthlyPerformance == ReadBytes(t24HoursAnnualPerformance.rest, 8) IN IF ~t24HoursMonthlyPerformance.ok THEN Fail ELSE
-    LET last12Months24HoursPerformance == ReadBytes(t24HoursMonthlyPerformance.rest, 8) IN IF ~last12Months24HoursPerformance.ok THEN Fail ELSE
+    LET n24HoursDailyPerformance == ReadBytes(last12MonthsPerformance.rest, 8) IN IF ~n24HoursDailyPerformance.ok THEN Fail ELSE
+    LET n24HoursAnnualPerformance == ReadBytes(n24HoursDailyPerformance.rest, 8) IN IF ~n24HoursAnnualPerformance.ok THEN Fail ELSE
+    LET n24HoursMonthlyPerformance == ReadBytes(n24HoursAnnualPerformance.rest, 8) IN IF ~n24HoursMonthlyPerformance.ok THEN Fail ELSE
+    LET last12Months24HoursPerformance == ReadBytes(n24HoursMonthlyPerformance.rest, 8) IN IF ~last12Months24HoursPerformance.ok THEN Fail ELSE
     Ok([ benchmarkName                  |-> benchmarkName.value,
          benchmarkDate                  |-> benchmarkDate.value,
          outstanding                    |-> outstanding.value,
@@ -1928,9 +1928,9 @@ DecodeBenchmarkMessage(bytes) ==
          annualPerformance              |-> annualPerformance.value,
          monthlyPerformance             |-> monthlyPerformance.value,
          last12MonthsPerformance        |-> last12MonthsPerformance.value,
-         t24HoursDailyPerformance       |-> t24HoursDailyPerformance.value,
-         t24HoursAnnualPerformance      |-> t24HoursAnnualPerformance.value,
-         t24HoursMonthlyPerformance     |-> t24HoursMonthlyPerformance.value,
+         n24HoursDailyPerformance       |-> n24HoursDailyPerformance.value,
+         n24HoursAnnualPerformance      |-> n24HoursAnnualPerformance.value,
+         n24HoursMonthlyPerformance     |-> n24HoursMonthlyPerformance.value,
          last12Months24HoursPerformance |-> last12Months24HoursPerformance.value ], last12Months24HoursPerformance.rest)
 
 ZeroBenchmarkMessage ==
@@ -1946,9 +1946,9 @@ ZeroBenchmarkMessage ==
       annualPerformance              |-> [i \in 1 .. 8 |-> 0],
       monthlyPerformance             |-> [i \in 1 .. 8 |-> 0],
       last12MonthsPerformance        |-> [i \in 1 .. 8 |-> 0],
-      t24HoursDailyPerformance       |-> [i \in 1 .. 8 |-> 0],
-      t24HoursAnnualPerformance      |-> [i \in 1 .. 8 |-> 0],
-      t24HoursMonthlyPerformance     |-> [i \in 1 .. 8 |-> 0],
+      n24HoursDailyPerformance       |-> [i \in 1 .. 8 |-> 0],
+      n24HoursAnnualPerformance      |-> [i \in 1 .. 8 |-> 0],
+      n24HoursMonthlyPerformance     |-> [i \in 1 .. 8 |-> 0],
       last12Months24HoursPerformance |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Benchmark Message at zero, then each field in turn at the values it is checked at *)
@@ -1966,9 +1966,9 @@ CheckedBenchmarkMessage ==
         \cup { [ZeroBenchmarkMessage EXCEPT !.annualPerformance = one] : one \in Sample(8) }
         \cup { [ZeroBenchmarkMessage EXCEPT !.monthlyPerformance = one] : one \in Sample(8) }
         \cup { [ZeroBenchmarkMessage EXCEPT !.last12MonthsPerformance = one] : one \in Sample(8) }
-        \cup { [ZeroBenchmarkMessage EXCEPT !.t24HoursDailyPerformance = one] : one \in Sample(8) }
-        \cup { [ZeroBenchmarkMessage EXCEPT !.t24HoursAnnualPerformance = one] : one \in Sample(8) }
-        \cup { [ZeroBenchmarkMessage EXCEPT !.t24HoursMonthlyPerformance = one] : one \in Sample(8) }
+        \cup { [ZeroBenchmarkMessage EXCEPT !.n24HoursDailyPerformance = one] : one \in Sample(8) }
+        \cup { [ZeroBenchmarkMessage EXCEPT !.n24HoursAnnualPerformance = one] : one \in Sample(8) }
+        \cup { [ZeroBenchmarkMessage EXCEPT !.n24HoursMonthlyPerformance = one] : one \in Sample(8) }
         \cup { [ZeroBenchmarkMessage EXCEPT !.last12Months24HoursPerformance = one] : one \in Sample(8) }
 
 (***************************************************************************)

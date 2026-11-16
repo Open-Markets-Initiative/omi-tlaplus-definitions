@@ -18,6 +18,9 @@
 (*                                                                         *)
 (* Note: Application Message fills what is left of the frame Packet Length *)
 (* states, which is what it is read from.                                  *)
+(*                                                                         *)
+(* Note: a Mach Message that ends the session is the last of its Packet:   *)
+(* nothing may follow it.                                                  *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -876,6 +879,9 @@ CheckedMachMessage ==
         \cup { [ZeroMachMessage EXCEPT !.sessionNumber = one] : one \in Sample(1) }
         \cup { [ZeroMachMessage EXCEPT !.payload = one] : one \in CheckedPayload }
 
+(* Does a Mach Message end the session? Nothing may follow one that does *)
+EndsSessionMachMessage(message) == message.payload.tag \in {EndOfSessionCode}
+
 (* A run of Mach Message, written one after another *)
 RECURSIVE EncodeMachMessageList(_)
 EncodeMachMessageList(messages) ==
@@ -885,12 +891,14 @@ EncodeMachMessageList(messages) ==
 
 (* As many Mach Message as the bytes hold, which is what its payload rule states. *)
 (* Each one takes bytes off the reader, so the run ends where the data does. *)
+(* Only the last of them may end the session, so one that does with bytes left fails *)
 RECURSIVE ReadMachMessageAll(_)
 ReadMachMessageAll(bytes) ==
     IF bytes = << >>
     THEN Ok(<< >>, << >>)
     ELSE LET one == DecodeMachMessage(bytes)
          IN  IF ~one.ok THEN Fail
+             ELSE IF EndsSessionMachMessage(one.value) /\ one.rest # << >> THEN Fail
              ELSE LET more == ReadMachMessageAll(one.rest)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
@@ -902,12 +910,18 @@ OneMachMessage ==
       [ZeroMachMessage EXCEPT !.payload = [tag |-> StartOfSessionCode, body |-> [empty |-> 0]]],
       [ZeroMachMessage EXCEPT !.payload = [tag |-> EndOfSessionCode, body |-> [empty |-> 0]]] }
 
+(* The runs of Mach Message checked: none, one, two of a kind and each kind followed by *)
+(* another, keeping those in which only the last may end the session *)
+SampleMachMessageLists ==
+    { run \in SampleLists(OneMachMessage) \cup { <<one, other>> : one \in OneMachMessage, other \in OneMachMessage } :
+          \A at \in 1 .. Len(run) - 1 : ~EndsSessionMachMessage(run[at]) }
+
 (***************************************************************************)
 (* Packet                                                                  *)
 (***************************************************************************)
 
 Packet ==
-    [ machMessage : SampleLists(OneMachMessage) ]
+    [ machMessage : SampleMachMessageLists ]
 
 EncodePacket(message) ==
     EncodeMachMessageList(message.machMessage)
@@ -922,7 +936,7 @@ ZeroPacket ==
 (* Packet at zero, then each field in turn at the values it is checked at *)
 CheckedPacket ==
     { ZeroPacket }
-        \cup { [ZeroPacket EXCEPT !.machMessage = one] : one \in SampleLists(OneMachMessage) }
+        \cup { [ZeroPacket EXCEPT !.machMessage = one] : one \in SampleMachMessageLists }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -1047,6 +1061,12 @@ FramesMachMessage ==
     \A message \in CheckedMachMessage :
         LET bytes == EncodeMachMessage(message)
         IN  DecodeUIntLE(SubSeq(bytes, 9, 10)) = Len(bytes) - 0
+
+(* A Mach Message that ends the session is the last of its Packet: a run with one after it does not decode *)
+EndsSessionLastMachMessage ==
+    \A last \in { one \in OneMachMessage : EndsSessionMachMessage(one) } :
+        \A after \in OneMachMessage :
+            ~ReadMachMessageAll(EncodeMachMessageList(<<last, after>>)).ok
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

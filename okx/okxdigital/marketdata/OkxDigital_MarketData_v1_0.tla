@@ -185,7 +185,7 @@ CheckedBboTbtChannelEventMessage ==
         \cup { [ZeroBboTbtChannelEventMessage EXCEPT !.szExponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Books L 2 Tbt Channel Event Message asks Group: 20 bytes                *)
+(* Books L 2 Tbt Channel Event Message Asks Group: 20 bytes                *)
 (***************************************************************************)
 
 BooksL2TbtChannelEventMessageAsksGroup ==
@@ -211,21 +211,21 @@ ZeroBooksL2TbtChannelEventMessageAsksGroup ==
       szMantissa |-> [i \in 1 .. 8 |-> 0],
       ordCount   |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Books L 2 Tbt Channel Event Message asks Group at zero, then each field in turn at the values it is checked at *)
+(* Books L 2 Tbt Channel Event Message Asks Group at zero, then each field in turn at the values it is checked at *)
 CheckedBooksL2TbtChannelEventMessageAsksGroup ==
     { ZeroBooksL2TbtChannelEventMessageAsksGroup }
         \cup { [ZeroBooksL2TbtChannelEventMessageAsksGroup EXCEPT !.pxMantissa = one] : one \in Sample(8) }
         \cup { [ZeroBooksL2TbtChannelEventMessageAsksGroup EXCEPT !.szMantissa = one] : one \in Sample(8) }
         \cup { [ZeroBooksL2TbtChannelEventMessageAsksGroup EXCEPT !.ordCount = one] : one \in Sample(4) }
 
-(* A run of Books L 2 Tbt Channel Event Message asks Group, written one after another *)
+(* A run of Books L 2 Tbt Channel Event Message Asks Group, written one after another *)
 RECURSIVE EncodeBooksL2TbtChannelEventMessageAsksGroupList(_)
 EncodeBooksL2TbtChannelEventMessageAsksGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeBooksL2TbtChannelEventMessageAsksGroup(Head(messages)) \o EncodeBooksL2TbtChannelEventMessageAsksGroupList(Tail(messages))
 
-(* As many Books L 2 Tbt Channel Event Message asks Group as the field that counts them says *)
+(* As many Books L 2 Tbt Channel Event Message Asks Group as the field that counts them says *)
 RECURSIVE ReadBooksL2TbtChannelEventMessageAsksGroupList(_, _)
 ReadBooksL2TbtChannelEventMessageAsksGroupList(bytes, count) ==
     IF count = 0
@@ -236,11 +236,11 @@ ReadBooksL2TbtChannelEventMessageAsksGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Books L 2 Tbt Channel Event Message asks Group of each kind, for the lists that carry them *)
+(* One Books L 2 Tbt Channel Event Message Asks Group of each kind, for the lists that carry them *)
 OneBooksL2TbtChannelEventMessageAsksGroup == { ZeroBooksL2TbtChannelEventMessageAsksGroup }
 
 (***************************************************************************)
-(* Books L 2 Tbt Channel Event Message asks Groups                         *)
+(* Books L 2 Tbt Channel Event Message Asks Groups                         *)
 (***************************************************************************)
 
 BooksL2TbtChannelEventMessageAsksGroups ==
@@ -263,14 +263,14 @@ ZeroBooksL2TbtChannelEventMessageAsksGroups ==
     [ blockLength                            |-> [i \in 1 .. 2 |-> 0],
       booksL2TbtChannelEventMessageAsksGroup |-> << >> ]
 
-(* Books L 2 Tbt Channel Event Message asks Groups at zero, then each field in turn at the values it is checked at *)
+(* Books L 2 Tbt Channel Event Message Asks Groups at zero, then each field in turn at the values it is checked at *)
 CheckedBooksL2TbtChannelEventMessageAsksGroups ==
     { ZeroBooksL2TbtChannelEventMessageAsksGroups }
         \cup { [ZeroBooksL2TbtChannelEventMessageAsksGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroBooksL2TbtChannelEventMessageAsksGroups EXCEPT !.booksL2TbtChannelEventMessageAsksGroup = one] : one \in SampleLists(OneBooksL2TbtChannelEventMessageAsksGroup) }
 
 (***************************************************************************)
-(* Books L 2 Tbt Channel Event Message bids Group: 20 bytes                *)
+(* Books L 2 Tbt Channel Event Message Bids Group: 20 bytes                *)
 (***************************************************************************)
 
 BooksL2TbtChannelEventMessageBidsGroup ==
@@ -296,21 +296,21 @@ ZeroBooksL2TbtChannelEventMessageBidsGroup ==
       szMantissa |-> [i \in 1 .. 8 |-> 0],
       ordCount   |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Books L 2 Tbt Channel Event Message bids Group at zero, then each field in turn at the values it is checked at *)
+(* Books L 2 Tbt Channel Event Message Bids Group at zero, then each field in turn at the values it is checked at *)
 CheckedBooksL2TbtChannelEventMessageBidsGroup ==
     { ZeroBooksL2TbtChannelEventMessageBidsGroup }
         \cup { [ZeroBooksL2TbtChannelEventMessageBidsGroup EXCEPT !.pxMantissa = one] : one \in Sample(8) }
         \cup { [ZeroBooksL2TbtChannelEventMessageBidsGroup EXCEPT !.szMantissa = one] : one \in Sample(8) }
         \cup { [ZeroBooksL2TbtChannelEventMessageBidsGroup EXCEPT !.ordCount = one] : one \in Sample(4) }
 
-(* A run of Books L 2 Tbt Channel Event Message bids Group, written one after another *)
+(* A run of Books L 2 Tbt Channel Event Message Bids Group, written one after another *)
 RECURSIVE EncodeBooksL2TbtChannelEventMessageBidsGroupList(_)
 EncodeBooksL2TbtChannelEventMessageBidsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeBooksL2TbtChannelEventMessageBidsGroup(Head(messages)) \o EncodeBooksL2TbtChannelEventMessageBidsGroupList(Tail(messages))
 
-(* As many Books L 2 Tbt Channel Event Message bids Group as the field that counts them says *)
+(* As many Books L 2 Tbt Channel Event Message Bids Group as the field that counts them says *)
 RECURSIVE ReadBooksL2TbtChannelEventMessageBidsGroupList(_, _)
 ReadBooksL2TbtChannelEventMessageBidsGroupList(bytes, count) ==
     IF count = 0
@@ -321,11 +321,11 @@ ReadBooksL2TbtChannelEventMessageBidsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Books L 2 Tbt Channel Event Message bids Group of each kind, for the lists that carry them *)
+(* One Books L 2 Tbt Channel Event Message Bids Group of each kind, for the lists that carry them *)
 OneBooksL2TbtChannelEventMessageBidsGroup == { ZeroBooksL2TbtChannelEventMessageBidsGroup }
 
 (***************************************************************************)
-(* Books L 2 Tbt Channel Event Message bids Groups                         *)
+(* Books L 2 Tbt Channel Event Message Bids Groups                         *)
 (***************************************************************************)
 
 BooksL2TbtChannelEventMessageBidsGroups ==
@@ -348,7 +348,7 @@ ZeroBooksL2TbtChannelEventMessageBidsGroups ==
     [ blockLength                            |-> [i \in 1 .. 2 |-> 0],
       booksL2TbtChannelEventMessageBidsGroup |-> << >> ]
 
-(* Books L 2 Tbt Channel Event Message bids Groups at zero, then each field in turn at the values it is checked at *)
+(* Books L 2 Tbt Channel Event Message Bids Groups at zero, then each field in turn at the values it is checked at *)
 CheckedBooksL2TbtChannelEventMessageBidsGroups ==
     { ZeroBooksL2TbtChannelEventMessageBidsGroups }
         \cup { [ZeroBooksL2TbtChannelEventMessageBidsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -483,7 +483,7 @@ CheckedBooksL2TbtExponentUpdateEventMessage ==
         \cup { [ZeroBooksL2TbtExponentUpdateEventMessage EXCEPT !.szExponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Books L 2 Tbt Elp Channel Event Message asks Group: 20 bytes            *)
+(* Books L 2 Tbt Elp Channel Event Message Asks Group: 20 bytes            *)
 (***************************************************************************)
 
 BooksL2TbtElpChannelEventMessageAsksGroup ==
@@ -509,21 +509,21 @@ ZeroBooksL2TbtElpChannelEventMessageAsksGroup ==
       szMantissa |-> [i \in 1 .. 8 |-> 0],
       ordCount   |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Books L 2 Tbt Elp Channel Event Message asks Group at zero, then each field in turn at the values it is checked at *)
+(* Books L 2 Tbt Elp Channel Event Message Asks Group at zero, then each field in turn at the values it is checked at *)
 CheckedBooksL2TbtElpChannelEventMessageAsksGroup ==
     { ZeroBooksL2TbtElpChannelEventMessageAsksGroup }
         \cup { [ZeroBooksL2TbtElpChannelEventMessageAsksGroup EXCEPT !.pxMantissa = one] : one \in Sample(8) }
         \cup { [ZeroBooksL2TbtElpChannelEventMessageAsksGroup EXCEPT !.szMantissa = one] : one \in Sample(8) }
         \cup { [ZeroBooksL2TbtElpChannelEventMessageAsksGroup EXCEPT !.ordCount = one] : one \in Sample(4) }
 
-(* A run of Books L 2 Tbt Elp Channel Event Message asks Group, written one after another *)
+(* A run of Books L 2 Tbt Elp Channel Event Message Asks Group, written one after another *)
 RECURSIVE EncodeBooksL2TbtElpChannelEventMessageAsksGroupList(_)
 EncodeBooksL2TbtElpChannelEventMessageAsksGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeBooksL2TbtElpChannelEventMessageAsksGroup(Head(messages)) \o EncodeBooksL2TbtElpChannelEventMessageAsksGroupList(Tail(messages))
 
-(* As many Books L 2 Tbt Elp Channel Event Message asks Group as the field that counts them says *)
+(* As many Books L 2 Tbt Elp Channel Event Message Asks Group as the field that counts them says *)
 RECURSIVE ReadBooksL2TbtElpChannelEventMessageAsksGroupList(_, _)
 ReadBooksL2TbtElpChannelEventMessageAsksGroupList(bytes, count) ==
     IF count = 0
@@ -534,11 +534,11 @@ ReadBooksL2TbtElpChannelEventMessageAsksGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Books L 2 Tbt Elp Channel Event Message asks Group of each kind, for the lists that carry them *)
+(* One Books L 2 Tbt Elp Channel Event Message Asks Group of each kind, for the lists that carry them *)
 OneBooksL2TbtElpChannelEventMessageAsksGroup == { ZeroBooksL2TbtElpChannelEventMessageAsksGroup }
 
 (***************************************************************************)
-(* Books L 2 Tbt Elp Channel Event Message asks Groups                     *)
+(* Books L 2 Tbt Elp Channel Event Message Asks Groups                     *)
 (***************************************************************************)
 
 BooksL2TbtElpChannelEventMessageAsksGroups ==
@@ -561,14 +561,14 @@ ZeroBooksL2TbtElpChannelEventMessageAsksGroups ==
     [ blockLength                               |-> [i \in 1 .. 2 |-> 0],
       booksL2TbtElpChannelEventMessageAsksGroup |-> << >> ]
 
-(* Books L 2 Tbt Elp Channel Event Message asks Groups at zero, then each field in turn at the values it is checked at *)
+(* Books L 2 Tbt Elp Channel Event Message Asks Groups at zero, then each field in turn at the values it is checked at *)
 CheckedBooksL2TbtElpChannelEventMessageAsksGroups ==
     { ZeroBooksL2TbtElpChannelEventMessageAsksGroups }
         \cup { [ZeroBooksL2TbtElpChannelEventMessageAsksGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroBooksL2TbtElpChannelEventMessageAsksGroups EXCEPT !.booksL2TbtElpChannelEventMessageAsksGroup = one] : one \in SampleLists(OneBooksL2TbtElpChannelEventMessageAsksGroup) }
 
 (***************************************************************************)
-(* Books L 2 Tbt Elp Channel Event Message bids Group: 20 bytes            *)
+(* Books L 2 Tbt Elp Channel Event Message Bids Group: 20 bytes            *)
 (***************************************************************************)
 
 BooksL2TbtElpChannelEventMessageBidsGroup ==
@@ -594,21 +594,21 @@ ZeroBooksL2TbtElpChannelEventMessageBidsGroup ==
       szMantissa |-> [i \in 1 .. 8 |-> 0],
       ordCount   |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Books L 2 Tbt Elp Channel Event Message bids Group at zero, then each field in turn at the values it is checked at *)
+(* Books L 2 Tbt Elp Channel Event Message Bids Group at zero, then each field in turn at the values it is checked at *)
 CheckedBooksL2TbtElpChannelEventMessageBidsGroup ==
     { ZeroBooksL2TbtElpChannelEventMessageBidsGroup }
         \cup { [ZeroBooksL2TbtElpChannelEventMessageBidsGroup EXCEPT !.pxMantissa = one] : one \in Sample(8) }
         \cup { [ZeroBooksL2TbtElpChannelEventMessageBidsGroup EXCEPT !.szMantissa = one] : one \in Sample(8) }
         \cup { [ZeroBooksL2TbtElpChannelEventMessageBidsGroup EXCEPT !.ordCount = one] : one \in Sample(4) }
 
-(* A run of Books L 2 Tbt Elp Channel Event Message bids Group, written one after another *)
+(* A run of Books L 2 Tbt Elp Channel Event Message Bids Group, written one after another *)
 RECURSIVE EncodeBooksL2TbtElpChannelEventMessageBidsGroupList(_)
 EncodeBooksL2TbtElpChannelEventMessageBidsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeBooksL2TbtElpChannelEventMessageBidsGroup(Head(messages)) \o EncodeBooksL2TbtElpChannelEventMessageBidsGroupList(Tail(messages))
 
-(* As many Books L 2 Tbt Elp Channel Event Message bids Group as the field that counts them says *)
+(* As many Books L 2 Tbt Elp Channel Event Message Bids Group as the field that counts them says *)
 RECURSIVE ReadBooksL2TbtElpChannelEventMessageBidsGroupList(_, _)
 ReadBooksL2TbtElpChannelEventMessageBidsGroupList(bytes, count) ==
     IF count = 0
@@ -619,11 +619,11 @@ ReadBooksL2TbtElpChannelEventMessageBidsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Books L 2 Tbt Elp Channel Event Message bids Group of each kind, for the lists that carry them *)
+(* One Books L 2 Tbt Elp Channel Event Message Bids Group of each kind, for the lists that carry them *)
 OneBooksL2TbtElpChannelEventMessageBidsGroup == { ZeroBooksL2TbtElpChannelEventMessageBidsGroup }
 
 (***************************************************************************)
-(* Books L 2 Tbt Elp Channel Event Message bids Groups                     *)
+(* Books L 2 Tbt Elp Channel Event Message Bids Groups                     *)
 (***************************************************************************)
 
 BooksL2TbtElpChannelEventMessageBidsGroups ==
@@ -646,7 +646,7 @@ ZeroBooksL2TbtElpChannelEventMessageBidsGroups ==
     [ blockLength                               |-> [i \in 1 .. 2 |-> 0],
       booksL2TbtElpChannelEventMessageBidsGroup |-> << >> ]
 
-(* Books L 2 Tbt Elp Channel Event Message bids Groups at zero, then each field in turn at the values it is checked at *)
+(* Books L 2 Tbt Elp Channel Event Message Bids Groups at zero, then each field in turn at the values it is checked at *)
 CheckedBooksL2TbtElpChannelEventMessageBidsGroups ==
     { ZeroBooksL2TbtElpChannelEventMessageBidsGroups }
         \cup { [ZeroBooksL2TbtElpChannelEventMessageBidsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -869,7 +869,7 @@ CheckedTradesChannelEventMessage ==
         \cup { [ZeroTradesChannelEventMessage EXCEPT !.source = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Snapshot Depth Response Event Message asks Group: 20 bytes              *)
+(* Snapshot Depth Response Event Message Asks Group: 20 bytes              *)
 (***************************************************************************)
 
 SnapshotDepthResponseEventMessageAsksGroup ==
@@ -895,21 +895,21 @@ ZeroSnapshotDepthResponseEventMessageAsksGroup ==
       szMantissa |-> [i \in 1 .. 8 |-> 0],
       ordCount   |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Snapshot Depth Response Event Message asks Group at zero, then each field in turn at the values it is checked at *)
+(* Snapshot Depth Response Event Message Asks Group at zero, then each field in turn at the values it is checked at *)
 CheckedSnapshotDepthResponseEventMessageAsksGroup ==
     { ZeroSnapshotDepthResponseEventMessageAsksGroup }
         \cup { [ZeroSnapshotDepthResponseEventMessageAsksGroup EXCEPT !.pxMantissa = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotDepthResponseEventMessageAsksGroup EXCEPT !.szMantissa = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotDepthResponseEventMessageAsksGroup EXCEPT !.ordCount = one] : one \in Sample(4) }
 
-(* A run of Snapshot Depth Response Event Message asks Group, written one after another *)
+(* A run of Snapshot Depth Response Event Message Asks Group, written one after another *)
 RECURSIVE EncodeSnapshotDepthResponseEventMessageAsksGroupList(_)
 EncodeSnapshotDepthResponseEventMessageAsksGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeSnapshotDepthResponseEventMessageAsksGroup(Head(messages)) \o EncodeSnapshotDepthResponseEventMessageAsksGroupList(Tail(messages))
 
-(* As many Snapshot Depth Response Event Message asks Group as the field that counts them says *)
+(* As many Snapshot Depth Response Event Message Asks Group as the field that counts them says *)
 RECURSIVE ReadSnapshotDepthResponseEventMessageAsksGroupList(_, _)
 ReadSnapshotDepthResponseEventMessageAsksGroupList(bytes, count) ==
     IF count = 0
@@ -920,11 +920,11 @@ ReadSnapshotDepthResponseEventMessageAsksGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Snapshot Depth Response Event Message asks Group of each kind, for the lists that carry them *)
+(* One Snapshot Depth Response Event Message Asks Group of each kind, for the lists that carry them *)
 OneSnapshotDepthResponseEventMessageAsksGroup == { ZeroSnapshotDepthResponseEventMessageAsksGroup }
 
 (***************************************************************************)
-(* Snapshot Depth Response Event Message asks Groups                       *)
+(* Snapshot Depth Response Event Message Asks Groups                       *)
 (***************************************************************************)
 
 SnapshotDepthResponseEventMessageAsksGroups ==
@@ -947,14 +947,14 @@ ZeroSnapshotDepthResponseEventMessageAsksGroups ==
     [ blockLength                                |-> [i \in 1 .. 2 |-> 0],
       snapshotDepthResponseEventMessageAsksGroup |-> << >> ]
 
-(* Snapshot Depth Response Event Message asks Groups at zero, then each field in turn at the values it is checked at *)
+(* Snapshot Depth Response Event Message Asks Groups at zero, then each field in turn at the values it is checked at *)
 CheckedSnapshotDepthResponseEventMessageAsksGroups ==
     { ZeroSnapshotDepthResponseEventMessageAsksGroups }
         \cup { [ZeroSnapshotDepthResponseEventMessageAsksGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroSnapshotDepthResponseEventMessageAsksGroups EXCEPT !.snapshotDepthResponseEventMessageAsksGroup = one] : one \in SampleLists(OneSnapshotDepthResponseEventMessageAsksGroup) }
 
 (***************************************************************************)
-(* Snapshot Depth Response Event Message bids Group: 20 bytes              *)
+(* Snapshot Depth Response Event Message Bids Group: 20 bytes              *)
 (***************************************************************************)
 
 SnapshotDepthResponseEventMessageBidsGroup ==
@@ -980,21 +980,21 @@ ZeroSnapshotDepthResponseEventMessageBidsGroup ==
       szMantissa |-> [i \in 1 .. 8 |-> 0],
       ordCount   |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Snapshot Depth Response Event Message bids Group at zero, then each field in turn at the values it is checked at *)
+(* Snapshot Depth Response Event Message Bids Group at zero, then each field in turn at the values it is checked at *)
 CheckedSnapshotDepthResponseEventMessageBidsGroup ==
     { ZeroSnapshotDepthResponseEventMessageBidsGroup }
         \cup { [ZeroSnapshotDepthResponseEventMessageBidsGroup EXCEPT !.pxMantissa = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotDepthResponseEventMessageBidsGroup EXCEPT !.szMantissa = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotDepthResponseEventMessageBidsGroup EXCEPT !.ordCount = one] : one \in Sample(4) }
 
-(* A run of Snapshot Depth Response Event Message bids Group, written one after another *)
+(* A run of Snapshot Depth Response Event Message Bids Group, written one after another *)
 RECURSIVE EncodeSnapshotDepthResponseEventMessageBidsGroupList(_)
 EncodeSnapshotDepthResponseEventMessageBidsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeSnapshotDepthResponseEventMessageBidsGroup(Head(messages)) \o EncodeSnapshotDepthResponseEventMessageBidsGroupList(Tail(messages))
 
-(* As many Snapshot Depth Response Event Message bids Group as the field that counts them says *)
+(* As many Snapshot Depth Response Event Message Bids Group as the field that counts them says *)
 RECURSIVE ReadSnapshotDepthResponseEventMessageBidsGroupList(_, _)
 ReadSnapshotDepthResponseEventMessageBidsGroupList(bytes, count) ==
     IF count = 0
@@ -1005,11 +1005,11 @@ ReadSnapshotDepthResponseEventMessageBidsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Snapshot Depth Response Event Message bids Group of each kind, for the lists that carry them *)
+(* One Snapshot Depth Response Event Message Bids Group of each kind, for the lists that carry them *)
 OneSnapshotDepthResponseEventMessageBidsGroup == { ZeroSnapshotDepthResponseEventMessageBidsGroup }
 
 (***************************************************************************)
-(* Snapshot Depth Response Event Message bids Groups                       *)
+(* Snapshot Depth Response Event Message Bids Groups                       *)
 (***************************************************************************)
 
 SnapshotDepthResponseEventMessageBidsGroups ==
@@ -1032,7 +1032,7 @@ ZeroSnapshotDepthResponseEventMessageBidsGroups ==
     [ blockLength                                |-> [i \in 1 .. 2 |-> 0],
       snapshotDepthResponseEventMessageBidsGroup |-> << >> ]
 
-(* Snapshot Depth Response Event Message bids Groups at zero, then each field in turn at the values it is checked at *)
+(* Snapshot Depth Response Event Message Bids Groups at zero, then each field in turn at the values it is checked at *)
 CheckedSnapshotDepthResponseEventMessageBidsGroups ==
     { ZeroSnapshotDepthResponseEventMessageBidsGroups }
         \cup { [ZeroSnapshotDepthResponseEventMessageBidsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -1238,7 +1238,7 @@ RoundTripBboTbtChannelEventMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Books L 2 Tbt Channel Event Message asks Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Books L 2 Tbt Channel Event Message Asks Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripBooksL2TbtChannelEventMessageAsksGroup ==
     \A message \in CheckedBooksL2TbtChannelEventMessageAsksGroup :
         LET read == DecodeBooksL2TbtChannelEventMessageAsksGroup(EncodeBooksL2TbtChannelEventMessageAsksGroup(message))
@@ -1246,7 +1246,7 @@ RoundTripBooksL2TbtChannelEventMessageAsksGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Books L 2 Tbt Channel Event Message asks Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Books L 2 Tbt Channel Event Message Asks Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripBooksL2TbtChannelEventMessageAsksGroups ==
     \A message \in CheckedBooksL2TbtChannelEventMessageAsksGroups :
         LET read == DecodeBooksL2TbtChannelEventMessageAsksGroups(EncodeBooksL2TbtChannelEventMessageAsksGroups(message))
@@ -1254,7 +1254,7 @@ RoundTripBooksL2TbtChannelEventMessageAsksGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Books L 2 Tbt Channel Event Message bids Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Books L 2 Tbt Channel Event Message Bids Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripBooksL2TbtChannelEventMessageBidsGroup ==
     \A message \in CheckedBooksL2TbtChannelEventMessageBidsGroup :
         LET read == DecodeBooksL2TbtChannelEventMessageBidsGroup(EncodeBooksL2TbtChannelEventMessageBidsGroup(message))
@@ -1262,7 +1262,7 @@ RoundTripBooksL2TbtChannelEventMessageBidsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Books L 2 Tbt Channel Event Message bids Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Books L 2 Tbt Channel Event Message Bids Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripBooksL2TbtChannelEventMessageBidsGroups ==
     \A message \in CheckedBooksL2TbtChannelEventMessageBidsGroups :
         LET read == DecodeBooksL2TbtChannelEventMessageBidsGroups(EncodeBooksL2TbtChannelEventMessageBidsGroups(message))
@@ -1286,7 +1286,7 @@ RoundTripBooksL2TbtExponentUpdateEventMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Books L 2 Tbt Elp Channel Event Message asks Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Books L 2 Tbt Elp Channel Event Message Asks Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripBooksL2TbtElpChannelEventMessageAsksGroup ==
     \A message \in CheckedBooksL2TbtElpChannelEventMessageAsksGroup :
         LET read == DecodeBooksL2TbtElpChannelEventMessageAsksGroup(EncodeBooksL2TbtElpChannelEventMessageAsksGroup(message))
@@ -1294,7 +1294,7 @@ RoundTripBooksL2TbtElpChannelEventMessageAsksGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Books L 2 Tbt Elp Channel Event Message asks Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Books L 2 Tbt Elp Channel Event Message Asks Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripBooksL2TbtElpChannelEventMessageAsksGroups ==
     \A message \in CheckedBooksL2TbtElpChannelEventMessageAsksGroups :
         LET read == DecodeBooksL2TbtElpChannelEventMessageAsksGroups(EncodeBooksL2TbtElpChannelEventMessageAsksGroups(message))
@@ -1302,7 +1302,7 @@ RoundTripBooksL2TbtElpChannelEventMessageAsksGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Books L 2 Tbt Elp Channel Event Message bids Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Books L 2 Tbt Elp Channel Event Message Bids Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripBooksL2TbtElpChannelEventMessageBidsGroup ==
     \A message \in CheckedBooksL2TbtElpChannelEventMessageBidsGroup :
         LET read == DecodeBooksL2TbtElpChannelEventMessageBidsGroup(EncodeBooksL2TbtElpChannelEventMessageBidsGroup(message))
@@ -1310,7 +1310,7 @@ RoundTripBooksL2TbtElpChannelEventMessageBidsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Books L 2 Tbt Elp Channel Event Message bids Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Books L 2 Tbt Elp Channel Event Message Bids Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripBooksL2TbtElpChannelEventMessageBidsGroups ==
     \A message \in CheckedBooksL2TbtElpChannelEventMessageBidsGroups :
         LET read == DecodeBooksL2TbtElpChannelEventMessageBidsGroups(EncodeBooksL2TbtElpChannelEventMessageBidsGroups(message))
@@ -1342,7 +1342,7 @@ RoundTripTradesChannelEventMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snapshot Depth Response Event Message asks Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Snapshot Depth Response Event Message Asks Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripSnapshotDepthResponseEventMessageAsksGroup ==
     \A message \in CheckedSnapshotDepthResponseEventMessageAsksGroup :
         LET read == DecodeSnapshotDepthResponseEventMessageAsksGroup(EncodeSnapshotDepthResponseEventMessageAsksGroup(message))
@@ -1350,7 +1350,7 @@ RoundTripSnapshotDepthResponseEventMessageAsksGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snapshot Depth Response Event Message asks Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Snapshot Depth Response Event Message Asks Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripSnapshotDepthResponseEventMessageAsksGroups ==
     \A message \in CheckedSnapshotDepthResponseEventMessageAsksGroups :
         LET read == DecodeSnapshotDepthResponseEventMessageAsksGroups(EncodeSnapshotDepthResponseEventMessageAsksGroups(message))
@@ -1358,7 +1358,7 @@ RoundTripSnapshotDepthResponseEventMessageAsksGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snapshot Depth Response Event Message bids Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Snapshot Depth Response Event Message Bids Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripSnapshotDepthResponseEventMessageBidsGroup ==
     \A message \in CheckedSnapshotDepthResponseEventMessageBidsGroup :
         LET read == DecodeSnapshotDepthResponseEventMessageBidsGroup(EncodeSnapshotDepthResponseEventMessageBidsGroup(message))
@@ -1366,7 +1366,7 @@ RoundTripSnapshotDepthResponseEventMessageBidsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snapshot Depth Response Event Message bids Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Snapshot Depth Response Event Message Bids Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripSnapshotDepthResponseEventMessageBidsGroups ==
     \A message \in CheckedSnapshotDepthResponseEventMessageBidsGroups :
         LET read == DecodeSnapshotDepthResponseEventMessageBidsGroups(EncodeSnapshotDepthResponseEventMessageBidsGroups(message))

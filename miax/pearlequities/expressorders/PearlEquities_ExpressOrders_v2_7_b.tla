@@ -185,7 +185,7 @@ CheckedSymbolUpdateMessage ==
         \cup { [ZeroSymbolUpdateMessage EXCEPT !.reserved12 = one] : one \in Sample(12) }
 
 (***************************************************************************)
-(* New Order Response Message: 76 bytes                                    *)
+(* New Order Response Message: 67 bytes                                    *)
 (***************************************************************************)
 
 NewOrderResponseMessage ==
@@ -197,7 +197,7 @@ NewOrderResponseMessage ==
       price              : Sample(8),
       size               : Sample(4),
       orderStatus        : Sample(1),
-      reserved19         : Sample(19) ]
+      reserved10         : Sample(10) ]
 
 EncodeNewOrderResponseMessage(message) ==
     message.matchingEngineTime
@@ -208,7 +208,7 @@ EncodeNewOrderResponseMessage(message) ==
         \o message.price
         \o message.size
         \o message.orderStatus
-        \o message.reserved19
+        \o message.reserved10
 
 DecodeNewOrderResponseMessage(bytes) ==
     LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
@@ -219,7 +219,7 @@ DecodeNewOrderResponseMessage(bytes) ==
     LET price == ReadBytes(orderId.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET size == ReadBytes(price.rest, 4) IN IF ~size.ok THEN Fail ELSE
     LET orderStatus == ReadBytes(size.rest, 1) IN IF ~orderStatus.ok THEN Fail ELSE
-    LET reserved19 == ReadBytes(orderStatus.rest, 19) IN IF ~reserved19.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(orderStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
     Ok([ matchingEngineTime |-> matchingEngineTime.value,
          mpid               |-> mpid.value,
          clientOrderId      |-> clientOrderId.value,
@@ -228,7 +228,7 @@ DecodeNewOrderResponseMessage(bytes) ==
          price              |-> price.value,
          size               |-> size.value,
          orderStatus        |-> orderStatus.value,
-         reserved19         |-> reserved19.value ], reserved19.rest)
+         reserved10         |-> reserved10.value ], reserved10.rest)
 
 ZeroNewOrderResponseMessage ==
     [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
@@ -239,7 +239,7 @@ ZeroNewOrderResponseMessage ==
       price              |-> [i \in 1 .. 8 |-> 0],
       size               |-> [i \in 1 .. 4 |-> 0],
       orderStatus        |-> [i \in 1 .. 1 |-> 0],
-      reserved19         |-> [i \in 1 .. 19 |-> 0] ]
+      reserved10         |-> [i \in 1 .. 10 |-> 0] ]
 
 (* New Order Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderResponseMessage ==
@@ -252,7 +252,7 @@ CheckedNewOrderResponseMessage ==
         \cup { [ZeroNewOrderResponseMessage EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderResponseMessage EXCEPT !.size = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderResponseMessage EXCEPT !.orderStatus = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderResponseMessage EXCEPT !.reserved19 = one] : one \in Sample(19) }
+        \cup { [ZeroNewOrderResponseMessage EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
 (* Modify Order Response Message: 87 bytes                                 *)
@@ -405,14 +405,14 @@ CheckedCancelOrderResponseMessage ==
 (***************************************************************************)
 
 CancelOrderByExchangeOrderIdResponseMessage ==
-    [ matchingEngineTime : Sample(8),
-      mpid               : Sample(4),
-      clientOrderId      : Sample(20),
-      symbolId           : Sample(4),
-      orderId            : Sample(8),
-      leavesQty          : Sample(4),
-      cancelStatus       : Sample(1),
-      reserved10         : Sample(10) ]
+    [ matchingEngineTime            : Sample(8),
+      mpid                          : Sample(4),
+      clientOrderId                 : Sample(20),
+      symbolId                      : Sample(4),
+      orderId                       : Sample(8),
+      leavesQty                     : Sample(4),
+      cancelByExchangeOrderIdStatus : Sample(1),
+      reserved10                    : Sample(10) ]
 
 EncodeCancelOrderByExchangeOrderIdResponseMessage(message) ==
     message.matchingEngineTime
@@ -421,7 +421,7 @@ EncodeCancelOrderByExchangeOrderIdResponseMessage(message) ==
         \o message.symbolId
         \o message.orderId
         \o message.leavesQty
-        \o message.cancelStatus
+        \o message.cancelByExchangeOrderIdStatus
         \o message.reserved10
 
 DecodeCancelOrderByExchangeOrderIdResponseMessage(bytes) ==
@@ -431,26 +431,26 @@ DecodeCancelOrderByExchangeOrderIdResponseMessage(bytes) ==
     LET symbolId == ReadBytes(clientOrderId.rest, 4) IN IF ~symbolId.ok THEN Fail ELSE
     LET orderId == ReadBytes(symbolId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(orderId.rest, 4) IN IF ~leavesQty.ok THEN Fail ELSE
-    LET cancelStatus == ReadBytes(leavesQty.rest, 1) IN IF ~cancelStatus.ok THEN Fail ELSE
-    LET reserved10 == ReadBytes(cancelStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
-    Ok([ matchingEngineTime |-> matchingEngineTime.value,
-         mpid               |-> mpid.value,
-         clientOrderId      |-> clientOrderId.value,
-         symbolId           |-> symbolId.value,
-         orderId            |-> orderId.value,
-         leavesQty          |-> leavesQty.value,
-         cancelStatus       |-> cancelStatus.value,
-         reserved10         |-> reserved10.value ], reserved10.rest)
+    LET cancelByExchangeOrderIdStatus == ReadBytes(leavesQty.rest, 1) IN IF ~cancelByExchangeOrderIdStatus.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(cancelByExchangeOrderIdStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    Ok([ matchingEngineTime            |-> matchingEngineTime.value,
+         mpid                          |-> mpid.value,
+         clientOrderId                 |-> clientOrderId.value,
+         symbolId                      |-> symbolId.value,
+         orderId                       |-> orderId.value,
+         leavesQty                     |-> leavesQty.value,
+         cancelByExchangeOrderIdStatus |-> cancelByExchangeOrderIdStatus.value,
+         reserved10                    |-> reserved10.value ], reserved10.rest)
 
 ZeroCancelOrderByExchangeOrderIdResponseMessage ==
-    [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
-      mpid               |-> [i \in 1 .. 4 |-> 0],
-      clientOrderId      |-> [i \in 1 .. 20 |-> 0],
-      symbolId           |-> [i \in 1 .. 4 |-> 0],
-      orderId            |-> [i \in 1 .. 8 |-> 0],
-      leavesQty          |-> [i \in 1 .. 4 |-> 0],
-      cancelStatus       |-> [i \in 1 .. 1 |-> 0],
-      reserved10         |-> [i \in 1 .. 10 |-> 0] ]
+    [ matchingEngineTime            |-> [i \in 1 .. 8 |-> 0],
+      mpid                          |-> [i \in 1 .. 4 |-> 0],
+      clientOrderId                 |-> [i \in 1 .. 20 |-> 0],
+      symbolId                      |-> [i \in 1 .. 4 |-> 0],
+      orderId                       |-> [i \in 1 .. 8 |-> 0],
+      leavesQty                     |-> [i \in 1 .. 4 |-> 0],
+      cancelByExchangeOrderIdStatus |-> [i \in 1 .. 1 |-> 0],
+      reserved10                    |-> [i \in 1 .. 10 |-> 0] ]
 
 (* Cancel Order By Exchange Order Id Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedCancelOrderByExchangeOrderIdResponseMessage ==
@@ -461,7 +461,7 @@ CheckedCancelOrderByExchangeOrderIdResponseMessage ==
         \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage EXCEPT !.symbolId = one] : one \in Sample(4) }
         \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage EXCEPT !.leavesQty = one] : one \in Sample(4) }
-        \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage EXCEPT !.cancelStatus = one] : one \in Sample(1) }
+        \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage EXCEPT !.cancelByExchangeOrderIdStatus = one] : one \in Sample(1) }
         \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
@@ -1428,7 +1428,7 @@ CheckedNewOrderRequestMessage ==
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.reserved11 = one] : one \in Sample(11) }
 
 (***************************************************************************)
-(* New Order Response Message: 76 bytes                                    *)
+(* New Order Response Message: 67 bytes                                    *)
 (***************************************************************************)
 
 NewOrderResponseMessage2 ==
@@ -1440,7 +1440,7 @@ NewOrderResponseMessage2 ==
       price              : Sample(8),
       size               : Sample(4),
       orderStatus        : Sample(1),
-      reserved19         : Sample(19) ]
+      reserved10         : Sample(10) ]
 
 EncodeNewOrderResponseMessage2(message) ==
     message.matchingEngineTime
@@ -1451,7 +1451,7 @@ EncodeNewOrderResponseMessage2(message) ==
         \o message.price
         \o message.size
         \o message.orderStatus
-        \o message.reserved19
+        \o message.reserved10
 
 DecodeNewOrderResponseMessage2(bytes) ==
     LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
@@ -1462,7 +1462,7 @@ DecodeNewOrderResponseMessage2(bytes) ==
     LET price == ReadBytes(orderId.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET size == ReadBytes(price.rest, 4) IN IF ~size.ok THEN Fail ELSE
     LET orderStatus == ReadBytes(size.rest, 1) IN IF ~orderStatus.ok THEN Fail ELSE
-    LET reserved19 == ReadBytes(orderStatus.rest, 19) IN IF ~reserved19.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(orderStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
     Ok([ matchingEngineTime |-> matchingEngineTime.value,
          mpid               |-> mpid.value,
          clientOrderId      |-> clientOrderId.value,
@@ -1471,7 +1471,7 @@ DecodeNewOrderResponseMessage2(bytes) ==
          price              |-> price.value,
          size               |-> size.value,
          orderStatus        |-> orderStatus.value,
-         reserved19         |-> reserved19.value ], reserved19.rest)
+         reserved10         |-> reserved10.value ], reserved10.rest)
 
 ZeroNewOrderResponseMessage2 ==
     [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
@@ -1482,7 +1482,7 @@ ZeroNewOrderResponseMessage2 ==
       price              |-> [i \in 1 .. 8 |-> 0],
       size               |-> [i \in 1 .. 4 |-> 0],
       orderStatus        |-> [i \in 1 .. 1 |-> 0],
-      reserved19         |-> [i \in 1 .. 19 |-> 0] ]
+      reserved10         |-> [i \in 1 .. 10 |-> 0] ]
 
 (* New Order Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderResponseMessage2 ==
@@ -1495,7 +1495,7 @@ CheckedNewOrderResponseMessage2 ==
         \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.size = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.orderStatus = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.reserved19 = one] : one \in Sample(19) }
+        \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
 (* Modify Order Request Message: 109 bytes                                 *)
@@ -1852,14 +1852,14 @@ CheckedCancelOrderByExchangeOrderIdRequestMessage ==
 (***************************************************************************)
 
 CancelOrderByExchangeOrderIdResponseMessage2 ==
-    [ matchingEngineTime : Sample(8),
-      mpid               : Sample(4),
-      clientOrderId      : Sample(20),
-      symbolId           : Sample(4),
-      orderId            : Sample(8),
-      leavesQty          : Sample(4),
-      cancelStatus       : Sample(1),
-      reserved10         : Sample(10) ]
+    [ matchingEngineTime            : Sample(8),
+      mpid                          : Sample(4),
+      clientOrderId                 : Sample(20),
+      symbolId                      : Sample(4),
+      orderId                       : Sample(8),
+      leavesQty                     : Sample(4),
+      cancelByExchangeOrderIdStatus : Sample(1),
+      reserved10                    : Sample(10) ]
 
 EncodeCancelOrderByExchangeOrderIdResponseMessage2(message) ==
     message.matchingEngineTime
@@ -1868,7 +1868,7 @@ EncodeCancelOrderByExchangeOrderIdResponseMessage2(message) ==
         \o message.symbolId
         \o message.orderId
         \o message.leavesQty
-        \o message.cancelStatus
+        \o message.cancelByExchangeOrderIdStatus
         \o message.reserved10
 
 DecodeCancelOrderByExchangeOrderIdResponseMessage2(bytes) ==
@@ -1878,26 +1878,26 @@ DecodeCancelOrderByExchangeOrderIdResponseMessage2(bytes) ==
     LET symbolId == ReadBytes(clientOrderId.rest, 4) IN IF ~symbolId.ok THEN Fail ELSE
     LET orderId == ReadBytes(symbolId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(orderId.rest, 4) IN IF ~leavesQty.ok THEN Fail ELSE
-    LET cancelStatus == ReadBytes(leavesQty.rest, 1) IN IF ~cancelStatus.ok THEN Fail ELSE
-    LET reserved10 == ReadBytes(cancelStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
-    Ok([ matchingEngineTime |-> matchingEngineTime.value,
-         mpid               |-> mpid.value,
-         clientOrderId      |-> clientOrderId.value,
-         symbolId           |-> symbolId.value,
-         orderId            |-> orderId.value,
-         leavesQty          |-> leavesQty.value,
-         cancelStatus       |-> cancelStatus.value,
-         reserved10         |-> reserved10.value ], reserved10.rest)
+    LET cancelByExchangeOrderIdStatus == ReadBytes(leavesQty.rest, 1) IN IF ~cancelByExchangeOrderIdStatus.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(cancelByExchangeOrderIdStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    Ok([ matchingEngineTime            |-> matchingEngineTime.value,
+         mpid                          |-> mpid.value,
+         clientOrderId                 |-> clientOrderId.value,
+         symbolId                      |-> symbolId.value,
+         orderId                       |-> orderId.value,
+         leavesQty                     |-> leavesQty.value,
+         cancelByExchangeOrderIdStatus |-> cancelByExchangeOrderIdStatus.value,
+         reserved10                    |-> reserved10.value ], reserved10.rest)
 
 ZeroCancelOrderByExchangeOrderIdResponseMessage2 ==
-    [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
-      mpid               |-> [i \in 1 .. 4 |-> 0],
-      clientOrderId      |-> [i \in 1 .. 20 |-> 0],
-      symbolId           |-> [i \in 1 .. 4 |-> 0],
-      orderId            |-> [i \in 1 .. 8 |-> 0],
-      leavesQty          |-> [i \in 1 .. 4 |-> 0],
-      cancelStatus       |-> [i \in 1 .. 1 |-> 0],
-      reserved10         |-> [i \in 1 .. 10 |-> 0] ]
+    [ matchingEngineTime            |-> [i \in 1 .. 8 |-> 0],
+      mpid                          |-> [i \in 1 .. 4 |-> 0],
+      clientOrderId                 |-> [i \in 1 .. 20 |-> 0],
+      symbolId                      |-> [i \in 1 .. 4 |-> 0],
+      orderId                       |-> [i \in 1 .. 8 |-> 0],
+      leavesQty                     |-> [i \in 1 .. 4 |-> 0],
+      cancelByExchangeOrderIdStatus |-> [i \in 1 .. 1 |-> 0],
+      reserved10                    |-> [i \in 1 .. 10 |-> 0] ]
 
 (* Cancel Order By Exchange Order Id Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedCancelOrderByExchangeOrderIdResponseMessage2 ==
@@ -1908,7 +1908,7 @@ CheckedCancelOrderByExchangeOrderIdResponseMessage2 ==
         \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage2 EXCEPT !.symbolId = one] : one \in Sample(4) }
         \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage2 EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage2 EXCEPT !.leavesQty = one] : one \in Sample(4) }
-        \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage2 EXCEPT !.cancelStatus = one] : one \in Sample(1) }
+        \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage2 EXCEPT !.cancelByExchangeOrderIdStatus = one] : one \in Sample(1) }
         \cup { [ZeroCancelOrderByExchangeOrderIdResponseMessage2 EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)

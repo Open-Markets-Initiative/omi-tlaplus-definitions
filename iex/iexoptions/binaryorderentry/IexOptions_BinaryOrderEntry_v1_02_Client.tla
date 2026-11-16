@@ -219,28 +219,28 @@ CheckedSubsessionLeaveMessage ==
 (***************************************************************************)
 
 NewOrderSingleMessage ==
-    [ accountAccount          : Sample(16),
-      instrumentId            : Sample(4),
-      marketParticipantId     : Sample(4),
-      clOrdId                 : Sample(8),
-      clearingAccount         : Sample(4),
-      customerOrFirm          : Sample(1),
-      openClose               : Sample(1),
-      attributedQuote         : Sample(1),
-      timeInForce             : Sample(1),
-      cancelInsteadOfSlide    : Sample(1),
-      displayInst             : Sample(1),
-      execInst                : Sample(1),
-      ordType                 : Sample(1),
-      targetPartyId           : Sample(4),
-      auctionId               : Sample(4),
-      clearingFirm            : Sample(4),
-      optionalData            : Sample(16),
-      routingFirmId           : Sample(4),
-      aiq                     : Sample(3),
-      side                    : Sample(1),
-      pricePrice8             : Sample(8),
-      orderQtyQuantityNonZero : Sample(4) ]
+    [ accountAccount       : Sample(16),
+      instrumentId         : Sample(4),
+      marketParticipantId  : Sample(4),
+      clOrdId              : Sample(8),
+      clearingAccount      : Sample(4),
+      customerOrFirm       : Sample(1),
+      openClose            : Sample(1),
+      attributedQuote      : Sample(1),
+      timeInForce          : Sample(1),
+      cancelInsteadOfSlide : Sample(1),
+      displayInst          : Sample(1),
+      execInst             : Sample(1),
+      ordType              : Sample(1),
+      targetPartyId        : Sample(4),
+      auctionId            : Sample(4),
+      clearingFirm         : Sample(4),
+      optionalData         : Sample(16),
+      routingFirmId        : Sample(4),
+      aiq                  : Sample(3),
+      side                 : Sample(1),
+      pricePrice8          : Sample(8),
+      orderQty             : Sample(4) ]
 
 EncodeNewOrderSingleMessage(message) ==
     message.accountAccount
@@ -264,7 +264,7 @@ EncodeNewOrderSingleMessage(message) ==
         \o message.aiq
         \o message.side
         \o message.pricePrice8
-        \o message.orderQtyQuantityNonZero
+        \o message.orderQty
 
 DecodeNewOrderSingleMessage(bytes) ==
     LET accountAccount == ReadBytes(bytes, 16) IN IF ~accountAccount.ok THEN Fail ELSE
@@ -288,53 +288,53 @@ DecodeNewOrderSingleMessage(bytes) ==
     LET aiq == ReadBytes(routingFirmId.rest, 3) IN IF ~aiq.ok THEN Fail ELSE
     LET side == ReadBytes(aiq.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET pricePrice8 == ReadBytes(side.rest, 8) IN IF ~pricePrice8.ok THEN Fail ELSE
-    LET orderQtyQuantityNonZero == ReadBytes(pricePrice8.rest, 4) IN IF ~orderQtyQuantityNonZero.ok THEN Fail ELSE
-    Ok([ accountAccount          |-> accountAccount.value,
-         instrumentId            |-> instrumentId.value,
-         marketParticipantId     |-> marketParticipantId.value,
-         clOrdId                 |-> clOrdId.value,
-         clearingAccount         |-> clearingAccount.value,
-         customerOrFirm          |-> customerOrFirm.value,
-         openClose               |-> openClose.value,
-         attributedQuote         |-> attributedQuote.value,
-         timeInForce             |-> timeInForce.value,
-         cancelInsteadOfSlide    |-> cancelInsteadOfSlide.value,
-         displayInst             |-> displayInst.value,
-         execInst                |-> execInst.value,
-         ordType                 |-> ordType.value,
-         targetPartyId           |-> targetPartyId.value,
-         auctionId               |-> auctionId.value,
-         clearingFirm            |-> clearingFirm.value,
-         optionalData            |-> optionalData.value,
-         routingFirmId           |-> routingFirmId.value,
-         aiq                     |-> aiq.value,
-         side                    |-> side.value,
-         pricePrice8             |-> pricePrice8.value,
-         orderQtyQuantityNonZero |-> orderQtyQuantityNonZero.value ], orderQtyQuantityNonZero.rest)
+    LET orderQty == ReadBytes(pricePrice8.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
+    Ok([ accountAccount       |-> accountAccount.value,
+         instrumentId         |-> instrumentId.value,
+         marketParticipantId  |-> marketParticipantId.value,
+         clOrdId              |-> clOrdId.value,
+         clearingAccount      |-> clearingAccount.value,
+         customerOrFirm       |-> customerOrFirm.value,
+         openClose            |-> openClose.value,
+         attributedQuote      |-> attributedQuote.value,
+         timeInForce          |-> timeInForce.value,
+         cancelInsteadOfSlide |-> cancelInsteadOfSlide.value,
+         displayInst          |-> displayInst.value,
+         execInst             |-> execInst.value,
+         ordType              |-> ordType.value,
+         targetPartyId        |-> targetPartyId.value,
+         auctionId            |-> auctionId.value,
+         clearingFirm         |-> clearingFirm.value,
+         optionalData         |-> optionalData.value,
+         routingFirmId        |-> routingFirmId.value,
+         aiq                  |-> aiq.value,
+         side                 |-> side.value,
+         pricePrice8          |-> pricePrice8.value,
+         orderQty             |-> orderQty.value ], orderQty.rest)
 
 ZeroNewOrderSingleMessage ==
-    [ accountAccount          |-> [i \in 1 .. 16 |-> 0],
-      instrumentId            |-> [i \in 1 .. 4 |-> 0],
-      marketParticipantId     |-> [i \in 1 .. 4 |-> 0],
-      clOrdId                 |-> [i \in 1 .. 8 |-> 0],
-      clearingAccount         |-> [i \in 1 .. 4 |-> 0],
-      customerOrFirm          |-> [i \in 1 .. 1 |-> 0],
-      openClose               |-> [i \in 1 .. 1 |-> 0],
-      attributedQuote         |-> [i \in 1 .. 1 |-> 0],
-      timeInForce             |-> [i \in 1 .. 1 |-> 0],
-      cancelInsteadOfSlide    |-> [i \in 1 .. 1 |-> 0],
-      displayInst             |-> [i \in 1 .. 1 |-> 0],
-      execInst                |-> [i \in 1 .. 1 |-> 0],
-      ordType                 |-> [i \in 1 .. 1 |-> 0],
-      targetPartyId           |-> [i \in 1 .. 4 |-> 0],
-      auctionId               |-> [i \in 1 .. 4 |-> 0],
-      clearingFirm            |-> [i \in 1 .. 4 |-> 0],
-      optionalData            |-> [i \in 1 .. 16 |-> 0],
-      routingFirmId           |-> [i \in 1 .. 4 |-> 0],
-      aiq                     |-> [i \in 1 .. 3 |-> 0],
-      side                    |-> [i \in 1 .. 1 |-> 0],
-      pricePrice8             |-> [i \in 1 .. 8 |-> 0],
-      orderQtyQuantityNonZero |-> [i \in 1 .. 4 |-> 0] ]
+    [ accountAccount       |-> [i \in 1 .. 16 |-> 0],
+      instrumentId         |-> [i \in 1 .. 4 |-> 0],
+      marketParticipantId  |-> [i \in 1 .. 4 |-> 0],
+      clOrdId              |-> [i \in 1 .. 8 |-> 0],
+      clearingAccount      |-> [i \in 1 .. 4 |-> 0],
+      customerOrFirm       |-> [i \in 1 .. 1 |-> 0],
+      openClose            |-> [i \in 1 .. 1 |-> 0],
+      attributedQuote      |-> [i \in 1 .. 1 |-> 0],
+      timeInForce          |-> [i \in 1 .. 1 |-> 0],
+      cancelInsteadOfSlide |-> [i \in 1 .. 1 |-> 0],
+      displayInst          |-> [i \in 1 .. 1 |-> 0],
+      execInst             |-> [i \in 1 .. 1 |-> 0],
+      ordType              |-> [i \in 1 .. 1 |-> 0],
+      targetPartyId        |-> [i \in 1 .. 4 |-> 0],
+      auctionId            |-> [i \in 1 .. 4 |-> 0],
+      clearingFirm         |-> [i \in 1 .. 4 |-> 0],
+      optionalData         |-> [i \in 1 .. 16 |-> 0],
+      routingFirmId        |-> [i \in 1 .. 4 |-> 0],
+      aiq                  |-> [i \in 1 .. 3 |-> 0],
+      side                 |-> [i \in 1 .. 1 |-> 0],
+      pricePrice8          |-> [i \in 1 .. 8 |-> 0],
+      orderQty             |-> [i \in 1 .. 4 |-> 0] ]
 
 (* New Order Single Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderSingleMessage ==
@@ -360,7 +360,7 @@ CheckedNewOrderSingleMessage ==
         \cup { [ZeroNewOrderSingleMessage EXCEPT !.aiq = one] : one \in Sample(3) }
         \cup { [ZeroNewOrderSingleMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderSingleMessage EXCEPT !.pricePrice8 = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderSingleMessage EXCEPT !.orderQtyQuantityNonZero = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderSingleMessage EXCEPT !.orderQty = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Order Cancel Replace Request Message: 100 bytes                         *)
@@ -389,7 +389,7 @@ OrderCancelReplaceRequestMessage ==
       aiq                          : Sample(3),
       side                         : Sample(1),
       pricePrice8                  : Sample(8),
-      orderQtyQuantityNonZero      : Sample(4) ]
+      orderQty                     : Sample(4) ]
 
 EncodeOrderCancelReplaceRequestMessage(message) ==
     message.accountAccount
@@ -414,7 +414,7 @@ EncodeOrderCancelReplaceRequestMessage(message) ==
         \o message.aiq
         \o message.side
         \o message.pricePrice8
-        \o message.orderQtyQuantityNonZero
+        \o message.orderQty
 
 DecodeOrderCancelReplaceRequestMessage(bytes) ==
     LET accountAccount == ReadBytes(bytes, 16) IN IF ~accountAccount.ok THEN Fail ELSE
@@ -439,7 +439,7 @@ DecodeOrderCancelReplaceRequestMessage(bytes) ==
     LET aiq == ReadBytes(routingFirmId.rest, 3) IN IF ~aiq.ok THEN Fail ELSE
     LET side == ReadBytes(aiq.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET pricePrice8 == ReadBytes(side.rest, 8) IN IF ~pricePrice8.ok THEN Fail ELSE
-    LET orderQtyQuantityNonZero == ReadBytes(pricePrice8.rest, 4) IN IF ~orderQtyQuantityNonZero.ok THEN Fail ELSE
+    LET orderQty == ReadBytes(pricePrice8.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
     Ok([ accountAccount               |-> accountAccount.value,
          instrumentId                 |-> instrumentId.value,
          marketParticipantId          |-> marketParticipantId.value,
@@ -462,7 +462,7 @@ DecodeOrderCancelReplaceRequestMessage(bytes) ==
          aiq                          |-> aiq.value,
          side                         |-> side.value,
          pricePrice8                  |-> pricePrice8.value,
-         orderQtyQuantityNonZero      |-> orderQtyQuantityNonZero.value ], orderQtyQuantityNonZero.rest)
+         orderQty                     |-> orderQty.value ], orderQty.rest)
 
 ZeroOrderCancelReplaceRequestMessage ==
     [ accountAccount               |-> [i \in 1 .. 16 |-> 0],
@@ -487,7 +487,7 @@ ZeroOrderCancelReplaceRequestMessage ==
       aiq                          |-> [i \in 1 .. 3 |-> 0],
       side                         |-> [i \in 1 .. 1 |-> 0],
       pricePrice8                  |-> [i \in 1 .. 8 |-> 0],
-      orderQtyQuantityNonZero      |-> [i \in 1 .. 4 |-> 0] ]
+      orderQty                     |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Order Cancel Replace Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderCancelReplaceRequestMessage ==
@@ -514,7 +514,7 @@ CheckedOrderCancelReplaceRequestMessage ==
         \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.aiq = one] : one \in Sample(3) }
         \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.pricePrice8 = one] : one \in Sample(8) }
-        \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.orderQtyQuantityNonZero = one] : one \in Sample(4) }
+        \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.orderQty = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Order Cancel Request Message: 24 bytes                                  *)
@@ -557,22 +557,22 @@ CheckedOrderCancelRequestMessage ==
         \cup { [ZeroOrderCancelRequestMessage EXCEPT !.origClOrdId = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* New Bulk Quote Message quote Updates Group: 15 bytes                    *)
+(* New Bulk Quote Message Quote Updates Group: 15 bytes                    *)
 (***************************************************************************)
 
 NewBulkQuoteMessageQuoteUpdatesGroup ==
-    [ instrumentId                 : Sample(4),
-      side                         : Sample(1),
-      pricePrice4Optional          : Sample(4),
-      orderQtyQuantityZeroOptional : Sample(4),
-      quoteType                    : Sample(1),
-      reserved                     : Sample(1) ]
+    [ instrumentId        : Sample(4),
+      side                : Sample(1),
+      pricePrice4Optional : Sample(4),
+      orderQtyOptional    : Sample(4),
+      quoteType           : Sample(1),
+      reserved            : Sample(1) ]
 
 EncodeNewBulkQuoteMessageQuoteUpdatesGroup(message) ==
     message.instrumentId
         \o message.side
         \o message.pricePrice4Optional
-        \o message.orderQtyQuantityZeroOptional
+        \o message.orderQtyOptional
         \o message.quoteType
         \o message.reserved
 
@@ -580,42 +580,42 @@ DecodeNewBulkQuoteMessageQuoteUpdatesGroup(bytes) ==
     LET instrumentId == ReadBytes(bytes, 4) IN IF ~instrumentId.ok THEN Fail ELSE
     LET side == ReadBytes(instrumentId.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET pricePrice4Optional == ReadBytes(side.rest, 4) IN IF ~pricePrice4Optional.ok THEN Fail ELSE
-    LET orderQtyQuantityZeroOptional == ReadBytes(pricePrice4Optional.rest, 4) IN IF ~orderQtyQuantityZeroOptional.ok THEN Fail ELSE
-    LET quoteType == ReadBytes(orderQtyQuantityZeroOptional.rest, 1) IN IF ~quoteType.ok THEN Fail ELSE
+    LET orderQtyOptional == ReadBytes(pricePrice4Optional.rest, 4) IN IF ~orderQtyOptional.ok THEN Fail ELSE
+    LET quoteType == ReadBytes(orderQtyOptional.rest, 1) IN IF ~quoteType.ok THEN Fail ELSE
     LET reserved == ReadBytes(quoteType.rest, 1) IN IF ~reserved.ok THEN Fail ELSE
-    Ok([ instrumentId                 |-> instrumentId.value,
-         side                         |-> side.value,
-         pricePrice4Optional          |-> pricePrice4Optional.value,
-         orderQtyQuantityZeroOptional |-> orderQtyQuantityZeroOptional.value,
-         quoteType                    |-> quoteType.value,
-         reserved                     |-> reserved.value ], reserved.rest)
+    Ok([ instrumentId        |-> instrumentId.value,
+         side                |-> side.value,
+         pricePrice4Optional |-> pricePrice4Optional.value,
+         orderQtyOptional    |-> orderQtyOptional.value,
+         quoteType           |-> quoteType.value,
+         reserved            |-> reserved.value ], reserved.rest)
 
 ZeroNewBulkQuoteMessageQuoteUpdatesGroup ==
-    [ instrumentId                 |-> [i \in 1 .. 4 |-> 0],
-      side                         |-> [i \in 1 .. 1 |-> 0],
-      pricePrice4Optional          |-> [i \in 1 .. 4 |-> 0],
-      orderQtyQuantityZeroOptional |-> [i \in 1 .. 4 |-> 0],
-      quoteType                    |-> [i \in 1 .. 1 |-> 0],
-      reserved                     |-> [i \in 1 .. 1 |-> 0] ]
+    [ instrumentId        |-> [i \in 1 .. 4 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      pricePrice4Optional |-> [i \in 1 .. 4 |-> 0],
+      orderQtyOptional    |-> [i \in 1 .. 4 |-> 0],
+      quoteType           |-> [i \in 1 .. 1 |-> 0],
+      reserved            |-> [i \in 1 .. 1 |-> 0] ]
 
-(* New Bulk Quote Message quote Updates Group at zero, then each field in turn at the values it is checked at *)
+(* New Bulk Quote Message Quote Updates Group at zero, then each field in turn at the values it is checked at *)
 CheckedNewBulkQuoteMessageQuoteUpdatesGroup ==
     { ZeroNewBulkQuoteMessageQuoteUpdatesGroup }
         \cup { [ZeroNewBulkQuoteMessageQuoteUpdatesGroup EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroNewBulkQuoteMessageQuoteUpdatesGroup EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroNewBulkQuoteMessageQuoteUpdatesGroup EXCEPT !.pricePrice4Optional = one] : one \in Sample(4) }
-        \cup { [ZeroNewBulkQuoteMessageQuoteUpdatesGroup EXCEPT !.orderQtyQuantityZeroOptional = one] : one \in Sample(4) }
+        \cup { [ZeroNewBulkQuoteMessageQuoteUpdatesGroup EXCEPT !.orderQtyOptional = one] : one \in Sample(4) }
         \cup { [ZeroNewBulkQuoteMessageQuoteUpdatesGroup EXCEPT !.quoteType = one] : one \in Sample(1) }
         \cup { [ZeroNewBulkQuoteMessageQuoteUpdatesGroup EXCEPT !.reserved = one] : one \in Sample(1) }
 
-(* A run of New Bulk Quote Message quote Updates Group, written one after another *)
+(* A run of New Bulk Quote Message Quote Updates Group, written one after another *)
 RECURSIVE EncodeNewBulkQuoteMessageQuoteUpdatesGroupList(_)
 EncodeNewBulkQuoteMessageQuoteUpdatesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeNewBulkQuoteMessageQuoteUpdatesGroup(Head(messages)) \o EncodeNewBulkQuoteMessageQuoteUpdatesGroupList(Tail(messages))
 
-(* As many New Bulk Quote Message quote Updates Group as the field that counts them says *)
+(* As many New Bulk Quote Message Quote Updates Group as the field that counts them says *)
 RECURSIVE ReadNewBulkQuoteMessageQuoteUpdatesGroupList(_, _)
 ReadNewBulkQuoteMessageQuoteUpdatesGroupList(bytes, count) ==
     IF count = 0
@@ -626,11 +626,11 @@ ReadNewBulkQuoteMessageQuoteUpdatesGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One New Bulk Quote Message quote Updates Group of each kind, for the lists that carry them *)
+(* One New Bulk Quote Message Quote Updates Group of each kind, for the lists that carry them *)
 OneNewBulkQuoteMessageQuoteUpdatesGroup == { ZeroNewBulkQuoteMessageQuoteUpdatesGroup }
 
 (***************************************************************************)
-(* New Bulk Quote Message quote Updates Groups                             *)
+(* New Bulk Quote Message Quote Updates Groups                             *)
 (***************************************************************************)
 
 NewBulkQuoteMessageQuoteUpdatesGroups ==
@@ -653,7 +653,7 @@ ZeroNewBulkQuoteMessageQuoteUpdatesGroups ==
     [ blockLengthShort                     |-> [i \in 1 .. 1 |-> 0],
       newBulkQuoteMessageQuoteUpdatesGroup |-> << >> ]
 
-(* New Bulk Quote Message quote Updates Groups at zero, then each field in turn at the values it is checked at *)
+(* New Bulk Quote Message Quote Updates Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNewBulkQuoteMessageQuoteUpdatesGroups ==
     { ZeroNewBulkQuoteMessageQuoteUpdatesGroups }
         \cup { [ZeroNewBulkQuoteMessageQuoteUpdatesGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
@@ -788,7 +788,7 @@ CheckedMassCancelRequestMessage ==
         \cup { [ZeroMassCancelRequestMessage EXCEPT !.bulkAction = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Purge Request Message custom Group Ids Group: 2 bytes                   *)
+(* Purge Request Message Custom Group Ids Group: 2 bytes                   *)
 (***************************************************************************)
 
 PurgeRequestMessageCustomGroupIdsGroup ==
@@ -804,19 +804,19 @@ DecodePurgeRequestMessageCustomGroupIdsGroup(bytes) ==
 ZeroPurgeRequestMessageCustomGroupIdsGroup ==
     [ customGroupId |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Purge Request Message custom Group Ids Group at zero, then each field in turn at the values it is checked at *)
+(* Purge Request Message Custom Group Ids Group at zero, then each field in turn at the values it is checked at *)
 CheckedPurgeRequestMessageCustomGroupIdsGroup ==
     { ZeroPurgeRequestMessageCustomGroupIdsGroup }
         \cup { [ZeroPurgeRequestMessageCustomGroupIdsGroup EXCEPT !.customGroupId = one] : one \in Sample(2) }
 
-(* A run of Purge Request Message custom Group Ids Group, written one after another *)
+(* A run of Purge Request Message Custom Group Ids Group, written one after another *)
 RECURSIVE EncodePurgeRequestMessageCustomGroupIdsGroupList(_)
 EncodePurgeRequestMessageCustomGroupIdsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodePurgeRequestMessageCustomGroupIdsGroup(Head(messages)) \o EncodePurgeRequestMessageCustomGroupIdsGroupList(Tail(messages))
 
-(* As many Purge Request Message custom Group Ids Group as the field that counts them says *)
+(* As many Purge Request Message Custom Group Ids Group as the field that counts them says *)
 RECURSIVE ReadPurgeRequestMessageCustomGroupIdsGroupList(_, _)
 ReadPurgeRequestMessageCustomGroupIdsGroupList(bytes, count) ==
     IF count = 0
@@ -827,11 +827,11 @@ ReadPurgeRequestMessageCustomGroupIdsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Purge Request Message custom Group Ids Group of each kind, for the lists that carry them *)
+(* One Purge Request Message Custom Group Ids Group of each kind, for the lists that carry them *)
 OnePurgeRequestMessageCustomGroupIdsGroup == { ZeroPurgeRequestMessageCustomGroupIdsGroup }
 
 (***************************************************************************)
-(* Purge Request Message custom Group Ids Groups                           *)
+(* Purge Request Message Custom Group Ids Groups                           *)
 (***************************************************************************)
 
 PurgeRequestMessageCustomGroupIdsGroups ==
@@ -854,7 +854,7 @@ ZeroPurgeRequestMessageCustomGroupIdsGroups ==
     [ blockLengthShort                       |-> [i \in 1 .. 1 |-> 0],
       purgeRequestMessageCustomGroupIdsGroup |-> << >> ]
 
-(* Purge Request Message custom Group Ids Groups at zero, then each field in turn at the values it is checked at *)
+(* Purge Request Message Custom Group Ids Groups at zero, then each field in turn at the values it is checked at *)
 CheckedPurgeRequestMessageCustomGroupIdsGroups ==
     { ZeroPurgeRequestMessageCustomGroupIdsGroups }
         \cup { [ZeroPurgeRequestMessageCustomGroupIdsGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
@@ -1318,7 +1318,7 @@ RoundTripOrderCancelRequestMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Bulk Quote Message quote Updates Group decodes back to what was encoded, and leaves nothing over *)
+(* Every New Bulk Quote Message Quote Updates Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripNewBulkQuoteMessageQuoteUpdatesGroup ==
     \A message \in CheckedNewBulkQuoteMessageQuoteUpdatesGroup :
         LET read == DecodeNewBulkQuoteMessageQuoteUpdatesGroup(EncodeNewBulkQuoteMessageQuoteUpdatesGroup(message))
@@ -1326,7 +1326,7 @@ RoundTripNewBulkQuoteMessageQuoteUpdatesGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Bulk Quote Message quote Updates Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every New Bulk Quote Message Quote Updates Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripNewBulkQuoteMessageQuoteUpdatesGroups ==
     \A message \in CheckedNewBulkQuoteMessageQuoteUpdatesGroups :
         LET read == DecodeNewBulkQuoteMessageQuoteUpdatesGroups(EncodeNewBulkQuoteMessageQuoteUpdatesGroups(message))
@@ -1350,7 +1350,7 @@ RoundTripMassCancelRequestMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Purge Request Message custom Group Ids Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Purge Request Message Custom Group Ids Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripPurgeRequestMessageCustomGroupIdsGroup ==
     \A message \in CheckedPurgeRequestMessageCustomGroupIdsGroup :
         LET read == DecodePurgeRequestMessageCustomGroupIdsGroup(EncodePurgeRequestMessageCustomGroupIdsGroup(message))
@@ -1358,7 +1358,7 @@ RoundTripPurgeRequestMessageCustomGroupIdsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Purge Request Message custom Group Ids Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Purge Request Message Custom Group Ids Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripPurgeRequestMessageCustomGroupIdsGroups ==
     \A message \in CheckedPurgeRequestMessageCustomGroupIdsGroups :
         LET read == DecodePurgeRequestMessageCustomGroupIdsGroups(EncodePurgeRequestMessageCustomGroupIdsGroups(message))

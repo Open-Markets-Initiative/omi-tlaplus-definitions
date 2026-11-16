@@ -107,57 +107,57 @@ SampleLists(entries) ==
 (***************************************************************************)
 
 NewOrderResponseMessage ==
-    [ matchingEngine       : Sample(8),
-      mpId                 : Sample(5),
-      clientOrderId        : Sample(20),
-      instrumentIdBinaryU4 : Sample(4),
-      orderId              : Sample(8),
-      status               : Sample(1),
-      reserved10           : Sample(10) ]
+    [ matchingEngineTime : Sample(8),
+      mpId               : Sample(5),
+      clientOrderId      : Sample(20),
+      instrumentId       : Sample(4),
+      orderId            : Sample(8),
+      orderStatus        : Sample(1),
+      reserved10         : Sample(10) ]
 
 EncodeNewOrderResponseMessage(message) ==
-    message.matchingEngine
+    message.matchingEngineTime
         \o message.mpId
         \o message.clientOrderId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.orderId
-        \o message.status
+        \o message.orderStatus
         \o message.reserved10
 
 DecodeNewOrderResponseMessage(bytes) ==
-    LET matchingEngine == ReadBytes(bytes, 8) IN IF ~matchingEngine.ok THEN Fail ELSE
-    LET mpId == ReadBytes(matchingEngine.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
+    LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
+    LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET orderId == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET status == ReadBytes(orderId.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET reserved10 == ReadBytes(status.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
-    Ok([ matchingEngine       |-> matchingEngine.value,
-         mpId                 |-> mpId.value,
-         clientOrderId        |-> clientOrderId.value,
-         instrumentIdBinaryU4 |-> instrumentIdBinaryU4.value,
-         orderId              |-> orderId.value,
-         status               |-> status.value,
-         reserved10           |-> reserved10.value ], reserved10.rest)
+    LET instrumentId == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET orderId == ReadBytes(instrumentId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET orderStatus == ReadBytes(orderId.rest, 1) IN IF ~orderStatus.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(orderStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    Ok([ matchingEngineTime |-> matchingEngineTime.value,
+         mpId               |-> mpId.value,
+         clientOrderId      |-> clientOrderId.value,
+         instrumentId       |-> instrumentId.value,
+         orderId            |-> orderId.value,
+         orderStatus        |-> orderStatus.value,
+         reserved10         |-> reserved10.value ], reserved10.rest)
 
 ZeroNewOrderResponseMessage ==
-    [ matchingEngine       |-> [i \in 1 .. 8 |-> 0],
-      mpId                 |-> [i \in 1 .. 5 |-> 0],
-      clientOrderId        |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      orderId              |-> [i \in 1 .. 8 |-> 0],
-      status               |-> [i \in 1 .. 1 |-> 0],
-      reserved10           |-> [i \in 1 .. 10 |-> 0] ]
+    [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
+      mpId               |-> [i \in 1 .. 5 |-> 0],
+      clientOrderId      |-> [i \in 1 .. 20 |-> 0],
+      instrumentId       |-> [i \in 1 .. 4 |-> 0],
+      orderId            |-> [i \in 1 .. 8 |-> 0],
+      orderStatus        |-> [i \in 1 .. 1 |-> 0],
+      reserved10         |-> [i \in 1 .. 10 |-> 0] ]
 
 (* New Order Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderResponseMessage ==
     { ZeroNewOrderResponseMessage }
-        \cup { [ZeroNewOrderResponseMessage EXCEPT !.matchingEngine = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderResponseMessage EXCEPT !.matchingEngineTime = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderResponseMessage EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroNewOrderResponseMessage EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroNewOrderResponseMessage EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderResponseMessage EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderResponseMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderResponseMessage EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderResponseMessage EXCEPT !.orderStatus = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderResponseMessage EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
@@ -169,10 +169,10 @@ ModifyOrderResponse ==
       mpId                  : Sample(5),
       clientOrderId         : Sample(20),
       originalClientOrderId : Sample(20),
-      instrumentIdBinaryU4  : Sample(4),
+      instrumentId          : Sample(4),
       orderId               : Sample(8),
       leavesQty             : Sample(4),
-      status                : Sample(1),
+      modifyStatus          : Sample(1),
       reserved10            : Sample(10) ]
 
 EncodeModifyOrderResponse(message) ==
@@ -180,10 +180,10 @@ EncodeModifyOrderResponse(message) ==
         \o message.mpId
         \o message.clientOrderId
         \o message.originalClientOrderId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.orderId
         \o message.leavesQty
-        \o message.status
+        \o message.modifyStatus
         \o message.reserved10
 
 DecodeModifyOrderResponse(bytes) ==
@@ -191,19 +191,19 @@ DecodeModifyOrderResponse(bytes) ==
     LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
     LET originalClientOrderId == ReadBytes(clientOrderId.rest, 20) IN IF ~originalClientOrderId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET orderId == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET orderId == ReadBytes(instrumentId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(orderId.rest, 4) IN IF ~leavesQty.ok THEN Fail ELSE
-    LET status == ReadBytes(leavesQty.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET reserved10 == ReadBytes(status.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    LET modifyStatus == ReadBytes(leavesQty.rest, 1) IN IF ~modifyStatus.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(modifyStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
     Ok([ matchingEngineTime    |-> matchingEngineTime.value,
          mpId                  |-> mpId.value,
          clientOrderId         |-> clientOrderId.value,
          originalClientOrderId |-> originalClientOrderId.value,
-         instrumentIdBinaryU4  |-> instrumentIdBinaryU4.value,
+         instrumentId          |-> instrumentId.value,
          orderId               |-> orderId.value,
          leavesQty             |-> leavesQty.value,
-         status                |-> status.value,
+         modifyStatus          |-> modifyStatus.value,
          reserved10            |-> reserved10.value ], reserved10.rest)
 
 ZeroModifyOrderResponse ==
@@ -211,10 +211,10 @@ ZeroModifyOrderResponse ==
       mpId                  |-> [i \in 1 .. 5 |-> 0],
       clientOrderId         |-> [i \in 1 .. 20 |-> 0],
       originalClientOrderId |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4  |-> [i \in 1 .. 4 |-> 0],
+      instrumentId          |-> [i \in 1 .. 4 |-> 0],
       orderId               |-> [i \in 1 .. 8 |-> 0],
       leavesQty             |-> [i \in 1 .. 4 |-> 0],
-      status                |-> [i \in 1 .. 1 |-> 0],
+      modifyStatus          |-> [i \in 1 .. 1 |-> 0],
       reserved10            |-> [i \in 1 .. 10 |-> 0] ]
 
 (* Modify Order Response at zero, then each field in turn at the values it is checked at *)
@@ -224,58 +224,63 @@ CheckedModifyOrderResponse ==
         \cup { [ZeroModifyOrderResponse EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroModifyOrderResponse EXCEPT !.clientOrderId = one] : one \in Sample(20) }
         \cup { [ZeroModifyOrderResponse EXCEPT !.originalClientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroModifyOrderResponse EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroModifyOrderResponse EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroModifyOrderResponse EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroModifyOrderResponse EXCEPT !.leavesQty = one] : one \in Sample(4) }
-        \cup { [ZeroModifyOrderResponse EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroModifyOrderResponse EXCEPT !.modifyStatus = one] : one \in Sample(1) }
         \cup { [ZeroModifyOrderResponse EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
-(* Cancel Order Response: 66 bytes                                         *)
+(* Cancel Order Response: 76 bytes                                         *)
 (***************************************************************************)
 
 CancelOrderResponse ==
-    [ matchingEngineTime   : Sample(8),
-      mpId                 : Sample(5),
-      clientOrderId        : Sample(20),
-      originalClientOrder  : Sample(20),
-      instrumentIdBinaryU4 : Sample(4),
-      orderId              : Sample(8),
-      status               : Sample(1) ]
+    [ matchingEngineTime    : Sample(8),
+      mpId                  : Sample(5),
+      clientOrderId         : Sample(20),
+      originalClientOrderId : Sample(20),
+      instrumentId          : Sample(4),
+      orderId               : Sample(8),
+      cancelStatus          : Sample(1),
+      reserved10            : Sample(10) ]
 
 EncodeCancelOrderResponse(message) ==
     message.matchingEngineTime
         \o message.mpId
         \o message.clientOrderId
-        \o message.originalClientOrder
-        \o message.instrumentIdBinaryU4
+        \o message.originalClientOrderId
+        \o message.instrumentId
         \o message.orderId
-        \o message.status
+        \o message.cancelStatus
+        \o message.reserved10
 
 DecodeCancelOrderResponse(bytes) ==
     LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
     LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET originalClientOrder == ReadBytes(clientOrderId.rest, 20) IN IF ~originalClientOrder.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(originalClientOrder.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET orderId == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET status == ReadBytes(orderId.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    Ok([ matchingEngineTime   |-> matchingEngineTime.value,
-         mpId                 |-> mpId.value,
-         clientOrderId        |-> clientOrderId.value,
-         originalClientOrder  |-> originalClientOrder.value,
-         instrumentIdBinaryU4 |-> instrumentIdBinaryU4.value,
-         orderId              |-> orderId.value,
-         status               |-> status.value ], status.rest)
+    LET originalClientOrderId == ReadBytes(clientOrderId.rest, 20) IN IF ~originalClientOrderId.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET orderId == ReadBytes(instrumentId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET cancelStatus == ReadBytes(orderId.rest, 1) IN IF ~cancelStatus.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(cancelStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    Ok([ matchingEngineTime    |-> matchingEngineTime.value,
+         mpId                  |-> mpId.value,
+         clientOrderId         |-> clientOrderId.value,
+         originalClientOrderId |-> originalClientOrderId.value,
+         instrumentId          |-> instrumentId.value,
+         orderId               |-> orderId.value,
+         cancelStatus          |-> cancelStatus.value,
+         reserved10            |-> reserved10.value ], reserved10.rest)
 
 ZeroCancelOrderResponse ==
-    [ matchingEngineTime   |-> [i \in 1 .. 8 |-> 0],
-      mpId                 |-> [i \in 1 .. 5 |-> 0],
-      clientOrderId        |-> [i \in 1 .. 20 |-> 0],
-      originalClientOrder  |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      orderId              |-> [i \in 1 .. 8 |-> 0],
-      status               |-> [i \in 1 .. 1 |-> 0] ]
+    [ matchingEngineTime    |-> [i \in 1 .. 8 |-> 0],
+      mpId                  |-> [i \in 1 .. 5 |-> 0],
+      clientOrderId         |-> [i \in 1 .. 20 |-> 0],
+      originalClientOrderId |-> [i \in 1 .. 20 |-> 0],
+      instrumentId          |-> [i \in 1 .. 4 |-> 0],
+      orderId               |-> [i \in 1 .. 8 |-> 0],
+      cancelStatus          |-> [i \in 1 .. 1 |-> 0],
+      reserved10            |-> [i \in 1 .. 10 |-> 0] ]
 
 (* Cancel Order Response at zero, then each field in turn at the values it is checked at *)
 CheckedCancelOrderResponse ==
@@ -283,10 +288,11 @@ CheckedCancelOrderResponse ==
         \cup { [ZeroCancelOrderResponse EXCEPT !.matchingEngineTime = one] : one \in Sample(8) }
         \cup { [ZeroCancelOrderResponse EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroCancelOrderResponse EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroCancelOrderResponse EXCEPT !.originalClientOrder = one] : one \in Sample(20) }
-        \cup { [ZeroCancelOrderResponse EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroCancelOrderResponse EXCEPT !.originalClientOrderId = one] : one \in Sample(20) }
+        \cup { [ZeroCancelOrderResponse EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroCancelOrderResponse EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroCancelOrderResponse EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroCancelOrderResponse EXCEPT !.cancelStatus = one] : one \in Sample(1) }
+        \cup { [ZeroCancelOrderResponse EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
 (* Mass Cancel Response: 44 bytes                                          *)
@@ -296,33 +302,33 @@ MassCancelResponse ==
     [ matchingEngineTime : Sample(8),
       mpId               : Sample(5),
       clientOrderId      : Sample(20),
-      status             : Sample(1),
+      massCancelStatus   : Sample(1),
       reserved10         : Sample(10) ]
 
 EncodeMassCancelResponse(message) ==
     message.matchingEngineTime
         \o message.mpId
         \o message.clientOrderId
-        \o message.status
+        \o message.massCancelStatus
         \o message.reserved10
 
 DecodeMassCancelResponse(bytes) ==
     LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
     LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET status == ReadBytes(clientOrderId.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET reserved10 == ReadBytes(status.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    LET massCancelStatus == ReadBytes(clientOrderId.rest, 1) IN IF ~massCancelStatus.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(massCancelStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
     Ok([ matchingEngineTime |-> matchingEngineTime.value,
          mpId               |-> mpId.value,
          clientOrderId      |-> clientOrderId.value,
-         status             |-> status.value,
+         massCancelStatus   |-> massCancelStatus.value,
          reserved10         |-> reserved10.value ], reserved10.rest)
 
 ZeroMassCancelResponse ==
     [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
       mpId               |-> [i \in 1 .. 5 |-> 0],
       clientOrderId      |-> [i \in 1 .. 20 |-> 0],
-      status             |-> [i \in 1 .. 1 |-> 0],
+      massCancelStatus   |-> [i \in 1 .. 1 |-> 0],
       reserved10         |-> [i \in 1 .. 10 |-> 0] ]
 
 (* Mass Cancel Response at zero, then each field in turn at the values it is checked at *)
@@ -331,50 +337,50 @@ CheckedMassCancelResponse ==
         \cup { [ZeroMassCancelResponse EXCEPT !.matchingEngineTime = one] : one \in Sample(8) }
         \cup { [ZeroMassCancelResponse EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroMassCancelResponse EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroMassCancelResponse EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroMassCancelResponse EXCEPT !.massCancelStatus = one] : one \in Sample(1) }
         \cup { [ZeroMassCancelResponse EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
-(* Strategy Creation Response Message: 70 bytes                            *)
+(* Strategy Creation Response Message: 54 bytes                            *)
 (***************************************************************************)
 
 StrategyCreationResponseMessage ==
-    [ matchingEngineTime   : Sample(8),
-      mpId                 : Sample(5),
-      clientOrderId        : Sample(20),
-      instrumentIdString20 : Sample(20),
-      status               : Sample(1),
-      reserved16           : Sample(16) ]
+    [ matchingEngineTime     : Sample(8),
+      mpId                   : Sample(5),
+      clientOrderId          : Sample(20),
+      instrumentId           : Sample(4),
+      strategyCreationStatus : Sample(1),
+      reserved16             : Sample(16) ]
 
 EncodeStrategyCreationResponseMessage(message) ==
     message.matchingEngineTime
         \o message.mpId
         \o message.clientOrderId
-        \o message.instrumentIdString20
-        \o message.status
+        \o message.instrumentId
+        \o message.strategyCreationStatus
         \o message.reserved16
 
 DecodeStrategyCreationResponseMessage(bytes) ==
     LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
     LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET instrumentIdString20 == ReadBytes(clientOrderId.rest, 20) IN IF ~instrumentIdString20.ok THEN Fail ELSE
-    LET status == ReadBytes(instrumentIdString20.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET reserved16 == ReadBytes(status.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    Ok([ matchingEngineTime   |-> matchingEngineTime.value,
-         mpId                 |-> mpId.value,
-         clientOrderId        |-> clientOrderId.value,
-         instrumentIdString20 |-> instrumentIdString20.value,
-         status               |-> status.value,
-         reserved16           |-> reserved16.value ], reserved16.rest)
+    LET instrumentId == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET strategyCreationStatus == ReadBytes(instrumentId.rest, 1) IN IF ~strategyCreationStatus.ok THEN Fail ELSE
+    LET reserved16 == ReadBytes(strategyCreationStatus.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
+    Ok([ matchingEngineTime     |-> matchingEngineTime.value,
+         mpId                   |-> mpId.value,
+         clientOrderId          |-> clientOrderId.value,
+         instrumentId           |-> instrumentId.value,
+         strategyCreationStatus |-> strategyCreationStatus.value,
+         reserved16             |-> reserved16.value ], reserved16.rest)
 
 ZeroStrategyCreationResponseMessage ==
-    [ matchingEngineTime   |-> [i \in 1 .. 8 |-> 0],
-      mpId                 |-> [i \in 1 .. 5 |-> 0],
-      clientOrderId        |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdString20 |-> [i \in 1 .. 20 |-> 0],
-      status               |-> [i \in 1 .. 1 |-> 0],
-      reserved16           |-> [i \in 1 .. 16 |-> 0] ]
+    [ matchingEngineTime     |-> [i \in 1 .. 8 |-> 0],
+      mpId                   |-> [i \in 1 .. 5 |-> 0],
+      clientOrderId          |-> [i \in 1 .. 20 |-> 0],
+      instrumentId           |-> [i \in 1 .. 4 |-> 0],
+      strategyCreationStatus |-> [i \in 1 .. 1 |-> 0],
+      reserved16             |-> [i \in 1 .. 16 |-> 0] ]
 
 (* Strategy Creation Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedStrategyCreationResponseMessage ==
@@ -382,8 +388,8 @@ CheckedStrategyCreationResponseMessage ==
         \cup { [ZeroStrategyCreationResponseMessage EXCEPT !.matchingEngineTime = one] : one \in Sample(8) }
         \cup { [ZeroStrategyCreationResponseMessage EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroStrategyCreationResponseMessage EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroStrategyCreationResponseMessage EXCEPT !.instrumentIdString20 = one] : one \in Sample(20) }
-        \cup { [ZeroStrategyCreationResponseMessage EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroStrategyCreationResponseMessage EXCEPT !.instrumentId = one] : one \in Sample(4) }
+        \cup { [ZeroStrategyCreationResponseMessage EXCEPT !.strategyCreationStatus = one] : one \in Sample(1) }
         \cup { [ZeroStrategyCreationResponseMessage EXCEPT !.reserved16 = one] : one \in Sample(16) }
 
 (***************************************************************************)
@@ -445,7 +451,7 @@ NewOrderNotification ==
       operatorLocation                 : Sample(6),
       account                          : Sample(16),
       clientOrderId                    : Sample(20),
-      instrumentIdBinaryU4             : Sample(4),
+      instrumentId                     : Sample(4),
       price                            : Sample(8),
       stopOrderTriggerPrice            : Sample(8),
       sizeBinaryU4                     : Sample(4),
@@ -473,7 +479,7 @@ EncodeNewOrderNotification(message) ==
         \o message.operatorLocation
         \o message.account
         \o message.clientOrderId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.price
         \o message.stopOrderTriggerPrice
         \o message.sizeBinaryU4
@@ -501,8 +507,8 @@ DecodeNewOrderNotification(bytes) ==
     LET operatorLocation == ReadBytes(operatorId.rest, 6) IN IF ~operatorLocation.ok THEN Fail ELSE
     LET account == ReadBytes(operatorLocation.rest, 16) IN IF ~account.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(account.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET price == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET price == ReadBytes(instrumentId.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET stopOrderTriggerPrice == ReadBytes(price.rest, 8) IN IF ~stopOrderTriggerPrice.ok THEN Fail ELSE
     LET sizeBinaryU4 == ReadBytes(stopOrderTriggerPrice.rest, 4) IN IF ~sizeBinaryU4.ok THEN Fail ELSE
     LET orderInstructions == ReadBytes(sizeBinaryU4.rest, 2) IN IF ~orderInstructions.ok THEN Fail ELSE
@@ -527,7 +533,7 @@ DecodeNewOrderNotification(bytes) ==
          operatorLocation                 |-> operatorLocation.value,
          account                          |-> account.value,
          clientOrderId                    |-> clientOrderId.value,
-         instrumentIdBinaryU4             |-> instrumentIdBinaryU4.value,
+         instrumentId                     |-> instrumentId.value,
          price                            |-> price.value,
          stopOrderTriggerPrice            |-> stopOrderTriggerPrice.value,
          sizeBinaryU4                     |-> sizeBinaryU4.value,
@@ -555,7 +561,7 @@ ZeroNewOrderNotification ==
       operatorLocation                 |-> [i \in 1 .. 6 |-> 0],
       account                          |-> [i \in 1 .. 16 |-> 0],
       clientOrderId                    |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4             |-> [i \in 1 .. 4 |-> 0],
+      instrumentId                     |-> [i \in 1 .. 4 |-> 0],
       price                            |-> [i \in 1 .. 8 |-> 0],
       stopOrderTriggerPrice            |-> [i \in 1 .. 8 |-> 0],
       sizeBinaryU4                     |-> [i \in 1 .. 4 |-> 0],
@@ -585,7 +591,7 @@ CheckedNewOrderNotification ==
         \cup { [ZeroNewOrderNotification EXCEPT !.operatorLocation = one] : one \in Sample(6) }
         \cup { [ZeroNewOrderNotification EXCEPT !.account = one] : one \in Sample(16) }
         \cup { [ZeroNewOrderNotification EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroNewOrderNotification EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderNotification EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderNotification EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderNotification EXCEPT !.stopOrderTriggerPrice = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderNotification EXCEPT !.sizeBinaryU4 = one] : one \in Sample(4) }
@@ -618,7 +624,7 @@ ModifyOrderNotification ==
       operatorLocation                 : Sample(6),
       clientOrderId                    : Sample(20),
       originalClientOrderId            : Sample(20),
-      instrumentIdBinaryU4             : Sample(4),
+      instrumentId                     : Sample(4),
       price                            : Sample(8),
       stopOrderTriggerPrice            : Sample(8),
       sizeBinaryS4                     : Sample(4),
@@ -639,7 +645,7 @@ EncodeModifyOrderNotification(message) ==
         \o message.operatorLocation
         \o message.clientOrderId
         \o message.originalClientOrderId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.price
         \o message.stopOrderTriggerPrice
         \o message.sizeBinaryS4
@@ -660,8 +666,8 @@ DecodeModifyOrderNotification(bytes) ==
     LET operatorLocation == ReadBytes(operatorId.rest, 6) IN IF ~operatorLocation.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(operatorLocation.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
     LET originalClientOrderId == ReadBytes(clientOrderId.rest, 20) IN IF ~originalClientOrderId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET price == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET price == ReadBytes(instrumentId.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET stopOrderTriggerPrice == ReadBytes(price.rest, 8) IN IF ~stopOrderTriggerPrice.ok THEN Fail ELSE
     LET sizeBinaryS4 == ReadBytes(stopOrderTriggerPrice.rest, 4) IN IF ~sizeBinaryS4.ok THEN Fail ELSE
     LET orderExpiryDate == ReadBytes(sizeBinaryS4.rest, 2) IN IF ~orderExpiryDate.ok THEN Fail ELSE
@@ -679,7 +685,7 @@ DecodeModifyOrderNotification(bytes) ==
          operatorLocation                 |-> operatorLocation.value,
          clientOrderId                    |-> clientOrderId.value,
          originalClientOrderId            |-> originalClientOrderId.value,
-         instrumentIdBinaryU4             |-> instrumentIdBinaryU4.value,
+         instrumentId                     |-> instrumentId.value,
          price                            |-> price.value,
          stopOrderTriggerPrice            |-> stopOrderTriggerPrice.value,
          sizeBinaryS4                     |-> sizeBinaryS4.value,
@@ -700,7 +706,7 @@ ZeroModifyOrderNotification ==
       operatorLocation                 |-> [i \in 1 .. 6 |-> 0],
       clientOrderId                    |-> [i \in 1 .. 20 |-> 0],
       originalClientOrderId            |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4             |-> [i \in 1 .. 4 |-> 0],
+      instrumentId                     |-> [i \in 1 .. 4 |-> 0],
       price                            |-> [i \in 1 .. 8 |-> 0],
       stopOrderTriggerPrice            |-> [i \in 1 .. 8 |-> 0],
       sizeBinaryS4                     |-> [i \in 1 .. 4 |-> 0],
@@ -723,7 +729,7 @@ CheckedModifyOrderNotification ==
         \cup { [ZeroModifyOrderNotification EXCEPT !.operatorLocation = one] : one \in Sample(6) }
         \cup { [ZeroModifyOrderNotification EXCEPT !.clientOrderId = one] : one \in Sample(20) }
         \cup { [ZeroModifyOrderNotification EXCEPT !.originalClientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroModifyOrderNotification EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroModifyOrderNotification EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroModifyOrderNotification EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroModifyOrderNotification EXCEPT !.stopOrderTriggerPrice = one] : one \in Sample(8) }
         \cup { [ZeroModifyOrderNotification EXCEPT !.sizeBinaryS4 = one] : one \in Sample(4) }
@@ -739,19 +745,19 @@ CheckedModifyOrderNotification ==
 (***************************************************************************)
 
 CancelReduceSizeOrderNotification ==
-    [ matchingEngineTime   : Sample(8),
-      mpId                 : Sample(5),
-      operatorId           : Sample(18),
-      operatorLocation     : Sample(6),
-      clientOrderId        : Sample(20),
-      instrumentIdBinaryU4 : Sample(4),
-      orderId              : Sample(8),
-      clientSendTime       : Sample(8),
-      leavesQty            : Sample(4),
-      cancelReason         : Sample(1),
-      lastPrice            : Sample(8),
-      lastSize             : Sample(4),
-      reserved8            : Sample(8) ]
+    [ matchingEngineTime : Sample(8),
+      mpId               : Sample(5),
+      operatorId         : Sample(18),
+      operatorLocation   : Sample(6),
+      clientOrderId      : Sample(20),
+      instrumentId       : Sample(4),
+      orderId            : Sample(8),
+      clientSendTime     : Sample(8),
+      leavesQty          : Sample(4),
+      cancelReason       : Sample(1),
+      lastPrice          : Sample(8),
+      lastSize           : Sample(4),
+      reserved8          : Sample(8) ]
 
 EncodeCancelReduceSizeOrderNotification(message) ==
     message.matchingEngineTime
@@ -759,7 +765,7 @@ EncodeCancelReduceSizeOrderNotification(message) ==
         \o message.operatorId
         \o message.operatorLocation
         \o message.clientOrderId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.orderId
         \o message.clientSendTime
         \o message.leavesQty
@@ -774,42 +780,42 @@ DecodeCancelReduceSizeOrderNotification(bytes) ==
     LET operatorId == ReadBytes(mpId.rest, 18) IN IF ~operatorId.ok THEN Fail ELSE
     LET operatorLocation == ReadBytes(operatorId.rest, 6) IN IF ~operatorLocation.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(operatorLocation.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET orderId == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET orderId == ReadBytes(instrumentId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET clientSendTime == ReadBytes(orderId.rest, 8) IN IF ~clientSendTime.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(clientSendTime.rest, 4) IN IF ~leavesQty.ok THEN Fail ELSE
     LET cancelReason == ReadBytes(leavesQty.rest, 1) IN IF ~cancelReason.ok THEN Fail ELSE
     LET lastPrice == ReadBytes(cancelReason.rest, 8) IN IF ~lastPrice.ok THEN Fail ELSE
     LET lastSize == ReadBytes(lastPrice.rest, 4) IN IF ~lastSize.ok THEN Fail ELSE
     LET reserved8 == ReadBytes(lastSize.rest, 8) IN IF ~reserved8.ok THEN Fail ELSE
-    Ok([ matchingEngineTime   |-> matchingEngineTime.value,
-         mpId                 |-> mpId.value,
-         operatorId           |-> operatorId.value,
-         operatorLocation     |-> operatorLocation.value,
-         clientOrderId        |-> clientOrderId.value,
-         instrumentIdBinaryU4 |-> instrumentIdBinaryU4.value,
-         orderId              |-> orderId.value,
-         clientSendTime       |-> clientSendTime.value,
-         leavesQty            |-> leavesQty.value,
-         cancelReason         |-> cancelReason.value,
-         lastPrice            |-> lastPrice.value,
-         lastSize             |-> lastSize.value,
-         reserved8            |-> reserved8.value ], reserved8.rest)
+    Ok([ matchingEngineTime |-> matchingEngineTime.value,
+         mpId               |-> mpId.value,
+         operatorId         |-> operatorId.value,
+         operatorLocation   |-> operatorLocation.value,
+         clientOrderId      |-> clientOrderId.value,
+         instrumentId       |-> instrumentId.value,
+         orderId            |-> orderId.value,
+         clientSendTime     |-> clientSendTime.value,
+         leavesQty          |-> leavesQty.value,
+         cancelReason       |-> cancelReason.value,
+         lastPrice          |-> lastPrice.value,
+         lastSize           |-> lastSize.value,
+         reserved8          |-> reserved8.value ], reserved8.rest)
 
 ZeroCancelReduceSizeOrderNotification ==
-    [ matchingEngineTime   |-> [i \in 1 .. 8 |-> 0],
-      mpId                 |-> [i \in 1 .. 5 |-> 0],
-      operatorId           |-> [i \in 1 .. 18 |-> 0],
-      operatorLocation     |-> [i \in 1 .. 6 |-> 0],
-      clientOrderId        |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      orderId              |-> [i \in 1 .. 8 |-> 0],
-      clientSendTime       |-> [i \in 1 .. 8 |-> 0],
-      leavesQty            |-> [i \in 1 .. 4 |-> 0],
-      cancelReason         |-> [i \in 1 .. 1 |-> 0],
-      lastPrice            |-> [i \in 1 .. 8 |-> 0],
-      lastSize             |-> [i \in 1 .. 4 |-> 0],
-      reserved8            |-> [i \in 1 .. 8 |-> 0] ]
+    [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
+      mpId               |-> [i \in 1 .. 5 |-> 0],
+      operatorId         |-> [i \in 1 .. 18 |-> 0],
+      operatorLocation   |-> [i \in 1 .. 6 |-> 0],
+      clientOrderId      |-> [i \in 1 .. 20 |-> 0],
+      instrumentId       |-> [i \in 1 .. 4 |-> 0],
+      orderId            |-> [i \in 1 .. 8 |-> 0],
+      clientSendTime     |-> [i \in 1 .. 8 |-> 0],
+      leavesQty          |-> [i \in 1 .. 4 |-> 0],
+      cancelReason       |-> [i \in 1 .. 1 |-> 0],
+      lastPrice          |-> [i \in 1 .. 8 |-> 0],
+      lastSize           |-> [i \in 1 .. 4 |-> 0],
+      reserved8          |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Cancel Reduce Size Order Notification at zero, then each field in turn at the values it is checked at *)
 CheckedCancelReduceSizeOrderNotification ==
@@ -819,7 +825,7 @@ CheckedCancelReduceSizeOrderNotification ==
         \cup { [ZeroCancelReduceSizeOrderNotification EXCEPT !.operatorId = one] : one \in Sample(18) }
         \cup { [ZeroCancelReduceSizeOrderNotification EXCEPT !.operatorLocation = one] : one \in Sample(6) }
         \cup { [ZeroCancelReduceSizeOrderNotification EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroCancelReduceSizeOrderNotification EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroCancelReduceSizeOrderNotification EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroCancelReduceSizeOrderNotification EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroCancelReduceSizeOrderNotification EXCEPT !.clientSendTime = one] : one \in Sample(8) }
         \cup { [ZeroCancelReduceSizeOrderNotification EXCEPT !.leavesQty = one] : one \in Sample(4) }
@@ -833,43 +839,43 @@ CheckedCancelReduceSizeOrderNotification ==
 (***************************************************************************)
 
 OrderStatusUpdateNotification ==
-    [ matchingEngineTime   : Sample(8),
-      instrumentIdBinaryU4 : Sample(4),
-      orderId              : Sample(8),
-      updateStatus         : Sample(1),
-      reserved32           : Sample(32) ]
+    [ matchingEngineTime : Sample(8),
+      instrumentId       : Sample(4),
+      orderId            : Sample(8),
+      updateStatus       : Sample(1),
+      reserved32         : Sample(32) ]
 
 EncodeOrderStatusUpdateNotification(message) ==
     message.matchingEngineTime
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.orderId
         \o message.updateStatus
         \o message.reserved32
 
 DecodeOrderStatusUpdateNotification(bytes) ==
     LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(matchingEngineTime.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET orderId == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(matchingEngineTime.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET orderId == ReadBytes(instrumentId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET updateStatus == ReadBytes(orderId.rest, 1) IN IF ~updateStatus.ok THEN Fail ELSE
     LET reserved32 == ReadBytes(updateStatus.rest, 32) IN IF ~reserved32.ok THEN Fail ELSE
-    Ok([ matchingEngineTime   |-> matchingEngineTime.value,
-         instrumentIdBinaryU4 |-> instrumentIdBinaryU4.value,
-         orderId              |-> orderId.value,
-         updateStatus         |-> updateStatus.value,
-         reserved32           |-> reserved32.value ], reserved32.rest)
+    Ok([ matchingEngineTime |-> matchingEngineTime.value,
+         instrumentId       |-> instrumentId.value,
+         orderId            |-> orderId.value,
+         updateStatus       |-> updateStatus.value,
+         reserved32         |-> reserved32.value ], reserved32.rest)
 
 ZeroOrderStatusUpdateNotification ==
-    [ matchingEngineTime   |-> [i \in 1 .. 8 |-> 0],
-      instrumentIdBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      orderId              |-> [i \in 1 .. 8 |-> 0],
-      updateStatus         |-> [i \in 1 .. 1 |-> 0],
-      reserved32           |-> [i \in 1 .. 32 |-> 0] ]
+    [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
+      instrumentId       |-> [i \in 1 .. 4 |-> 0],
+      orderId            |-> [i \in 1 .. 8 |-> 0],
+      updateStatus       |-> [i \in 1 .. 1 |-> 0],
+      reserved32         |-> [i \in 1 .. 32 |-> 0] ]
 
 (* Order Status Update Notification at zero, then each field in turn at the values it is checked at *)
 CheckedOrderStatusUpdateNotification ==
     { ZeroOrderStatusUpdateNotification }
         \cup { [ZeroOrderStatusUpdateNotification EXCEPT !.matchingEngineTime = one] : one \in Sample(8) }
-        \cup { [ZeroOrderStatusUpdateNotification EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroOrderStatusUpdateNotification EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroOrderStatusUpdateNotification EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroOrderStatusUpdateNotification EXCEPT !.updateStatus = one] : one \in Sample(1) }
         \cup { [ZeroOrderStatusUpdateNotification EXCEPT !.reserved32 = one] : one \in Sample(32) }
@@ -879,32 +885,32 @@ CheckedOrderStatusUpdateNotification ==
 (***************************************************************************)
 
 SimpleExecutionNotification ==
-    [ matchingEngineTime   : Sample(8),
-      mpId                 : Sample(5),
-      operatorId           : Sample(18),
-      operatorLocation     : Sample(6),
-      instrumentIdBinaryU4 : Sample(4),
-      clientOrderId        : Sample(20),
-      simpleTradeId        : Sample(8),
-      complexTradeId       : Sample(8),
-      executionId          : Sample(8),
-      tradeDate            : Sample(2),
-      correctionNumber     : Sample(1),
-      tradeStatus          : Sample(1),
-      lastPrice            : Sample(8),
-      lastSize             : Sample(4),
-      orderInstructions    : Sample(2),
-      ctiCode              : Sample(1),
-      textMemo             : Sample(20),
-      liquidityIndicator   : Sample(3),
-      reserved32           : Sample(32) ]
+    [ matchingEngineTime : Sample(8),
+      mpId               : Sample(5),
+      operatorId         : Sample(18),
+      operatorLocation   : Sample(6),
+      instrumentId       : Sample(4),
+      clientOrderId      : Sample(20),
+      simpleTradeId      : Sample(8),
+      complexTradeId     : Sample(8),
+      executionId        : Sample(8),
+      tradeDate          : Sample(2),
+      correctionNumber   : Sample(1),
+      tradeStatus        : Sample(1),
+      lastPrice          : Sample(8),
+      lastSize           : Sample(4),
+      orderInstructions  : Sample(2),
+      ctiCode            : Sample(1),
+      textMemo           : Sample(20),
+      liquidityIndicator : Sample(3),
+      reserved32         : Sample(32) ]
 
 EncodeSimpleExecutionNotification(message) ==
     message.matchingEngineTime
         \o message.mpId
         \o message.operatorId
         \o message.operatorLocation
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.clientOrderId
         \o message.simpleTradeId
         \o message.complexTradeId
@@ -925,8 +931,8 @@ DecodeSimpleExecutionNotification(bytes) ==
     LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET operatorId == ReadBytes(mpId.rest, 18) IN IF ~operatorId.ok THEN Fail ELSE
     LET operatorLocation == ReadBytes(operatorId.rest, 6) IN IF ~operatorLocation.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(operatorLocation.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET clientOrderId == ReadBytes(instrumentIdBinaryU4.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(operatorLocation.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET clientOrderId == ReadBytes(instrumentId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
     LET simpleTradeId == ReadBytes(clientOrderId.rest, 8) IN IF ~simpleTradeId.ok THEN Fail ELSE
     LET complexTradeId == ReadBytes(simpleTradeId.rest, 8) IN IF ~complexTradeId.ok THEN Fail ELSE
     LET executionId == ReadBytes(complexTradeId.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
@@ -940,46 +946,46 @@ DecodeSimpleExecutionNotification(bytes) ==
     LET textMemo == ReadBytes(ctiCode.rest, 20) IN IF ~textMemo.ok THEN Fail ELSE
     LET liquidityIndicator == ReadBytes(textMemo.rest, 3) IN IF ~liquidityIndicator.ok THEN Fail ELSE
     LET reserved32 == ReadBytes(liquidityIndicator.rest, 32) IN IF ~reserved32.ok THEN Fail ELSE
-    Ok([ matchingEngineTime   |-> matchingEngineTime.value,
-         mpId                 |-> mpId.value,
-         operatorId           |-> operatorId.value,
-         operatorLocation     |-> operatorLocation.value,
-         instrumentIdBinaryU4 |-> instrumentIdBinaryU4.value,
-         clientOrderId        |-> clientOrderId.value,
-         simpleTradeId        |-> simpleTradeId.value,
-         complexTradeId       |-> complexTradeId.value,
-         executionId          |-> executionId.value,
-         tradeDate            |-> tradeDate.value,
-         correctionNumber     |-> correctionNumber.value,
-         tradeStatus          |-> tradeStatus.value,
-         lastPrice            |-> lastPrice.value,
-         lastSize             |-> lastSize.value,
-         orderInstructions    |-> orderInstructions.value,
-         ctiCode              |-> ctiCode.value,
-         textMemo             |-> textMemo.value,
-         liquidityIndicator   |-> liquidityIndicator.value,
-         reserved32           |-> reserved32.value ], reserved32.rest)
+    Ok([ matchingEngineTime |-> matchingEngineTime.value,
+         mpId               |-> mpId.value,
+         operatorId         |-> operatorId.value,
+         operatorLocation   |-> operatorLocation.value,
+         instrumentId       |-> instrumentId.value,
+         clientOrderId      |-> clientOrderId.value,
+         simpleTradeId      |-> simpleTradeId.value,
+         complexTradeId     |-> complexTradeId.value,
+         executionId        |-> executionId.value,
+         tradeDate          |-> tradeDate.value,
+         correctionNumber   |-> correctionNumber.value,
+         tradeStatus        |-> tradeStatus.value,
+         lastPrice          |-> lastPrice.value,
+         lastSize           |-> lastSize.value,
+         orderInstructions  |-> orderInstructions.value,
+         ctiCode            |-> ctiCode.value,
+         textMemo           |-> textMemo.value,
+         liquidityIndicator |-> liquidityIndicator.value,
+         reserved32         |-> reserved32.value ], reserved32.rest)
 
 ZeroSimpleExecutionNotification ==
-    [ matchingEngineTime   |-> [i \in 1 .. 8 |-> 0],
-      mpId                 |-> [i \in 1 .. 5 |-> 0],
-      operatorId           |-> [i \in 1 .. 18 |-> 0],
-      operatorLocation     |-> [i \in 1 .. 6 |-> 0],
-      instrumentIdBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      clientOrderId        |-> [i \in 1 .. 20 |-> 0],
-      simpleTradeId        |-> [i \in 1 .. 8 |-> 0],
-      complexTradeId       |-> [i \in 1 .. 8 |-> 0],
-      executionId          |-> [i \in 1 .. 8 |-> 0],
-      tradeDate            |-> [i \in 1 .. 2 |-> 0],
-      correctionNumber     |-> [i \in 1 .. 1 |-> 0],
-      tradeStatus          |-> [i \in 1 .. 1 |-> 0],
-      lastPrice            |-> [i \in 1 .. 8 |-> 0],
-      lastSize             |-> [i \in 1 .. 4 |-> 0],
-      orderInstructions    |-> [i \in 1 .. 2 |-> 0],
-      ctiCode              |-> [i \in 1 .. 1 |-> 0],
-      textMemo             |-> [i \in 1 .. 20 |-> 0],
-      liquidityIndicator   |-> [i \in 1 .. 3 |-> 0],
-      reserved32           |-> [i \in 1 .. 32 |-> 0] ]
+    [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
+      mpId               |-> [i \in 1 .. 5 |-> 0],
+      operatorId         |-> [i \in 1 .. 18 |-> 0],
+      operatorLocation   |-> [i \in 1 .. 6 |-> 0],
+      instrumentId       |-> [i \in 1 .. 4 |-> 0],
+      clientOrderId      |-> [i \in 1 .. 20 |-> 0],
+      simpleTradeId      |-> [i \in 1 .. 8 |-> 0],
+      complexTradeId     |-> [i \in 1 .. 8 |-> 0],
+      executionId        |-> [i \in 1 .. 8 |-> 0],
+      tradeDate          |-> [i \in 1 .. 2 |-> 0],
+      correctionNumber   |-> [i \in 1 .. 1 |-> 0],
+      tradeStatus        |-> [i \in 1 .. 1 |-> 0],
+      lastPrice          |-> [i \in 1 .. 8 |-> 0],
+      lastSize           |-> [i \in 1 .. 4 |-> 0],
+      orderInstructions  |-> [i \in 1 .. 2 |-> 0],
+      ctiCode            |-> [i \in 1 .. 1 |-> 0],
+      textMemo           |-> [i \in 1 .. 20 |-> 0],
+      liquidityIndicator |-> [i \in 1 .. 3 |-> 0],
+      reserved32         |-> [i \in 1 .. 32 |-> 0] ]
 
 (* Simple Execution Notification at zero, then each field in turn at the values it is checked at *)
 CheckedSimpleExecutionNotification ==
@@ -988,7 +994,7 @@ CheckedSimpleExecutionNotification ==
         \cup { [ZeroSimpleExecutionNotification EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroSimpleExecutionNotification EXCEPT !.operatorId = one] : one \in Sample(18) }
         \cup { [ZeroSimpleExecutionNotification EXCEPT !.operatorLocation = one] : one \in Sample(6) }
-        \cup { [ZeroSimpleExecutionNotification EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroSimpleExecutionNotification EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroSimpleExecutionNotification EXCEPT !.clientOrderId = one] : one \in Sample(20) }
         \cup { [ZeroSimpleExecutionNotification EXCEPT !.simpleTradeId = one] : one \in Sample(8) }
         \cup { [ZeroSimpleExecutionNotification EXCEPT !.complexTradeId = one] : one \in Sample(8) }
@@ -1009,21 +1015,21 @@ CheckedSimpleExecutionNotification ==
 (***************************************************************************)
 
 ComplexExecutionNotification ==
-    [ matchingEngineTime   : Sample(8),
-      mpId                 : Sample(5),
-      instrumentIdBinaryU4 : Sample(4),
-      clientOrderId        : Sample(20),
-      complexTradeId       : Sample(8),
-      tradeDate            : Sample(2),
-      lastNetPrice         : Sample(8),
-      lastSize             : Sample(4),
-      orderInstructions    : Sample(2),
-      reserved32           : Sample(32) ]
+    [ matchingEngineTime : Sample(8),
+      mpId               : Sample(5),
+      instrumentId       : Sample(4),
+      clientOrderId      : Sample(20),
+      complexTradeId     : Sample(8),
+      tradeDate          : Sample(2),
+      lastNetPrice       : Sample(8),
+      lastSize           : Sample(4),
+      orderInstructions  : Sample(2),
+      reserved32         : Sample(32) ]
 
 EncodeComplexExecutionNotification(message) ==
     message.matchingEngineTime
         \o message.mpId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.clientOrderId
         \o message.complexTradeId
         \o message.tradeDate
@@ -1035,43 +1041,43 @@ EncodeComplexExecutionNotification(message) ==
 DecodeComplexExecutionNotification(bytes) ==
     LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
     LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(mpId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET clientOrderId == ReadBytes(instrumentIdBinaryU4.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(mpId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET clientOrderId == ReadBytes(instrumentId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
     LET complexTradeId == ReadBytes(clientOrderId.rest, 8) IN IF ~complexTradeId.ok THEN Fail ELSE
     LET tradeDate == ReadBytes(complexTradeId.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
     LET lastNetPrice == ReadBytes(tradeDate.rest, 8) IN IF ~lastNetPrice.ok THEN Fail ELSE
     LET lastSize == ReadBytes(lastNetPrice.rest, 4) IN IF ~lastSize.ok THEN Fail ELSE
     LET orderInstructions == ReadBytes(lastSize.rest, 2) IN IF ~orderInstructions.ok THEN Fail ELSE
     LET reserved32 == ReadBytes(orderInstructions.rest, 32) IN IF ~reserved32.ok THEN Fail ELSE
-    Ok([ matchingEngineTime   |-> matchingEngineTime.value,
-         mpId                 |-> mpId.value,
-         instrumentIdBinaryU4 |-> instrumentIdBinaryU4.value,
-         clientOrderId        |-> clientOrderId.value,
-         complexTradeId       |-> complexTradeId.value,
-         tradeDate            |-> tradeDate.value,
-         lastNetPrice         |-> lastNetPrice.value,
-         lastSize             |-> lastSize.value,
-         orderInstructions    |-> orderInstructions.value,
-         reserved32           |-> reserved32.value ], reserved32.rest)
+    Ok([ matchingEngineTime |-> matchingEngineTime.value,
+         mpId               |-> mpId.value,
+         instrumentId       |-> instrumentId.value,
+         clientOrderId      |-> clientOrderId.value,
+         complexTradeId     |-> complexTradeId.value,
+         tradeDate          |-> tradeDate.value,
+         lastNetPrice       |-> lastNetPrice.value,
+         lastSize           |-> lastSize.value,
+         orderInstructions  |-> orderInstructions.value,
+         reserved32         |-> reserved32.value ], reserved32.rest)
 
 ZeroComplexExecutionNotification ==
-    [ matchingEngineTime   |-> [i \in 1 .. 8 |-> 0],
-      mpId                 |-> [i \in 1 .. 5 |-> 0],
-      instrumentIdBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      clientOrderId        |-> [i \in 1 .. 20 |-> 0],
-      complexTradeId       |-> [i \in 1 .. 8 |-> 0],
-      tradeDate            |-> [i \in 1 .. 2 |-> 0],
-      lastNetPrice         |-> [i \in 1 .. 8 |-> 0],
-      lastSize             |-> [i \in 1 .. 4 |-> 0],
-      orderInstructions    |-> [i \in 1 .. 2 |-> 0],
-      reserved32           |-> [i \in 1 .. 32 |-> 0] ]
+    [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
+      mpId               |-> [i \in 1 .. 5 |-> 0],
+      instrumentId       |-> [i \in 1 .. 4 |-> 0],
+      clientOrderId      |-> [i \in 1 .. 20 |-> 0],
+      complexTradeId     |-> [i \in 1 .. 8 |-> 0],
+      tradeDate          |-> [i \in 1 .. 2 |-> 0],
+      lastNetPrice       |-> [i \in 1 .. 8 |-> 0],
+      lastSize           |-> [i \in 1 .. 4 |-> 0],
+      orderInstructions  |-> [i \in 1 .. 2 |-> 0],
+      reserved32         |-> [i \in 1 .. 32 |-> 0] ]
 
 (* Complex Execution Notification at zero, then each field in turn at the values it is checked at *)
 CheckedComplexExecutionNotification ==
     { ZeroComplexExecutionNotification }
         \cup { [ZeroComplexExecutionNotification EXCEPT !.matchingEngineTime = one] : one \in Sample(8) }
         \cup { [ZeroComplexExecutionNotification EXCEPT !.mpId = one] : one \in Sample(5) }
-        \cup { [ZeroComplexExecutionNotification EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroComplexExecutionNotification EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroComplexExecutionNotification EXCEPT !.clientOrderId = one] : one \in Sample(20) }
         \cup { [ZeroComplexExecutionNotification EXCEPT !.complexTradeId = one] : one \in Sample(8) }
         \cup { [ZeroComplexExecutionNotification EXCEPT !.tradeDate = one] : one \in Sample(2) }
@@ -1200,7 +1206,7 @@ NewOrderRequestMessage ==
       operatorLocation                 : Sample(6),
       account                          : Sample(16),
       clientOrderId                    : Sample(20),
-      instrumentIdBinaryU4             : Sample(4),
+      instrumentId                     : Sample(4),
       price                            : Sample(8),
       stopOrderTriggerPrice            : Sample(8),
       sizeBinaryU4                     : Sample(4),
@@ -1226,7 +1232,7 @@ EncodeNewOrderRequestMessage(message) ==
         \o message.operatorLocation
         \o message.account
         \o message.clientOrderId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.price
         \o message.stopOrderTriggerPrice
         \o message.sizeBinaryU4
@@ -1252,8 +1258,8 @@ DecodeNewOrderRequestMessage(bytes) ==
     LET operatorLocation == ReadBytes(operatorId.rest, 6) IN IF ~operatorLocation.ok THEN Fail ELSE
     LET account == ReadBytes(operatorLocation.rest, 16) IN IF ~account.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(account.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET price == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET price == ReadBytes(instrumentId.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET stopOrderTriggerPrice == ReadBytes(price.rest, 8) IN IF ~stopOrderTriggerPrice.ok THEN Fail ELSE
     LET sizeBinaryU4 == ReadBytes(stopOrderTriggerPrice.rest, 4) IN IF ~sizeBinaryU4.ok THEN Fail ELSE
     LET orderInstructions == ReadBytes(sizeBinaryU4.rest, 2) IN IF ~orderInstructions.ok THEN Fail ELSE
@@ -1276,7 +1282,7 @@ DecodeNewOrderRequestMessage(bytes) ==
          operatorLocation                 |-> operatorLocation.value,
          account                          |-> account.value,
          clientOrderId                    |-> clientOrderId.value,
-         instrumentIdBinaryU4             |-> instrumentIdBinaryU4.value,
+         instrumentId                     |-> instrumentId.value,
          price                            |-> price.value,
          stopOrderTriggerPrice            |-> stopOrderTriggerPrice.value,
          sizeBinaryU4                     |-> sizeBinaryU4.value,
@@ -1302,7 +1308,7 @@ ZeroNewOrderRequestMessage ==
       operatorLocation                 |-> [i \in 1 .. 6 |-> 0],
       account                          |-> [i \in 1 .. 16 |-> 0],
       clientOrderId                    |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4             |-> [i \in 1 .. 4 |-> 0],
+      instrumentId                     |-> [i \in 1 .. 4 |-> 0],
       price                            |-> [i \in 1 .. 8 |-> 0],
       stopOrderTriggerPrice            |-> [i \in 1 .. 8 |-> 0],
       sizeBinaryU4                     |-> [i \in 1 .. 4 |-> 0],
@@ -1330,7 +1336,7 @@ CheckedNewOrderRequestMessage ==
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.operatorLocation = one] : one \in Sample(6) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.account = one] : one \in Sample(16) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.stopOrderTriggerPrice = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.sizeBinaryU4 = one] : one \in Sample(4) }
@@ -1354,57 +1360,57 @@ CheckedNewOrderRequestMessage ==
 (***************************************************************************)
 
 NewOrderResponseMessage2 ==
-    [ matchingEngine       : Sample(8),
-      mpId                 : Sample(5),
-      clientOrderId        : Sample(20),
-      instrumentIdBinaryU4 : Sample(4),
-      orderId              : Sample(8),
-      status               : Sample(1),
-      reserved10           : Sample(10) ]
+    [ matchingEngineTime : Sample(8),
+      mpId               : Sample(5),
+      clientOrderId      : Sample(20),
+      instrumentId       : Sample(4),
+      orderId            : Sample(8),
+      orderStatus        : Sample(1),
+      reserved10         : Sample(10) ]
 
 EncodeNewOrderResponseMessage2(message) ==
-    message.matchingEngine
+    message.matchingEngineTime
         \o message.mpId
         \o message.clientOrderId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.orderId
-        \o message.status
+        \o message.orderStatus
         \o message.reserved10
 
 DecodeNewOrderResponseMessage2(bytes) ==
-    LET matchingEngine == ReadBytes(bytes, 8) IN IF ~matchingEngine.ok THEN Fail ELSE
-    LET mpId == ReadBytes(matchingEngine.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
+    LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
+    LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET orderId == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET status == ReadBytes(orderId.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET reserved10 == ReadBytes(status.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
-    Ok([ matchingEngine       |-> matchingEngine.value,
-         mpId                 |-> mpId.value,
-         clientOrderId        |-> clientOrderId.value,
-         instrumentIdBinaryU4 |-> instrumentIdBinaryU4.value,
-         orderId              |-> orderId.value,
-         status               |-> status.value,
-         reserved10           |-> reserved10.value ], reserved10.rest)
+    LET instrumentId == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET orderId == ReadBytes(instrumentId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET orderStatus == ReadBytes(orderId.rest, 1) IN IF ~orderStatus.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(orderStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    Ok([ matchingEngineTime |-> matchingEngineTime.value,
+         mpId               |-> mpId.value,
+         clientOrderId      |-> clientOrderId.value,
+         instrumentId       |-> instrumentId.value,
+         orderId            |-> orderId.value,
+         orderStatus        |-> orderStatus.value,
+         reserved10         |-> reserved10.value ], reserved10.rest)
 
 ZeroNewOrderResponseMessage2 ==
-    [ matchingEngine       |-> [i \in 1 .. 8 |-> 0],
-      mpId                 |-> [i \in 1 .. 5 |-> 0],
-      clientOrderId        |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      orderId              |-> [i \in 1 .. 8 |-> 0],
-      status               |-> [i \in 1 .. 1 |-> 0],
-      reserved10           |-> [i \in 1 .. 10 |-> 0] ]
+    [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
+      mpId               |-> [i \in 1 .. 5 |-> 0],
+      clientOrderId      |-> [i \in 1 .. 20 |-> 0],
+      instrumentId       |-> [i \in 1 .. 4 |-> 0],
+      orderId            |-> [i \in 1 .. 8 |-> 0],
+      orderStatus        |-> [i \in 1 .. 1 |-> 0],
+      reserved10         |-> [i \in 1 .. 10 |-> 0] ]
 
 (* New Order Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderResponseMessage2 ==
     { ZeroNewOrderResponseMessage2 }
-        \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.matchingEngine = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.matchingEngineTime = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.orderStatus = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderResponseMessage2 EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
@@ -1418,7 +1424,7 @@ ModifyOrderRequestMessage ==
       operatorLocation                 : Sample(6),
       clientOrderId                    : Sample(20),
       originalClientOrderId            : Sample(20),
-      instrumentIdBinaryU4             : Sample(4),
+      instrumentId                     : Sample(4),
       price                            : Sample(8),
       stopOrderTriggerPrice            : Sample(8),
       sizeBinaryS4                     : Sample(4),
@@ -1436,7 +1442,7 @@ EncodeModifyOrderRequestMessage(message) ==
         \o message.operatorLocation
         \o message.clientOrderId
         \o message.originalClientOrderId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.price
         \o message.stopOrderTriggerPrice
         \o message.sizeBinaryS4
@@ -1454,8 +1460,8 @@ DecodeModifyOrderRequestMessage(bytes) ==
     LET operatorLocation == ReadBytes(operatorId.rest, 6) IN IF ~operatorLocation.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(operatorLocation.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
     LET originalClientOrderId == ReadBytes(clientOrderId.rest, 20) IN IF ~originalClientOrderId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET price == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET price == ReadBytes(instrumentId.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET stopOrderTriggerPrice == ReadBytes(price.rest, 8) IN IF ~stopOrderTriggerPrice.ok THEN Fail ELSE
     LET sizeBinaryS4 == ReadBytes(stopOrderTriggerPrice.rest, 4) IN IF ~sizeBinaryS4.ok THEN Fail ELSE
     LET orderExpiryDate == ReadBytes(sizeBinaryS4.rest, 2) IN IF ~orderExpiryDate.ok THEN Fail ELSE
@@ -1470,7 +1476,7 @@ DecodeModifyOrderRequestMessage(bytes) ==
          operatorLocation                 |-> operatorLocation.value,
          clientOrderId                    |-> clientOrderId.value,
          originalClientOrderId            |-> originalClientOrderId.value,
-         instrumentIdBinaryU4             |-> instrumentIdBinaryU4.value,
+         instrumentId                     |-> instrumentId.value,
          price                            |-> price.value,
          stopOrderTriggerPrice            |-> stopOrderTriggerPrice.value,
          sizeBinaryS4                     |-> sizeBinaryS4.value,
@@ -1488,7 +1494,7 @@ ZeroModifyOrderRequestMessage ==
       operatorLocation                 |-> [i \in 1 .. 6 |-> 0],
       clientOrderId                    |-> [i \in 1 .. 20 |-> 0],
       originalClientOrderId            |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4             |-> [i \in 1 .. 4 |-> 0],
+      instrumentId                     |-> [i \in 1 .. 4 |-> 0],
       price                            |-> [i \in 1 .. 8 |-> 0],
       stopOrderTriggerPrice            |-> [i \in 1 .. 8 |-> 0],
       sizeBinaryS4                     |-> [i \in 1 .. 4 |-> 0],
@@ -1508,7 +1514,7 @@ CheckedModifyOrderRequestMessage ==
         \cup { [ZeroModifyOrderRequestMessage EXCEPT !.operatorLocation = one] : one \in Sample(6) }
         \cup { [ZeroModifyOrderRequestMessage EXCEPT !.clientOrderId = one] : one \in Sample(20) }
         \cup { [ZeroModifyOrderRequestMessage EXCEPT !.originalClientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroModifyOrderRequestMessage EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroModifyOrderRequestMessage EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroModifyOrderRequestMessage EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroModifyOrderRequestMessage EXCEPT !.stopOrderTriggerPrice = one] : one \in Sample(8) }
         \cup { [ZeroModifyOrderRequestMessage EXCEPT !.sizeBinaryS4 = one] : one \in Sample(4) }
@@ -1528,10 +1534,10 @@ ModifyOrderResponse2 ==
       mpId                  : Sample(5),
       clientOrderId         : Sample(20),
       originalClientOrderId : Sample(20),
-      instrumentIdBinaryU4  : Sample(4),
+      instrumentId          : Sample(4),
       orderId               : Sample(8),
       leavesQty             : Sample(4),
-      status                : Sample(1),
+      modifyStatus          : Sample(1),
       reserved10            : Sample(10) ]
 
 EncodeModifyOrderResponse2(message) ==
@@ -1539,10 +1545,10 @@ EncodeModifyOrderResponse2(message) ==
         \o message.mpId
         \o message.clientOrderId
         \o message.originalClientOrderId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.orderId
         \o message.leavesQty
-        \o message.status
+        \o message.modifyStatus
         \o message.reserved10
 
 DecodeModifyOrderResponse2(bytes) ==
@@ -1550,19 +1556,19 @@ DecodeModifyOrderResponse2(bytes) ==
     LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
     LET originalClientOrderId == ReadBytes(clientOrderId.rest, 20) IN IF ~originalClientOrderId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET orderId == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET orderId == ReadBytes(instrumentId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(orderId.rest, 4) IN IF ~leavesQty.ok THEN Fail ELSE
-    LET status == ReadBytes(leavesQty.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET reserved10 == ReadBytes(status.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    LET modifyStatus == ReadBytes(leavesQty.rest, 1) IN IF ~modifyStatus.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(modifyStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
     Ok([ matchingEngineTime    |-> matchingEngineTime.value,
          mpId                  |-> mpId.value,
          clientOrderId         |-> clientOrderId.value,
          originalClientOrderId |-> originalClientOrderId.value,
-         instrumentIdBinaryU4  |-> instrumentIdBinaryU4.value,
+         instrumentId          |-> instrumentId.value,
          orderId               |-> orderId.value,
          leavesQty             |-> leavesQty.value,
-         status                |-> status.value,
+         modifyStatus          |-> modifyStatus.value,
          reserved10            |-> reserved10.value ], reserved10.rest)
 
 ZeroModifyOrderResponse2 ==
@@ -1570,10 +1576,10 @@ ZeroModifyOrderResponse2 ==
       mpId                  |-> [i \in 1 .. 5 |-> 0],
       clientOrderId         |-> [i \in 1 .. 20 |-> 0],
       originalClientOrderId |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4  |-> [i \in 1 .. 4 |-> 0],
+      instrumentId          |-> [i \in 1 .. 4 |-> 0],
       orderId               |-> [i \in 1 .. 8 |-> 0],
       leavesQty             |-> [i \in 1 .. 4 |-> 0],
-      status                |-> [i \in 1 .. 1 |-> 0],
+      modifyStatus          |-> [i \in 1 .. 1 |-> 0],
       reserved10            |-> [i \in 1 .. 10 |-> 0] ]
 
 (* Modify Order Response at zero, then each field in turn at the values it is checked at *)
@@ -1583,10 +1589,10 @@ CheckedModifyOrderResponse2 ==
         \cup { [ZeroModifyOrderResponse2 EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroModifyOrderResponse2 EXCEPT !.clientOrderId = one] : one \in Sample(20) }
         \cup { [ZeroModifyOrderResponse2 EXCEPT !.originalClientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroModifyOrderResponse2 EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroModifyOrderResponse2 EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroModifyOrderResponse2 EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroModifyOrderResponse2 EXCEPT !.leavesQty = one] : one \in Sample(4) }
-        \cup { [ZeroModifyOrderResponse2 EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroModifyOrderResponse2 EXCEPT !.modifyStatus = one] : one \in Sample(1) }
         \cup { [ZeroModifyOrderResponse2 EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
@@ -1601,7 +1607,7 @@ CancelOrderRequestMessage ==
       orderId               : Sample(8),
       clientOrderId         : Sample(20),
       originalClientOrderId : Sample(20),
-      instrumentIdBinaryU4  : Sample(4),
+      instrumentId          : Sample(4),
       reserved10            : Sample(10) ]
 
 EncodeCancelOrderRequestMessage(message) ==
@@ -1612,7 +1618,7 @@ EncodeCancelOrderRequestMessage(message) ==
         \o message.orderId
         \o message.clientOrderId
         \o message.originalClientOrderId
-        \o message.instrumentIdBinaryU4
+        \o message.instrumentId
         \o message.reserved10
 
 DecodeCancelOrderRequestMessage(bytes) ==
@@ -1623,8 +1629,8 @@ DecodeCancelOrderRequestMessage(bytes) ==
     LET orderId == ReadBytes(operatorLocation.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(orderId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
     LET originalClientOrderId == ReadBytes(clientOrderId.rest, 20) IN IF ~originalClientOrderId.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET reserved10 == ReadBytes(instrumentIdBinaryU4.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(instrumentId.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
     Ok([ clientSendTime        |-> clientSendTime.value,
          mpId                  |-> mpId.value,
          operatorId            |-> operatorId.value,
@@ -1632,7 +1638,7 @@ DecodeCancelOrderRequestMessage(bytes) ==
          orderId               |-> orderId.value,
          clientOrderId         |-> clientOrderId.value,
          originalClientOrderId |-> originalClientOrderId.value,
-         instrumentIdBinaryU4  |-> instrumentIdBinaryU4.value,
+         instrumentId          |-> instrumentId.value,
          reserved10            |-> reserved10.value ], reserved10.rest)
 
 ZeroCancelOrderRequestMessage ==
@@ -1643,7 +1649,7 @@ ZeroCancelOrderRequestMessage ==
       orderId               |-> [i \in 1 .. 8 |-> 0],
       clientOrderId         |-> [i \in 1 .. 20 |-> 0],
       originalClientOrderId |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4  |-> [i \in 1 .. 4 |-> 0],
+      instrumentId          |-> [i \in 1 .. 4 |-> 0],
       reserved10            |-> [i \in 1 .. 10 |-> 0] ]
 
 (* Cancel Order Request Message at zero, then each field in turn at the values it is checked at *)
@@ -1656,55 +1662,60 @@ CheckedCancelOrderRequestMessage ==
         \cup { [ZeroCancelOrderRequestMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroCancelOrderRequestMessage EXCEPT !.clientOrderId = one] : one \in Sample(20) }
         \cup { [ZeroCancelOrderRequestMessage EXCEPT !.originalClientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroCancelOrderRequestMessage EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroCancelOrderRequestMessage EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroCancelOrderRequestMessage EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
-(* Cancel Order Response: 66 bytes                                         *)
+(* Cancel Order Response: 76 bytes                                         *)
 (***************************************************************************)
 
 CancelOrderResponse2 ==
-    [ matchingEngineTime   : Sample(8),
-      mpId                 : Sample(5),
-      clientOrderId        : Sample(20),
-      originalClientOrder  : Sample(20),
-      instrumentIdBinaryU4 : Sample(4),
-      orderId              : Sample(8),
-      status               : Sample(1) ]
+    [ matchingEngineTime    : Sample(8),
+      mpId                  : Sample(5),
+      clientOrderId         : Sample(20),
+      originalClientOrderId : Sample(20),
+      instrumentId          : Sample(4),
+      orderId               : Sample(8),
+      cancelStatus          : Sample(1),
+      reserved10            : Sample(10) ]
 
 EncodeCancelOrderResponse2(message) ==
     message.matchingEngineTime
         \o message.mpId
         \o message.clientOrderId
-        \o message.originalClientOrder
-        \o message.instrumentIdBinaryU4
+        \o message.originalClientOrderId
+        \o message.instrumentId
         \o message.orderId
-        \o message.status
+        \o message.cancelStatus
+        \o message.reserved10
 
 DecodeCancelOrderResponse2(bytes) ==
     LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
     LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET originalClientOrder == ReadBytes(clientOrderId.rest, 20) IN IF ~originalClientOrder.ok THEN Fail ELSE
-    LET instrumentIdBinaryU4 == ReadBytes(originalClientOrder.rest, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET orderId == ReadBytes(instrumentIdBinaryU4.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET status == ReadBytes(orderId.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    Ok([ matchingEngineTime   |-> matchingEngineTime.value,
-         mpId                 |-> mpId.value,
-         clientOrderId        |-> clientOrderId.value,
-         originalClientOrder  |-> originalClientOrder.value,
-         instrumentIdBinaryU4 |-> instrumentIdBinaryU4.value,
-         orderId              |-> orderId.value,
-         status               |-> status.value ], status.rest)
+    LET originalClientOrderId == ReadBytes(clientOrderId.rest, 20) IN IF ~originalClientOrderId.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(originalClientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET orderId == ReadBytes(instrumentId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET cancelStatus == ReadBytes(orderId.rest, 1) IN IF ~cancelStatus.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(cancelStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    Ok([ matchingEngineTime    |-> matchingEngineTime.value,
+         mpId                  |-> mpId.value,
+         clientOrderId         |-> clientOrderId.value,
+         originalClientOrderId |-> originalClientOrderId.value,
+         instrumentId          |-> instrumentId.value,
+         orderId               |-> orderId.value,
+         cancelStatus          |-> cancelStatus.value,
+         reserved10            |-> reserved10.value ], reserved10.rest)
 
 ZeroCancelOrderResponse2 ==
-    [ matchingEngineTime   |-> [i \in 1 .. 8 |-> 0],
-      mpId                 |-> [i \in 1 .. 5 |-> 0],
-      clientOrderId        |-> [i \in 1 .. 20 |-> 0],
-      originalClientOrder  |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      orderId              |-> [i \in 1 .. 8 |-> 0],
-      status               |-> [i \in 1 .. 1 |-> 0] ]
+    [ matchingEngineTime    |-> [i \in 1 .. 8 |-> 0],
+      mpId                  |-> [i \in 1 .. 5 |-> 0],
+      clientOrderId         |-> [i \in 1 .. 20 |-> 0],
+      originalClientOrderId |-> [i \in 1 .. 20 |-> 0],
+      instrumentId          |-> [i \in 1 .. 4 |-> 0],
+      orderId               |-> [i \in 1 .. 8 |-> 0],
+      cancelStatus          |-> [i \in 1 .. 1 |-> 0],
+      reserved10            |-> [i \in 1 .. 10 |-> 0] ]
 
 (* Cancel Order Response at zero, then each field in turn at the values it is checked at *)
 CheckedCancelOrderResponse2 ==
@@ -1712,10 +1723,11 @@ CheckedCancelOrderResponse2 ==
         \cup { [ZeroCancelOrderResponse2 EXCEPT !.matchingEngineTime = one] : one \in Sample(8) }
         \cup { [ZeroCancelOrderResponse2 EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroCancelOrderResponse2 EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroCancelOrderResponse2 EXCEPT !.originalClientOrder = one] : one \in Sample(20) }
-        \cup { [ZeroCancelOrderResponse2 EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroCancelOrderResponse2 EXCEPT !.originalClientOrderId = one] : one \in Sample(20) }
+        \cup { [ZeroCancelOrderResponse2 EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroCancelOrderResponse2 EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroCancelOrderResponse2 EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroCancelOrderResponse2 EXCEPT !.cancelStatus = one] : one \in Sample(1) }
+        \cup { [ZeroCancelOrderResponse2 EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
 (* Mass Cancel Request: 86 bytes                                           *)
@@ -1813,33 +1825,33 @@ MassCancelResponse2 ==
     [ matchingEngineTime : Sample(8),
       mpId               : Sample(5),
       clientOrderId      : Sample(20),
-      status             : Sample(1),
+      massCancelStatus   : Sample(1),
       reserved10         : Sample(10) ]
 
 EncodeMassCancelResponse2(message) ==
     message.matchingEngineTime
         \o message.mpId
         \o message.clientOrderId
-        \o message.status
+        \o message.massCancelStatus
         \o message.reserved10
 
 DecodeMassCancelResponse2(bytes) ==
     LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
     LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET status == ReadBytes(clientOrderId.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET reserved10 == ReadBytes(status.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
+    LET massCancelStatus == ReadBytes(clientOrderId.rest, 1) IN IF ~massCancelStatus.ok THEN Fail ELSE
+    LET reserved10 == ReadBytes(massCancelStatus.rest, 10) IN IF ~reserved10.ok THEN Fail ELSE
     Ok([ matchingEngineTime |-> matchingEngineTime.value,
          mpId               |-> mpId.value,
          clientOrderId      |-> clientOrderId.value,
-         status             |-> status.value,
+         massCancelStatus   |-> massCancelStatus.value,
          reserved10         |-> reserved10.value ], reserved10.rest)
 
 ZeroMassCancelResponse2 ==
     [ matchingEngineTime |-> [i \in 1 .. 8 |-> 0],
       mpId               |-> [i \in 1 .. 5 |-> 0],
       clientOrderId      |-> [i \in 1 .. 20 |-> 0],
-      status             |-> [i \in 1 .. 1 |-> 0],
+      massCancelStatus   |-> [i \in 1 .. 1 |-> 0],
       reserved10         |-> [i \in 1 .. 10 |-> 0] ]
 
 (* Mass Cancel Response at zero, then each field in turn at the values it is checked at *)
@@ -1848,7 +1860,7 @@ CheckedMassCancelResponse2 ==
         \cup { [ZeroMassCancelResponse2 EXCEPT !.matchingEngineTime = one] : one \in Sample(8) }
         \cup { [ZeroMassCancelResponse2 EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroMassCancelResponse2 EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroMassCancelResponse2 EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroMassCancelResponse2 EXCEPT !.massCancelStatus = one] : one \in Sample(1) }
         \cup { [ZeroMassCancelResponse2 EXCEPT !.reserved10 = one] : one \in Sample(10) }
 
 (***************************************************************************)
@@ -1856,32 +1868,32 @@ CheckedMassCancelResponse2 ==
 (***************************************************************************)
 
 StrategyLeg ==
-    [ instrumentIdBinaryU4 : Sample(4),
-      legRatio             : Sample(4),
-      reserved8            : Sample(8) ]
+    [ instrumentId : Sample(4),
+      legRatio     : Sample(4),
+      reserved8    : Sample(8) ]
 
 EncodeStrategyLeg(message) ==
-    message.instrumentIdBinaryU4
+    message.instrumentId
         \o message.legRatio
         \o message.reserved8
 
 DecodeStrategyLeg(bytes) ==
-    LET instrumentIdBinaryU4 == ReadBytes(bytes, 4) IN IF ~instrumentIdBinaryU4.ok THEN Fail ELSE
-    LET legRatio == ReadBytes(instrumentIdBinaryU4.rest, 4) IN IF ~legRatio.ok THEN Fail ELSE
+    LET instrumentId == ReadBytes(bytes, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET legRatio == ReadBytes(instrumentId.rest, 4) IN IF ~legRatio.ok THEN Fail ELSE
     LET reserved8 == ReadBytes(legRatio.rest, 8) IN IF ~reserved8.ok THEN Fail ELSE
-    Ok([ instrumentIdBinaryU4 |-> instrumentIdBinaryU4.value,
-         legRatio             |-> legRatio.value,
-         reserved8            |-> reserved8.value ], reserved8.rest)
+    Ok([ instrumentId |-> instrumentId.value,
+         legRatio     |-> legRatio.value,
+         reserved8    |-> reserved8.value ], reserved8.rest)
 
 ZeroStrategyLeg ==
-    [ instrumentIdBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      legRatio             |-> [i \in 1 .. 4 |-> 0],
-      reserved8            |-> [i \in 1 .. 8 |-> 0] ]
+    [ instrumentId |-> [i \in 1 .. 4 |-> 0],
+      legRatio     |-> [i \in 1 .. 4 |-> 0],
+      reserved8    |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Strategy Leg at zero, then each field in turn at the values it is checked at *)
 CheckedStrategyLeg ==
     { ZeroStrategyLeg }
-        \cup { [ZeroStrategyLeg EXCEPT !.instrumentIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroStrategyLeg EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroStrategyLeg EXCEPT !.legRatio = one] : one \in Sample(4) }
         \cup { [ZeroStrategyLeg EXCEPT !.reserved8 = one] : one \in Sample(8) }
 
@@ -1967,46 +1979,46 @@ CheckedStrategyCreationRequest ==
         \cup { [ZeroStrategyCreationRequest EXCEPT !.strategyLeg = one] : one \in SampleLists(OneStrategyLeg) }
 
 (***************************************************************************)
-(* Strategy Creation Response Message: 70 bytes                            *)
+(* Strategy Creation Response Message: 54 bytes                            *)
 (***************************************************************************)
 
 StrategyCreationResponseMessage2 ==
-    [ matchingEngineTime   : Sample(8),
-      mpId                 : Sample(5),
-      clientOrderId        : Sample(20),
-      instrumentIdString20 : Sample(20),
-      status               : Sample(1),
-      reserved16           : Sample(16) ]
+    [ matchingEngineTime     : Sample(8),
+      mpId                   : Sample(5),
+      clientOrderId          : Sample(20),
+      instrumentId           : Sample(4),
+      strategyCreationStatus : Sample(1),
+      reserved16             : Sample(16) ]
 
 EncodeStrategyCreationResponseMessage2(message) ==
     message.matchingEngineTime
         \o message.mpId
         \o message.clientOrderId
-        \o message.instrumentIdString20
-        \o message.status
+        \o message.instrumentId
+        \o message.strategyCreationStatus
         \o message.reserved16
 
 DecodeStrategyCreationResponseMessage2(bytes) ==
     LET matchingEngineTime == ReadBytes(bytes, 8) IN IF ~matchingEngineTime.ok THEN Fail ELSE
     LET mpId == ReadBytes(matchingEngineTime.rest, 5) IN IF ~mpId.ok THEN Fail ELSE
     LET clientOrderId == ReadBytes(mpId.rest, 20) IN IF ~clientOrderId.ok THEN Fail ELSE
-    LET instrumentIdString20 == ReadBytes(clientOrderId.rest, 20) IN IF ~instrumentIdString20.ok THEN Fail ELSE
-    LET status == ReadBytes(instrumentIdString20.rest, 1) IN IF ~status.ok THEN Fail ELSE
-    LET reserved16 == ReadBytes(status.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    Ok([ matchingEngineTime   |-> matchingEngineTime.value,
-         mpId                 |-> mpId.value,
-         clientOrderId        |-> clientOrderId.value,
-         instrumentIdString20 |-> instrumentIdString20.value,
-         status               |-> status.value,
-         reserved16           |-> reserved16.value ], reserved16.rest)
+    LET instrumentId == ReadBytes(clientOrderId.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
+    LET strategyCreationStatus == ReadBytes(instrumentId.rest, 1) IN IF ~strategyCreationStatus.ok THEN Fail ELSE
+    LET reserved16 == ReadBytes(strategyCreationStatus.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
+    Ok([ matchingEngineTime     |-> matchingEngineTime.value,
+         mpId                   |-> mpId.value,
+         clientOrderId          |-> clientOrderId.value,
+         instrumentId           |-> instrumentId.value,
+         strategyCreationStatus |-> strategyCreationStatus.value,
+         reserved16             |-> reserved16.value ], reserved16.rest)
 
 ZeroStrategyCreationResponseMessage2 ==
-    [ matchingEngineTime   |-> [i \in 1 .. 8 |-> 0],
-      mpId                 |-> [i \in 1 .. 5 |-> 0],
-      clientOrderId        |-> [i \in 1 .. 20 |-> 0],
-      instrumentIdString20 |-> [i \in 1 .. 20 |-> 0],
-      status               |-> [i \in 1 .. 1 |-> 0],
-      reserved16           |-> [i \in 1 .. 16 |-> 0] ]
+    [ matchingEngineTime     |-> [i \in 1 .. 8 |-> 0],
+      mpId                   |-> [i \in 1 .. 5 |-> 0],
+      clientOrderId          |-> [i \in 1 .. 20 |-> 0],
+      instrumentId           |-> [i \in 1 .. 4 |-> 0],
+      strategyCreationStatus |-> [i \in 1 .. 1 |-> 0],
+      reserved16             |-> [i \in 1 .. 16 |-> 0] ]
 
 (* Strategy Creation Response Message at zero, then each field in turn at the values it is checked at *)
 CheckedStrategyCreationResponseMessage2 ==
@@ -2014,8 +2026,8 @@ CheckedStrategyCreationResponseMessage2 ==
         \cup { [ZeroStrategyCreationResponseMessage2 EXCEPT !.matchingEngineTime = one] : one \in Sample(8) }
         \cup { [ZeroStrategyCreationResponseMessage2 EXCEPT !.mpId = one] : one \in Sample(5) }
         \cup { [ZeroStrategyCreationResponseMessage2 EXCEPT !.clientOrderId = one] : one \in Sample(20) }
-        \cup { [ZeroStrategyCreationResponseMessage2 EXCEPT !.instrumentIdString20 = one] : one \in Sample(20) }
-        \cup { [ZeroStrategyCreationResponseMessage2 EXCEPT !.status = one] : one \in Sample(1) }
+        \cup { [ZeroStrategyCreationResponseMessage2 EXCEPT !.instrumentId = one] : one \in Sample(4) }
+        \cup { [ZeroStrategyCreationResponseMessage2 EXCEPT !.strategyCreationStatus = one] : one \in Sample(1) }
         \cup { [ZeroStrategyCreationResponseMessage2 EXCEPT !.reserved16 = one] : one \in Sample(16) }
 
 (***************************************************************************)

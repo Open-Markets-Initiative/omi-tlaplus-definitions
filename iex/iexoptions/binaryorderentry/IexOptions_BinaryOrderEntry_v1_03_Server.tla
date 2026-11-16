@@ -384,7 +384,7 @@ OrderAckMessage ==
       aiq                     : Sample(3),
       side                    : Sample(1),
       pricePrice8Optional     : Sample(8),
-      orderQtyQuantityNonZero : Sample(4),
+      orderQty                : Sample(4),
       leavesQty               : Sample(4),
       effectiveLimitPrice     : Sample(8),
       displayPrice            : Sample(8),
@@ -417,7 +417,7 @@ EncodeOrderAckMessage(message) ==
         \o message.aiq
         \o message.side
         \o message.pricePrice8Optional
-        \o message.orderQtyQuantityNonZero
+        \o message.orderQty
         \o message.leavesQty
         \o message.effectiveLimitPrice
         \o message.displayPrice
@@ -450,8 +450,8 @@ DecodeOrderAckMessage(bytes) ==
     LET aiq == ReadBytes(routingFirmId.rest, 3) IN IF ~aiq.ok THEN Fail ELSE
     LET side == ReadBytes(aiq.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET pricePrice8Optional == ReadBytes(side.rest, 8) IN IF ~pricePrice8Optional.ok THEN Fail ELSE
-    LET orderQtyQuantityNonZero == ReadBytes(pricePrice8Optional.rest, 4) IN IF ~orderQtyQuantityNonZero.ok THEN Fail ELSE
-    LET leavesQty == ReadBytes(orderQtyQuantityNonZero.rest, 4) IN IF ~leavesQty.ok THEN Fail ELSE
+    LET orderQty == ReadBytes(pricePrice8Optional.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
+    LET leavesQty == ReadBytes(orderQty.rest, 4) IN IF ~leavesQty.ok THEN Fail ELSE
     LET effectiveLimitPrice == ReadBytes(leavesQty.rest, 8) IN IF ~effectiveLimitPrice.ok THEN Fail ELSE
     LET displayPrice == ReadBytes(effectiveLimitPrice.rest, 8) IN IF ~displayPrice.ok THEN Fail ELSE
     LET reasonCodeOptional == ReadBytes(displayPrice.rest, 1) IN IF ~reasonCodeOptional.ok THEN Fail ELSE
@@ -481,7 +481,7 @@ DecodeOrderAckMessage(bytes) ==
          aiq                     |-> aiq.value,
          side                    |-> side.value,
          pricePrice8Optional     |-> pricePrice8Optional.value,
-         orderQtyQuantityNonZero |-> orderQtyQuantityNonZero.value,
+         orderQty                |-> orderQty.value,
          leavesQty               |-> leavesQty.value,
          effectiveLimitPrice     |-> effectiveLimitPrice.value,
          displayPrice            |-> displayPrice.value,
@@ -514,7 +514,7 @@ ZeroOrderAckMessage ==
       aiq                     |-> [i \in 1 .. 3 |-> 0],
       side                    |-> [i \in 1 .. 1 |-> 0],
       pricePrice8Optional     |-> [i \in 1 .. 8 |-> 0],
-      orderQtyQuantityNonZero |-> [i \in 1 .. 4 |-> 0],
+      orderQty                |-> [i \in 1 .. 4 |-> 0],
       leavesQty               |-> [i \in 1 .. 4 |-> 0],
       effectiveLimitPrice     |-> [i \in 1 .. 8 |-> 0],
       displayPrice            |-> [i \in 1 .. 8 |-> 0],
@@ -549,7 +549,7 @@ CheckedOrderAckMessage ==
         \cup { [ZeroOrderAckMessage EXCEPT !.aiq = one] : one \in Sample(3) }
         \cup { [ZeroOrderAckMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroOrderAckMessage EXCEPT !.pricePrice8Optional = one] : one \in Sample(8) }
-        \cup { [ZeroOrderAckMessage EXCEPT !.orderQtyQuantityNonZero = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAckMessage EXCEPT !.orderQty = one] : one \in Sample(4) }
         \cup { [ZeroOrderAckMessage EXCEPT !.leavesQty = one] : one \in Sample(4) }
         \cup { [ZeroOrderAckMessage EXCEPT !.effectiveLimitPrice = one] : one \in Sample(8) }
         \cup { [ZeroOrderAckMessage EXCEPT !.displayPrice = one] : one \in Sample(8) }
@@ -562,19 +562,19 @@ CheckedOrderAckMessage ==
 (***************************************************************************)
 
 UnsolicitedModifyAckMessage ==
-    [ transactTime            : Sample(8),
-      instrumentId            : Sample(4),
-      marketParticipantId     : Sample(4),
-      origClOrdId             : Sample(8),
-      orderId                 : Sample(8),
-      pricePrice8             : Sample(8),
-      orderQtyQuantityNonZero : Sample(4),
-      leavesQty               : Sample(4),
-      effectiveLimitPrice     : Sample(8),
-      displayPrice            : Sample(8),
-      restatementReason       : Sample(1),
-      reasonCodeOptional      : Sample(1),
-      ackType                 : Sample(1) ]
+    [ transactTime        : Sample(8),
+      instrumentId        : Sample(4),
+      marketParticipantId : Sample(4),
+      origClOrdId         : Sample(8),
+      orderId             : Sample(8),
+      pricePrice8         : Sample(8),
+      orderQty            : Sample(4),
+      leavesQty           : Sample(4),
+      effectiveLimitPrice : Sample(8),
+      displayPrice        : Sample(8),
+      restatementReason   : Sample(1),
+      reasonCodeOptional  : Sample(1),
+      ackType             : Sample(1) ]
 
 EncodeUnsolicitedModifyAckMessage(message) ==
     message.transactTime
@@ -583,7 +583,7 @@ EncodeUnsolicitedModifyAckMessage(message) ==
         \o message.origClOrdId
         \o message.orderId
         \o message.pricePrice8
-        \o message.orderQtyQuantityNonZero
+        \o message.orderQty
         \o message.leavesQty
         \o message.effectiveLimitPrice
         \o message.displayPrice
@@ -598,41 +598,41 @@ DecodeUnsolicitedModifyAckMessage(bytes) ==
     LET origClOrdId == ReadBytes(marketParticipantId.rest, 8) IN IF ~origClOrdId.ok THEN Fail ELSE
     LET orderId == ReadBytes(origClOrdId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET pricePrice8 == ReadBytes(orderId.rest, 8) IN IF ~pricePrice8.ok THEN Fail ELSE
-    LET orderQtyQuantityNonZero == ReadBytes(pricePrice8.rest, 4) IN IF ~orderQtyQuantityNonZero.ok THEN Fail ELSE
-    LET leavesQty == ReadBytes(orderQtyQuantityNonZero.rest, 4) IN IF ~leavesQty.ok THEN Fail ELSE
+    LET orderQty == ReadBytes(pricePrice8.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
+    LET leavesQty == ReadBytes(orderQty.rest, 4) IN IF ~leavesQty.ok THEN Fail ELSE
     LET effectiveLimitPrice == ReadBytes(leavesQty.rest, 8) IN IF ~effectiveLimitPrice.ok THEN Fail ELSE
     LET displayPrice == ReadBytes(effectiveLimitPrice.rest, 8) IN IF ~displayPrice.ok THEN Fail ELSE
     LET restatementReason == ReadBytes(displayPrice.rest, 1) IN IF ~restatementReason.ok THEN Fail ELSE
     LET reasonCodeOptional == ReadBytes(restatementReason.rest, 1) IN IF ~reasonCodeOptional.ok THEN Fail ELSE
     LET ackType == ReadBytes(reasonCodeOptional.rest, 1) IN IF ~ackType.ok THEN Fail ELSE
-    Ok([ transactTime            |-> transactTime.value,
-         instrumentId            |-> instrumentId.value,
-         marketParticipantId     |-> marketParticipantId.value,
-         origClOrdId             |-> origClOrdId.value,
-         orderId                 |-> orderId.value,
-         pricePrice8             |-> pricePrice8.value,
-         orderQtyQuantityNonZero |-> orderQtyQuantityNonZero.value,
-         leavesQty               |-> leavesQty.value,
-         effectiveLimitPrice     |-> effectiveLimitPrice.value,
-         displayPrice            |-> displayPrice.value,
-         restatementReason       |-> restatementReason.value,
-         reasonCodeOptional      |-> reasonCodeOptional.value,
-         ackType                 |-> ackType.value ], ackType.rest)
+    Ok([ transactTime        |-> transactTime.value,
+         instrumentId        |-> instrumentId.value,
+         marketParticipantId |-> marketParticipantId.value,
+         origClOrdId         |-> origClOrdId.value,
+         orderId             |-> orderId.value,
+         pricePrice8         |-> pricePrice8.value,
+         orderQty            |-> orderQty.value,
+         leavesQty           |-> leavesQty.value,
+         effectiveLimitPrice |-> effectiveLimitPrice.value,
+         displayPrice        |-> displayPrice.value,
+         restatementReason   |-> restatementReason.value,
+         reasonCodeOptional  |-> reasonCodeOptional.value,
+         ackType             |-> ackType.value ], ackType.rest)
 
 ZeroUnsolicitedModifyAckMessage ==
-    [ transactTime            |-> [i \in 1 .. 8 |-> 0],
-      instrumentId            |-> [i \in 1 .. 4 |-> 0],
-      marketParticipantId     |-> [i \in 1 .. 4 |-> 0],
-      origClOrdId             |-> [i \in 1 .. 8 |-> 0],
-      orderId                 |-> [i \in 1 .. 8 |-> 0],
-      pricePrice8             |-> [i \in 1 .. 8 |-> 0],
-      orderQtyQuantityNonZero |-> [i \in 1 .. 4 |-> 0],
-      leavesQty               |-> [i \in 1 .. 4 |-> 0],
-      effectiveLimitPrice     |-> [i \in 1 .. 8 |-> 0],
-      displayPrice            |-> [i \in 1 .. 8 |-> 0],
-      restatementReason       |-> [i \in 1 .. 1 |-> 0],
-      reasonCodeOptional      |-> [i \in 1 .. 1 |-> 0],
-      ackType                 |-> [i \in 1 .. 1 |-> 0] ]
+    [ transactTime        |-> [i \in 1 .. 8 |-> 0],
+      instrumentId        |-> [i \in 1 .. 4 |-> 0],
+      marketParticipantId |-> [i \in 1 .. 4 |-> 0],
+      origClOrdId         |-> [i \in 1 .. 8 |-> 0],
+      orderId             |-> [i \in 1 .. 8 |-> 0],
+      pricePrice8         |-> [i \in 1 .. 8 |-> 0],
+      orderQty            |-> [i \in 1 .. 4 |-> 0],
+      leavesQty           |-> [i \in 1 .. 4 |-> 0],
+      effectiveLimitPrice |-> [i \in 1 .. 8 |-> 0],
+      displayPrice        |-> [i \in 1 .. 8 |-> 0],
+      restatementReason   |-> [i \in 1 .. 1 |-> 0],
+      reasonCodeOptional  |-> [i \in 1 .. 1 |-> 0],
+      ackType             |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Unsolicited Modify Ack Message at zero, then each field in turn at the values it is checked at *)
 CheckedUnsolicitedModifyAckMessage ==
@@ -643,7 +643,7 @@ CheckedUnsolicitedModifyAckMessage ==
         \cup { [ZeroUnsolicitedModifyAckMessage EXCEPT !.origClOrdId = one] : one \in Sample(8) }
         \cup { [ZeroUnsolicitedModifyAckMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroUnsolicitedModifyAckMessage EXCEPT !.pricePrice8 = one] : one \in Sample(8) }
-        \cup { [ZeroUnsolicitedModifyAckMessage EXCEPT !.orderQtyQuantityNonZero = one] : one \in Sample(4) }
+        \cup { [ZeroUnsolicitedModifyAckMessage EXCEPT !.orderQty = one] : one \in Sample(4) }
         \cup { [ZeroUnsolicitedModifyAckMessage EXCEPT !.leavesQty = one] : one \in Sample(4) }
         \cup { [ZeroUnsolicitedModifyAckMessage EXCEPT !.effectiveLimitPrice = one] : one \in Sample(8) }
         \cup { [ZeroUnsolicitedModifyAckMessage EXCEPT !.displayPrice = one] : one \in Sample(8) }
@@ -810,17 +810,17 @@ CheckedMassCancelAckMessage ==
         \cup { [ZeroMassCancelAckMessage EXCEPT !.throttleIndicator = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Bulk Quote Ack Message quote Acks Group: 23 bytes                       *)
+(* Bulk Quote Ack Message Quote Acks Group: 23 bytes                       *)
 (***************************************************************************)
 
 BulkQuoteAckMessageQuoteAcksGroup ==
-    [ instrumentId                 : Sample(4),
-      side                         : Sample(1),
-      orderIdOptional              : Sample(8),
-      ackType                      : Sample(1),
-      pricePrice4Optional          : Sample(4),
-      orderQtyQuantityZeroOptional : Sample(4),
-      reasonCodeOptional           : Sample(1) ]
+    [ instrumentId        : Sample(4),
+      side                : Sample(1),
+      orderIdOptional     : Sample(8),
+      ackType             : Sample(1),
+      pricePrice4Optional : Sample(4),
+      orderQtyOptional    : Sample(4),
+      reasonCodeOptional  : Sample(1) ]
 
 EncodeBulkQuoteAckMessageQuoteAcksGroup(message) ==
     message.instrumentId
@@ -828,7 +828,7 @@ EncodeBulkQuoteAckMessageQuoteAcksGroup(message) ==
         \o message.orderIdOptional
         \o message.ackType
         \o message.pricePrice4Optional
-        \o message.orderQtyQuantityZeroOptional
+        \o message.orderQtyOptional
         \o message.reasonCodeOptional
 
 DecodeBulkQuoteAckMessageQuoteAcksGroup(bytes) ==
@@ -837,26 +837,26 @@ DecodeBulkQuoteAckMessageQuoteAcksGroup(bytes) ==
     LET orderIdOptional == ReadBytes(side.rest, 8) IN IF ~orderIdOptional.ok THEN Fail ELSE
     LET ackType == ReadBytes(orderIdOptional.rest, 1) IN IF ~ackType.ok THEN Fail ELSE
     LET pricePrice4Optional == ReadBytes(ackType.rest, 4) IN IF ~pricePrice4Optional.ok THEN Fail ELSE
-    LET orderQtyQuantityZeroOptional == ReadBytes(pricePrice4Optional.rest, 4) IN IF ~orderQtyQuantityZeroOptional.ok THEN Fail ELSE
-    LET reasonCodeOptional == ReadBytes(orderQtyQuantityZeroOptional.rest, 1) IN IF ~reasonCodeOptional.ok THEN Fail ELSE
-    Ok([ instrumentId                 |-> instrumentId.value,
-         side                         |-> side.value,
-         orderIdOptional              |-> orderIdOptional.value,
-         ackType                      |-> ackType.value,
-         pricePrice4Optional          |-> pricePrice4Optional.value,
-         orderQtyQuantityZeroOptional |-> orderQtyQuantityZeroOptional.value,
-         reasonCodeOptional           |-> reasonCodeOptional.value ], reasonCodeOptional.rest)
+    LET orderQtyOptional == ReadBytes(pricePrice4Optional.rest, 4) IN IF ~orderQtyOptional.ok THEN Fail ELSE
+    LET reasonCodeOptional == ReadBytes(orderQtyOptional.rest, 1) IN IF ~reasonCodeOptional.ok THEN Fail ELSE
+    Ok([ instrumentId        |-> instrumentId.value,
+         side                |-> side.value,
+         orderIdOptional     |-> orderIdOptional.value,
+         ackType             |-> ackType.value,
+         pricePrice4Optional |-> pricePrice4Optional.value,
+         orderQtyOptional    |-> orderQtyOptional.value,
+         reasonCodeOptional  |-> reasonCodeOptional.value ], reasonCodeOptional.rest)
 
 ZeroBulkQuoteAckMessageQuoteAcksGroup ==
-    [ instrumentId                 |-> [i \in 1 .. 4 |-> 0],
-      side                         |-> [i \in 1 .. 1 |-> 0],
-      orderIdOptional              |-> [i \in 1 .. 8 |-> 0],
-      ackType                      |-> [i \in 1 .. 1 |-> 0],
-      pricePrice4Optional          |-> [i \in 1 .. 4 |-> 0],
-      orderQtyQuantityZeroOptional |-> [i \in 1 .. 4 |-> 0],
-      reasonCodeOptional           |-> [i \in 1 .. 1 |-> 0] ]
+    [ instrumentId        |-> [i \in 1 .. 4 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      orderIdOptional     |-> [i \in 1 .. 8 |-> 0],
+      ackType             |-> [i \in 1 .. 1 |-> 0],
+      pricePrice4Optional |-> [i \in 1 .. 4 |-> 0],
+      orderQtyOptional    |-> [i \in 1 .. 4 |-> 0],
+      reasonCodeOptional  |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Bulk Quote Ack Message quote Acks Group at zero, then each field in turn at the values it is checked at *)
+(* Bulk Quote Ack Message Quote Acks Group at zero, then each field in turn at the values it is checked at *)
 CheckedBulkQuoteAckMessageQuoteAcksGroup ==
     { ZeroBulkQuoteAckMessageQuoteAcksGroup }
         \cup { [ZeroBulkQuoteAckMessageQuoteAcksGroup EXCEPT !.instrumentId = one] : one \in Sample(4) }
@@ -864,17 +864,17 @@ CheckedBulkQuoteAckMessageQuoteAcksGroup ==
         \cup { [ZeroBulkQuoteAckMessageQuoteAcksGroup EXCEPT !.orderIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroBulkQuoteAckMessageQuoteAcksGroup EXCEPT !.ackType = one] : one \in Sample(1) }
         \cup { [ZeroBulkQuoteAckMessageQuoteAcksGroup EXCEPT !.pricePrice4Optional = one] : one \in Sample(4) }
-        \cup { [ZeroBulkQuoteAckMessageQuoteAcksGroup EXCEPT !.orderQtyQuantityZeroOptional = one] : one \in Sample(4) }
+        \cup { [ZeroBulkQuoteAckMessageQuoteAcksGroup EXCEPT !.orderQtyOptional = one] : one \in Sample(4) }
         \cup { [ZeroBulkQuoteAckMessageQuoteAcksGroup EXCEPT !.reasonCodeOptional = one] : one \in Sample(1) }
 
-(* A run of Bulk Quote Ack Message quote Acks Group, written one after another *)
+(* A run of Bulk Quote Ack Message Quote Acks Group, written one after another *)
 RECURSIVE EncodeBulkQuoteAckMessageQuoteAcksGroupList(_)
 EncodeBulkQuoteAckMessageQuoteAcksGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeBulkQuoteAckMessageQuoteAcksGroup(Head(messages)) \o EncodeBulkQuoteAckMessageQuoteAcksGroupList(Tail(messages))
 
-(* As many Bulk Quote Ack Message quote Acks Group as the field that counts them says *)
+(* As many Bulk Quote Ack Message Quote Acks Group as the field that counts them says *)
 RECURSIVE ReadBulkQuoteAckMessageQuoteAcksGroupList(_, _)
 ReadBulkQuoteAckMessageQuoteAcksGroupList(bytes, count) ==
     IF count = 0
@@ -885,11 +885,11 @@ ReadBulkQuoteAckMessageQuoteAcksGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Bulk Quote Ack Message quote Acks Group of each kind, for the lists that carry them *)
+(* One Bulk Quote Ack Message Quote Acks Group of each kind, for the lists that carry them *)
 OneBulkQuoteAckMessageQuoteAcksGroup == { ZeroBulkQuoteAckMessageQuoteAcksGroup }
 
 (***************************************************************************)
-(* Bulk Quote Ack Message quote Acks Groups                                *)
+(* Bulk Quote Ack Message Quote Acks Groups                                *)
 (***************************************************************************)
 
 BulkQuoteAckMessageQuoteAcksGroups ==
@@ -912,7 +912,7 @@ ZeroBulkQuoteAckMessageQuoteAcksGroups ==
     [ blockLengthShort                  |-> [i \in 1 .. 1 |-> 0],
       bulkQuoteAckMessageQuoteAcksGroup |-> << >> ]
 
-(* Bulk Quote Ack Message quote Acks Groups at zero, then each field in turn at the values it is checked at *)
+(* Bulk Quote Ack Message Quote Acks Groups at zero, then each field in turn at the values it is checked at *)
 CheckedBulkQuoteAckMessageQuoteAcksGroups ==
     { ZeroBulkQuoteAckMessageQuoteAcksGroups }
         \cup { [ZeroBulkQuoteAckMessageQuoteAcksGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
@@ -987,19 +987,19 @@ CheckedBulkQuoteAckMessage ==
 (***************************************************************************)
 
 NewIocQuoteAckMessage ==
-    [ transactTime            : Sample(8),
-      marketParticipantId     : Sample(4),
-      clOrdId                 : Sample(8),
-      clearingAccount         : Sample(4),
-      aiq                     : Sample(3),
-      instrumentId            : Sample(4),
-      side                    : Sample(1),
-      orderId                 : Sample(8),
-      ackType                 : Sample(1),
-      pricePrice4Optional     : Sample(4),
-      orderQtyQuantityNonZero : Sample(4),
-      reasonCodeOptional      : Sample(1),
-      throttleIndicator       : Sample(1) ]
+    [ transactTime        : Sample(8),
+      marketParticipantId : Sample(4),
+      clOrdId             : Sample(8),
+      clearingAccount     : Sample(4),
+      aiq                 : Sample(3),
+      instrumentId        : Sample(4),
+      side                : Sample(1),
+      orderId             : Sample(8),
+      ackType             : Sample(1),
+      pricePrice4Optional : Sample(4),
+      orderQty            : Sample(4),
+      reasonCodeOptional  : Sample(1),
+      throttleIndicator   : Sample(1) ]
 
 EncodeNewIocQuoteAckMessage(message) ==
     message.transactTime
@@ -1012,7 +1012,7 @@ EncodeNewIocQuoteAckMessage(message) ==
         \o message.orderId
         \o message.ackType
         \o message.pricePrice4Optional
-        \o message.orderQtyQuantityNonZero
+        \o message.orderQty
         \o message.reasonCodeOptional
         \o message.throttleIndicator
 
@@ -1027,37 +1027,37 @@ DecodeNewIocQuoteAckMessage(bytes) ==
     LET orderId == ReadBytes(side.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET ackType == ReadBytes(orderId.rest, 1) IN IF ~ackType.ok THEN Fail ELSE
     LET pricePrice4Optional == ReadBytes(ackType.rest, 4) IN IF ~pricePrice4Optional.ok THEN Fail ELSE
-    LET orderQtyQuantityNonZero == ReadBytes(pricePrice4Optional.rest, 4) IN IF ~orderQtyQuantityNonZero.ok THEN Fail ELSE
-    LET reasonCodeOptional == ReadBytes(orderQtyQuantityNonZero.rest, 1) IN IF ~reasonCodeOptional.ok THEN Fail ELSE
+    LET orderQty == ReadBytes(pricePrice4Optional.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
+    LET reasonCodeOptional == ReadBytes(orderQty.rest, 1) IN IF ~reasonCodeOptional.ok THEN Fail ELSE
     LET throttleIndicator == ReadBytes(reasonCodeOptional.rest, 1) IN IF ~throttleIndicator.ok THEN Fail ELSE
-    Ok([ transactTime            |-> transactTime.value,
-         marketParticipantId     |-> marketParticipantId.value,
-         clOrdId                 |-> clOrdId.value,
-         clearingAccount         |-> clearingAccount.value,
-         aiq                     |-> aiq.value,
-         instrumentId            |-> instrumentId.value,
-         side                    |-> side.value,
-         orderId                 |-> orderId.value,
-         ackType                 |-> ackType.value,
-         pricePrice4Optional     |-> pricePrice4Optional.value,
-         orderQtyQuantityNonZero |-> orderQtyQuantityNonZero.value,
-         reasonCodeOptional      |-> reasonCodeOptional.value,
-         throttleIndicator       |-> throttleIndicator.value ], throttleIndicator.rest)
+    Ok([ transactTime        |-> transactTime.value,
+         marketParticipantId |-> marketParticipantId.value,
+         clOrdId             |-> clOrdId.value,
+         clearingAccount     |-> clearingAccount.value,
+         aiq                 |-> aiq.value,
+         instrumentId        |-> instrumentId.value,
+         side                |-> side.value,
+         orderId             |-> orderId.value,
+         ackType             |-> ackType.value,
+         pricePrice4Optional |-> pricePrice4Optional.value,
+         orderQty            |-> orderQty.value,
+         reasonCodeOptional  |-> reasonCodeOptional.value,
+         throttleIndicator   |-> throttleIndicator.value ], throttleIndicator.rest)
 
 ZeroNewIocQuoteAckMessage ==
-    [ transactTime            |-> [i \in 1 .. 8 |-> 0],
-      marketParticipantId     |-> [i \in 1 .. 4 |-> 0],
-      clOrdId                 |-> [i \in 1 .. 8 |-> 0],
-      clearingAccount         |-> [i \in 1 .. 4 |-> 0],
-      aiq                     |-> [i \in 1 .. 3 |-> 0],
-      instrumentId            |-> [i \in 1 .. 4 |-> 0],
-      side                    |-> [i \in 1 .. 1 |-> 0],
-      orderId                 |-> [i \in 1 .. 8 |-> 0],
-      ackType                 |-> [i \in 1 .. 1 |-> 0],
-      pricePrice4Optional     |-> [i \in 1 .. 4 |-> 0],
-      orderQtyQuantityNonZero |-> [i \in 1 .. 4 |-> 0],
-      reasonCodeOptional      |-> [i \in 1 .. 1 |-> 0],
-      throttleIndicator       |-> [i \in 1 .. 1 |-> 0] ]
+    [ transactTime        |-> [i \in 1 .. 8 |-> 0],
+      marketParticipantId |-> [i \in 1 .. 4 |-> 0],
+      clOrdId             |-> [i \in 1 .. 8 |-> 0],
+      clearingAccount     |-> [i \in 1 .. 4 |-> 0],
+      aiq                 |-> [i \in 1 .. 3 |-> 0],
+      instrumentId        |-> [i \in 1 .. 4 |-> 0],
+      side                |-> [i \in 1 .. 1 |-> 0],
+      orderId             |-> [i \in 1 .. 8 |-> 0],
+      ackType             |-> [i \in 1 .. 1 |-> 0],
+      pricePrice4Optional |-> [i \in 1 .. 4 |-> 0],
+      orderQty            |-> [i \in 1 .. 4 |-> 0],
+      reasonCodeOptional  |-> [i \in 1 .. 1 |-> 0],
+      throttleIndicator   |-> [i \in 1 .. 1 |-> 0] ]
 
 (* New Ioc Quote Ack Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewIocQuoteAckMessage ==
@@ -1072,7 +1072,7 @@ CheckedNewIocQuoteAckMessage ==
         \cup { [ZeroNewIocQuoteAckMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroNewIocQuoteAckMessage EXCEPT !.ackType = one] : one \in Sample(1) }
         \cup { [ZeroNewIocQuoteAckMessage EXCEPT !.pricePrice4Optional = one] : one \in Sample(4) }
-        \cup { [ZeroNewIocQuoteAckMessage EXCEPT !.orderQtyQuantityNonZero = one] : one \in Sample(4) }
+        \cup { [ZeroNewIocQuoteAckMessage EXCEPT !.orderQty = one] : one \in Sample(4) }
         \cup { [ZeroNewIocQuoteAckMessage EXCEPT !.reasonCodeOptional = one] : one \in Sample(1) }
         \cup { [ZeroNewIocQuoteAckMessage EXCEPT !.throttleIndicator = one] : one \in Sample(1) }
 
@@ -1223,7 +1223,7 @@ CheckedQuoteCanceledMessage ==
         \cup { [ZeroQuoteCanceledMessage EXCEPT !.delta = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Purge Ack Message custom Group Ids Group: 2 bytes                       *)
+(* Purge Ack Message Custom Group Ids Group: 2 bytes                       *)
 (***************************************************************************)
 
 PurgeAckMessageCustomGroupIdsGroup ==
@@ -1239,19 +1239,19 @@ DecodePurgeAckMessageCustomGroupIdsGroup(bytes) ==
 ZeroPurgeAckMessageCustomGroupIdsGroup ==
     [ customGroupId |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Purge Ack Message custom Group Ids Group at zero, then each field in turn at the values it is checked at *)
+(* Purge Ack Message Custom Group Ids Group at zero, then each field in turn at the values it is checked at *)
 CheckedPurgeAckMessageCustomGroupIdsGroup ==
     { ZeroPurgeAckMessageCustomGroupIdsGroup }
         \cup { [ZeroPurgeAckMessageCustomGroupIdsGroup EXCEPT !.customGroupId = one] : one \in Sample(2) }
 
-(* A run of Purge Ack Message custom Group Ids Group, written one after another *)
+(* A run of Purge Ack Message Custom Group Ids Group, written one after another *)
 RECURSIVE EncodePurgeAckMessageCustomGroupIdsGroupList(_)
 EncodePurgeAckMessageCustomGroupIdsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodePurgeAckMessageCustomGroupIdsGroup(Head(messages)) \o EncodePurgeAckMessageCustomGroupIdsGroupList(Tail(messages))
 
-(* As many Purge Ack Message custom Group Ids Group as the field that counts them says *)
+(* As many Purge Ack Message Custom Group Ids Group as the field that counts them says *)
 RECURSIVE ReadPurgeAckMessageCustomGroupIdsGroupList(_, _)
 ReadPurgeAckMessageCustomGroupIdsGroupList(bytes, count) ==
     IF count = 0
@@ -1262,11 +1262,11 @@ ReadPurgeAckMessageCustomGroupIdsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Purge Ack Message custom Group Ids Group of each kind, for the lists that carry them *)
+(* One Purge Ack Message Custom Group Ids Group of each kind, for the lists that carry them *)
 OnePurgeAckMessageCustomGroupIdsGroup == { ZeroPurgeAckMessageCustomGroupIdsGroup }
 
 (***************************************************************************)
-(* Purge Ack Message custom Group Ids Groups                               *)
+(* Purge Ack Message Custom Group Ids Groups                               *)
 (***************************************************************************)
 
 PurgeAckMessageCustomGroupIdsGroups ==
@@ -1289,7 +1289,7 @@ ZeroPurgeAckMessageCustomGroupIdsGroups ==
     [ blockLengthShort                   |-> [i \in 1 .. 1 |-> 0],
       purgeAckMessageCustomGroupIdsGroup |-> << >> ]
 
-(* Purge Ack Message custom Group Ids Groups at zero, then each field in turn at the values it is checked at *)
+(* Purge Ack Message Custom Group Ids Groups at zero, then each field in turn at the values it is checked at *)
 CheckedPurgeAckMessageCustomGroupIdsGroups ==
     { ZeroPurgeAckMessageCustomGroupIdsGroups }
         \cup { [ZeroPurgeAckMessageCustomGroupIdsGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
@@ -2665,7 +2665,7 @@ RoundTripMassCancelAckMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Bulk Quote Ack Message quote Acks Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Bulk Quote Ack Message Quote Acks Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripBulkQuoteAckMessageQuoteAcksGroup ==
     \A message \in CheckedBulkQuoteAckMessageQuoteAcksGroup :
         LET read == DecodeBulkQuoteAckMessageQuoteAcksGroup(EncodeBulkQuoteAckMessageQuoteAcksGroup(message))
@@ -2673,7 +2673,7 @@ RoundTripBulkQuoteAckMessageQuoteAcksGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Bulk Quote Ack Message quote Acks Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Bulk Quote Ack Message Quote Acks Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripBulkQuoteAckMessageQuoteAcksGroups ==
     \A message \in CheckedBulkQuoteAckMessageQuoteAcksGroups :
         LET read == DecodeBulkQuoteAckMessageQuoteAcksGroups(EncodeBulkQuoteAckMessageQuoteAcksGroups(message))
@@ -2713,7 +2713,7 @@ RoundTripQuoteCanceledMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Purge Ack Message custom Group Ids Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Purge Ack Message Custom Group Ids Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripPurgeAckMessageCustomGroupIdsGroup ==
     \A message \in CheckedPurgeAckMessageCustomGroupIdsGroup :
         LET read == DecodePurgeAckMessageCustomGroupIdsGroup(EncodePurgeAckMessageCustomGroupIdsGroup(message))
@@ -2721,7 +2721,7 @@ RoundTripPurgeAckMessageCustomGroupIdsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Purge Ack Message custom Group Ids Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Purge Ack Message Custom Group Ids Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripPurgeAckMessageCustomGroupIdsGroups ==
     \A message \in CheckedPurgeAckMessageCustomGroupIdsGroups :
         LET read == DecodePurgeAckMessageCustomGroupIdsGroups(EncodePurgeAckMessageCustomGroupIdsGroups(message))

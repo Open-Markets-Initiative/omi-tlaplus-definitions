@@ -429,27 +429,27 @@ CheckedQuantity ==
 (***************************************************************************)
 
 ShowQty ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissaOptional : Sample(8),
+      exponent         : Sample(1) ]
 
 EncodeShowQty(message) ==
-    message.mantissa
+    message.mantissaOptional
         \o message.exponent
 
 DecodeShowQty(bytes) ==
-    LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET mantissaOptional == ReadBytes(bytes, 8) IN IF ~mantissaOptional.ok THEN Fail ELSE
+    LET exponent == ReadBytes(mantissaOptional.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
+    Ok([ mantissaOptional |-> mantissaOptional.value,
+         exponent         |-> exponent.value ], exponent.rest)
 
 ZeroShowQty ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissaOptional |-> [i \in 1 .. 8 |-> 0],
+      exponent         |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Show Qty at zero, then each field in turn at the values it is checked at *)
 CheckedShowQty ==
     { ZeroShowQty }
-        \cup { [ZeroShowQty EXCEPT !.mantissa = one] : one \in Sample(8) }
+        \cup { [ZeroShowQty EXCEPT !.mantissaOptional = one] : one \in Sample(8) }
         \cup { [ZeroShowQty EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -567,27 +567,27 @@ CheckedQuantity2 ==
 (***************************************************************************)
 
 ShowQty2 ==
-    [ mantissa : Sample(8),
-      exponent : Sample(1) ]
+    [ mantissaOptional : Sample(8),
+      exponent         : Sample(1) ]
 
 EncodeShowQty2(message) ==
-    message.mantissa
+    message.mantissaOptional
         \o message.exponent
 
 DecodeShowQty2(bytes) ==
-    LET mantissa == ReadBytes(bytes, 8) IN IF ~mantissa.ok THEN Fail ELSE
-    LET exponent == ReadBytes(mantissa.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
-    Ok([ mantissa |-> mantissa.value,
-         exponent |-> exponent.value ], exponent.rest)
+    LET mantissaOptional == ReadBytes(bytes, 8) IN IF ~mantissaOptional.ok THEN Fail ELSE
+    LET exponent == ReadBytes(mantissaOptional.rest, 1) IN IF ~exponent.ok THEN Fail ELSE
+    Ok([ mantissaOptional |-> mantissaOptional.value,
+         exponent         |-> exponent.value ], exponent.rest)
 
 ZeroShowQty2 ==
-    [ mantissa |-> [i \in 1 .. 8 |-> 0],
-      exponent |-> [i \in 1 .. 1 |-> 0] ]
+    [ mantissaOptional |-> [i \in 1 .. 8 |-> 0],
+      exponent         |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Show Qty at zero, then each field in turn at the values it is checked at *)
 CheckedShowQty2 ==
     { ZeroShowQty2 }
-        \cup { [ZeroShowQty2 EXCEPT !.mantissa = one] : one \in Sample(8) }
+        \cup { [ZeroShowQty2 EXCEPT !.mantissaOptional = one] : one \in Sample(8) }
         \cup { [ZeroShowQty2 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -739,7 +739,7 @@ CheckedAskQty ==
         \cup { [ZeroAskQty EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Mass Quote Request Message quotes Group: 46 bytes                       *)
+(* Mass Quote Request Message Quotes Group: 46 bytes                       *)
 (***************************************************************************)
 
 MassQuoteRequestMessageQuotesGroup ==
@@ -785,7 +785,7 @@ ZeroMassQuoteRequestMessageQuotesGroup ==
       bidFlags         |-> [i \in 1 .. 2 |-> 0],
       askFlags         |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Mass Quote Request Message quotes Group at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Request Message Quotes Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteRequestMessageQuotesGroup ==
     { ZeroMassQuoteRequestMessageQuotesGroup }
         \cup { [ZeroMassQuoteRequestMessageQuotesGroup EXCEPT !.instrumentId = one] : one \in Sample(8) }
@@ -796,14 +796,14 @@ CheckedMassQuoteRequestMessageQuotesGroup ==
         \cup { [ZeroMassQuoteRequestMessageQuotesGroup EXCEPT !.bidFlags = one] : one \in Sample(2) }
         \cup { [ZeroMassQuoteRequestMessageQuotesGroup EXCEPT !.askFlags = one] : one \in Sample(2) }
 
-(* A run of Mass Quote Request Message quotes Group, written one after another *)
+(* A run of Mass Quote Request Message Quotes Group, written one after another *)
 RECURSIVE EncodeMassQuoteRequestMessageQuotesGroupList(_)
 EncodeMassQuoteRequestMessageQuotesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeMassQuoteRequestMessageQuotesGroup(Head(messages)) \o EncodeMassQuoteRequestMessageQuotesGroupList(Tail(messages))
 
-(* As many Mass Quote Request Message quotes Group as the field that counts them says *)
+(* As many Mass Quote Request Message Quotes Group as the field that counts them says *)
 RECURSIVE ReadMassQuoteRequestMessageQuotesGroupList(_, _)
 ReadMassQuoteRequestMessageQuotesGroupList(bytes, count) ==
     IF count = 0
@@ -814,11 +814,11 @@ ReadMassQuoteRequestMessageQuotesGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Mass Quote Request Message quotes Group of each kind, for the lists that carry them *)
+(* One Mass Quote Request Message Quotes Group of each kind, for the lists that carry them *)
 OneMassQuoteRequestMessageQuotesGroup == { ZeroMassQuoteRequestMessageQuotesGroup }
 
 (***************************************************************************)
-(* Mass Quote Request Message quotes Groups                                *)
+(* Mass Quote Request Message Quotes Groups                                *)
 (***************************************************************************)
 
 MassQuoteRequestMessageQuotesGroups ==
@@ -841,7 +841,7 @@ ZeroMassQuoteRequestMessageQuotesGroups ==
     [ blockLength                        |-> [i \in 1 .. 2 |-> 0],
       massQuoteRequestMessageQuotesGroup |-> << >> ]
 
-(* Mass Quote Request Message quotes Groups at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Request Message Quotes Groups at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteRequestMessageQuotesGroups ==
     { ZeroMassQuoteRequestMessageQuotesGroups }
         \cup { [ZeroMassQuoteRequestMessageQuotesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -1092,7 +1092,7 @@ CheckedFillQty ==
         \cup { [ZeroFillQty EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* New Order Response Message fills Group: 25 bytes                        *)
+(* New Order Response Message Fills Group: 25 bytes                        *)
 (***************************************************************************)
 
 NewOrderResponseMessageFillsGroup ==
@@ -1118,21 +1118,21 @@ ZeroNewOrderResponseMessageFillsGroup ==
       fillPrice |-> [i \in 1 .. 8 |-> 0],
       fillQty   |-> ZeroFillQty ]
 
-(* New Order Response Message fills Group at zero, then each field in turn at the values it is checked at *)
+(* New Order Response Message Fills Group at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderResponseMessageFillsGroup ==
     { ZeroNewOrderResponseMessageFillsGroup }
         \cup { [ZeroNewOrderResponseMessageFillsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderResponseMessageFillsGroup EXCEPT !.fillPrice = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderResponseMessageFillsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty }
 
-(* A run of New Order Response Message fills Group, written one after another *)
+(* A run of New Order Response Message Fills Group, written one after another *)
 RECURSIVE EncodeNewOrderResponseMessageFillsGroupList(_)
 EncodeNewOrderResponseMessageFillsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeNewOrderResponseMessageFillsGroup(Head(messages)) \o EncodeNewOrderResponseMessageFillsGroupList(Tail(messages))
 
-(* As many New Order Response Message fills Group as the field that counts them says *)
+(* As many New Order Response Message Fills Group as the field that counts them says *)
 RECURSIVE ReadNewOrderResponseMessageFillsGroupList(_, _)
 ReadNewOrderResponseMessageFillsGroupList(bytes, count) ==
     IF count = 0
@@ -1143,11 +1143,11 @@ ReadNewOrderResponseMessageFillsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One New Order Response Message fills Group of each kind, for the lists that carry them *)
+(* One New Order Response Message Fills Group of each kind, for the lists that carry them *)
 OneNewOrderResponseMessageFillsGroup == { ZeroNewOrderResponseMessageFillsGroup }
 
 (***************************************************************************)
-(* New Order Response Message fills Groups                                 *)
+(* New Order Response Message Fills Groups                                 *)
 (***************************************************************************)
 
 NewOrderResponseMessageFillsGroups ==
@@ -1170,7 +1170,7 @@ ZeroNewOrderResponseMessageFillsGroups ==
     [ blockLength                       |-> [i \in 1 .. 2 |-> 0],
       newOrderResponseMessageFillsGroup |-> << >> ]
 
-(* New Order Response Message fills Groups at zero, then each field in turn at the values it is checked at *)
+(* New Order Response Message Fills Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderResponseMessageFillsGroups ==
     { ZeroNewOrderResponseMessageFillsGroups }
         \cup { [ZeroNewOrderResponseMessageFillsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -1205,7 +1205,7 @@ CheckedFillQty2 ==
         \cup { [ZeroFillQty2 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* New Order Response Message legs Group: 34 bytes                         *)
+(* New Order Response Message Legs Group: 34 bytes                         *)
 (***************************************************************************)
 
 NewOrderResponseMessageLegsGroup ==
@@ -1241,7 +1241,7 @@ ZeroNewOrderResponseMessageLegsGroup ==
       fillQty   |-> ZeroFillQty2,
       legSide   |-> [i \in 1 .. 1 |-> 0] ]
 
-(* New Order Response Message legs Group at zero, then each field in turn at the values it is checked at *)
+(* New Order Response Message Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderResponseMessageLegsGroup ==
     { ZeroNewOrderResponseMessageLegsGroup }
         \cup { [ZeroNewOrderResponseMessageLegsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
@@ -1250,14 +1250,14 @@ CheckedNewOrderResponseMessageLegsGroup ==
         \cup { [ZeroNewOrderResponseMessageLegsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty2 }
         \cup { [ZeroNewOrderResponseMessageLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
 
-(* A run of New Order Response Message legs Group, written one after another *)
+(* A run of New Order Response Message Legs Group, written one after another *)
 RECURSIVE EncodeNewOrderResponseMessageLegsGroupList(_)
 EncodeNewOrderResponseMessageLegsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeNewOrderResponseMessageLegsGroup(Head(messages)) \o EncodeNewOrderResponseMessageLegsGroupList(Tail(messages))
 
-(* As many New Order Response Message legs Group as the field that counts them says *)
+(* As many New Order Response Message Legs Group as the field that counts them says *)
 RECURSIVE ReadNewOrderResponseMessageLegsGroupList(_, _)
 ReadNewOrderResponseMessageLegsGroupList(bytes, count) ==
     IF count = 0
@@ -1268,11 +1268,11 @@ ReadNewOrderResponseMessageLegsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One New Order Response Message legs Group of each kind, for the lists that carry them *)
+(* One New Order Response Message Legs Group of each kind, for the lists that carry them *)
 OneNewOrderResponseMessageLegsGroup == { ZeroNewOrderResponseMessageLegsGroup }
 
 (***************************************************************************)
-(* New Order Response Message legs Groups                                  *)
+(* New Order Response Message Legs Groups                                  *)
 (***************************************************************************)
 
 NewOrderResponseMessageLegsGroups ==
@@ -1295,7 +1295,7 @@ ZeroNewOrderResponseMessageLegsGroups ==
     [ blockLength                      |-> [i \in 1 .. 2 |-> 0],
       newOrderResponseMessageLegsGroup |-> << >> ]
 
-(* New Order Response Message legs Groups at zero, then each field in turn at the values it is checked at *)
+(* New Order Response Message Legs Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderResponseMessageLegsGroups ==
     { ZeroNewOrderResponseMessageLegsGroups }
         \cup { [ZeroNewOrderResponseMessageLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -1614,7 +1614,7 @@ CheckedFillQty3 ==
         \cup { [ZeroFillQty3 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Amend Order Response Message fills Group: 25 bytes                      *)
+(* Amend Order Response Message Fills Group: 25 bytes                      *)
 (***************************************************************************)
 
 AmendOrderResponseMessageFillsGroup ==
@@ -1640,21 +1640,21 @@ ZeroAmendOrderResponseMessageFillsGroup ==
       fillPrice |-> [i \in 1 .. 8 |-> 0],
       fillQty   |-> ZeroFillQty3 ]
 
-(* Amend Order Response Message fills Group at zero, then each field in turn at the values it is checked at *)
+(* Amend Order Response Message Fills Group at zero, then each field in turn at the values it is checked at *)
 CheckedAmendOrderResponseMessageFillsGroup ==
     { ZeroAmendOrderResponseMessageFillsGroup }
         \cup { [ZeroAmendOrderResponseMessageFillsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
         \cup { [ZeroAmendOrderResponseMessageFillsGroup EXCEPT !.fillPrice = one] : one \in Sample(8) }
         \cup { [ZeroAmendOrderResponseMessageFillsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty3 }
 
-(* A run of Amend Order Response Message fills Group, written one after another *)
+(* A run of Amend Order Response Message Fills Group, written one after another *)
 RECURSIVE EncodeAmendOrderResponseMessageFillsGroupList(_)
 EncodeAmendOrderResponseMessageFillsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeAmendOrderResponseMessageFillsGroup(Head(messages)) \o EncodeAmendOrderResponseMessageFillsGroupList(Tail(messages))
 
-(* As many Amend Order Response Message fills Group as the field that counts them says *)
+(* As many Amend Order Response Message Fills Group as the field that counts them says *)
 RECURSIVE ReadAmendOrderResponseMessageFillsGroupList(_, _)
 ReadAmendOrderResponseMessageFillsGroupList(bytes, count) ==
     IF count = 0
@@ -1665,11 +1665,11 @@ ReadAmendOrderResponseMessageFillsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Amend Order Response Message fills Group of each kind, for the lists that carry them *)
+(* One Amend Order Response Message Fills Group of each kind, for the lists that carry them *)
 OneAmendOrderResponseMessageFillsGroup == { ZeroAmendOrderResponseMessageFillsGroup }
 
 (***************************************************************************)
-(* Amend Order Response Message fills Groups                               *)
+(* Amend Order Response Message Fills Groups                               *)
 (***************************************************************************)
 
 AmendOrderResponseMessageFillsGroups ==
@@ -1692,7 +1692,7 @@ ZeroAmendOrderResponseMessageFillsGroups ==
     [ blockLength                         |-> [i \in 1 .. 2 |-> 0],
       amendOrderResponseMessageFillsGroup |-> << >> ]
 
-(* Amend Order Response Message fills Groups at zero, then each field in turn at the values it is checked at *)
+(* Amend Order Response Message Fills Groups at zero, then each field in turn at the values it is checked at *)
 CheckedAmendOrderResponseMessageFillsGroups ==
     { ZeroAmendOrderResponseMessageFillsGroups }
         \cup { [ZeroAmendOrderResponseMessageFillsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -1727,7 +1727,7 @@ CheckedFillQty4 ==
         \cup { [ZeroFillQty4 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Amend Order Response Message legs Group: 34 bytes                       *)
+(* Amend Order Response Message Legs Group: 34 bytes                       *)
 (***************************************************************************)
 
 AmendOrderResponseMessageLegsGroup ==
@@ -1763,7 +1763,7 @@ ZeroAmendOrderResponseMessageLegsGroup ==
       fillQty   |-> ZeroFillQty4,
       legSide   |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Amend Order Response Message legs Group at zero, then each field in turn at the values it is checked at *)
+(* Amend Order Response Message Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedAmendOrderResponseMessageLegsGroup ==
     { ZeroAmendOrderResponseMessageLegsGroup }
         \cup { [ZeroAmendOrderResponseMessageLegsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
@@ -1772,14 +1772,14 @@ CheckedAmendOrderResponseMessageLegsGroup ==
         \cup { [ZeroAmendOrderResponseMessageLegsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty4 }
         \cup { [ZeroAmendOrderResponseMessageLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
 
-(* A run of Amend Order Response Message legs Group, written one after another *)
+(* A run of Amend Order Response Message Legs Group, written one after another *)
 RECURSIVE EncodeAmendOrderResponseMessageLegsGroupList(_)
 EncodeAmendOrderResponseMessageLegsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeAmendOrderResponseMessageLegsGroup(Head(messages)) \o EncodeAmendOrderResponseMessageLegsGroupList(Tail(messages))
 
-(* As many Amend Order Response Message legs Group as the field that counts them says *)
+(* As many Amend Order Response Message Legs Group as the field that counts them says *)
 RECURSIVE ReadAmendOrderResponseMessageLegsGroupList(_, _)
 ReadAmendOrderResponseMessageLegsGroupList(bytes, count) ==
     IF count = 0
@@ -1790,11 +1790,11 @@ ReadAmendOrderResponseMessageLegsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Amend Order Response Message legs Group of each kind, for the lists that carry them *)
+(* One Amend Order Response Message Legs Group of each kind, for the lists that carry them *)
 OneAmendOrderResponseMessageLegsGroup == { ZeroAmendOrderResponseMessageLegsGroup }
 
 (***************************************************************************)
-(* Amend Order Response Message legs Groups                                *)
+(* Amend Order Response Message Legs Groups                                *)
 (***************************************************************************)
 
 AmendOrderResponseMessageLegsGroups ==
@@ -1817,7 +1817,7 @@ ZeroAmendOrderResponseMessageLegsGroups ==
     [ blockLength                        |-> [i \in 1 .. 2 |-> 0],
       amendOrderResponseMessageLegsGroup |-> << >> ]
 
-(* Amend Order Response Message legs Groups at zero, then each field in turn at the values it is checked at *)
+(* Amend Order Response Message Legs Groups at zero, then each field in turn at the values it is checked at *)
 CheckedAmendOrderResponseMessageLegsGroups ==
     { ZeroAmendOrderResponseMessageLegsGroups }
         \cup { [ZeroAmendOrderResponseMessageLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -2276,7 +2276,7 @@ CheckedAskFilledQty ==
         \cup { [ZeroAskFilledQty EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Mass Quote Response Message quotes Group: 80 bytes                      *)
+(* Mass Quote Response Message Quotes Group: 80 bytes                      *)
 (***************************************************************************)
 
 MassQuoteResponseMessageQuotesGroup ==
@@ -2352,7 +2352,7 @@ ZeroMassQuoteResponseMessageQuotesGroup ==
       bidRejectReason |-> [i \in 1 .. 1 |-> 0],
       askRejectReason |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Mass Quote Response Message quotes Group at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Response Message Quotes Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteResponseMessageQuotesGroup ==
     { ZeroMassQuoteResponseMessageQuotesGroup }
         \cup { [ZeroMassQuoteResponseMessageQuotesGroup EXCEPT !.instrumentId = one] : one \in Sample(8) }
@@ -2369,14 +2369,14 @@ CheckedMassQuoteResponseMessageQuotesGroup ==
         \cup { [ZeroMassQuoteResponseMessageQuotesGroup EXCEPT !.bidRejectReason = one] : one \in Sample(1) }
         \cup { [ZeroMassQuoteResponseMessageQuotesGroup EXCEPT !.askRejectReason = one] : one \in Sample(1) }
 
-(* A run of Mass Quote Response Message quotes Group, written one after another *)
+(* A run of Mass Quote Response Message Quotes Group, written one after another *)
 RECURSIVE EncodeMassQuoteResponseMessageQuotesGroupList(_)
 EncodeMassQuoteResponseMessageQuotesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeMassQuoteResponseMessageQuotesGroup(Head(messages)) \o EncodeMassQuoteResponseMessageQuotesGroupList(Tail(messages))
 
-(* As many Mass Quote Response Message quotes Group as the field that counts them says *)
+(* As many Mass Quote Response Message Quotes Group as the field that counts them says *)
 RECURSIVE ReadMassQuoteResponseMessageQuotesGroupList(_, _)
 ReadMassQuoteResponseMessageQuotesGroupList(bytes, count) ==
     IF count = 0
@@ -2387,11 +2387,11 @@ ReadMassQuoteResponseMessageQuotesGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Mass Quote Response Message quotes Group of each kind, for the lists that carry them *)
+(* One Mass Quote Response Message Quotes Group of each kind, for the lists that carry them *)
 OneMassQuoteResponseMessageQuotesGroup == { ZeroMassQuoteResponseMessageQuotesGroup }
 
 (***************************************************************************)
-(* Mass Quote Response Message quotes Groups                               *)
+(* Mass Quote Response Message Quotes Groups                               *)
 (***************************************************************************)
 
 MassQuoteResponseMessageQuotesGroups ==
@@ -2414,7 +2414,7 @@ ZeroMassQuoteResponseMessageQuotesGroups ==
     [ blockLength                         |-> [i \in 1 .. 2 |-> 0],
       massQuoteResponseMessageQuotesGroup |-> << >> ]
 
-(* Mass Quote Response Message quotes Groups at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Response Message Quotes Groups at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteResponseMessageQuotesGroups ==
     { ZeroMassQuoteResponseMessageQuotesGroups }
         \cup { [ZeroMassQuoteResponseMessageQuotesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -2449,7 +2449,7 @@ CheckedFillQty5 ==
         \cup { [ZeroFillQty5 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Mass Quote Response Message bid Fills Group: 33 bytes                   *)
+(* Mass Quote Response Message Bid Fills Group: 33 bytes                   *)
 (***************************************************************************)
 
 MassQuoteResponseMessageBidFillsGroup ==
@@ -2480,7 +2480,7 @@ ZeroMassQuoteResponseMessageBidFillsGroup ==
       fillPrice    |-> [i \in 1 .. 8 |-> 0],
       fillQty      |-> ZeroFillQty5 ]
 
-(* Mass Quote Response Message bid Fills Group at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Response Message Bid Fills Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteResponseMessageBidFillsGroup ==
     { ZeroMassQuoteResponseMessageBidFillsGroup }
         \cup { [ZeroMassQuoteResponseMessageBidFillsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
@@ -2488,14 +2488,14 @@ CheckedMassQuoteResponseMessageBidFillsGroup ==
         \cup { [ZeroMassQuoteResponseMessageBidFillsGroup EXCEPT !.fillPrice = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteResponseMessageBidFillsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty5 }
 
-(* A run of Mass Quote Response Message bid Fills Group, written one after another *)
+(* A run of Mass Quote Response Message Bid Fills Group, written one after another *)
 RECURSIVE EncodeMassQuoteResponseMessageBidFillsGroupList(_)
 EncodeMassQuoteResponseMessageBidFillsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeMassQuoteResponseMessageBidFillsGroup(Head(messages)) \o EncodeMassQuoteResponseMessageBidFillsGroupList(Tail(messages))
 
-(* As many Mass Quote Response Message bid Fills Group as the field that counts them says *)
+(* As many Mass Quote Response Message Bid Fills Group as the field that counts them says *)
 RECURSIVE ReadMassQuoteResponseMessageBidFillsGroupList(_, _)
 ReadMassQuoteResponseMessageBidFillsGroupList(bytes, count) ==
     IF count = 0
@@ -2506,11 +2506,11 @@ ReadMassQuoteResponseMessageBidFillsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Mass Quote Response Message bid Fills Group of each kind, for the lists that carry them *)
+(* One Mass Quote Response Message Bid Fills Group of each kind, for the lists that carry them *)
 OneMassQuoteResponseMessageBidFillsGroup == { ZeroMassQuoteResponseMessageBidFillsGroup }
 
 (***************************************************************************)
-(* Mass Quote Response Message bid Fills Groups                            *)
+(* Mass Quote Response Message Bid Fills Groups                            *)
 (***************************************************************************)
 
 MassQuoteResponseMessageBidFillsGroups ==
@@ -2533,7 +2533,7 @@ ZeroMassQuoteResponseMessageBidFillsGroups ==
     [ blockLength                           |-> [i \in 1 .. 2 |-> 0],
       massQuoteResponseMessageBidFillsGroup |-> << >> ]
 
-(* Mass Quote Response Message bid Fills Groups at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Response Message Bid Fills Groups at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteResponseMessageBidFillsGroups ==
     { ZeroMassQuoteResponseMessageBidFillsGroups }
         \cup { [ZeroMassQuoteResponseMessageBidFillsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -2568,7 +2568,7 @@ CheckedFillQty6 ==
         \cup { [ZeroFillQty6 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Mass Quote Response Message ask Fills Group: 33 bytes                   *)
+(* Mass Quote Response Message Ask Fills Group: 33 bytes                   *)
 (***************************************************************************)
 
 MassQuoteResponseMessageAskFillsGroup ==
@@ -2599,7 +2599,7 @@ ZeroMassQuoteResponseMessageAskFillsGroup ==
       fillPrice    |-> [i \in 1 .. 8 |-> 0],
       fillQty      |-> ZeroFillQty6 ]
 
-(* Mass Quote Response Message ask Fills Group at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Response Message Ask Fills Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteResponseMessageAskFillsGroup ==
     { ZeroMassQuoteResponseMessageAskFillsGroup }
         \cup { [ZeroMassQuoteResponseMessageAskFillsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
@@ -2607,14 +2607,14 @@ CheckedMassQuoteResponseMessageAskFillsGroup ==
         \cup { [ZeroMassQuoteResponseMessageAskFillsGroup EXCEPT !.fillPrice = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteResponseMessageAskFillsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty6 }
 
-(* A run of Mass Quote Response Message ask Fills Group, written one after another *)
+(* A run of Mass Quote Response Message Ask Fills Group, written one after another *)
 RECURSIVE EncodeMassQuoteResponseMessageAskFillsGroupList(_)
 EncodeMassQuoteResponseMessageAskFillsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeMassQuoteResponseMessageAskFillsGroup(Head(messages)) \o EncodeMassQuoteResponseMessageAskFillsGroupList(Tail(messages))
 
-(* As many Mass Quote Response Message ask Fills Group as the field that counts them says *)
+(* As many Mass Quote Response Message Ask Fills Group as the field that counts them says *)
 RECURSIVE ReadMassQuoteResponseMessageAskFillsGroupList(_, _)
 ReadMassQuoteResponseMessageAskFillsGroupList(bytes, count) ==
     IF count = 0
@@ -2625,11 +2625,11 @@ ReadMassQuoteResponseMessageAskFillsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Mass Quote Response Message ask Fills Group of each kind, for the lists that carry them *)
+(* One Mass Quote Response Message Ask Fills Group of each kind, for the lists that carry them *)
 OneMassQuoteResponseMessageAskFillsGroup == { ZeroMassQuoteResponseMessageAskFillsGroup }
 
 (***************************************************************************)
-(* Mass Quote Response Message ask Fills Groups                            *)
+(* Mass Quote Response Message Ask Fills Groups                            *)
 (***************************************************************************)
 
 MassQuoteResponseMessageAskFillsGroups ==
@@ -2652,7 +2652,7 @@ ZeroMassQuoteResponseMessageAskFillsGroups ==
     [ blockLength                           |-> [i \in 1 .. 2 |-> 0],
       massQuoteResponseMessageAskFillsGroup |-> << >> ]
 
-(* Mass Quote Response Message ask Fills Groups at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Response Message Ask Fills Groups at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteResponseMessageAskFillsGroups ==
     { ZeroMassQuoteResponseMessageAskFillsGroups }
         \cup { [ZeroMassQuoteResponseMessageAskFillsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -2687,7 +2687,7 @@ CheckedFillQty7 ==
         \cup { [ZeroFillQty7 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Mass Quote Response Message legs Group: 34 bytes                        *)
+(* Mass Quote Response Message Legs Group: 34 bytes                        *)
 (***************************************************************************)
 
 MassQuoteResponseMessageLegsGroup ==
@@ -2723,7 +2723,7 @@ ZeroMassQuoteResponseMessageLegsGroup ==
       fillQty   |-> ZeroFillQty7,
       legSide   |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Mass Quote Response Message legs Group at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Response Message Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteResponseMessageLegsGroup ==
     { ZeroMassQuoteResponseMessageLegsGroup }
         \cup { [ZeroMassQuoteResponseMessageLegsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
@@ -2732,14 +2732,14 @@ CheckedMassQuoteResponseMessageLegsGroup ==
         \cup { [ZeroMassQuoteResponseMessageLegsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty7 }
         \cup { [ZeroMassQuoteResponseMessageLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
 
-(* A run of Mass Quote Response Message legs Group, written one after another *)
+(* A run of Mass Quote Response Message Legs Group, written one after another *)
 RECURSIVE EncodeMassQuoteResponseMessageLegsGroupList(_)
 EncodeMassQuoteResponseMessageLegsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeMassQuoteResponseMessageLegsGroup(Head(messages)) \o EncodeMassQuoteResponseMessageLegsGroupList(Tail(messages))
 
-(* As many Mass Quote Response Message legs Group as the field that counts them says *)
+(* As many Mass Quote Response Message Legs Group as the field that counts them says *)
 RECURSIVE ReadMassQuoteResponseMessageLegsGroupList(_, _)
 ReadMassQuoteResponseMessageLegsGroupList(bytes, count) ==
     IF count = 0
@@ -2750,11 +2750,11 @@ ReadMassQuoteResponseMessageLegsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Mass Quote Response Message legs Group of each kind, for the lists that carry them *)
+(* One Mass Quote Response Message Legs Group of each kind, for the lists that carry them *)
 OneMassQuoteResponseMessageLegsGroup == { ZeroMassQuoteResponseMessageLegsGroup }
 
 (***************************************************************************)
-(* Mass Quote Response Message legs Groups                                 *)
+(* Mass Quote Response Message Legs Groups                                 *)
 (***************************************************************************)
 
 MassQuoteResponseMessageLegsGroups ==
@@ -2777,7 +2777,7 @@ ZeroMassQuoteResponseMessageLegsGroups ==
     [ blockLength                       |-> [i \in 1 .. 2 |-> 0],
       massQuoteResponseMessageLegsGroup |-> << >> ]
 
-(* Mass Quote Response Message legs Groups at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Response Message Legs Groups at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteResponseMessageLegsGroups ==
     { ZeroMassQuoteResponseMessageLegsGroups }
         \cup { [ZeroMassQuoteResponseMessageLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -3114,7 +3114,7 @@ CheckedTotalFilled3 ==
         \cup { [ZeroTotalFilled3 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Order Filled Message fills Group: 60 bytes                              *)
+(* Order Filled Message Fills Group: 60 bytes                              *)
 (***************************************************************************)
 
 OrderFilledMessageFillsGroup ==
@@ -3170,7 +3170,7 @@ ZeroOrderFilledMessageFillsGroup ==
       side           |-> [i \in 1 .. 1 |-> 0],
       flagsFillFlags |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Order Filled Message fills Group at zero, then each field in turn at the values it is checked at *)
+(* Order Filled Message Fills Group at zero, then each field in turn at the values it is checked at *)
 CheckedOrderFilledMessageFillsGroup ==
     { ZeroOrderFilledMessageFillsGroup }
         \cup { [ZeroOrderFilledMessageFillsGroup EXCEPT !.clientOrderId = one] : one \in Sample(8) }
@@ -3183,14 +3183,14 @@ CheckedOrderFilledMessageFillsGroup ==
         \cup { [ZeroOrderFilledMessageFillsGroup EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroOrderFilledMessageFillsGroup EXCEPT !.flagsFillFlags = one] : one \in Sample(1) }
 
-(* A run of Order Filled Message fills Group, written one after another *)
+(* A run of Order Filled Message Fills Group, written one after another *)
 RECURSIVE EncodeOrderFilledMessageFillsGroupList(_)
 EncodeOrderFilledMessageFillsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeOrderFilledMessageFillsGroup(Head(messages)) \o EncodeOrderFilledMessageFillsGroupList(Tail(messages))
 
-(* As many Order Filled Message fills Group as the field that counts them says *)
+(* As many Order Filled Message Fills Group as the field that counts them says *)
 RECURSIVE ReadOrderFilledMessageFillsGroupList(_, _)
 ReadOrderFilledMessageFillsGroupList(bytes, count) ==
     IF count = 0
@@ -3201,11 +3201,11 @@ ReadOrderFilledMessageFillsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Order Filled Message fills Group of each kind, for the lists that carry them *)
+(* One Order Filled Message Fills Group of each kind, for the lists that carry them *)
 OneOrderFilledMessageFillsGroup == { ZeroOrderFilledMessageFillsGroup }
 
 (***************************************************************************)
-(* Order Filled Message fills Groups                                       *)
+(* Order Filled Message Fills Groups                                       *)
 (***************************************************************************)
 
 OrderFilledMessageFillsGroups ==
@@ -3228,7 +3228,7 @@ ZeroOrderFilledMessageFillsGroups ==
     [ blockLength                  |-> [i \in 1 .. 2 |-> 0],
       orderFilledMessageFillsGroup |-> << >> ]
 
-(* Order Filled Message fills Groups at zero, then each field in turn at the values it is checked at *)
+(* Order Filled Message Fills Groups at zero, then each field in turn at the values it is checked at *)
 CheckedOrderFilledMessageFillsGroups ==
     { ZeroOrderFilledMessageFillsGroups }
         \cup { [ZeroOrderFilledMessageFillsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -3263,7 +3263,7 @@ CheckedFillQty9 ==
         \cup { [ZeroFillQty9 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Order Filled Message legs Group: 34 bytes                               *)
+(* Order Filled Message Legs Group: 34 bytes                               *)
 (***************************************************************************)
 
 OrderFilledMessageLegsGroup ==
@@ -3299,7 +3299,7 @@ ZeroOrderFilledMessageLegsGroup ==
       fillQty |-> ZeroFillQty9,
       legSide |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Order Filled Message legs Group at zero, then each field in turn at the values it is checked at *)
+(* Order Filled Message Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedOrderFilledMessageLegsGroup ==
     { ZeroOrderFilledMessageLegsGroup }
         \cup { [ZeroOrderFilledMessageLegsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
@@ -3308,14 +3308,14 @@ CheckedOrderFilledMessageLegsGroup ==
         \cup { [ZeroOrderFilledMessageLegsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty9 }
         \cup { [ZeroOrderFilledMessageLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
 
-(* A run of Order Filled Message legs Group, written one after another *)
+(* A run of Order Filled Message Legs Group, written one after another *)
 RECURSIVE EncodeOrderFilledMessageLegsGroupList(_)
 EncodeOrderFilledMessageLegsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeOrderFilledMessageLegsGroup(Head(messages)) \o EncodeOrderFilledMessageLegsGroupList(Tail(messages))
 
-(* As many Order Filled Message legs Group as the field that counts them says *)
+(* As many Order Filled Message Legs Group as the field that counts them says *)
 RECURSIVE ReadOrderFilledMessageLegsGroupList(_, _)
 ReadOrderFilledMessageLegsGroupList(bytes, count) ==
     IF count = 0
@@ -3326,11 +3326,11 @@ ReadOrderFilledMessageLegsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Order Filled Message legs Group of each kind, for the lists that carry them *)
+(* One Order Filled Message Legs Group of each kind, for the lists that carry them *)
 OneOrderFilledMessageLegsGroup == { ZeroOrderFilledMessageLegsGroup }
 
 (***************************************************************************)
-(* Order Filled Message legs Groups                                        *)
+(* Order Filled Message Legs Groups                                        *)
 (***************************************************************************)
 
 OrderFilledMessageLegsGroups ==
@@ -3353,7 +3353,7 @@ ZeroOrderFilledMessageLegsGroups ==
     [ blockLength                 |-> [i \in 1 .. 2 |-> 0],
       orderFilledMessageLegsGroup |-> << >> ]
 
-(* Order Filled Message legs Groups at zero, then each field in turn at the values it is checked at *)
+(* Order Filled Message Legs Groups at zero, then each field in turn at the values it is checked at *)
 CheckedOrderFilledMessageLegsGroups ==
     { ZeroOrderFilledMessageLegsGroups }
         \cup { [ZeroOrderFilledMessageLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -3428,7 +3428,7 @@ CheckedTotalFilled4 ==
         \cup { [ZeroTotalFilled4 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Orders Canceled Message orders Group: 35 bytes                          *)
+(* Orders Canceled Message Orders Group: 35 bytes                          *)
 (***************************************************************************)
 
 OrdersCanceledMessageOrdersGroup ==
@@ -3469,7 +3469,7 @@ ZeroOrdersCanceledMessageOrdersGroup ==
       cancelReason     |-> [i \in 1 .. 1 |-> 0],
       flagsCancelFlags |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Orders Canceled Message orders Group at zero, then each field in turn at the values it is checked at *)
+(* Orders Canceled Message Orders Group at zero, then each field in turn at the values it is checked at *)
 CheckedOrdersCanceledMessageOrdersGroup ==
     { ZeroOrdersCanceledMessageOrdersGroup }
         \cup { [ZeroOrdersCanceledMessageOrdersGroup EXCEPT !.clientOrderId = one] : one \in Sample(8) }
@@ -3479,14 +3479,14 @@ CheckedOrdersCanceledMessageOrdersGroup ==
         \cup { [ZeroOrdersCanceledMessageOrdersGroup EXCEPT !.cancelReason = one] : one \in Sample(1) }
         \cup { [ZeroOrdersCanceledMessageOrdersGroup EXCEPT !.flagsCancelFlags = one] : one \in Sample(1) }
 
-(* A run of Orders Canceled Message orders Group, written one after another *)
+(* A run of Orders Canceled Message Orders Group, written one after another *)
 RECURSIVE EncodeOrdersCanceledMessageOrdersGroupList(_)
 EncodeOrdersCanceledMessageOrdersGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeOrdersCanceledMessageOrdersGroup(Head(messages)) \o EncodeOrdersCanceledMessageOrdersGroupList(Tail(messages))
 
-(* As many Orders Canceled Message orders Group as the field that counts them says *)
+(* As many Orders Canceled Message Orders Group as the field that counts them says *)
 RECURSIVE ReadOrdersCanceledMessageOrdersGroupList(_, _)
 ReadOrdersCanceledMessageOrdersGroupList(bytes, count) ==
     IF count = 0
@@ -3497,11 +3497,11 @@ ReadOrdersCanceledMessageOrdersGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Orders Canceled Message orders Group of each kind, for the lists that carry them *)
+(* One Orders Canceled Message Orders Group of each kind, for the lists that carry them *)
 OneOrdersCanceledMessageOrdersGroup == { ZeroOrdersCanceledMessageOrdersGroup }
 
 (***************************************************************************)
-(* Orders Canceled Message orders Groups                                   *)
+(* Orders Canceled Message Orders Groups                                   *)
 (***************************************************************************)
 
 OrdersCanceledMessageOrdersGroups ==
@@ -3524,7 +3524,7 @@ ZeroOrdersCanceledMessageOrdersGroups ==
     [ blockLength                      |-> [i \in 1 .. 2 |-> 0],
       ordersCanceledMessageOrdersGroup |-> << >> ]
 
-(* Orders Canceled Message orders Groups at zero, then each field in turn at the values it is checked at *)
+(* Orders Canceled Message Orders Groups at zero, then each field in turn at the values it is checked at *)
 CheckedOrdersCanceledMessageOrdersGroups ==
     { ZeroOrdersCanceledMessageOrdersGroups }
         \cup { [ZeroOrdersCanceledMessageOrdersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -3683,7 +3683,7 @@ CheckedFillQty10 ==
         \cup { [ZeroFillQty10 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Order Placed Message fills Group: 25 bytes                              *)
+(* Order Placed Message Fills Group: 25 bytes                              *)
 (***************************************************************************)
 
 OrderPlacedMessageFillsGroup ==
@@ -3709,21 +3709,21 @@ ZeroOrderPlacedMessageFillsGroup ==
       fillPrice |-> [i \in 1 .. 8 |-> 0],
       fillQty   |-> ZeroFillQty10 ]
 
-(* Order Placed Message fills Group at zero, then each field in turn at the values it is checked at *)
+(* Order Placed Message Fills Group at zero, then each field in turn at the values it is checked at *)
 CheckedOrderPlacedMessageFillsGroup ==
     { ZeroOrderPlacedMessageFillsGroup }
         \cup { [ZeroOrderPlacedMessageFillsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
         \cup { [ZeroOrderPlacedMessageFillsGroup EXCEPT !.fillPrice = one] : one \in Sample(8) }
         \cup { [ZeroOrderPlacedMessageFillsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty10 }
 
-(* A run of Order Placed Message fills Group, written one after another *)
+(* A run of Order Placed Message Fills Group, written one after another *)
 RECURSIVE EncodeOrderPlacedMessageFillsGroupList(_)
 EncodeOrderPlacedMessageFillsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeOrderPlacedMessageFillsGroup(Head(messages)) \o EncodeOrderPlacedMessageFillsGroupList(Tail(messages))
 
-(* As many Order Placed Message fills Group as the field that counts them says *)
+(* As many Order Placed Message Fills Group as the field that counts them says *)
 RECURSIVE ReadOrderPlacedMessageFillsGroupList(_, _)
 ReadOrderPlacedMessageFillsGroupList(bytes, count) ==
     IF count = 0
@@ -3734,11 +3734,11 @@ ReadOrderPlacedMessageFillsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Order Placed Message fills Group of each kind, for the lists that carry them *)
+(* One Order Placed Message Fills Group of each kind, for the lists that carry them *)
 OneOrderPlacedMessageFillsGroup == { ZeroOrderPlacedMessageFillsGroup }
 
 (***************************************************************************)
-(* Order Placed Message fills Groups                                       *)
+(* Order Placed Message Fills Groups                                       *)
 (***************************************************************************)
 
 OrderPlacedMessageFillsGroups ==
@@ -3761,7 +3761,7 @@ ZeroOrderPlacedMessageFillsGroups ==
     [ blockLength                  |-> [i \in 1 .. 2 |-> 0],
       orderPlacedMessageFillsGroup |-> << >> ]
 
-(* Order Placed Message fills Groups at zero, then each field in turn at the values it is checked at *)
+(* Order Placed Message Fills Groups at zero, then each field in turn at the values it is checked at *)
 CheckedOrderPlacedMessageFillsGroups ==
     { ZeroOrderPlacedMessageFillsGroups }
         \cup { [ZeroOrderPlacedMessageFillsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -3796,7 +3796,7 @@ CheckedFillQty11 ==
         \cup { [ZeroFillQty11 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Order Placed Message legs Group: 34 bytes                               *)
+(* Order Placed Message Legs Group: 34 bytes                               *)
 (***************************************************************************)
 
 OrderPlacedMessageLegsGroup ==
@@ -3832,7 +3832,7 @@ ZeroOrderPlacedMessageLegsGroup ==
       fillQty   |-> ZeroFillQty11,
       legSide   |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Order Placed Message legs Group at zero, then each field in turn at the values it is checked at *)
+(* Order Placed Message Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedOrderPlacedMessageLegsGroup ==
     { ZeroOrderPlacedMessageLegsGroup }
         \cup { [ZeroOrderPlacedMessageLegsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
@@ -3841,14 +3841,14 @@ CheckedOrderPlacedMessageLegsGroup ==
         \cup { [ZeroOrderPlacedMessageLegsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty11 }
         \cup { [ZeroOrderPlacedMessageLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
 
-(* A run of Order Placed Message legs Group, written one after another *)
+(* A run of Order Placed Message Legs Group, written one after another *)
 RECURSIVE EncodeOrderPlacedMessageLegsGroupList(_)
 EncodeOrderPlacedMessageLegsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeOrderPlacedMessageLegsGroup(Head(messages)) \o EncodeOrderPlacedMessageLegsGroupList(Tail(messages))
 
-(* As many Order Placed Message legs Group as the field that counts them says *)
+(* As many Order Placed Message Legs Group as the field that counts them says *)
 RECURSIVE ReadOrderPlacedMessageLegsGroupList(_, _)
 ReadOrderPlacedMessageLegsGroupList(bytes, count) ==
     IF count = 0
@@ -3859,11 +3859,11 @@ ReadOrderPlacedMessageLegsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Order Placed Message legs Group of each kind, for the lists that carry them *)
+(* One Order Placed Message Legs Group of each kind, for the lists that carry them *)
 OneOrderPlacedMessageLegsGroup == { ZeroOrderPlacedMessageLegsGroup }
 
 (***************************************************************************)
-(* Order Placed Message legs Groups                                        *)
+(* Order Placed Message Legs Groups                                        *)
 (***************************************************************************)
 
 OrderPlacedMessageLegsGroups ==
@@ -3886,7 +3886,7 @@ ZeroOrderPlacedMessageLegsGroups ==
     [ blockLength                 |-> [i \in 1 .. 2 |-> 0],
       orderPlacedMessageLegsGroup |-> << >> ]
 
-(* Order Placed Message legs Groups at zero, then each field in turn at the values it is checked at *)
+(* Order Placed Message Legs Groups at zero, then each field in turn at the values it is checked at *)
 CheckedOrderPlacedMessageLegsGroups ==
     { ZeroOrderPlacedMessageLegsGroups }
         \cup { [ZeroOrderPlacedMessageLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -4071,7 +4071,7 @@ CheckedVisibleQty4 ==
         \cup { [ZeroVisibleQty4 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Mass Quote Orders Placed Message orders Group: 62 bytes                 *)
+(* Mass Quote Orders Placed Message Orders Group: 62 bytes                 *)
 (***************************************************************************)
 
 MassQuoteOrdersPlacedMessageOrdersGroup ==
@@ -4132,7 +4132,7 @@ ZeroMassQuoteOrdersPlacedMessageOrdersGroup ==
       status        |-> [i \in 1 .. 1 |-> 0],
       cancelReason  |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Mass Quote Orders Placed Message orders Group at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Orders Placed Message Orders Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteOrdersPlacedMessageOrdersGroup ==
     { ZeroMassQuoteOrdersPlacedMessageOrdersGroup }
         \cup { [ZeroMassQuoteOrdersPlacedMessageOrdersGroup EXCEPT !.clientOrderId = one] : one \in Sample(8) }
@@ -4146,14 +4146,14 @@ CheckedMassQuoteOrdersPlacedMessageOrdersGroup ==
         \cup { [ZeroMassQuoteOrdersPlacedMessageOrdersGroup EXCEPT !.status = one] : one \in Sample(1) }
         \cup { [ZeroMassQuoteOrdersPlacedMessageOrdersGroup EXCEPT !.cancelReason = one] : one \in Sample(1) }
 
-(* A run of Mass Quote Orders Placed Message orders Group, written one after another *)
+(* A run of Mass Quote Orders Placed Message Orders Group, written one after another *)
 RECURSIVE EncodeMassQuoteOrdersPlacedMessageOrdersGroupList(_)
 EncodeMassQuoteOrdersPlacedMessageOrdersGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeMassQuoteOrdersPlacedMessageOrdersGroup(Head(messages)) \o EncodeMassQuoteOrdersPlacedMessageOrdersGroupList(Tail(messages))
 
-(* As many Mass Quote Orders Placed Message orders Group as the field that counts them says *)
+(* As many Mass Quote Orders Placed Message Orders Group as the field that counts them says *)
 RECURSIVE ReadMassQuoteOrdersPlacedMessageOrdersGroupList(_, _)
 ReadMassQuoteOrdersPlacedMessageOrdersGroupList(bytes, count) ==
     IF count = 0
@@ -4164,11 +4164,11 @@ ReadMassQuoteOrdersPlacedMessageOrdersGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Mass Quote Orders Placed Message orders Group of each kind, for the lists that carry them *)
+(* One Mass Quote Orders Placed Message Orders Group of each kind, for the lists that carry them *)
 OneMassQuoteOrdersPlacedMessageOrdersGroup == { ZeroMassQuoteOrdersPlacedMessageOrdersGroup }
 
 (***************************************************************************)
-(* Mass Quote Orders Placed Message orders Groups                          *)
+(* Mass Quote Orders Placed Message Orders Groups                          *)
 (***************************************************************************)
 
 MassQuoteOrdersPlacedMessageOrdersGroups ==
@@ -4191,7 +4191,7 @@ ZeroMassQuoteOrdersPlacedMessageOrdersGroups ==
     [ blockLength                             |-> [i \in 1 .. 2 |-> 0],
       massQuoteOrdersPlacedMessageOrdersGroup |-> << >> ]
 
-(* Mass Quote Orders Placed Message orders Groups at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Orders Placed Message Orders Groups at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteOrdersPlacedMessageOrdersGroups ==
     { ZeroMassQuoteOrdersPlacedMessageOrdersGroups }
         \cup { [ZeroMassQuoteOrdersPlacedMessageOrdersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -4226,7 +4226,7 @@ CheckedFillQty12 ==
         \cup { [ZeroFillQty12 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Mass Quote Orders Placed Message fills Group: 33 bytes                  *)
+(* Mass Quote Orders Placed Message Fills Group: 33 bytes                  *)
 (***************************************************************************)
 
 MassQuoteOrdersPlacedMessageFillsGroup ==
@@ -4257,7 +4257,7 @@ ZeroMassQuoteOrdersPlacedMessageFillsGroup ==
       fillPrice     |-> [i \in 1 .. 8 |-> 0],
       fillQty       |-> ZeroFillQty12 ]
 
-(* Mass Quote Orders Placed Message fills Group at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Orders Placed Message Fills Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteOrdersPlacedMessageFillsGroup ==
     { ZeroMassQuoteOrdersPlacedMessageFillsGroup }
         \cup { [ZeroMassQuoteOrdersPlacedMessageFillsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
@@ -4265,14 +4265,14 @@ CheckedMassQuoteOrdersPlacedMessageFillsGroup ==
         \cup { [ZeroMassQuoteOrdersPlacedMessageFillsGroup EXCEPT !.fillPrice = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteOrdersPlacedMessageFillsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty12 }
 
-(* A run of Mass Quote Orders Placed Message fills Group, written one after another *)
+(* A run of Mass Quote Orders Placed Message Fills Group, written one after another *)
 RECURSIVE EncodeMassQuoteOrdersPlacedMessageFillsGroupList(_)
 EncodeMassQuoteOrdersPlacedMessageFillsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeMassQuoteOrdersPlacedMessageFillsGroup(Head(messages)) \o EncodeMassQuoteOrdersPlacedMessageFillsGroupList(Tail(messages))
 
-(* As many Mass Quote Orders Placed Message fills Group as the field that counts them says *)
+(* As many Mass Quote Orders Placed Message Fills Group as the field that counts them says *)
 RECURSIVE ReadMassQuoteOrdersPlacedMessageFillsGroupList(_, _)
 ReadMassQuoteOrdersPlacedMessageFillsGroupList(bytes, count) ==
     IF count = 0
@@ -4283,11 +4283,11 @@ ReadMassQuoteOrdersPlacedMessageFillsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Mass Quote Orders Placed Message fills Group of each kind, for the lists that carry them *)
+(* One Mass Quote Orders Placed Message Fills Group of each kind, for the lists that carry them *)
 OneMassQuoteOrdersPlacedMessageFillsGroup == { ZeroMassQuoteOrdersPlacedMessageFillsGroup }
 
 (***************************************************************************)
-(* Mass Quote Orders Placed Message fills Groups                           *)
+(* Mass Quote Orders Placed Message Fills Groups                           *)
 (***************************************************************************)
 
 MassQuoteOrdersPlacedMessageFillsGroups ==
@@ -4310,7 +4310,7 @@ ZeroMassQuoteOrdersPlacedMessageFillsGroups ==
     [ blockLength                            |-> [i \in 1 .. 2 |-> 0],
       massQuoteOrdersPlacedMessageFillsGroup |-> << >> ]
 
-(* Mass Quote Orders Placed Message fills Groups at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Orders Placed Message Fills Groups at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteOrdersPlacedMessageFillsGroups ==
     { ZeroMassQuoteOrdersPlacedMessageFillsGroups }
         \cup { [ZeroMassQuoteOrdersPlacedMessageFillsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -4345,7 +4345,7 @@ CheckedFillQty13 ==
         \cup { [ZeroFillQty13 EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Mass Quote Orders Placed Message legs Group: 34 bytes                   *)
+(* Mass Quote Orders Placed Message Legs Group: 34 bytes                   *)
 (***************************************************************************)
 
 MassQuoteOrdersPlacedMessageLegsGroup ==
@@ -4381,7 +4381,7 @@ ZeroMassQuoteOrdersPlacedMessageLegsGroup ==
       fillQty   |-> ZeroFillQty13,
       legSide   |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Mass Quote Orders Placed Message legs Group at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Orders Placed Message Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteOrdersPlacedMessageLegsGroup ==
     { ZeroMassQuoteOrdersPlacedMessageLegsGroup }
         \cup { [ZeroMassQuoteOrdersPlacedMessageLegsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
@@ -4390,14 +4390,14 @@ CheckedMassQuoteOrdersPlacedMessageLegsGroup ==
         \cup { [ZeroMassQuoteOrdersPlacedMessageLegsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty13 }
         \cup { [ZeroMassQuoteOrdersPlacedMessageLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
 
-(* A run of Mass Quote Orders Placed Message legs Group, written one after another *)
+(* A run of Mass Quote Orders Placed Message Legs Group, written one after another *)
 RECURSIVE EncodeMassQuoteOrdersPlacedMessageLegsGroupList(_)
 EncodeMassQuoteOrdersPlacedMessageLegsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeMassQuoteOrdersPlacedMessageLegsGroup(Head(messages)) \o EncodeMassQuoteOrdersPlacedMessageLegsGroupList(Tail(messages))
 
-(* As many Mass Quote Orders Placed Message legs Group as the field that counts them says *)
+(* As many Mass Quote Orders Placed Message Legs Group as the field that counts them says *)
 RECURSIVE ReadMassQuoteOrdersPlacedMessageLegsGroupList(_, _)
 ReadMassQuoteOrdersPlacedMessageLegsGroupList(bytes, count) ==
     IF count = 0
@@ -4408,11 +4408,11 @@ ReadMassQuoteOrdersPlacedMessageLegsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Mass Quote Orders Placed Message legs Group of each kind, for the lists that carry them *)
+(* One Mass Quote Orders Placed Message Legs Group of each kind, for the lists that carry them *)
 OneMassQuoteOrdersPlacedMessageLegsGroup == { ZeroMassQuoteOrdersPlacedMessageLegsGroup }
 
 (***************************************************************************)
-(* Mass Quote Orders Placed Message legs Groups                            *)
+(* Mass Quote Orders Placed Message Legs Groups                            *)
 (***************************************************************************)
 
 MassQuoteOrdersPlacedMessageLegsGroups ==
@@ -4435,7 +4435,7 @@ ZeroMassQuoteOrdersPlacedMessageLegsGroups ==
     [ blockLength                           |-> [i \in 1 .. 2 |-> 0],
       massQuoteOrdersPlacedMessageLegsGroup |-> << >> ]
 
-(* Mass Quote Orders Placed Message legs Groups at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Orders Placed Message Legs Groups at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteOrdersPlacedMessageLegsGroups ==
     { ZeroMassQuoteOrdersPlacedMessageLegsGroups }
         \cup { [ZeroMassQuoteOrdersPlacedMessageLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -5222,7 +5222,7 @@ RoundTripAskQty ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Request Message quotes Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Request Message Quotes Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteRequestMessageQuotesGroup ==
     \A message \in CheckedMassQuoteRequestMessageQuotesGroup :
         LET read == DecodeMassQuoteRequestMessageQuotesGroup(EncodeMassQuoteRequestMessageQuotesGroup(message))
@@ -5230,7 +5230,7 @@ RoundTripMassQuoteRequestMessageQuotesGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Request Message quotes Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Request Message Quotes Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteRequestMessageQuotesGroups ==
     \A message \in CheckedMassQuoteRequestMessageQuotesGroups :
         LET read == DecodeMassQuoteRequestMessageQuotesGroups(EncodeMassQuoteRequestMessageQuotesGroups(message))
@@ -5294,7 +5294,7 @@ RoundTripFillQty ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Order Response Message fills Group decodes back to what was encoded, and leaves nothing over *)
+(* Every New Order Response Message Fills Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripNewOrderResponseMessageFillsGroup ==
     \A message \in CheckedNewOrderResponseMessageFillsGroup :
         LET read == DecodeNewOrderResponseMessageFillsGroup(EncodeNewOrderResponseMessageFillsGroup(message))
@@ -5302,7 +5302,7 @@ RoundTripNewOrderResponseMessageFillsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Order Response Message fills Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every New Order Response Message Fills Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripNewOrderResponseMessageFillsGroups ==
     \A message \in CheckedNewOrderResponseMessageFillsGroups :
         LET read == DecodeNewOrderResponseMessageFillsGroups(EncodeNewOrderResponseMessageFillsGroups(message))
@@ -5318,7 +5318,7 @@ RoundTripFillQty2 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Order Response Message legs Group decodes back to what was encoded, and leaves nothing over *)
+(* Every New Order Response Message Legs Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripNewOrderResponseMessageLegsGroup ==
     \A message \in CheckedNewOrderResponseMessageLegsGroup :
         LET read == DecodeNewOrderResponseMessageLegsGroup(EncodeNewOrderResponseMessageLegsGroup(message))
@@ -5326,7 +5326,7 @@ RoundTripNewOrderResponseMessageLegsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Order Response Message legs Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every New Order Response Message Legs Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripNewOrderResponseMessageLegsGroups ==
     \A message \in CheckedNewOrderResponseMessageLegsGroups :
         LET read == DecodeNewOrderResponseMessageLegsGroups(EncodeNewOrderResponseMessageLegsGroups(message))
@@ -5390,7 +5390,7 @@ RoundTripFillQty3 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Amend Order Response Message fills Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Amend Order Response Message Fills Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripAmendOrderResponseMessageFillsGroup ==
     \A message \in CheckedAmendOrderResponseMessageFillsGroup :
         LET read == DecodeAmendOrderResponseMessageFillsGroup(EncodeAmendOrderResponseMessageFillsGroup(message))
@@ -5398,7 +5398,7 @@ RoundTripAmendOrderResponseMessageFillsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Amend Order Response Message fills Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Amend Order Response Message Fills Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripAmendOrderResponseMessageFillsGroups ==
     \A message \in CheckedAmendOrderResponseMessageFillsGroups :
         LET read == DecodeAmendOrderResponseMessageFillsGroups(EncodeAmendOrderResponseMessageFillsGroups(message))
@@ -5414,7 +5414,7 @@ RoundTripFillQty4 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Amend Order Response Message legs Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Amend Order Response Message Legs Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripAmendOrderResponseMessageLegsGroup ==
     \A message \in CheckedAmendOrderResponseMessageLegsGroup :
         LET read == DecodeAmendOrderResponseMessageLegsGroup(EncodeAmendOrderResponseMessageLegsGroup(message))
@@ -5422,7 +5422,7 @@ RoundTripAmendOrderResponseMessageLegsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Amend Order Response Message legs Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Amend Order Response Message Legs Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripAmendOrderResponseMessageLegsGroups ==
     \A message \in CheckedAmendOrderResponseMessageLegsGroups :
         LET read == DecodeAmendOrderResponseMessageLegsGroups(EncodeAmendOrderResponseMessageLegsGroups(message))
@@ -5510,7 +5510,7 @@ RoundTripAskFilledQty ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Response Message quotes Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Response Message Quotes Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteResponseMessageQuotesGroup ==
     \A message \in CheckedMassQuoteResponseMessageQuotesGroup :
         LET read == DecodeMassQuoteResponseMessageQuotesGroup(EncodeMassQuoteResponseMessageQuotesGroup(message))
@@ -5518,7 +5518,7 @@ RoundTripMassQuoteResponseMessageQuotesGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Response Message quotes Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Response Message Quotes Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteResponseMessageQuotesGroups ==
     \A message \in CheckedMassQuoteResponseMessageQuotesGroups :
         LET read == DecodeMassQuoteResponseMessageQuotesGroups(EncodeMassQuoteResponseMessageQuotesGroups(message))
@@ -5534,7 +5534,7 @@ RoundTripFillQty5 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Response Message bid Fills Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Response Message Bid Fills Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteResponseMessageBidFillsGroup ==
     \A message \in CheckedMassQuoteResponseMessageBidFillsGroup :
         LET read == DecodeMassQuoteResponseMessageBidFillsGroup(EncodeMassQuoteResponseMessageBidFillsGroup(message))
@@ -5542,7 +5542,7 @@ RoundTripMassQuoteResponseMessageBidFillsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Response Message bid Fills Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Response Message Bid Fills Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteResponseMessageBidFillsGroups ==
     \A message \in CheckedMassQuoteResponseMessageBidFillsGroups :
         LET read == DecodeMassQuoteResponseMessageBidFillsGroups(EncodeMassQuoteResponseMessageBidFillsGroups(message))
@@ -5558,7 +5558,7 @@ RoundTripFillQty6 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Response Message ask Fills Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Response Message Ask Fills Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteResponseMessageAskFillsGroup ==
     \A message \in CheckedMassQuoteResponseMessageAskFillsGroup :
         LET read == DecodeMassQuoteResponseMessageAskFillsGroup(EncodeMassQuoteResponseMessageAskFillsGroup(message))
@@ -5566,7 +5566,7 @@ RoundTripMassQuoteResponseMessageAskFillsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Response Message ask Fills Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Response Message Ask Fills Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteResponseMessageAskFillsGroups ==
     \A message \in CheckedMassQuoteResponseMessageAskFillsGroups :
         LET read == DecodeMassQuoteResponseMessageAskFillsGroups(EncodeMassQuoteResponseMessageAskFillsGroups(message))
@@ -5582,7 +5582,7 @@ RoundTripFillQty7 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Response Message legs Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Response Message Legs Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteResponseMessageLegsGroup ==
     \A message \in CheckedMassQuoteResponseMessageLegsGroup :
         LET read == DecodeMassQuoteResponseMessageLegsGroup(EncodeMassQuoteResponseMessageLegsGroup(message))
@@ -5590,7 +5590,7 @@ RoundTripMassQuoteResponseMessageLegsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Response Message legs Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Response Message Legs Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteResponseMessageLegsGroups ==
     \A message \in CheckedMassQuoteResponseMessageLegsGroups :
         LET read == DecodeMassQuoteResponseMessageLegsGroups(EncodeMassQuoteResponseMessageLegsGroups(message))
@@ -5662,7 +5662,7 @@ RoundTripTotalFilled3 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Filled Message fills Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Order Filled Message Fills Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrderFilledMessageFillsGroup ==
     \A message \in CheckedOrderFilledMessageFillsGroup :
         LET read == DecodeOrderFilledMessageFillsGroup(EncodeOrderFilledMessageFillsGroup(message))
@@ -5670,7 +5670,7 @@ RoundTripOrderFilledMessageFillsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Filled Message fills Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Order Filled Message Fills Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrderFilledMessageFillsGroups ==
     \A message \in CheckedOrderFilledMessageFillsGroups :
         LET read == DecodeOrderFilledMessageFillsGroups(EncodeOrderFilledMessageFillsGroups(message))
@@ -5686,7 +5686,7 @@ RoundTripFillQty9 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Filled Message legs Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Order Filled Message Legs Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrderFilledMessageLegsGroup ==
     \A message \in CheckedOrderFilledMessageLegsGroup :
         LET read == DecodeOrderFilledMessageLegsGroup(EncodeOrderFilledMessageLegsGroup(message))
@@ -5694,7 +5694,7 @@ RoundTripOrderFilledMessageLegsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Filled Message legs Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Order Filled Message Legs Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrderFilledMessageLegsGroups ==
     \A message \in CheckedOrderFilledMessageLegsGroups :
         LET read == DecodeOrderFilledMessageLegsGroups(EncodeOrderFilledMessageLegsGroups(message))
@@ -5718,7 +5718,7 @@ RoundTripTotalFilled4 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Orders Canceled Message orders Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Orders Canceled Message Orders Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrdersCanceledMessageOrdersGroup ==
     \A message \in CheckedOrdersCanceledMessageOrdersGroup :
         LET read == DecodeOrdersCanceledMessageOrdersGroup(EncodeOrdersCanceledMessageOrdersGroup(message))
@@ -5726,7 +5726,7 @@ RoundTripOrdersCanceledMessageOrdersGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Orders Canceled Message orders Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Orders Canceled Message Orders Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrdersCanceledMessageOrdersGroups ==
     \A message \in CheckedOrdersCanceledMessageOrdersGroups :
         LET read == DecodeOrdersCanceledMessageOrdersGroups(EncodeOrdersCanceledMessageOrdersGroups(message))
@@ -5774,7 +5774,7 @@ RoundTripFillQty10 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Placed Message fills Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Order Placed Message Fills Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrderPlacedMessageFillsGroup ==
     \A message \in CheckedOrderPlacedMessageFillsGroup :
         LET read == DecodeOrderPlacedMessageFillsGroup(EncodeOrderPlacedMessageFillsGroup(message))
@@ -5782,7 +5782,7 @@ RoundTripOrderPlacedMessageFillsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Placed Message fills Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Order Placed Message Fills Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrderPlacedMessageFillsGroups ==
     \A message \in CheckedOrderPlacedMessageFillsGroups :
         LET read == DecodeOrderPlacedMessageFillsGroups(EncodeOrderPlacedMessageFillsGroups(message))
@@ -5798,7 +5798,7 @@ RoundTripFillQty11 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Placed Message legs Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Order Placed Message Legs Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrderPlacedMessageLegsGroup ==
     \A message \in CheckedOrderPlacedMessageLegsGroup :
         LET read == DecodeOrderPlacedMessageLegsGroup(EncodeOrderPlacedMessageLegsGroup(message))
@@ -5806,7 +5806,7 @@ RoundTripOrderPlacedMessageLegsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Placed Message legs Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Order Placed Message Legs Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripOrderPlacedMessageLegsGroups ==
     \A message \in CheckedOrderPlacedMessageLegsGroups :
         LET read == DecodeOrderPlacedMessageLegsGroups(EncodeOrderPlacedMessageLegsGroups(message))
@@ -5846,7 +5846,7 @@ RoundTripVisibleQty4 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Orders Placed Message orders Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Orders Placed Message Orders Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteOrdersPlacedMessageOrdersGroup ==
     \A message \in CheckedMassQuoteOrdersPlacedMessageOrdersGroup :
         LET read == DecodeMassQuoteOrdersPlacedMessageOrdersGroup(EncodeMassQuoteOrdersPlacedMessageOrdersGroup(message))
@@ -5854,7 +5854,7 @@ RoundTripMassQuoteOrdersPlacedMessageOrdersGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Orders Placed Message orders Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Orders Placed Message Orders Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteOrdersPlacedMessageOrdersGroups ==
     \A message \in CheckedMassQuoteOrdersPlacedMessageOrdersGroups :
         LET read == DecodeMassQuoteOrdersPlacedMessageOrdersGroups(EncodeMassQuoteOrdersPlacedMessageOrdersGroups(message))
@@ -5870,7 +5870,7 @@ RoundTripFillQty12 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Orders Placed Message fills Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Orders Placed Message Fills Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteOrdersPlacedMessageFillsGroup ==
     \A message \in CheckedMassQuoteOrdersPlacedMessageFillsGroup :
         LET read == DecodeMassQuoteOrdersPlacedMessageFillsGroup(EncodeMassQuoteOrdersPlacedMessageFillsGroup(message))
@@ -5878,7 +5878,7 @@ RoundTripMassQuoteOrdersPlacedMessageFillsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Orders Placed Message fills Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Orders Placed Message Fills Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteOrdersPlacedMessageFillsGroups ==
     \A message \in CheckedMassQuoteOrdersPlacedMessageFillsGroups :
         LET read == DecodeMassQuoteOrdersPlacedMessageFillsGroups(EncodeMassQuoteOrdersPlacedMessageFillsGroups(message))
@@ -5894,7 +5894,7 @@ RoundTripFillQty13 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Orders Placed Message legs Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Orders Placed Message Legs Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteOrdersPlacedMessageLegsGroup ==
     \A message \in CheckedMassQuoteOrdersPlacedMessageLegsGroup :
         LET read == DecodeMassQuoteOrdersPlacedMessageLegsGroup(EncodeMassQuoteOrdersPlacedMessageLegsGroup(message))
@@ -5902,7 +5902,7 @@ RoundTripMassQuoteOrdersPlacedMessageLegsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Orders Placed Message legs Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Orders Placed Message Legs Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteOrdersPlacedMessageLegsGroups ==
     \A message \in CheckedMassQuoteOrdersPlacedMessageLegsGroups :
         LET read == DecodeMassQuoteOrdersPlacedMessageLegsGroups(EncodeMassQuoteOrdersPlacedMessageLegsGroups(message))

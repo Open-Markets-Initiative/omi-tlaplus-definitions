@@ -417,7 +417,7 @@ CheckedNewsMessage ==
         \cup { [ZeroNewsMessage EXCEPT !.textVarString16Null = one] : one \in CheckedTextVarString16Null }
 
 (***************************************************************************)
-(* Security Definition Report Strategy Message no Block Details Group: 12  *)
+(* Security Definition Report Strategy Message No Block Details Group: 12  *)
 (* bytes                                                                   *)
 (***************************************************************************)
 
@@ -444,21 +444,21 @@ ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup ==
       blockDetailsTradeType |-> [i \in 1 .. 3 |-> 0],
       blockDetailsMinQty    |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Security Definition Report Strategy Message no Block Details Group at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Report Strategy Message No Block Details Group at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup ==
     { ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup EXCEPT !.blockDetailsBlockType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup EXCEPT !.blockDetailsTradeType = one] : one \in Sample(3) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup EXCEPT !.blockDetailsMinQty = one] : one \in Sample(8) }
 
-(* A run of Security Definition Report Strategy Message no Block Details Group, written one after another *)
+(* A run of Security Definition Report Strategy Message No Block Details Group, written one after another *)
 RECURSIVE EncodeSecurityDefinitionReportStrategyMessageNoBlockDetailsGroupList(_)
 EncodeSecurityDefinitionReportStrategyMessageNoBlockDetailsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup(Head(messages)) \o EncodeSecurityDefinitionReportStrategyMessageNoBlockDetailsGroupList(Tail(messages))
 
-(* As many Security Definition Report Strategy Message no Block Details Group as the field that counts them says *)
+(* As many Security Definition Report Strategy Message No Block Details Group as the field that counts them says *)
 RECURSIVE ReadSecurityDefinitionReportStrategyMessageNoBlockDetailsGroupList(_, _)
 ReadSecurityDefinitionReportStrategyMessageNoBlockDetailsGroupList(bytes, count) ==
     IF count = 0
@@ -469,11 +469,11 @@ ReadSecurityDefinitionReportStrategyMessageNoBlockDetailsGroupList(bytes, count)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Security Definition Report Strategy Message no Block Details Group of each kind, for the lists that carry them *)
+(* One Security Definition Report Strategy Message No Block Details Group of each kind, for the lists that carry them *)
 OneSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup == { ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup }
 
 (***************************************************************************)
-(* Security Definition Report Strategy Message no Block Details Groups     *)
+(* Security Definition Report Strategy Message No Block Details Groups     *)
 (***************************************************************************)
 
 SecurityDefinitionReportStrategyMessageNoBlockDetailsGroups ==
@@ -496,14 +496,14 @@ ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups ==
     [ blockLength                                                |-> [i \in 1 .. 2 |-> 0],
       securityDefinitionReportStrategyMessageNoBlockDetailsGroup |-> << >> ]
 
-(* Security Definition Report Strategy Message no Block Details Groups at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Report Strategy Message No Block Details Groups at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups ==
     { ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups EXCEPT !.securityDefinitionReportStrategyMessageNoBlockDetailsGroup = one] : one \in SampleLists(OneSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup) }
 
 (***************************************************************************)
-(* Security Definition Report Strategy Message no Security Alt I D Group:  *)
+(* Security Definition Report Strategy Message No Security Alt I D Group:  *)
 (* 33 bytes                                                                *)
 (***************************************************************************)
 
@@ -525,20 +525,20 @@ ZeroSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup ==
     [ securityAltId       |-> [i \in 1 .. 30 |-> 0],
       securityAltIdSource |-> [i \in 1 .. 3 |-> 0] ]
 
-(* Security Definition Report Strategy Message no Security Alt I D Group at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Report Strategy Message No Security Alt I D Group at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup ==
     { ZeroSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup EXCEPT !.securityAltId = one] : one \in Sample(30) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup EXCEPT !.securityAltIdSource = one] : one \in Sample(3) }
 
-(* A run of Security Definition Report Strategy Message no Security Alt I D Group, written one after another *)
+(* A run of Security Definition Report Strategy Message No Security Alt I D Group, written one after another *)
 RECURSIVE EncodeSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroupList(_)
 EncodeSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup(Head(messages)) \o EncodeSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroupList(Tail(messages))
 
-(* As many Security Definition Report Strategy Message no Security Alt I D Group as the field that counts them says *)
+(* As many Security Definition Report Strategy Message No Security Alt I D Group as the field that counts them says *)
 RECURSIVE ReadSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroupList(_, _)
 ReadSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroupList(bytes, count) ==
     IF count = 0
@@ -549,11 +549,11 @@ ReadSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroupList(bytes, count
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Security Definition Report Strategy Message no Security Alt I D Group of each kind, for the lists that carry them *)
+(* One Security Definition Report Strategy Message No Security Alt I D Group of each kind, for the lists that carry them *)
 OneSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup == { ZeroSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup }
 
 (***************************************************************************)
-(* Security Definition Report Strategy Message no Security Alt I D Groups  *)
+(* Security Definition Report Strategy Message No Security Alt I D Groups  *)
 (***************************************************************************)
 
 SecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups ==
@@ -576,14 +576,14 @@ ZeroSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups ==
     [ blockLength                                                 |-> [i \in 1 .. 2 |-> 0],
       securityDefinitionReportStrategyMessageNoSecurityAltIDGroup |-> << >> ]
 
-(* Security Definition Report Strategy Message no Security Alt I D Groups at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Report Strategy Message No Security Alt I D Groups at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups ==
     { ZeroSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups EXCEPT !.securityDefinitionReportStrategyMessageNoSecurityAltIDGroup = one] : one \in SampleLists(OneSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup) }
 
 (***************************************************************************)
-(* Security Definition Report Strategy Message no Legs Group: 28 bytes     *)
+(* Security Definition Report Strategy Message No Legs Group: 28 bytes     *)
 (***************************************************************************)
 
 SecurityDefinitionReportStrategyMessageNoLegsGroup ==
@@ -644,7 +644,7 @@ ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup ==
       legRatioPriceDenominator |-> [i \in 1 .. 2 |-> 0],
       legRatioPriceNumerator   |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Security Definition Report Strategy Message no Legs Group at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Report Strategy Message No Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportStrategyMessageNoLegsGroup ==
     { ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legSymbol = one] : one \in Sample(4) }
@@ -658,14 +658,14 @@ CheckedSecurityDefinitionReportStrategyMessageNoLegsGroup ==
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legRatioPriceDenominator = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup EXCEPT !.legRatioPriceNumerator = one] : one \in Sample(2) }
 
-(* A run of Security Definition Report Strategy Message no Legs Group, written one after another *)
+(* A run of Security Definition Report Strategy Message No Legs Group, written one after another *)
 RECURSIVE EncodeSecurityDefinitionReportStrategyMessageNoLegsGroupList(_)
 EncodeSecurityDefinitionReportStrategyMessageNoLegsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeSecurityDefinitionReportStrategyMessageNoLegsGroup(Head(messages)) \o EncodeSecurityDefinitionReportStrategyMessageNoLegsGroupList(Tail(messages))
 
-(* As many Security Definition Report Strategy Message no Legs Group as the field that counts them says *)
+(* As many Security Definition Report Strategy Message No Legs Group as the field that counts them says *)
 RECURSIVE ReadSecurityDefinitionReportStrategyMessageNoLegsGroupList(_, _)
 ReadSecurityDefinitionReportStrategyMessageNoLegsGroupList(bytes, count) ==
     IF count = 0
@@ -676,11 +676,11 @@ ReadSecurityDefinitionReportStrategyMessageNoLegsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Security Definition Report Strategy Message no Legs Group of each kind, for the lists that carry them *)
+(* One Security Definition Report Strategy Message No Legs Group of each kind, for the lists that carry them *)
 OneSecurityDefinitionReportStrategyMessageNoLegsGroup == { ZeroSecurityDefinitionReportStrategyMessageNoLegsGroup }
 
 (***************************************************************************)
-(* Security Definition Report Strategy Message no Legs Groups              *)
+(* Security Definition Report Strategy Message No Legs Groups              *)
 (***************************************************************************)
 
 SecurityDefinitionReportStrategyMessageNoLegsGroups ==
@@ -703,7 +703,7 @@ ZeroSecurityDefinitionReportStrategyMessageNoLegsGroups ==
     [ blockLength                                        |-> [i \in 1 .. 2 |-> 0],
       securityDefinitionReportStrategyMessageNoLegsGroup |-> << >> ]
 
-(* Security Definition Report Strategy Message no Legs Groups at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Report Strategy Message No Legs Groups at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportStrategyMessageNoLegsGroups ==
     { ZeroSecurityDefinitionReportStrategyMessageNoLegsGroups }
         \cup { [ZeroSecurityDefinitionReportStrategyMessageNoLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -1338,7 +1338,7 @@ CheckedSecurityDefinitionReportStrategyMessage ==
         \cup { [ZeroSecurityDefinitionReportStrategyMessage EXCEPT !.physicalCode = one] : one \in CheckedPhysicalCode }
 
 (***************************************************************************)
-(* Security Definition Report Message no Block Details Group: 12 bytes     *)
+(* Security Definition Report Message No Block Details Group: 12 bytes     *)
 (***************************************************************************)
 
 SecurityDefinitionReportMessageNoBlockDetailsGroup ==
@@ -1364,21 +1364,21 @@ ZeroSecurityDefinitionReportMessageNoBlockDetailsGroup ==
       blockDetailsTradeType |-> [i \in 1 .. 3 |-> 0],
       blockDetailsMinQty    |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Security Definition Report Message no Block Details Group at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Report Message No Block Details Group at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportMessageNoBlockDetailsGroup ==
     { ZeroSecurityDefinitionReportMessageNoBlockDetailsGroup }
         \cup { [ZeroSecurityDefinitionReportMessageNoBlockDetailsGroup EXCEPT !.blockDetailsBlockType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityDefinitionReportMessageNoBlockDetailsGroup EXCEPT !.blockDetailsTradeType = one] : one \in Sample(3) }
         \cup { [ZeroSecurityDefinitionReportMessageNoBlockDetailsGroup EXCEPT !.blockDetailsMinQty = one] : one \in Sample(8) }
 
-(* A run of Security Definition Report Message no Block Details Group, written one after another *)
+(* A run of Security Definition Report Message No Block Details Group, written one after another *)
 RECURSIVE EncodeSecurityDefinitionReportMessageNoBlockDetailsGroupList(_)
 EncodeSecurityDefinitionReportMessageNoBlockDetailsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeSecurityDefinitionReportMessageNoBlockDetailsGroup(Head(messages)) \o EncodeSecurityDefinitionReportMessageNoBlockDetailsGroupList(Tail(messages))
 
-(* As many Security Definition Report Message no Block Details Group as the field that counts them says *)
+(* As many Security Definition Report Message No Block Details Group as the field that counts them says *)
 RECURSIVE ReadSecurityDefinitionReportMessageNoBlockDetailsGroupList(_, _)
 ReadSecurityDefinitionReportMessageNoBlockDetailsGroupList(bytes, count) ==
     IF count = 0
@@ -1389,11 +1389,11 @@ ReadSecurityDefinitionReportMessageNoBlockDetailsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Security Definition Report Message no Block Details Group of each kind, for the lists that carry them *)
+(* One Security Definition Report Message No Block Details Group of each kind, for the lists that carry them *)
 OneSecurityDefinitionReportMessageNoBlockDetailsGroup == { ZeroSecurityDefinitionReportMessageNoBlockDetailsGroup }
 
 (***************************************************************************)
-(* Security Definition Report Message no Block Details Groups              *)
+(* Security Definition Report Message No Block Details Groups              *)
 (***************************************************************************)
 
 SecurityDefinitionReportMessageNoBlockDetailsGroups ==
@@ -1416,14 +1416,14 @@ ZeroSecurityDefinitionReportMessageNoBlockDetailsGroups ==
     [ blockLength                                        |-> [i \in 1 .. 2 |-> 0],
       securityDefinitionReportMessageNoBlockDetailsGroup |-> << >> ]
 
-(* Security Definition Report Message no Block Details Groups at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Report Message No Block Details Groups at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportMessageNoBlockDetailsGroups ==
     { ZeroSecurityDefinitionReportMessageNoBlockDetailsGroups }
         \cup { [ZeroSecurityDefinitionReportMessageNoBlockDetailsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroSecurityDefinitionReportMessageNoBlockDetailsGroups EXCEPT !.securityDefinitionReportMessageNoBlockDetailsGroup = one] : one \in SampleLists(OneSecurityDefinitionReportMessageNoBlockDetailsGroup) }
 
 (***************************************************************************)
-(* Security Definition Report Message no Security Alt I D Group: 33 bytes  *)
+(* Security Definition Report Message No Security Alt I D Group: 33 bytes  *)
 (***************************************************************************)
 
 SecurityDefinitionReportMessageNoSecurityAltIDGroup ==
@@ -1444,20 +1444,20 @@ ZeroSecurityDefinitionReportMessageNoSecurityAltIDGroup ==
     [ securityAltId       |-> [i \in 1 .. 30 |-> 0],
       securityAltIdSource |-> [i \in 1 .. 3 |-> 0] ]
 
-(* Security Definition Report Message no Security Alt I D Group at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Report Message No Security Alt I D Group at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportMessageNoSecurityAltIDGroup ==
     { ZeroSecurityDefinitionReportMessageNoSecurityAltIDGroup }
         \cup { [ZeroSecurityDefinitionReportMessageNoSecurityAltIDGroup EXCEPT !.securityAltId = one] : one \in Sample(30) }
         \cup { [ZeroSecurityDefinitionReportMessageNoSecurityAltIDGroup EXCEPT !.securityAltIdSource = one] : one \in Sample(3) }
 
-(* A run of Security Definition Report Message no Security Alt I D Group, written one after another *)
+(* A run of Security Definition Report Message No Security Alt I D Group, written one after another *)
 RECURSIVE EncodeSecurityDefinitionReportMessageNoSecurityAltIDGroupList(_)
 EncodeSecurityDefinitionReportMessageNoSecurityAltIDGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeSecurityDefinitionReportMessageNoSecurityAltIDGroup(Head(messages)) \o EncodeSecurityDefinitionReportMessageNoSecurityAltIDGroupList(Tail(messages))
 
-(* As many Security Definition Report Message no Security Alt I D Group as the field that counts them says *)
+(* As many Security Definition Report Message No Security Alt I D Group as the field that counts them says *)
 RECURSIVE ReadSecurityDefinitionReportMessageNoSecurityAltIDGroupList(_, _)
 ReadSecurityDefinitionReportMessageNoSecurityAltIDGroupList(bytes, count) ==
     IF count = 0
@@ -1468,11 +1468,11 @@ ReadSecurityDefinitionReportMessageNoSecurityAltIDGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Security Definition Report Message no Security Alt I D Group of each kind, for the lists that carry them *)
+(* One Security Definition Report Message No Security Alt I D Group of each kind, for the lists that carry them *)
 OneSecurityDefinitionReportMessageNoSecurityAltIDGroup == { ZeroSecurityDefinitionReportMessageNoSecurityAltIDGroup }
 
 (***************************************************************************)
-(* Security Definition Report Message no Security Alt I D Groups           *)
+(* Security Definition Report Message No Security Alt I D Groups           *)
 (***************************************************************************)
 
 SecurityDefinitionReportMessageNoSecurityAltIDGroups ==
@@ -1495,7 +1495,7 @@ ZeroSecurityDefinitionReportMessageNoSecurityAltIDGroups ==
     [ blockLength                                         |-> [i \in 1 .. 2 |-> 0],
       securityDefinitionReportMessageNoSecurityAltIDGroup |-> << >> ]
 
-(* Security Definition Report Message no Security Alt I D Groups at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Report Message No Security Alt I D Groups at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionReportMessageNoSecurityAltIDGroups ==
     { ZeroSecurityDefinitionReportMessageNoSecurityAltIDGroups }
         \cup { [ZeroSecurityDefinitionReportMessageNoSecurityAltIDGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -2586,7 +2586,7 @@ CheckedSecurityDefinitionReportProductMessage ==
         \cup { [ZeroSecurityDefinitionReportProductMessage EXCEPT !.productGroup = one] : one \in CheckedProductGroup }
 
 (***************************************************************************)
-(* I P Request Message no Users Group: 20 bytes                            *)
+(* I P Request Message No Users Group: 20 bytes                            *)
 (***************************************************************************)
 
 IPRequestMessageNoUsersGroup ==
@@ -2602,19 +2602,19 @@ DecodeIPRequestMessageNoUsersGroup(bytes) ==
 ZeroIPRequestMessageNoUsersGroup ==
     [ userId |-> [i \in 1 .. 20 |-> 0] ]
 
-(* I P Request Message no Users Group at zero, then each field in turn at the values it is checked at *)
+(* I P Request Message No Users Group at zero, then each field in turn at the values it is checked at *)
 CheckedIPRequestMessageNoUsersGroup ==
     { ZeroIPRequestMessageNoUsersGroup }
         \cup { [ZeroIPRequestMessageNoUsersGroup EXCEPT !.userId = one] : one \in Sample(20) }
 
-(* A run of I P Request Message no Users Group, written one after another *)
+(* A run of I P Request Message No Users Group, written one after another *)
 RECURSIVE EncodeIPRequestMessageNoUsersGroupList(_)
 EncodeIPRequestMessageNoUsersGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeIPRequestMessageNoUsersGroup(Head(messages)) \o EncodeIPRequestMessageNoUsersGroupList(Tail(messages))
 
-(* As many I P Request Message no Users Group as the field that counts them says *)
+(* As many I P Request Message No Users Group as the field that counts them says *)
 RECURSIVE ReadIPRequestMessageNoUsersGroupList(_, _)
 ReadIPRequestMessageNoUsersGroupList(bytes, count) ==
     IF count = 0
@@ -2625,11 +2625,11 @@ ReadIPRequestMessageNoUsersGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One I P Request Message no Users Group of each kind, for the lists that carry them *)
+(* One I P Request Message No Users Group of each kind, for the lists that carry them *)
 OneIPRequestMessageNoUsersGroup == { ZeroIPRequestMessageNoUsersGroup }
 
 (***************************************************************************)
-(* I P Request Message no Users Groups                                     *)
+(* I P Request Message No Users Groups                                     *)
 (***************************************************************************)
 
 IPRequestMessageNoUsersGroups ==
@@ -2652,7 +2652,7 @@ ZeroIPRequestMessageNoUsersGroups ==
     [ blockLength                  |-> [i \in 1 .. 2 |-> 0],
       iPRequestMessageNoUsersGroup |-> << >> ]
 
-(* I P Request Message no Users Groups at zero, then each field in turn at the values it is checked at *)
+(* I P Request Message No Users Groups at zero, then each field in turn at the values it is checked at *)
 CheckedIPRequestMessageNoUsersGroups ==
     { ZeroIPRequestMessageNoUsersGroups }
         \cup { [ZeroIPRequestMessageNoUsersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -2687,7 +2687,7 @@ CheckedIpRequestMessage ==
         \cup { [ZeroIpRequestMessage EXCEPT !.iPRequestMessageNoUsersGroups = one] : one \in CheckedIPRequestMessageNoUsersGroups }
 
 (***************************************************************************)
-(* I P Report Message no Users Group: 88 bytes                             *)
+(* I P Report Message No Users Group: 88 bytes                             *)
 (***************************************************************************)
 
 IPReportMessageNoUsersGroup ==
@@ -2723,7 +2723,7 @@ ZeroIPReportMessageNoUsersGroup ==
       port           |-> [i \in 1 .. 2 |-> 0],
       ipSessionToken |-> [i \in 1 .. 50 |-> 0] ]
 
-(* I P Report Message no Users Group at zero, then each field in turn at the values it is checked at *)
+(* I P Report Message No Users Group at zero, then each field in turn at the values it is checked at *)
 CheckedIPReportMessageNoUsersGroup ==
     { ZeroIPReportMessageNoUsersGroup }
         \cup { [ZeroIPReportMessageNoUsersGroup EXCEPT !.userId = one] : one \in Sample(20) }
@@ -2732,14 +2732,14 @@ CheckedIPReportMessageNoUsersGroup ==
         \cup { [ZeroIPReportMessageNoUsersGroup EXCEPT !.port = one] : one \in Sample(2) }
         \cup { [ZeroIPReportMessageNoUsersGroup EXCEPT !.ipSessionToken = one] : one \in Sample(50) }
 
-(* A run of I P Report Message no Users Group, written one after another *)
+(* A run of I P Report Message No Users Group, written one after another *)
 RECURSIVE EncodeIPReportMessageNoUsersGroupList(_)
 EncodeIPReportMessageNoUsersGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeIPReportMessageNoUsersGroup(Head(messages)) \o EncodeIPReportMessageNoUsersGroupList(Tail(messages))
 
-(* As many I P Report Message no Users Group as the field that counts them says *)
+(* As many I P Report Message No Users Group as the field that counts them says *)
 RECURSIVE ReadIPReportMessageNoUsersGroupList(_, _)
 ReadIPReportMessageNoUsersGroupList(bytes, count) ==
     IF count = 0
@@ -2750,11 +2750,11 @@ ReadIPReportMessageNoUsersGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One I P Report Message no Users Group of each kind, for the lists that carry them *)
+(* One I P Report Message No Users Group of each kind, for the lists that carry them *)
 OneIPReportMessageNoUsersGroup == { ZeroIPReportMessageNoUsersGroup }
 
 (***************************************************************************)
-(* I P Report Message no Users Groups                                      *)
+(* I P Report Message No Users Groups                                      *)
 (***************************************************************************)
 
 IPReportMessageNoUsersGroups ==
@@ -2777,7 +2777,7 @@ ZeroIPReportMessageNoUsersGroups ==
     [ blockLength                 |-> [i \in 1 .. 2 |-> 0],
       iPReportMessageNoUsersGroup |-> << >> ]
 
-(* I P Report Message no Users Groups at zero, then each field in turn at the values it is checked at *)
+(* I P Report Message No Users Groups at zero, then each field in turn at the values it is checked at *)
 CheckedIPReportMessageNoUsersGroups ==
     { ZeroIPReportMessageNoUsersGroups }
         \cup { [ZeroIPReportMessageNoUsersGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -3570,7 +3570,7 @@ CheckedQuoteRequestMessage ==
         \cup { [ZeroQuoteRequestMessage EXCEPT !.onBehalfOfLocationId = one] : one \in Sample(41) }
 
 (***************************************************************************)
-(* New Order Cross Request Message no Sides Group: 265 bytes               *)
+(* New Order Cross Request Message No Sides Group: 265 bytes               *)
 (***************************************************************************)
 
 NewOrderCrossRequestMessageNoSidesGroup ==
@@ -3706,7 +3706,7 @@ ZeroNewOrderCrossRequestMessageNoSidesGroup ==
       onBehalfOfSubId                |-> [i \in 1 .. 41 |-> 0],
       onBehalfOfLocationId           |-> [i \in 1 .. 41 |-> 0] ]
 
-(* New Order Cross Request Message no Sides Group at zero, then each field in turn at the values it is checked at *)
+(* New Order Cross Request Message No Sides Group at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderCrossRequestMessageNoSidesGroup ==
     { ZeroNewOrderCrossRequestMessageNoSidesGroup }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.side = one] : one \in Sample(1) }
@@ -3735,14 +3735,14 @@ CheckedNewOrderCrossRequestMessageNoSidesGroup ==
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.onBehalfOfSubId = one] : one \in Sample(41) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroup EXCEPT !.onBehalfOfLocationId = one] : one \in Sample(41) }
 
-(* A run of New Order Cross Request Message no Sides Group, written one after another *)
+(* A run of New Order Cross Request Message No Sides Group, written one after another *)
 RECURSIVE EncodeNewOrderCrossRequestMessageNoSidesGroupList(_)
 EncodeNewOrderCrossRequestMessageNoSidesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeNewOrderCrossRequestMessageNoSidesGroup(Head(messages)) \o EncodeNewOrderCrossRequestMessageNoSidesGroupList(Tail(messages))
 
-(* As many New Order Cross Request Message no Sides Group as the field that counts them says *)
+(* As many New Order Cross Request Message No Sides Group as the field that counts them says *)
 RECURSIVE ReadNewOrderCrossRequestMessageNoSidesGroupList(_, _)
 ReadNewOrderCrossRequestMessageNoSidesGroupList(bytes, count) ==
     IF count = 0
@@ -3753,11 +3753,11 @@ ReadNewOrderCrossRequestMessageNoSidesGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One New Order Cross Request Message no Sides Group of each kind, for the lists that carry them *)
+(* One New Order Cross Request Message No Sides Group of each kind, for the lists that carry them *)
 OneNewOrderCrossRequestMessageNoSidesGroup == { ZeroNewOrderCrossRequestMessageNoSidesGroup }
 
 (***************************************************************************)
-(* New Order Cross Request Message no Sides Groups                         *)
+(* New Order Cross Request Message No Sides Groups                         *)
 (***************************************************************************)
 
 NewOrderCrossRequestMessageNoSidesGroups ==
@@ -3780,14 +3780,14 @@ ZeroNewOrderCrossRequestMessageNoSidesGroups ==
     [ blockLength                             |-> [i \in 1 .. 2 |-> 0],
       newOrderCrossRequestMessageNoSidesGroup |-> << >> ]
 
-(* New Order Cross Request Message no Sides Groups at zero, then each field in turn at the values it is checked at *)
+(* New Order Cross Request Message No Sides Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderCrossRequestMessageNoSidesGroups ==
     { ZeroNewOrderCrossRequestMessageNoSidesGroups }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroNewOrderCrossRequestMessageNoSidesGroups EXCEPT !.newOrderCrossRequestMessageNoSidesGroup = one] : one \in SampleLists(OneNewOrderCrossRequestMessageNoSidesGroup) }
 
 (***************************************************************************)
-(* New Order Cross Request Message no Legs Group: 113 bytes                *)
+(* New Order Cross Request Message No Legs Group: 113 bytes                *)
 (***************************************************************************)
 
 NewOrderCrossRequestMessageNoLegsGroup ==
@@ -3838,7 +3838,7 @@ ZeroNewOrderCrossRequestMessageNoLegsGroup ==
       legMemoField        |-> [i \in 1 .. 12 |-> 0],
       legSecurityId       |-> [i \in 1 .. 75 |-> 0] ]
 
-(* New Order Cross Request Message no Legs Group at zero, then each field in turn at the values it is checked at *)
+(* New Order Cross Request Message No Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderCrossRequestMessageNoLegsGroup ==
     { ZeroNewOrderCrossRequestMessageNoLegsGroup }
         \cup { [ZeroNewOrderCrossRequestMessageNoLegsGroup EXCEPT !.legSymbolOptional = one] : one \in Sample(4) }
@@ -3850,14 +3850,14 @@ CheckedNewOrderCrossRequestMessageNoLegsGroup ==
         \cup { [ZeroNewOrderCrossRequestMessageNoLegsGroup EXCEPT !.legMemoField = one] : one \in Sample(12) }
         \cup { [ZeroNewOrderCrossRequestMessageNoLegsGroup EXCEPT !.legSecurityId = one] : one \in Sample(75) }
 
-(* A run of New Order Cross Request Message no Legs Group, written one after another *)
+(* A run of New Order Cross Request Message No Legs Group, written one after another *)
 RECURSIVE EncodeNewOrderCrossRequestMessageNoLegsGroupList(_)
 EncodeNewOrderCrossRequestMessageNoLegsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeNewOrderCrossRequestMessageNoLegsGroup(Head(messages)) \o EncodeNewOrderCrossRequestMessageNoLegsGroupList(Tail(messages))
 
-(* As many New Order Cross Request Message no Legs Group as the field that counts them says *)
+(* As many New Order Cross Request Message No Legs Group as the field that counts them says *)
 RECURSIVE ReadNewOrderCrossRequestMessageNoLegsGroupList(_, _)
 ReadNewOrderCrossRequestMessageNoLegsGroupList(bytes, count) ==
     IF count = 0
@@ -3868,11 +3868,11 @@ ReadNewOrderCrossRequestMessageNoLegsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One New Order Cross Request Message no Legs Group of each kind, for the lists that carry them *)
+(* One New Order Cross Request Message No Legs Group of each kind, for the lists that carry them *)
 OneNewOrderCrossRequestMessageNoLegsGroup == { ZeroNewOrderCrossRequestMessageNoLegsGroup }
 
 (***************************************************************************)
-(* New Order Cross Request Message no Legs Groups                          *)
+(* New Order Cross Request Message No Legs Groups                          *)
 (***************************************************************************)
 
 NewOrderCrossRequestMessageNoLegsGroups ==
@@ -3895,7 +3895,7 @@ ZeroNewOrderCrossRequestMessageNoLegsGroups ==
     [ blockLength                            |-> [i \in 1 .. 2 |-> 0],
       newOrderCrossRequestMessageNoLegsGroup |-> << >> ]
 
-(* New Order Cross Request Message no Legs Groups at zero, then each field in turn at the values it is checked at *)
+(* New Order Cross Request Message No Legs Groups at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderCrossRequestMessageNoLegsGroups ==
     { ZeroNewOrderCrossRequestMessageNoLegsGroups }
         \cup { [ZeroNewOrderCrossRequestMessageNoLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -4108,7 +4108,7 @@ CheckedOrderMassCancelRequestMessage ==
         \cup { [ZeroOrderMassCancelRequestMessage EXCEPT !.onBehalfOfSubIDOptional = one] : one \in Sample(41) }
 
 (***************************************************************************)
-(* Mass Quote Request Message no Quote Sets Group: 48 bytes                *)
+(* Mass Quote Request Message No Quote Sets Group: 48 bytes                *)
 (***************************************************************************)
 
 MassQuoteRequestMessageNoQuoteSetsGroup ==
@@ -4159,7 +4159,7 @@ ZeroMassQuoteRequestMessageNoQuoteSetsGroup ==
       bidSz            |-> [i \in 1 .. 8 |-> 0],
       offerSz          |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Mass Quote Request Message no Quote Sets Group at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Request Message No Quote Sets Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteRequestMessageNoQuoteSetsGroup ==
     { ZeroMassQuoteRequestMessageNoQuoteSetsGroup }
         \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.quoteSetId = one] : one \in Sample(4) }
@@ -4171,14 +4171,14 @@ CheckedMassQuoteRequestMessageNoQuoteSetsGroup ==
         \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.bidSz = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroup EXCEPT !.offerSz = one] : one \in Sample(8) }
 
-(* A run of Mass Quote Request Message no Quote Sets Group, written one after another *)
+(* A run of Mass Quote Request Message No Quote Sets Group, written one after another *)
 RECURSIVE EncodeMassQuoteRequestMessageNoQuoteSetsGroupList(_)
 EncodeMassQuoteRequestMessageNoQuoteSetsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeMassQuoteRequestMessageNoQuoteSetsGroup(Head(messages)) \o EncodeMassQuoteRequestMessageNoQuoteSetsGroupList(Tail(messages))
 
-(* As many Mass Quote Request Message no Quote Sets Group as the field that counts them says *)
+(* As many Mass Quote Request Message No Quote Sets Group as the field that counts them says *)
 RECURSIVE ReadMassQuoteRequestMessageNoQuoteSetsGroupList(_, _)
 ReadMassQuoteRequestMessageNoQuoteSetsGroupList(bytes, count) ==
     IF count = 0
@@ -4189,11 +4189,11 @@ ReadMassQuoteRequestMessageNoQuoteSetsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Mass Quote Request Message no Quote Sets Group of each kind, for the lists that carry them *)
+(* One Mass Quote Request Message No Quote Sets Group of each kind, for the lists that carry them *)
 OneMassQuoteRequestMessageNoQuoteSetsGroup == { ZeroMassQuoteRequestMessageNoQuoteSetsGroup }
 
 (***************************************************************************)
-(* Mass Quote Request Message no Quote Sets Groups                         *)
+(* Mass Quote Request Message No Quote Sets Groups                         *)
 (***************************************************************************)
 
 MassQuoteRequestMessageNoQuoteSetsGroups ==
@@ -4216,7 +4216,7 @@ ZeroMassQuoteRequestMessageNoQuoteSetsGroups ==
     [ blockLength                             |-> [i \in 1 .. 2 |-> 0],
       massQuoteRequestMessageNoQuoteSetsGroup |-> << >> ]
 
-(* Mass Quote Request Message no Quote Sets Groups at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Request Message No Quote Sets Groups at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteRequestMessageNoQuoteSetsGroups ==
     { ZeroMassQuoteRequestMessageNoQuoteSetsGroups }
         \cup { [ZeroMassQuoteRequestMessageNoQuoteSetsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -4323,7 +4323,7 @@ CheckedMassQuoteRequestMessage ==
         \cup { [ZeroMassQuoteRequestMessage EXCEPT !.massQuoteRequestMessageNoQuoteSetsGroups = one] : one \in CheckedMassQuoteRequestMessageNoQuoteSetsGroups }
 
 (***************************************************************************)
-(* Quote Cancel Request Message no Quote Entries Group: 12 bytes           *)
+(* Quote Cancel Request Message No Quote Entries Group: 12 bytes           *)
 (***************************************************************************)
 
 QuoteCancelRequestMessageNoQuoteEntriesGroup ==
@@ -4349,21 +4349,21 @@ ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup ==
       underlyingSecurityId     |-> [i \in 1 .. 4 |-> 0],
       underlyingProduct        |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Quote Cancel Request Message no Quote Entries Group at zero, then each field in turn at the values it is checked at *)
+(* Quote Cancel Request Message No Quote Entries Group at zero, then each field in turn at the values it is checked at *)
 CheckedQuoteCancelRequestMessageNoQuoteEntriesGroup ==
     { ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup }
         \cup { [ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup EXCEPT !.underlyingSymbolOptional = one] : one \in Sample(4) }
         \cup { [ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup EXCEPT !.underlyingSecurityId = one] : one \in Sample(4) }
         \cup { [ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup EXCEPT !.underlyingProduct = one] : one \in Sample(4) }
 
-(* A run of Quote Cancel Request Message no Quote Entries Group, written one after another *)
+(* A run of Quote Cancel Request Message No Quote Entries Group, written one after another *)
 RECURSIVE EncodeQuoteCancelRequestMessageNoQuoteEntriesGroupList(_)
 EncodeQuoteCancelRequestMessageNoQuoteEntriesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeQuoteCancelRequestMessageNoQuoteEntriesGroup(Head(messages)) \o EncodeQuoteCancelRequestMessageNoQuoteEntriesGroupList(Tail(messages))
 
-(* As many Quote Cancel Request Message no Quote Entries Group as the field that counts them says *)
+(* As many Quote Cancel Request Message No Quote Entries Group as the field that counts them says *)
 RECURSIVE ReadQuoteCancelRequestMessageNoQuoteEntriesGroupList(_, _)
 ReadQuoteCancelRequestMessageNoQuoteEntriesGroupList(bytes, count) ==
     IF count = 0
@@ -4374,11 +4374,11 @@ ReadQuoteCancelRequestMessageNoQuoteEntriesGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Quote Cancel Request Message no Quote Entries Group of each kind, for the lists that carry them *)
+(* One Quote Cancel Request Message No Quote Entries Group of each kind, for the lists that carry them *)
 OneQuoteCancelRequestMessageNoQuoteEntriesGroup == { ZeroQuoteCancelRequestMessageNoQuoteEntriesGroup }
 
 (***************************************************************************)
-(* Quote Cancel Request Message no Quote Entries Groups                    *)
+(* Quote Cancel Request Message No Quote Entries Groups                    *)
 (***************************************************************************)
 
 QuoteCancelRequestMessageNoQuoteEntriesGroups ==
@@ -4401,7 +4401,7 @@ ZeroQuoteCancelRequestMessageNoQuoteEntriesGroups ==
     [ blockLength                                  |-> [i \in 1 .. 2 |-> 0],
       quoteCancelRequestMessageNoQuoteEntriesGroup |-> << >> ]
 
-(* Quote Cancel Request Message no Quote Entries Groups at zero, then each field in turn at the values it is checked at *)
+(* Quote Cancel Request Message No Quote Entries Groups at zero, then each field in turn at the values it is checked at *)
 CheckedQuoteCancelRequestMessageNoQuoteEntriesGroups ==
     { ZeroQuoteCancelRequestMessageNoQuoteEntriesGroups }
         \cup { [ZeroQuoteCancelRequestMessageNoQuoteEntriesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -4448,7 +4448,7 @@ CheckedQuoteCancelRequestMessage ==
         \cup { [ZeroQuoteCancelRequestMessage EXCEPT !.quoteCancelRequestMessageNoQuoteEntriesGroups = one] : one \in CheckedQuoteCancelRequestMessageNoQuoteEntriesGroups }
 
 (***************************************************************************)
-(* Security Definition Request Create Strategy Message no Legs Group: 22   *)
+(* Security Definition Request Create Strategy Message No Legs Group: 22   *)
 (* bytes                                                                   *)
 (***************************************************************************)
 
@@ -4495,7 +4495,7 @@ ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup ==
       legPrice                       |-> [i \in 1 .. 8 |-> 0],
       legOptionDelta                 |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Security Definition Request Create Strategy Message no Legs Group at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Request Create Strategy Message No Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup ==
     { ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legSymbol = one] : one \in Sample(4) }
@@ -4506,14 +4506,14 @@ CheckedSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup ==
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legPrice = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup EXCEPT !.legOptionDelta = one] : one \in Sample(4) }
 
-(* A run of Security Definition Request Create Strategy Message no Legs Group, written one after another *)
+(* A run of Security Definition Request Create Strategy Message No Legs Group, written one after another *)
 RECURSIVE EncodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroupList(_)
 EncodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup(Head(messages)) \o EncodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroupList(Tail(messages))
 
-(* As many Security Definition Request Create Strategy Message no Legs Group as the field that counts them says *)
+(* As many Security Definition Request Create Strategy Message No Legs Group as the field that counts them says *)
 RECURSIVE ReadSecurityDefinitionRequestCreateStrategyMessageNoLegsGroupList(_, _)
 ReadSecurityDefinitionRequestCreateStrategyMessageNoLegsGroupList(bytes, count) ==
     IF count = 0
@@ -4524,11 +4524,11 @@ ReadSecurityDefinitionRequestCreateStrategyMessageNoLegsGroupList(bytes, count) 
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Security Definition Request Create Strategy Message no Legs Group of each kind, for the lists that carry them *)
+(* One Security Definition Request Create Strategy Message No Legs Group of each kind, for the lists that carry them *)
 OneSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup == { ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup }
 
 (***************************************************************************)
-(* Security Definition Request Create Strategy Message no Legs Groups      *)
+(* Security Definition Request Create Strategy Message No Legs Groups      *)
 (***************************************************************************)
 
 SecurityDefinitionRequestCreateStrategyMessageNoLegsGroups ==
@@ -4551,7 +4551,7 @@ ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups ==
     [ blockLength                                               |-> [i \in 1 .. 2 |-> 0],
       securityDefinitionRequestCreateStrategyMessageNoLegsGroup |-> << >> ]
 
-(* Security Definition Request Create Strategy Message no Legs Groups at zero, then each field in turn at the values it is checked at *)
+(* Security Definition Request Create Strategy Message No Legs Groups at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups ==
     { ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups }
         \cup { [ZeroSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -6110,7 +6110,7 @@ CheckedOrderMassCancelReportMessage ==
         \cup { [ZeroOrderMassCancelReportMessage EXCEPT !.text = one] : one \in Sample(100) }
 
 (***************************************************************************)
-(* Mass Quote Report Message no Quote Sets Group: 121 bytes                *)
+(* Mass Quote Report Message No Quote Sets Group: 121 bytes                *)
 (***************************************************************************)
 
 MassQuoteReportMessageNoQuoteSetsGroup ==
@@ -6156,7 +6156,7 @@ ZeroMassQuoteReportMessageNoQuoteSetsGroup ==
       quoteEntryExchangeCode     |-> [i \in 1 .. 4 |-> 0],
       quoteEntryRejectReasonText |-> [i \in 1 .. 100 |-> 0] ]
 
-(* Mass Quote Report Message no Quote Sets Group at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Report Message No Quote Sets Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteReportMessageNoQuoteSetsGroup ==
     { ZeroMassQuoteReportMessageNoQuoteSetsGroup }
         \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.quoteSetId = one] : one \in Sample(4) }
@@ -6167,14 +6167,14 @@ CheckedMassQuoteReportMessageNoQuoteSetsGroup ==
         \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.quoteEntryExchangeCode = one] : one \in Sample(4) }
         \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroup EXCEPT !.quoteEntryRejectReasonText = one] : one \in Sample(100) }
 
-(* A run of Mass Quote Report Message no Quote Sets Group, written one after another *)
+(* A run of Mass Quote Report Message No Quote Sets Group, written one after another *)
 RECURSIVE EncodeMassQuoteReportMessageNoQuoteSetsGroupList(_)
 EncodeMassQuoteReportMessageNoQuoteSetsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeMassQuoteReportMessageNoQuoteSetsGroup(Head(messages)) \o EncodeMassQuoteReportMessageNoQuoteSetsGroupList(Tail(messages))
 
-(* As many Mass Quote Report Message no Quote Sets Group as the field that counts them says *)
+(* As many Mass Quote Report Message No Quote Sets Group as the field that counts them says *)
 RECURSIVE ReadMassQuoteReportMessageNoQuoteSetsGroupList(_, _)
 ReadMassQuoteReportMessageNoQuoteSetsGroupList(bytes, count) ==
     IF count = 0
@@ -6185,11 +6185,11 @@ ReadMassQuoteReportMessageNoQuoteSetsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Mass Quote Report Message no Quote Sets Group of each kind, for the lists that carry them *)
+(* One Mass Quote Report Message No Quote Sets Group of each kind, for the lists that carry them *)
 OneMassQuoteReportMessageNoQuoteSetsGroup == { ZeroMassQuoteReportMessageNoQuoteSetsGroup }
 
 (***************************************************************************)
-(* Mass Quote Report Message no Quote Sets Groups                          *)
+(* Mass Quote Report Message No Quote Sets Groups                          *)
 (***************************************************************************)
 
 MassQuoteReportMessageNoQuoteSetsGroups ==
@@ -6212,7 +6212,7 @@ ZeroMassQuoteReportMessageNoQuoteSetsGroups ==
     [ blockLength                            |-> [i \in 1 .. 2 |-> 0],
       massQuoteReportMessageNoQuoteSetsGroup |-> << >> ]
 
-(* Mass Quote Report Message no Quote Sets Groups at zero, then each field in turn at the values it is checked at *)
+(* Mass Quote Report Message No Quote Sets Groups at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteReportMessageNoQuoteSetsGroups ==
     { ZeroMassQuoteReportMessageNoQuoteSetsGroups }
         \cup { [ZeroMassQuoteReportMessageNoQuoteSetsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -6880,7 +6880,7 @@ RoundTripNewsMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Report Strategy Message no Block Details Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Report Strategy Message No Block Details Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup ==
     \A message \in CheckedSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup :
         LET read == DecodeSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup(EncodeSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup(message))
@@ -6888,7 +6888,7 @@ RoundTripSecurityDefinitionReportStrategyMessageNoBlockDetailsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Report Strategy Message no Block Details Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Report Strategy Message No Block Details Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups ==
     \A message \in CheckedSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups :
         LET read == DecodeSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups(EncodeSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups(message))
@@ -6896,7 +6896,7 @@ RoundTripSecurityDefinitionReportStrategyMessageNoBlockDetailsGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Report Strategy Message no Security Alt I D Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Report Strategy Message No Security Alt I D Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup ==
     \A message \in CheckedSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup :
         LET read == DecodeSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup(EncodeSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup(message))
@@ -6904,7 +6904,7 @@ RoundTripSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Report Strategy Message no Security Alt I D Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Report Strategy Message No Security Alt I D Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups ==
     \A message \in CheckedSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups :
         LET read == DecodeSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups(EncodeSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups(message))
@@ -6912,7 +6912,7 @@ RoundTripSecurityDefinitionReportStrategyMessageNoSecurityAltIDGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Report Strategy Message no Legs Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Report Strategy Message No Legs Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionReportStrategyMessageNoLegsGroup ==
     \A message \in CheckedSecurityDefinitionReportStrategyMessageNoLegsGroup :
         LET read == DecodeSecurityDefinitionReportStrategyMessageNoLegsGroup(EncodeSecurityDefinitionReportStrategyMessageNoLegsGroup(message))
@@ -6920,7 +6920,7 @@ RoundTripSecurityDefinitionReportStrategyMessageNoLegsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Report Strategy Message no Legs Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Report Strategy Message No Legs Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionReportStrategyMessageNoLegsGroups ==
     \A message \in CheckedSecurityDefinitionReportStrategyMessageNoLegsGroups :
         LET read == DecodeSecurityDefinitionReportStrategyMessageNoLegsGroups(EncodeSecurityDefinitionReportStrategyMessageNoLegsGroups(message))
@@ -7032,7 +7032,7 @@ RoundTripSecurityDefinitionReportStrategyMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Report Message no Block Details Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Report Message No Block Details Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionReportMessageNoBlockDetailsGroup ==
     \A message \in CheckedSecurityDefinitionReportMessageNoBlockDetailsGroup :
         LET read == DecodeSecurityDefinitionReportMessageNoBlockDetailsGroup(EncodeSecurityDefinitionReportMessageNoBlockDetailsGroup(message))
@@ -7040,7 +7040,7 @@ RoundTripSecurityDefinitionReportMessageNoBlockDetailsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Report Message no Block Details Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Report Message No Block Details Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionReportMessageNoBlockDetailsGroups ==
     \A message \in CheckedSecurityDefinitionReportMessageNoBlockDetailsGroups :
         LET read == DecodeSecurityDefinitionReportMessageNoBlockDetailsGroups(EncodeSecurityDefinitionReportMessageNoBlockDetailsGroups(message))
@@ -7048,7 +7048,7 @@ RoundTripSecurityDefinitionReportMessageNoBlockDetailsGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Report Message no Security Alt I D Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Report Message No Security Alt I D Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionReportMessageNoSecurityAltIDGroup ==
     \A message \in CheckedSecurityDefinitionReportMessageNoSecurityAltIDGroup :
         LET read == DecodeSecurityDefinitionReportMessageNoSecurityAltIDGroup(EncodeSecurityDefinitionReportMessageNoSecurityAltIDGroup(message))
@@ -7056,7 +7056,7 @@ RoundTripSecurityDefinitionReportMessageNoSecurityAltIDGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Report Message no Security Alt I D Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Report Message No Security Alt I D Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionReportMessageNoSecurityAltIDGroups ==
     \A message \in CheckedSecurityDefinitionReportMessageNoSecurityAltIDGroups :
         LET read == DecodeSecurityDefinitionReportMessageNoSecurityAltIDGroups(EncodeSecurityDefinitionReportMessageNoSecurityAltIDGroups(message))
@@ -7216,7 +7216,7 @@ RoundTripSecurityDefinitionReportProductMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every I P Request Message no Users Group decodes back to what was encoded, and leaves nothing over *)
+(* Every I P Request Message No Users Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripIPRequestMessageNoUsersGroup ==
     \A message \in CheckedIPRequestMessageNoUsersGroup :
         LET read == DecodeIPRequestMessageNoUsersGroup(EncodeIPRequestMessageNoUsersGroup(message))
@@ -7224,7 +7224,7 @@ RoundTripIPRequestMessageNoUsersGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every I P Request Message no Users Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every I P Request Message No Users Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripIPRequestMessageNoUsersGroups ==
     \A message \in CheckedIPRequestMessageNoUsersGroups :
         LET read == DecodeIPRequestMessageNoUsersGroups(EncodeIPRequestMessageNoUsersGroups(message))
@@ -7240,7 +7240,7 @@ RoundTripIpRequestMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every I P Report Message no Users Group decodes back to what was encoded, and leaves nothing over *)
+(* Every I P Report Message No Users Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripIPReportMessageNoUsersGroup ==
     \A message \in CheckedIPReportMessageNoUsersGroup :
         LET read == DecodeIPReportMessageNoUsersGroup(EncodeIPReportMessageNoUsersGroup(message))
@@ -7248,7 +7248,7 @@ RoundTripIPReportMessageNoUsersGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every I P Report Message no Users Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every I P Report Message No Users Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripIPReportMessageNoUsersGroups ==
     \A message \in CheckedIPReportMessageNoUsersGroups :
         LET read == DecodeIPReportMessageNoUsersGroups(EncodeIPReportMessageNoUsersGroups(message))
@@ -7328,7 +7328,7 @@ RoundTripQuoteRequestMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Order Cross Request Message no Sides Group decodes back to what was encoded, and leaves nothing over *)
+(* Every New Order Cross Request Message No Sides Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripNewOrderCrossRequestMessageNoSidesGroup ==
     \A message \in CheckedNewOrderCrossRequestMessageNoSidesGroup :
         LET read == DecodeNewOrderCrossRequestMessageNoSidesGroup(EncodeNewOrderCrossRequestMessageNoSidesGroup(message))
@@ -7336,7 +7336,7 @@ RoundTripNewOrderCrossRequestMessageNoSidesGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Order Cross Request Message no Sides Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every New Order Cross Request Message No Sides Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripNewOrderCrossRequestMessageNoSidesGroups ==
     \A message \in CheckedNewOrderCrossRequestMessageNoSidesGroups :
         LET read == DecodeNewOrderCrossRequestMessageNoSidesGroups(EncodeNewOrderCrossRequestMessageNoSidesGroups(message))
@@ -7344,7 +7344,7 @@ RoundTripNewOrderCrossRequestMessageNoSidesGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Order Cross Request Message no Legs Group decodes back to what was encoded, and leaves nothing over *)
+(* Every New Order Cross Request Message No Legs Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripNewOrderCrossRequestMessageNoLegsGroup ==
     \A message \in CheckedNewOrderCrossRequestMessageNoLegsGroup :
         LET read == DecodeNewOrderCrossRequestMessageNoLegsGroup(EncodeNewOrderCrossRequestMessageNoLegsGroup(message))
@@ -7352,7 +7352,7 @@ RoundTripNewOrderCrossRequestMessageNoLegsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Order Cross Request Message no Legs Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every New Order Cross Request Message No Legs Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripNewOrderCrossRequestMessageNoLegsGroups ==
     \A message \in CheckedNewOrderCrossRequestMessageNoLegsGroups :
         LET read == DecodeNewOrderCrossRequestMessageNoLegsGroups(EncodeNewOrderCrossRequestMessageNoLegsGroups(message))
@@ -7376,7 +7376,7 @@ RoundTripOrderMassCancelRequestMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Request Message no Quote Sets Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Request Message No Quote Sets Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteRequestMessageNoQuoteSetsGroup ==
     \A message \in CheckedMassQuoteRequestMessageNoQuoteSetsGroup :
         LET read == DecodeMassQuoteRequestMessageNoQuoteSetsGroup(EncodeMassQuoteRequestMessageNoQuoteSetsGroup(message))
@@ -7384,7 +7384,7 @@ RoundTripMassQuoteRequestMessageNoQuoteSetsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Request Message no Quote Sets Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Request Message No Quote Sets Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteRequestMessageNoQuoteSetsGroups ==
     \A message \in CheckedMassQuoteRequestMessageNoQuoteSetsGroups :
         LET read == DecodeMassQuoteRequestMessageNoQuoteSetsGroups(EncodeMassQuoteRequestMessageNoQuoteSetsGroups(message))
@@ -7400,7 +7400,7 @@ RoundTripMassQuoteRequestMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Quote Cancel Request Message no Quote Entries Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Quote Cancel Request Message No Quote Entries Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripQuoteCancelRequestMessageNoQuoteEntriesGroup ==
     \A message \in CheckedQuoteCancelRequestMessageNoQuoteEntriesGroup :
         LET read == DecodeQuoteCancelRequestMessageNoQuoteEntriesGroup(EncodeQuoteCancelRequestMessageNoQuoteEntriesGroup(message))
@@ -7408,7 +7408,7 @@ RoundTripQuoteCancelRequestMessageNoQuoteEntriesGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Quote Cancel Request Message no Quote Entries Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Quote Cancel Request Message No Quote Entries Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripQuoteCancelRequestMessageNoQuoteEntriesGroups ==
     \A message \in CheckedQuoteCancelRequestMessageNoQuoteEntriesGroups :
         LET read == DecodeQuoteCancelRequestMessageNoQuoteEntriesGroups(EncodeQuoteCancelRequestMessageNoQuoteEntriesGroups(message))
@@ -7424,7 +7424,7 @@ RoundTripQuoteCancelRequestMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Request Create Strategy Message no Legs Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Request Create Strategy Message No Legs Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup ==
     \A message \in CheckedSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup :
         LET read == DecodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup(EncodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup(message))
@@ -7432,7 +7432,7 @@ RoundTripSecurityDefinitionRequestCreateStrategyMessageNoLegsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Request Create Strategy Message no Legs Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Security Definition Request Create Strategy Message No Legs Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups ==
     \A message \in CheckedSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups :
         LET read == DecodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups(EncodeSecurityDefinitionRequestCreateStrategyMessageNoLegsGroups(message))
@@ -7616,7 +7616,7 @@ RoundTripOrderMassCancelReportMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Report Message no Quote Sets Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Report Message No Quote Sets Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteReportMessageNoQuoteSetsGroup ==
     \A message \in CheckedMassQuoteReportMessageNoQuoteSetsGroup :
         LET read == DecodeMassQuoteReportMessageNoQuoteSetsGroup(EncodeMassQuoteReportMessageNoQuoteSetsGroup(message))
@@ -7624,7 +7624,7 @@ RoundTripMassQuoteReportMessageNoQuoteSetsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Quote Report Message no Quote Sets Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Mass Quote Report Message No Quote Sets Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripMassQuoteReportMessageNoQuoteSetsGroups ==
     \A message \in CheckedMassQuoteReportMessageNoQuoteSetsGroups :
         LET read == DecodeMassQuoteReportMessageNoQuoteSetsGroups(EncodeMassQuoteReportMessageNoQuoteSetsGroups(message))

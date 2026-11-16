@@ -145,28 +145,28 @@ CheckedMarketDataPacketHeader ==
 (***************************************************************************)
 
 IncrementalPacketHeader ==
-    [ transactTime             : Sample(8),
-      exchangeTradingSessionId : Sample(4) ]
+    [ transactTime                     : Sample(8),
+      exchangeTradingSessionIdOptional : Sample(4) ]
 
 EncodeIncrementalPacketHeader(message) ==
     message.transactTime
-        \o message.exchangeTradingSessionId
+        \o message.exchangeTradingSessionIdOptional
 
 DecodeIncrementalPacketHeader(bytes) ==
     LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET exchangeTradingSessionId == ReadBytes(transactTime.rest, 4) IN IF ~exchangeTradingSessionId.ok THEN Fail ELSE
-    Ok([ transactTime             |-> transactTime.value,
-         exchangeTradingSessionId |-> exchangeTradingSessionId.value ], exchangeTradingSessionId.rest)
+    LET exchangeTradingSessionIdOptional == ReadBytes(transactTime.rest, 4) IN IF ~exchangeTradingSessionIdOptional.ok THEN Fail ELSE
+    Ok([ transactTime                     |-> transactTime.value,
+         exchangeTradingSessionIdOptional |-> exchangeTradingSessionIdOptional.value ], exchangeTradingSessionIdOptional.rest)
 
 ZeroIncrementalPacketHeader ==
-    [ transactTime             |-> [i \in 1 .. 8 |-> 0],
-      exchangeTradingSessionId |-> [i \in 1 .. 4 |-> 0] ]
+    [ transactTime                     |-> [i \in 1 .. 8 |-> 0],
+      exchangeTradingSessionIdOptional |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Incremental Packet Header at zero, then each field in turn at the values it is checked at *)
 CheckedIncrementalPacketHeader ==
     { ZeroIncrementalPacketHeader }
         \cup { [ZeroIncrementalPacketHeader EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalPacketHeader EXCEPT !.exchangeTradingSessionId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalPacketHeader EXCEPT !.exchangeTradingSessionIdOptional = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Sequence Reset Message: 4 bytes                                         *)
@@ -488,22 +488,22 @@ CheckedSecurityMassStatusMessage ==
 (***************************************************************************)
 
 SecurityGroupStatusMessage ==
-    [ securityGroupId                 : Sample(8),
-      haltType                        : Sample(1),
-      tradeModeMask                   : Sample(4),
-      groupMaskInt64NullOptional      : Sample(8),
-      sectionIdInt32NullOptional      : Sample(4),
-      baseContractIdInt32NullOptional : Sample(4),
-      securityTradingStatus           : Sample(1),
-      statusChangeTime                : Sample(8) ]
+    [ securityGroupId        : Sample(8),
+      haltType               : Sample(1),
+      tradeModeMask          : Sample(4),
+      groupMaskOptional      : Sample(8),
+      sectionIdOptional      : Sample(4),
+      baseContractIdOptional : Sample(4),
+      securityTradingStatus  : Sample(1),
+      statusChangeTime       : Sample(8) ]
 
 EncodeSecurityGroupStatusMessage(message) ==
     message.securityGroupId
         \o message.haltType
         \o message.tradeModeMask
-        \o message.groupMaskInt64NullOptional
-        \o message.sectionIdInt32NullOptional
-        \o message.baseContractIdInt32NullOptional
+        \o message.groupMaskOptional
+        \o message.sectionIdOptional
+        \o message.baseContractIdOptional
         \o message.securityTradingStatus
         \o message.statusChangeTime
 
@@ -511,29 +511,29 @@ DecodeSecurityGroupStatusMessage(bytes) ==
     LET securityGroupId == ReadBytes(bytes, 8) IN IF ~securityGroupId.ok THEN Fail ELSE
     LET haltType == ReadBytes(securityGroupId.rest, 1) IN IF ~haltType.ok THEN Fail ELSE
     LET tradeModeMask == ReadBytes(haltType.rest, 4) IN IF ~tradeModeMask.ok THEN Fail ELSE
-    LET groupMaskInt64NullOptional == ReadBytes(tradeModeMask.rest, 8) IN IF ~groupMaskInt64NullOptional.ok THEN Fail ELSE
-    LET sectionIdInt32NullOptional == ReadBytes(groupMaskInt64NullOptional.rest, 4) IN IF ~sectionIdInt32NullOptional.ok THEN Fail ELSE
-    LET baseContractIdInt32NullOptional == ReadBytes(sectionIdInt32NullOptional.rest, 4) IN IF ~baseContractIdInt32NullOptional.ok THEN Fail ELSE
-    LET securityTradingStatus == ReadBytes(baseContractIdInt32NullOptional.rest, 1) IN IF ~securityTradingStatus.ok THEN Fail ELSE
+    LET groupMaskOptional == ReadBytes(tradeModeMask.rest, 8) IN IF ~groupMaskOptional.ok THEN Fail ELSE
+    LET sectionIdOptional == ReadBytes(groupMaskOptional.rest, 4) IN IF ~sectionIdOptional.ok THEN Fail ELSE
+    LET baseContractIdOptional == ReadBytes(sectionIdOptional.rest, 4) IN IF ~baseContractIdOptional.ok THEN Fail ELSE
+    LET securityTradingStatus == ReadBytes(baseContractIdOptional.rest, 1) IN IF ~securityTradingStatus.ok THEN Fail ELSE
     LET statusChangeTime == ReadBytes(securityTradingStatus.rest, 8) IN IF ~statusChangeTime.ok THEN Fail ELSE
-    Ok([ securityGroupId                 |-> securityGroupId.value,
-         haltType                        |-> haltType.value,
-         tradeModeMask                   |-> tradeModeMask.value,
-         groupMaskInt64NullOptional      |-> groupMaskInt64NullOptional.value,
-         sectionIdInt32NullOptional      |-> sectionIdInt32NullOptional.value,
-         baseContractIdInt32NullOptional |-> baseContractIdInt32NullOptional.value,
-         securityTradingStatus           |-> securityTradingStatus.value,
-         statusChangeTime                |-> statusChangeTime.value ], statusChangeTime.rest)
+    Ok([ securityGroupId        |-> securityGroupId.value,
+         haltType               |-> haltType.value,
+         tradeModeMask          |-> tradeModeMask.value,
+         groupMaskOptional      |-> groupMaskOptional.value,
+         sectionIdOptional      |-> sectionIdOptional.value,
+         baseContractIdOptional |-> baseContractIdOptional.value,
+         securityTradingStatus  |-> securityTradingStatus.value,
+         statusChangeTime       |-> statusChangeTime.value ], statusChangeTime.rest)
 
 ZeroSecurityGroupStatusMessage ==
-    [ securityGroupId                 |-> [i \in 1 .. 8 |-> 0],
-      haltType                        |-> [i \in 1 .. 1 |-> 0],
-      tradeModeMask                   |-> [i \in 1 .. 4 |-> 0],
-      groupMaskInt64NullOptional      |-> [i \in 1 .. 8 |-> 0],
-      sectionIdInt32NullOptional      |-> [i \in 1 .. 4 |-> 0],
-      baseContractIdInt32NullOptional |-> [i \in 1 .. 4 |-> 0],
-      securityTradingStatus           |-> [i \in 1 .. 1 |-> 0],
-      statusChangeTime                |-> [i \in 1 .. 8 |-> 0] ]
+    [ securityGroupId        |-> [i \in 1 .. 8 |-> 0],
+      haltType               |-> [i \in 1 .. 1 |-> 0],
+      tradeModeMask          |-> [i \in 1 .. 4 |-> 0],
+      groupMaskOptional      |-> [i \in 1 .. 8 |-> 0],
+      sectionIdOptional      |-> [i \in 1 .. 4 |-> 0],
+      baseContractIdOptional |-> [i \in 1 .. 4 |-> 0],
+      securityTradingStatus  |-> [i \in 1 .. 1 |-> 0],
+      statusChangeTime       |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Security Group Status Message at zero, then each field in turn at the values it is checked at *)
 CheckedSecurityGroupStatusMessage ==
@@ -541,9 +541,9 @@ CheckedSecurityGroupStatusMessage ==
         \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.securityGroupId = one] : one \in Sample(8) }
         \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.haltType = one] : one \in Sample(1) }
         \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.tradeModeMask = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.groupMaskInt64NullOptional = one] : one \in Sample(8) }
-        \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.sectionIdInt32NullOptional = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.baseContractIdInt32NullOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.groupMaskOptional = one] : one \in Sample(8) }
+        \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.sectionIdOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.baseContractIdOptional = one] : one \in Sample(4) }
         \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.securityTradingStatus = one] : one \in Sample(1) }
         \cup { [ZeroSecurityGroupStatusMessage EXCEPT !.statusChangeTime = one] : one \in Sample(8) }
 

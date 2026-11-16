@@ -587,14 +587,14 @@ CheckedSetAckMessage ==
 (***************************************************************************)
 
 NewOrderMessage ==
-    [ clientOrderId : Sample(8),
-      correlationId : Sample(8),
-      limitPrice    : Sample(8),
-      quantity      : Sample(4),
-      instrumentId  : Sample(4),
-      side          : Sample(1),
-      flags         : Sample(1),
-      goodTilDate   : Sample(2) ]
+    [ clientOrderId   : Sample(8),
+      correlationId   : Sample(8),
+      limitPrice      : Sample(8),
+      quantity        : Sample(4),
+      instrumentId    : Sample(4),
+      side            : Sample(1),
+      newOrderPadding : Sample(1),
+      goodTilDate     : Sample(2) ]
 
 EncodeNewOrderMessage(message) ==
     message.clientOrderId
@@ -603,7 +603,7 @@ EncodeNewOrderMessage(message) ==
         \o message.quantity
         \o message.instrumentId
         \o message.side
-        \o message.flags
+        \o message.newOrderPadding
         \o message.goodTilDate
 
 DecodeNewOrderMessage(bytes) ==
@@ -613,26 +613,26 @@ DecodeNewOrderMessage(bytes) ==
     LET quantity == ReadBytes(limitPrice.rest, 4) IN IF ~quantity.ok THEN Fail ELSE
     LET instrumentId == ReadBytes(quantity.rest, 4) IN IF ~instrumentId.ok THEN Fail ELSE
     LET side == ReadBytes(instrumentId.rest, 1) IN IF ~side.ok THEN Fail ELSE
-    LET flags == ReadBytes(side.rest, 1) IN IF ~flags.ok THEN Fail ELSE
-    LET goodTilDate == ReadBytes(flags.rest, 2) IN IF ~goodTilDate.ok THEN Fail ELSE
-    Ok([ clientOrderId |-> clientOrderId.value,
-         correlationId |-> correlationId.value,
-         limitPrice    |-> limitPrice.value,
-         quantity      |-> quantity.value,
-         instrumentId  |-> instrumentId.value,
-         side          |-> side.value,
-         flags         |-> flags.value,
-         goodTilDate   |-> goodTilDate.value ], goodTilDate.rest)
+    LET newOrderPadding == ReadBytes(side.rest, 1) IN IF ~newOrderPadding.ok THEN Fail ELSE
+    LET goodTilDate == ReadBytes(newOrderPadding.rest, 2) IN IF ~goodTilDate.ok THEN Fail ELSE
+    Ok([ clientOrderId   |-> clientOrderId.value,
+         correlationId   |-> correlationId.value,
+         limitPrice      |-> limitPrice.value,
+         quantity        |-> quantity.value,
+         instrumentId    |-> instrumentId.value,
+         side            |-> side.value,
+         newOrderPadding |-> newOrderPadding.value,
+         goodTilDate     |-> goodTilDate.value ], goodTilDate.rest)
 
 ZeroNewOrderMessage ==
-    [ clientOrderId |-> [i \in 1 .. 8 |-> 0],
-      correlationId |-> [i \in 1 .. 8 |-> 0],
-      limitPrice    |-> [i \in 1 .. 8 |-> 0],
-      quantity      |-> [i \in 1 .. 4 |-> 0],
-      instrumentId  |-> [i \in 1 .. 4 |-> 0],
-      side          |-> [i \in 1 .. 1 |-> 0],
-      flags         |-> [i \in 1 .. 1 |-> 0],
-      goodTilDate   |-> [i \in 1 .. 2 |-> 0] ]
+    [ clientOrderId   |-> [i \in 1 .. 8 |-> 0],
+      correlationId   |-> [i \in 1 .. 8 |-> 0],
+      limitPrice      |-> [i \in 1 .. 8 |-> 0],
+      quantity        |-> [i \in 1 .. 4 |-> 0],
+      instrumentId    |-> [i \in 1 .. 4 |-> 0],
+      side            |-> [i \in 1 .. 1 |-> 0],
+      newOrderPadding |-> [i \in 1 .. 1 |-> 0],
+      goodTilDate     |-> [i \in 1 .. 2 |-> 0] ]
 
 (* New Order Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderMessage ==
@@ -643,7 +643,7 @@ CheckedNewOrderMessage ==
         \cup { [ZeroNewOrderMessage EXCEPT !.quantity = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderMessage EXCEPT !.instrumentId = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.flags = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderMessage EXCEPT !.newOrderPadding = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderMessage EXCEPT !.goodTilDate = one] : one \in Sample(2) }
 
 (***************************************************************************)
@@ -1951,7 +1951,7 @@ CheckedPayload ==
 
 SbeMessage ==
     [ protocolId         : Sample(1),
-      flags              : Sample(1),
+      sessionFlags       : Sample(1),
       sequenceNumber     : Sample(4),
       lastProcessedSeqNo : Sample(4),
       reserved           : Sample(4),
@@ -1976,12 +1976,12 @@ EncodeSbeMessageBody(message) ==
 (* Message Length counts the bytes it frames, so it is written from them *)
 EncodeSbeMessage(message) ==
     LET body == EncodeSbeMessageBody(message)
-    IN  message.protocolId \o message.flags \o EncodeUIntLE(Len(body) + 4, 2) \o body
+    IN  message.protocolId \o message.sessionFlags \o EncodeUIntLE(Len(body) + 4, 2) \o body
 
 DecodeSbeMessage(bytes) ==
     LET protocolId == ReadBytes(bytes, 1) IN IF ~protocolId.ok THEN Fail ELSE
-    LET flags == ReadBytes(protocolId.rest, 1) IN IF ~flags.ok THEN Fail ELSE
-    LET length == ReadUIntLE(flags.rest, 2) IN IF ~length.ok THEN Fail ELSE
+    LET sessionFlags == ReadBytes(protocolId.rest, 1) IN IF ~sessionFlags.ok THEN Fail ELSE
+    LET length == ReadUIntLE(sessionFlags.rest, 2) IN IF ~length.ok THEN Fail ELSE
     LET size == length.value - 4 IN
     IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, size)
@@ -1999,7 +1999,7 @@ DecodeSbeMessage(bytes) ==
     LET padding == Ok(payload.rest, << >>) IN IF ~padding.ok THEN Fail ELSE
     IF padding.rest # << >> THEN Fail ELSE
     Ok([ protocolId         |-> protocolId.value,
-         flags              |-> flags.value,
+         sessionFlags       |-> sessionFlags.value,
          sequenceNumber     |-> sequenceNumber.value,
          lastProcessedSeqNo |-> lastProcessedSeqNo.value,
          reserved           |-> reserved.value,
@@ -2011,7 +2011,7 @@ DecodeSbeMessage(bytes) ==
 
 ZeroSbeMessage ==
     [ protocolId         |-> [i \in 1 .. 1 |-> 0],
-      flags              |-> [i \in 1 .. 1 |-> 0],
+      sessionFlags       |-> [i \in 1 .. 1 |-> 0],
       sequenceNumber     |-> [i \in 1 .. 4 |-> 0],
       lastProcessedSeqNo |-> [i \in 1 .. 4 |-> 0],
       reserved           |-> [i \in 1 .. 4 |-> 0],
@@ -2025,7 +2025,7 @@ ZeroSbeMessage ==
 CheckedSbeMessage ==
     { ZeroSbeMessage }
         \cup { [ZeroSbeMessage EXCEPT !.protocolId = one] : one \in Sample(1) }
-        \cup { [ZeroSbeMessage EXCEPT !.flags = one] : one \in Sample(1) }
+        \cup { [ZeroSbeMessage EXCEPT !.sessionFlags = one] : one \in Sample(1) }
         \cup { [ZeroSbeMessage EXCEPT !.sequenceNumber = one] : one \in Sample(4) }
         \cup { [ZeroSbeMessage EXCEPT !.lastProcessedSeqNo = one] : one \in Sample(4) }
         \cup { [ZeroSbeMessage EXCEPT !.reserved = one] : one \in Sample(4) }

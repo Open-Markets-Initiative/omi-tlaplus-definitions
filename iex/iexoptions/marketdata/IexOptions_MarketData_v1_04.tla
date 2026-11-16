@@ -1153,7 +1153,7 @@ CheckedMessage ==
         \cup { [ZeroMessage EXCEPT !.messageData = one] : one \in SampleBytes }
 
 (***************************************************************************)
-(* Sequenced Packet Message messages Group                                 *)
+(* Sequenced Packet Message Messages Group                                 *)
 (***************************************************************************)
 
 SequencedPacketMessageMessagesGroup ==
@@ -1169,19 +1169,19 @@ DecodeSequencedPacketMessageMessagesGroup(bytes) ==
 ZeroSequencedPacketMessageMessagesGroup ==
     [ message |-> ZeroMessage ]
 
-(* Sequenced Packet Message messages Group at zero, then each field in turn at the values it is checked at *)
+(* Sequenced Packet Message Messages Group at zero, then each field in turn at the values it is checked at *)
 CheckedSequencedPacketMessageMessagesGroup ==
     { ZeroSequencedPacketMessageMessagesGroup }
         \cup { [ZeroSequencedPacketMessageMessagesGroup EXCEPT !.message = one] : one \in CheckedMessage }
 
-(* A run of Sequenced Packet Message messages Group, written one after another *)
+(* A run of Sequenced Packet Message Messages Group, written one after another *)
 RECURSIVE EncodeSequencedPacketMessageMessagesGroupList(_)
 EncodeSequencedPacketMessageMessagesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeSequencedPacketMessageMessagesGroup(Head(messages)) \o EncodeSequencedPacketMessageMessagesGroupList(Tail(messages))
 
-(* As many Sequenced Packet Message messages Group as the field that counts them says *)
+(* As many Sequenced Packet Message Messages Group as the field that counts them says *)
 RECURSIVE ReadSequencedPacketMessageMessagesGroupList(_, _)
 ReadSequencedPacketMessageMessagesGroupList(bytes, count) ==
     IF count = 0
@@ -1192,11 +1192,11 @@ ReadSequencedPacketMessageMessagesGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Sequenced Packet Message messages Group of each kind, for the lists that carry them *)
+(* One Sequenced Packet Message Messages Group of each kind, for the lists that carry them *)
 OneSequencedPacketMessageMessagesGroup == { ZeroSequencedPacketMessageMessagesGroup }
 
 (***************************************************************************)
-(* Sequenced Packet Message messages Groups                                *)
+(* Sequenced Packet Message Messages Groups                                *)
 (***************************************************************************)
 
 SequencedPacketMessageMessagesGroups ==
@@ -1219,7 +1219,7 @@ ZeroSequencedPacketMessageMessagesGroups ==
     [ blockLengthShort                    |-> [i \in 1 .. 1 |-> 0],
       sequencedPacketMessageMessagesGroup |-> << >> ]
 
-(* Sequenced Packet Message messages Groups at zero, then each field in turn at the values it is checked at *)
+(* Sequenced Packet Message Messages Groups at zero, then each field in turn at the values it is checked at *)
 CheckedSequencedPacketMessageMessagesGroups ==
     { ZeroSequencedPacketMessageMessagesGroups }
         \cup { [ZeroSequencedPacketMessageMessagesGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
@@ -1951,7 +1951,7 @@ RoundTripMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Sequenced Packet Message messages Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Sequenced Packet Message Messages Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripSequencedPacketMessageMessagesGroup ==
     \A message \in CheckedSequencedPacketMessageMessagesGroup :
         LET read == DecodeSequencedPacketMessageMessagesGroup(EncodeSequencedPacketMessageMessagesGroup(message))
@@ -1959,7 +1959,7 @@ RoundTripSequencedPacketMessageMessagesGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Sequenced Packet Message messages Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Sequenced Packet Message Messages Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripSequencedPacketMessageMessagesGroups ==
     \A message \in CheckedSequencedPacketMessageMessagesGroups :
         LET read == DecodeSequencedPacketMessageMessagesGroups(EncodeSequencedPacketMessageMessagesGroups(message))

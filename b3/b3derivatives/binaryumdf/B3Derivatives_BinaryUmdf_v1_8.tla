@@ -2064,7 +2064,7 @@ TheoreticalOpeningPrice16Message ==
       mdUpdateAction                 : Sample(1),
       tradeDate                      : Sample(2),
       mdCorporateOffsetPriceOptional : Sample(8),
-      mdEntrySizeQuantityOptional    : Sample(8),
+      mdEntrySizeOptional            : Sample(8),
       mdEntryTimestamp               : Sample(8),
       rptSeq                         : Sample(4) ]
 
@@ -2074,7 +2074,7 @@ EncodeTheoreticalOpeningPrice16Message(message) ==
         \o message.mdUpdateAction
         \o message.tradeDate
         \o message.mdCorporateOffsetPriceOptional
-        \o message.mdEntrySizeQuantityOptional
+        \o message.mdEntrySizeOptional
         \o message.mdEntryTimestamp
         \o message.rptSeq
 
@@ -2084,15 +2084,15 @@ DecodeTheoreticalOpeningPrice16Message(bytes) ==
     LET mdUpdateAction == ReadBytes(matchEventIndicator.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
     LET tradeDate == ReadBytes(mdUpdateAction.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
     LET mdCorporateOffsetPriceOptional == ReadBytes(tradeDate.rest, 8) IN IF ~mdCorporateOffsetPriceOptional.ok THEN Fail ELSE
-    LET mdEntrySizeQuantityOptional == ReadBytes(mdCorporateOffsetPriceOptional.rest, 8) IN IF ~mdEntrySizeQuantityOptional.ok THEN Fail ELSE
-    LET mdEntryTimestamp == ReadBytes(mdEntrySizeQuantityOptional.rest, 8) IN IF ~mdEntryTimestamp.ok THEN Fail ELSE
+    LET mdEntrySizeOptional == ReadBytes(mdCorporateOffsetPriceOptional.rest, 8) IN IF ~mdEntrySizeOptional.ok THEN Fail ELSE
+    LET mdEntryTimestamp == ReadBytes(mdEntrySizeOptional.rest, 8) IN IF ~mdEntryTimestamp.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(mdEntryTimestamp.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
     Ok([ securityId                     |-> securityId.value,
          matchEventIndicator            |-> matchEventIndicator.value,
          mdUpdateAction                 |-> mdUpdateAction.value,
          tradeDate                      |-> tradeDate.value,
          mdCorporateOffsetPriceOptional |-> mdCorporateOffsetPriceOptional.value,
-         mdEntrySizeQuantityOptional    |-> mdEntrySizeQuantityOptional.value,
+         mdEntrySizeOptional            |-> mdEntrySizeOptional.value,
          mdEntryTimestamp               |-> mdEntryTimestamp.value,
          rptSeq                         |-> rptSeq.value ], rptSeq.rest)
 
@@ -2102,7 +2102,7 @@ ZeroTheoreticalOpeningPrice16Message ==
       mdUpdateAction                 |-> [i \in 1 .. 1 |-> 0],
       tradeDate                      |-> [i \in 1 .. 2 |-> 0],
       mdCorporateOffsetPriceOptional |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeQuantityOptional    |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySizeOptional            |-> [i \in 1 .. 8 |-> 0],
       mdEntryTimestamp               |-> [i \in 1 .. 8 |-> 0],
       rptSeq                         |-> [i \in 1 .. 4 |-> 0] ]
 
@@ -2114,7 +2114,7 @@ CheckedTheoreticalOpeningPrice16Message ==
         \cup { [ZeroTheoreticalOpeningPrice16Message EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
         \cup { [ZeroTheoreticalOpeningPrice16Message EXCEPT !.tradeDate = one] : one \in Sample(2) }
         \cup { [ZeroTheoreticalOpeningPrice16Message EXCEPT !.mdCorporateOffsetPriceOptional = one] : one \in Sample(8) }
-        \cup { [ZeroTheoreticalOpeningPrice16Message EXCEPT !.mdEntrySizeQuantityOptional = one] : one \in Sample(8) }
+        \cup { [ZeroTheoreticalOpeningPrice16Message EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(8) }
         \cup { [ZeroTheoreticalOpeningPrice16Message EXCEPT !.mdEntryTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroTheoreticalOpeningPrice16Message EXCEPT !.rptSeq = one] : one \in Sample(4) }
 
@@ -2193,20 +2193,20 @@ CheckedClosingPrice17Message ==
 (***************************************************************************)
 
 AuctionImbalance19Message ==
-    [ securityId                  : Sample(8),
-      matchEventIndicator         : Sample(1),
-      mdUpdateAction              : Sample(1),
-      imbalanceCondition          : Sample(2),
-      mdEntrySizeQuantityOptional : Sample(8),
-      mdEntryTimestamp            : Sample(8),
-      rptSeq                      : Sample(4) ]
+    [ securityId          : Sample(8),
+      matchEventIndicator : Sample(1),
+      mdUpdateAction      : Sample(1),
+      imbalanceCondition  : Sample(2),
+      mdEntrySizeOptional : Sample(8),
+      mdEntryTimestamp    : Sample(8),
+      rptSeq              : Sample(4) ]
 
 EncodeAuctionImbalance19Message(message) ==
     message.securityId
         \o message.matchEventIndicator
         \o message.mdUpdateAction
         \o message.imbalanceCondition
-        \o message.mdEntrySizeQuantityOptional
+        \o message.mdEntrySizeOptional
         \o message.mdEntryTimestamp
         \o message.rptSeq
 
@@ -2215,25 +2215,25 @@ DecodeAuctionImbalance19Message(bytes) ==
     LET matchEventIndicator == ReadBytes(securityId.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
     LET mdUpdateAction == ReadBytes(matchEventIndicator.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
     LET imbalanceCondition == ReadBytes(mdUpdateAction.rest, 2) IN IF ~imbalanceCondition.ok THEN Fail ELSE
-    LET mdEntrySizeQuantityOptional == ReadBytes(imbalanceCondition.rest, 8) IN IF ~mdEntrySizeQuantityOptional.ok THEN Fail ELSE
-    LET mdEntryTimestamp == ReadBytes(mdEntrySizeQuantityOptional.rest, 8) IN IF ~mdEntryTimestamp.ok THEN Fail ELSE
+    LET mdEntrySizeOptional == ReadBytes(imbalanceCondition.rest, 8) IN IF ~mdEntrySizeOptional.ok THEN Fail ELSE
+    LET mdEntryTimestamp == ReadBytes(mdEntrySizeOptional.rest, 8) IN IF ~mdEntryTimestamp.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(mdEntryTimestamp.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
-    Ok([ securityId                  |-> securityId.value,
-         matchEventIndicator         |-> matchEventIndicator.value,
-         mdUpdateAction              |-> mdUpdateAction.value,
-         imbalanceCondition          |-> imbalanceCondition.value,
-         mdEntrySizeQuantityOptional |-> mdEntrySizeQuantityOptional.value,
-         mdEntryTimestamp            |-> mdEntryTimestamp.value,
-         rptSeq                      |-> rptSeq.value ], rptSeq.rest)
+    Ok([ securityId          |-> securityId.value,
+         matchEventIndicator |-> matchEventIndicator.value,
+         mdUpdateAction      |-> mdUpdateAction.value,
+         imbalanceCondition  |-> imbalanceCondition.value,
+         mdEntrySizeOptional |-> mdEntrySizeOptional.value,
+         mdEntryTimestamp    |-> mdEntryTimestamp.value,
+         rptSeq              |-> rptSeq.value ], rptSeq.rest)
 
 ZeroAuctionImbalance19Message ==
-    [ securityId                  |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator         |-> [i \in 1 .. 1 |-> 0],
-      mdUpdateAction              |-> [i \in 1 .. 1 |-> 0],
-      imbalanceCondition          |-> [i \in 1 .. 2 |-> 0],
-      mdEntrySizeQuantityOptional |-> [i \in 1 .. 8 |-> 0],
-      mdEntryTimestamp            |-> [i \in 1 .. 8 |-> 0],
-      rptSeq                      |-> [i \in 1 .. 4 |-> 0] ]
+    [ securityId          |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator |-> [i \in 1 .. 1 |-> 0],
+      mdUpdateAction      |-> [i \in 1 .. 1 |-> 0],
+      imbalanceCondition  |-> [i \in 1 .. 2 |-> 0],
+      mdEntrySizeOptional |-> [i \in 1 .. 8 |-> 0],
+      mdEntryTimestamp    |-> [i \in 1 .. 8 |-> 0],
+      rptSeq              |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Auction Imbalance 19 Message at zero, then each field in turn at the values it is checked at *)
 CheckedAuctionImbalance19Message ==
@@ -2242,7 +2242,7 @@ CheckedAuctionImbalance19Message ==
         \cup { [ZeroAuctionImbalance19Message EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
         \cup { [ZeroAuctionImbalance19Message EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
         \cup { [ZeroAuctionImbalance19Message EXCEPT !.imbalanceCondition = one] : one \in Sample(2) }
-        \cup { [ZeroAuctionImbalance19Message EXCEPT !.mdEntrySizeQuantityOptional = one] : one \in Sample(8) }
+        \cup { [ZeroAuctionImbalance19Message EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(8) }
         \cup { [ZeroAuctionImbalance19Message EXCEPT !.mdEntryTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroAuctionImbalance19Message EXCEPT !.rptSeq = one] : one \in Sample(4) }
 
@@ -2582,7 +2582,7 @@ LastTradePrice27Message ==
       tradingSessionId    : Sample(1),
       tradeCondition      : Sample(2),
       mdFuturePrice       : Sample(8),
-      mdEntrySizeQuantity : Sample(8),
+      mdEntrySize         : Sample(8),
       tradeId             : Sample(4),
       mdEntryBuyer        : Sample(4),
       mdEntrySeller       : Sample(4),
@@ -2600,7 +2600,7 @@ EncodeLastTradePrice27Message(message) ==
         \o message.tradingSessionId
         \o message.tradeCondition
         \o message.mdFuturePrice
-        \o message.mdEntrySizeQuantity
+        \o message.mdEntrySize
         \o message.tradeId
         \o message.mdEntryBuyer
         \o message.mdEntrySeller
@@ -2618,8 +2618,8 @@ DecodeLastTradePrice27Message(bytes) ==
     LET tradingSessionId == ReadBytes(matchEventIndicator.rest, 1) IN IF ~tradingSessionId.ok THEN Fail ELSE
     LET tradeCondition == ReadBytes(tradingSessionId.rest, 2) IN IF ~tradeCondition.ok THEN Fail ELSE
     LET mdFuturePrice == ReadBytes(tradeCondition.rest, 8) IN IF ~mdFuturePrice.ok THEN Fail ELSE
-    LET mdEntrySizeQuantity == ReadBytes(mdFuturePrice.rest, 8) IN IF ~mdEntrySizeQuantity.ok THEN Fail ELSE
-    LET tradeId == ReadBytes(mdEntrySizeQuantity.rest, 4) IN IF ~tradeId.ok THEN Fail ELSE
+    LET mdEntrySize == ReadBytes(mdFuturePrice.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET tradeId == ReadBytes(mdEntrySize.rest, 4) IN IF ~tradeId.ok THEN Fail ELSE
     LET mdEntryBuyer == ReadBytes(tradeId.rest, 4) IN IF ~mdEntryBuyer.ok THEN Fail ELSE
     LET mdEntrySeller == ReadBytes(mdEntryBuyer.rest, 4) IN IF ~mdEntrySeller.ok THEN Fail ELSE
     LET tradeDate == ReadBytes(mdEntrySeller.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
@@ -2634,7 +2634,7 @@ DecodeLastTradePrice27Message(bytes) ==
          tradingSessionId    |-> tradingSessionId.value,
          tradeCondition      |-> tradeCondition.value,
          mdFuturePrice       |-> mdFuturePrice.value,
-         mdEntrySizeQuantity |-> mdEntrySizeQuantity.value,
+         mdEntrySize         |-> mdEntrySize.value,
          tradeId             |-> tradeId.value,
          mdEntryBuyer        |-> mdEntryBuyer.value,
          mdEntrySeller       |-> mdEntrySeller.value,
@@ -2652,7 +2652,7 @@ ZeroLastTradePrice27Message ==
       tradingSessionId    |-> [i \in 1 .. 1 |-> 0],
       tradeCondition      |-> [i \in 1 .. 2 |-> 0],
       mdFuturePrice       |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeQuantity |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize         |-> [i \in 1 .. 8 |-> 0],
       tradeId             |-> [i \in 1 .. 4 |-> 0],
       mdEntryBuyer        |-> [i \in 1 .. 4 |-> 0],
       mdEntrySeller       |-> [i \in 1 .. 4 |-> 0],
@@ -2672,7 +2672,7 @@ CheckedLastTradePrice27Message ==
         \cup { [ZeroLastTradePrice27Message EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
         \cup { [ZeroLastTradePrice27Message EXCEPT !.tradeCondition = one] : one \in Sample(2) }
         \cup { [ZeroLastTradePrice27Message EXCEPT !.mdFuturePrice = one] : one \in Sample(8) }
-        \cup { [ZeroLastTradePrice27Message EXCEPT !.mdEntrySizeQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroLastTradePrice27Message EXCEPT !.mdEntrySize = one] : one \in Sample(8) }
         \cup { [ZeroLastTradePrice27Message EXCEPT !.tradeId = one] : one \in Sample(4) }
         \cup { [ZeroLastTradePrice27Message EXCEPT !.mdEntryBuyer = one] : one \in Sample(4) }
         \cup { [ZeroLastTradePrice27Message EXCEPT !.mdEntrySeller = one] : one \in Sample(4) }
@@ -2775,7 +2775,7 @@ OpenInterest29Message ==
       matchEventIndicator : Sample(1),
       offset9Padding1     : Sample(1),
       tradeDate           : Sample(2),
-      mdEntrySizeQuantity : Sample(8),
+      mdEntrySize         : Sample(8),
       mdEntryTimestamp    : Sample(8),
       rptSeq              : Sample(4) ]
 
@@ -2784,7 +2784,7 @@ EncodeOpenInterest29Message(message) ==
         \o message.matchEventIndicator
         \o message.offset9Padding1
         \o message.tradeDate
-        \o message.mdEntrySizeQuantity
+        \o message.mdEntrySize
         \o message.mdEntryTimestamp
         \o message.rptSeq
 
@@ -2793,14 +2793,14 @@ DecodeOpenInterest29Message(bytes) ==
     LET matchEventIndicator == ReadBytes(securityId.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
     LET offset9Padding1 == ReadBytes(matchEventIndicator.rest, 1) IN IF ~offset9Padding1.ok THEN Fail ELSE
     LET tradeDate == ReadBytes(offset9Padding1.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
-    LET mdEntrySizeQuantity == ReadBytes(tradeDate.rest, 8) IN IF ~mdEntrySizeQuantity.ok THEN Fail ELSE
-    LET mdEntryTimestamp == ReadBytes(mdEntrySizeQuantity.rest, 8) IN IF ~mdEntryTimestamp.ok THEN Fail ELSE
+    LET mdEntrySize == ReadBytes(tradeDate.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET mdEntryTimestamp == ReadBytes(mdEntrySize.rest, 8) IN IF ~mdEntryTimestamp.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(mdEntryTimestamp.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
     Ok([ securityId          |-> securityId.value,
          matchEventIndicator |-> matchEventIndicator.value,
          offset9Padding1     |-> offset9Padding1.value,
          tradeDate           |-> tradeDate.value,
-         mdEntrySizeQuantity |-> mdEntrySizeQuantity.value,
+         mdEntrySize         |-> mdEntrySize.value,
          mdEntryTimestamp    |-> mdEntryTimestamp.value,
          rptSeq              |-> rptSeq.value ], rptSeq.rest)
 
@@ -2809,7 +2809,7 @@ ZeroOpenInterest29Message ==
       matchEventIndicator |-> [i \in 1 .. 1 |-> 0],
       offset9Padding1     |-> [i \in 1 .. 1 |-> 0],
       tradeDate           |-> [i \in 1 .. 2 |-> 0],
-      mdEntrySizeQuantity |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize         |-> [i \in 1 .. 8 |-> 0],
       mdEntryTimestamp    |-> [i \in 1 .. 8 |-> 0],
       rptSeq              |-> [i \in 1 .. 4 |-> 0] ]
 
@@ -2820,7 +2820,7 @@ CheckedOpenInterest29Message ==
         \cup { [ZeroOpenInterest29Message EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
         \cup { [ZeroOpenInterest29Message EXCEPT !.offset9Padding1 = one] : one \in Sample(1) }
         \cup { [ZeroOpenInterest29Message EXCEPT !.tradeDate = one] : one \in Sample(2) }
-        \cup { [ZeroOpenInterest29Message EXCEPT !.mdEntrySizeQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroOpenInterest29Message EXCEPT !.mdEntrySize = one] : one \in Sample(8) }
         \cup { [ZeroOpenInterest29Message EXCEPT !.mdEntryTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroOpenInterest29Message EXCEPT !.rptSeq = one] : one \in Sample(4) }
 
@@ -2899,7 +2899,7 @@ OrderMbO50Message ==
       mdEntryType                    : Sample(1),
       offset11Padding1               : Sample(1),
       mdCorporateOffsetPriceOptional : Sample(8),
-      mdEntrySizeQuantity            : Sample(8),
+      mdEntrySize                    : Sample(8),
       mdEntryPositionNo              : Sample(4),
       enteringFirm                   : Sample(4),
       mdInsertTimestamp              : Sample(8),
@@ -2914,7 +2914,7 @@ EncodeOrderMbO50Message(message) ==
         \o message.mdEntryType
         \o message.offset11Padding1
         \o message.mdCorporateOffsetPriceOptional
-        \o message.mdEntrySizeQuantity
+        \o message.mdEntrySize
         \o message.mdEntryPositionNo
         \o message.enteringFirm
         \o message.mdInsertTimestamp
@@ -2929,8 +2929,8 @@ DecodeOrderMbO50Message(bytes) ==
     LET mdEntryType == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryType.ok THEN Fail ELSE
     LET offset11Padding1 == ReadBytes(mdEntryType.rest, 1) IN IF ~offset11Padding1.ok THEN Fail ELSE
     LET mdCorporateOffsetPriceOptional == ReadBytes(offset11Padding1.rest, 8) IN IF ~mdCorporateOffsetPriceOptional.ok THEN Fail ELSE
-    LET mdEntrySizeQuantity == ReadBytes(mdCorporateOffsetPriceOptional.rest, 8) IN IF ~mdEntrySizeQuantity.ok THEN Fail ELSE
-    LET mdEntryPositionNo == ReadBytes(mdEntrySizeQuantity.rest, 4) IN IF ~mdEntryPositionNo.ok THEN Fail ELSE
+    LET mdEntrySize == ReadBytes(mdCorporateOffsetPriceOptional.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET mdEntryPositionNo == ReadBytes(mdEntrySize.rest, 4) IN IF ~mdEntryPositionNo.ok THEN Fail ELSE
     LET enteringFirm == ReadBytes(mdEntryPositionNo.rest, 4) IN IF ~enteringFirm.ok THEN Fail ELSE
     LET mdInsertTimestamp == ReadBytes(enteringFirm.rest, 8) IN IF ~mdInsertTimestamp.ok THEN Fail ELSE
     LET secondaryOrderId == ReadBytes(mdInsertTimestamp.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
@@ -2942,7 +2942,7 @@ DecodeOrderMbO50Message(bytes) ==
          mdEntryType                    |-> mdEntryType.value,
          offset11Padding1               |-> offset11Padding1.value,
          mdCorporateOffsetPriceOptional |-> mdCorporateOffsetPriceOptional.value,
-         mdEntrySizeQuantity            |-> mdEntrySizeQuantity.value,
+         mdEntrySize                    |-> mdEntrySize.value,
          mdEntryPositionNo              |-> mdEntryPositionNo.value,
          enteringFirm                   |-> enteringFirm.value,
          mdInsertTimestamp              |-> mdInsertTimestamp.value,
@@ -2957,7 +2957,7 @@ ZeroOrderMbO50Message ==
       mdEntryType                    |-> [i \in 1 .. 1 |-> 0],
       offset11Padding1               |-> [i \in 1 .. 1 |-> 0],
       mdCorporateOffsetPriceOptional |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeQuantity            |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize                    |-> [i \in 1 .. 8 |-> 0],
       mdEntryPositionNo              |-> [i \in 1 .. 4 |-> 0],
       enteringFirm                   |-> [i \in 1 .. 4 |-> 0],
       mdInsertTimestamp              |-> [i \in 1 .. 8 |-> 0],
@@ -2974,7 +2974,7 @@ CheckedOrderMbO50Message ==
         \cup { [ZeroOrderMbO50Message EXCEPT !.mdEntryType = one] : one \in Sample(1) }
         \cup { [ZeroOrderMbO50Message EXCEPT !.offset11Padding1 = one] : one \in Sample(1) }
         \cup { [ZeroOrderMbO50Message EXCEPT !.mdCorporateOffsetPriceOptional = one] : one \in Sample(8) }
-        \cup { [ZeroOrderMbO50Message EXCEPT !.mdEntrySizeQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroOrderMbO50Message EXCEPT !.mdEntrySize = one] : one \in Sample(8) }
         \cup { [ZeroOrderMbO50Message EXCEPT !.mdEntryPositionNo = one] : one \in Sample(4) }
         \cup { [ZeroOrderMbO50Message EXCEPT !.enteringFirm = one] : one \in Sample(4) }
         \cup { [ZeroOrderMbO50Message EXCEPT !.mdInsertTimestamp = one] : one \in Sample(8) }
@@ -2987,16 +2987,16 @@ CheckedOrderMbO50Message ==
 (***************************************************************************)
 
 DeleteOrderMbO51Message ==
-    [ securityId                  : Sample(8),
-      matchEventIndicator         : Sample(1),
-      offset9Padding1             : Sample(1),
-      mdEntryType                 : Sample(1),
-      offset11Padding1            : Sample(1),
-      mdEntryPositionNo           : Sample(4),
-      mdEntrySizeQuantityOptional : Sample(8),
-      secondaryOrderId            : Sample(8),
-      mdEntryTimestamp            : Sample(8),
-      rptSeq                      : Sample(4) ]
+    [ securityId          : Sample(8),
+      matchEventIndicator : Sample(1),
+      offset9Padding1     : Sample(1),
+      mdEntryType         : Sample(1),
+      offset11Padding1    : Sample(1),
+      mdEntryPositionNo   : Sample(4),
+      mdEntrySizeOptional : Sample(8),
+      secondaryOrderId    : Sample(8),
+      mdEntryTimestamp    : Sample(8),
+      rptSeq              : Sample(4) ]
 
 EncodeDeleteOrderMbO51Message(message) ==
     message.securityId
@@ -3005,7 +3005,7 @@ EncodeDeleteOrderMbO51Message(message) ==
         \o message.mdEntryType
         \o message.offset11Padding1
         \o message.mdEntryPositionNo
-        \o message.mdEntrySizeQuantityOptional
+        \o message.mdEntrySizeOptional
         \o message.secondaryOrderId
         \o message.mdEntryTimestamp
         \o message.rptSeq
@@ -3017,32 +3017,32 @@ DecodeDeleteOrderMbO51Message(bytes) ==
     LET mdEntryType == ReadBytes(offset9Padding1.rest, 1) IN IF ~mdEntryType.ok THEN Fail ELSE
     LET offset11Padding1 == ReadBytes(mdEntryType.rest, 1) IN IF ~offset11Padding1.ok THEN Fail ELSE
     LET mdEntryPositionNo == ReadBytes(offset11Padding1.rest, 4) IN IF ~mdEntryPositionNo.ok THEN Fail ELSE
-    LET mdEntrySizeQuantityOptional == ReadBytes(mdEntryPositionNo.rest, 8) IN IF ~mdEntrySizeQuantityOptional.ok THEN Fail ELSE
-    LET secondaryOrderId == ReadBytes(mdEntrySizeQuantityOptional.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
+    LET mdEntrySizeOptional == ReadBytes(mdEntryPositionNo.rest, 8) IN IF ~mdEntrySizeOptional.ok THEN Fail ELSE
+    LET secondaryOrderId == ReadBytes(mdEntrySizeOptional.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
     LET mdEntryTimestamp == ReadBytes(secondaryOrderId.rest, 8) IN IF ~mdEntryTimestamp.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(mdEntryTimestamp.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
-    Ok([ securityId                  |-> securityId.value,
-         matchEventIndicator         |-> matchEventIndicator.value,
-         offset9Padding1             |-> offset9Padding1.value,
-         mdEntryType                 |-> mdEntryType.value,
-         offset11Padding1            |-> offset11Padding1.value,
-         mdEntryPositionNo           |-> mdEntryPositionNo.value,
-         mdEntrySizeQuantityOptional |-> mdEntrySizeQuantityOptional.value,
-         secondaryOrderId            |-> secondaryOrderId.value,
-         mdEntryTimestamp            |-> mdEntryTimestamp.value,
-         rptSeq                      |-> rptSeq.value ], rptSeq.rest)
+    Ok([ securityId          |-> securityId.value,
+         matchEventIndicator |-> matchEventIndicator.value,
+         offset9Padding1     |-> offset9Padding1.value,
+         mdEntryType         |-> mdEntryType.value,
+         offset11Padding1    |-> offset11Padding1.value,
+         mdEntryPositionNo   |-> mdEntryPositionNo.value,
+         mdEntrySizeOptional |-> mdEntrySizeOptional.value,
+         secondaryOrderId    |-> secondaryOrderId.value,
+         mdEntryTimestamp    |-> mdEntryTimestamp.value,
+         rptSeq              |-> rptSeq.value ], rptSeq.rest)
 
 ZeroDeleteOrderMbO51Message ==
-    [ securityId                  |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator         |-> [i \in 1 .. 1 |-> 0],
-      offset9Padding1             |-> [i \in 1 .. 1 |-> 0],
-      mdEntryType                 |-> [i \in 1 .. 1 |-> 0],
-      offset11Padding1            |-> [i \in 1 .. 1 |-> 0],
-      mdEntryPositionNo           |-> [i \in 1 .. 4 |-> 0],
-      mdEntrySizeQuantityOptional |-> [i \in 1 .. 8 |-> 0],
-      secondaryOrderId            |-> [i \in 1 .. 8 |-> 0],
-      mdEntryTimestamp            |-> [i \in 1 .. 8 |-> 0],
-      rptSeq                      |-> [i \in 1 .. 4 |-> 0] ]
+    [ securityId          |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator |-> [i \in 1 .. 1 |-> 0],
+      offset9Padding1     |-> [i \in 1 .. 1 |-> 0],
+      mdEntryType         |-> [i \in 1 .. 1 |-> 0],
+      offset11Padding1    |-> [i \in 1 .. 1 |-> 0],
+      mdEntryPositionNo   |-> [i \in 1 .. 4 |-> 0],
+      mdEntrySizeOptional |-> [i \in 1 .. 8 |-> 0],
+      secondaryOrderId    |-> [i \in 1 .. 8 |-> 0],
+      mdEntryTimestamp    |-> [i \in 1 .. 8 |-> 0],
+      rptSeq              |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Delete Order Mb O 51 Message at zero, then each field in turn at the values it is checked at *)
 CheckedDeleteOrderMbO51Message ==
@@ -3053,7 +3053,7 @@ CheckedDeleteOrderMbO51Message ==
         \cup { [ZeroDeleteOrderMbO51Message EXCEPT !.mdEntryType = one] : one \in Sample(1) }
         \cup { [ZeroDeleteOrderMbO51Message EXCEPT !.offset11Padding1 = one] : one \in Sample(1) }
         \cup { [ZeroDeleteOrderMbO51Message EXCEPT !.mdEntryPositionNo = one] : one \in Sample(4) }
-        \cup { [ZeroDeleteOrderMbO51Message EXCEPT !.mdEntrySizeQuantityOptional = one] : one \in Sample(8) }
+        \cup { [ZeroDeleteOrderMbO51Message EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(8) }
         \cup { [ZeroDeleteOrderMbO51Message EXCEPT !.secondaryOrderId = one] : one \in Sample(8) }
         \cup { [ZeroDeleteOrderMbO51Message EXCEPT !.mdEntryTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroDeleteOrderMbO51Message EXCEPT !.rptSeq = one] : one \in Sample(4) }
@@ -3132,7 +3132,7 @@ Trade53Message ==
       tradingSessionId    : Sample(1),
       tradeCondition      : Sample(2),
       mdFuturePrice       : Sample(8),
-      mdEntrySizeQuantity : Sample(8),
+      mdEntrySize         : Sample(8),
       tradeId             : Sample(4),
       mdEntryBuyer        : Sample(4),
       mdEntrySeller       : Sample(4),
@@ -3148,7 +3148,7 @@ EncodeTrade53Message(message) ==
         \o message.tradingSessionId
         \o message.tradeCondition
         \o message.mdFuturePrice
-        \o message.mdEntrySizeQuantity
+        \o message.mdEntrySize
         \o message.tradeId
         \o message.mdEntryBuyer
         \o message.mdEntrySeller
@@ -3164,8 +3164,8 @@ DecodeTrade53Message(bytes) ==
     LET tradingSessionId == ReadBytes(matchEventIndicator.rest, 1) IN IF ~tradingSessionId.ok THEN Fail ELSE
     LET tradeCondition == ReadBytes(tradingSessionId.rest, 2) IN IF ~tradeCondition.ok THEN Fail ELSE
     LET mdFuturePrice == ReadBytes(tradeCondition.rest, 8) IN IF ~mdFuturePrice.ok THEN Fail ELSE
-    LET mdEntrySizeQuantity == ReadBytes(mdFuturePrice.rest, 8) IN IF ~mdEntrySizeQuantity.ok THEN Fail ELSE
-    LET tradeId == ReadBytes(mdEntrySizeQuantity.rest, 4) IN IF ~tradeId.ok THEN Fail ELSE
+    LET mdEntrySize == ReadBytes(mdFuturePrice.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET tradeId == ReadBytes(mdEntrySize.rest, 4) IN IF ~tradeId.ok THEN Fail ELSE
     LET mdEntryBuyer == ReadBytes(tradeId.rest, 4) IN IF ~mdEntryBuyer.ok THEN Fail ELSE
     LET mdEntrySeller == ReadBytes(mdEntryBuyer.rest, 4) IN IF ~mdEntrySeller.ok THEN Fail ELSE
     LET tradeDate == ReadBytes(mdEntrySeller.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
@@ -3178,7 +3178,7 @@ DecodeTrade53Message(bytes) ==
          tradingSessionId    |-> tradingSessionId.value,
          tradeCondition      |-> tradeCondition.value,
          mdFuturePrice       |-> mdFuturePrice.value,
-         mdEntrySizeQuantity |-> mdEntrySizeQuantity.value,
+         mdEntrySize         |-> mdEntrySize.value,
          tradeId             |-> tradeId.value,
          mdEntryBuyer        |-> mdEntryBuyer.value,
          mdEntrySeller       |-> mdEntrySeller.value,
@@ -3194,7 +3194,7 @@ ZeroTrade53Message ==
       tradingSessionId    |-> [i \in 1 .. 1 |-> 0],
       tradeCondition      |-> [i \in 1 .. 2 |-> 0],
       mdFuturePrice       |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeQuantity |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize         |-> [i \in 1 .. 8 |-> 0],
       tradeId             |-> [i \in 1 .. 4 |-> 0],
       mdEntryBuyer        |-> [i \in 1 .. 4 |-> 0],
       mdEntrySeller       |-> [i \in 1 .. 4 |-> 0],
@@ -3212,7 +3212,7 @@ CheckedTrade53Message ==
         \cup { [ZeroTrade53Message EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
         \cup { [ZeroTrade53Message EXCEPT !.tradeCondition = one] : one \in Sample(2) }
         \cup { [ZeroTrade53Message EXCEPT !.mdFuturePrice = one] : one \in Sample(8) }
-        \cup { [ZeroTrade53Message EXCEPT !.mdEntrySizeQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroTrade53Message EXCEPT !.mdEntrySize = one] : one \in Sample(8) }
         \cup { [ZeroTrade53Message EXCEPT !.tradeId = one] : one \in Sample(4) }
         \cup { [ZeroTrade53Message EXCEPT !.mdEntryBuyer = one] : one \in Sample(4) }
         \cup { [ZeroTrade53Message EXCEPT !.mdEntrySeller = one] : one \in Sample(4) }
@@ -3232,7 +3232,7 @@ ForwardTrade54Message ==
       tradingSessionId    : Sample(1),
       tradeCondition      : Sample(2),
       mdFuturePrice       : Sample(8),
-      mdEntrySizeQuantity : Sample(8),
+      mdEntrySize         : Sample(8),
       tradeId             : Sample(4),
       mdEntryBuyer        : Sample(4),
       mdEntrySeller       : Sample(4),
@@ -3250,7 +3250,7 @@ EncodeForwardTrade54Message(message) ==
         \o message.tradingSessionId
         \o message.tradeCondition
         \o message.mdFuturePrice
-        \o message.mdEntrySizeQuantity
+        \o message.mdEntrySize
         \o message.tradeId
         \o message.mdEntryBuyer
         \o message.mdEntrySeller
@@ -3268,8 +3268,8 @@ DecodeForwardTrade54Message(bytes) ==
     LET tradingSessionId == ReadBytes(matchEventIndicator.rest, 1) IN IF ~tradingSessionId.ok THEN Fail ELSE
     LET tradeCondition == ReadBytes(tradingSessionId.rest, 2) IN IF ~tradeCondition.ok THEN Fail ELSE
     LET mdFuturePrice == ReadBytes(tradeCondition.rest, 8) IN IF ~mdFuturePrice.ok THEN Fail ELSE
-    LET mdEntrySizeQuantity == ReadBytes(mdFuturePrice.rest, 8) IN IF ~mdEntrySizeQuantity.ok THEN Fail ELSE
-    LET tradeId == ReadBytes(mdEntrySizeQuantity.rest, 4) IN IF ~tradeId.ok THEN Fail ELSE
+    LET mdEntrySize == ReadBytes(mdFuturePrice.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET tradeId == ReadBytes(mdEntrySize.rest, 4) IN IF ~tradeId.ok THEN Fail ELSE
     LET mdEntryBuyer == ReadBytes(tradeId.rest, 4) IN IF ~mdEntryBuyer.ok THEN Fail ELSE
     LET mdEntrySeller == ReadBytes(mdEntryBuyer.rest, 4) IN IF ~mdEntrySeller.ok THEN Fail ELSE
     LET tradeDate == ReadBytes(mdEntrySeller.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
@@ -3284,7 +3284,7 @@ DecodeForwardTrade54Message(bytes) ==
          tradingSessionId    |-> tradingSessionId.value,
          tradeCondition      |-> tradeCondition.value,
          mdFuturePrice       |-> mdFuturePrice.value,
-         mdEntrySizeQuantity |-> mdEntrySizeQuantity.value,
+         mdEntrySize         |-> mdEntrySize.value,
          tradeId             |-> tradeId.value,
          mdEntryBuyer        |-> mdEntryBuyer.value,
          mdEntrySeller       |-> mdEntrySeller.value,
@@ -3302,7 +3302,7 @@ ZeroForwardTrade54Message ==
       tradingSessionId    |-> [i \in 1 .. 1 |-> 0],
       tradeCondition      |-> [i \in 1 .. 2 |-> 0],
       mdFuturePrice       |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeQuantity |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize         |-> [i \in 1 .. 8 |-> 0],
       tradeId             |-> [i \in 1 .. 4 |-> 0],
       mdEntryBuyer        |-> [i \in 1 .. 4 |-> 0],
       mdEntrySeller       |-> [i \in 1 .. 4 |-> 0],
@@ -3322,7 +3322,7 @@ CheckedForwardTrade54Message ==
         \cup { [ZeroForwardTrade54Message EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
         \cup { [ZeroForwardTrade54Message EXCEPT !.tradeCondition = one] : one \in Sample(2) }
         \cup { [ZeroForwardTrade54Message EXCEPT !.mdFuturePrice = one] : one \in Sample(8) }
-        \cup { [ZeroForwardTrade54Message EXCEPT !.mdEntrySizeQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroForwardTrade54Message EXCEPT !.mdEntrySize = one] : one \in Sample(8) }
         \cup { [ZeroForwardTrade54Message EXCEPT !.tradeId = one] : one \in Sample(4) }
         \cup { [ZeroForwardTrade54Message EXCEPT !.mdEntryBuyer = one] : one \in Sample(4) }
         \cup { [ZeroForwardTrade54Message EXCEPT !.mdEntrySeller = one] : one \in Sample(4) }
@@ -3502,7 +3502,7 @@ TradeBust57Message ==
       tradingSessionId    : Sample(1),
       offset10Padding2    : Sample(2),
       mdFuturePrice       : Sample(8),
-      mdEntrySizeQuantity : Sample(8),
+      mdEntrySize         : Sample(8),
       tradeId             : Sample(4),
       tradeDate           : Sample(2),
       offset34Padding2    : Sample(2),
@@ -3515,7 +3515,7 @@ EncodeTradeBust57Message(message) ==
         \o message.tradingSessionId
         \o message.offset10Padding2
         \o message.mdFuturePrice
-        \o message.mdEntrySizeQuantity
+        \o message.mdEntrySize
         \o message.tradeId
         \o message.tradeDate
         \o message.offset34Padding2
@@ -3528,8 +3528,8 @@ DecodeTradeBust57Message(bytes) ==
     LET tradingSessionId == ReadBytes(matchEventIndicator.rest, 1) IN IF ~tradingSessionId.ok THEN Fail ELSE
     LET offset10Padding2 == ReadBytes(tradingSessionId.rest, 2) IN IF ~offset10Padding2.ok THEN Fail ELSE
     LET mdFuturePrice == ReadBytes(offset10Padding2.rest, 8) IN IF ~mdFuturePrice.ok THEN Fail ELSE
-    LET mdEntrySizeQuantity == ReadBytes(mdFuturePrice.rest, 8) IN IF ~mdEntrySizeQuantity.ok THEN Fail ELSE
-    LET tradeId == ReadBytes(mdEntrySizeQuantity.rest, 4) IN IF ~tradeId.ok THEN Fail ELSE
+    LET mdEntrySize == ReadBytes(mdFuturePrice.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET tradeId == ReadBytes(mdEntrySize.rest, 4) IN IF ~tradeId.ok THEN Fail ELSE
     LET tradeDate == ReadBytes(tradeId.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
     LET offset34Padding2 == ReadBytes(tradeDate.rest, 2) IN IF ~offset34Padding2.ok THEN Fail ELSE
     LET mdEntryTimestamp == ReadBytes(offset34Padding2.rest, 8) IN IF ~mdEntryTimestamp.ok THEN Fail ELSE
@@ -3539,7 +3539,7 @@ DecodeTradeBust57Message(bytes) ==
          tradingSessionId    |-> tradingSessionId.value,
          offset10Padding2    |-> offset10Padding2.value,
          mdFuturePrice       |-> mdFuturePrice.value,
-         mdEntrySizeQuantity |-> mdEntrySizeQuantity.value,
+         mdEntrySize         |-> mdEntrySize.value,
          tradeId             |-> tradeId.value,
          tradeDate           |-> tradeDate.value,
          offset34Padding2    |-> offset34Padding2.value,
@@ -3552,7 +3552,7 @@ ZeroTradeBust57Message ==
       tradingSessionId    |-> [i \in 1 .. 1 |-> 0],
       offset10Padding2    |-> [i \in 1 .. 2 |-> 0],
       mdFuturePrice       |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeQuantity |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize         |-> [i \in 1 .. 8 |-> 0],
       tradeId             |-> [i \in 1 .. 4 |-> 0],
       tradeDate           |-> [i \in 1 .. 2 |-> 0],
       offset34Padding2    |-> [i \in 1 .. 2 |-> 0],
@@ -3567,7 +3567,7 @@ CheckedTradeBust57Message ==
         \cup { [ZeroTradeBust57Message EXCEPT !.tradingSessionId = one] : one \in Sample(1) }
         \cup { [ZeroTradeBust57Message EXCEPT !.offset10Padding2 = one] : one \in Sample(2) }
         \cup { [ZeroTradeBust57Message EXCEPT !.mdFuturePrice = one] : one \in Sample(8) }
-        \cup { [ZeroTradeBust57Message EXCEPT !.mdEntrySizeQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroTradeBust57Message EXCEPT !.mdEntrySize = one] : one \in Sample(8) }
         \cup { [ZeroTradeBust57Message EXCEPT !.tradeId = one] : one \in Sample(4) }
         \cup { [ZeroTradeBust57Message EXCEPT !.tradeDate = one] : one \in Sample(2) }
         \cup { [ZeroTradeBust57Message EXCEPT !.offset34Padding2 = one] : one \in Sample(2) }
@@ -3575,13 +3575,13 @@ CheckedTradeBust57Message ==
         \cup { [ZeroTradeBust57Message EXCEPT !.rptSeq = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Snapshot Full Refresh Orders Mb O 71 Message no M D Entries Group: 41   *)
+(* Snapshot Full Refresh Orders Mb O 71 Message No M D Entries Group: 41   *)
 (* bytes                                                                   *)
 (***************************************************************************)
 
 SnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup ==
     [ mdCorporateOffsetPriceOptional : Sample(8),
-      mdEntrySizeQuantity            : Sample(8),
+      mdEntrySize                    : Sample(8),
       mdEntryPositionNo              : Sample(4),
       enteringFirm                   : Sample(4),
       mdInsertTimestamp              : Sample(8),
@@ -3590,7 +3590,7 @@ SnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup ==
 
 EncodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup(message) ==
     message.mdCorporateOffsetPriceOptional
-        \o message.mdEntrySizeQuantity
+        \o message.mdEntrySize
         \o message.mdEntryPositionNo
         \o message.enteringFirm
         \o message.mdInsertTimestamp
@@ -3599,14 +3599,14 @@ EncodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup(message) ==
 
 DecodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup(bytes) ==
     LET mdCorporateOffsetPriceOptional == ReadBytes(bytes, 8) IN IF ~mdCorporateOffsetPriceOptional.ok THEN Fail ELSE
-    LET mdEntrySizeQuantity == ReadBytes(mdCorporateOffsetPriceOptional.rest, 8) IN IF ~mdEntrySizeQuantity.ok THEN Fail ELSE
-    LET mdEntryPositionNo == ReadBytes(mdEntrySizeQuantity.rest, 4) IN IF ~mdEntryPositionNo.ok THEN Fail ELSE
+    LET mdEntrySize == ReadBytes(mdCorporateOffsetPriceOptional.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET mdEntryPositionNo == ReadBytes(mdEntrySize.rest, 4) IN IF ~mdEntryPositionNo.ok THEN Fail ELSE
     LET enteringFirm == ReadBytes(mdEntryPositionNo.rest, 4) IN IF ~enteringFirm.ok THEN Fail ELSE
     LET mdInsertTimestamp == ReadBytes(enteringFirm.rest, 8) IN IF ~mdInsertTimestamp.ok THEN Fail ELSE
     LET secondaryOrderId == ReadBytes(mdInsertTimestamp.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
     LET mdEntryType == ReadBytes(secondaryOrderId.rest, 1) IN IF ~mdEntryType.ok THEN Fail ELSE
     Ok([ mdCorporateOffsetPriceOptional |-> mdCorporateOffsetPriceOptional.value,
-         mdEntrySizeQuantity            |-> mdEntrySizeQuantity.value,
+         mdEntrySize                    |-> mdEntrySize.value,
          mdEntryPositionNo              |-> mdEntryPositionNo.value,
          enteringFirm                   |-> enteringFirm.value,
          mdInsertTimestamp              |-> mdInsertTimestamp.value,
@@ -3615,32 +3615,32 @@ DecodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup(bytes) ==
 
 ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup ==
     [ mdCorporateOffsetPriceOptional |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeQuantity            |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize                    |-> [i \in 1 .. 8 |-> 0],
       mdEntryPositionNo              |-> [i \in 1 .. 4 |-> 0],
       enteringFirm                   |-> [i \in 1 .. 4 |-> 0],
       mdInsertTimestamp              |-> [i \in 1 .. 8 |-> 0],
       secondaryOrderId               |-> [i \in 1 .. 8 |-> 0],
       mdEntryType                    |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Snapshot Full Refresh Orders Mb O 71 Message no M D Entries Group at zero, then each field in turn at the values it is checked at *)
+(* Snapshot Full Refresh Orders Mb O 71 Message No M D Entries Group at zero, then each field in turn at the values it is checked at *)
 CheckedSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup ==
     { ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup }
         \cup { [ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup EXCEPT !.mdCorporateOffsetPriceOptional = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup EXCEPT !.mdEntrySizeQuantity = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup EXCEPT !.mdEntrySize = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup EXCEPT !.mdEntryPositionNo = one] : one \in Sample(4) }
         \cup { [ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup EXCEPT !.enteringFirm = one] : one \in Sample(4) }
         \cup { [ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup EXCEPT !.mdInsertTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup EXCEPT !.secondaryOrderId = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup EXCEPT !.mdEntryType = one] : one \in Sample(1) }
 
-(* A run of Snapshot Full Refresh Orders Mb O 71 Message no M D Entries Group, written one after another *)
+(* A run of Snapshot Full Refresh Orders Mb O 71 Message No M D Entries Group, written one after another *)
 RECURSIVE EncodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroupList(_)
 EncodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup(Head(messages)) \o EncodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroupList(Tail(messages))
 
-(* As many Snapshot Full Refresh Orders Mb O 71 Message no M D Entries Group as the field that counts them says *)
+(* As many Snapshot Full Refresh Orders Mb O 71 Message No M D Entries Group as the field that counts them says *)
 RECURSIVE ReadSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroupList(_, _)
 ReadSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroupList(bytes, count) ==
     IF count = 0
@@ -3651,11 +3651,11 @@ ReadSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Snapshot Full Refresh Orders Mb O 71 Message no M D Entries Group of each kind, for the lists that carry them *)
+(* One Snapshot Full Refresh Orders Mb O 71 Message No M D Entries Group of each kind, for the lists that carry them *)
 OneSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup == { ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup }
 
 (***************************************************************************)
-(* Snapshot Full Refresh Orders Mb O 71 Message no M D Entries Groups      *)
+(* Snapshot Full Refresh Orders Mb O 71 Message No M D Entries Groups      *)
 (***************************************************************************)
 
 SnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroups ==
@@ -3678,7 +3678,7 @@ ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroups ==
     [ blockLength                                           |-> [i \in 1 .. 2 |-> 0],
       snapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup |-> << >> ]
 
-(* Snapshot Full Refresh Orders Mb O 71 Message no M D Entries Groups at zero, then each field in turn at the values it is checked at *)
+(* Snapshot Full Refresh Orders Mb O 71 Message No M D Entries Groups at zero, then each field in turn at the values it is checked at *)
 CheckedSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroups ==
     { ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroups }
         \cup { [ZeroSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -4454,7 +4454,7 @@ RoundTripTradeBust57Message ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snapshot Full Refresh Orders Mb O 71 Message no M D Entries Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Snapshot Full Refresh Orders Mb O 71 Message No M D Entries Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup ==
     \A message \in CheckedSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup :
         LET read == DecodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup(EncodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup(message))
@@ -4462,7 +4462,7 @@ RoundTripSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snapshot Full Refresh Orders Mb O 71 Message no M D Entries Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Snapshot Full Refresh Orders Mb O 71 Message No M D Entries Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroups ==
     \A message \in CheckedSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroups :
         LET read == DecodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroups(EncodeSnapshotFullRefreshOrdersMbO71MessageNoMDEntriesGroups(message))

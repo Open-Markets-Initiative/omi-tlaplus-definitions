@@ -97,7 +97,7 @@ SampleLists(entries) ==
         \cup { <<one, one>> : one \in entries }
 
 (***************************************************************************)
-(* Trades Stream Event Message trades Group: 25 bytes                      *)
+(* Trades Stream Event Message Trades Group: 25 bytes                      *)
 (***************************************************************************)
 
 TradesStreamEventMessageTradesGroup ==
@@ -128,7 +128,7 @@ ZeroTradesStreamEventMessageTradesGroup ==
       qty          |-> [i \in 1 .. 8 |-> 0],
       isBuyerMaker |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Trades Stream Event Message trades Group at zero, then each field in turn at the values it is checked at *)
+(* Trades Stream Event Message Trades Group at zero, then each field in turn at the values it is checked at *)
 CheckedTradesStreamEventMessageTradesGroup ==
     { ZeroTradesStreamEventMessageTradesGroup }
         \cup { [ZeroTradesStreamEventMessageTradesGroup EXCEPT !.id = one] : one \in Sample(8) }
@@ -136,14 +136,14 @@ CheckedTradesStreamEventMessageTradesGroup ==
         \cup { [ZeroTradesStreamEventMessageTradesGroup EXCEPT !.qty = one] : one \in Sample(8) }
         \cup { [ZeroTradesStreamEventMessageTradesGroup EXCEPT !.isBuyerMaker = one] : one \in Sample(1) }
 
-(* A run of Trades Stream Event Message trades Group, written one after another *)
+(* A run of Trades Stream Event Message Trades Group, written one after another *)
 RECURSIVE EncodeTradesStreamEventMessageTradesGroupList(_)
 EncodeTradesStreamEventMessageTradesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeTradesStreamEventMessageTradesGroup(Head(messages)) \o EncodeTradesStreamEventMessageTradesGroupList(Tail(messages))
 
-(* As many Trades Stream Event Message trades Group as the field that counts them says *)
+(* As many Trades Stream Event Message Trades Group as the field that counts them says *)
 RECURSIVE ReadTradesStreamEventMessageTradesGroupList(_, _)
 ReadTradesStreamEventMessageTradesGroupList(bytes, count) ==
     IF count = 0
@@ -154,11 +154,11 @@ ReadTradesStreamEventMessageTradesGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Trades Stream Event Message trades Group of each kind, for the lists that carry them *)
+(* One Trades Stream Event Message Trades Group of each kind, for the lists that carry them *)
 OneTradesStreamEventMessageTradesGroup == { ZeroTradesStreamEventMessageTradesGroup }
 
 (***************************************************************************)
-(* Trades Stream Event Message trades Groups                               *)
+(* Trades Stream Event Message Trades Groups                               *)
 (***************************************************************************)
 
 TradesStreamEventMessageTradesGroups ==
@@ -181,7 +181,7 @@ ZeroTradesStreamEventMessageTradesGroups ==
     [ blockLength                         |-> [i \in 1 .. 2 |-> 0],
       tradesStreamEventMessageTradesGroup |-> << >> ]
 
-(* Trades Stream Event Message trades Groups at zero, then each field in turn at the values it is checked at *)
+(* Trades Stream Event Message Trades Groups at zero, then each field in turn at the values it is checked at *)
 CheckedTradesStreamEventMessageTradesGroups ==
     { ZeroTradesStreamEventMessageTradesGroups }
         \cup { [ZeroTradesStreamEventMessageTradesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -358,7 +358,7 @@ CheckedBestBidAskStreamEventMessage ==
         \cup { [ZeroBestBidAskStreamEventMessage EXCEPT !.symbol = one] : one \in CheckedSymbol2 }
 
 (***************************************************************************)
-(* Depth Snapshot Stream Event Message bids Group: 16 bytes                *)
+(* Depth Snapshot Stream Event Message Bids Group: 16 bytes                *)
 (***************************************************************************)
 
 DepthSnapshotStreamEventMessageBidsGroup ==
@@ -379,20 +379,20 @@ ZeroDepthSnapshotStreamEventMessageBidsGroup ==
     [ price |-> [i \in 1 .. 8 |-> 0],
       qty   |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Depth Snapshot Stream Event Message bids Group at zero, then each field in turn at the values it is checked at *)
+(* Depth Snapshot Stream Event Message Bids Group at zero, then each field in turn at the values it is checked at *)
 CheckedDepthSnapshotStreamEventMessageBidsGroup ==
     { ZeroDepthSnapshotStreamEventMessageBidsGroup }
         \cup { [ZeroDepthSnapshotStreamEventMessageBidsGroup EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroDepthSnapshotStreamEventMessageBidsGroup EXCEPT !.qty = one] : one \in Sample(8) }
 
-(* A run of Depth Snapshot Stream Event Message bids Group, written one after another *)
+(* A run of Depth Snapshot Stream Event Message Bids Group, written one after another *)
 RECURSIVE EncodeDepthSnapshotStreamEventMessageBidsGroupList(_)
 EncodeDepthSnapshotStreamEventMessageBidsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeDepthSnapshotStreamEventMessageBidsGroup(Head(messages)) \o EncodeDepthSnapshotStreamEventMessageBidsGroupList(Tail(messages))
 
-(* As many Depth Snapshot Stream Event Message bids Group as the field that counts them says *)
+(* As many Depth Snapshot Stream Event Message Bids Group as the field that counts them says *)
 RECURSIVE ReadDepthSnapshotStreamEventMessageBidsGroupList(_, _)
 ReadDepthSnapshotStreamEventMessageBidsGroupList(bytes, count) ==
     IF count = 0
@@ -403,11 +403,11 @@ ReadDepthSnapshotStreamEventMessageBidsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Depth Snapshot Stream Event Message bids Group of each kind, for the lists that carry them *)
+(* One Depth Snapshot Stream Event Message Bids Group of each kind, for the lists that carry them *)
 OneDepthSnapshotStreamEventMessageBidsGroup == { ZeroDepthSnapshotStreamEventMessageBidsGroup }
 
 (***************************************************************************)
-(* Depth Snapshot Stream Event Message bids Groups                         *)
+(* Depth Snapshot Stream Event Message Bids Groups                         *)
 (***************************************************************************)
 
 DepthSnapshotStreamEventMessageBidsGroups ==
@@ -430,14 +430,14 @@ ZeroDepthSnapshotStreamEventMessageBidsGroups ==
     [ blockLength                              |-> [i \in 1 .. 2 |-> 0],
       depthSnapshotStreamEventMessageBidsGroup |-> << >> ]
 
-(* Depth Snapshot Stream Event Message bids Groups at zero, then each field in turn at the values it is checked at *)
+(* Depth Snapshot Stream Event Message Bids Groups at zero, then each field in turn at the values it is checked at *)
 CheckedDepthSnapshotStreamEventMessageBidsGroups ==
     { ZeroDepthSnapshotStreamEventMessageBidsGroups }
         \cup { [ZeroDepthSnapshotStreamEventMessageBidsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroDepthSnapshotStreamEventMessageBidsGroups EXCEPT !.depthSnapshotStreamEventMessageBidsGroup = one] : one \in SampleLists(OneDepthSnapshotStreamEventMessageBidsGroup) }
 
 (***************************************************************************)
-(* Depth Snapshot Stream Event Message asks Group: 16 bytes                *)
+(* Depth Snapshot Stream Event Message Asks Group: 16 bytes                *)
 (***************************************************************************)
 
 DepthSnapshotStreamEventMessageAsksGroup ==
@@ -458,20 +458,20 @@ ZeroDepthSnapshotStreamEventMessageAsksGroup ==
     [ price |-> [i \in 1 .. 8 |-> 0],
       qty   |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Depth Snapshot Stream Event Message asks Group at zero, then each field in turn at the values it is checked at *)
+(* Depth Snapshot Stream Event Message Asks Group at zero, then each field in turn at the values it is checked at *)
 CheckedDepthSnapshotStreamEventMessageAsksGroup ==
     { ZeroDepthSnapshotStreamEventMessageAsksGroup }
         \cup { [ZeroDepthSnapshotStreamEventMessageAsksGroup EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroDepthSnapshotStreamEventMessageAsksGroup EXCEPT !.qty = one] : one \in Sample(8) }
 
-(* A run of Depth Snapshot Stream Event Message asks Group, written one after another *)
+(* A run of Depth Snapshot Stream Event Message Asks Group, written one after another *)
 RECURSIVE EncodeDepthSnapshotStreamEventMessageAsksGroupList(_)
 EncodeDepthSnapshotStreamEventMessageAsksGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeDepthSnapshotStreamEventMessageAsksGroup(Head(messages)) \o EncodeDepthSnapshotStreamEventMessageAsksGroupList(Tail(messages))
 
-(* As many Depth Snapshot Stream Event Message asks Group as the field that counts them says *)
+(* As many Depth Snapshot Stream Event Message Asks Group as the field that counts them says *)
 RECURSIVE ReadDepthSnapshotStreamEventMessageAsksGroupList(_, _)
 ReadDepthSnapshotStreamEventMessageAsksGroupList(bytes, count) ==
     IF count = 0
@@ -482,11 +482,11 @@ ReadDepthSnapshotStreamEventMessageAsksGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Depth Snapshot Stream Event Message asks Group of each kind, for the lists that carry them *)
+(* One Depth Snapshot Stream Event Message Asks Group of each kind, for the lists that carry them *)
 OneDepthSnapshotStreamEventMessageAsksGroup == { ZeroDepthSnapshotStreamEventMessageAsksGroup }
 
 (***************************************************************************)
-(* Depth Snapshot Stream Event Message asks Groups                         *)
+(* Depth Snapshot Stream Event Message Asks Groups                         *)
 (***************************************************************************)
 
 DepthSnapshotStreamEventMessageAsksGroups ==
@@ -509,7 +509,7 @@ ZeroDepthSnapshotStreamEventMessageAsksGroups ==
     [ blockLength                              |-> [i \in 1 .. 2 |-> 0],
       depthSnapshotStreamEventMessageAsksGroup |-> << >> ]
 
-(* Depth Snapshot Stream Event Message asks Groups at zero, then each field in turn at the values it is checked at *)
+(* Depth Snapshot Stream Event Message Asks Groups at zero, then each field in turn at the values it is checked at *)
 CheckedDepthSnapshotStreamEventMessageAsksGroups ==
     { ZeroDepthSnapshotStreamEventMessageAsksGroups }
         \cup { [ZeroDepthSnapshotStreamEventMessageAsksGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -598,7 +598,7 @@ CheckedDepthSnapshotStreamEventMessage ==
         \cup { [ZeroDepthSnapshotStreamEventMessage EXCEPT !.symbol = one] : one \in CheckedSymbol3 }
 
 (***************************************************************************)
-(* Depth Diff Stream Event Message bids Group: 16 bytes                    *)
+(* Depth Diff Stream Event Message Bids Group: 16 bytes                    *)
 (***************************************************************************)
 
 DepthDiffStreamEventMessageBidsGroup ==
@@ -619,20 +619,20 @@ ZeroDepthDiffStreamEventMessageBidsGroup ==
     [ price |-> [i \in 1 .. 8 |-> 0],
       qty   |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Depth Diff Stream Event Message bids Group at zero, then each field in turn at the values it is checked at *)
+(* Depth Diff Stream Event Message Bids Group at zero, then each field in turn at the values it is checked at *)
 CheckedDepthDiffStreamEventMessageBidsGroup ==
     { ZeroDepthDiffStreamEventMessageBidsGroup }
         \cup { [ZeroDepthDiffStreamEventMessageBidsGroup EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroDepthDiffStreamEventMessageBidsGroup EXCEPT !.qty = one] : one \in Sample(8) }
 
-(* A run of Depth Diff Stream Event Message bids Group, written one after another *)
+(* A run of Depth Diff Stream Event Message Bids Group, written one after another *)
 RECURSIVE EncodeDepthDiffStreamEventMessageBidsGroupList(_)
 EncodeDepthDiffStreamEventMessageBidsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeDepthDiffStreamEventMessageBidsGroup(Head(messages)) \o EncodeDepthDiffStreamEventMessageBidsGroupList(Tail(messages))
 
-(* As many Depth Diff Stream Event Message bids Group as the field that counts them says *)
+(* As many Depth Diff Stream Event Message Bids Group as the field that counts them says *)
 RECURSIVE ReadDepthDiffStreamEventMessageBidsGroupList(_, _)
 ReadDepthDiffStreamEventMessageBidsGroupList(bytes, count) ==
     IF count = 0
@@ -643,11 +643,11 @@ ReadDepthDiffStreamEventMessageBidsGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Depth Diff Stream Event Message bids Group of each kind, for the lists that carry them *)
+(* One Depth Diff Stream Event Message Bids Group of each kind, for the lists that carry them *)
 OneDepthDiffStreamEventMessageBidsGroup == { ZeroDepthDiffStreamEventMessageBidsGroup }
 
 (***************************************************************************)
-(* Depth Diff Stream Event Message bids Groups                             *)
+(* Depth Diff Stream Event Message Bids Groups                             *)
 (***************************************************************************)
 
 DepthDiffStreamEventMessageBidsGroups ==
@@ -670,14 +670,14 @@ ZeroDepthDiffStreamEventMessageBidsGroups ==
     [ blockLength                          |-> [i \in 1 .. 2 |-> 0],
       depthDiffStreamEventMessageBidsGroup |-> << >> ]
 
-(* Depth Diff Stream Event Message bids Groups at zero, then each field in turn at the values it is checked at *)
+(* Depth Diff Stream Event Message Bids Groups at zero, then each field in turn at the values it is checked at *)
 CheckedDepthDiffStreamEventMessageBidsGroups ==
     { ZeroDepthDiffStreamEventMessageBidsGroups }
         \cup { [ZeroDepthDiffStreamEventMessageBidsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
         \cup { [ZeroDepthDiffStreamEventMessageBidsGroups EXCEPT !.depthDiffStreamEventMessageBidsGroup = one] : one \in SampleLists(OneDepthDiffStreamEventMessageBidsGroup) }
 
 (***************************************************************************)
-(* Depth Diff Stream Event Message asks Group: 16 bytes                    *)
+(* Depth Diff Stream Event Message Asks Group: 16 bytes                    *)
 (***************************************************************************)
 
 DepthDiffStreamEventMessageAsksGroup ==
@@ -698,20 +698,20 @@ ZeroDepthDiffStreamEventMessageAsksGroup ==
     [ price |-> [i \in 1 .. 8 |-> 0],
       qty   |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Depth Diff Stream Event Message asks Group at zero, then each field in turn at the values it is checked at *)
+(* Depth Diff Stream Event Message Asks Group at zero, then each field in turn at the values it is checked at *)
 CheckedDepthDiffStreamEventMessageAsksGroup ==
     { ZeroDepthDiffStreamEventMessageAsksGroup }
         \cup { [ZeroDepthDiffStreamEventMessageAsksGroup EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroDepthDiffStreamEventMessageAsksGroup EXCEPT !.qty = one] : one \in Sample(8) }
 
-(* A run of Depth Diff Stream Event Message asks Group, written one after another *)
+(* A run of Depth Diff Stream Event Message Asks Group, written one after another *)
 RECURSIVE EncodeDepthDiffStreamEventMessageAsksGroupList(_)
 EncodeDepthDiffStreamEventMessageAsksGroupList(messages) ==
     IF messages = << >>
     THEN << >>
     ELSE EncodeDepthDiffStreamEventMessageAsksGroup(Head(messages)) \o EncodeDepthDiffStreamEventMessageAsksGroupList(Tail(messages))
 
-(* As many Depth Diff Stream Event Message asks Group as the field that counts them says *)
+(* As many Depth Diff Stream Event Message Asks Group as the field that counts them says *)
 RECURSIVE ReadDepthDiffStreamEventMessageAsksGroupList(_, _)
 ReadDepthDiffStreamEventMessageAsksGroupList(bytes, count) ==
     IF count = 0
@@ -722,11 +722,11 @@ ReadDepthDiffStreamEventMessageAsksGroupList(bytes, count) ==
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Depth Diff Stream Event Message asks Group of each kind, for the lists that carry them *)
+(* One Depth Diff Stream Event Message Asks Group of each kind, for the lists that carry them *)
 OneDepthDiffStreamEventMessageAsksGroup == { ZeroDepthDiffStreamEventMessageAsksGroup }
 
 (***************************************************************************)
-(* Depth Diff Stream Event Message asks Groups                             *)
+(* Depth Diff Stream Event Message Asks Groups                             *)
 (***************************************************************************)
 
 DepthDiffStreamEventMessageAsksGroups ==
@@ -749,7 +749,7 @@ ZeroDepthDiffStreamEventMessageAsksGroups ==
     [ blockLength                          |-> [i \in 1 .. 2 |-> 0],
       depthDiffStreamEventMessageAsksGroup |-> << >> ]
 
-(* Depth Diff Stream Event Message asks Groups at zero, then each field in turn at the values it is checked at *)
+(* Depth Diff Stream Event Message Asks Groups at zero, then each field in turn at the values it is checked at *)
 CheckedDepthDiffStreamEventMessageAsksGroups ==
     { ZeroDepthDiffStreamEventMessageAsksGroups }
         \cup { [ZeroDepthDiffStreamEventMessageAsksGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
@@ -962,7 +962,7 @@ RoundTripUIntLE ==
                 /\ \A i \in 1 .. width : EncodeUIntLE(value, width)[i] \in Byte
                 /\ \A i \in 1 .. width : EncodeUIntBE(value, width)[i] \in Byte
 
-(* Every Trades Stream Event Message trades Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Trades Stream Event Message Trades Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripTradesStreamEventMessageTradesGroup ==
     \A message \in CheckedTradesStreamEventMessageTradesGroup :
         LET read == DecodeTradesStreamEventMessageTradesGroup(EncodeTradesStreamEventMessageTradesGroup(message))
@@ -970,7 +970,7 @@ RoundTripTradesStreamEventMessageTradesGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Trades Stream Event Message trades Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Trades Stream Event Message Trades Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripTradesStreamEventMessageTradesGroups ==
     \A message \in CheckedTradesStreamEventMessageTradesGroups :
         LET read == DecodeTradesStreamEventMessageTradesGroups(EncodeTradesStreamEventMessageTradesGroups(message))
@@ -1010,7 +1010,7 @@ RoundTripBestBidAskStreamEventMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Depth Snapshot Stream Event Message bids Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Depth Snapshot Stream Event Message Bids Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripDepthSnapshotStreamEventMessageBidsGroup ==
     \A message \in CheckedDepthSnapshotStreamEventMessageBidsGroup :
         LET read == DecodeDepthSnapshotStreamEventMessageBidsGroup(EncodeDepthSnapshotStreamEventMessageBidsGroup(message))
@@ -1018,7 +1018,7 @@ RoundTripDepthSnapshotStreamEventMessageBidsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Depth Snapshot Stream Event Message bids Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Depth Snapshot Stream Event Message Bids Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripDepthSnapshotStreamEventMessageBidsGroups ==
     \A message \in CheckedDepthSnapshotStreamEventMessageBidsGroups :
         LET read == DecodeDepthSnapshotStreamEventMessageBidsGroups(EncodeDepthSnapshotStreamEventMessageBidsGroups(message))
@@ -1026,7 +1026,7 @@ RoundTripDepthSnapshotStreamEventMessageBidsGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Depth Snapshot Stream Event Message asks Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Depth Snapshot Stream Event Message Asks Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripDepthSnapshotStreamEventMessageAsksGroup ==
     \A message \in CheckedDepthSnapshotStreamEventMessageAsksGroup :
         LET read == DecodeDepthSnapshotStreamEventMessageAsksGroup(EncodeDepthSnapshotStreamEventMessageAsksGroup(message))
@@ -1034,7 +1034,7 @@ RoundTripDepthSnapshotStreamEventMessageAsksGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Depth Snapshot Stream Event Message asks Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Depth Snapshot Stream Event Message Asks Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripDepthSnapshotStreamEventMessageAsksGroups ==
     \A message \in CheckedDepthSnapshotStreamEventMessageAsksGroups :
         LET read == DecodeDepthSnapshotStreamEventMessageAsksGroups(EncodeDepthSnapshotStreamEventMessageAsksGroups(message))
@@ -1058,7 +1058,7 @@ RoundTripDepthSnapshotStreamEventMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Depth Diff Stream Event Message bids Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Depth Diff Stream Event Message Bids Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripDepthDiffStreamEventMessageBidsGroup ==
     \A message \in CheckedDepthDiffStreamEventMessageBidsGroup :
         LET read == DecodeDepthDiffStreamEventMessageBidsGroup(EncodeDepthDiffStreamEventMessageBidsGroup(message))
@@ -1066,7 +1066,7 @@ RoundTripDepthDiffStreamEventMessageBidsGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Depth Diff Stream Event Message bids Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Depth Diff Stream Event Message Bids Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripDepthDiffStreamEventMessageBidsGroups ==
     \A message \in CheckedDepthDiffStreamEventMessageBidsGroups :
         LET read == DecodeDepthDiffStreamEventMessageBidsGroups(EncodeDepthDiffStreamEventMessageBidsGroups(message))
@@ -1074,7 +1074,7 @@ RoundTripDepthDiffStreamEventMessageBidsGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Depth Diff Stream Event Message asks Group decodes back to what was encoded, and leaves nothing over *)
+(* Every Depth Diff Stream Event Message Asks Group decodes back to what was encoded, and leaves nothing over *)
 RoundTripDepthDiffStreamEventMessageAsksGroup ==
     \A message \in CheckedDepthDiffStreamEventMessageAsksGroup :
         LET read == DecodeDepthDiffStreamEventMessageAsksGroup(EncodeDepthDiffStreamEventMessageAsksGroup(message))
@@ -1082,7 +1082,7 @@ RoundTripDepthDiffStreamEventMessageAsksGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Depth Diff Stream Event Message asks Groups decodes back to what was encoded, and leaves nothing over *)
+(* Every Depth Diff Stream Event Message Asks Groups decodes back to what was encoded, and leaves nothing over *)
 RoundTripDepthDiffStreamEventMessageAsksGroups ==
     \A message \in CheckedDepthDiffStreamEventMessageAsksGroups :
         LET read == DecodeDepthDiffStreamEventMessageAsksGroups(EncodeDepthDiffStreamEventMessageAsksGroups(message))

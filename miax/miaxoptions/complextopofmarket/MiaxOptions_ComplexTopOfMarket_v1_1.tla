@@ -18,6 +18,9 @@
 (*                                                                         *)
 (* Note: Application Message fills what is left of the frame Packet Length *)
 (* states, which is what it is read from.                                  *)
+(*                                                                         *)
+(* Note: a Mach Message that ends the session is the last of its Packet:   *)
+(* nothing may follow it.                                                  *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
 
@@ -915,7 +918,7 @@ UnderlyingTradingStatusMessage ==
       underlyingSymbol                 : Sample(11),
       tradingStatus                    : Sample(1),
       eventReason                      : Sample(1),
-      secondsPart                      : Sample(4),
+      expectedEventTimeSecondsPart     : Sample(4),
       expectedEventTimeNanoSecondsPart : Sample(4) ]
 
 EncodeUnderlyingTradingStatusMessage(message) ==
@@ -923,7 +926,7 @@ EncodeUnderlyingTradingStatusMessage(message) ==
         \o message.underlyingSymbol
         \o message.tradingStatus
         \o message.eventReason
-        \o message.secondsPart
+        \o message.expectedEventTimeSecondsPart
         \o message.expectedEventTimeNanoSecondsPart
 
 DecodeUnderlyingTradingStatusMessage(bytes) ==
@@ -931,13 +934,13 @@ DecodeUnderlyingTradingStatusMessage(bytes) ==
     LET underlyingSymbol == ReadBytes(nanoseconds.rest, 11) IN IF ~underlyingSymbol.ok THEN Fail ELSE
     LET tradingStatus == ReadBytes(underlyingSymbol.rest, 1) IN IF ~tradingStatus.ok THEN Fail ELSE
     LET eventReason == ReadBytes(tradingStatus.rest, 1) IN IF ~eventReason.ok THEN Fail ELSE
-    LET secondsPart == ReadBytes(eventReason.rest, 4) IN IF ~secondsPart.ok THEN Fail ELSE
-    LET expectedEventTimeNanoSecondsPart == ReadBytes(secondsPart.rest, 4) IN IF ~expectedEventTimeNanoSecondsPart.ok THEN Fail ELSE
+    LET expectedEventTimeSecondsPart == ReadBytes(eventReason.rest, 4) IN IF ~expectedEventTimeSecondsPart.ok THEN Fail ELSE
+    LET expectedEventTimeNanoSecondsPart == ReadBytes(expectedEventTimeSecondsPart.rest, 4) IN IF ~expectedEventTimeNanoSecondsPart.ok THEN Fail ELSE
     Ok([ nanoseconds                      |-> nanoseconds.value,
          underlyingSymbol                 |-> underlyingSymbol.value,
          tradingStatus                    |-> tradingStatus.value,
          eventReason                      |-> eventReason.value,
-         secondsPart                      |-> secondsPart.value,
+         expectedEventTimeSecondsPart     |-> expectedEventTimeSecondsPart.value,
          expectedEventTimeNanoSecondsPart |-> expectedEventTimeNanoSecondsPart.value ], expectedEventTimeNanoSecondsPart.rest)
 
 ZeroUnderlyingTradingStatusMessage ==
@@ -945,7 +948,7 @@ ZeroUnderlyingTradingStatusMessage ==
       underlyingSymbol                 |-> [i \in 1 .. 11 |-> 0],
       tradingStatus                    |-> [i \in 1 .. 1 |-> 0],
       eventReason                      |-> [i \in 1 .. 1 |-> 0],
-      secondsPart                      |-> [i \in 1 .. 4 |-> 0],
+      expectedEventTimeSecondsPart     |-> [i \in 1 .. 4 |-> 0],
       expectedEventTimeNanoSecondsPart |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Underlying Trading Status Message at zero, then each field in turn at the values it is checked at *)
@@ -955,7 +958,7 @@ CheckedUnderlyingTradingStatusMessage ==
         \cup { [ZeroUnderlyingTradingStatusMessage EXCEPT !.underlyingSymbol = one] : one \in Sample(11) }
         \cup { [ZeroUnderlyingTradingStatusMessage EXCEPT !.tradingStatus = one] : one \in Sample(1) }
         \cup { [ZeroUnderlyingTradingStatusMessage EXCEPT !.eventReason = one] : one \in Sample(1) }
-        \cup { [ZeroUnderlyingTradingStatusMessage EXCEPT !.secondsPart = one] : one \in Sample(4) }
+        \cup { [ZeroUnderlyingTradingStatusMessage EXCEPT !.expectedEventTimeSecondsPart = one] : one \in Sample(4) }
         \cup { [ZeroUnderlyingTradingStatusMessage EXCEPT !.expectedEventTimeNanoSecondsPart = one] : one \in Sample(4) }
 
 (***************************************************************************)
@@ -1147,6 +1150,9 @@ CheckedMachMessage ==
         \cup { [ZeroMachMessage EXCEPT !.sessionNumber = one] : one \in Sample(1) }
         \cup { [ZeroMachMessage EXCEPT !.payload = one] : one \in CheckedPayload }
 
+(* Does a Mach Message end the session? Nothing may follow one that does *)
+EndsSessionMachMessage(message) == message.payload.tag \in {EndOfSessionCode}
+
 (* A run of Mach Message, written one after another *)
 RECURSIVE EncodeMachMessageList(_)
 EncodeMachMessageList(messages) ==
@@ -1156,12 +1162,14 @@ EncodeMachMessageList(messages) ==
 
 (* As many Mach Message as the bytes hold, which is what its payload rule states. *)
 (* Each one takes bytes off the reader, so the run ends where the data does. *)
+(* Only the last of them may end the session, so one that does with bytes left fails *)
 RECURSIVE ReadMachMessageAll(_)
 ReadMachMessageAll(bytes) ==
     IF bytes = << >>
     THEN Ok(<< >>, << >>)
     ELSE LET one == DecodeMachMessage(bytes)
          IN  IF ~one.ok THEN Fail
+             ELSE IF EndsSessionMachMessage(one.value) /\ one.rest # << >> THEN Fail
              ELSE LET more == ReadMachMessageAll(one.rest)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
@@ -1173,12 +1181,18 @@ OneMachMessage ==
       [ZeroMachMessage EXCEPT !.payload = [tag |-> EndOfSessionCode, body |-> [empty |-> 0]]],
       [ZeroMachMessage EXCEPT !.payload = [tag |-> ApplicationMessageCode, body |-> ZeroApplicationMessage]] }
 
+(* The runs of Mach Message checked: none, one, two of a kind and each kind followed by *)
+(* another, keeping those in which only the last may end the session *)
+SampleMachMessageLists ==
+    { run \in SampleLists(OneMachMessage) \cup { <<one, other>> : one \in OneMachMessage, other \in OneMachMessage } :
+          \A at \in 1 .. Len(run) - 1 : ~EndsSessionMachMessage(run[at]) }
+
 (***************************************************************************)
 (* Packet                                                                  *)
 (***************************************************************************)
 
 Packet ==
-    [ machMessage : SampleLists(OneMachMessage) ]
+    [ machMessage : SampleMachMessageLists ]
 
 EncodePacket(message) ==
     EncodeMachMessageList(message.machMessage)
@@ -1193,7 +1207,7 @@ ZeroPacket ==
 (* Packet at zero, then each field in turn at the values it is checked at *)
 CheckedPacket ==
     { ZeroPacket }
-        \cup { [ZeroPacket EXCEPT !.machMessage = one] : one \in SampleLists(OneMachMessage) }
+        \cup { [ZeroPacket EXCEPT !.machMessage = one] : one \in SampleMachMessageLists }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -1390,6 +1404,12 @@ FramesMachMessage ==
     \A message \in CheckedMachMessage :
         LET bytes == EncodeMachMessage(message)
         IN  DecodeUIntLE(SubSeq(bytes, 9, 10)) = Len(bytes) - 0
+
+(* A Mach Message that ends the session is the last of its Packet: a run with one after it does not decode *)
+EndsSessionLastMachMessage ==
+    \A last \in { one \in OneMachMessage : EndsSessionMachMessage(one) } :
+        \A after \in OneMachMessage :
+            ~ReadMachMessageAll(EncodeMachMessageList(<<last, after>>)).ok
 
 -----------------------------------------------------------------------------
 (* The state the session machine will run over. It stands still until there are *)

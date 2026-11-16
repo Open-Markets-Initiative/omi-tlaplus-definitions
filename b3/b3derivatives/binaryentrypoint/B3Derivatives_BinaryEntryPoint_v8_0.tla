@@ -868,7 +868,7 @@ SimpleNewOrderMessage ==
     [ inboundBusinessHeader          : InboundBusinessHeader,
       ordtagid                       : Sample(1),
       mmProtectionReset              : Sample(1),
-      clordid                        : Sample(8),
+      clOrdId                        : Sample(8),
       account                        : Sample(4),
       senderLocation                 : Sample(10),
       enteringTrader                 : Sample(5),
@@ -887,7 +887,7 @@ EncodeSimpleNewOrderMessage(message) ==
     EncodeInboundBusinessHeader(message.inboundBusinessHeader)
         \o message.ordtagid
         \o message.mmProtectionReset
-        \o message.clordid
+        \o message.clOrdId
         \o message.account
         \o message.senderLocation
         \o message.enteringTrader
@@ -906,8 +906,8 @@ DecodeSimpleNewOrderMessage(bytes) ==
     LET inboundBusinessHeader == DecodeInboundBusinessHeader(bytes) IN IF ~inboundBusinessHeader.ok THEN Fail ELSE
     LET ordtagid == ReadBytes(inboundBusinessHeader.rest, 1) IN IF ~ordtagid.ok THEN Fail ELSE
     LET mmProtectionReset == ReadBytes(ordtagid.rest, 1) IN IF ~mmProtectionReset.ok THEN Fail ELSE
-    LET clordid == ReadBytes(mmProtectionReset.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET account == ReadBytes(clordid.rest, 4) IN IF ~account.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(mmProtectionReset.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET account == ReadBytes(clOrdId.rest, 4) IN IF ~account.ok THEN Fail ELSE
     LET senderLocation == ReadBytes(account.rest, 10) IN IF ~senderLocation.ok THEN Fail ELSE
     LET enteringTrader == ReadBytes(senderLocation.rest, 5) IN IF ~enteringTrader.ok THEN Fail ELSE
     LET selfTradePreventionInstruction == ReadBytes(enteringTrader.rest, 1) IN IF ~selfTradePreventionInstruction.ok THEN Fail ELSE
@@ -923,7 +923,7 @@ DecodeSimpleNewOrderMessage(bytes) ==
     Ok([ inboundBusinessHeader          |-> inboundBusinessHeader.value,
          ordtagid                       |-> ordtagid.value,
          mmProtectionReset              |-> mmProtectionReset.value,
-         clordid                        |-> clordid.value,
+         clOrdId                        |-> clOrdId.value,
          account                        |-> account.value,
          senderLocation                 |-> senderLocation.value,
          enteringTrader                 |-> enteringTrader.value,
@@ -942,7 +942,7 @@ ZeroSimpleNewOrderMessage ==
     [ inboundBusinessHeader          |-> ZeroInboundBusinessHeader,
       ordtagid                       |-> [i \in 1 .. 1 |-> 0],
       mmProtectionReset              |-> [i \in 1 .. 1 |-> 0],
-      clordid                        |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                        |-> [i \in 1 .. 8 |-> 0],
       account                        |-> [i \in 1 .. 4 |-> 0],
       senderLocation                 |-> [i \in 1 .. 10 |-> 0],
       enteringTrader                 |-> [i \in 1 .. 5 |-> 0],
@@ -963,7 +963,7 @@ CheckedSimpleNewOrderMessage ==
         \cup { [ZeroSimpleNewOrderMessage EXCEPT !.inboundBusinessHeader = one] : one \in CheckedInboundBusinessHeader }
         \cup { [ZeroSimpleNewOrderMessage EXCEPT !.ordtagid = one] : one \in Sample(1) }
         \cup { [ZeroSimpleNewOrderMessage EXCEPT !.mmProtectionReset = one] : one \in Sample(1) }
-        \cup { [ZeroSimpleNewOrderMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroSimpleNewOrderMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroSimpleNewOrderMessage EXCEPT !.account = one] : one \in Sample(4) }
         \cup { [ZeroSimpleNewOrderMessage EXCEPT !.senderLocation = one] : one \in Sample(10) }
         \cup { [ZeroSimpleNewOrderMessage EXCEPT !.enteringTrader = one] : one \in Sample(5) }
@@ -1090,7 +1090,7 @@ SimpleModifyOrderMessage ==
     [ inboundBusinessHeader          : InboundBusinessHeader2,
       ordtagid                       : Sample(1),
       mmProtectionReset              : Sample(1),
-      clordid                        : Sample(8),
+      clOrdId                        : Sample(8),
       account                        : Sample(4),
       senderLocation                 : Sample(10),
       enteringTrader                 : Sample(5),
@@ -1111,7 +1111,7 @@ EncodeSimpleModifyOrderMessage(message) ==
     EncodeInboundBusinessHeader2(message.inboundBusinessHeader)
         \o message.ordtagid
         \o message.mmProtectionReset
-        \o message.clordid
+        \o message.clOrdId
         \o message.account
         \o message.senderLocation
         \o message.enteringTrader
@@ -1132,8 +1132,8 @@ DecodeSimpleModifyOrderMessage(bytes) ==
     LET inboundBusinessHeader == DecodeInboundBusinessHeader2(bytes) IN IF ~inboundBusinessHeader.ok THEN Fail ELSE
     LET ordtagid == ReadBytes(inboundBusinessHeader.rest, 1) IN IF ~ordtagid.ok THEN Fail ELSE
     LET mmProtectionReset == ReadBytes(ordtagid.rest, 1) IN IF ~mmProtectionReset.ok THEN Fail ELSE
-    LET clordid == ReadBytes(mmProtectionReset.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET account == ReadBytes(clordid.rest, 4) IN IF ~account.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(mmProtectionReset.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET account == ReadBytes(clOrdId.rest, 4) IN IF ~account.ok THEN Fail ELSE
     LET senderLocation == ReadBytes(account.rest, 10) IN IF ~senderLocation.ok THEN Fail ELSE
     LET enteringTrader == ReadBytes(senderLocation.rest, 5) IN IF ~enteringTrader.ok THEN Fail ELSE
     LET selfTradePreventionInstruction == ReadBytes(enteringTrader.rest, 1) IN IF ~selfTradePreventionInstruction.ok THEN Fail ELSE
@@ -1151,7 +1151,7 @@ DecodeSimpleModifyOrderMessage(bytes) ==
     Ok([ inboundBusinessHeader          |-> inboundBusinessHeader.value,
          ordtagid                       |-> ordtagid.value,
          mmProtectionReset              |-> mmProtectionReset.value,
-         clordid                        |-> clordid.value,
+         clOrdId                        |-> clOrdId.value,
          account                        |-> account.value,
          senderLocation                 |-> senderLocation.value,
          enteringTrader                 |-> enteringTrader.value,
@@ -1172,7 +1172,7 @@ ZeroSimpleModifyOrderMessage ==
     [ inboundBusinessHeader          |-> ZeroInboundBusinessHeader2,
       ordtagid                       |-> [i \in 1 .. 1 |-> 0],
       mmProtectionReset              |-> [i \in 1 .. 1 |-> 0],
-      clordid                        |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                        |-> [i \in 1 .. 8 |-> 0],
       account                        |-> [i \in 1 .. 4 |-> 0],
       senderLocation                 |-> [i \in 1 .. 10 |-> 0],
       enteringTrader                 |-> [i \in 1 .. 5 |-> 0],
@@ -1195,7 +1195,7 @@ CheckedSimpleModifyOrderMessage ==
         \cup { [ZeroSimpleModifyOrderMessage EXCEPT !.inboundBusinessHeader = one] : one \in CheckedInboundBusinessHeader2 }
         \cup { [ZeroSimpleModifyOrderMessage EXCEPT !.ordtagid = one] : one \in Sample(1) }
         \cup { [ZeroSimpleModifyOrderMessage EXCEPT !.mmProtectionReset = one] : one \in Sample(1) }
-        \cup { [ZeroSimpleModifyOrderMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroSimpleModifyOrderMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroSimpleModifyOrderMessage EXCEPT !.account = one] : one \in Sample(4) }
         \cup { [ZeroSimpleModifyOrderMessage EXCEPT !.senderLocation = one] : one \in Sample(10) }
         \cup { [ZeroSimpleModifyOrderMessage EXCEPT !.enteringTrader = one] : one \in Sample(5) }
@@ -1382,7 +1382,7 @@ NewOrderSingleMessage ==
     [ inboundBusinessHeader          : InboundBusinessHeader3,
       ordtagid                       : Sample(1),
       mmProtectionReset              : Sample(1),
-      clordid                        : Sample(8),
+      clOrdId                        : Sample(8),
       account                        : Sample(4),
       senderLocation                 : Sample(10),
       enteringTrader                 : Sample(5),
@@ -1408,7 +1408,7 @@ EncodeNewOrderSingleMessage(message) ==
     EncodeInboundBusinessHeader3(message.inboundBusinessHeader)
         \o message.ordtagid
         \o message.mmProtectionReset
-        \o message.clordid
+        \o message.clOrdId
         \o message.account
         \o message.senderLocation
         \o message.enteringTrader
@@ -1434,8 +1434,8 @@ DecodeNewOrderSingleMessage(bytes) ==
     LET inboundBusinessHeader == DecodeInboundBusinessHeader3(bytes) IN IF ~inboundBusinessHeader.ok THEN Fail ELSE
     LET ordtagid == ReadBytes(inboundBusinessHeader.rest, 1) IN IF ~ordtagid.ok THEN Fail ELSE
     LET mmProtectionReset == ReadBytes(ordtagid.rest, 1) IN IF ~mmProtectionReset.ok THEN Fail ELSE
-    LET clordid == ReadBytes(mmProtectionReset.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET account == ReadBytes(clordid.rest, 4) IN IF ~account.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(mmProtectionReset.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET account == ReadBytes(clOrdId.rest, 4) IN IF ~account.ok THEN Fail ELSE
     LET senderLocation == ReadBytes(account.rest, 10) IN IF ~senderLocation.ok THEN Fail ELSE
     LET enteringTrader == ReadBytes(senderLocation.rest, 5) IN IF ~enteringTrader.ok THEN Fail ELSE
     LET selfTradePreventionInstruction == ReadBytes(enteringTrader.rest, 1) IN IF ~selfTradePreventionInstruction.ok THEN Fail ELSE
@@ -1458,7 +1458,7 @@ DecodeNewOrderSingleMessage(bytes) ==
     Ok([ inboundBusinessHeader          |-> inboundBusinessHeader.value,
          ordtagid                       |-> ordtagid.value,
          mmProtectionReset              |-> mmProtectionReset.value,
-         clordid                        |-> clordid.value,
+         clOrdId                        |-> clOrdId.value,
          account                        |-> account.value,
          senderLocation                 |-> senderLocation.value,
          enteringTrader                 |-> enteringTrader.value,
@@ -1484,7 +1484,7 @@ ZeroNewOrderSingleMessage ==
     [ inboundBusinessHeader          |-> ZeroInboundBusinessHeader3,
       ordtagid                       |-> [i \in 1 .. 1 |-> 0],
       mmProtectionReset              |-> [i \in 1 .. 1 |-> 0],
-      clordid                        |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                        |-> [i \in 1 .. 8 |-> 0],
       account                        |-> [i \in 1 .. 4 |-> 0],
       senderLocation                 |-> [i \in 1 .. 10 |-> 0],
       enteringTrader                 |-> [i \in 1 .. 5 |-> 0],
@@ -1512,7 +1512,7 @@ CheckedNewOrderSingleMessage ==
         \cup { [ZeroNewOrderSingleMessage EXCEPT !.inboundBusinessHeader = one] : one \in CheckedInboundBusinessHeader3 }
         \cup { [ZeroNewOrderSingleMessage EXCEPT !.ordtagid = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderSingleMessage EXCEPT !.mmProtectionReset = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderSingleMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderSingleMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderSingleMessage EXCEPT !.account = one] : one \in Sample(4) }
         \cup { [ZeroNewOrderSingleMessage EXCEPT !.senderLocation = one] : one \in Sample(10) }
         \cup { [ZeroNewOrderSingleMessage EXCEPT !.enteringTrader = one] : one \in Sample(5) }
@@ -1704,7 +1704,7 @@ OrderCancelReplaceRequestMessage ==
     [ inboundBusinessHeader          : InboundBusinessHeader4,
       ordtagid                       : Sample(1),
       mmProtectionReset              : Sample(1),
-      clordid                        : Sample(8),
+      clOrdId                        : Sample(8),
       account                        : Sample(4),
       senderLocation                 : Sample(10),
       enteringTrader                 : Sample(5),
@@ -1733,7 +1733,7 @@ EncodeOrderCancelReplaceRequestMessage(message) ==
     EncodeInboundBusinessHeader4(message.inboundBusinessHeader)
         \o message.ordtagid
         \o message.mmProtectionReset
-        \o message.clordid
+        \o message.clOrdId
         \o message.account
         \o message.senderLocation
         \o message.enteringTrader
@@ -1762,8 +1762,8 @@ DecodeOrderCancelReplaceRequestMessage(bytes) ==
     LET inboundBusinessHeader == DecodeInboundBusinessHeader4(bytes) IN IF ~inboundBusinessHeader.ok THEN Fail ELSE
     LET ordtagid == ReadBytes(inboundBusinessHeader.rest, 1) IN IF ~ordtagid.ok THEN Fail ELSE
     LET mmProtectionReset == ReadBytes(ordtagid.rest, 1) IN IF ~mmProtectionReset.ok THEN Fail ELSE
-    LET clordid == ReadBytes(mmProtectionReset.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET account == ReadBytes(clordid.rest, 4) IN IF ~account.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(mmProtectionReset.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET account == ReadBytes(clOrdId.rest, 4) IN IF ~account.ok THEN Fail ELSE
     LET senderLocation == ReadBytes(account.rest, 10) IN IF ~senderLocation.ok THEN Fail ELSE
     LET enteringTrader == ReadBytes(senderLocation.rest, 5) IN IF ~enteringTrader.ok THEN Fail ELSE
     LET selfTradePreventionInstruction == ReadBytes(enteringTrader.rest, 1) IN IF ~selfTradePreventionInstruction.ok THEN Fail ELSE
@@ -1789,7 +1789,7 @@ DecodeOrderCancelReplaceRequestMessage(bytes) ==
     Ok([ inboundBusinessHeader          |-> inboundBusinessHeader.value,
          ordtagid                       |-> ordtagid.value,
          mmProtectionReset              |-> mmProtectionReset.value,
-         clordid                        |-> clordid.value,
+         clOrdId                        |-> clOrdId.value,
          account                        |-> account.value,
          senderLocation                 |-> senderLocation.value,
          enteringTrader                 |-> enteringTrader.value,
@@ -1818,7 +1818,7 @@ ZeroOrderCancelReplaceRequestMessage ==
     [ inboundBusinessHeader          |-> ZeroInboundBusinessHeader4,
       ordtagid                       |-> [i \in 1 .. 1 |-> 0],
       mmProtectionReset              |-> [i \in 1 .. 1 |-> 0],
-      clordid                        |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                        |-> [i \in 1 .. 8 |-> 0],
       account                        |-> [i \in 1 .. 4 |-> 0],
       senderLocation                 |-> [i \in 1 .. 10 |-> 0],
       enteringTrader                 |-> [i \in 1 .. 5 |-> 0],
@@ -1849,7 +1849,7 @@ CheckedOrderCancelReplaceRequestMessage ==
         \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.inboundBusinessHeader = one] : one \in CheckedInboundBusinessHeader4 }
         \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.ordtagid = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.mmProtectionReset = one] : one \in Sample(1) }
-        \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.account = one] : one \in Sample(4) }
         \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.senderLocation = one] : one \in Sample(10) }
         \cup { [ZeroOrderCancelReplaceRequestMessage EXCEPT !.enteringTrader = one] : one \in Sample(5) }
@@ -1975,7 +1975,7 @@ CheckedMemo5 ==
 OrderCancelRequestMessage ==
     [ inboundBusinessHeader         : InboundBusinessHeader5,
       offset18Padding2              : Sample(2),
-      clordid                       : Sample(8),
+      clOrdId                       : Sample(8),
       securityId                    : Sample(8),
       orderIdOptional               : Sample(8),
       origclordid                   : Sample(8),
@@ -1991,7 +1991,7 @@ OrderCancelRequestMessage ==
 EncodeOrderCancelRequestMessage(message) ==
     EncodeInboundBusinessHeader5(message.inboundBusinessHeader)
         \o message.offset18Padding2
-        \o message.clordid
+        \o message.clOrdId
         \o message.securityId
         \o message.orderIdOptional
         \o message.origclordid
@@ -2007,8 +2007,8 @@ EncodeOrderCancelRequestMessage(message) ==
 DecodeOrderCancelRequestMessage(bytes) ==
     LET inboundBusinessHeader == DecodeInboundBusinessHeader5(bytes) IN IF ~inboundBusinessHeader.ok THEN Fail ELSE
     LET offset18Padding2 == ReadBytes(inboundBusinessHeader.rest, 2) IN IF ~offset18Padding2.ok THEN Fail ELSE
-    LET clordid == ReadBytes(offset18Padding2.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET securityId == ReadBytes(clordid.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(offset18Padding2.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET securityId == ReadBytes(clOrdId.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
     LET orderIdOptional == ReadBytes(securityId.rest, 8) IN IF ~orderIdOptional.ok THEN Fail ELSE
     LET origclordid == ReadBytes(orderIdOptional.rest, 8) IN IF ~origclordid.ok THEN Fail ELSE
     LET side == ReadBytes(origclordid.rest, 1) IN IF ~side.ok THEN Fail ELSE
@@ -2021,7 +2021,7 @@ DecodeOrderCancelRequestMessage(bytes) ==
     LET memo == DecodeMemo5(deskId.rest) IN IF ~memo.ok THEN Fail ELSE
     Ok([ inboundBusinessHeader         |-> inboundBusinessHeader.value,
          offset18Padding2              |-> offset18Padding2.value,
-         clordid                       |-> clordid.value,
+         clOrdId                       |-> clOrdId.value,
          securityId                    |-> securityId.value,
          orderIdOptional               |-> orderIdOptional.value,
          origclordid                   |-> origclordid.value,
@@ -2037,7 +2037,7 @@ DecodeOrderCancelRequestMessage(bytes) ==
 ZeroOrderCancelRequestMessage ==
     [ inboundBusinessHeader         |-> ZeroInboundBusinessHeader5,
       offset18Padding2              |-> [i \in 1 .. 2 |-> 0],
-      clordid                       |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                       |-> [i \in 1 .. 8 |-> 0],
       securityId                    |-> [i \in 1 .. 8 |-> 0],
       orderIdOptional               |-> [i \in 1 .. 8 |-> 0],
       origclordid                   |-> [i \in 1 .. 8 |-> 0],
@@ -2055,7 +2055,7 @@ CheckedOrderCancelRequestMessage ==
     { ZeroOrderCancelRequestMessage }
         \cup { [ZeroOrderCancelRequestMessage EXCEPT !.inboundBusinessHeader = one] : one \in CheckedInboundBusinessHeader5 }
         \cup { [ZeroOrderCancelRequestMessage EXCEPT !.offset18Padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroOrderCancelRequestMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroOrderCancelRequestMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroOrderCancelRequestMessage EXCEPT !.securityId = one] : one \in Sample(8) }
         \cup { [ZeroOrderCancelRequestMessage EXCEPT !.orderIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroOrderCancelRequestMessage EXCEPT !.origclordid = one] : one \in Sample(8) }
@@ -2123,33 +2123,33 @@ CrossSidesGroup ==
       offset1Padding1      : Sample(1),
       account              : Sample(4),
       enteringFirmOptional : Sample(4),
-      clordid              : Sample(8) ]
+      clOrdId              : Sample(8) ]
 
 EncodeCrossSidesGroup(message) ==
     message.side
         \o message.offset1Padding1
         \o message.account
         \o message.enteringFirmOptional
-        \o message.clordid
+        \o message.clOrdId
 
 DecodeCrossSidesGroup(bytes) ==
     LET side == ReadBytes(bytes, 1) IN IF ~side.ok THEN Fail ELSE
     LET offset1Padding1 == ReadBytes(side.rest, 1) IN IF ~offset1Padding1.ok THEN Fail ELSE
     LET account == ReadBytes(offset1Padding1.rest, 4) IN IF ~account.ok THEN Fail ELSE
     LET enteringFirmOptional == ReadBytes(account.rest, 4) IN IF ~enteringFirmOptional.ok THEN Fail ELSE
-    LET clordid == ReadBytes(enteringFirmOptional.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(enteringFirmOptional.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
     Ok([ side                 |-> side.value,
          offset1Padding1      |-> offset1Padding1.value,
          account              |-> account.value,
          enteringFirmOptional |-> enteringFirmOptional.value,
-         clordid              |-> clordid.value ], clordid.rest)
+         clOrdId              |-> clOrdId.value ], clOrdId.rest)
 
 ZeroCrossSidesGroup ==
     [ side                 |-> [i \in 1 .. 1 |-> 0],
       offset1Padding1      |-> [i \in 1 .. 1 |-> 0],
       account              |-> [i \in 1 .. 4 |-> 0],
       enteringFirmOptional |-> [i \in 1 .. 4 |-> 0],
-      clordid              |-> [i \in 1 .. 8 |-> 0] ]
+      clOrdId              |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Cross Sides Group at zero, then each field in turn at the values it is checked at *)
 CheckedCrossSidesGroup ==
@@ -2158,7 +2158,7 @@ CheckedCrossSidesGroup ==
         \cup { [ZeroCrossSidesGroup EXCEPT !.offset1Padding1 = one] : one \in Sample(1) }
         \cup { [ZeroCrossSidesGroup EXCEPT !.account = one] : one \in Sample(4) }
         \cup { [ZeroCrossSidesGroup EXCEPT !.enteringFirmOptional = one] : one \in Sample(4) }
-        \cup { [ZeroCrossSidesGroup EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroCrossSidesGroup EXCEPT !.clOrdId = one] : one \in Sample(8) }
 
 (* A run of Cross Sides Group, written one after another *)
 RECURSIVE EncodeCrossSidesGroupList(_)
@@ -2266,7 +2266,7 @@ CheckedMemo6 ==
 NewOrderCrossMessage ==
     [ inboundBusinessHeader   : InboundBusinessHeader6,
       offset18Padding2        : Sample(2),
-      crossid                 : Sample(8),
+      crossId                 : Sample(8),
       senderLocation          : Sample(10),
       enteringTrader          : Sample(5),
       executingTraderOptional : Sample(5),
@@ -2281,7 +2281,7 @@ NewOrderCrossMessage ==
 EncodeNewOrderCrossMessage(message) ==
     EncodeInboundBusinessHeader6(message.inboundBusinessHeader)
         \o message.offset18Padding2
-        \o message.crossid
+        \o message.crossId
         \o message.senderLocation
         \o message.enteringTrader
         \o message.executingTraderOptional
@@ -2296,8 +2296,8 @@ EncodeNewOrderCrossMessage(message) ==
 DecodeNewOrderCrossMessage(bytes) ==
     LET inboundBusinessHeader == DecodeInboundBusinessHeader6(bytes) IN IF ~inboundBusinessHeader.ok THEN Fail ELSE
     LET offset18Padding2 == ReadBytes(inboundBusinessHeader.rest, 2) IN IF ~offset18Padding2.ok THEN Fail ELSE
-    LET crossid == ReadBytes(offset18Padding2.rest, 8) IN IF ~crossid.ok THEN Fail ELSE
-    LET senderLocation == ReadBytes(crossid.rest, 10) IN IF ~senderLocation.ok THEN Fail ELSE
+    LET crossId == ReadBytes(offset18Padding2.rest, 8) IN IF ~crossId.ok THEN Fail ELSE
+    LET senderLocation == ReadBytes(crossId.rest, 10) IN IF ~senderLocation.ok THEN Fail ELSE
     LET enteringTrader == ReadBytes(senderLocation.rest, 5) IN IF ~enteringTrader.ok THEN Fail ELSE
     LET executingTraderOptional == ReadBytes(enteringTrader.rest, 5) IN IF ~executingTraderOptional.ok THEN Fail ELSE
     LET securityId == ReadBytes(executingTraderOptional.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
@@ -2309,7 +2309,7 @@ DecodeNewOrderCrossMessage(bytes) ==
     LET memo == DecodeMemo6(deskId.rest) IN IF ~memo.ok THEN Fail ELSE
     Ok([ inboundBusinessHeader   |-> inboundBusinessHeader.value,
          offset18Padding2        |-> offset18Padding2.value,
-         crossid                 |-> crossid.value,
+         crossId                 |-> crossId.value,
          senderLocation          |-> senderLocation.value,
          enteringTrader          |-> enteringTrader.value,
          executingTraderOptional |-> executingTraderOptional.value,
@@ -2324,7 +2324,7 @@ DecodeNewOrderCrossMessage(bytes) ==
 ZeroNewOrderCrossMessage ==
     [ inboundBusinessHeader   |-> ZeroInboundBusinessHeader6,
       offset18Padding2        |-> [i \in 1 .. 2 |-> 0],
-      crossid                 |-> [i \in 1 .. 8 |-> 0],
+      crossId                 |-> [i \in 1 .. 8 |-> 0],
       senderLocation          |-> [i \in 1 .. 10 |-> 0],
       enteringTrader          |-> [i \in 1 .. 5 |-> 0],
       executingTraderOptional |-> [i \in 1 .. 5 |-> 0],
@@ -2341,7 +2341,7 @@ CheckedNewOrderCrossMessage ==
     { ZeroNewOrderCrossMessage }
         \cup { [ZeroNewOrderCrossMessage EXCEPT !.inboundBusinessHeader = one] : one \in CheckedInboundBusinessHeader6 }
         \cup { [ZeroNewOrderCrossMessage EXCEPT !.offset18Padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroNewOrderCrossMessage EXCEPT !.crossid = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderCrossMessage EXCEPT !.crossId = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderCrossMessage EXCEPT !.senderLocation = one] : one \in Sample(10) }
         \cup { [ZeroNewOrderCrossMessage EXCEPT !.enteringTrader = one] : one \in Sample(5) }
         \cup { [ZeroNewOrderCrossMessage EXCEPT !.executingTraderOptional = one] : one \in Sample(5) }
@@ -2455,7 +2455,7 @@ ExecutionReportNewMessage ==
     [ outboundBusinessHeader    : OutboundBusinessHeader,
       side                      : Sample(1),
       ordStatus                 : Sample(1),
-      clordid                   : Sample(8),
+      clOrdId                   : Sample(8),
       secondaryOrderId          : Sample(8),
       securityId                : Sample(8),
       orderId                   : Sample(8),
@@ -2475,7 +2475,7 @@ ExecutionReportNewMessage ==
       stopPx                    : Sample(8),
       minQty                    : Sample(8),
       maxFloor                  : Sample(8),
-      crossidOptional           : Sample(8),
+      crossIdOptional           : Sample(8),
       deskId                    : DeskId5,
       memo                      : Memo7 ]
 
@@ -2483,7 +2483,7 @@ EncodeExecutionReportNewMessage(message) ==
     EncodeOutboundBusinessHeader(message.outboundBusinessHeader)
         \o message.side
         \o message.ordStatus
-        \o message.clordid
+        \o message.clOrdId
         \o message.secondaryOrderId
         \o message.securityId
         \o message.orderId
@@ -2503,7 +2503,7 @@ EncodeExecutionReportNewMessage(message) ==
         \o message.stopPx
         \o message.minQty
         \o message.maxFloor
-        \o message.crossidOptional
+        \o message.crossIdOptional
         \o EncodeDeskId5(message.deskId)
         \o EncodeMemo7(message.memo)
 
@@ -2511,8 +2511,8 @@ DecodeExecutionReportNewMessage(bytes) ==
     LET outboundBusinessHeader == DecodeOutboundBusinessHeader(bytes) IN IF ~outboundBusinessHeader.ok THEN Fail ELSE
     LET side == ReadBytes(outboundBusinessHeader.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET ordStatus == ReadBytes(side.rest, 1) IN IF ~ordStatus.ok THEN Fail ELSE
-    LET clordid == ReadBytes(ordStatus.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET secondaryOrderId == ReadBytes(clordid.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(ordStatus.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET secondaryOrderId == ReadBytes(clOrdId.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
     LET securityId == ReadBytes(secondaryOrderId.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
     LET orderId == ReadBytes(securityId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET account == ReadBytes(orderId.rest, 4) IN IF ~account.ok THEN Fail ELSE
@@ -2531,13 +2531,13 @@ DecodeExecutionReportNewMessage(bytes) ==
     LET stopPx == ReadBytes(priceOptional.rest, 8) IN IF ~stopPx.ok THEN Fail ELSE
     LET minQty == ReadBytes(stopPx.rest, 8) IN IF ~minQty.ok THEN Fail ELSE
     LET maxFloor == ReadBytes(minQty.rest, 8) IN IF ~maxFloor.ok THEN Fail ELSE
-    LET crossidOptional == ReadBytes(maxFloor.rest, 8) IN IF ~crossidOptional.ok THEN Fail ELSE
-    LET deskId == DecodeDeskId5(crossidOptional.rest) IN IF ~deskId.ok THEN Fail ELSE
+    LET crossIdOptional == ReadBytes(maxFloor.rest, 8) IN IF ~crossIdOptional.ok THEN Fail ELSE
+    LET deskId == DecodeDeskId5(crossIdOptional.rest) IN IF ~deskId.ok THEN Fail ELSE
     LET memo == DecodeMemo7(deskId.rest) IN IF ~memo.ok THEN Fail ELSE
     Ok([ outboundBusinessHeader    |-> outboundBusinessHeader.value,
          side                      |-> side.value,
          ordStatus                 |-> ordStatus.value,
-         clordid                   |-> clordid.value,
+         clOrdId                   |-> clOrdId.value,
          secondaryOrderId          |-> secondaryOrderId.value,
          securityId                |-> securityId.value,
          orderId                   |-> orderId.value,
@@ -2557,7 +2557,7 @@ DecodeExecutionReportNewMessage(bytes) ==
          stopPx                    |-> stopPx.value,
          minQty                    |-> minQty.value,
          maxFloor                  |-> maxFloor.value,
-         crossidOptional           |-> crossidOptional.value,
+         crossIdOptional           |-> crossIdOptional.value,
          deskId                    |-> deskId.value,
          memo                      |-> memo.value ], memo.rest)
 
@@ -2565,7 +2565,7 @@ ZeroExecutionReportNewMessage ==
     [ outboundBusinessHeader    |-> ZeroOutboundBusinessHeader,
       side                      |-> [i \in 1 .. 1 |-> 0],
       ordStatus                 |-> [i \in 1 .. 1 |-> 0],
-      clordid                   |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                   |-> [i \in 1 .. 8 |-> 0],
       secondaryOrderId          |-> [i \in 1 .. 8 |-> 0],
       securityId                |-> [i \in 1 .. 8 |-> 0],
       orderId                   |-> [i \in 1 .. 8 |-> 0],
@@ -2585,7 +2585,7 @@ ZeroExecutionReportNewMessage ==
       stopPx                    |-> [i \in 1 .. 8 |-> 0],
       minQty                    |-> [i \in 1 .. 8 |-> 0],
       maxFloor                  |-> [i \in 1 .. 8 |-> 0],
-      crossidOptional           |-> [i \in 1 .. 8 |-> 0],
+      crossIdOptional           |-> [i \in 1 .. 8 |-> 0],
       deskId                    |-> ZeroDeskId5,
       memo                      |-> ZeroMemo7 ]
 
@@ -2595,7 +2595,7 @@ CheckedExecutionReportNewMessage ==
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.outboundBusinessHeader = one] : one \in CheckedOutboundBusinessHeader }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.ordStatus = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportNewMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportNewMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.secondaryOrderId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.securityId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.orderId = one] : one \in Sample(8) }
@@ -2615,7 +2615,7 @@ CheckedExecutionReportNewMessage ==
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.stopPx = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.minQty = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.maxFloor = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportNewMessage EXCEPT !.crossidOptional = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportNewMessage EXCEPT !.crossIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.deskId = one] : one \in CheckedDeskId5 }
         \cup { [ZeroExecutionReportNewMessage EXCEPT !.memo = one] : one \in CheckedMemo7 }
 
@@ -2721,7 +2721,7 @@ ExecutionReportModifyMessage ==
     [ outboundBusinessHeader    : OutboundBusinessHeader2,
       side                      : Sample(1),
       ordStatus                 : Sample(1),
-      clordid                   : Sample(8),
+      clOrdId                   : Sample(8),
       secondaryOrderId          : Sample(8),
       securityId                : Sample(8),
       leavesQty                 : Sample(8),
@@ -2751,7 +2751,7 @@ EncodeExecutionReportModifyMessage(message) ==
     EncodeOutboundBusinessHeader2(message.outboundBusinessHeader)
         \o message.side
         \o message.ordStatus
-        \o message.clordid
+        \o message.clOrdId
         \o message.secondaryOrderId
         \o message.securityId
         \o message.leavesQty
@@ -2781,8 +2781,8 @@ DecodeExecutionReportModifyMessage(bytes) ==
     LET outboundBusinessHeader == DecodeOutboundBusinessHeader2(bytes) IN IF ~outboundBusinessHeader.ok THEN Fail ELSE
     LET side == ReadBytes(outboundBusinessHeader.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET ordStatus == ReadBytes(side.rest, 1) IN IF ~ordStatus.ok THEN Fail ELSE
-    LET clordid == ReadBytes(ordStatus.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET secondaryOrderId == ReadBytes(clordid.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(ordStatus.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET secondaryOrderId == ReadBytes(clOrdId.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
     LET securityId == ReadBytes(secondaryOrderId.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
     LET leavesQty == ReadBytes(securityId.rest, 8) IN IF ~leavesQty.ok THEN Fail ELSE
     LET account == ReadBytes(leavesQty.rest, 4) IN IF ~account.ok THEN Fail ELSE
@@ -2809,7 +2809,7 @@ DecodeExecutionReportModifyMessage(bytes) ==
     Ok([ outboundBusinessHeader    |-> outboundBusinessHeader.value,
          side                      |-> side.value,
          ordStatus                 |-> ordStatus.value,
-         clordid                   |-> clordid.value,
+         clOrdId                   |-> clOrdId.value,
          secondaryOrderId          |-> secondaryOrderId.value,
          securityId                |-> securityId.value,
          leavesQty                 |-> leavesQty.value,
@@ -2839,7 +2839,7 @@ ZeroExecutionReportModifyMessage ==
     [ outboundBusinessHeader    |-> ZeroOutboundBusinessHeader2,
       side                      |-> [i \in 1 .. 1 |-> 0],
       ordStatus                 |-> [i \in 1 .. 1 |-> 0],
-      clordid                   |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                   |-> [i \in 1 .. 8 |-> 0],
       secondaryOrderId          |-> [i \in 1 .. 8 |-> 0],
       securityId                |-> [i \in 1 .. 8 |-> 0],
       leavesQty                 |-> [i \in 1 .. 8 |-> 0],
@@ -2871,7 +2871,7 @@ CheckedExecutionReportModifyMessage ==
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.outboundBusinessHeader = one] : one \in CheckedOutboundBusinessHeader2 }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.ordStatus = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportModifyMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.secondaryOrderId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.securityId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportModifyMessage EXCEPT !.leavesQty = one] : one \in Sample(8) }
@@ -2999,7 +2999,7 @@ ExecutionReportCancelMessage ==
     [ outboundBusinessHeader     : OutboundBusinessHeader3,
       side                       : Sample(1),
       ordStatus                  : Sample(1),
-      clordid                    : Sample(8),
+      clOrdId                    : Sample(8),
       secondaryOrderId           : Sample(8),
       securityId                 : Sample(8),
       cumQty                     : Sample(8),
@@ -3029,7 +3029,7 @@ EncodeExecutionReportCancelMessage(message) ==
     EncodeOutboundBusinessHeader3(message.outboundBusinessHeader)
         \o message.side
         \o message.ordStatus
-        \o message.clordid
+        \o message.clOrdId
         \o message.secondaryOrderId
         \o message.securityId
         \o message.cumQty
@@ -3059,8 +3059,8 @@ DecodeExecutionReportCancelMessage(bytes) ==
     LET outboundBusinessHeader == DecodeOutboundBusinessHeader3(bytes) IN IF ~outboundBusinessHeader.ok THEN Fail ELSE
     LET side == ReadBytes(outboundBusinessHeader.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET ordStatus == ReadBytes(side.rest, 1) IN IF ~ordStatus.ok THEN Fail ELSE
-    LET clordid == ReadBytes(ordStatus.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET secondaryOrderId == ReadBytes(clordid.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(ordStatus.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET secondaryOrderId == ReadBytes(clOrdId.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
     LET securityId == ReadBytes(secondaryOrderId.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
     LET cumQty == ReadBytes(securityId.rest, 8) IN IF ~cumQty.ok THEN Fail ELSE
     LET account == ReadBytes(cumQty.rest, 4) IN IF ~account.ok THEN Fail ELSE
@@ -3087,7 +3087,7 @@ DecodeExecutionReportCancelMessage(bytes) ==
     Ok([ outboundBusinessHeader     |-> outboundBusinessHeader.value,
          side                       |-> side.value,
          ordStatus                  |-> ordStatus.value,
-         clordid                    |-> clordid.value,
+         clOrdId                    |-> clOrdId.value,
          secondaryOrderId           |-> secondaryOrderId.value,
          securityId                 |-> securityId.value,
          cumQty                     |-> cumQty.value,
@@ -3117,7 +3117,7 @@ ZeroExecutionReportCancelMessage ==
     [ outboundBusinessHeader     |-> ZeroOutboundBusinessHeader3,
       side                       |-> [i \in 1 .. 1 |-> 0],
       ordStatus                  |-> [i \in 1 .. 1 |-> 0],
-      clordid                    |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                    |-> [i \in 1 .. 8 |-> 0],
       secondaryOrderId           |-> [i \in 1 .. 8 |-> 0],
       securityId                 |-> [i \in 1 .. 8 |-> 0],
       cumQty                     |-> [i \in 1 .. 8 |-> 0],
@@ -3149,7 +3149,7 @@ CheckedExecutionReportCancelMessage ==
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.outboundBusinessHeader = one] : one \in CheckedOutboundBusinessHeader3 }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.ordStatus = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportCancelMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.secondaryOrderId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.securityId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportCancelMessage EXCEPT !.cumQty = one] : one \in Sample(8) }
@@ -3277,7 +3277,7 @@ ExecutionReportTradeMessage ==
     [ outboundBusinessHeader : OutboundBusinessHeader4,
       side                   : Sample(1),
       ordStatus              : Sample(1),
-      clordidOptional        : Sample(8),
+      clOrdIdOptional        : Sample(8),
       secondaryOrderId       : Sample(8),
       securityId             : Sample(8),
       account                : Sample(4),
@@ -3299,7 +3299,7 @@ ExecutionReportTradeMessage ==
       offset119Padding1      : Sample(1),
       secondaryExecId        : Sample(8),
       execRefId              : Sample(8),
-      crossidOptional        : Sample(8),
+      crossIdOptional        : Sample(8),
       crossedIndicator       : Sample(2),
       orderQty               : Sample(8),
       deskId                 : DeskId8,
@@ -3309,7 +3309,7 @@ EncodeExecutionReportTradeMessage(message) ==
     EncodeOutboundBusinessHeader4(message.outboundBusinessHeader)
         \o message.side
         \o message.ordStatus
-        \o message.clordidOptional
+        \o message.clOrdIdOptional
         \o message.secondaryOrderId
         \o message.securityId
         \o message.account
@@ -3331,7 +3331,7 @@ EncodeExecutionReportTradeMessage(message) ==
         \o message.offset119Padding1
         \o message.secondaryExecId
         \o message.execRefId
-        \o message.crossidOptional
+        \o message.crossIdOptional
         \o message.crossedIndicator
         \o message.orderQty
         \o EncodeDeskId8(message.deskId)
@@ -3341,8 +3341,8 @@ DecodeExecutionReportTradeMessage(bytes) ==
     LET outboundBusinessHeader == DecodeOutboundBusinessHeader4(bytes) IN IF ~outboundBusinessHeader.ok THEN Fail ELSE
     LET side == ReadBytes(outboundBusinessHeader.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET ordStatus == ReadBytes(side.rest, 1) IN IF ~ordStatus.ok THEN Fail ELSE
-    LET clordidOptional == ReadBytes(ordStatus.rest, 8) IN IF ~clordidOptional.ok THEN Fail ELSE
-    LET secondaryOrderId == ReadBytes(clordidOptional.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
+    LET clOrdIdOptional == ReadBytes(ordStatus.rest, 8) IN IF ~clOrdIdOptional.ok THEN Fail ELSE
+    LET secondaryOrderId == ReadBytes(clOrdIdOptional.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
     LET securityId == ReadBytes(secondaryOrderId.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
     LET account == ReadBytes(securityId.rest, 4) IN IF ~account.ok THEN Fail ELSE
     LET lastQty == ReadBytes(account.rest, 8) IN IF ~lastQty.ok THEN Fail ELSE
@@ -3363,15 +3363,15 @@ DecodeExecutionReportTradeMessage(bytes) ==
     LET offset119Padding1 == ReadBytes(totNoRelatedSym.rest, 1) IN IF ~offset119Padding1.ok THEN Fail ELSE
     LET secondaryExecId == ReadBytes(offset119Padding1.rest, 8) IN IF ~secondaryExecId.ok THEN Fail ELSE
     LET execRefId == ReadBytes(secondaryExecId.rest, 8) IN IF ~execRefId.ok THEN Fail ELSE
-    LET crossidOptional == ReadBytes(execRefId.rest, 8) IN IF ~crossidOptional.ok THEN Fail ELSE
-    LET crossedIndicator == ReadBytes(crossidOptional.rest, 2) IN IF ~crossedIndicator.ok THEN Fail ELSE
+    LET crossIdOptional == ReadBytes(execRefId.rest, 8) IN IF ~crossIdOptional.ok THEN Fail ELSE
+    LET crossedIndicator == ReadBytes(crossIdOptional.rest, 2) IN IF ~crossedIndicator.ok THEN Fail ELSE
     LET orderQty == ReadBytes(crossedIndicator.rest, 8) IN IF ~orderQty.ok THEN Fail ELSE
     LET deskId == DecodeDeskId8(orderQty.rest) IN IF ~deskId.ok THEN Fail ELSE
     LET memo == DecodeMemo10(deskId.rest) IN IF ~memo.ok THEN Fail ELSE
     Ok([ outboundBusinessHeader |-> outboundBusinessHeader.value,
          side                   |-> side.value,
          ordStatus              |-> ordStatus.value,
-         clordidOptional        |-> clordidOptional.value,
+         clOrdIdOptional        |-> clOrdIdOptional.value,
          secondaryOrderId       |-> secondaryOrderId.value,
          securityId             |-> securityId.value,
          account                |-> account.value,
@@ -3393,7 +3393,7 @@ DecodeExecutionReportTradeMessage(bytes) ==
          offset119Padding1      |-> offset119Padding1.value,
          secondaryExecId        |-> secondaryExecId.value,
          execRefId              |-> execRefId.value,
-         crossidOptional        |-> crossidOptional.value,
+         crossIdOptional        |-> crossIdOptional.value,
          crossedIndicator       |-> crossedIndicator.value,
          orderQty               |-> orderQty.value,
          deskId                 |-> deskId.value,
@@ -3403,7 +3403,7 @@ ZeroExecutionReportTradeMessage ==
     [ outboundBusinessHeader |-> ZeroOutboundBusinessHeader4,
       side                   |-> [i \in 1 .. 1 |-> 0],
       ordStatus              |-> [i \in 1 .. 1 |-> 0],
-      clordidOptional        |-> [i \in 1 .. 8 |-> 0],
+      clOrdIdOptional        |-> [i \in 1 .. 8 |-> 0],
       secondaryOrderId       |-> [i \in 1 .. 8 |-> 0],
       securityId             |-> [i \in 1 .. 8 |-> 0],
       account                |-> [i \in 1 .. 4 |-> 0],
@@ -3425,7 +3425,7 @@ ZeroExecutionReportTradeMessage ==
       offset119Padding1      |-> [i \in 1 .. 1 |-> 0],
       secondaryExecId        |-> [i \in 1 .. 8 |-> 0],
       execRefId              |-> [i \in 1 .. 8 |-> 0],
-      crossidOptional        |-> [i \in 1 .. 8 |-> 0],
+      crossIdOptional        |-> [i \in 1 .. 8 |-> 0],
       crossedIndicator       |-> [i \in 1 .. 2 |-> 0],
       orderQty               |-> [i \in 1 .. 8 |-> 0],
       deskId                 |-> ZeroDeskId8,
@@ -3437,7 +3437,7 @@ CheckedExecutionReportTradeMessage ==
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.outboundBusinessHeader = one] : one \in CheckedOutboundBusinessHeader4 }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.ordStatus = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.clordidOptional = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.clOrdIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.secondaryOrderId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.securityId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.account = one] : one \in Sample(4) }
@@ -3459,7 +3459,7 @@ CheckedExecutionReportTradeMessage ==
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.offset119Padding1 = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.secondaryExecId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.execRefId = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.crossidOptional = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportTradeMessage EXCEPT !.crossIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.crossedIndicator = one] : one \in Sample(2) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.orderQty = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportTradeMessage EXCEPT !.deskId = one] : one \in CheckedDeskId8 }
@@ -3591,7 +3591,7 @@ ExecutionReportRejectMessage ==
     [ outboundBusinessHeader   : OutboundBusinessHeader5,
       side                     : Sample(1),
       cxlRejResponseTo         : Sample(1),
-      clordid                  : Sample(8),
+      clOrdId                  : Sample(8),
       secondaryOrderIdOptional : Sample(8),
       securityId               : Sample(8),
       ordRejReason             : Sample(4),
@@ -3608,7 +3608,7 @@ ExecutionReportRejectMessage ==
       stopPx                   : Sample(8),
       minQty                   : Sample(8),
       maxFloor                 : Sample(8),
-      crossidOptional          : Sample(8),
+      crossIdOptional          : Sample(8),
       crossedIndicator         : Sample(2),
       deskId                   : DeskId9,
       memo                     : Memo11,
@@ -3618,7 +3618,7 @@ EncodeExecutionReportRejectMessage(message) ==
     EncodeOutboundBusinessHeader5(message.outboundBusinessHeader)
         \o message.side
         \o message.cxlRejResponseTo
-        \o message.clordid
+        \o message.clOrdId
         \o message.secondaryOrderIdOptional
         \o message.securityId
         \o message.ordRejReason
@@ -3635,7 +3635,7 @@ EncodeExecutionReportRejectMessage(message) ==
         \o message.stopPx
         \o message.minQty
         \o message.maxFloor
-        \o message.crossidOptional
+        \o message.crossIdOptional
         \o message.crossedIndicator
         \o EncodeDeskId9(message.deskId)
         \o EncodeMemo11(message.memo)
@@ -3645,8 +3645,8 @@ DecodeExecutionReportRejectMessage(bytes) ==
     LET outboundBusinessHeader == DecodeOutboundBusinessHeader5(bytes) IN IF ~outboundBusinessHeader.ok THEN Fail ELSE
     LET side == ReadBytes(outboundBusinessHeader.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET cxlRejResponseTo == ReadBytes(side.rest, 1) IN IF ~cxlRejResponseTo.ok THEN Fail ELSE
-    LET clordid == ReadBytes(cxlRejResponseTo.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET secondaryOrderIdOptional == ReadBytes(clordid.rest, 8) IN IF ~secondaryOrderIdOptional.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(cxlRejResponseTo.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET secondaryOrderIdOptional == ReadBytes(clOrdId.rest, 8) IN IF ~secondaryOrderIdOptional.ok THEN Fail ELSE
     LET securityId == ReadBytes(secondaryOrderIdOptional.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
     LET ordRejReason == ReadBytes(securityId.rest, 4) IN IF ~ordRejReason.ok THEN Fail ELSE
     LET transactTime == ReadBytes(ordRejReason.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
@@ -3662,15 +3662,15 @@ DecodeExecutionReportRejectMessage(bytes) ==
     LET stopPx == ReadBytes(priceOptional.rest, 8) IN IF ~stopPx.ok THEN Fail ELSE
     LET minQty == ReadBytes(stopPx.rest, 8) IN IF ~minQty.ok THEN Fail ELSE
     LET maxFloor == ReadBytes(minQty.rest, 8) IN IF ~maxFloor.ok THEN Fail ELSE
-    LET crossidOptional == ReadBytes(maxFloor.rest, 8) IN IF ~crossidOptional.ok THEN Fail ELSE
-    LET crossedIndicator == ReadBytes(crossidOptional.rest, 2) IN IF ~crossedIndicator.ok THEN Fail ELSE
+    LET crossIdOptional == ReadBytes(maxFloor.rest, 8) IN IF ~crossIdOptional.ok THEN Fail ELSE
+    LET crossedIndicator == ReadBytes(crossIdOptional.rest, 2) IN IF ~crossedIndicator.ok THEN Fail ELSE
     LET deskId == DecodeDeskId9(crossedIndicator.rest) IN IF ~deskId.ok THEN Fail ELSE
     LET memo == DecodeMemo11(deskId.rest) IN IF ~memo.ok THEN Fail ELSE
     LET text == DecodeText(memo.rest) IN IF ~text.ok THEN Fail ELSE
     Ok([ outboundBusinessHeader   |-> outboundBusinessHeader.value,
          side                     |-> side.value,
          cxlRejResponseTo         |-> cxlRejResponseTo.value,
-         clordid                  |-> clordid.value,
+         clOrdId                  |-> clOrdId.value,
          secondaryOrderIdOptional |-> secondaryOrderIdOptional.value,
          securityId               |-> securityId.value,
          ordRejReason             |-> ordRejReason.value,
@@ -3687,7 +3687,7 @@ DecodeExecutionReportRejectMessage(bytes) ==
          stopPx                   |-> stopPx.value,
          minQty                   |-> minQty.value,
          maxFloor                 |-> maxFloor.value,
-         crossidOptional          |-> crossidOptional.value,
+         crossIdOptional          |-> crossIdOptional.value,
          crossedIndicator         |-> crossedIndicator.value,
          deskId                   |-> deskId.value,
          memo                     |-> memo.value,
@@ -3697,7 +3697,7 @@ ZeroExecutionReportRejectMessage ==
     [ outboundBusinessHeader   |-> ZeroOutboundBusinessHeader5,
       side                     |-> [i \in 1 .. 1 |-> 0],
       cxlRejResponseTo         |-> [i \in 1 .. 1 |-> 0],
-      clordid                  |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                  |-> [i \in 1 .. 8 |-> 0],
       secondaryOrderIdOptional |-> [i \in 1 .. 8 |-> 0],
       securityId               |-> [i \in 1 .. 8 |-> 0],
       ordRejReason             |-> [i \in 1 .. 4 |-> 0],
@@ -3714,7 +3714,7 @@ ZeroExecutionReportRejectMessage ==
       stopPx                   |-> [i \in 1 .. 8 |-> 0],
       minQty                   |-> [i \in 1 .. 8 |-> 0],
       maxFloor                 |-> [i \in 1 .. 8 |-> 0],
-      crossidOptional          |-> [i \in 1 .. 8 |-> 0],
+      crossIdOptional          |-> [i \in 1 .. 8 |-> 0],
       crossedIndicator         |-> [i \in 1 .. 2 |-> 0],
       deskId                   |-> ZeroDeskId9,
       memo                     |-> ZeroMemo11,
@@ -3726,7 +3726,7 @@ CheckedExecutionReportRejectMessage ==
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.outboundBusinessHeader = one] : one \in CheckedOutboundBusinessHeader5 }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.cxlRejResponseTo = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.secondaryOrderIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.securityId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.ordRejReason = one] : one \in Sample(4) }
@@ -3743,7 +3743,7 @@ CheckedExecutionReportRejectMessage ==
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.stopPx = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.minQty = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.maxFloor = one] : one \in Sample(8) }
-        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.crossidOptional = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportRejectMessage EXCEPT !.crossIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.crossedIndicator = one] : one \in Sample(2) }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.deskId = one] : one \in CheckedDeskId9 }
         \cup { [ZeroExecutionReportRejectMessage EXCEPT !.memo = one] : one \in CheckedMemo11 }
@@ -3851,7 +3851,7 @@ ExecutionReportForwardMessage ==
     [ outboundBusinessHeader   : OutboundBusinessHeader6,
       side                     : Sample(1),
       ordStatus                : Sample(1),
-      clordidOptional          : Sample(8),
+      clOrdIdOptional          : Sample(8),
       secondaryOrderId         : Sample(8),
       securityId               : Sample(8),
       account                  : Sample(4),
@@ -3880,7 +3880,7 @@ EncodeExecutionReportForwardMessage(message) ==
     EncodeOutboundBusinessHeader6(message.outboundBusinessHeader)
         \o message.side
         \o message.ordStatus
-        \o message.clordidOptional
+        \o message.clOrdIdOptional
         \o message.secondaryOrderId
         \o message.securityId
         \o message.account
@@ -3909,8 +3909,8 @@ DecodeExecutionReportForwardMessage(bytes) ==
     LET outboundBusinessHeader == DecodeOutboundBusinessHeader6(bytes) IN IF ~outboundBusinessHeader.ok THEN Fail ELSE
     LET side == ReadBytes(outboundBusinessHeader.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET ordStatus == ReadBytes(side.rest, 1) IN IF ~ordStatus.ok THEN Fail ELSE
-    LET clordidOptional == ReadBytes(ordStatus.rest, 8) IN IF ~clordidOptional.ok THEN Fail ELSE
-    LET secondaryOrderId == ReadBytes(clordidOptional.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
+    LET clOrdIdOptional == ReadBytes(ordStatus.rest, 8) IN IF ~clOrdIdOptional.ok THEN Fail ELSE
+    LET secondaryOrderId == ReadBytes(clOrdIdOptional.rest, 8) IN IF ~secondaryOrderId.ok THEN Fail ELSE
     LET securityId == ReadBytes(secondaryOrderId.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
     LET account == ReadBytes(securityId.rest, 4) IN IF ~account.ok THEN Fail ELSE
     LET lastQty == ReadBytes(account.rest, 8) IN IF ~lastQty.ok THEN Fail ELSE
@@ -3936,7 +3936,7 @@ DecodeExecutionReportForwardMessage(bytes) ==
     Ok([ outboundBusinessHeader   |-> outboundBusinessHeader.value,
          side                     |-> side.value,
          ordStatus                |-> ordStatus.value,
-         clordidOptional          |-> clordidOptional.value,
+         clOrdIdOptional          |-> clOrdIdOptional.value,
          secondaryOrderId         |-> secondaryOrderId.value,
          securityId               |-> securityId.value,
          account                  |-> account.value,
@@ -3965,7 +3965,7 @@ ZeroExecutionReportForwardMessage ==
     [ outboundBusinessHeader   |-> ZeroOutboundBusinessHeader6,
       side                     |-> [i \in 1 .. 1 |-> 0],
       ordStatus                |-> [i \in 1 .. 1 |-> 0],
-      clordidOptional          |-> [i \in 1 .. 8 |-> 0],
+      clOrdIdOptional          |-> [i \in 1 .. 8 |-> 0],
       secondaryOrderId         |-> [i \in 1 .. 8 |-> 0],
       securityId               |-> [i \in 1 .. 8 |-> 0],
       account                  |-> [i \in 1 .. 4 |-> 0],
@@ -3996,7 +3996,7 @@ CheckedExecutionReportForwardMessage ==
         \cup { [ZeroExecutionReportForwardMessage EXCEPT !.outboundBusinessHeader = one] : one \in CheckedOutboundBusinessHeader6 }
         \cup { [ZeroExecutionReportForwardMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroExecutionReportForwardMessage EXCEPT !.ordStatus = one] : one \in Sample(1) }
-        \cup { [ZeroExecutionReportForwardMessage EXCEPT !.clordidOptional = one] : one \in Sample(8) }
+        \cup { [ZeroExecutionReportForwardMessage EXCEPT !.clOrdIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportForwardMessage EXCEPT !.secondaryOrderId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportForwardMessage EXCEPT !.securityId = one] : one \in Sample(8) }
         \cup { [ZeroExecutionReportForwardMessage EXCEPT !.account = one] : one \in Sample(4) }
@@ -7019,7 +7019,7 @@ OrderMassActionRequestMessage ==
     [ inboundBusinessHeader       : InboundBusinessHeader11,
       massActionType              : Sample(1),
       massActionScope             : Sample(1),
-      clordid                     : Sample(8),
+      clOrdId                     : Sample(8),
       massCancelRestatementReason : Sample(1),
       ordtagid                    : Sample(1),
       sideOptional                : Sample(1),
@@ -7032,7 +7032,7 @@ EncodeOrderMassActionRequestMessage(message) ==
     EncodeInboundBusinessHeader11(message.inboundBusinessHeader)
         \o message.massActionType
         \o message.massActionScope
-        \o message.clordid
+        \o message.clOrdId
         \o message.massCancelRestatementReason
         \o message.ordtagid
         \o message.sideOptional
@@ -7045,8 +7045,8 @@ DecodeOrderMassActionRequestMessage(bytes) ==
     LET inboundBusinessHeader == DecodeInboundBusinessHeader11(bytes) IN IF ~inboundBusinessHeader.ok THEN Fail ELSE
     LET massActionType == ReadBytes(inboundBusinessHeader.rest, 1) IN IF ~massActionType.ok THEN Fail ELSE
     LET massActionScope == ReadBytes(massActionType.rest, 1) IN IF ~massActionScope.ok THEN Fail ELSE
-    LET clordid == ReadBytes(massActionScope.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET massCancelRestatementReason == ReadBytes(clordid.rest, 1) IN IF ~massCancelRestatementReason.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(massActionScope.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET massCancelRestatementReason == ReadBytes(clOrdId.rest, 1) IN IF ~massCancelRestatementReason.ok THEN Fail ELSE
     LET ordtagid == ReadBytes(massCancelRestatementReason.rest, 1) IN IF ~ordtagid.ok THEN Fail ELSE
     LET sideOptional == ReadBytes(ordtagid.rest, 1) IN IF ~sideOptional.ok THEN Fail ELSE
     LET offset31Padding1 == ReadBytes(sideOptional.rest, 1) IN IF ~offset31Padding1.ok THEN Fail ELSE
@@ -7056,7 +7056,7 @@ DecodeOrderMassActionRequestMessage(bytes) ==
     Ok([ inboundBusinessHeader       |-> inboundBusinessHeader.value,
          massActionType              |-> massActionType.value,
          massActionScope             |-> massActionScope.value,
-         clordid                     |-> clordid.value,
+         clOrdId                     |-> clOrdId.value,
          massCancelRestatementReason |-> massCancelRestatementReason.value,
          ordtagid                    |-> ordtagid.value,
          sideOptional                |-> sideOptional.value,
@@ -7069,7 +7069,7 @@ ZeroOrderMassActionRequestMessage ==
     [ inboundBusinessHeader       |-> ZeroInboundBusinessHeader11,
       massActionType              |-> [i \in 1 .. 1 |-> 0],
       massActionScope             |-> [i \in 1 .. 1 |-> 0],
-      clordid                     |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                     |-> [i \in 1 .. 8 |-> 0],
       massCancelRestatementReason |-> [i \in 1 .. 1 |-> 0],
       ordtagid                    |-> [i \in 1 .. 1 |-> 0],
       sideOptional                |-> [i \in 1 .. 1 |-> 0],
@@ -7084,7 +7084,7 @@ CheckedOrderMassActionRequestMessage ==
         \cup { [ZeroOrderMassActionRequestMessage EXCEPT !.inboundBusinessHeader = one] : one \in CheckedInboundBusinessHeader11 }
         \cup { [ZeroOrderMassActionRequestMessage EXCEPT !.massActionType = one] : one \in Sample(1) }
         \cup { [ZeroOrderMassActionRequestMessage EXCEPT !.massActionScope = one] : one \in Sample(1) }
-        \cup { [ZeroOrderMassActionRequestMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroOrderMassActionRequestMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroOrderMassActionRequestMessage EXCEPT !.massCancelRestatementReason = one] : one \in Sample(1) }
         \cup { [ZeroOrderMassActionRequestMessage EXCEPT !.ordtagid = one] : one \in Sample(1) }
         \cup { [ZeroOrderMassActionRequestMessage EXCEPT !.sideOptional = one] : one \in Sample(1) }
@@ -7205,7 +7205,7 @@ OrderMassActionReportMessage ==
     [ outboundBusinessHeader      : OutboundBusinessHeader11,
       massActionType              : Sample(1),
       massActionScope             : Sample(1),
-      clordid                     : Sample(8),
+      clOrdId                     : Sample(8),
       massActionReportId          : Sample(8),
       transactTime                : Sample(8),
       massActionResponse          : Sample(1),
@@ -7223,7 +7223,7 @@ EncodeOrderMassActionReportMessage(message) ==
     EncodeOutboundBusinessHeader11(message.outboundBusinessHeader)
         \o message.massActionType
         \o message.massActionScope
-        \o message.clordid
+        \o message.clOrdId
         \o message.massActionReportId
         \o message.transactTime
         \o message.massActionResponse
@@ -7241,8 +7241,8 @@ DecodeOrderMassActionReportMessage(bytes) ==
     LET outboundBusinessHeader == DecodeOutboundBusinessHeader11(bytes) IN IF ~outboundBusinessHeader.ok THEN Fail ELSE
     LET massActionType == ReadBytes(outboundBusinessHeader.rest, 1) IN IF ~massActionType.ok THEN Fail ELSE
     LET massActionScope == ReadBytes(massActionType.rest, 1) IN IF ~massActionScope.ok THEN Fail ELSE
-    LET clordid == ReadBytes(massActionScope.rest, 8) IN IF ~clordid.ok THEN Fail ELSE
-    LET massActionReportId == ReadBytes(clordid.rest, 8) IN IF ~massActionReportId.ok THEN Fail ELSE
+    LET clOrdId == ReadBytes(massActionScope.rest, 8) IN IF ~clOrdId.ok THEN Fail ELSE
+    LET massActionReportId == ReadBytes(clOrdId.rest, 8) IN IF ~massActionReportId.ok THEN Fail ELSE
     LET transactTime == ReadBytes(massActionReportId.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
     LET massActionResponse == ReadBytes(transactTime.rest, 1) IN IF ~massActionResponse.ok THEN Fail ELSE
     LET massActionRejectReason == ReadBytes(massActionResponse.rest, 1) IN IF ~massActionRejectReason.ok THEN Fail ELSE
@@ -7257,7 +7257,7 @@ DecodeOrderMassActionReportMessage(bytes) ==
     Ok([ outboundBusinessHeader      |-> outboundBusinessHeader.value,
          massActionType              |-> massActionType.value,
          massActionScope             |-> massActionScope.value,
-         clordid                     |-> clordid.value,
+         clOrdId                     |-> clOrdId.value,
          massActionReportId          |-> massActionReportId.value,
          transactTime                |-> transactTime.value,
          massActionResponse          |-> massActionResponse.value,
@@ -7275,7 +7275,7 @@ ZeroOrderMassActionReportMessage ==
     [ outboundBusinessHeader      |-> ZeroOutboundBusinessHeader11,
       massActionType              |-> [i \in 1 .. 1 |-> 0],
       massActionScope             |-> [i \in 1 .. 1 |-> 0],
-      clordid                     |-> [i \in 1 .. 8 |-> 0],
+      clOrdId                     |-> [i \in 1 .. 8 |-> 0],
       massActionReportId          |-> [i \in 1 .. 8 |-> 0],
       transactTime                |-> [i \in 1 .. 8 |-> 0],
       massActionResponse          |-> [i \in 1 .. 1 |-> 0],
@@ -7295,7 +7295,7 @@ CheckedOrderMassActionReportMessage ==
         \cup { [ZeroOrderMassActionReportMessage EXCEPT !.outboundBusinessHeader = one] : one \in CheckedOutboundBusinessHeader11 }
         \cup { [ZeroOrderMassActionReportMessage EXCEPT !.massActionType = one] : one \in Sample(1) }
         \cup { [ZeroOrderMassActionReportMessage EXCEPT !.massActionScope = one] : one \in Sample(1) }
-        \cup { [ZeroOrderMassActionReportMessage EXCEPT !.clordid = one] : one \in Sample(8) }
+        \cup { [ZeroOrderMassActionReportMessage EXCEPT !.clOrdId = one] : one \in Sample(8) }
         \cup { [ZeroOrderMassActionReportMessage EXCEPT !.massActionReportId = one] : one \in Sample(8) }
         \cup { [ZeroOrderMassActionReportMessage EXCEPT !.transactTime = one] : one \in Sample(8) }
         \cup { [ZeroOrderMassActionReportMessage EXCEPT !.massActionResponse = one] : one \in Sample(1) }

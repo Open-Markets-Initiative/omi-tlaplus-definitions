@@ -145,28 +145,28 @@ CheckedMarketDataPacketHeader ==
 (***************************************************************************)
 
 IncrementalPacketHeader ==
-    [ transactTime             : Sample(8),
-      exchangeTradingSessionId : Sample(4) ]
+    [ transactTime                     : Sample(8),
+      exchangeTradingSessionIdOptional : Sample(4) ]
 
 EncodeIncrementalPacketHeader(message) ==
     message.transactTime
-        \o message.exchangeTradingSessionId
+        \o message.exchangeTradingSessionIdOptional
 
 DecodeIncrementalPacketHeader(bytes) ==
     LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET exchangeTradingSessionId == ReadBytes(transactTime.rest, 4) IN IF ~exchangeTradingSessionId.ok THEN Fail ELSE
-    Ok([ transactTime             |-> transactTime.value,
-         exchangeTradingSessionId |-> exchangeTradingSessionId.value ], exchangeTradingSessionId.rest)
+    LET exchangeTradingSessionIdOptional == ReadBytes(transactTime.rest, 4) IN IF ~exchangeTradingSessionIdOptional.ok THEN Fail ELSE
+    Ok([ transactTime                     |-> transactTime.value,
+         exchangeTradingSessionIdOptional |-> exchangeTradingSessionIdOptional.value ], exchangeTradingSessionIdOptional.rest)
 
 ZeroIncrementalPacketHeader ==
-    [ transactTime             |-> [i \in 1 .. 8 |-> 0],
-      exchangeTradingSessionId |-> [i \in 1 .. 4 |-> 0] ]
+    [ transactTime                     |-> [i \in 1 .. 8 |-> 0],
+      exchangeTradingSessionIdOptional |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Incremental Packet Header at zero, then each field in turn at the values it is checked at *)
 CheckedIncrementalPacketHeader ==
     { ZeroIncrementalPacketHeader }
         \cup { [ZeroIncrementalPacketHeader EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalPacketHeader EXCEPT !.exchangeTradingSessionId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalPacketHeader EXCEPT !.exchangeTradingSessionIdOptional = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Sequence Reset Message: 4 bytes                                         *)
@@ -314,42 +314,42 @@ CheckedBestPricesMessage ==
 (***************************************************************************)
 
 EmptyBookMessage ==
-    [ lastMsgSeqNumProcessedUInt32NullOptional : Sample(4) ]
+    [ lastMsgSeqNumProcessedOptional : Sample(4) ]
 
 EncodeEmptyBookMessage(message) ==
-    message.lastMsgSeqNumProcessedUInt32NullOptional
+    message.lastMsgSeqNumProcessedOptional
 
 DecodeEmptyBookMessage(bytes) ==
-    LET lastMsgSeqNumProcessedUInt32NullOptional == ReadBytes(bytes, 4) IN IF ~lastMsgSeqNumProcessedUInt32NullOptional.ok THEN Fail ELSE
-    Ok([ lastMsgSeqNumProcessedUInt32NullOptional |-> lastMsgSeqNumProcessedUInt32NullOptional.value ], lastMsgSeqNumProcessedUInt32NullOptional.rest)
+    LET lastMsgSeqNumProcessedOptional == ReadBytes(bytes, 4) IN IF ~lastMsgSeqNumProcessedOptional.ok THEN Fail ELSE
+    Ok([ lastMsgSeqNumProcessedOptional |-> lastMsgSeqNumProcessedOptional.value ], lastMsgSeqNumProcessedOptional.rest)
 
 ZeroEmptyBookMessage ==
-    [ lastMsgSeqNumProcessedUInt32NullOptional |-> [i \in 1 .. 4 |-> 0] ]
+    [ lastMsgSeqNumProcessedOptional |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Empty Book Message at zero, then each field in turn at the values it is checked at *)
 CheckedEmptyBookMessage ==
     { ZeroEmptyBookMessage }
-        \cup { [ZeroEmptyBookMessage EXCEPT !.lastMsgSeqNumProcessedUInt32NullOptional = one] : one \in Sample(4) }
+        \cup { [ZeroEmptyBookMessage EXCEPT !.lastMsgSeqNumProcessedOptional = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Order Update Message: 50 bytes                                          *)
 (***************************************************************************)
 
 OrderUpdateMessage ==
-    [ mdEntryIdInt64    : Sample(8),
-      mdEntryPxDecimal5 : Sample(8),
-      mdEntrySizeInt64  : Sample(8),
-      mdFlags           : Sample(8),
-      mdFlags2          : Sample(8),
-      securityId        : Sample(4),
-      rptSeq            : Sample(4),
-      mdUpdateAction    : Sample(1),
-      mdEntryType       : Sample(1) ]
+    [ mdEntryId      : Sample(8),
+      mdEntryPx      : Sample(8),
+      mdEntrySize    : Sample(8),
+      mdFlags        : Sample(8),
+      mdFlags2       : Sample(8),
+      securityId     : Sample(4),
+      rptSeq         : Sample(4),
+      mdUpdateAction : Sample(1),
+      mdEntryType    : Sample(1) ]
 
 EncodeOrderUpdateMessage(message) ==
-    message.mdEntryIdInt64
-        \o message.mdEntryPxDecimal5
-        \o message.mdEntrySizeInt64
+    message.mdEntryId
+        \o message.mdEntryPx
+        \o message.mdEntrySize
         \o message.mdFlags
         \o message.mdFlags2
         \o message.securityId
@@ -358,42 +358,42 @@ EncodeOrderUpdateMessage(message) ==
         \o message.mdEntryType
 
 DecodeOrderUpdateMessage(bytes) ==
-    LET mdEntryIdInt64 == ReadBytes(bytes, 8) IN IF ~mdEntryIdInt64.ok THEN Fail ELSE
-    LET mdEntryPxDecimal5 == ReadBytes(mdEntryIdInt64.rest, 8) IN IF ~mdEntryPxDecimal5.ok THEN Fail ELSE
-    LET mdEntrySizeInt64 == ReadBytes(mdEntryPxDecimal5.rest, 8) IN IF ~mdEntrySizeInt64.ok THEN Fail ELSE
-    LET mdFlags == ReadBytes(mdEntrySizeInt64.rest, 8) IN IF ~mdFlags.ok THEN Fail ELSE
+    LET mdEntryId == ReadBytes(bytes, 8) IN IF ~mdEntryId.ok THEN Fail ELSE
+    LET mdEntryPx == ReadBytes(mdEntryId.rest, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
+    LET mdEntrySize == ReadBytes(mdEntryPx.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
+    LET mdFlags == ReadBytes(mdEntrySize.rest, 8) IN IF ~mdFlags.ok THEN Fail ELSE
     LET mdFlags2 == ReadBytes(mdFlags.rest, 8) IN IF ~mdFlags2.ok THEN Fail ELSE
     LET securityId == ReadBytes(mdFlags2.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
     LET mdUpdateAction == ReadBytes(rptSeq.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
     LET mdEntryType == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryType.ok THEN Fail ELSE
-    Ok([ mdEntryIdInt64    |-> mdEntryIdInt64.value,
-         mdEntryPxDecimal5 |-> mdEntryPxDecimal5.value,
-         mdEntrySizeInt64  |-> mdEntrySizeInt64.value,
-         mdFlags           |-> mdFlags.value,
-         mdFlags2          |-> mdFlags2.value,
-         securityId        |-> securityId.value,
-         rptSeq            |-> rptSeq.value,
-         mdUpdateAction    |-> mdUpdateAction.value,
-         mdEntryType       |-> mdEntryType.value ], mdEntryType.rest)
+    Ok([ mdEntryId      |-> mdEntryId.value,
+         mdEntryPx      |-> mdEntryPx.value,
+         mdEntrySize    |-> mdEntrySize.value,
+         mdFlags        |-> mdFlags.value,
+         mdFlags2       |-> mdFlags2.value,
+         securityId     |-> securityId.value,
+         rptSeq         |-> rptSeq.value,
+         mdUpdateAction |-> mdUpdateAction.value,
+         mdEntryType    |-> mdEntryType.value ], mdEntryType.rest)
 
 ZeroOrderUpdateMessage ==
-    [ mdEntryIdInt64    |-> [i \in 1 .. 8 |-> 0],
-      mdEntryPxDecimal5 |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeInt64  |-> [i \in 1 .. 8 |-> 0],
-      mdFlags           |-> [i \in 1 .. 8 |-> 0],
-      mdFlags2          |-> [i \in 1 .. 8 |-> 0],
-      securityId        |-> [i \in 1 .. 4 |-> 0],
-      rptSeq            |-> [i \in 1 .. 4 |-> 0],
-      mdUpdateAction    |-> [i \in 1 .. 1 |-> 0],
-      mdEntryType       |-> [i \in 1 .. 1 |-> 0] ]
+    [ mdEntryId      |-> [i \in 1 .. 8 |-> 0],
+      mdEntryPx      |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize    |-> [i \in 1 .. 8 |-> 0],
+      mdFlags        |-> [i \in 1 .. 8 |-> 0],
+      mdFlags2       |-> [i \in 1 .. 8 |-> 0],
+      securityId     |-> [i \in 1 .. 4 |-> 0],
+      rptSeq         |-> [i \in 1 .. 4 |-> 0],
+      mdUpdateAction |-> [i \in 1 .. 1 |-> 0],
+      mdEntryType    |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Order Update Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderUpdateMessage ==
     { ZeroOrderUpdateMessage }
-        \cup { [ZeroOrderUpdateMessage EXCEPT !.mdEntryIdInt64 = one] : one \in Sample(8) }
-        \cup { [ZeroOrderUpdateMessage EXCEPT !.mdEntryPxDecimal5 = one] : one \in Sample(8) }
-        \cup { [ZeroOrderUpdateMessage EXCEPT !.mdEntrySizeInt64 = one] : one \in Sample(8) }
+        \cup { [ZeroOrderUpdateMessage EXCEPT !.mdEntryId = one] : one \in Sample(8) }
+        \cup { [ZeroOrderUpdateMessage EXCEPT !.mdEntryPx = one] : one \in Sample(8) }
+        \cup { [ZeroOrderUpdateMessage EXCEPT !.mdEntrySize = one] : one \in Sample(8) }
         \cup { [ZeroOrderUpdateMessage EXCEPT !.mdFlags = one] : one \in Sample(8) }
         \cup { [ZeroOrderUpdateMessage EXCEPT !.mdFlags2 = one] : one \in Sample(8) }
         \cup { [ZeroOrderUpdateMessage EXCEPT !.securityId = one] : one \in Sample(4) }
@@ -406,26 +406,26 @@ CheckedOrderUpdateMessage ==
 (***************************************************************************)
 
 OrderExecutionMessage ==
-    [ mdEntryIdInt64                : Sample(8),
-      mdEntryPxDecimal5NullOptional : Sample(8),
-      mdEntrySizeInt64NullOptional  : Sample(8),
-      lastPx                        : Sample(8),
-      lastQty                       : Sample(8),
-      tradeIdInt64                  : Sample(8),
-      mdFlags                       : Sample(8),
-      mdFlags2                      : Sample(8),
-      securityId                    : Sample(4),
-      rptSeq                        : Sample(4),
-      mdUpdateAction                : Sample(1),
-      mdEntryType                   : Sample(1) ]
+    [ mdEntryId           : Sample(8),
+      mdEntryPxOptional   : Sample(8),
+      mdEntrySizeOptional : Sample(8),
+      lastPx              : Sample(8),
+      lastQty             : Sample(8),
+      tradeId             : Sample(8),
+      mdFlags             : Sample(8),
+      mdFlags2            : Sample(8),
+      securityId          : Sample(4),
+      rptSeq              : Sample(4),
+      mdUpdateAction      : Sample(1),
+      mdEntryType         : Sample(1) ]
 
 EncodeOrderExecutionMessage(message) ==
-    message.mdEntryIdInt64
-        \o message.mdEntryPxDecimal5NullOptional
-        \o message.mdEntrySizeInt64NullOptional
+    message.mdEntryId
+        \o message.mdEntryPxOptional
+        \o message.mdEntrySizeOptional
         \o message.lastPx
         \o message.lastQty
-        \o message.tradeIdInt64
+        \o message.tradeId
         \o message.mdFlags
         \o message.mdFlags2
         \o message.securityId
@@ -434,54 +434,54 @@ EncodeOrderExecutionMessage(message) ==
         \o message.mdEntryType
 
 DecodeOrderExecutionMessage(bytes) ==
-    LET mdEntryIdInt64 == ReadBytes(bytes, 8) IN IF ~mdEntryIdInt64.ok THEN Fail ELSE
-    LET mdEntryPxDecimal5NullOptional == ReadBytes(mdEntryIdInt64.rest, 8) IN IF ~mdEntryPxDecimal5NullOptional.ok THEN Fail ELSE
-    LET mdEntrySizeInt64NullOptional == ReadBytes(mdEntryPxDecimal5NullOptional.rest, 8) IN IF ~mdEntrySizeInt64NullOptional.ok THEN Fail ELSE
-    LET lastPx == ReadBytes(mdEntrySizeInt64NullOptional.rest, 8) IN IF ~lastPx.ok THEN Fail ELSE
+    LET mdEntryId == ReadBytes(bytes, 8) IN IF ~mdEntryId.ok THEN Fail ELSE
+    LET mdEntryPxOptional == ReadBytes(mdEntryId.rest, 8) IN IF ~mdEntryPxOptional.ok THEN Fail ELSE
+    LET mdEntrySizeOptional == ReadBytes(mdEntryPxOptional.rest, 8) IN IF ~mdEntrySizeOptional.ok THEN Fail ELSE
+    LET lastPx == ReadBytes(mdEntrySizeOptional.rest, 8) IN IF ~lastPx.ok THEN Fail ELSE
     LET lastQty == ReadBytes(lastPx.rest, 8) IN IF ~lastQty.ok THEN Fail ELSE
-    LET tradeIdInt64 == ReadBytes(lastQty.rest, 8) IN IF ~tradeIdInt64.ok THEN Fail ELSE
-    LET mdFlags == ReadBytes(tradeIdInt64.rest, 8) IN IF ~mdFlags.ok THEN Fail ELSE
+    LET tradeId == ReadBytes(lastQty.rest, 8) IN IF ~tradeId.ok THEN Fail ELSE
+    LET mdFlags == ReadBytes(tradeId.rest, 8) IN IF ~mdFlags.ok THEN Fail ELSE
     LET mdFlags2 == ReadBytes(mdFlags.rest, 8) IN IF ~mdFlags2.ok THEN Fail ELSE
     LET securityId == ReadBytes(mdFlags2.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
     LET mdUpdateAction == ReadBytes(rptSeq.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
     LET mdEntryType == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryType.ok THEN Fail ELSE
-    Ok([ mdEntryIdInt64                |-> mdEntryIdInt64.value,
-         mdEntryPxDecimal5NullOptional |-> mdEntryPxDecimal5NullOptional.value,
-         mdEntrySizeInt64NullOptional  |-> mdEntrySizeInt64NullOptional.value,
-         lastPx                        |-> lastPx.value,
-         lastQty                       |-> lastQty.value,
-         tradeIdInt64                  |-> tradeIdInt64.value,
-         mdFlags                       |-> mdFlags.value,
-         mdFlags2                      |-> mdFlags2.value,
-         securityId                    |-> securityId.value,
-         rptSeq                        |-> rptSeq.value,
-         mdUpdateAction                |-> mdUpdateAction.value,
-         mdEntryType                   |-> mdEntryType.value ], mdEntryType.rest)
+    Ok([ mdEntryId           |-> mdEntryId.value,
+         mdEntryPxOptional   |-> mdEntryPxOptional.value,
+         mdEntrySizeOptional |-> mdEntrySizeOptional.value,
+         lastPx              |-> lastPx.value,
+         lastQty             |-> lastQty.value,
+         tradeId             |-> tradeId.value,
+         mdFlags             |-> mdFlags.value,
+         mdFlags2            |-> mdFlags2.value,
+         securityId          |-> securityId.value,
+         rptSeq              |-> rptSeq.value,
+         mdUpdateAction      |-> mdUpdateAction.value,
+         mdEntryType         |-> mdEntryType.value ], mdEntryType.rest)
 
 ZeroOrderExecutionMessage ==
-    [ mdEntryIdInt64                |-> [i \in 1 .. 8 |-> 0],
-      mdEntryPxDecimal5NullOptional |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeInt64NullOptional  |-> [i \in 1 .. 8 |-> 0],
-      lastPx                        |-> [i \in 1 .. 8 |-> 0],
-      lastQty                       |-> [i \in 1 .. 8 |-> 0],
-      tradeIdInt64                  |-> [i \in 1 .. 8 |-> 0],
-      mdFlags                       |-> [i \in 1 .. 8 |-> 0],
-      mdFlags2                      |-> [i \in 1 .. 8 |-> 0],
-      securityId                    |-> [i \in 1 .. 4 |-> 0],
-      rptSeq                        |-> [i \in 1 .. 4 |-> 0],
-      mdUpdateAction                |-> [i \in 1 .. 1 |-> 0],
-      mdEntryType                   |-> [i \in 1 .. 1 |-> 0] ]
+    [ mdEntryId           |-> [i \in 1 .. 8 |-> 0],
+      mdEntryPxOptional   |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySizeOptional |-> [i \in 1 .. 8 |-> 0],
+      lastPx              |-> [i \in 1 .. 8 |-> 0],
+      lastQty             |-> [i \in 1 .. 8 |-> 0],
+      tradeId             |-> [i \in 1 .. 8 |-> 0],
+      mdFlags             |-> [i \in 1 .. 8 |-> 0],
+      mdFlags2            |-> [i \in 1 .. 8 |-> 0],
+      securityId          |-> [i \in 1 .. 4 |-> 0],
+      rptSeq              |-> [i \in 1 .. 4 |-> 0],
+      mdUpdateAction      |-> [i \in 1 .. 1 |-> 0],
+      mdEntryType         |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Order Execution Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderExecutionMessage ==
     { ZeroOrderExecutionMessage }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.mdEntryIdInt64 = one] : one \in Sample(8) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.mdEntryPxDecimal5NullOptional = one] : one \in Sample(8) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.mdEntrySizeInt64NullOptional = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecutionMessage EXCEPT !.mdEntryId = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecutionMessage EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecutionMessage EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(8) }
         \cup { [ZeroOrderExecutionMessage EXCEPT !.lastPx = one] : one \in Sample(8) }
         \cup { [ZeroOrderExecutionMessage EXCEPT !.lastQty = one] : one \in Sample(8) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.tradeIdInt64 = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecutionMessage EXCEPT !.tradeId = one] : one \in Sample(8) }
         \cup { [ZeroOrderExecutionMessage EXCEPT !.mdFlags = one] : one \in Sample(8) }
         \cup { [ZeroOrderExecutionMessage EXCEPT !.mdFlags2 = one] : one \in Sample(8) }
         \cup { [ZeroOrderExecutionMessage EXCEPT !.securityId = one] : one \in Sample(4) }
