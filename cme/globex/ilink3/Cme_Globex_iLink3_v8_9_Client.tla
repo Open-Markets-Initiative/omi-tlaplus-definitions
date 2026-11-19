@@ -3050,7 +3050,7 @@ MassQuoteRequestEntriesGroup ==
     [ securityId   : Sample(4),
       price        : Sample(8),
       orderQty     : Sample(4),
-      sideSide     : Sample(1),
+      quoteSide    : Sample(1),
       quoteEntryId : Sample(4),
       quoteSetId   : Sample(2) ]
 
@@ -3058,7 +3058,7 @@ EncodeMassQuoteRequestEntriesGroup(message) ==
     message.securityId
         \o message.price
         \o message.orderQty
-        \o message.sideSide
+        \o message.quoteSide
         \o message.quoteEntryId
         \o message.quoteSetId
 
@@ -3066,13 +3066,13 @@ DecodeMassQuoteRequestEntriesGroup(bytes) ==
     LET securityId == ReadBytes(bytes, 4) IN IF ~securityId.ok THEN Fail ELSE
     LET price == ReadBytes(securityId.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET orderQty == ReadBytes(price.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
-    LET sideSide == ReadBytes(orderQty.rest, 1) IN IF ~sideSide.ok THEN Fail ELSE
-    LET quoteEntryId == ReadBytes(sideSide.rest, 4) IN IF ~quoteEntryId.ok THEN Fail ELSE
+    LET quoteSide == ReadBytes(orderQty.rest, 1) IN IF ~quoteSide.ok THEN Fail ELSE
+    LET quoteEntryId == ReadBytes(quoteSide.rest, 4) IN IF ~quoteEntryId.ok THEN Fail ELSE
     LET quoteSetId == ReadBytes(quoteEntryId.rest, 2) IN IF ~quoteSetId.ok THEN Fail ELSE
     Ok([ securityId   |-> securityId.value,
          price        |-> price.value,
          orderQty     |-> orderQty.value,
-         sideSide     |-> sideSide.value,
+         quoteSide    |-> quoteSide.value,
          quoteEntryId |-> quoteEntryId.value,
          quoteSetId   |-> quoteSetId.value ], quoteSetId.rest)
 
@@ -3080,7 +3080,7 @@ ZeroMassQuoteRequestEntriesGroup ==
     [ securityId   |-> [i \in 1 .. 4 |-> 0],
       price        |-> [i \in 1 .. 8 |-> 0],
       orderQty     |-> [i \in 1 .. 4 |-> 0],
-      sideSide     |-> [i \in 1 .. 1 |-> 0],
+      quoteSide    |-> [i \in 1 .. 1 |-> 0],
       quoteEntryId |-> [i \in 1 .. 4 |-> 0],
       quoteSetId   |-> [i \in 1 .. 2 |-> 0] ]
 
@@ -3090,7 +3090,7 @@ CheckedMassQuoteRequestEntriesGroup ==
         \cup { [ZeroMassQuoteRequestEntriesGroup EXCEPT !.securityId = one] : one \in Sample(4) }
         \cup { [ZeroMassQuoteRequestEntriesGroup EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteRequestEntriesGroup EXCEPT !.orderQty = one] : one \in Sample(4) }
-        \cup { [ZeroMassQuoteRequestEntriesGroup EXCEPT !.sideSide = one] : one \in Sample(1) }
+        \cup { [ZeroMassQuoteRequestEntriesGroup EXCEPT !.quoteSide = one] : one \in Sample(1) }
         \cup { [ZeroMassQuoteRequestEntriesGroup EXCEPT !.quoteEntryId = one] : one \in Sample(4) }
         \cup { [ZeroMassQuoteRequestEntriesGroup EXCEPT !.quoteSetId = one] : one \in Sample(2) }
 

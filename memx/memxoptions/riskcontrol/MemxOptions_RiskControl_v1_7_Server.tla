@@ -357,44 +357,44 @@ CheckedActiveRiskThresholdStateMessage ==
 (***************************************************************************)
 
 ActiveRiskThresholdChangeRejectedMessage ==
-    [ clOrdIdActiveRiskThresholdChangeRejectedClOrdId             : Sample(20),
-      underlierActiveRiskThresholdChangeRejectedUnderlierOptional : Sample(6),
-      efidActiveRiskThresholdChangeRejectedEfidOptional           : Sample(4),
-      thresholdQuantity                                           : Sample(4),
-      rejectReason                                                : Sample(2) ]
+    [ clordid           : Sample(20),
+      underlierOptional : Sample(6),
+      efidOptional      : Sample(4),
+      thresholdQuantity : Sample(4),
+      rejectReason      : Sample(2) ]
 
 EncodeActiveRiskThresholdChangeRejectedMessage(message) ==
-    message.clOrdIdActiveRiskThresholdChangeRejectedClOrdId
-        \o message.underlierActiveRiskThresholdChangeRejectedUnderlierOptional
-        \o message.efidActiveRiskThresholdChangeRejectedEfidOptional
+    message.clordid
+        \o message.underlierOptional
+        \o message.efidOptional
         \o message.thresholdQuantity
         \o message.rejectReason
 
 DecodeActiveRiskThresholdChangeRejectedMessage(bytes) ==
-    LET clOrdIdActiveRiskThresholdChangeRejectedClOrdId == ReadBytes(bytes, 20) IN IF ~clOrdIdActiveRiskThresholdChangeRejectedClOrdId.ok THEN Fail ELSE
-    LET underlierActiveRiskThresholdChangeRejectedUnderlierOptional == ReadBytes(clOrdIdActiveRiskThresholdChangeRejectedClOrdId.rest, 6) IN IF ~underlierActiveRiskThresholdChangeRejectedUnderlierOptional.ok THEN Fail ELSE
-    LET efidActiveRiskThresholdChangeRejectedEfidOptional == ReadBytes(underlierActiveRiskThresholdChangeRejectedUnderlierOptional.rest, 4) IN IF ~efidActiveRiskThresholdChangeRejectedEfidOptional.ok THEN Fail ELSE
-    LET thresholdQuantity == ReadBytes(efidActiveRiskThresholdChangeRejectedEfidOptional.rest, 4) IN IF ~thresholdQuantity.ok THEN Fail ELSE
+    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
+    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
+    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
+    LET thresholdQuantity == ReadBytes(efidOptional.rest, 4) IN IF ~thresholdQuantity.ok THEN Fail ELSE
     LET rejectReason == ReadBytes(thresholdQuantity.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
-    Ok([ clOrdIdActiveRiskThresholdChangeRejectedClOrdId             |-> clOrdIdActiveRiskThresholdChangeRejectedClOrdId.value,
-         underlierActiveRiskThresholdChangeRejectedUnderlierOptional |-> underlierActiveRiskThresholdChangeRejectedUnderlierOptional.value,
-         efidActiveRiskThresholdChangeRejectedEfidOptional           |-> efidActiveRiskThresholdChangeRejectedEfidOptional.value,
-         thresholdQuantity                                           |-> thresholdQuantity.value,
-         rejectReason                                                |-> rejectReason.value ], rejectReason.rest)
+    Ok([ clordid           |-> clordid.value,
+         underlierOptional |-> underlierOptional.value,
+         efidOptional      |-> efidOptional.value,
+         thresholdQuantity |-> thresholdQuantity.value,
+         rejectReason      |-> rejectReason.value ], rejectReason.rest)
 
 ZeroActiveRiskThresholdChangeRejectedMessage ==
-    [ clOrdIdActiveRiskThresholdChangeRejectedClOrdId             |-> [i \in 1 .. 20 |-> 0],
-      underlierActiveRiskThresholdChangeRejectedUnderlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidActiveRiskThresholdChangeRejectedEfidOptional           |-> [i \in 1 .. 4 |-> 0],
-      thresholdQuantity                                           |-> [i \in 1 .. 4 |-> 0],
-      rejectReason                                                |-> [i \in 1 .. 2 |-> 0] ]
+    [ clordid           |-> [i \in 1 .. 20 |-> 0],
+      underlierOptional |-> [i \in 1 .. 6 |-> 0],
+      efidOptional      |-> [i \in 1 .. 4 |-> 0],
+      thresholdQuantity |-> [i \in 1 .. 4 |-> 0],
+      rejectReason      |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Active Risk Threshold Change Rejected Message at zero, then each field in turn at the values it is checked at *)
 CheckedActiveRiskThresholdChangeRejectedMessage ==
     { ZeroActiveRiskThresholdChangeRejectedMessage }
-        \cup { [ZeroActiveRiskThresholdChangeRejectedMessage EXCEPT !.clOrdIdActiveRiskThresholdChangeRejectedClOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroActiveRiskThresholdChangeRejectedMessage EXCEPT !.underlierActiveRiskThresholdChangeRejectedUnderlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroActiveRiskThresholdChangeRejectedMessage EXCEPT !.efidActiveRiskThresholdChangeRejectedEfidOptional = one] : one \in Sample(4) }
+        \cup { [ZeroActiveRiskThresholdChangeRejectedMessage EXCEPT !.clordid = one] : one \in Sample(20) }
+        \cup { [ZeroActiveRiskThresholdChangeRejectedMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
+        \cup { [ZeroActiveRiskThresholdChangeRejectedMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
         \cup { [ZeroActiveRiskThresholdChangeRejectedMessage EXCEPT !.thresholdQuantity = one] : one \in Sample(4) }
         \cup { [ZeroActiveRiskThresholdChangeRejectedMessage EXCEPT !.rejectReason = one] : one \in Sample(2) }
 
@@ -449,44 +449,44 @@ CheckedActiveRiskAcknowledgedMessage ==
 (***************************************************************************)
 
 ActiveRiskAcknowledgeRejectedMessage ==
-    [ clOrdIdActiveRiskAcknowledgeRejectedClOrdId     : Sample(20),
-      underlierActiveRiskAcknowledgeRejectedUnderlier : Sample(6),
-      efidActiveRiskAcknowledgeRejectedEfid           : Sample(4),
-      thresholdQuantity                               : Sample(4),
-      rejectReason                                    : Sample(2) ]
+    [ clordid           : Sample(20),
+      underlier         : Sample(6),
+      efid              : Sample(4),
+      thresholdQuantity : Sample(4),
+      rejectReason      : Sample(2) ]
 
 EncodeActiveRiskAcknowledgeRejectedMessage(message) ==
-    message.clOrdIdActiveRiskAcknowledgeRejectedClOrdId
-        \o message.underlierActiveRiskAcknowledgeRejectedUnderlier
-        \o message.efidActiveRiskAcknowledgeRejectedEfid
+    message.clordid
+        \o message.underlier
+        \o message.efid
         \o message.thresholdQuantity
         \o message.rejectReason
 
 DecodeActiveRiskAcknowledgeRejectedMessage(bytes) ==
-    LET clOrdIdActiveRiskAcknowledgeRejectedClOrdId == ReadBytes(bytes, 20) IN IF ~clOrdIdActiveRiskAcknowledgeRejectedClOrdId.ok THEN Fail ELSE
-    LET underlierActiveRiskAcknowledgeRejectedUnderlier == ReadBytes(clOrdIdActiveRiskAcknowledgeRejectedClOrdId.rest, 6) IN IF ~underlierActiveRiskAcknowledgeRejectedUnderlier.ok THEN Fail ELSE
-    LET efidActiveRiskAcknowledgeRejectedEfid == ReadBytes(underlierActiveRiskAcknowledgeRejectedUnderlier.rest, 4) IN IF ~efidActiveRiskAcknowledgeRejectedEfid.ok THEN Fail ELSE
-    LET thresholdQuantity == ReadBytes(efidActiveRiskAcknowledgeRejectedEfid.rest, 4) IN IF ~thresholdQuantity.ok THEN Fail ELSE
+    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
+    LET underlier == ReadBytes(clordid.rest, 6) IN IF ~underlier.ok THEN Fail ELSE
+    LET efid == ReadBytes(underlier.rest, 4) IN IF ~efid.ok THEN Fail ELSE
+    LET thresholdQuantity == ReadBytes(efid.rest, 4) IN IF ~thresholdQuantity.ok THEN Fail ELSE
     LET rejectReason == ReadBytes(thresholdQuantity.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
-    Ok([ clOrdIdActiveRiskAcknowledgeRejectedClOrdId     |-> clOrdIdActiveRiskAcknowledgeRejectedClOrdId.value,
-         underlierActiveRiskAcknowledgeRejectedUnderlier |-> underlierActiveRiskAcknowledgeRejectedUnderlier.value,
-         efidActiveRiskAcknowledgeRejectedEfid           |-> efidActiveRiskAcknowledgeRejectedEfid.value,
-         thresholdQuantity                               |-> thresholdQuantity.value,
-         rejectReason                                    |-> rejectReason.value ], rejectReason.rest)
+    Ok([ clordid           |-> clordid.value,
+         underlier         |-> underlier.value,
+         efid              |-> efid.value,
+         thresholdQuantity |-> thresholdQuantity.value,
+         rejectReason      |-> rejectReason.value ], rejectReason.rest)
 
 ZeroActiveRiskAcknowledgeRejectedMessage ==
-    [ clOrdIdActiveRiskAcknowledgeRejectedClOrdId     |-> [i \in 1 .. 20 |-> 0],
-      underlierActiveRiskAcknowledgeRejectedUnderlier |-> [i \in 1 .. 6 |-> 0],
-      efidActiveRiskAcknowledgeRejectedEfid           |-> [i \in 1 .. 4 |-> 0],
-      thresholdQuantity                               |-> [i \in 1 .. 4 |-> 0],
-      rejectReason                                    |-> [i \in 1 .. 2 |-> 0] ]
+    [ clordid           |-> [i \in 1 .. 20 |-> 0],
+      underlier         |-> [i \in 1 .. 6 |-> 0],
+      efid              |-> [i \in 1 .. 4 |-> 0],
+      thresholdQuantity |-> [i \in 1 .. 4 |-> 0],
+      rejectReason      |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Active Risk Acknowledge Rejected Message at zero, then each field in turn at the values it is checked at *)
 CheckedActiveRiskAcknowledgeRejectedMessage ==
     { ZeroActiveRiskAcknowledgeRejectedMessage }
-        \cup { [ZeroActiveRiskAcknowledgeRejectedMessage EXCEPT !.clOrdIdActiveRiskAcknowledgeRejectedClOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroActiveRiskAcknowledgeRejectedMessage EXCEPT !.underlierActiveRiskAcknowledgeRejectedUnderlier = one] : one \in Sample(6) }
-        \cup { [ZeroActiveRiskAcknowledgeRejectedMessage EXCEPT !.efidActiveRiskAcknowledgeRejectedEfid = one] : one \in Sample(4) }
+        \cup { [ZeroActiveRiskAcknowledgeRejectedMessage EXCEPT !.clordid = one] : one \in Sample(20) }
+        \cup { [ZeroActiveRiskAcknowledgeRejectedMessage EXCEPT !.underlier = one] : one \in Sample(6) }
+        \cup { [ZeroActiveRiskAcknowledgeRejectedMessage EXCEPT !.efid = one] : one \in Sample(4) }
         \cup { [ZeroActiveRiskAcknowledgeRejectedMessage EXCEPT !.thresholdQuantity = one] : one \in Sample(4) }
         \cup { [ZeroActiveRiskAcknowledgeRejectedMessage EXCEPT !.rejectReason = one] : one \in Sample(2) }
 
@@ -923,32 +923,32 @@ CheckedManualCpBreachTriggerDoneMessage ==
 (***************************************************************************)
 
 RiskThresholdUpdateRejectedMessage ==
-    [ clOrdIdRiskThresholdUpdateRejectedClOrdId : Sample(20),
-      riskType                                  : Sample(1),
-      rejectReason                              : Sample(2) ]
+    [ clordid      : Sample(20),
+      riskType     : Sample(1),
+      rejectReason : Sample(2) ]
 
 EncodeRiskThresholdUpdateRejectedMessage(message) ==
-    message.clOrdIdRiskThresholdUpdateRejectedClOrdId
+    message.clordid
         \o message.riskType
         \o message.rejectReason
 
 DecodeRiskThresholdUpdateRejectedMessage(bytes) ==
-    LET clOrdIdRiskThresholdUpdateRejectedClOrdId == ReadBytes(bytes, 20) IN IF ~clOrdIdRiskThresholdUpdateRejectedClOrdId.ok THEN Fail ELSE
-    LET riskType == ReadBytes(clOrdIdRiskThresholdUpdateRejectedClOrdId.rest, 1) IN IF ~riskType.ok THEN Fail ELSE
+    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
+    LET riskType == ReadBytes(clordid.rest, 1) IN IF ~riskType.ok THEN Fail ELSE
     LET rejectReason == ReadBytes(riskType.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
-    Ok([ clOrdIdRiskThresholdUpdateRejectedClOrdId |-> clOrdIdRiskThresholdUpdateRejectedClOrdId.value,
-         riskType                                  |-> riskType.value,
-         rejectReason                              |-> rejectReason.value ], rejectReason.rest)
+    Ok([ clordid      |-> clordid.value,
+         riskType     |-> riskType.value,
+         rejectReason |-> rejectReason.value ], rejectReason.rest)
 
 ZeroRiskThresholdUpdateRejectedMessage ==
-    [ clOrdIdRiskThresholdUpdateRejectedClOrdId |-> [i \in 1 .. 20 |-> 0],
-      riskType                                  |-> [i \in 1 .. 1 |-> 0],
-      rejectReason                              |-> [i \in 1 .. 2 |-> 0] ]
+    [ clordid      |-> [i \in 1 .. 20 |-> 0],
+      riskType     |-> [i \in 1 .. 1 |-> 0],
+      rejectReason |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Risk Threshold Update Rejected Message at zero, then each field in turn at the values it is checked at *)
 CheckedRiskThresholdUpdateRejectedMessage ==
     { ZeroRiskThresholdUpdateRejectedMessage }
-        \cup { [ZeroRiskThresholdUpdateRejectedMessage EXCEPT !.clOrdIdRiskThresholdUpdateRejectedClOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroRiskThresholdUpdateRejectedMessage EXCEPT !.clordid = one] : one \in Sample(20) }
         \cup { [ZeroRiskThresholdUpdateRejectedMessage EXCEPT !.riskType = one] : one \in Sample(1) }
         \cup { [ZeroRiskThresholdUpdateRejectedMessage EXCEPT !.rejectReason = one] : one \in Sample(2) }
 
@@ -1199,44 +1199,44 @@ CheckedSingleOrderMaxContractsThresholdStateMessage ==
 (***************************************************************************)
 
 SingleOrderAllowMarketOrdersStateMessage ==
-    [ clOrdIdSingleOrderAllowMarketOrdersStateClOrdIdOptional     : Sample(20),
-      underlierSingleOrderAllowMarketOrdersStateUnderlierOptional : Sample(6),
-      efidSingleOrderAllowMarketOrdersStateEfidOptional           : Sample(4),
-      riskGroupId                                                 : Sample(2),
-      marketOrders                                                : Sample(1) ]
+    [ clordidOptional   : Sample(20),
+      underlierOptional : Sample(6),
+      efidOptional      : Sample(4),
+      riskGroupId       : Sample(2),
+      marketOrders      : Sample(1) ]
 
 EncodeSingleOrderAllowMarketOrdersStateMessage(message) ==
-    message.clOrdIdSingleOrderAllowMarketOrdersStateClOrdIdOptional
-        \o message.underlierSingleOrderAllowMarketOrdersStateUnderlierOptional
-        \o message.efidSingleOrderAllowMarketOrdersStateEfidOptional
+    message.clordidOptional
+        \o message.underlierOptional
+        \o message.efidOptional
         \o message.riskGroupId
         \o message.marketOrders
 
 DecodeSingleOrderAllowMarketOrdersStateMessage(bytes) ==
-    LET clOrdIdSingleOrderAllowMarketOrdersStateClOrdIdOptional == ReadBytes(bytes, 20) IN IF ~clOrdIdSingleOrderAllowMarketOrdersStateClOrdIdOptional.ok THEN Fail ELSE
-    LET underlierSingleOrderAllowMarketOrdersStateUnderlierOptional == ReadBytes(clOrdIdSingleOrderAllowMarketOrdersStateClOrdIdOptional.rest, 6) IN IF ~underlierSingleOrderAllowMarketOrdersStateUnderlierOptional.ok THEN Fail ELSE
-    LET efidSingleOrderAllowMarketOrdersStateEfidOptional == ReadBytes(underlierSingleOrderAllowMarketOrdersStateUnderlierOptional.rest, 4) IN IF ~efidSingleOrderAllowMarketOrdersStateEfidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidSingleOrderAllowMarketOrdersStateEfidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
+    LET clordidOptional == ReadBytes(bytes, 20) IN IF ~clordidOptional.ok THEN Fail ELSE
+    LET underlierOptional == ReadBytes(clordidOptional.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
+    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
+    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
     LET marketOrders == ReadBytes(riskGroupId.rest, 1) IN IF ~marketOrders.ok THEN Fail ELSE
-    Ok([ clOrdIdSingleOrderAllowMarketOrdersStateClOrdIdOptional     |-> clOrdIdSingleOrderAllowMarketOrdersStateClOrdIdOptional.value,
-         underlierSingleOrderAllowMarketOrdersStateUnderlierOptional |-> underlierSingleOrderAllowMarketOrdersStateUnderlierOptional.value,
-         efidSingleOrderAllowMarketOrdersStateEfidOptional           |-> efidSingleOrderAllowMarketOrdersStateEfidOptional.value,
-         riskGroupId                                                 |-> riskGroupId.value,
-         marketOrders                                                |-> marketOrders.value ], marketOrders.rest)
+    Ok([ clordidOptional   |-> clordidOptional.value,
+         underlierOptional |-> underlierOptional.value,
+         efidOptional      |-> efidOptional.value,
+         riskGroupId       |-> riskGroupId.value,
+         marketOrders      |-> marketOrders.value ], marketOrders.rest)
 
 ZeroSingleOrderAllowMarketOrdersStateMessage ==
-    [ clOrdIdSingleOrderAllowMarketOrdersStateClOrdIdOptional     |-> [i \in 1 .. 20 |-> 0],
-      underlierSingleOrderAllowMarketOrdersStateUnderlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidSingleOrderAllowMarketOrdersStateEfidOptional           |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId                                                 |-> [i \in 1 .. 2 |-> 0],
-      marketOrders                                                |-> [i \in 1 .. 1 |-> 0] ]
+    [ clordidOptional   |-> [i \in 1 .. 20 |-> 0],
+      underlierOptional |-> [i \in 1 .. 6 |-> 0],
+      efidOptional      |-> [i \in 1 .. 4 |-> 0],
+      riskGroupId       |-> [i \in 1 .. 2 |-> 0],
+      marketOrders      |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Single Order Allow Market Orders State Message at zero, then each field in turn at the values it is checked at *)
 CheckedSingleOrderAllowMarketOrdersStateMessage ==
     { ZeroSingleOrderAllowMarketOrdersStateMessage }
-        \cup { [ZeroSingleOrderAllowMarketOrdersStateMessage EXCEPT !.clOrdIdSingleOrderAllowMarketOrdersStateClOrdIdOptional = one] : one \in Sample(20) }
-        \cup { [ZeroSingleOrderAllowMarketOrdersStateMessage EXCEPT !.underlierSingleOrderAllowMarketOrdersStateUnderlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroSingleOrderAllowMarketOrdersStateMessage EXCEPT !.efidSingleOrderAllowMarketOrdersStateEfidOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSingleOrderAllowMarketOrdersStateMessage EXCEPT !.clordidOptional = one] : one \in Sample(20) }
+        \cup { [ZeroSingleOrderAllowMarketOrdersStateMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
+        \cup { [ZeroSingleOrderAllowMarketOrdersStateMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
         \cup { [ZeroSingleOrderAllowMarketOrdersStateMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
         \cup { [ZeroSingleOrderAllowMarketOrdersStateMessage EXCEPT !.marketOrders = one] : one \in Sample(1) }
 
@@ -1245,44 +1245,44 @@ CheckedSingleOrderAllowMarketOrdersStateMessage ==
 (***************************************************************************)
 
 SingleOrderRestrictedUnderlierStateMessage ==
-    [ clOrdIdSingleOrderRestrictedUnderlierStateClOrdIdOptional : Sample(20),
-      underlierSingleOrderRestrictedUnderlierStateUnderlier     : Sample(6),
-      efidSingleOrderRestrictedUnderlierStateEfidOptional       : Sample(4),
-      riskGroupId                                               : Sample(2),
-      restricted                                                : Sample(1) ]
+    [ clordidOptional : Sample(20),
+      underlier       : Sample(6),
+      efidOptional    : Sample(4),
+      riskGroupId     : Sample(2),
+      restricted      : Sample(1) ]
 
 EncodeSingleOrderRestrictedUnderlierStateMessage(message) ==
-    message.clOrdIdSingleOrderRestrictedUnderlierStateClOrdIdOptional
-        \o message.underlierSingleOrderRestrictedUnderlierStateUnderlier
-        \o message.efidSingleOrderRestrictedUnderlierStateEfidOptional
+    message.clordidOptional
+        \o message.underlier
+        \o message.efidOptional
         \o message.riskGroupId
         \o message.restricted
 
 DecodeSingleOrderRestrictedUnderlierStateMessage(bytes) ==
-    LET clOrdIdSingleOrderRestrictedUnderlierStateClOrdIdOptional == ReadBytes(bytes, 20) IN IF ~clOrdIdSingleOrderRestrictedUnderlierStateClOrdIdOptional.ok THEN Fail ELSE
-    LET underlierSingleOrderRestrictedUnderlierStateUnderlier == ReadBytes(clOrdIdSingleOrderRestrictedUnderlierStateClOrdIdOptional.rest, 6) IN IF ~underlierSingleOrderRestrictedUnderlierStateUnderlier.ok THEN Fail ELSE
-    LET efidSingleOrderRestrictedUnderlierStateEfidOptional == ReadBytes(underlierSingleOrderRestrictedUnderlierStateUnderlier.rest, 4) IN IF ~efidSingleOrderRestrictedUnderlierStateEfidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidSingleOrderRestrictedUnderlierStateEfidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
+    LET clordidOptional == ReadBytes(bytes, 20) IN IF ~clordidOptional.ok THEN Fail ELSE
+    LET underlier == ReadBytes(clordidOptional.rest, 6) IN IF ~underlier.ok THEN Fail ELSE
+    LET efidOptional == ReadBytes(underlier.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
+    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
     LET restricted == ReadBytes(riskGroupId.rest, 1) IN IF ~restricted.ok THEN Fail ELSE
-    Ok([ clOrdIdSingleOrderRestrictedUnderlierStateClOrdIdOptional |-> clOrdIdSingleOrderRestrictedUnderlierStateClOrdIdOptional.value,
-         underlierSingleOrderRestrictedUnderlierStateUnderlier     |-> underlierSingleOrderRestrictedUnderlierStateUnderlier.value,
-         efidSingleOrderRestrictedUnderlierStateEfidOptional       |-> efidSingleOrderRestrictedUnderlierStateEfidOptional.value,
-         riskGroupId                                               |-> riskGroupId.value,
-         restricted                                                |-> restricted.value ], restricted.rest)
+    Ok([ clordidOptional |-> clordidOptional.value,
+         underlier       |-> underlier.value,
+         efidOptional    |-> efidOptional.value,
+         riskGroupId     |-> riskGroupId.value,
+         restricted      |-> restricted.value ], restricted.rest)
 
 ZeroSingleOrderRestrictedUnderlierStateMessage ==
-    [ clOrdIdSingleOrderRestrictedUnderlierStateClOrdIdOptional |-> [i \in 1 .. 20 |-> 0],
-      underlierSingleOrderRestrictedUnderlierStateUnderlier     |-> [i \in 1 .. 6 |-> 0],
-      efidSingleOrderRestrictedUnderlierStateEfidOptional       |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId                                               |-> [i \in 1 .. 2 |-> 0],
-      restricted                                                |-> [i \in 1 .. 1 |-> 0] ]
+    [ clordidOptional |-> [i \in 1 .. 20 |-> 0],
+      underlier       |-> [i \in 1 .. 6 |-> 0],
+      efidOptional    |-> [i \in 1 .. 4 |-> 0],
+      riskGroupId     |-> [i \in 1 .. 2 |-> 0],
+      restricted      |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Single Order Restricted Underlier State Message at zero, then each field in turn at the values it is checked at *)
 CheckedSingleOrderRestrictedUnderlierStateMessage ==
     { ZeroSingleOrderRestrictedUnderlierStateMessage }
-        \cup { [ZeroSingleOrderRestrictedUnderlierStateMessage EXCEPT !.clOrdIdSingleOrderRestrictedUnderlierStateClOrdIdOptional = one] : one \in Sample(20) }
-        \cup { [ZeroSingleOrderRestrictedUnderlierStateMessage EXCEPT !.underlierSingleOrderRestrictedUnderlierStateUnderlier = one] : one \in Sample(6) }
-        \cup { [ZeroSingleOrderRestrictedUnderlierStateMessage EXCEPT !.efidSingleOrderRestrictedUnderlierStateEfidOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSingleOrderRestrictedUnderlierStateMessage EXCEPT !.clordidOptional = one] : one \in Sample(20) }
+        \cup { [ZeroSingleOrderRestrictedUnderlierStateMessage EXCEPT !.underlier = one] : one \in Sample(6) }
+        \cup { [ZeroSingleOrderRestrictedUnderlierStateMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
         \cup { [ZeroSingleOrderRestrictedUnderlierStateMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
         \cup { [ZeroSingleOrderRestrictedUnderlierStateMessage EXCEPT !.restricted = one] : one \in Sample(1) }
 
@@ -1319,27 +1319,27 @@ CheckedRiskSettingsQueryDoneMessage ==
 (***************************************************************************)
 
 RiskSettingsQueryRejectedMessage ==
-    [ clOrdIdRiskSettingsQueryRejectedClOrdId : Sample(20),
-      rejectReason                            : Sample(2) ]
+    [ clordid      : Sample(20),
+      rejectReason : Sample(2) ]
 
 EncodeRiskSettingsQueryRejectedMessage(message) ==
-    message.clOrdIdRiskSettingsQueryRejectedClOrdId
+    message.clordid
         \o message.rejectReason
 
 DecodeRiskSettingsQueryRejectedMessage(bytes) ==
-    LET clOrdIdRiskSettingsQueryRejectedClOrdId == ReadBytes(bytes, 20) IN IF ~clOrdIdRiskSettingsQueryRejectedClOrdId.ok THEN Fail ELSE
-    LET rejectReason == ReadBytes(clOrdIdRiskSettingsQueryRejectedClOrdId.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
-    Ok([ clOrdIdRiskSettingsQueryRejectedClOrdId |-> clOrdIdRiskSettingsQueryRejectedClOrdId.value,
-         rejectReason                            |-> rejectReason.value ], rejectReason.rest)
+    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
+    LET rejectReason == ReadBytes(clordid.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
+    Ok([ clordid      |-> clordid.value,
+         rejectReason |-> rejectReason.value ], rejectReason.rest)
 
 ZeroRiskSettingsQueryRejectedMessage ==
-    [ clOrdIdRiskSettingsQueryRejectedClOrdId |-> [i \in 1 .. 20 |-> 0],
-      rejectReason                            |-> [i \in 1 .. 2 |-> 0] ]
+    [ clordid      |-> [i \in 1 .. 20 |-> 0],
+      rejectReason |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Risk Settings Query Rejected Message at zero, then each field in turn at the values it is checked at *)
 CheckedRiskSettingsQueryRejectedMessage ==
     { ZeroRiskSettingsQueryRejectedMessage }
-        \cup { [ZeroRiskSettingsQueryRejectedMessage EXCEPT !.clOrdIdRiskSettingsQueryRejectedClOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroRiskSettingsQueryRejectedMessage EXCEPT !.clordid = one] : one \in Sample(20) }
         \cup { [ZeroRiskSettingsQueryRejectedMessage EXCEPT !.rejectReason = one] : one \in Sample(2) }
 
 (***************************************************************************)
@@ -1347,44 +1347,44 @@ CheckedRiskSettingsQueryRejectedMessage ==
 (***************************************************************************)
 
 ManualCpBreachTriggerRejectedMessage ==
-    [ clOrdIdManualCpBreachTriggerRejectedClOrdId             : Sample(20),
-      underlierManualCpBreachTriggerRejectedUnderlierOptional : Sample(6),
-      efidManualCpBreachTriggerRejectedEfidOptional           : Sample(4),
-      riskGroupId                                             : Sample(2),
-      rejectReason                                            : Sample(2) ]
+    [ clordid           : Sample(20),
+      underlierOptional : Sample(6),
+      efidOptional      : Sample(4),
+      riskGroupId       : Sample(2),
+      rejectReason      : Sample(2) ]
 
 EncodeManualCpBreachTriggerRejectedMessage(message) ==
-    message.clOrdIdManualCpBreachTriggerRejectedClOrdId
-        \o message.underlierManualCpBreachTriggerRejectedUnderlierOptional
-        \o message.efidManualCpBreachTriggerRejectedEfidOptional
+    message.clordid
+        \o message.underlierOptional
+        \o message.efidOptional
         \o message.riskGroupId
         \o message.rejectReason
 
 DecodeManualCpBreachTriggerRejectedMessage(bytes) ==
-    LET clOrdIdManualCpBreachTriggerRejectedClOrdId == ReadBytes(bytes, 20) IN IF ~clOrdIdManualCpBreachTriggerRejectedClOrdId.ok THEN Fail ELSE
-    LET underlierManualCpBreachTriggerRejectedUnderlierOptional == ReadBytes(clOrdIdManualCpBreachTriggerRejectedClOrdId.rest, 6) IN IF ~underlierManualCpBreachTriggerRejectedUnderlierOptional.ok THEN Fail ELSE
-    LET efidManualCpBreachTriggerRejectedEfidOptional == ReadBytes(underlierManualCpBreachTriggerRejectedUnderlierOptional.rest, 4) IN IF ~efidManualCpBreachTriggerRejectedEfidOptional.ok THEN Fail ELSE
-    LET riskGroupId == ReadBytes(efidManualCpBreachTriggerRejectedEfidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
+    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
+    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
+    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
+    LET riskGroupId == ReadBytes(efidOptional.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
     LET rejectReason == ReadBytes(riskGroupId.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
-    Ok([ clOrdIdManualCpBreachTriggerRejectedClOrdId             |-> clOrdIdManualCpBreachTriggerRejectedClOrdId.value,
-         underlierManualCpBreachTriggerRejectedUnderlierOptional |-> underlierManualCpBreachTriggerRejectedUnderlierOptional.value,
-         efidManualCpBreachTriggerRejectedEfidOptional           |-> efidManualCpBreachTriggerRejectedEfidOptional.value,
-         riskGroupId                                             |-> riskGroupId.value,
-         rejectReason                                            |-> rejectReason.value ], rejectReason.rest)
+    Ok([ clordid           |-> clordid.value,
+         underlierOptional |-> underlierOptional.value,
+         efidOptional      |-> efidOptional.value,
+         riskGroupId       |-> riskGroupId.value,
+         rejectReason      |-> rejectReason.value ], rejectReason.rest)
 
 ZeroManualCpBreachTriggerRejectedMessage ==
-    [ clOrdIdManualCpBreachTriggerRejectedClOrdId             |-> [i \in 1 .. 20 |-> 0],
-      underlierManualCpBreachTriggerRejectedUnderlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidManualCpBreachTriggerRejectedEfidOptional           |-> [i \in 1 .. 4 |-> 0],
-      riskGroupId                                             |-> [i \in 1 .. 2 |-> 0],
-      rejectReason                                            |-> [i \in 1 .. 2 |-> 0] ]
+    [ clordid           |-> [i \in 1 .. 20 |-> 0],
+      underlierOptional |-> [i \in 1 .. 6 |-> 0],
+      efidOptional      |-> [i \in 1 .. 4 |-> 0],
+      riskGroupId       |-> [i \in 1 .. 2 |-> 0],
+      rejectReason      |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Manual Cp Breach Trigger Rejected Message at zero, then each field in turn at the values it is checked at *)
 CheckedManualCpBreachTriggerRejectedMessage ==
     { ZeroManualCpBreachTriggerRejectedMessage }
-        \cup { [ZeroManualCpBreachTriggerRejectedMessage EXCEPT !.clOrdIdManualCpBreachTriggerRejectedClOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroManualCpBreachTriggerRejectedMessage EXCEPT !.underlierManualCpBreachTriggerRejectedUnderlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroManualCpBreachTriggerRejectedMessage EXCEPT !.efidManualCpBreachTriggerRejectedEfidOptional = one] : one \in Sample(4) }
+        \cup { [ZeroManualCpBreachTriggerRejectedMessage EXCEPT !.clordid = one] : one \in Sample(20) }
+        \cup { [ZeroManualCpBreachTriggerRejectedMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
+        \cup { [ZeroManualCpBreachTriggerRejectedMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
         \cup { [ZeroManualCpBreachTriggerRejectedMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
         \cup { [ZeroManualCpBreachTriggerRejectedMessage EXCEPT !.rejectReason = one] : one \in Sample(2) }
 
@@ -1393,32 +1393,32 @@ CheckedManualCpBreachTriggerRejectedMessage ==
 (***************************************************************************)
 
 BreachClearRejectedMessage ==
-    [ clOrdIdBreachClearRejectedClOrdId : Sample(20),
-      breachIdOptional                  : Sample(8),
-      rejectReason                      : Sample(2) ]
+    [ clordid          : Sample(20),
+      breachIdOptional : Sample(8),
+      rejectReason     : Sample(2) ]
 
 EncodeBreachClearRejectedMessage(message) ==
-    message.clOrdIdBreachClearRejectedClOrdId
+    message.clordid
         \o message.breachIdOptional
         \o message.rejectReason
 
 DecodeBreachClearRejectedMessage(bytes) ==
-    LET clOrdIdBreachClearRejectedClOrdId == ReadBytes(bytes, 20) IN IF ~clOrdIdBreachClearRejectedClOrdId.ok THEN Fail ELSE
-    LET breachIdOptional == ReadBytes(clOrdIdBreachClearRejectedClOrdId.rest, 8) IN IF ~breachIdOptional.ok THEN Fail ELSE
+    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
+    LET breachIdOptional == ReadBytes(clordid.rest, 8) IN IF ~breachIdOptional.ok THEN Fail ELSE
     LET rejectReason == ReadBytes(breachIdOptional.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
-    Ok([ clOrdIdBreachClearRejectedClOrdId |-> clOrdIdBreachClearRejectedClOrdId.value,
-         breachIdOptional                  |-> breachIdOptional.value,
-         rejectReason                      |-> rejectReason.value ], rejectReason.rest)
+    Ok([ clordid          |-> clordid.value,
+         breachIdOptional |-> breachIdOptional.value,
+         rejectReason     |-> rejectReason.value ], rejectReason.rest)
 
 ZeroBreachClearRejectedMessage ==
-    [ clOrdIdBreachClearRejectedClOrdId |-> [i \in 1 .. 20 |-> 0],
-      breachIdOptional                  |-> [i \in 1 .. 8 |-> 0],
-      rejectReason                      |-> [i \in 1 .. 2 |-> 0] ]
+    [ clordid          |-> [i \in 1 .. 20 |-> 0],
+      breachIdOptional |-> [i \in 1 .. 8 |-> 0],
+      rejectReason     |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Breach Clear Rejected Message at zero, then each field in turn at the values it is checked at *)
 CheckedBreachClearRejectedMessage ==
     { ZeroBreachClearRejectedMessage }
-        \cup { [ZeroBreachClearRejectedMessage EXCEPT !.clOrdIdBreachClearRejectedClOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroBreachClearRejectedMessage EXCEPT !.clordid = one] : one \in Sample(20) }
         \cup { [ZeroBreachClearRejectedMessage EXCEPT !.breachIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroBreachClearRejectedMessage EXCEPT !.rejectReason = one] : one \in Sample(2) }
 
@@ -1455,49 +1455,49 @@ CheckedBreachClearedMessage ==
 (***************************************************************************)
 
 BreachClearAllAcceptedMessage ==
-    [ clOrdIdBreachClearAllAcceptedClOrdId : Sample(20) ]
+    [ clordid : Sample(20) ]
 
 EncodeBreachClearAllAcceptedMessage(message) ==
-    message.clOrdIdBreachClearAllAcceptedClOrdId
+    message.clordid
 
 DecodeBreachClearAllAcceptedMessage(bytes) ==
-    LET clOrdIdBreachClearAllAcceptedClOrdId == ReadBytes(bytes, 20) IN IF ~clOrdIdBreachClearAllAcceptedClOrdId.ok THEN Fail ELSE
-    Ok([ clOrdIdBreachClearAllAcceptedClOrdId |-> clOrdIdBreachClearAllAcceptedClOrdId.value ], clOrdIdBreachClearAllAcceptedClOrdId.rest)
+    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
+    Ok([ clordid |-> clordid.value ], clordid.rest)
 
 ZeroBreachClearAllAcceptedMessage ==
-    [ clOrdIdBreachClearAllAcceptedClOrdId |-> [i \in 1 .. 20 |-> 0] ]
+    [ clordid |-> [i \in 1 .. 20 |-> 0] ]
 
 (* Breach Clear All Accepted Message at zero, then each field in turn at the values it is checked at *)
 CheckedBreachClearAllAcceptedMessage ==
     { ZeroBreachClearAllAcceptedMessage }
-        \cup { [ZeroBreachClearAllAcceptedMessage EXCEPT !.clOrdIdBreachClearAllAcceptedClOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroBreachClearAllAcceptedMessage EXCEPT !.clordid = one] : one \in Sample(20) }
 
 (***************************************************************************)
 (* Breach Clear All Rejected Message: 22 bytes                             *)
 (***************************************************************************)
 
 BreachClearAllRejectedMessage ==
-    [ clOrdIdBreachClearAllRejectedClOrdId : Sample(20),
-      rejectReason                         : Sample(2) ]
+    [ clordid      : Sample(20),
+      rejectReason : Sample(2) ]
 
 EncodeBreachClearAllRejectedMessage(message) ==
-    message.clOrdIdBreachClearAllRejectedClOrdId
+    message.clordid
         \o message.rejectReason
 
 DecodeBreachClearAllRejectedMessage(bytes) ==
-    LET clOrdIdBreachClearAllRejectedClOrdId == ReadBytes(bytes, 20) IN IF ~clOrdIdBreachClearAllRejectedClOrdId.ok THEN Fail ELSE
-    LET rejectReason == ReadBytes(clOrdIdBreachClearAllRejectedClOrdId.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
-    Ok([ clOrdIdBreachClearAllRejectedClOrdId |-> clOrdIdBreachClearAllRejectedClOrdId.value,
-         rejectReason                         |-> rejectReason.value ], rejectReason.rest)
+    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
+    LET rejectReason == ReadBytes(clordid.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
+    Ok([ clordid      |-> clordid.value,
+         rejectReason |-> rejectReason.value ], rejectReason.rest)
 
 ZeroBreachClearAllRejectedMessage ==
-    [ clOrdIdBreachClearAllRejectedClOrdId |-> [i \in 1 .. 20 |-> 0],
-      rejectReason                         |-> [i \in 1 .. 2 |-> 0] ]
+    [ clordid      |-> [i \in 1 .. 20 |-> 0],
+      rejectReason |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Breach Clear All Rejected Message at zero, then each field in turn at the values it is checked at *)
 CheckedBreachClearAllRejectedMessage ==
     { ZeroBreachClearAllRejectedMessage }
-        \cup { [ZeroBreachClearAllRejectedMessage EXCEPT !.clOrdIdBreachClearAllRejectedClOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroBreachClearAllRejectedMessage EXCEPT !.clordid = one] : one \in Sample(20) }
         \cup { [ZeroBreachClearAllRejectedMessage EXCEPT !.rejectReason = one] : one \in Sample(2) }
 
 (***************************************************************************)
@@ -1505,73 +1505,73 @@ CheckedBreachClearAllRejectedMessage ==
 (***************************************************************************)
 
 BreachClearAllByEfidOrUnderlierAcceptedMessage ==
-    [ clOrdIdBreachClearAllByEfidOrUnderlierAcceptedClOrdId             : Sample(20),
-      underlierBreachClearAllByEfidOrUnderlierAcceptedUnderlierOptional : Sample(6),
-      efidBreachClearAllByEfidOrUnderlierAcceptedEfidOptional           : Sample(4) ]
+    [ clordid           : Sample(20),
+      underlierOptional : Sample(6),
+      efidOptional      : Sample(4) ]
 
 EncodeBreachClearAllByEfidOrUnderlierAcceptedMessage(message) ==
-    message.clOrdIdBreachClearAllByEfidOrUnderlierAcceptedClOrdId
-        \o message.underlierBreachClearAllByEfidOrUnderlierAcceptedUnderlierOptional
-        \o message.efidBreachClearAllByEfidOrUnderlierAcceptedEfidOptional
+    message.clordid
+        \o message.underlierOptional
+        \o message.efidOptional
 
 DecodeBreachClearAllByEfidOrUnderlierAcceptedMessage(bytes) ==
-    LET clOrdIdBreachClearAllByEfidOrUnderlierAcceptedClOrdId == ReadBytes(bytes, 20) IN IF ~clOrdIdBreachClearAllByEfidOrUnderlierAcceptedClOrdId.ok THEN Fail ELSE
-    LET underlierBreachClearAllByEfidOrUnderlierAcceptedUnderlierOptional == ReadBytes(clOrdIdBreachClearAllByEfidOrUnderlierAcceptedClOrdId.rest, 6) IN IF ~underlierBreachClearAllByEfidOrUnderlierAcceptedUnderlierOptional.ok THEN Fail ELSE
-    LET efidBreachClearAllByEfidOrUnderlierAcceptedEfidOptional == ReadBytes(underlierBreachClearAllByEfidOrUnderlierAcceptedUnderlierOptional.rest, 4) IN IF ~efidBreachClearAllByEfidOrUnderlierAcceptedEfidOptional.ok THEN Fail ELSE
-    Ok([ clOrdIdBreachClearAllByEfidOrUnderlierAcceptedClOrdId             |-> clOrdIdBreachClearAllByEfidOrUnderlierAcceptedClOrdId.value,
-         underlierBreachClearAllByEfidOrUnderlierAcceptedUnderlierOptional |-> underlierBreachClearAllByEfidOrUnderlierAcceptedUnderlierOptional.value,
-         efidBreachClearAllByEfidOrUnderlierAcceptedEfidOptional           |-> efidBreachClearAllByEfidOrUnderlierAcceptedEfidOptional.value ], efidBreachClearAllByEfidOrUnderlierAcceptedEfidOptional.rest)
+    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
+    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
+    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
+    Ok([ clordid           |-> clordid.value,
+         underlierOptional |-> underlierOptional.value,
+         efidOptional      |-> efidOptional.value ], efidOptional.rest)
 
 ZeroBreachClearAllByEfidOrUnderlierAcceptedMessage ==
-    [ clOrdIdBreachClearAllByEfidOrUnderlierAcceptedClOrdId             |-> [i \in 1 .. 20 |-> 0],
-      underlierBreachClearAllByEfidOrUnderlierAcceptedUnderlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidBreachClearAllByEfidOrUnderlierAcceptedEfidOptional           |-> [i \in 1 .. 4 |-> 0] ]
+    [ clordid           |-> [i \in 1 .. 20 |-> 0],
+      underlierOptional |-> [i \in 1 .. 6 |-> 0],
+      efidOptional      |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Breach Clear All By Efid Or Underlier Accepted Message at zero, then each field in turn at the values it is checked at *)
 CheckedBreachClearAllByEfidOrUnderlierAcceptedMessage ==
     { ZeroBreachClearAllByEfidOrUnderlierAcceptedMessage }
-        \cup { [ZeroBreachClearAllByEfidOrUnderlierAcceptedMessage EXCEPT !.clOrdIdBreachClearAllByEfidOrUnderlierAcceptedClOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroBreachClearAllByEfidOrUnderlierAcceptedMessage EXCEPT !.underlierBreachClearAllByEfidOrUnderlierAcceptedUnderlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroBreachClearAllByEfidOrUnderlierAcceptedMessage EXCEPT !.efidBreachClearAllByEfidOrUnderlierAcceptedEfidOptional = one] : one \in Sample(4) }
+        \cup { [ZeroBreachClearAllByEfidOrUnderlierAcceptedMessage EXCEPT !.clordid = one] : one \in Sample(20) }
+        \cup { [ZeroBreachClearAllByEfidOrUnderlierAcceptedMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
+        \cup { [ZeroBreachClearAllByEfidOrUnderlierAcceptedMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Breach Clear All By Efid Or Underlier Rejected Message: 32 bytes        *)
 (***************************************************************************)
 
 BreachClearAllByEfidOrUnderlierRejectedMessage ==
-    [ clOrdIdBreachClearAllByEfidOrUnderlierRejectedClOrdId             : Sample(20),
-      underlierBreachClearAllByEfidOrUnderlierRejectedUnderlierOptional : Sample(6),
-      efidBreachClearAllByEfidOrUnderlierRejectedEfidOptional           : Sample(4),
-      rejectReason                                                      : Sample(2) ]
+    [ clordid           : Sample(20),
+      underlierOptional : Sample(6),
+      efidOptional      : Sample(4),
+      rejectReason      : Sample(2) ]
 
 EncodeBreachClearAllByEfidOrUnderlierRejectedMessage(message) ==
-    message.clOrdIdBreachClearAllByEfidOrUnderlierRejectedClOrdId
-        \o message.underlierBreachClearAllByEfidOrUnderlierRejectedUnderlierOptional
-        \o message.efidBreachClearAllByEfidOrUnderlierRejectedEfidOptional
+    message.clordid
+        \o message.underlierOptional
+        \o message.efidOptional
         \o message.rejectReason
 
 DecodeBreachClearAllByEfidOrUnderlierRejectedMessage(bytes) ==
-    LET clOrdIdBreachClearAllByEfidOrUnderlierRejectedClOrdId == ReadBytes(bytes, 20) IN IF ~clOrdIdBreachClearAllByEfidOrUnderlierRejectedClOrdId.ok THEN Fail ELSE
-    LET underlierBreachClearAllByEfidOrUnderlierRejectedUnderlierOptional == ReadBytes(clOrdIdBreachClearAllByEfidOrUnderlierRejectedClOrdId.rest, 6) IN IF ~underlierBreachClearAllByEfidOrUnderlierRejectedUnderlierOptional.ok THEN Fail ELSE
-    LET efidBreachClearAllByEfidOrUnderlierRejectedEfidOptional == ReadBytes(underlierBreachClearAllByEfidOrUnderlierRejectedUnderlierOptional.rest, 4) IN IF ~efidBreachClearAllByEfidOrUnderlierRejectedEfidOptional.ok THEN Fail ELSE
-    LET rejectReason == ReadBytes(efidBreachClearAllByEfidOrUnderlierRejectedEfidOptional.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
-    Ok([ clOrdIdBreachClearAllByEfidOrUnderlierRejectedClOrdId             |-> clOrdIdBreachClearAllByEfidOrUnderlierRejectedClOrdId.value,
-         underlierBreachClearAllByEfidOrUnderlierRejectedUnderlierOptional |-> underlierBreachClearAllByEfidOrUnderlierRejectedUnderlierOptional.value,
-         efidBreachClearAllByEfidOrUnderlierRejectedEfidOptional           |-> efidBreachClearAllByEfidOrUnderlierRejectedEfidOptional.value,
-         rejectReason                                                      |-> rejectReason.value ], rejectReason.rest)
+    LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
+    LET underlierOptional == ReadBytes(clordid.rest, 6) IN IF ~underlierOptional.ok THEN Fail ELSE
+    LET efidOptional == ReadBytes(underlierOptional.rest, 4) IN IF ~efidOptional.ok THEN Fail ELSE
+    LET rejectReason == ReadBytes(efidOptional.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
+    Ok([ clordid           |-> clordid.value,
+         underlierOptional |-> underlierOptional.value,
+         efidOptional      |-> efidOptional.value,
+         rejectReason      |-> rejectReason.value ], rejectReason.rest)
 
 ZeroBreachClearAllByEfidOrUnderlierRejectedMessage ==
-    [ clOrdIdBreachClearAllByEfidOrUnderlierRejectedClOrdId             |-> [i \in 1 .. 20 |-> 0],
-      underlierBreachClearAllByEfidOrUnderlierRejectedUnderlierOptional |-> [i \in 1 .. 6 |-> 0],
-      efidBreachClearAllByEfidOrUnderlierRejectedEfidOptional           |-> [i \in 1 .. 4 |-> 0],
-      rejectReason                                                      |-> [i \in 1 .. 2 |-> 0] ]
+    [ clordid           |-> [i \in 1 .. 20 |-> 0],
+      underlierOptional |-> [i \in 1 .. 6 |-> 0],
+      efidOptional      |-> [i \in 1 .. 4 |-> 0],
+      rejectReason      |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Breach Clear All By Efid Or Underlier Rejected Message at zero, then each field in turn at the values it is checked at *)
 CheckedBreachClearAllByEfidOrUnderlierRejectedMessage ==
     { ZeroBreachClearAllByEfidOrUnderlierRejectedMessage }
-        \cup { [ZeroBreachClearAllByEfidOrUnderlierRejectedMessage EXCEPT !.clOrdIdBreachClearAllByEfidOrUnderlierRejectedClOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroBreachClearAllByEfidOrUnderlierRejectedMessage EXCEPT !.underlierBreachClearAllByEfidOrUnderlierRejectedUnderlierOptional = one] : one \in Sample(6) }
-        \cup { [ZeroBreachClearAllByEfidOrUnderlierRejectedMessage EXCEPT !.efidBreachClearAllByEfidOrUnderlierRejectedEfidOptional = one] : one \in Sample(4) }
+        \cup { [ZeroBreachClearAllByEfidOrUnderlierRejectedMessage EXCEPT !.clordid = one] : one \in Sample(20) }
+        \cup { [ZeroBreachClearAllByEfidOrUnderlierRejectedMessage EXCEPT !.underlierOptional = one] : one \in Sample(6) }
+        \cup { [ZeroBreachClearAllByEfidOrUnderlierRejectedMessage EXCEPT !.efidOptional = one] : one \in Sample(4) }
         \cup { [ZeroBreachClearAllByEfidOrUnderlierRejectedMessage EXCEPT !.rejectReason = one] : one \in Sample(2) }
 
 (***************************************************************************)

@@ -518,7 +518,7 @@ SimpleArmProtectionSettingsNotification ==
       mpid                          : Sample(4),
       underlyingSymbol              : Sample(11),
       allowableEngagementPercentage : Sample(4),
-      countingPeriodBinaryU2        : Sample(2),
+      countingPeriod                : Sample(2),
       action                        : Sample(1),
       source                        : Sample(1) ]
 
@@ -527,7 +527,7 @@ EncodeSimpleArmProtectionSettingsNotification(message) ==
         \o message.mpid
         \o message.underlyingSymbol
         \o message.allowableEngagementPercentage
-        \o message.countingPeriodBinaryU2
+        \o message.countingPeriod
         \o message.action
         \o message.source
 
@@ -536,14 +536,14 @@ DecodeSimpleArmProtectionSettingsNotification(bytes) ==
     LET mpid == ReadBytes(notificationTime.rest, 4) IN IF ~mpid.ok THEN Fail ELSE
     LET underlyingSymbol == ReadBytes(mpid.rest, 11) IN IF ~underlyingSymbol.ok THEN Fail ELSE
     LET allowableEngagementPercentage == ReadBytes(underlyingSymbol.rest, 4) IN IF ~allowableEngagementPercentage.ok THEN Fail ELSE
-    LET countingPeriodBinaryU2 == ReadBytes(allowableEngagementPercentage.rest, 2) IN IF ~countingPeriodBinaryU2.ok THEN Fail ELSE
-    LET action == ReadBytes(countingPeriodBinaryU2.rest, 1) IN IF ~action.ok THEN Fail ELSE
+    LET countingPeriod == ReadBytes(allowableEngagementPercentage.rest, 2) IN IF ~countingPeriod.ok THEN Fail ELSE
+    LET action == ReadBytes(countingPeriod.rest, 1) IN IF ~action.ok THEN Fail ELSE
     LET source == ReadBytes(action.rest, 1) IN IF ~source.ok THEN Fail ELSE
     Ok([ notificationTime              |-> notificationTime.value,
          mpid                          |-> mpid.value,
          underlyingSymbol              |-> underlyingSymbol.value,
          allowableEngagementPercentage |-> allowableEngagementPercentage.value,
-         countingPeriodBinaryU2        |-> countingPeriodBinaryU2.value,
+         countingPeriod                |-> countingPeriod.value,
          action                        |-> action.value,
          source                        |-> source.value ], source.rest)
 
@@ -552,7 +552,7 @@ ZeroSimpleArmProtectionSettingsNotification ==
       mpid                          |-> [i \in 1 .. 4 |-> 0],
       underlyingSymbol              |-> [i \in 1 .. 11 |-> 0],
       allowableEngagementPercentage |-> [i \in 1 .. 4 |-> 0],
-      countingPeriodBinaryU2        |-> [i \in 1 .. 2 |-> 0],
+      countingPeriod                |-> [i \in 1 .. 2 |-> 0],
       action                        |-> [i \in 1 .. 1 |-> 0],
       source                        |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -563,7 +563,7 @@ CheckedSimpleArmProtectionSettingsNotification ==
         \cup { [ZeroSimpleArmProtectionSettingsNotification EXCEPT !.mpid = one] : one \in Sample(4) }
         \cup { [ZeroSimpleArmProtectionSettingsNotification EXCEPT !.underlyingSymbol = one] : one \in Sample(11) }
         \cup { [ZeroSimpleArmProtectionSettingsNotification EXCEPT !.allowableEngagementPercentage = one] : one \in Sample(4) }
-        \cup { [ZeroSimpleArmProtectionSettingsNotification EXCEPT !.countingPeriodBinaryU2 = one] : one \in Sample(2) }
+        \cup { [ZeroSimpleArmProtectionSettingsNotification EXCEPT !.countingPeriod = one] : one \in Sample(2) }
         \cup { [ZeroSimpleArmProtectionSettingsNotification EXCEPT !.action = one] : one \in Sample(1) }
         \cup { [ZeroSimpleArmProtectionSettingsNotification EXCEPT !.source = one] : one \in Sample(1) }
 
@@ -572,21 +572,21 @@ CheckedSimpleArmProtectionSettingsNotification ==
 (***************************************************************************)
 
 Arm2UnderlyingLevelProtectionSettingsNotification ==
-    [ notificationTime          : Sample(8),
-      mpid                      : Sample(4),
-      action                    : Sample(1),
-      underlyingSymbol          : Sample(11),
-      armThresholdCountBinaryU4 : Sample(4),
-      countingPeriodBinaryU4    : Sample(4),
-      reserved16                : Sample(16) ]
+    [ notificationTime   : Sample(8),
+      mpid               : Sample(4),
+      action             : Sample(1),
+      underlyingSymbol   : Sample(11),
+      armThresholdCount  : Sample(4),
+      arm2CountingPeriod : Sample(4),
+      reserved16         : Sample(16) ]
 
 EncodeArm2UnderlyingLevelProtectionSettingsNotification(message) ==
     message.notificationTime
         \o message.mpid
         \o message.action
         \o message.underlyingSymbol
-        \o message.armThresholdCountBinaryU4
-        \o message.countingPeriodBinaryU4
+        \o message.armThresholdCount
+        \o message.arm2CountingPeriod
         \o message.reserved16
 
 DecodeArm2UnderlyingLevelProtectionSettingsNotification(bytes) ==
@@ -594,25 +594,25 @@ DecodeArm2UnderlyingLevelProtectionSettingsNotification(bytes) ==
     LET mpid == ReadBytes(notificationTime.rest, 4) IN IF ~mpid.ok THEN Fail ELSE
     LET action == ReadBytes(mpid.rest, 1) IN IF ~action.ok THEN Fail ELSE
     LET underlyingSymbol == ReadBytes(action.rest, 11) IN IF ~underlyingSymbol.ok THEN Fail ELSE
-    LET armThresholdCountBinaryU4 == ReadBytes(underlyingSymbol.rest, 4) IN IF ~armThresholdCountBinaryU4.ok THEN Fail ELSE
-    LET countingPeriodBinaryU4 == ReadBytes(armThresholdCountBinaryU4.rest, 4) IN IF ~countingPeriodBinaryU4.ok THEN Fail ELSE
-    LET reserved16 == ReadBytes(countingPeriodBinaryU4.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    Ok([ notificationTime          |-> notificationTime.value,
-         mpid                      |-> mpid.value,
-         action                    |-> action.value,
-         underlyingSymbol          |-> underlyingSymbol.value,
-         armThresholdCountBinaryU4 |-> armThresholdCountBinaryU4.value,
-         countingPeriodBinaryU4    |-> countingPeriodBinaryU4.value,
-         reserved16                |-> reserved16.value ], reserved16.rest)
+    LET armThresholdCount == ReadBytes(underlyingSymbol.rest, 4) IN IF ~armThresholdCount.ok THEN Fail ELSE
+    LET arm2CountingPeriod == ReadBytes(armThresholdCount.rest, 4) IN IF ~arm2CountingPeriod.ok THEN Fail ELSE
+    LET reserved16 == ReadBytes(arm2CountingPeriod.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
+    Ok([ notificationTime   |-> notificationTime.value,
+         mpid               |-> mpid.value,
+         action             |-> action.value,
+         underlyingSymbol   |-> underlyingSymbol.value,
+         armThresholdCount  |-> armThresholdCount.value,
+         arm2CountingPeriod |-> arm2CountingPeriod.value,
+         reserved16         |-> reserved16.value ], reserved16.rest)
 
 ZeroArm2UnderlyingLevelProtectionSettingsNotification ==
-    [ notificationTime          |-> [i \in 1 .. 8 |-> 0],
-      mpid                      |-> [i \in 1 .. 4 |-> 0],
-      action                    |-> [i \in 1 .. 1 |-> 0],
-      underlyingSymbol          |-> [i \in 1 .. 11 |-> 0],
-      armThresholdCountBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      countingPeriodBinaryU4    |-> [i \in 1 .. 4 |-> 0],
-      reserved16                |-> [i \in 1 .. 16 |-> 0] ]
+    [ notificationTime   |-> [i \in 1 .. 8 |-> 0],
+      mpid               |-> [i \in 1 .. 4 |-> 0],
+      action             |-> [i \in 1 .. 1 |-> 0],
+      underlyingSymbol   |-> [i \in 1 .. 11 |-> 0],
+      armThresholdCount  |-> [i \in 1 .. 4 |-> 0],
+      arm2CountingPeriod |-> [i \in 1 .. 4 |-> 0],
+      reserved16         |-> [i \in 1 .. 16 |-> 0] ]
 
 (* Arm 2 Underlying Level Protection Settings Notification at zero, then each field in turn at the values it is checked at *)
 CheckedArm2UnderlyingLevelProtectionSettingsNotification ==
@@ -621,8 +621,8 @@ CheckedArm2UnderlyingLevelProtectionSettingsNotification ==
         \cup { [ZeroArm2UnderlyingLevelProtectionSettingsNotification EXCEPT !.mpid = one] : one \in Sample(4) }
         \cup { [ZeroArm2UnderlyingLevelProtectionSettingsNotification EXCEPT !.action = one] : one \in Sample(1) }
         \cup { [ZeroArm2UnderlyingLevelProtectionSettingsNotification EXCEPT !.underlyingSymbol = one] : one \in Sample(11) }
-        \cup { [ZeroArm2UnderlyingLevelProtectionSettingsNotification EXCEPT !.armThresholdCountBinaryU4 = one] : one \in Sample(4) }
-        \cup { [ZeroArm2UnderlyingLevelProtectionSettingsNotification EXCEPT !.countingPeriodBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroArm2UnderlyingLevelProtectionSettingsNotification EXCEPT !.armThresholdCount = one] : one \in Sample(4) }
+        \cup { [ZeroArm2UnderlyingLevelProtectionSettingsNotification EXCEPT !.arm2CountingPeriod = one] : one \in Sample(4) }
         \cup { [ZeroArm2UnderlyingLevelProtectionSettingsNotification EXCEPT !.reserved16 = one] : one \in Sample(16) }
 
 (***************************************************************************)
@@ -694,21 +694,21 @@ CheckedSingleSideLiquidityProtectionTriggerNotification ==
 (***************************************************************************)
 
 Arm2UnderlyingLevelProtectionNotification ==
-    [ notificationTime          : Sample(8),
-      mpid                      : Sample(4),
-      underlyingSymbol          : Sample(11),
-      notificationType          : Sample(1),
-      armThresholdCountBinaryU4 : Sample(4),
-      countingPeriodBinaryU4    : Sample(4),
-      reserved16                : Sample(16) ]
+    [ notificationTime   : Sample(8),
+      mpid               : Sample(4),
+      underlyingSymbol   : Sample(11),
+      notificationType   : Sample(1),
+      armThresholdCount  : Sample(4),
+      arm2CountingPeriod : Sample(4),
+      reserved16         : Sample(16) ]
 
 EncodeArm2UnderlyingLevelProtectionNotification(message) ==
     message.notificationTime
         \o message.mpid
         \o message.underlyingSymbol
         \o message.notificationType
-        \o message.armThresholdCountBinaryU4
-        \o message.countingPeriodBinaryU4
+        \o message.armThresholdCount
+        \o message.arm2CountingPeriod
         \o message.reserved16
 
 DecodeArm2UnderlyingLevelProtectionNotification(bytes) ==
@@ -716,25 +716,25 @@ DecodeArm2UnderlyingLevelProtectionNotification(bytes) ==
     LET mpid == ReadBytes(notificationTime.rest, 4) IN IF ~mpid.ok THEN Fail ELSE
     LET underlyingSymbol == ReadBytes(mpid.rest, 11) IN IF ~underlyingSymbol.ok THEN Fail ELSE
     LET notificationType == ReadBytes(underlyingSymbol.rest, 1) IN IF ~notificationType.ok THEN Fail ELSE
-    LET armThresholdCountBinaryU4 == ReadBytes(notificationType.rest, 4) IN IF ~armThresholdCountBinaryU4.ok THEN Fail ELSE
-    LET countingPeriodBinaryU4 == ReadBytes(armThresholdCountBinaryU4.rest, 4) IN IF ~countingPeriodBinaryU4.ok THEN Fail ELSE
-    LET reserved16 == ReadBytes(countingPeriodBinaryU4.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    Ok([ notificationTime          |-> notificationTime.value,
-         mpid                      |-> mpid.value,
-         underlyingSymbol          |-> underlyingSymbol.value,
-         notificationType          |-> notificationType.value,
-         armThresholdCountBinaryU4 |-> armThresholdCountBinaryU4.value,
-         countingPeriodBinaryU4    |-> countingPeriodBinaryU4.value,
-         reserved16                |-> reserved16.value ], reserved16.rest)
+    LET armThresholdCount == ReadBytes(notificationType.rest, 4) IN IF ~armThresholdCount.ok THEN Fail ELSE
+    LET arm2CountingPeriod == ReadBytes(armThresholdCount.rest, 4) IN IF ~arm2CountingPeriod.ok THEN Fail ELSE
+    LET reserved16 == ReadBytes(arm2CountingPeriod.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
+    Ok([ notificationTime   |-> notificationTime.value,
+         mpid               |-> mpid.value,
+         underlyingSymbol   |-> underlyingSymbol.value,
+         notificationType   |-> notificationType.value,
+         armThresholdCount  |-> armThresholdCount.value,
+         arm2CountingPeriod |-> arm2CountingPeriod.value,
+         reserved16         |-> reserved16.value ], reserved16.rest)
 
 ZeroArm2UnderlyingLevelProtectionNotification ==
-    [ notificationTime          |-> [i \in 1 .. 8 |-> 0],
-      mpid                      |-> [i \in 1 .. 4 |-> 0],
-      underlyingSymbol          |-> [i \in 1 .. 11 |-> 0],
-      notificationType          |-> [i \in 1 .. 1 |-> 0],
-      armThresholdCountBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      countingPeriodBinaryU4    |-> [i \in 1 .. 4 |-> 0],
-      reserved16                |-> [i \in 1 .. 16 |-> 0] ]
+    [ notificationTime   |-> [i \in 1 .. 8 |-> 0],
+      mpid               |-> [i \in 1 .. 4 |-> 0],
+      underlyingSymbol   |-> [i \in 1 .. 11 |-> 0],
+      notificationType   |-> [i \in 1 .. 1 |-> 0],
+      armThresholdCount  |-> [i \in 1 .. 4 |-> 0],
+      arm2CountingPeriod |-> [i \in 1 .. 4 |-> 0],
+      reserved16         |-> [i \in 1 .. 16 |-> 0] ]
 
 (* Arm 2 Underlying Level Protection Notification at zero, then each field in turn at the values it is checked at *)
 CheckedArm2UnderlyingLevelProtectionNotification ==
@@ -743,8 +743,8 @@ CheckedArm2UnderlyingLevelProtectionNotification ==
         \cup { [ZeroArm2UnderlyingLevelProtectionNotification EXCEPT !.mpid = one] : one \in Sample(4) }
         \cup { [ZeroArm2UnderlyingLevelProtectionNotification EXCEPT !.underlyingSymbol = one] : one \in Sample(11) }
         \cup { [ZeroArm2UnderlyingLevelProtectionNotification EXCEPT !.notificationType = one] : one \in Sample(1) }
-        \cup { [ZeroArm2UnderlyingLevelProtectionNotification EXCEPT !.armThresholdCountBinaryU4 = one] : one \in Sample(4) }
-        \cup { [ZeroArm2UnderlyingLevelProtectionNotification EXCEPT !.countingPeriodBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroArm2UnderlyingLevelProtectionNotification EXCEPT !.armThresholdCount = one] : one \in Sample(4) }
+        \cup { [ZeroArm2UnderlyingLevelProtectionNotification EXCEPT !.arm2CountingPeriod = one] : one \in Sample(4) }
         \cup { [ZeroArm2UnderlyingLevelProtectionNotification EXCEPT !.reserved16 = one] : one \in Sample(16) }
 
 (***************************************************************************)
@@ -752,44 +752,44 @@ CheckedArm2UnderlyingLevelProtectionNotification ==
 (***************************************************************************)
 
 Arm2FirmLevelProtectionNotification ==
-    [ notificationTime           : Sample(8),
-      armThresholdCountBinary4u4 : Sample(4),
-      countingPeriodBinary4u4    : Sample(4),
-      notificationType           : Sample(1),
-      reserved16                 : Sample(16) ]
+    [ notificationTime   : Sample(8),
+      armThresholdCount  : Sample(4),
+      arm2CountingPeriod : Sample(4),
+      notificationType   : Sample(1),
+      reserved16         : Sample(16) ]
 
 EncodeArm2FirmLevelProtectionNotification(message) ==
     message.notificationTime
-        \o message.armThresholdCountBinary4u4
-        \o message.countingPeriodBinary4u4
+        \o message.armThresholdCount
+        \o message.arm2CountingPeriod
         \o message.notificationType
         \o message.reserved16
 
 DecodeArm2FirmLevelProtectionNotification(bytes) ==
     LET notificationTime == ReadBytes(bytes, 8) IN IF ~notificationTime.ok THEN Fail ELSE
-    LET armThresholdCountBinary4u4 == ReadBytes(notificationTime.rest, 4) IN IF ~armThresholdCountBinary4u4.ok THEN Fail ELSE
-    LET countingPeriodBinary4u4 == ReadBytes(armThresholdCountBinary4u4.rest, 4) IN IF ~countingPeriodBinary4u4.ok THEN Fail ELSE
-    LET notificationType == ReadBytes(countingPeriodBinary4u4.rest, 1) IN IF ~notificationType.ok THEN Fail ELSE
+    LET armThresholdCount == ReadBytes(notificationTime.rest, 4) IN IF ~armThresholdCount.ok THEN Fail ELSE
+    LET arm2CountingPeriod == ReadBytes(armThresholdCount.rest, 4) IN IF ~arm2CountingPeriod.ok THEN Fail ELSE
+    LET notificationType == ReadBytes(arm2CountingPeriod.rest, 1) IN IF ~notificationType.ok THEN Fail ELSE
     LET reserved16 == ReadBytes(notificationType.rest, 16) IN IF ~reserved16.ok THEN Fail ELSE
-    Ok([ notificationTime           |-> notificationTime.value,
-         armThresholdCountBinary4u4 |-> armThresholdCountBinary4u4.value,
-         countingPeriodBinary4u4    |-> countingPeriodBinary4u4.value,
-         notificationType           |-> notificationType.value,
-         reserved16                 |-> reserved16.value ], reserved16.rest)
+    Ok([ notificationTime   |-> notificationTime.value,
+         armThresholdCount  |-> armThresholdCount.value,
+         arm2CountingPeriod |-> arm2CountingPeriod.value,
+         notificationType   |-> notificationType.value,
+         reserved16         |-> reserved16.value ], reserved16.rest)
 
 ZeroArm2FirmLevelProtectionNotification ==
-    [ notificationTime           |-> [i \in 1 .. 8 |-> 0],
-      armThresholdCountBinary4u4 |-> [i \in 1 .. 4 |-> 0],
-      countingPeriodBinary4u4    |-> [i \in 1 .. 4 |-> 0],
-      notificationType           |-> [i \in 1 .. 1 |-> 0],
-      reserved16                 |-> [i \in 1 .. 16 |-> 0] ]
+    [ notificationTime   |-> [i \in 1 .. 8 |-> 0],
+      armThresholdCount  |-> [i \in 1 .. 4 |-> 0],
+      arm2CountingPeriod |-> [i \in 1 .. 4 |-> 0],
+      notificationType   |-> [i \in 1 .. 1 |-> 0],
+      reserved16         |-> [i \in 1 .. 16 |-> 0] ]
 
 (* Arm 2 Firm Level Protection Notification at zero, then each field in turn at the values it is checked at *)
 CheckedArm2FirmLevelProtectionNotification ==
     { ZeroArm2FirmLevelProtectionNotification }
         \cup { [ZeroArm2FirmLevelProtectionNotification EXCEPT !.notificationTime = one] : one \in Sample(8) }
-        \cup { [ZeroArm2FirmLevelProtectionNotification EXCEPT !.armThresholdCountBinary4u4 = one] : one \in Sample(4) }
-        \cup { [ZeroArm2FirmLevelProtectionNotification EXCEPT !.countingPeriodBinary4u4 = one] : one \in Sample(4) }
+        \cup { [ZeroArm2FirmLevelProtectionNotification EXCEPT !.armThresholdCount = one] : one \in Sample(4) }
+        \cup { [ZeroArm2FirmLevelProtectionNotification EXCEPT !.arm2CountingPeriod = one] : one \in Sample(4) }
         \cup { [ZeroArm2FirmLevelProtectionNotification EXCEPT !.notificationType = one] : one \in Sample(1) }
         \cup { [ZeroArm2FirmLevelProtectionNotification EXCEPT !.reserved16 = one] : one \in Sample(16) }
 
@@ -1340,7 +1340,7 @@ SimpleArmSettingsUpdateRequest ==
       action                        : Sample(1),
       underlyingSymbol              : Sample(11),
       allowableEngagementPercentage : Sample(4),
-      countingPeriodBinaryU2        : Sample(2) ]
+      countingPeriod                : Sample(2) ]
 
 EncodeSimpleArmSettingsUpdateRequest(message) ==
     message.clientMessageId
@@ -1348,7 +1348,7 @@ EncodeSimpleArmSettingsUpdateRequest(message) ==
         \o message.action
         \o message.underlyingSymbol
         \o message.allowableEngagementPercentage
-        \o message.countingPeriodBinaryU2
+        \o message.countingPeriod
 
 DecodeSimpleArmSettingsUpdateRequest(bytes) ==
     LET clientMessageId == ReadBytes(bytes, 4) IN IF ~clientMessageId.ok THEN Fail ELSE
@@ -1356,13 +1356,13 @@ DecodeSimpleArmSettingsUpdateRequest(bytes) ==
     LET action == ReadBytes(mpid.rest, 1) IN IF ~action.ok THEN Fail ELSE
     LET underlyingSymbol == ReadBytes(action.rest, 11) IN IF ~underlyingSymbol.ok THEN Fail ELSE
     LET allowableEngagementPercentage == ReadBytes(underlyingSymbol.rest, 4) IN IF ~allowableEngagementPercentage.ok THEN Fail ELSE
-    LET countingPeriodBinaryU2 == ReadBytes(allowableEngagementPercentage.rest, 2) IN IF ~countingPeriodBinaryU2.ok THEN Fail ELSE
+    LET countingPeriod == ReadBytes(allowableEngagementPercentage.rest, 2) IN IF ~countingPeriod.ok THEN Fail ELSE
     Ok([ clientMessageId               |-> clientMessageId.value,
          mpid                          |-> mpid.value,
          action                        |-> action.value,
          underlyingSymbol              |-> underlyingSymbol.value,
          allowableEngagementPercentage |-> allowableEngagementPercentage.value,
-         countingPeriodBinaryU2        |-> countingPeriodBinaryU2.value ], countingPeriodBinaryU2.rest)
+         countingPeriod                |-> countingPeriod.value ], countingPeriod.rest)
 
 ZeroSimpleArmSettingsUpdateRequest ==
     [ clientMessageId               |-> [i \in 1 .. 4 |-> 0],
@@ -1370,7 +1370,7 @@ ZeroSimpleArmSettingsUpdateRequest ==
       action                        |-> [i \in 1 .. 1 |-> 0],
       underlyingSymbol              |-> [i \in 1 .. 11 |-> 0],
       allowableEngagementPercentage |-> [i \in 1 .. 4 |-> 0],
-      countingPeriodBinaryU2        |-> [i \in 1 .. 2 |-> 0] ]
+      countingPeriod                |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Simple Arm Settings Update Request at zero, then each field in turn at the values it is checked at *)
 CheckedSimpleArmSettingsUpdateRequest ==
@@ -1380,7 +1380,7 @@ CheckedSimpleArmSettingsUpdateRequest ==
         \cup { [ZeroSimpleArmSettingsUpdateRequest EXCEPT !.action = one] : one \in Sample(1) }
         \cup { [ZeroSimpleArmSettingsUpdateRequest EXCEPT !.underlyingSymbol = one] : one \in Sample(11) }
         \cup { [ZeroSimpleArmSettingsUpdateRequest EXCEPT !.allowableEngagementPercentage = one] : one \in Sample(4) }
-        \cup { [ZeroSimpleArmSettingsUpdateRequest EXCEPT !.countingPeriodBinaryU2 = one] : one \in Sample(2) }
+        \cup { [ZeroSimpleArmSettingsUpdateRequest EXCEPT !.countingPeriod = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Simple Arm Settings Update Response: 20 bytes                           *)
@@ -1427,42 +1427,42 @@ CheckedSimpleArmSettingsUpdateResponse ==
 (***************************************************************************)
 
 Arm2UnderlyingLevelProtectionSettingsUpdateRequest ==
-    [ clientMessageId           : Sample(4),
-      mpid                      : Sample(4),
-      action                    : Sample(1),
-      underlyingSymbol          : Sample(11),
-      armThresholdCountBinaryU4 : Sample(4),
-      countingPeriodBinaryU4    : Sample(4) ]
+    [ clientMessageId    : Sample(4),
+      mpid               : Sample(4),
+      action             : Sample(1),
+      underlyingSymbol   : Sample(11),
+      armThresholdCount  : Sample(4),
+      arm2CountingPeriod : Sample(4) ]
 
 EncodeArm2UnderlyingLevelProtectionSettingsUpdateRequest(message) ==
     message.clientMessageId
         \o message.mpid
         \o message.action
         \o message.underlyingSymbol
-        \o message.armThresholdCountBinaryU4
-        \o message.countingPeriodBinaryU4
+        \o message.armThresholdCount
+        \o message.arm2CountingPeriod
 
 DecodeArm2UnderlyingLevelProtectionSettingsUpdateRequest(bytes) ==
     LET clientMessageId == ReadBytes(bytes, 4) IN IF ~clientMessageId.ok THEN Fail ELSE
     LET mpid == ReadBytes(clientMessageId.rest, 4) IN IF ~mpid.ok THEN Fail ELSE
     LET action == ReadBytes(mpid.rest, 1) IN IF ~action.ok THEN Fail ELSE
     LET underlyingSymbol == ReadBytes(action.rest, 11) IN IF ~underlyingSymbol.ok THEN Fail ELSE
-    LET armThresholdCountBinaryU4 == ReadBytes(underlyingSymbol.rest, 4) IN IF ~armThresholdCountBinaryU4.ok THEN Fail ELSE
-    LET countingPeriodBinaryU4 == ReadBytes(armThresholdCountBinaryU4.rest, 4) IN IF ~countingPeriodBinaryU4.ok THEN Fail ELSE
-    Ok([ clientMessageId           |-> clientMessageId.value,
-         mpid                      |-> mpid.value,
-         action                    |-> action.value,
-         underlyingSymbol          |-> underlyingSymbol.value,
-         armThresholdCountBinaryU4 |-> armThresholdCountBinaryU4.value,
-         countingPeriodBinaryU4    |-> countingPeriodBinaryU4.value ], countingPeriodBinaryU4.rest)
+    LET armThresholdCount == ReadBytes(underlyingSymbol.rest, 4) IN IF ~armThresholdCount.ok THEN Fail ELSE
+    LET arm2CountingPeriod == ReadBytes(armThresholdCount.rest, 4) IN IF ~arm2CountingPeriod.ok THEN Fail ELSE
+    Ok([ clientMessageId    |-> clientMessageId.value,
+         mpid               |-> mpid.value,
+         action             |-> action.value,
+         underlyingSymbol   |-> underlyingSymbol.value,
+         armThresholdCount  |-> armThresholdCount.value,
+         arm2CountingPeriod |-> arm2CountingPeriod.value ], arm2CountingPeriod.rest)
 
 ZeroArm2UnderlyingLevelProtectionSettingsUpdateRequest ==
-    [ clientMessageId           |-> [i \in 1 .. 4 |-> 0],
-      mpid                      |-> [i \in 1 .. 4 |-> 0],
-      action                    |-> [i \in 1 .. 1 |-> 0],
-      underlyingSymbol          |-> [i \in 1 .. 11 |-> 0],
-      armThresholdCountBinaryU4 |-> [i \in 1 .. 4 |-> 0],
-      countingPeriodBinaryU4    |-> [i \in 1 .. 4 |-> 0] ]
+    [ clientMessageId    |-> [i \in 1 .. 4 |-> 0],
+      mpid               |-> [i \in 1 .. 4 |-> 0],
+      action             |-> [i \in 1 .. 1 |-> 0],
+      underlyingSymbol   |-> [i \in 1 .. 11 |-> 0],
+      armThresholdCount  |-> [i \in 1 .. 4 |-> 0],
+      arm2CountingPeriod |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Arm 2 Underlying Level Protection Settings Update Request at zero, then each field in turn at the values it is checked at *)
 CheckedArm2UnderlyingLevelProtectionSettingsUpdateRequest ==
@@ -1471,8 +1471,8 @@ CheckedArm2UnderlyingLevelProtectionSettingsUpdateRequest ==
         \cup { [ZeroArm2UnderlyingLevelProtectionSettingsUpdateRequest EXCEPT !.mpid = one] : one \in Sample(4) }
         \cup { [ZeroArm2UnderlyingLevelProtectionSettingsUpdateRequest EXCEPT !.action = one] : one \in Sample(1) }
         \cup { [ZeroArm2UnderlyingLevelProtectionSettingsUpdateRequest EXCEPT !.underlyingSymbol = one] : one \in Sample(11) }
-        \cup { [ZeroArm2UnderlyingLevelProtectionSettingsUpdateRequest EXCEPT !.armThresholdCountBinaryU4 = one] : one \in Sample(4) }
-        \cup { [ZeroArm2UnderlyingLevelProtectionSettingsUpdateRequest EXCEPT !.countingPeriodBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroArm2UnderlyingLevelProtectionSettingsUpdateRequest EXCEPT !.armThresholdCount = one] : one \in Sample(4) }
+        \cup { [ZeroArm2UnderlyingLevelProtectionSettingsUpdateRequest EXCEPT !.arm2CountingPeriod = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Arm 2 Underlying Level Protection Settings Update Response: 20 bytes    *)
@@ -1519,17 +1519,17 @@ CheckedArm2UnderlyingLevelProtectionSettingsUpdateResponse ==
 (***************************************************************************)
 
 SingleSideQuote ==
-    [ productId         : Sample(4),
-      quoteParameters   : Sample(1),
-      priceBinaryPrc4u4 : Sample(4),
-      size              : Sample(4),
-      side              : Sample(1),
-      reserved2         : Sample(2) ]
+    [ productId       : Sample(4),
+      quoteParameters : Sample(1),
+      price           : Sample(4),
+      size            : Sample(4),
+      side            : Sample(1),
+      reserved2       : Sample(2) ]
 
 EncodeSingleSideQuote(message) ==
     message.productId
         \o message.quoteParameters
-        \o message.priceBinaryPrc4u4
+        \o message.price
         \o message.size
         \o message.side
         \o message.reserved2
@@ -1537,31 +1537,31 @@ EncodeSingleSideQuote(message) ==
 DecodeSingleSideQuote(bytes) ==
     LET productId == ReadBytes(bytes, 4) IN IF ~productId.ok THEN Fail ELSE
     LET quoteParameters == ReadBytes(productId.rest, 1) IN IF ~quoteParameters.ok THEN Fail ELSE
-    LET priceBinaryPrc4u4 == ReadBytes(quoteParameters.rest, 4) IN IF ~priceBinaryPrc4u4.ok THEN Fail ELSE
-    LET size == ReadBytes(priceBinaryPrc4u4.rest, 4) IN IF ~size.ok THEN Fail ELSE
+    LET price == ReadBytes(quoteParameters.rest, 4) IN IF ~price.ok THEN Fail ELSE
+    LET size == ReadBytes(price.rest, 4) IN IF ~size.ok THEN Fail ELSE
     LET side == ReadBytes(size.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET reserved2 == ReadBytes(side.rest, 2) IN IF ~reserved2.ok THEN Fail ELSE
-    Ok([ productId         |-> productId.value,
-         quoteParameters   |-> quoteParameters.value,
-         priceBinaryPrc4u4 |-> priceBinaryPrc4u4.value,
-         size              |-> size.value,
-         side              |-> side.value,
-         reserved2         |-> reserved2.value ], reserved2.rest)
+    Ok([ productId       |-> productId.value,
+         quoteParameters |-> quoteParameters.value,
+         price           |-> price.value,
+         size            |-> size.value,
+         side            |-> side.value,
+         reserved2       |-> reserved2.value ], reserved2.rest)
 
 ZeroSingleSideQuote ==
-    [ productId         |-> [i \in 1 .. 4 |-> 0],
-      quoteParameters   |-> [i \in 1 .. 1 |-> 0],
-      priceBinaryPrc4u4 |-> [i \in 1 .. 4 |-> 0],
-      size              |-> [i \in 1 .. 4 |-> 0],
-      side              |-> [i \in 1 .. 1 |-> 0],
-      reserved2         |-> [i \in 1 .. 2 |-> 0] ]
+    [ productId       |-> [i \in 1 .. 4 |-> 0],
+      quoteParameters |-> [i \in 1 .. 1 |-> 0],
+      price           |-> [i \in 1 .. 4 |-> 0],
+      size            |-> [i \in 1 .. 4 |-> 0],
+      side            |-> [i \in 1 .. 1 |-> 0],
+      reserved2       |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Single Side Quote at zero, then each field in turn at the values it is checked at *)
 CheckedSingleSideQuote ==
     { ZeroSingleSideQuote }
         \cup { [ZeroSingleSideQuote EXCEPT !.productId = one] : one \in Sample(4) }
         \cup { [ZeroSingleSideQuote EXCEPT !.quoteParameters = one] : one \in Sample(1) }
-        \cup { [ZeroSingleSideQuote EXCEPT !.priceBinaryPrc4u4 = one] : one \in Sample(4) }
+        \cup { [ZeroSingleSideQuote EXCEPT !.price = one] : one \in Sample(4) }
         \cup { [ZeroSingleSideQuote EXCEPT !.size = one] : one \in Sample(4) }
         \cup { [ZeroSingleSideQuote EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroSingleSideQuote EXCEPT !.reserved2 = one] : one \in Sample(2) }
@@ -1743,18 +1743,18 @@ CheckedSimpleBulkQuoteResponse ==
 (***************************************************************************)
 
 SimpleEnhancedQuoteEQuoteMessage ==
-    [ clientMessageId   : Sample(4),
-      mpid              : Sample(4),
-      clientSendTime    : Sample(8),
-      productId         : Sample(4),
-      eQuoteAction      : Sample(1),
-      eQuoteType        : Sample(1),
-      eventId           : Sample(4),
-      targetMessageId   : Sample(4),
-      priceBinaryPrc4u4 : Sample(4),
-      size              : Sample(4),
-      side              : Sample(1),
-      reserved4         : Sample(4) ]
+    [ clientMessageId : Sample(4),
+      mpid            : Sample(4),
+      clientSendTime  : Sample(8),
+      productId       : Sample(4),
+      eQuoteAction    : Sample(1),
+      eQuoteType      : Sample(1),
+      eventId         : Sample(4),
+      targetMessageId : Sample(4),
+      price           : Sample(4),
+      size            : Sample(4),
+      side            : Sample(1),
+      reserved4       : Sample(4) ]
 
 EncodeSimpleEnhancedQuoteEQuoteMessage(message) ==
     message.clientMessageId
@@ -1765,7 +1765,7 @@ EncodeSimpleEnhancedQuoteEQuoteMessage(message) ==
         \o message.eQuoteType
         \o message.eventId
         \o message.targetMessageId
-        \o message.priceBinaryPrc4u4
+        \o message.price
         \o message.size
         \o message.side
         \o message.reserved4
@@ -1779,36 +1779,36 @@ DecodeSimpleEnhancedQuoteEQuoteMessage(bytes) ==
     LET eQuoteType == ReadBytes(eQuoteAction.rest, 1) IN IF ~eQuoteType.ok THEN Fail ELSE
     LET eventId == ReadBytes(eQuoteType.rest, 4) IN IF ~eventId.ok THEN Fail ELSE
     LET targetMessageId == ReadBytes(eventId.rest, 4) IN IF ~targetMessageId.ok THEN Fail ELSE
-    LET priceBinaryPrc4u4 == ReadBytes(targetMessageId.rest, 4) IN IF ~priceBinaryPrc4u4.ok THEN Fail ELSE
-    LET size == ReadBytes(priceBinaryPrc4u4.rest, 4) IN IF ~size.ok THEN Fail ELSE
+    LET price == ReadBytes(targetMessageId.rest, 4) IN IF ~price.ok THEN Fail ELSE
+    LET size == ReadBytes(price.rest, 4) IN IF ~size.ok THEN Fail ELSE
     LET side == ReadBytes(size.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET reserved4 == ReadBytes(side.rest, 4) IN IF ~reserved4.ok THEN Fail ELSE
-    Ok([ clientMessageId   |-> clientMessageId.value,
-         mpid              |-> mpid.value,
-         clientSendTime    |-> clientSendTime.value,
-         productId         |-> productId.value,
-         eQuoteAction      |-> eQuoteAction.value,
-         eQuoteType        |-> eQuoteType.value,
-         eventId           |-> eventId.value,
-         targetMessageId   |-> targetMessageId.value,
-         priceBinaryPrc4u4 |-> priceBinaryPrc4u4.value,
-         size              |-> size.value,
-         side              |-> side.value,
-         reserved4         |-> reserved4.value ], reserved4.rest)
+    Ok([ clientMessageId |-> clientMessageId.value,
+         mpid            |-> mpid.value,
+         clientSendTime  |-> clientSendTime.value,
+         productId       |-> productId.value,
+         eQuoteAction    |-> eQuoteAction.value,
+         eQuoteType      |-> eQuoteType.value,
+         eventId         |-> eventId.value,
+         targetMessageId |-> targetMessageId.value,
+         price           |-> price.value,
+         size            |-> size.value,
+         side            |-> side.value,
+         reserved4       |-> reserved4.value ], reserved4.rest)
 
 ZeroSimpleEnhancedQuoteEQuoteMessage ==
-    [ clientMessageId   |-> [i \in 1 .. 4 |-> 0],
-      mpid              |-> [i \in 1 .. 4 |-> 0],
-      clientSendTime    |-> [i \in 1 .. 8 |-> 0],
-      productId         |-> [i \in 1 .. 4 |-> 0],
-      eQuoteAction      |-> [i \in 1 .. 1 |-> 0],
-      eQuoteType        |-> [i \in 1 .. 1 |-> 0],
-      eventId           |-> [i \in 1 .. 4 |-> 0],
-      targetMessageId   |-> [i \in 1 .. 4 |-> 0],
-      priceBinaryPrc4u4 |-> [i \in 1 .. 4 |-> 0],
-      size              |-> [i \in 1 .. 4 |-> 0],
-      side              |-> [i \in 1 .. 1 |-> 0],
-      reserved4         |-> [i \in 1 .. 4 |-> 0] ]
+    [ clientMessageId |-> [i \in 1 .. 4 |-> 0],
+      mpid            |-> [i \in 1 .. 4 |-> 0],
+      clientSendTime  |-> [i \in 1 .. 8 |-> 0],
+      productId       |-> [i \in 1 .. 4 |-> 0],
+      eQuoteAction    |-> [i \in 1 .. 1 |-> 0],
+      eQuoteType      |-> [i \in 1 .. 1 |-> 0],
+      eventId         |-> [i \in 1 .. 4 |-> 0],
+      targetMessageId |-> [i \in 1 .. 4 |-> 0],
+      price           |-> [i \in 1 .. 4 |-> 0],
+      size            |-> [i \in 1 .. 4 |-> 0],
+      side            |-> [i \in 1 .. 1 |-> 0],
+      reserved4       |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Simple Enhanced Quote E Quote Message at zero, then each field in turn at the values it is checked at *)
 CheckedSimpleEnhancedQuoteEQuoteMessage ==
@@ -1821,7 +1821,7 @@ CheckedSimpleEnhancedQuoteEQuoteMessage ==
         \cup { [ZeroSimpleEnhancedQuoteEQuoteMessage EXCEPT !.eQuoteType = one] : one \in Sample(1) }
         \cup { [ZeroSimpleEnhancedQuoteEQuoteMessage EXCEPT !.eventId = one] : one \in Sample(4) }
         \cup { [ZeroSimpleEnhancedQuoteEQuoteMessage EXCEPT !.targetMessageId = one] : one \in Sample(4) }
-        \cup { [ZeroSimpleEnhancedQuoteEQuoteMessage EXCEPT !.priceBinaryPrc4u4 = one] : one \in Sample(4) }
+        \cup { [ZeroSimpleEnhancedQuoteEQuoteMessage EXCEPT !.price = one] : one \in Sample(4) }
         \cup { [ZeroSimpleEnhancedQuoteEQuoteMessage EXCEPT !.size = one] : one \in Sample(4) }
         \cup { [ZeroSimpleEnhancedQuoteEQuoteMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroSimpleEnhancedQuoteEQuoteMessage EXCEPT !.reserved4 = one] : one \in Sample(4) }
@@ -1839,7 +1839,7 @@ ComplexEnhancedQuoteEQuoteMessage ==
       eQuoteType              : Sample(1),
       complexEventId          : Sample(4),
       targetMessageId         : Sample(4),
-      priceBinaryPrc4s8       : Sample(8),
+      netPrice                : Sample(8),
       size                    : Sample(4),
       side                    : Sample(1),
       stockSellShortIndicator : Sample(1),
@@ -1854,7 +1854,7 @@ EncodeComplexEnhancedQuoteEQuoteMessage(message) ==
         \o message.eQuoteType
         \o message.complexEventId
         \o message.targetMessageId
-        \o message.priceBinaryPrc4s8
+        \o message.netPrice
         \o message.size
         \o message.side
         \o message.stockSellShortIndicator
@@ -1869,8 +1869,8 @@ DecodeComplexEnhancedQuoteEQuoteMessage(bytes) ==
     LET eQuoteType == ReadBytes(eQuoteAction.rest, 1) IN IF ~eQuoteType.ok THEN Fail ELSE
     LET complexEventId == ReadBytes(eQuoteType.rest, 4) IN IF ~complexEventId.ok THEN Fail ELSE
     LET targetMessageId == ReadBytes(complexEventId.rest, 4) IN IF ~targetMessageId.ok THEN Fail ELSE
-    LET priceBinaryPrc4s8 == ReadBytes(targetMessageId.rest, 8) IN IF ~priceBinaryPrc4s8.ok THEN Fail ELSE
-    LET size == ReadBytes(priceBinaryPrc4s8.rest, 4) IN IF ~size.ok THEN Fail ELSE
+    LET netPrice == ReadBytes(targetMessageId.rest, 8) IN IF ~netPrice.ok THEN Fail ELSE
+    LET size == ReadBytes(netPrice.rest, 4) IN IF ~size.ok THEN Fail ELSE
     LET side == ReadBytes(size.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET stockSellShortIndicator == ReadBytes(side.rest, 1) IN IF ~stockSellShortIndicator.ok THEN Fail ELSE
     LET reserved15 == ReadBytes(stockSellShortIndicator.rest, 15) IN IF ~reserved15.ok THEN Fail ELSE
@@ -1882,7 +1882,7 @@ DecodeComplexEnhancedQuoteEQuoteMessage(bytes) ==
          eQuoteType              |-> eQuoteType.value,
          complexEventId          |-> complexEventId.value,
          targetMessageId         |-> targetMessageId.value,
-         priceBinaryPrc4s8       |-> priceBinaryPrc4s8.value,
+         netPrice                |-> netPrice.value,
          size                    |-> size.value,
          side                    |-> side.value,
          stockSellShortIndicator |-> stockSellShortIndicator.value,
@@ -1897,7 +1897,7 @@ ZeroComplexEnhancedQuoteEQuoteMessage ==
       eQuoteType              |-> [i \in 1 .. 1 |-> 0],
       complexEventId          |-> [i \in 1 .. 4 |-> 0],
       targetMessageId         |-> [i \in 1 .. 4 |-> 0],
-      priceBinaryPrc4s8       |-> [i \in 1 .. 8 |-> 0],
+      netPrice                |-> [i \in 1 .. 8 |-> 0],
       size                    |-> [i \in 1 .. 4 |-> 0],
       side                    |-> [i \in 1 .. 1 |-> 0],
       stockSellShortIndicator |-> [i \in 1 .. 1 |-> 0],
@@ -1914,7 +1914,7 @@ CheckedComplexEnhancedQuoteEQuoteMessage ==
         \cup { [ZeroComplexEnhancedQuoteEQuoteMessage EXCEPT !.eQuoteType = one] : one \in Sample(1) }
         \cup { [ZeroComplexEnhancedQuoteEQuoteMessage EXCEPT !.complexEventId = one] : one \in Sample(4) }
         \cup { [ZeroComplexEnhancedQuoteEQuoteMessage EXCEPT !.targetMessageId = one] : one \in Sample(4) }
-        \cup { [ZeroComplexEnhancedQuoteEQuoteMessage EXCEPT !.priceBinaryPrc4s8 = one] : one \in Sample(8) }
+        \cup { [ZeroComplexEnhancedQuoteEQuoteMessage EXCEPT !.netPrice = one] : one \in Sample(8) }
         \cup { [ZeroComplexEnhancedQuoteEQuoteMessage EXCEPT !.size = one] : one \in Sample(4) }
         \cup { [ZeroComplexEnhancedQuoteEQuoteMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroComplexEnhancedQuoteEQuoteMessage EXCEPT !.stockSellShortIndicator = one] : one \in Sample(1) }

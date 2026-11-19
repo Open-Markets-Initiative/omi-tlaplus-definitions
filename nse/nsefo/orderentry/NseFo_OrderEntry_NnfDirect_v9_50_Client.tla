@@ -2138,830 +2138,26 @@ CheckedOrderEntryBody4 ==
         \cup { [ZeroOrderEntryBody4 EXCEPT !.reserved52 = one] : one \in Sample(52) }
 
 (***************************************************************************)
-(* Order Confirmation Message: 276 bytes                                   *)
+(* Kill Switch Request Message: 276 bytes                                  *)
 (***************************************************************************)
 
-OrderConfirmationMessage ==
+KillSwitchRequestMessage ==
     [ orderEntryBody : OrderEntryBody4 ]
 
-EncodeOrderConfirmationMessage(message) ==
+EncodeKillSwitchRequestMessage(message) ==
     EncodeOrderEntryBody4(message.orderEntryBody)
 
-DecodeOrderConfirmationMessage(bytes) ==
+DecodeKillSwitchRequestMessage(bytes) ==
     LET orderEntryBody == DecodeOrderEntryBody4(bytes) IN IF ~orderEntryBody.ok THEN Fail ELSE
     Ok([ orderEntryBody |-> orderEntryBody.value ], orderEntryBody.rest)
 
-ZeroOrderConfirmationMessage ==
+ZeroKillSwitchRequestMessage ==
     [ orderEntryBody |-> ZeroOrderEntryBody4 ]
 
-(* Order Confirmation Message at zero, then each field in turn at the values it is checked at *)
-CheckedOrderConfirmationMessage ==
-    { ZeroOrderConfirmationMessage }
-        \cup { [ZeroOrderConfirmationMessage EXCEPT !.orderEntryBody = one] : one \in CheckedOrderEntryBody4 }
-
-(***************************************************************************)
-(* Contract Desc: 28 bytes                                                 *)
-(***************************************************************************)
-
-ContractDesc5 ==
-    [ instrumentName : Sample(6),
-      symbol         : Sample(10),
-      expiryDate     : Sample(4),
-      strikePrice    : Sample(4),
-      optionType     : Sample(2),
-      caLevel        : Sample(2) ]
-
-EncodeContractDesc5(message) ==
-    message.instrumentName
-        \o message.symbol
-        \o message.expiryDate
-        \o message.strikePrice
-        \o message.optionType
-        \o message.caLevel
-
-DecodeContractDesc5(bytes) ==
-    LET instrumentName == ReadBytes(bytes, 6) IN IF ~instrumentName.ok THEN Fail ELSE
-    LET symbol == ReadBytes(instrumentName.rest, 10) IN IF ~symbol.ok THEN Fail ELSE
-    LET expiryDate == ReadBytes(symbol.rest, 4) IN IF ~expiryDate.ok THEN Fail ELSE
-    LET strikePrice == ReadBytes(expiryDate.rest, 4) IN IF ~strikePrice.ok THEN Fail ELSE
-    LET optionType == ReadBytes(strikePrice.rest, 2) IN IF ~optionType.ok THEN Fail ELSE
-    LET caLevel == ReadBytes(optionType.rest, 2) IN IF ~caLevel.ok THEN Fail ELSE
-    Ok([ instrumentName |-> instrumentName.value,
-         symbol         |-> symbol.value,
-         expiryDate     |-> expiryDate.value,
-         strikePrice    |-> strikePrice.value,
-         optionType     |-> optionType.value,
-         caLevel        |-> caLevel.value ], caLevel.rest)
-
-ZeroContractDesc5 ==
-    [ instrumentName |-> [i \in 1 .. 6 |-> 0],
-      symbol         |-> [i \in 1 .. 10 |-> 0],
-      expiryDate     |-> [i \in 1 .. 4 |-> 0],
-      strikePrice    |-> [i \in 1 .. 4 |-> 0],
-      optionType     |-> [i \in 1 .. 2 |-> 0],
-      caLevel        |-> [i \in 1 .. 2 |-> 0] ]
-
-(* Contract Desc at zero, then each field in turn at the values it is checked at *)
-CheckedContractDesc5 ==
-    { ZeroContractDesc5 }
-        \cup { [ZeroContractDesc5 EXCEPT !.instrumentName = one] : one \in Sample(6) }
-        \cup { [ZeroContractDesc5 EXCEPT !.symbol = one] : one \in Sample(10) }
-        \cup { [ZeroContractDesc5 EXCEPT !.expiryDate = one] : one \in Sample(4) }
-        \cup { [ZeroContractDesc5 EXCEPT !.strikePrice = one] : one \in Sample(4) }
-        \cup { [ZeroContractDesc5 EXCEPT !.optionType = one] : one \in Sample(2) }
-        \cup { [ZeroContractDesc5 EXCEPT !.caLevel = one] : one \in Sample(2) }
-
-(***************************************************************************)
-(* Order Entry Body: 276 bytes                                             *)
-(***************************************************************************)
-
-OrderEntryBody5 ==
-    [ participantType          : Sample(1),
-      reserved1                : Sample(1),
-      competitorPeriod         : Sample(2),
-      solicitorPeriod          : Sample(2),
-      modifiedCancelledBy      : Sample(1),
-      secondReserved1          : Sample(1),
-      reasonCode               : Sample(2),
-      reserved4                : Sample(4),
-      tokenNo                  : Sample(4),
-      contractDesc             : ContractDesc5,
-      counterPartyBrokerId     : Sample(5),
-      thirdReserved1           : Sample(1),
-      reserved2                : Sample(2),
-      closeoutFlag             : Sample(1),
-      fourthReserved1          : Sample(1),
-      orderType                : Sample(2),
-      orderNumber              : Sample(8),
-      accountNumber            : Sample(10),
-      bookType                 : Sample(2),
-      buySellIndicator         : Sample(2),
-      disclosedVolume          : Sample(4),
-      disclosedVolumeRemaining : Sample(4),
-      totalVolumeRemaining     : Sample(4),
-      volume                   : Sample(4),
-      volumeFilledToday        : Sample(4),
-      price                    : Sample(4),
-      triggerPrice             : Sample(4),
-      goodTillDate             : Sample(4),
-      entryDateTime            : Sample(4),
-      minimumFillAonVolume     : Sample(4),
-      lastModified             : Sample(4),
-      stOrderFlags             : Sample(2),
-      branchId                 : Sample(2),
-      traderId                 : Sample(4),
-      brokerId                 : Sample(5),
-      cOrdFiller               : Sample(24),
-      openClose                : Sample(1),
-      settlor                  : Sample(12),
-      proClientIndicator       : Sample(2),
-      settlementPeriod         : Sample(2),
-      additionalOrderFlags     : Sample(1),
-      fifthReserved1           : Sample(1),
-      filler116                : Sample(2),
-      filler17                 : Sample(1),
-      filler18                 : Sample(1),
-      nnfField                 : Sample(8),
-      mktReplay                : Sample(8),
-      pan                      : Sample(10),
-      algoId                   : Sample(4),
-      secondReserved2          : Sample(2),
-      lastActivityReference    : Sample(8),
-      reserved52               : Sample(52) ]
-
-EncodeOrderEntryBody5(message) ==
-    message.participantType
-        \o message.reserved1
-        \o message.competitorPeriod
-        \o message.solicitorPeriod
-        \o message.modifiedCancelledBy
-        \o message.secondReserved1
-        \o message.reasonCode
-        \o message.reserved4
-        \o message.tokenNo
-        \o EncodeContractDesc5(message.contractDesc)
-        \o message.counterPartyBrokerId
-        \o message.thirdReserved1
-        \o message.reserved2
-        \o message.closeoutFlag
-        \o message.fourthReserved1
-        \o message.orderType
-        \o message.orderNumber
-        \o message.accountNumber
-        \o message.bookType
-        \o message.buySellIndicator
-        \o message.disclosedVolume
-        \o message.disclosedVolumeRemaining
-        \o message.totalVolumeRemaining
-        \o message.volume
-        \o message.volumeFilledToday
-        \o message.price
-        \o message.triggerPrice
-        \o message.goodTillDate
-        \o message.entryDateTime
-        \o message.minimumFillAonVolume
-        \o message.lastModified
-        \o message.stOrderFlags
-        \o message.branchId
-        \o message.traderId
-        \o message.brokerId
-        \o message.cOrdFiller
-        \o message.openClose
-        \o message.settlor
-        \o message.proClientIndicator
-        \o message.settlementPeriod
-        \o message.additionalOrderFlags
-        \o message.fifthReserved1
-        \o message.filler116
-        \o message.filler17
-        \o message.filler18
-        \o message.nnfField
-        \o message.mktReplay
-        \o message.pan
-        \o message.algoId
-        \o message.secondReserved2
-        \o message.lastActivityReference
-        \o message.reserved52
-
-DecodeOrderEntryBody5(bytes) ==
-    LET participantType == ReadBytes(bytes, 1) IN IF ~participantType.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(participantType.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
-    LET competitorPeriod == ReadBytes(reserved1.rest, 2) IN IF ~competitorPeriod.ok THEN Fail ELSE
-    LET solicitorPeriod == ReadBytes(competitorPeriod.rest, 2) IN IF ~solicitorPeriod.ok THEN Fail ELSE
-    LET modifiedCancelledBy == ReadBytes(solicitorPeriod.rest, 1) IN IF ~modifiedCancelledBy.ok THEN Fail ELSE
-    LET secondReserved1 == ReadBytes(modifiedCancelledBy.rest, 1) IN IF ~secondReserved1.ok THEN Fail ELSE
-    LET reasonCode == ReadBytes(secondReserved1.rest, 2) IN IF ~reasonCode.ok THEN Fail ELSE
-    LET reserved4 == ReadBytes(reasonCode.rest, 4) IN IF ~reserved4.ok THEN Fail ELSE
-    LET tokenNo == ReadBytes(reserved4.rest, 4) IN IF ~tokenNo.ok THEN Fail ELSE
-    LET contractDesc == DecodeContractDesc5(tokenNo.rest) IN IF ~contractDesc.ok THEN Fail ELSE
-    LET counterPartyBrokerId == ReadBytes(contractDesc.rest, 5) IN IF ~counterPartyBrokerId.ok THEN Fail ELSE
-    LET thirdReserved1 == ReadBytes(counterPartyBrokerId.rest, 1) IN IF ~thirdReserved1.ok THEN Fail ELSE
-    LET reserved2 == ReadBytes(thirdReserved1.rest, 2) IN IF ~reserved2.ok THEN Fail ELSE
-    LET closeoutFlag == ReadBytes(reserved2.rest, 1) IN IF ~closeoutFlag.ok THEN Fail ELSE
-    LET fourthReserved1 == ReadBytes(closeoutFlag.rest, 1) IN IF ~fourthReserved1.ok THEN Fail ELSE
-    LET orderType == ReadBytes(fourthReserved1.rest, 2) IN IF ~orderType.ok THEN Fail ELSE
-    LET orderNumber == ReadBytes(orderType.rest, 8) IN IF ~orderNumber.ok THEN Fail ELSE
-    LET accountNumber == ReadBytes(orderNumber.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET bookType == ReadBytes(accountNumber.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET buySellIndicator == ReadBytes(bookType.rest, 2) IN IF ~buySellIndicator.ok THEN Fail ELSE
-    LET disclosedVolume == ReadBytes(buySellIndicator.rest, 4) IN IF ~disclosedVolume.ok THEN Fail ELSE
-    LET disclosedVolumeRemaining == ReadBytes(disclosedVolume.rest, 4) IN IF ~disclosedVolumeRemaining.ok THEN Fail ELSE
-    LET totalVolumeRemaining == ReadBytes(disclosedVolumeRemaining.rest, 4) IN IF ~totalVolumeRemaining.ok THEN Fail ELSE
-    LET volume == ReadBytes(totalVolumeRemaining.rest, 4) IN IF ~volume.ok THEN Fail ELSE
-    LET volumeFilledToday == ReadBytes(volume.rest, 4) IN IF ~volumeFilledToday.ok THEN Fail ELSE
-    LET price == ReadBytes(volumeFilledToday.rest, 4) IN IF ~price.ok THEN Fail ELSE
-    LET triggerPrice == ReadBytes(price.rest, 4) IN IF ~triggerPrice.ok THEN Fail ELSE
-    LET goodTillDate == ReadBytes(triggerPrice.rest, 4) IN IF ~goodTillDate.ok THEN Fail ELSE
-    LET entryDateTime == ReadBytes(goodTillDate.rest, 4) IN IF ~entryDateTime.ok THEN Fail ELSE
-    LET minimumFillAonVolume == ReadBytes(entryDateTime.rest, 4) IN IF ~minimumFillAonVolume.ok THEN Fail ELSE
-    LET lastModified == ReadBytes(minimumFillAonVolume.rest, 4) IN IF ~lastModified.ok THEN Fail ELSE
-    LET stOrderFlags == ReadBytes(lastModified.rest, 2) IN IF ~stOrderFlags.ok THEN Fail ELSE
-    LET branchId == ReadBytes(stOrderFlags.rest, 2) IN IF ~branchId.ok THEN Fail ELSE
-    LET traderId == ReadBytes(branchId.rest, 4) IN IF ~traderId.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(traderId.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
-    LET cOrdFiller == ReadBytes(brokerId.rest, 24) IN IF ~cOrdFiller.ok THEN Fail ELSE
-    LET openClose == ReadBytes(cOrdFiller.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
-    LET settlor == ReadBytes(openClose.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
-    LET proClientIndicator == ReadBytes(settlor.rest, 2) IN IF ~proClientIndicator.ok THEN Fail ELSE
-    LET settlementPeriod == ReadBytes(proClientIndicator.rest, 2) IN IF ~settlementPeriod.ok THEN Fail ELSE
-    LET additionalOrderFlags == ReadBytes(settlementPeriod.rest, 1) IN IF ~additionalOrderFlags.ok THEN Fail ELSE
-    LET fifthReserved1 == ReadBytes(additionalOrderFlags.rest, 1) IN IF ~fifthReserved1.ok THEN Fail ELSE
-    LET filler116 == ReadBytes(fifthReserved1.rest, 2) IN IF ~filler116.ok THEN Fail ELSE
-    LET filler17 == ReadBytes(filler116.rest, 1) IN IF ~filler17.ok THEN Fail ELSE
-    LET filler18 == ReadBytes(filler17.rest, 1) IN IF ~filler18.ok THEN Fail ELSE
-    LET nnfField == ReadBytes(filler18.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET mktReplay == ReadBytes(nnfField.rest, 8) IN IF ~mktReplay.ok THEN Fail ELSE
-    LET pan == ReadBytes(mktReplay.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET algoId == ReadBytes(pan.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
-    LET secondReserved2 == ReadBytes(algoId.rest, 2) IN IF ~secondReserved2.ok THEN Fail ELSE
-    LET lastActivityReference == ReadBytes(secondReserved2.rest, 8) IN IF ~lastActivityReference.ok THEN Fail ELSE
-    LET reserved52 == ReadBytes(lastActivityReference.rest, 52) IN IF ~reserved52.ok THEN Fail ELSE
-    Ok([ participantType          |-> participantType.value,
-         reserved1                |-> reserved1.value,
-         competitorPeriod         |-> competitorPeriod.value,
-         solicitorPeriod          |-> solicitorPeriod.value,
-         modifiedCancelledBy      |-> modifiedCancelledBy.value,
-         secondReserved1          |-> secondReserved1.value,
-         reasonCode               |-> reasonCode.value,
-         reserved4                |-> reserved4.value,
-         tokenNo                  |-> tokenNo.value,
-         contractDesc             |-> contractDesc.value,
-         counterPartyBrokerId     |-> counterPartyBrokerId.value,
-         thirdReserved1           |-> thirdReserved1.value,
-         reserved2                |-> reserved2.value,
-         closeoutFlag             |-> closeoutFlag.value,
-         fourthReserved1          |-> fourthReserved1.value,
-         orderType                |-> orderType.value,
-         orderNumber              |-> orderNumber.value,
-         accountNumber            |-> accountNumber.value,
-         bookType                 |-> bookType.value,
-         buySellIndicator         |-> buySellIndicator.value,
-         disclosedVolume          |-> disclosedVolume.value,
-         disclosedVolumeRemaining |-> disclosedVolumeRemaining.value,
-         totalVolumeRemaining     |-> totalVolumeRemaining.value,
-         volume                   |-> volume.value,
-         volumeFilledToday        |-> volumeFilledToday.value,
-         price                    |-> price.value,
-         triggerPrice             |-> triggerPrice.value,
-         goodTillDate             |-> goodTillDate.value,
-         entryDateTime            |-> entryDateTime.value,
-         minimumFillAonVolume     |-> minimumFillAonVolume.value,
-         lastModified             |-> lastModified.value,
-         stOrderFlags             |-> stOrderFlags.value,
-         branchId                 |-> branchId.value,
-         traderId                 |-> traderId.value,
-         brokerId                 |-> brokerId.value,
-         cOrdFiller               |-> cOrdFiller.value,
-         openClose                |-> openClose.value,
-         settlor                  |-> settlor.value,
-         proClientIndicator       |-> proClientIndicator.value,
-         settlementPeriod         |-> settlementPeriod.value,
-         additionalOrderFlags     |-> additionalOrderFlags.value,
-         fifthReserved1           |-> fifthReserved1.value,
-         filler116                |-> filler116.value,
-         filler17                 |-> filler17.value,
-         filler18                 |-> filler18.value,
-         nnfField                 |-> nnfField.value,
-         mktReplay                |-> mktReplay.value,
-         pan                      |-> pan.value,
-         algoId                   |-> algoId.value,
-         secondReserved2          |-> secondReserved2.value,
-         lastActivityReference    |-> lastActivityReference.value,
-         reserved52               |-> reserved52.value ], reserved52.rest)
-
-ZeroOrderEntryBody5 ==
-    [ participantType          |-> [i \in 1 .. 1 |-> 0],
-      reserved1                |-> [i \in 1 .. 1 |-> 0],
-      competitorPeriod         |-> [i \in 1 .. 2 |-> 0],
-      solicitorPeriod          |-> [i \in 1 .. 2 |-> 0],
-      modifiedCancelledBy      |-> [i \in 1 .. 1 |-> 0],
-      secondReserved1          |-> [i \in 1 .. 1 |-> 0],
-      reasonCode               |-> [i \in 1 .. 2 |-> 0],
-      reserved4                |-> [i \in 1 .. 4 |-> 0],
-      tokenNo                  |-> [i \in 1 .. 4 |-> 0],
-      contractDesc             |-> ZeroContractDesc5,
-      counterPartyBrokerId     |-> [i \in 1 .. 5 |-> 0],
-      thirdReserved1           |-> [i \in 1 .. 1 |-> 0],
-      reserved2                |-> [i \in 1 .. 2 |-> 0],
-      closeoutFlag             |-> [i \in 1 .. 1 |-> 0],
-      fourthReserved1          |-> [i \in 1 .. 1 |-> 0],
-      orderType                |-> [i \in 1 .. 2 |-> 0],
-      orderNumber              |-> [i \in 1 .. 8 |-> 0],
-      accountNumber            |-> [i \in 1 .. 10 |-> 0],
-      bookType                 |-> [i \in 1 .. 2 |-> 0],
-      buySellIndicator         |-> [i \in 1 .. 2 |-> 0],
-      disclosedVolume          |-> [i \in 1 .. 4 |-> 0],
-      disclosedVolumeRemaining |-> [i \in 1 .. 4 |-> 0],
-      totalVolumeRemaining     |-> [i \in 1 .. 4 |-> 0],
-      volume                   |-> [i \in 1 .. 4 |-> 0],
-      volumeFilledToday        |-> [i \in 1 .. 4 |-> 0],
-      price                    |-> [i \in 1 .. 4 |-> 0],
-      triggerPrice             |-> [i \in 1 .. 4 |-> 0],
-      goodTillDate             |-> [i \in 1 .. 4 |-> 0],
-      entryDateTime            |-> [i \in 1 .. 4 |-> 0],
-      minimumFillAonVolume     |-> [i \in 1 .. 4 |-> 0],
-      lastModified             |-> [i \in 1 .. 4 |-> 0],
-      stOrderFlags             |-> [i \in 1 .. 2 |-> 0],
-      branchId                 |-> [i \in 1 .. 2 |-> 0],
-      traderId                 |-> [i \in 1 .. 4 |-> 0],
-      brokerId                 |-> [i \in 1 .. 5 |-> 0],
-      cOrdFiller               |-> [i \in 1 .. 24 |-> 0],
-      openClose                |-> [i \in 1 .. 1 |-> 0],
-      settlor                  |-> [i \in 1 .. 12 |-> 0],
-      proClientIndicator       |-> [i \in 1 .. 2 |-> 0],
-      settlementPeriod         |-> [i \in 1 .. 2 |-> 0],
-      additionalOrderFlags     |-> [i \in 1 .. 1 |-> 0],
-      fifthReserved1           |-> [i \in 1 .. 1 |-> 0],
-      filler116                |-> [i \in 1 .. 2 |-> 0],
-      filler17                 |-> [i \in 1 .. 1 |-> 0],
-      filler18                 |-> [i \in 1 .. 1 |-> 0],
-      nnfField                 |-> [i \in 1 .. 8 |-> 0],
-      mktReplay                |-> [i \in 1 .. 8 |-> 0],
-      pan                      |-> [i \in 1 .. 10 |-> 0],
-      algoId                   |-> [i \in 1 .. 4 |-> 0],
-      secondReserved2          |-> [i \in 1 .. 2 |-> 0],
-      lastActivityReference    |-> [i \in 1 .. 8 |-> 0],
-      reserved52               |-> [i \in 1 .. 52 |-> 0] ]
-
-(* Order Entry Body at zero, then each field in turn at the values it is checked at *)
-CheckedOrderEntryBody5 ==
-    { ZeroOrderEntryBody5 }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.participantType = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.reserved1 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.competitorPeriod = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.solicitorPeriod = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.modifiedCancelledBy = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.secondReserved1 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.reasonCode = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.reserved4 = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.tokenNo = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.contractDesc = one] : one \in CheckedContractDesc5 }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.counterPartyBrokerId = one] : one \in Sample(5) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.thirdReserved1 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.reserved2 = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.closeoutFlag = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.fourthReserved1 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.orderType = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.orderNumber = one] : one \in Sample(8) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.buySellIndicator = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.disclosedVolume = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.disclosedVolumeRemaining = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.totalVolumeRemaining = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.volume = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.volumeFilledToday = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.price = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.triggerPrice = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.goodTillDate = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.entryDateTime = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.minimumFillAonVolume = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.lastModified = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.stOrderFlags = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.branchId = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.traderId = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.brokerId = one] : one \in Sample(5) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.cOrdFiller = one] : one \in Sample(24) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.openClose = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.settlor = one] : one \in Sample(12) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.proClientIndicator = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.settlementPeriod = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.additionalOrderFlags = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.fifthReserved1 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.filler116 = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.filler17 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.filler18 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.mktReplay = one] : one \in Sample(8) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.algoId = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.secondReserved2 = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.lastActivityReference = one] : one \in Sample(8) }
-        \cup { [ZeroOrderEntryBody5 EXCEPT !.reserved52 = one] : one \in Sample(52) }
-
-(***************************************************************************)
-(* Order Modification Confirmation Message: 276 bytes                      *)
-(***************************************************************************)
-
-OrderModificationConfirmationMessage ==
-    [ orderEntryBody : OrderEntryBody5 ]
-
-EncodeOrderModificationConfirmationMessage(message) ==
-    EncodeOrderEntryBody5(message.orderEntryBody)
-
-DecodeOrderModificationConfirmationMessage(bytes) ==
-    LET orderEntryBody == DecodeOrderEntryBody5(bytes) IN IF ~orderEntryBody.ok THEN Fail ELSE
-    Ok([ orderEntryBody |-> orderEntryBody.value ], orderEntryBody.rest)
-
-ZeroOrderModificationConfirmationMessage ==
-    [ orderEntryBody |-> ZeroOrderEntryBody5 ]
-
-(* Order Modification Confirmation Message at zero, then each field in turn at the values it is checked at *)
-CheckedOrderModificationConfirmationMessage ==
-    { ZeroOrderModificationConfirmationMessage }
-        \cup { [ZeroOrderModificationConfirmationMessage EXCEPT !.orderEntryBody = one] : one \in CheckedOrderEntryBody5 }
-
-(***************************************************************************)
-(* Contract Desc: 28 bytes                                                 *)
-(***************************************************************************)
-
-ContractDesc6 ==
-    [ instrumentName : Sample(6),
-      symbol         : Sample(10),
-      expiryDate     : Sample(4),
-      strikePrice    : Sample(4),
-      optionType     : Sample(2),
-      caLevel        : Sample(2) ]
-
-EncodeContractDesc6(message) ==
-    message.instrumentName
-        \o message.symbol
-        \o message.expiryDate
-        \o message.strikePrice
-        \o message.optionType
-        \o message.caLevel
-
-DecodeContractDesc6(bytes) ==
-    LET instrumentName == ReadBytes(bytes, 6) IN IF ~instrumentName.ok THEN Fail ELSE
-    LET symbol == ReadBytes(instrumentName.rest, 10) IN IF ~symbol.ok THEN Fail ELSE
-    LET expiryDate == ReadBytes(symbol.rest, 4) IN IF ~expiryDate.ok THEN Fail ELSE
-    LET strikePrice == ReadBytes(expiryDate.rest, 4) IN IF ~strikePrice.ok THEN Fail ELSE
-    LET optionType == ReadBytes(strikePrice.rest, 2) IN IF ~optionType.ok THEN Fail ELSE
-    LET caLevel == ReadBytes(optionType.rest, 2) IN IF ~caLevel.ok THEN Fail ELSE
-    Ok([ instrumentName |-> instrumentName.value,
-         symbol         |-> symbol.value,
-         expiryDate     |-> expiryDate.value,
-         strikePrice    |-> strikePrice.value,
-         optionType     |-> optionType.value,
-         caLevel        |-> caLevel.value ], caLevel.rest)
-
-ZeroContractDesc6 ==
-    [ instrumentName |-> [i \in 1 .. 6 |-> 0],
-      symbol         |-> [i \in 1 .. 10 |-> 0],
-      expiryDate     |-> [i \in 1 .. 4 |-> 0],
-      strikePrice    |-> [i \in 1 .. 4 |-> 0],
-      optionType     |-> [i \in 1 .. 2 |-> 0],
-      caLevel        |-> [i \in 1 .. 2 |-> 0] ]
-
-(* Contract Desc at zero, then each field in turn at the values it is checked at *)
-CheckedContractDesc6 ==
-    { ZeroContractDesc6 }
-        \cup { [ZeroContractDesc6 EXCEPT !.instrumentName = one] : one \in Sample(6) }
-        \cup { [ZeroContractDesc6 EXCEPT !.symbol = one] : one \in Sample(10) }
-        \cup { [ZeroContractDesc6 EXCEPT !.expiryDate = one] : one \in Sample(4) }
-        \cup { [ZeroContractDesc6 EXCEPT !.strikePrice = one] : one \in Sample(4) }
-        \cup { [ZeroContractDesc6 EXCEPT !.optionType = one] : one \in Sample(2) }
-        \cup { [ZeroContractDesc6 EXCEPT !.caLevel = one] : one \in Sample(2) }
-
-(***************************************************************************)
-(* Order Entry Body: 276 bytes                                             *)
-(***************************************************************************)
-
-OrderEntryBody6 ==
-    [ participantType          : Sample(1),
-      reserved1                : Sample(1),
-      competitorPeriod         : Sample(2),
-      solicitorPeriod          : Sample(2),
-      modifiedCancelledBy      : Sample(1),
-      secondReserved1          : Sample(1),
-      reasonCode               : Sample(2),
-      reserved4                : Sample(4),
-      tokenNo                  : Sample(4),
-      contractDesc             : ContractDesc6,
-      counterPartyBrokerId     : Sample(5),
-      thirdReserved1           : Sample(1),
-      reserved2                : Sample(2),
-      closeoutFlag             : Sample(1),
-      fourthReserved1          : Sample(1),
-      orderType                : Sample(2),
-      orderNumber              : Sample(8),
-      accountNumber            : Sample(10),
-      bookType                 : Sample(2),
-      buySellIndicator         : Sample(2),
-      disclosedVolume          : Sample(4),
-      disclosedVolumeRemaining : Sample(4),
-      totalVolumeRemaining     : Sample(4),
-      volume                   : Sample(4),
-      volumeFilledToday        : Sample(4),
-      price                    : Sample(4),
-      triggerPrice             : Sample(4),
-      goodTillDate             : Sample(4),
-      entryDateTime            : Sample(4),
-      minimumFillAonVolume     : Sample(4),
-      lastModified             : Sample(4),
-      stOrderFlags             : Sample(2),
-      branchId                 : Sample(2),
-      traderId                 : Sample(4),
-      brokerId                 : Sample(5),
-      cOrdFiller               : Sample(24),
-      openClose                : Sample(1),
-      settlor                  : Sample(12),
-      proClientIndicator       : Sample(2),
-      settlementPeriod         : Sample(2),
-      additionalOrderFlags     : Sample(1),
-      fifthReserved1           : Sample(1),
-      filler116                : Sample(2),
-      filler17                 : Sample(1),
-      filler18                 : Sample(1),
-      nnfField                 : Sample(8),
-      mktReplay                : Sample(8),
-      pan                      : Sample(10),
-      algoId                   : Sample(4),
-      secondReserved2          : Sample(2),
-      lastActivityReference    : Sample(8),
-      reserved52               : Sample(52) ]
-
-EncodeOrderEntryBody6(message) ==
-    message.participantType
-        \o message.reserved1
-        \o message.competitorPeriod
-        \o message.solicitorPeriod
-        \o message.modifiedCancelledBy
-        \o message.secondReserved1
-        \o message.reasonCode
-        \o message.reserved4
-        \o message.tokenNo
-        \o EncodeContractDesc6(message.contractDesc)
-        \o message.counterPartyBrokerId
-        \o message.thirdReserved1
-        \o message.reserved2
-        \o message.closeoutFlag
-        \o message.fourthReserved1
-        \o message.orderType
-        \o message.orderNumber
-        \o message.accountNumber
-        \o message.bookType
-        \o message.buySellIndicator
-        \o message.disclosedVolume
-        \o message.disclosedVolumeRemaining
-        \o message.totalVolumeRemaining
-        \o message.volume
-        \o message.volumeFilledToday
-        \o message.price
-        \o message.triggerPrice
-        \o message.goodTillDate
-        \o message.entryDateTime
-        \o message.minimumFillAonVolume
-        \o message.lastModified
-        \o message.stOrderFlags
-        \o message.branchId
-        \o message.traderId
-        \o message.brokerId
-        \o message.cOrdFiller
-        \o message.openClose
-        \o message.settlor
-        \o message.proClientIndicator
-        \o message.settlementPeriod
-        \o message.additionalOrderFlags
-        \o message.fifthReserved1
-        \o message.filler116
-        \o message.filler17
-        \o message.filler18
-        \o message.nnfField
-        \o message.mktReplay
-        \o message.pan
-        \o message.algoId
-        \o message.secondReserved2
-        \o message.lastActivityReference
-        \o message.reserved52
-
-DecodeOrderEntryBody6(bytes) ==
-    LET participantType == ReadBytes(bytes, 1) IN IF ~participantType.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(participantType.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
-    LET competitorPeriod == ReadBytes(reserved1.rest, 2) IN IF ~competitorPeriod.ok THEN Fail ELSE
-    LET solicitorPeriod == ReadBytes(competitorPeriod.rest, 2) IN IF ~solicitorPeriod.ok THEN Fail ELSE
-    LET modifiedCancelledBy == ReadBytes(solicitorPeriod.rest, 1) IN IF ~modifiedCancelledBy.ok THEN Fail ELSE
-    LET secondReserved1 == ReadBytes(modifiedCancelledBy.rest, 1) IN IF ~secondReserved1.ok THEN Fail ELSE
-    LET reasonCode == ReadBytes(secondReserved1.rest, 2) IN IF ~reasonCode.ok THEN Fail ELSE
-    LET reserved4 == ReadBytes(reasonCode.rest, 4) IN IF ~reserved4.ok THEN Fail ELSE
-    LET tokenNo == ReadBytes(reserved4.rest, 4) IN IF ~tokenNo.ok THEN Fail ELSE
-    LET contractDesc == DecodeContractDesc6(tokenNo.rest) IN IF ~contractDesc.ok THEN Fail ELSE
-    LET counterPartyBrokerId == ReadBytes(contractDesc.rest, 5) IN IF ~counterPartyBrokerId.ok THEN Fail ELSE
-    LET thirdReserved1 == ReadBytes(counterPartyBrokerId.rest, 1) IN IF ~thirdReserved1.ok THEN Fail ELSE
-    LET reserved2 == ReadBytes(thirdReserved1.rest, 2) IN IF ~reserved2.ok THEN Fail ELSE
-    LET closeoutFlag == ReadBytes(reserved2.rest, 1) IN IF ~closeoutFlag.ok THEN Fail ELSE
-    LET fourthReserved1 == ReadBytes(closeoutFlag.rest, 1) IN IF ~fourthReserved1.ok THEN Fail ELSE
-    LET orderType == ReadBytes(fourthReserved1.rest, 2) IN IF ~orderType.ok THEN Fail ELSE
-    LET orderNumber == ReadBytes(orderType.rest, 8) IN IF ~orderNumber.ok THEN Fail ELSE
-    LET accountNumber == ReadBytes(orderNumber.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET bookType == ReadBytes(accountNumber.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET buySellIndicator == ReadBytes(bookType.rest, 2) IN IF ~buySellIndicator.ok THEN Fail ELSE
-    LET disclosedVolume == ReadBytes(buySellIndicator.rest, 4) IN IF ~disclosedVolume.ok THEN Fail ELSE
-    LET disclosedVolumeRemaining == ReadBytes(disclosedVolume.rest, 4) IN IF ~disclosedVolumeRemaining.ok THEN Fail ELSE
-    LET totalVolumeRemaining == ReadBytes(disclosedVolumeRemaining.rest, 4) IN IF ~totalVolumeRemaining.ok THEN Fail ELSE
-    LET volume == ReadBytes(totalVolumeRemaining.rest, 4) IN IF ~volume.ok THEN Fail ELSE
-    LET volumeFilledToday == ReadBytes(volume.rest, 4) IN IF ~volumeFilledToday.ok THEN Fail ELSE
-    LET price == ReadBytes(volumeFilledToday.rest, 4) IN IF ~price.ok THEN Fail ELSE
-    LET triggerPrice == ReadBytes(price.rest, 4) IN IF ~triggerPrice.ok THEN Fail ELSE
-    LET goodTillDate == ReadBytes(triggerPrice.rest, 4) IN IF ~goodTillDate.ok THEN Fail ELSE
-    LET entryDateTime == ReadBytes(goodTillDate.rest, 4) IN IF ~entryDateTime.ok THEN Fail ELSE
-    LET minimumFillAonVolume == ReadBytes(entryDateTime.rest, 4) IN IF ~minimumFillAonVolume.ok THEN Fail ELSE
-    LET lastModified == ReadBytes(minimumFillAonVolume.rest, 4) IN IF ~lastModified.ok THEN Fail ELSE
-    LET stOrderFlags == ReadBytes(lastModified.rest, 2) IN IF ~stOrderFlags.ok THEN Fail ELSE
-    LET branchId == ReadBytes(stOrderFlags.rest, 2) IN IF ~branchId.ok THEN Fail ELSE
-    LET traderId == ReadBytes(branchId.rest, 4) IN IF ~traderId.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(traderId.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
-    LET cOrdFiller == ReadBytes(brokerId.rest, 24) IN IF ~cOrdFiller.ok THEN Fail ELSE
-    LET openClose == ReadBytes(cOrdFiller.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
-    LET settlor == ReadBytes(openClose.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
-    LET proClientIndicator == ReadBytes(settlor.rest, 2) IN IF ~proClientIndicator.ok THEN Fail ELSE
-    LET settlementPeriod == ReadBytes(proClientIndicator.rest, 2) IN IF ~settlementPeriod.ok THEN Fail ELSE
-    LET additionalOrderFlags == ReadBytes(settlementPeriod.rest, 1) IN IF ~additionalOrderFlags.ok THEN Fail ELSE
-    LET fifthReserved1 == ReadBytes(additionalOrderFlags.rest, 1) IN IF ~fifthReserved1.ok THEN Fail ELSE
-    LET filler116 == ReadBytes(fifthReserved1.rest, 2) IN IF ~filler116.ok THEN Fail ELSE
-    LET filler17 == ReadBytes(filler116.rest, 1) IN IF ~filler17.ok THEN Fail ELSE
-    LET filler18 == ReadBytes(filler17.rest, 1) IN IF ~filler18.ok THEN Fail ELSE
-    LET nnfField == ReadBytes(filler18.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET mktReplay == ReadBytes(nnfField.rest, 8) IN IF ~mktReplay.ok THEN Fail ELSE
-    LET pan == ReadBytes(mktReplay.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET algoId == ReadBytes(pan.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
-    LET secondReserved2 == ReadBytes(algoId.rest, 2) IN IF ~secondReserved2.ok THEN Fail ELSE
-    LET lastActivityReference == ReadBytes(secondReserved2.rest, 8) IN IF ~lastActivityReference.ok THEN Fail ELSE
-    LET reserved52 == ReadBytes(lastActivityReference.rest, 52) IN IF ~reserved52.ok THEN Fail ELSE
-    Ok([ participantType          |-> participantType.value,
-         reserved1                |-> reserved1.value,
-         competitorPeriod         |-> competitorPeriod.value,
-         solicitorPeriod          |-> solicitorPeriod.value,
-         modifiedCancelledBy      |-> modifiedCancelledBy.value,
-         secondReserved1          |-> secondReserved1.value,
-         reasonCode               |-> reasonCode.value,
-         reserved4                |-> reserved4.value,
-         tokenNo                  |-> tokenNo.value,
-         contractDesc             |-> contractDesc.value,
-         counterPartyBrokerId     |-> counterPartyBrokerId.value,
-         thirdReserved1           |-> thirdReserved1.value,
-         reserved2                |-> reserved2.value,
-         closeoutFlag             |-> closeoutFlag.value,
-         fourthReserved1          |-> fourthReserved1.value,
-         orderType                |-> orderType.value,
-         orderNumber              |-> orderNumber.value,
-         accountNumber            |-> accountNumber.value,
-         bookType                 |-> bookType.value,
-         buySellIndicator         |-> buySellIndicator.value,
-         disclosedVolume          |-> disclosedVolume.value,
-         disclosedVolumeRemaining |-> disclosedVolumeRemaining.value,
-         totalVolumeRemaining     |-> totalVolumeRemaining.value,
-         volume                   |-> volume.value,
-         volumeFilledToday        |-> volumeFilledToday.value,
-         price                    |-> price.value,
-         triggerPrice             |-> triggerPrice.value,
-         goodTillDate             |-> goodTillDate.value,
-         entryDateTime            |-> entryDateTime.value,
-         minimumFillAonVolume     |-> minimumFillAonVolume.value,
-         lastModified             |-> lastModified.value,
-         stOrderFlags             |-> stOrderFlags.value,
-         branchId                 |-> branchId.value,
-         traderId                 |-> traderId.value,
-         brokerId                 |-> brokerId.value,
-         cOrdFiller               |-> cOrdFiller.value,
-         openClose                |-> openClose.value,
-         settlor                  |-> settlor.value,
-         proClientIndicator       |-> proClientIndicator.value,
-         settlementPeriod         |-> settlementPeriod.value,
-         additionalOrderFlags     |-> additionalOrderFlags.value,
-         fifthReserved1           |-> fifthReserved1.value,
-         filler116                |-> filler116.value,
-         filler17                 |-> filler17.value,
-         filler18                 |-> filler18.value,
-         nnfField                 |-> nnfField.value,
-         mktReplay                |-> mktReplay.value,
-         pan                      |-> pan.value,
-         algoId                   |-> algoId.value,
-         secondReserved2          |-> secondReserved2.value,
-         lastActivityReference    |-> lastActivityReference.value,
-         reserved52               |-> reserved52.value ], reserved52.rest)
-
-ZeroOrderEntryBody6 ==
-    [ participantType          |-> [i \in 1 .. 1 |-> 0],
-      reserved1                |-> [i \in 1 .. 1 |-> 0],
-      competitorPeriod         |-> [i \in 1 .. 2 |-> 0],
-      solicitorPeriod          |-> [i \in 1 .. 2 |-> 0],
-      modifiedCancelledBy      |-> [i \in 1 .. 1 |-> 0],
-      secondReserved1          |-> [i \in 1 .. 1 |-> 0],
-      reasonCode               |-> [i \in 1 .. 2 |-> 0],
-      reserved4                |-> [i \in 1 .. 4 |-> 0],
-      tokenNo                  |-> [i \in 1 .. 4 |-> 0],
-      contractDesc             |-> ZeroContractDesc6,
-      counterPartyBrokerId     |-> [i \in 1 .. 5 |-> 0],
-      thirdReserved1           |-> [i \in 1 .. 1 |-> 0],
-      reserved2                |-> [i \in 1 .. 2 |-> 0],
-      closeoutFlag             |-> [i \in 1 .. 1 |-> 0],
-      fourthReserved1          |-> [i \in 1 .. 1 |-> 0],
-      orderType                |-> [i \in 1 .. 2 |-> 0],
-      orderNumber              |-> [i \in 1 .. 8 |-> 0],
-      accountNumber            |-> [i \in 1 .. 10 |-> 0],
-      bookType                 |-> [i \in 1 .. 2 |-> 0],
-      buySellIndicator         |-> [i \in 1 .. 2 |-> 0],
-      disclosedVolume          |-> [i \in 1 .. 4 |-> 0],
-      disclosedVolumeRemaining |-> [i \in 1 .. 4 |-> 0],
-      totalVolumeRemaining     |-> [i \in 1 .. 4 |-> 0],
-      volume                   |-> [i \in 1 .. 4 |-> 0],
-      volumeFilledToday        |-> [i \in 1 .. 4 |-> 0],
-      price                    |-> [i \in 1 .. 4 |-> 0],
-      triggerPrice             |-> [i \in 1 .. 4 |-> 0],
-      goodTillDate             |-> [i \in 1 .. 4 |-> 0],
-      entryDateTime            |-> [i \in 1 .. 4 |-> 0],
-      minimumFillAonVolume     |-> [i \in 1 .. 4 |-> 0],
-      lastModified             |-> [i \in 1 .. 4 |-> 0],
-      stOrderFlags             |-> [i \in 1 .. 2 |-> 0],
-      branchId                 |-> [i \in 1 .. 2 |-> 0],
-      traderId                 |-> [i \in 1 .. 4 |-> 0],
-      brokerId                 |-> [i \in 1 .. 5 |-> 0],
-      cOrdFiller               |-> [i \in 1 .. 24 |-> 0],
-      openClose                |-> [i \in 1 .. 1 |-> 0],
-      settlor                  |-> [i \in 1 .. 12 |-> 0],
-      proClientIndicator       |-> [i \in 1 .. 2 |-> 0],
-      settlementPeriod         |-> [i \in 1 .. 2 |-> 0],
-      additionalOrderFlags     |-> [i \in 1 .. 1 |-> 0],
-      fifthReserved1           |-> [i \in 1 .. 1 |-> 0],
-      filler116                |-> [i \in 1 .. 2 |-> 0],
-      filler17                 |-> [i \in 1 .. 1 |-> 0],
-      filler18                 |-> [i \in 1 .. 1 |-> 0],
-      nnfField                 |-> [i \in 1 .. 8 |-> 0],
-      mktReplay                |-> [i \in 1 .. 8 |-> 0],
-      pan                      |-> [i \in 1 .. 10 |-> 0],
-      algoId                   |-> [i \in 1 .. 4 |-> 0],
-      secondReserved2          |-> [i \in 1 .. 2 |-> 0],
-      lastActivityReference    |-> [i \in 1 .. 8 |-> 0],
-      reserved52               |-> [i \in 1 .. 52 |-> 0] ]
-
-(* Order Entry Body at zero, then each field in turn at the values it is checked at *)
-CheckedOrderEntryBody6 ==
-    { ZeroOrderEntryBody6 }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.participantType = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.reserved1 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.competitorPeriod = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.solicitorPeriod = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.modifiedCancelledBy = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.secondReserved1 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.reasonCode = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.reserved4 = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.tokenNo = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.contractDesc = one] : one \in CheckedContractDesc6 }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.counterPartyBrokerId = one] : one \in Sample(5) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.thirdReserved1 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.reserved2 = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.closeoutFlag = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.fourthReserved1 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.orderType = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.orderNumber = one] : one \in Sample(8) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.buySellIndicator = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.disclosedVolume = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.disclosedVolumeRemaining = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.totalVolumeRemaining = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.volume = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.volumeFilledToday = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.price = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.triggerPrice = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.goodTillDate = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.entryDateTime = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.minimumFillAonVolume = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.lastModified = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.stOrderFlags = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.branchId = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.traderId = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.brokerId = one] : one \in Sample(5) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.cOrdFiller = one] : one \in Sample(24) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.openClose = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.settlor = one] : one \in Sample(12) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.proClientIndicator = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.settlementPeriod = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.additionalOrderFlags = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.fifthReserved1 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.filler116 = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.filler17 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.filler18 = one] : one \in Sample(1) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.mktReplay = one] : one \in Sample(8) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.algoId = one] : one \in Sample(4) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.secondReserved2 = one] : one \in Sample(2) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.lastActivityReference = one] : one \in Sample(8) }
-        \cup { [ZeroOrderEntryBody6 EXCEPT !.reserved52 = one] : one \in Sample(52) }
-
-(***************************************************************************)
-(* Order Entry Message: 276 bytes                                          *)
-(***************************************************************************)
-
-OrderEntryMessage ==
-    [ orderEntryBody : OrderEntryBody6 ]
-
-EncodeOrderEntryMessage(message) ==
-    EncodeOrderEntryBody6(message.orderEntryBody)
-
-DecodeOrderEntryMessage(bytes) ==
-    LET orderEntryBody == DecodeOrderEntryBody6(bytes) IN IF ~orderEntryBody.ok THEN Fail ELSE
-    Ok([ orderEntryBody |-> orderEntryBody.value ], orderEntryBody.rest)
-
-ZeroOrderEntryMessage ==
-    [ orderEntryBody |-> ZeroOrderEntryBody6 ]
-
-(* Order Entry Message at zero, then each field in turn at the values it is checked at *)
-CheckedOrderEntryMessage ==
-    { ZeroOrderEntryMessage }
-        \cup { [ZeroOrderEntryMessage EXCEPT !.orderEntryBody = one] : one \in CheckedOrderEntryBody6 }
+(* Kill Switch Request Message at zero, then each field in turn at the values it is checked at *)
+CheckedKillSwitchRequestMessage ==
+    { ZeroKillSwitchRequestMessage }
+        \cup { [ZeroKillSwitchRequestMessage EXCEPT !.orderEntryBody = one] : one \in CheckedOrderEntryBody4 }
 
 (***************************************************************************)
 (* Price Modification Message: 66 bytes                                    *)
@@ -3043,6 +2239,252 @@ CheckedPriceModificationMessage ==
 (* Contract Desc: 28 bytes                                                 *)
 (***************************************************************************)
 
+ContractDesc5 ==
+    [ instrumentName : Sample(6),
+      symbol         : Sample(10),
+      expiryDate     : Sample(4),
+      strikePrice    : Sample(4),
+      optionType     : Sample(2),
+      caLevel        : Sample(2) ]
+
+EncodeContractDesc5(message) ==
+    message.instrumentName
+        \o message.symbol
+        \o message.expiryDate
+        \o message.strikePrice
+        \o message.optionType
+        \o message.caLevel
+
+DecodeContractDesc5(bytes) ==
+    LET instrumentName == ReadBytes(bytes, 6) IN IF ~instrumentName.ok THEN Fail ELSE
+    LET symbol == ReadBytes(instrumentName.rest, 10) IN IF ~symbol.ok THEN Fail ELSE
+    LET expiryDate == ReadBytes(symbol.rest, 4) IN IF ~expiryDate.ok THEN Fail ELSE
+    LET strikePrice == ReadBytes(expiryDate.rest, 4) IN IF ~strikePrice.ok THEN Fail ELSE
+    LET optionType == ReadBytes(strikePrice.rest, 2) IN IF ~optionType.ok THEN Fail ELSE
+    LET caLevel == ReadBytes(optionType.rest, 2) IN IF ~caLevel.ok THEN Fail ELSE
+    Ok([ instrumentName |-> instrumentName.value,
+         symbol         |-> symbol.value,
+         expiryDate     |-> expiryDate.value,
+         strikePrice    |-> strikePrice.value,
+         optionType     |-> optionType.value,
+         caLevel        |-> caLevel.value ], caLevel.rest)
+
+ZeroContractDesc5 ==
+    [ instrumentName |-> [i \in 1 .. 6 |-> 0],
+      symbol         |-> [i \in 1 .. 10 |-> 0],
+      expiryDate     |-> [i \in 1 .. 4 |-> 0],
+      strikePrice    |-> [i \in 1 .. 4 |-> 0],
+      optionType     |-> [i \in 1 .. 2 |-> 0],
+      caLevel        |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Contract Desc at zero, then each field in turn at the values it is checked at *)
+CheckedContractDesc5 ==
+    { ZeroContractDesc5 }
+        \cup { [ZeroContractDesc5 EXCEPT !.instrumentName = one] : one \in Sample(6) }
+        \cup { [ZeroContractDesc5 EXCEPT !.symbol = one] : one \in Sample(10) }
+        \cup { [ZeroContractDesc5 EXCEPT !.expiryDate = one] : one \in Sample(4) }
+        \cup { [ZeroContractDesc5 EXCEPT !.strikePrice = one] : one \in Sample(4) }
+        \cup { [ZeroContractDesc5 EXCEPT !.optionType = one] : one \in Sample(2) }
+        \cup { [ZeroContractDesc5 EXCEPT !.caLevel = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Trade Inquiry Message: 194 bytes                                        *)
+(***************************************************************************)
+
+TradeInquiryMessage ==
+    [ tokenNo           : Sample(4),
+      contractDesc      : ContractDesc5,
+      fillNumber        : Sample(4),
+      fillQuantity      : Sample(4),
+      fillPrice         : Sample(4),
+      mktType           : Sample(1),
+      buyOpenClose      : Sample(1),
+      reserved4         : Sample(4),
+      buyBrokerId       : Sample(5),
+      sellBrokerId      : Sample(5),
+      traderId          : Sample(4),
+      requestedBy       : Sample(1),
+      sellOpenClose     : Sample(1),
+      buyAccountNumber  : Sample(10),
+      sellAccountNumber : Sample(10),
+      reserved24        : Sample(24),
+      reserved2         : Sample(2),
+      secondReserved2   : Sample(2),
+      buyPan            : Sample(10),
+      sellPan           : Sample(10),
+      reserved60        : Sample(60) ]
+
+EncodeTradeInquiryMessage(message) ==
+    message.tokenNo
+        \o EncodeContractDesc5(message.contractDesc)
+        \o message.fillNumber
+        \o message.fillQuantity
+        \o message.fillPrice
+        \o message.mktType
+        \o message.buyOpenClose
+        \o message.reserved4
+        \o message.buyBrokerId
+        \o message.sellBrokerId
+        \o message.traderId
+        \o message.requestedBy
+        \o message.sellOpenClose
+        \o message.buyAccountNumber
+        \o message.sellAccountNumber
+        \o message.reserved24
+        \o message.reserved2
+        \o message.secondReserved2
+        \o message.buyPan
+        \o message.sellPan
+        \o message.reserved60
+
+DecodeTradeInquiryMessage(bytes) ==
+    LET tokenNo == ReadBytes(bytes, 4) IN IF ~tokenNo.ok THEN Fail ELSE
+    LET contractDesc == DecodeContractDesc5(tokenNo.rest) IN IF ~contractDesc.ok THEN Fail ELSE
+    LET fillNumber == ReadBytes(contractDesc.rest, 4) IN IF ~fillNumber.ok THEN Fail ELSE
+    LET fillQuantity == ReadBytes(fillNumber.rest, 4) IN IF ~fillQuantity.ok THEN Fail ELSE
+    LET fillPrice == ReadBytes(fillQuantity.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
+    LET mktType == ReadBytes(fillPrice.rest, 1) IN IF ~mktType.ok THEN Fail ELSE
+    LET buyOpenClose == ReadBytes(mktType.rest, 1) IN IF ~buyOpenClose.ok THEN Fail ELSE
+    LET reserved4 == ReadBytes(buyOpenClose.rest, 4) IN IF ~reserved4.ok THEN Fail ELSE
+    LET buyBrokerId == ReadBytes(reserved4.rest, 5) IN IF ~buyBrokerId.ok THEN Fail ELSE
+    LET sellBrokerId == ReadBytes(buyBrokerId.rest, 5) IN IF ~sellBrokerId.ok THEN Fail ELSE
+    LET traderId == ReadBytes(sellBrokerId.rest, 4) IN IF ~traderId.ok THEN Fail ELSE
+    LET requestedBy == ReadBytes(traderId.rest, 1) IN IF ~requestedBy.ok THEN Fail ELSE
+    LET sellOpenClose == ReadBytes(requestedBy.rest, 1) IN IF ~sellOpenClose.ok THEN Fail ELSE
+    LET buyAccountNumber == ReadBytes(sellOpenClose.rest, 10) IN IF ~buyAccountNumber.ok THEN Fail ELSE
+    LET sellAccountNumber == ReadBytes(buyAccountNumber.rest, 10) IN IF ~sellAccountNumber.ok THEN Fail ELSE
+    LET reserved24 == ReadBytes(sellAccountNumber.rest, 24) IN IF ~reserved24.ok THEN Fail ELSE
+    LET reserved2 == ReadBytes(reserved24.rest, 2) IN IF ~reserved2.ok THEN Fail ELSE
+    LET secondReserved2 == ReadBytes(reserved2.rest, 2) IN IF ~secondReserved2.ok THEN Fail ELSE
+    LET buyPan == ReadBytes(secondReserved2.rest, 10) IN IF ~buyPan.ok THEN Fail ELSE
+    LET sellPan == ReadBytes(buyPan.rest, 10) IN IF ~sellPan.ok THEN Fail ELSE
+    LET reserved60 == ReadBytes(sellPan.rest, 60) IN IF ~reserved60.ok THEN Fail ELSE
+    Ok([ tokenNo           |-> tokenNo.value,
+         contractDesc      |-> contractDesc.value,
+         fillNumber        |-> fillNumber.value,
+         fillQuantity      |-> fillQuantity.value,
+         fillPrice         |-> fillPrice.value,
+         mktType           |-> mktType.value,
+         buyOpenClose      |-> buyOpenClose.value,
+         reserved4         |-> reserved4.value,
+         buyBrokerId       |-> buyBrokerId.value,
+         sellBrokerId      |-> sellBrokerId.value,
+         traderId          |-> traderId.value,
+         requestedBy       |-> requestedBy.value,
+         sellOpenClose     |-> sellOpenClose.value,
+         buyAccountNumber  |-> buyAccountNumber.value,
+         sellAccountNumber |-> sellAccountNumber.value,
+         reserved24        |-> reserved24.value,
+         reserved2         |-> reserved2.value,
+         secondReserved2   |-> secondReserved2.value,
+         buyPan            |-> buyPan.value,
+         sellPan           |-> sellPan.value,
+         reserved60        |-> reserved60.value ], reserved60.rest)
+
+ZeroTradeInquiryMessage ==
+    [ tokenNo           |-> [i \in 1 .. 4 |-> 0],
+      contractDesc      |-> ZeroContractDesc5,
+      fillNumber        |-> [i \in 1 .. 4 |-> 0],
+      fillQuantity      |-> [i \in 1 .. 4 |-> 0],
+      fillPrice         |-> [i \in 1 .. 4 |-> 0],
+      mktType           |-> [i \in 1 .. 1 |-> 0],
+      buyOpenClose      |-> [i \in 1 .. 1 |-> 0],
+      reserved4         |-> [i \in 1 .. 4 |-> 0],
+      buyBrokerId       |-> [i \in 1 .. 5 |-> 0],
+      sellBrokerId      |-> [i \in 1 .. 5 |-> 0],
+      traderId          |-> [i \in 1 .. 4 |-> 0],
+      requestedBy       |-> [i \in 1 .. 1 |-> 0],
+      sellOpenClose     |-> [i \in 1 .. 1 |-> 0],
+      buyAccountNumber  |-> [i \in 1 .. 10 |-> 0],
+      sellAccountNumber |-> [i \in 1 .. 10 |-> 0],
+      reserved24        |-> [i \in 1 .. 24 |-> 0],
+      reserved2         |-> [i \in 1 .. 2 |-> 0],
+      secondReserved2   |-> [i \in 1 .. 2 |-> 0],
+      buyPan            |-> [i \in 1 .. 10 |-> 0],
+      sellPan           |-> [i \in 1 .. 10 |-> 0],
+      reserved60        |-> [i \in 1 .. 60 |-> 0] ]
+
+(* Trade Inquiry Message at zero, then each field in turn at the values it is checked at *)
+CheckedTradeInquiryMessage ==
+    { ZeroTradeInquiryMessage }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.tokenNo = one] : one \in Sample(4) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.contractDesc = one] : one \in CheckedContractDesc5 }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.fillNumber = one] : one \in Sample(4) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.fillQuantity = one] : one \in Sample(4) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.mktType = one] : one \in Sample(1) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.buyOpenClose = one] : one \in Sample(1) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.reserved4 = one] : one \in Sample(4) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.buyBrokerId = one] : one \in Sample(5) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.sellBrokerId = one] : one \in Sample(5) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.traderId = one] : one \in Sample(4) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.requestedBy = one] : one \in Sample(1) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.sellOpenClose = one] : one \in Sample(1) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.buyAccountNumber = one] : one \in Sample(10) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.sellAccountNumber = one] : one \in Sample(10) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.reserved24 = one] : one \in Sample(24) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.reserved2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.secondReserved2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.buyPan = one] : one \in Sample(10) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.sellPan = one] : one \in Sample(10) }
+        \cup { [ZeroTradeInquiryMessage EXCEPT !.reserved60 = one] : one \in Sample(60) }
+
+(***************************************************************************)
+(* Contract Desc: 28 bytes                                                 *)
+(***************************************************************************)
+
+ContractDesc6 ==
+    [ instrumentName : Sample(6),
+      symbol         : Sample(10),
+      expiryDate     : Sample(4),
+      strikePrice    : Sample(4),
+      optionType     : Sample(2),
+      caLevel        : Sample(2) ]
+
+EncodeContractDesc6(message) ==
+    message.instrumentName
+        \o message.symbol
+        \o message.expiryDate
+        \o message.strikePrice
+        \o message.optionType
+        \o message.caLevel
+
+DecodeContractDesc6(bytes) ==
+    LET instrumentName == ReadBytes(bytes, 6) IN IF ~instrumentName.ok THEN Fail ELSE
+    LET symbol == ReadBytes(instrumentName.rest, 10) IN IF ~symbol.ok THEN Fail ELSE
+    LET expiryDate == ReadBytes(symbol.rest, 4) IN IF ~expiryDate.ok THEN Fail ELSE
+    LET strikePrice == ReadBytes(expiryDate.rest, 4) IN IF ~strikePrice.ok THEN Fail ELSE
+    LET optionType == ReadBytes(strikePrice.rest, 2) IN IF ~optionType.ok THEN Fail ELSE
+    LET caLevel == ReadBytes(optionType.rest, 2) IN IF ~caLevel.ok THEN Fail ELSE
+    Ok([ instrumentName |-> instrumentName.value,
+         symbol         |-> symbol.value,
+         expiryDate     |-> expiryDate.value,
+         strikePrice    |-> strikePrice.value,
+         optionType     |-> optionType.value,
+         caLevel        |-> caLevel.value ], caLevel.rest)
+
+ZeroContractDesc6 ==
+    [ instrumentName |-> [i \in 1 .. 6 |-> 0],
+      symbol         |-> [i \in 1 .. 10 |-> 0],
+      expiryDate     |-> [i \in 1 .. 4 |-> 0],
+      strikePrice    |-> [i \in 1 .. 4 |-> 0],
+      optionType     |-> [i \in 1 .. 2 |-> 0],
+      caLevel        |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Contract Desc at zero, then each field in turn at the values it is checked at *)
+CheckedContractDesc6 ==
+    { ZeroContractDesc6 }
+        \cup { [ZeroContractDesc6 EXCEPT !.instrumentName = one] : one \in Sample(6) }
+        \cup { [ZeroContractDesc6 EXCEPT !.symbol = one] : one \in Sample(10) }
+        \cup { [ZeroContractDesc6 EXCEPT !.expiryDate = one] : one \in Sample(4) }
+        \cup { [ZeroContractDesc6 EXCEPT !.strikePrice = one] : one \in Sample(4) }
+        \cup { [ZeroContractDesc6 EXCEPT !.optionType = one] : one \in Sample(2) }
+        \cup { [ZeroContractDesc6 EXCEPT !.caLevel = one] : one \in Sample(2) }
+
+(***************************************************************************)
+(* Contract Desc: 28 bytes                                                 *)
+(***************************************************************************)
+
 ContractDesc7 ==
     [ instrumentName : Sample(6),
       symbol         : Sample(10),
@@ -3092,258 +2534,12 @@ CheckedContractDesc7 ==
         \cup { [ZeroContractDesc7 EXCEPT !.caLevel = one] : one \in Sample(2) }
 
 (***************************************************************************)
-(* Trade Inquiry Message: 194 bytes                                        *)
-(***************************************************************************)
-
-TradeInquiryMessage ==
-    [ tokenNo           : Sample(4),
-      contractDesc      : ContractDesc7,
-      fillNumber        : Sample(4),
-      fillQuantity      : Sample(4),
-      fillPrice         : Sample(4),
-      mktType           : Sample(1),
-      buyOpenClose      : Sample(1),
-      reserved4         : Sample(4),
-      buyBrokerId       : Sample(5),
-      sellBrokerId      : Sample(5),
-      traderId          : Sample(4),
-      requestedBy       : Sample(1),
-      sellOpenClose     : Sample(1),
-      buyAccountNumber  : Sample(10),
-      sellAccountNumber : Sample(10),
-      reserved24        : Sample(24),
-      reserved2         : Sample(2),
-      secondReserved2   : Sample(2),
-      buyPan            : Sample(10),
-      sellPan           : Sample(10),
-      reserved60        : Sample(60) ]
-
-EncodeTradeInquiryMessage(message) ==
-    message.tokenNo
-        \o EncodeContractDesc7(message.contractDesc)
-        \o message.fillNumber
-        \o message.fillQuantity
-        \o message.fillPrice
-        \o message.mktType
-        \o message.buyOpenClose
-        \o message.reserved4
-        \o message.buyBrokerId
-        \o message.sellBrokerId
-        \o message.traderId
-        \o message.requestedBy
-        \o message.sellOpenClose
-        \o message.buyAccountNumber
-        \o message.sellAccountNumber
-        \o message.reserved24
-        \o message.reserved2
-        \o message.secondReserved2
-        \o message.buyPan
-        \o message.sellPan
-        \o message.reserved60
-
-DecodeTradeInquiryMessage(bytes) ==
-    LET tokenNo == ReadBytes(bytes, 4) IN IF ~tokenNo.ok THEN Fail ELSE
-    LET contractDesc == DecodeContractDesc7(tokenNo.rest) IN IF ~contractDesc.ok THEN Fail ELSE
-    LET fillNumber == ReadBytes(contractDesc.rest, 4) IN IF ~fillNumber.ok THEN Fail ELSE
-    LET fillQuantity == ReadBytes(fillNumber.rest, 4) IN IF ~fillQuantity.ok THEN Fail ELSE
-    LET fillPrice == ReadBytes(fillQuantity.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
-    LET mktType == ReadBytes(fillPrice.rest, 1) IN IF ~mktType.ok THEN Fail ELSE
-    LET buyOpenClose == ReadBytes(mktType.rest, 1) IN IF ~buyOpenClose.ok THEN Fail ELSE
-    LET reserved4 == ReadBytes(buyOpenClose.rest, 4) IN IF ~reserved4.ok THEN Fail ELSE
-    LET buyBrokerId == ReadBytes(reserved4.rest, 5) IN IF ~buyBrokerId.ok THEN Fail ELSE
-    LET sellBrokerId == ReadBytes(buyBrokerId.rest, 5) IN IF ~sellBrokerId.ok THEN Fail ELSE
-    LET traderId == ReadBytes(sellBrokerId.rest, 4) IN IF ~traderId.ok THEN Fail ELSE
-    LET requestedBy == ReadBytes(traderId.rest, 1) IN IF ~requestedBy.ok THEN Fail ELSE
-    LET sellOpenClose == ReadBytes(requestedBy.rest, 1) IN IF ~sellOpenClose.ok THEN Fail ELSE
-    LET buyAccountNumber == ReadBytes(sellOpenClose.rest, 10) IN IF ~buyAccountNumber.ok THEN Fail ELSE
-    LET sellAccountNumber == ReadBytes(buyAccountNumber.rest, 10) IN IF ~sellAccountNumber.ok THEN Fail ELSE
-    LET reserved24 == ReadBytes(sellAccountNumber.rest, 24) IN IF ~reserved24.ok THEN Fail ELSE
-    LET reserved2 == ReadBytes(reserved24.rest, 2) IN IF ~reserved2.ok THEN Fail ELSE
-    LET secondReserved2 == ReadBytes(reserved2.rest, 2) IN IF ~secondReserved2.ok THEN Fail ELSE
-    LET buyPan == ReadBytes(secondReserved2.rest, 10) IN IF ~buyPan.ok THEN Fail ELSE
-    LET sellPan == ReadBytes(buyPan.rest, 10) IN IF ~sellPan.ok THEN Fail ELSE
-    LET reserved60 == ReadBytes(sellPan.rest, 60) IN IF ~reserved60.ok THEN Fail ELSE
-    Ok([ tokenNo           |-> tokenNo.value,
-         contractDesc      |-> contractDesc.value,
-         fillNumber        |-> fillNumber.value,
-         fillQuantity      |-> fillQuantity.value,
-         fillPrice         |-> fillPrice.value,
-         mktType           |-> mktType.value,
-         buyOpenClose      |-> buyOpenClose.value,
-         reserved4         |-> reserved4.value,
-         buyBrokerId       |-> buyBrokerId.value,
-         sellBrokerId      |-> sellBrokerId.value,
-         traderId          |-> traderId.value,
-         requestedBy       |-> requestedBy.value,
-         sellOpenClose     |-> sellOpenClose.value,
-         buyAccountNumber  |-> buyAccountNumber.value,
-         sellAccountNumber |-> sellAccountNumber.value,
-         reserved24        |-> reserved24.value,
-         reserved2         |-> reserved2.value,
-         secondReserved2   |-> secondReserved2.value,
-         buyPan            |-> buyPan.value,
-         sellPan           |-> sellPan.value,
-         reserved60        |-> reserved60.value ], reserved60.rest)
-
-ZeroTradeInquiryMessage ==
-    [ tokenNo           |-> [i \in 1 .. 4 |-> 0],
-      contractDesc      |-> ZeroContractDesc7,
-      fillNumber        |-> [i \in 1 .. 4 |-> 0],
-      fillQuantity      |-> [i \in 1 .. 4 |-> 0],
-      fillPrice         |-> [i \in 1 .. 4 |-> 0],
-      mktType           |-> [i \in 1 .. 1 |-> 0],
-      buyOpenClose      |-> [i \in 1 .. 1 |-> 0],
-      reserved4         |-> [i \in 1 .. 4 |-> 0],
-      buyBrokerId       |-> [i \in 1 .. 5 |-> 0],
-      sellBrokerId      |-> [i \in 1 .. 5 |-> 0],
-      traderId          |-> [i \in 1 .. 4 |-> 0],
-      requestedBy       |-> [i \in 1 .. 1 |-> 0],
-      sellOpenClose     |-> [i \in 1 .. 1 |-> 0],
-      buyAccountNumber  |-> [i \in 1 .. 10 |-> 0],
-      sellAccountNumber |-> [i \in 1 .. 10 |-> 0],
-      reserved24        |-> [i \in 1 .. 24 |-> 0],
-      reserved2         |-> [i \in 1 .. 2 |-> 0],
-      secondReserved2   |-> [i \in 1 .. 2 |-> 0],
-      buyPan            |-> [i \in 1 .. 10 |-> 0],
-      sellPan           |-> [i \in 1 .. 10 |-> 0],
-      reserved60        |-> [i \in 1 .. 60 |-> 0] ]
-
-(* Trade Inquiry Message at zero, then each field in turn at the values it is checked at *)
-CheckedTradeInquiryMessage ==
-    { ZeroTradeInquiryMessage }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.tokenNo = one] : one \in Sample(4) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.contractDesc = one] : one \in CheckedContractDesc7 }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.fillNumber = one] : one \in Sample(4) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.fillQuantity = one] : one \in Sample(4) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.mktType = one] : one \in Sample(1) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.buyOpenClose = one] : one \in Sample(1) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.reserved4 = one] : one \in Sample(4) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.buyBrokerId = one] : one \in Sample(5) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.sellBrokerId = one] : one \in Sample(5) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.traderId = one] : one \in Sample(4) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.requestedBy = one] : one \in Sample(1) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.sellOpenClose = one] : one \in Sample(1) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.buyAccountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.sellAccountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.reserved24 = one] : one \in Sample(24) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.reserved2 = one] : one \in Sample(2) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.secondReserved2 = one] : one \in Sample(2) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.buyPan = one] : one \in Sample(10) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.sellPan = one] : one \in Sample(10) }
-        \cup { [ZeroTradeInquiryMessage EXCEPT !.reserved60 = one] : one \in Sample(60) }
-
-(***************************************************************************)
-(* Contract Desc: 28 bytes                                                 *)
-(***************************************************************************)
-
-ContractDesc8 ==
-    [ instrumentName : Sample(6),
-      symbol         : Sample(10),
-      expiryDate     : Sample(4),
-      strikePrice    : Sample(4),
-      optionType     : Sample(2),
-      caLevel        : Sample(2) ]
-
-EncodeContractDesc8(message) ==
-    message.instrumentName
-        \o message.symbol
-        \o message.expiryDate
-        \o message.strikePrice
-        \o message.optionType
-        \o message.caLevel
-
-DecodeContractDesc8(bytes) ==
-    LET instrumentName == ReadBytes(bytes, 6) IN IF ~instrumentName.ok THEN Fail ELSE
-    LET symbol == ReadBytes(instrumentName.rest, 10) IN IF ~symbol.ok THEN Fail ELSE
-    LET expiryDate == ReadBytes(symbol.rest, 4) IN IF ~expiryDate.ok THEN Fail ELSE
-    LET strikePrice == ReadBytes(expiryDate.rest, 4) IN IF ~strikePrice.ok THEN Fail ELSE
-    LET optionType == ReadBytes(strikePrice.rest, 2) IN IF ~optionType.ok THEN Fail ELSE
-    LET caLevel == ReadBytes(optionType.rest, 2) IN IF ~caLevel.ok THEN Fail ELSE
-    Ok([ instrumentName |-> instrumentName.value,
-         symbol         |-> symbol.value,
-         expiryDate     |-> expiryDate.value,
-         strikePrice    |-> strikePrice.value,
-         optionType     |-> optionType.value,
-         caLevel        |-> caLevel.value ], caLevel.rest)
-
-ZeroContractDesc8 ==
-    [ instrumentName |-> [i \in 1 .. 6 |-> 0],
-      symbol         |-> [i \in 1 .. 10 |-> 0],
-      expiryDate     |-> [i \in 1 .. 4 |-> 0],
-      strikePrice    |-> [i \in 1 .. 4 |-> 0],
-      optionType     |-> [i \in 1 .. 2 |-> 0],
-      caLevel        |-> [i \in 1 .. 2 |-> 0] ]
-
-(* Contract Desc at zero, then each field in turn at the values it is checked at *)
-CheckedContractDesc8 ==
-    { ZeroContractDesc8 }
-        \cup { [ZeroContractDesc8 EXCEPT !.instrumentName = one] : one \in Sample(6) }
-        \cup { [ZeroContractDesc8 EXCEPT !.symbol = one] : one \in Sample(10) }
-        \cup { [ZeroContractDesc8 EXCEPT !.expiryDate = one] : one \in Sample(4) }
-        \cup { [ZeroContractDesc8 EXCEPT !.strikePrice = one] : one \in Sample(4) }
-        \cup { [ZeroContractDesc8 EXCEPT !.optionType = one] : one \in Sample(2) }
-        \cup { [ZeroContractDesc8 EXCEPT !.caLevel = one] : one \in Sample(2) }
-
-(***************************************************************************)
-(* Contract Desc: 28 bytes                                                 *)
-(***************************************************************************)
-
-ContractDesc9 ==
-    [ instrumentName : Sample(6),
-      symbol         : Sample(10),
-      expiryDate     : Sample(4),
-      strikePrice    : Sample(4),
-      optionType     : Sample(2),
-      caLevel        : Sample(2) ]
-
-EncodeContractDesc9(message) ==
-    message.instrumentName
-        \o message.symbol
-        \o message.expiryDate
-        \o message.strikePrice
-        \o message.optionType
-        \o message.caLevel
-
-DecodeContractDesc9(bytes) ==
-    LET instrumentName == ReadBytes(bytes, 6) IN IF ~instrumentName.ok THEN Fail ELSE
-    LET symbol == ReadBytes(instrumentName.rest, 10) IN IF ~symbol.ok THEN Fail ELSE
-    LET expiryDate == ReadBytes(symbol.rest, 4) IN IF ~expiryDate.ok THEN Fail ELSE
-    LET strikePrice == ReadBytes(expiryDate.rest, 4) IN IF ~strikePrice.ok THEN Fail ELSE
-    LET optionType == ReadBytes(strikePrice.rest, 2) IN IF ~optionType.ok THEN Fail ELSE
-    LET caLevel == ReadBytes(optionType.rest, 2) IN IF ~caLevel.ok THEN Fail ELSE
-    Ok([ instrumentName |-> instrumentName.value,
-         symbol         |-> symbol.value,
-         expiryDate     |-> expiryDate.value,
-         strikePrice    |-> strikePrice.value,
-         optionType     |-> optionType.value,
-         caLevel        |-> caLevel.value ], caLevel.rest)
-
-ZeroContractDesc9 ==
-    [ instrumentName |-> [i \in 1 .. 6 |-> 0],
-      symbol         |-> [i \in 1 .. 10 |-> 0],
-      expiryDate     |-> [i \in 1 .. 4 |-> 0],
-      strikePrice    |-> [i \in 1 .. 4 |-> 0],
-      optionType     |-> [i \in 1 .. 2 |-> 0],
-      caLevel        |-> [i \in 1 .. 2 |-> 0] ]
-
-(* Contract Desc at zero, then each field in turn at the values it is checked at *)
-CheckedContractDesc9 ==
-    { ZeroContractDesc9 }
-        \cup { [ZeroContractDesc9 EXCEPT !.instrumentName = one] : one \in Sample(6) }
-        \cup { [ZeroContractDesc9 EXCEPT !.symbol = one] : one \in Sample(10) }
-        \cup { [ZeroContractDesc9 EXCEPT !.expiryDate = one] : one \in Sample(4) }
-        \cup { [ZeroContractDesc9 EXCEPT !.strikePrice = one] : one \in Sample(4) }
-        \cup { [ZeroContractDesc9 EXCEPT !.optionType = one] : one \in Sample(2) }
-        \cup { [ZeroContractDesc9 EXCEPT !.caLevel = one] : one \in Sample(2) }
-
-(***************************************************************************)
 (* Ms Spd Leg Info: 80 bytes                                               *)
 (***************************************************************************)
 
 MsSpdLegInfo ==
     [ token2                 : Sample(4),
-      contractDesc           : ContractDesc9,
+      contractDesc           : ContractDesc7,
       opBrokerId2            : Sample(5),
       fillerx2               : Sample(1),
       orderType2             : Sample(2),
@@ -3364,7 +2560,7 @@ MsSpdLegInfo ==
 
 EncodeMsSpdLegInfo(message) ==
     message.token2
-        \o EncodeContractDesc9(message.contractDesc)
+        \o EncodeContractDesc7(message.contractDesc)
         \o message.opBrokerId2
         \o message.fillerx2
         \o message.orderType2
@@ -3385,7 +2581,7 @@ EncodeMsSpdLegInfo(message) ==
 
 DecodeMsSpdLegInfo(bytes) ==
     LET token2 == ReadBytes(bytes, 4) IN IF ~token2.ok THEN Fail ELSE
-    LET contractDesc == DecodeContractDesc9(token2.rest) IN IF ~contractDesc.ok THEN Fail ELSE
+    LET contractDesc == DecodeContractDesc7(token2.rest) IN IF ~contractDesc.ok THEN Fail ELSE
     LET opBrokerId2 == ReadBytes(contractDesc.rest, 5) IN IF ~opBrokerId2.ok THEN Fail ELSE
     LET fillerx2 == ReadBytes(opBrokerId2.rest, 1) IN IF ~fillerx2.ok THEN Fail ELSE
     LET orderType2 == ReadBytes(fillerx2.rest, 2) IN IF ~orderType2.ok THEN Fail ELSE
@@ -3425,7 +2621,7 @@ DecodeMsSpdLegInfo(bytes) ==
 
 ZeroMsSpdLegInfo ==
     [ token2                 |-> [i \in 1 .. 4 |-> 0],
-      contractDesc           |-> ZeroContractDesc9,
+      contractDesc           |-> ZeroContractDesc7,
       opBrokerId2            |-> [i \in 1 .. 5 |-> 0],
       fillerx2               |-> [i \in 1 .. 1 |-> 0],
       orderType2             |-> [i \in 1 .. 2 |-> 0],
@@ -3448,7 +2644,7 @@ ZeroMsSpdLegInfo ==
 CheckedMsSpdLegInfo ==
     { ZeroMsSpdLegInfo }
         \cup { [ZeroMsSpdLegInfo EXCEPT !.token2 = one] : one \in Sample(4) }
-        \cup { [ZeroMsSpdLegInfo EXCEPT !.contractDesc = one] : one \in CheckedContractDesc9 }
+        \cup { [ZeroMsSpdLegInfo EXCEPT !.contractDesc = one] : one \in CheckedContractDesc7 }
         \cup { [ZeroMsSpdLegInfo EXCEPT !.opBrokerId2 = one] : one \in Sample(5) }
         \cup { [ZeroMsSpdLegInfo EXCEPT !.fillerx2 = one] : one \in Sample(1) }
         \cup { [ZeroMsSpdLegInfo EXCEPT !.orderType2 = one] : one \in Sample(2) }
@@ -3506,7 +2702,7 @@ SpreadOrderBody ==
       startAlpha1            : Sample(2),
       endAlpha1              : Sample(2),
       token1                 : Sample(4),
-      contractDesc           : ContractDesc8,
+      contractDesc           : ContractDesc6,
       opBrokerId1            : Sample(5),
       fillerx1               : Sample(1),
       fillerOptions1         : Sample(3),
@@ -3562,7 +2758,7 @@ EncodeSpreadOrderBody(message) ==
         \o message.startAlpha1
         \o message.endAlpha1
         \o message.token1
-        \o EncodeContractDesc8(message.contractDesc)
+        \o EncodeContractDesc6(message.contractDesc)
         \o message.opBrokerId1
         \o message.fillerx1
         \o message.fillerOptions1
@@ -3618,7 +2814,7 @@ DecodeSpreadOrderBody(bytes) ==
     LET startAlpha1 == ReadBytes(reasonCode1.rest, 2) IN IF ~startAlpha1.ok THEN Fail ELSE
     LET endAlpha1 == ReadBytes(startAlpha1.rest, 2) IN IF ~endAlpha1.ok THEN Fail ELSE
     LET token1 == ReadBytes(endAlpha1.rest, 4) IN IF ~token1.ok THEN Fail ELSE
-    LET contractDesc == DecodeContractDesc8(token1.rest) IN IF ~contractDesc.ok THEN Fail ELSE
+    LET contractDesc == DecodeContractDesc6(token1.rest) IN IF ~contractDesc.ok THEN Fail ELSE
     LET opBrokerId1 == ReadBytes(contractDesc.rest, 5) IN IF ~opBrokerId1.ok THEN Fail ELSE
     LET fillerx1 == ReadBytes(opBrokerId1.rest, 1) IN IF ~fillerx1.ok THEN Fail ELSE
     LET fillerOptions1 == ReadBytes(fillerx1.rest, 3) IN IF ~fillerOptions1.ok THEN Fail ELSE
@@ -3728,7 +2924,7 @@ ZeroSpreadOrderBody ==
       startAlpha1            |-> [i \in 1 .. 2 |-> 0],
       endAlpha1              |-> [i \in 1 .. 2 |-> 0],
       token1                 |-> [i \in 1 .. 4 |-> 0],
-      contractDesc           |-> ZeroContractDesc8,
+      contractDesc           |-> ZeroContractDesc6,
       opBrokerId1            |-> [i \in 1 .. 5 |-> 0],
       fillerx1               |-> [i \in 1 .. 1 |-> 0],
       fillerOptions1         |-> [i \in 1 .. 3 |-> 0],
@@ -3786,7 +2982,7 @@ CheckedSpreadOrderBody ==
         \cup { [ZeroSpreadOrderBody EXCEPT !.startAlpha1 = one] : one \in Sample(2) }
         \cup { [ZeroSpreadOrderBody EXCEPT !.endAlpha1 = one] : one \in Sample(2) }
         \cup { [ZeroSpreadOrderBody EXCEPT !.token1 = one] : one \in Sample(4) }
-        \cup { [ZeroSpreadOrderBody EXCEPT !.contractDesc = one] : one \in CheckedContractDesc8 }
+        \cup { [ZeroSpreadOrderBody EXCEPT !.contractDesc = one] : one \in CheckedContractDesc6 }
         \cup { [ZeroSpreadOrderBody EXCEPT !.opBrokerId1 = one] : one \in Sample(5) }
         \cup { [ZeroSpreadOrderBody EXCEPT !.fillerx1 = one] : one \in Sample(1) }
         \cup { [ZeroSpreadOrderBody EXCEPT !.fillerOptions1 = one] : one \in Sample(3) }
@@ -4340,15 +3536,7 @@ DownloadRequestMessageCode == 7000  \* 0x1b58
 OrderEntryRequestMessageCode == 2000  \* 0x7d0
 OrderModificationRequestMessageCode == 2040  \* 0x7f8
 OrderCancellationRequestMessageCode == 2070  \* 0x816
-OrderConfirmationMessageCode == 2073  \* 0x819
-OrderModificationConfirmationMessageCode == 2074  \* 0x81a
-OrderEntryMessageCode == 2012  \* 0x7dc
-OrderEntryMessageCode2 == 2042  \* 0x7fa
-OrderEntryMessageCode3 == 2062  \* 0x80e
-OrderEntryMessageCode4 == 2072  \* 0x818
-OrderEntryMessageCode5 == 2170  \* 0x87a
-OrderEntryMessageCode6 == 2231  \* 0x8b7
-OrderEntryMessageCode7 == 9002  \* 0x232a
+KillSwitchRequestMessageCode == 2062  \* 0x80e
 PriceModificationMessageCode == 2013  \* 0x7dd
 PriceModificationMessageCode2 == 20406  \* 0x4fb6
 TradeInquiryMessageCode == 5445  \* 0x1545
@@ -4400,15 +3588,7 @@ ClientMessagePayload ==
         \cup [ tag : {OrderEntryRequestMessageCode}, body : OrderEntryRequestMessage ]
         \cup [ tag : {OrderModificationRequestMessageCode}, body : OrderModificationRequestMessage ]
         \cup [ tag : {OrderCancellationRequestMessageCode}, body : OrderCancellationRequestMessage ]
-        \cup [ tag : {OrderConfirmationMessageCode}, body : OrderConfirmationMessage ]
-        \cup [ tag : {OrderModificationConfirmationMessageCode}, body : OrderModificationConfirmationMessage ]
-        \cup [ tag : {OrderEntryMessageCode}, body : OrderEntryMessage ]
-        \cup [ tag : {OrderEntryMessageCode2}, body : OrderEntryMessage ]
-        \cup [ tag : {OrderEntryMessageCode3}, body : OrderEntryMessage ]
-        \cup [ tag : {OrderEntryMessageCode4}, body : OrderEntryMessage ]
-        \cup [ tag : {OrderEntryMessageCode5}, body : OrderEntryMessage ]
-        \cup [ tag : {OrderEntryMessageCode6}, body : OrderEntryMessage ]
-        \cup [ tag : {OrderEntryMessageCode7}, body : OrderEntryMessage ]
+        \cup [ tag : {KillSwitchRequestMessageCode}, body : KillSwitchRequestMessage ]
         \cup [ tag : {PriceModificationMessageCode}, body : PriceModificationMessage ]
         \cup [ tag : {PriceModificationMessageCode2}, body : PriceModificationMessage ]
         \cup [ tag : {TradeInquiryMessageCode}, body : TradeInquiryMessage ]
@@ -4460,15 +3640,7 @@ EncodeClientMessagePayload(message) ==
       [] message.tag = OrderEntryRequestMessageCode -> EncodeOrderEntryRequestMessage(message.body)
       [] message.tag = OrderModificationRequestMessageCode -> EncodeOrderModificationRequestMessage(message.body)
       [] message.tag = OrderCancellationRequestMessageCode -> EncodeOrderCancellationRequestMessage(message.body)
-      [] message.tag = OrderConfirmationMessageCode -> EncodeOrderConfirmationMessage(message.body)
-      [] message.tag = OrderModificationConfirmationMessageCode -> EncodeOrderModificationConfirmationMessage(message.body)
-      [] message.tag = OrderEntryMessageCode -> EncodeOrderEntryMessage(message.body)
-      [] message.tag = OrderEntryMessageCode2 -> EncodeOrderEntryMessage(message.body)
-      [] message.tag = OrderEntryMessageCode3 -> EncodeOrderEntryMessage(message.body)
-      [] message.tag = OrderEntryMessageCode4 -> EncodeOrderEntryMessage(message.body)
-      [] message.tag = OrderEntryMessageCode5 -> EncodeOrderEntryMessage(message.body)
-      [] message.tag = OrderEntryMessageCode6 -> EncodeOrderEntryMessage(message.body)
-      [] message.tag = OrderEntryMessageCode7 -> EncodeOrderEntryMessage(message.body)
+      [] message.tag = KillSwitchRequestMessageCode -> EncodeKillSwitchRequestMessage(message.body)
       [] message.tag = PriceModificationMessageCode -> EncodePriceModificationMessage(message.body)
       [] message.tag = PriceModificationMessageCode2 -> EncodePriceModificationMessage(message.body)
       [] message.tag = TradeInquiryMessageCode -> EncodeTradeInquiryMessage(message.body)
@@ -4521,15 +3693,7 @@ DecodeClientMessagePayload(tag, bytes) ==
               [] tag = OrderEntryRequestMessageCode -> DecodeOrderEntryRequestMessage(bytes)
               [] tag = OrderModificationRequestMessageCode -> DecodeOrderModificationRequestMessage(bytes)
               [] tag = OrderCancellationRequestMessageCode -> DecodeOrderCancellationRequestMessage(bytes)
-              [] tag = OrderConfirmationMessageCode -> DecodeOrderConfirmationMessage(bytes)
-              [] tag = OrderModificationConfirmationMessageCode -> DecodeOrderModificationConfirmationMessage(bytes)
-              [] tag = OrderEntryMessageCode -> DecodeOrderEntryMessage(bytes)
-              [] tag = OrderEntryMessageCode2 -> DecodeOrderEntryMessage(bytes)
-              [] tag = OrderEntryMessageCode3 -> DecodeOrderEntryMessage(bytes)
-              [] tag = OrderEntryMessageCode4 -> DecodeOrderEntryMessage(bytes)
-              [] tag = OrderEntryMessageCode5 -> DecodeOrderEntryMessage(bytes)
-              [] tag = OrderEntryMessageCode6 -> DecodeOrderEntryMessage(bytes)
-              [] tag = OrderEntryMessageCode7 -> DecodeOrderEntryMessage(bytes)
+              [] tag = KillSwitchRequestMessageCode -> DecodeKillSwitchRequestMessage(bytes)
               [] tag = PriceModificationMessageCode -> DecodePriceModificationMessage(bytes)
               [] tag = PriceModificationMessageCode2 -> DecodePriceModificationMessage(bytes)
               [] tag = TradeInquiryMessageCode -> DecodeTradeInquiryMessage(bytes)
@@ -4586,15 +3750,7 @@ CheckedClientMessagePayload ==
         \cup { [tag |-> OrderEntryRequestMessageCode, body |-> one] : one \in CheckedOrderEntryRequestMessage }
         \cup { [tag |-> OrderModificationRequestMessageCode, body |-> one] : one \in CheckedOrderModificationRequestMessage }
         \cup { [tag |-> OrderCancellationRequestMessageCode, body |-> one] : one \in CheckedOrderCancellationRequestMessage }
-        \cup { [tag |-> OrderConfirmationMessageCode, body |-> one] : one \in CheckedOrderConfirmationMessage }
-        \cup { [tag |-> OrderModificationConfirmationMessageCode, body |-> one] : one \in CheckedOrderModificationConfirmationMessage }
-        \cup { [tag |-> OrderEntryMessageCode, body |-> one] : one \in CheckedOrderEntryMessage }
-        \cup { [tag |-> OrderEntryMessageCode2, body |-> one] : one \in CheckedOrderEntryMessage }
-        \cup { [tag |-> OrderEntryMessageCode3, body |-> one] : one \in CheckedOrderEntryMessage }
-        \cup { [tag |-> OrderEntryMessageCode4, body |-> one] : one \in CheckedOrderEntryMessage }
-        \cup { [tag |-> OrderEntryMessageCode5, body |-> one] : one \in CheckedOrderEntryMessage }
-        \cup { [tag |-> OrderEntryMessageCode6, body |-> one] : one \in CheckedOrderEntryMessage }
-        \cup { [tag |-> OrderEntryMessageCode7, body |-> one] : one \in CheckedOrderEntryMessage }
+        \cup { [tag |-> KillSwitchRequestMessageCode, body |-> one] : one \in CheckedKillSwitchRequestMessage }
         \cup { [tag |-> PriceModificationMessageCode, body |-> one] : one \in CheckedPriceModificationMessage }
         \cup { [tag |-> PriceModificationMessageCode2, body |-> one] : one \in CheckedPriceModificationMessage }
         \cup { [tag |-> TradeInquiryMessageCode, body |-> one] : one \in CheckedTradeInquiryMessage }
@@ -4765,15 +3921,7 @@ OneClientDirectPacket ==
       [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderEntryRequestMessageCode, body |-> ZeroOrderEntryRequestMessage]],
       [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderModificationRequestMessageCode, body |-> ZeroOrderModificationRequestMessage]],
       [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderCancellationRequestMessageCode, body |-> ZeroOrderCancellationRequestMessage]],
-      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderConfirmationMessageCode, body |-> ZeroOrderConfirmationMessage]],
-      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderModificationConfirmationMessageCode, body |-> ZeroOrderModificationConfirmationMessage]],
-      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderEntryMessageCode, body |-> ZeroOrderEntryMessage]],
-      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderEntryMessageCode2, body |-> ZeroOrderEntryMessage]],
-      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderEntryMessageCode3, body |-> ZeroOrderEntryMessage]],
-      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderEntryMessageCode4, body |-> ZeroOrderEntryMessage]],
-      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderEntryMessageCode5, body |-> ZeroOrderEntryMessage]],
-      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderEntryMessageCode6, body |-> ZeroOrderEntryMessage]],
-      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> OrderEntryMessageCode7, body |-> ZeroOrderEntryMessage]],
+      [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> KillSwitchRequestMessageCode, body |-> ZeroKillSwitchRequestMessage]],
       [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> PriceModificationMessageCode, body |-> ZeroPriceModificationMessage]],
       [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> PriceModificationMessageCode2, body |-> ZeroPriceModificationMessage]],
       [ZeroClientDirectPacket EXCEPT !.clientMessagePayload = [tag |-> TradeInquiryMessageCode, body |-> ZeroTradeInquiryMessage]],
@@ -5005,58 +4153,10 @@ RoundTripOrderEntryBody4 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Confirmation Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderConfirmationMessage ==
-    \A message \in CheckedOrderConfirmationMessage :
-        LET read == DecodeOrderConfirmationMessage(EncodeOrderConfirmationMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Contract Desc decodes back to what was encoded, and leaves nothing over *)
-RoundTripContractDesc5 ==
-    \A message \in CheckedContractDesc5 :
-        LET read == DecodeContractDesc5(EncodeContractDesc5(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Order Entry Body decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderEntryBody5 ==
-    \A message \in CheckedOrderEntryBody5 :
-        LET read == DecodeOrderEntryBody5(EncodeOrderEntryBody5(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Order Modification Confirmation Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderModificationConfirmationMessage ==
-    \A message \in CheckedOrderModificationConfirmationMessage :
-        LET read == DecodeOrderModificationConfirmationMessage(EncodeOrderModificationConfirmationMessage(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Contract Desc decodes back to what was encoded, and leaves nothing over *)
-RoundTripContractDesc6 ==
-    \A message \in CheckedContractDesc6 :
-        LET read == DecodeContractDesc6(EncodeContractDesc6(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Order Entry Body decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderEntryBody6 ==
-    \A message \in CheckedOrderEntryBody6 :
-        LET read == DecodeOrderEntryBody6(EncodeOrderEntryBody6(message))
-        IN  /\ read.ok
-            /\ read.value = message
-            /\ read.rest = << >>
-
-(* Every Order Entry Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderEntryMessage ==
-    \A message \in CheckedOrderEntryMessage :
-        LET read == DecodeOrderEntryMessage(EncodeOrderEntryMessage(message))
+(* Every Kill Switch Request Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripKillSwitchRequestMessage ==
+    \A message \in CheckedKillSwitchRequestMessage :
+        LET read == DecodeKillSwitchRequestMessage(EncodeKillSwitchRequestMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -5070,9 +4170,9 @@ RoundTripPriceModificationMessage ==
             /\ read.rest = << >>
 
 (* Every Contract Desc decodes back to what was encoded, and leaves nothing over *)
-RoundTripContractDesc7 ==
-    \A message \in CheckedContractDesc7 :
-        LET read == DecodeContractDesc7(EncodeContractDesc7(message))
+RoundTripContractDesc5 ==
+    \A message \in CheckedContractDesc5 :
+        LET read == DecodeContractDesc5(EncodeContractDesc5(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -5086,17 +4186,17 @@ RoundTripTradeInquiryMessage ==
             /\ read.rest = << >>
 
 (* Every Contract Desc decodes back to what was encoded, and leaves nothing over *)
-RoundTripContractDesc8 ==
-    \A message \in CheckedContractDesc8 :
-        LET read == DecodeContractDesc8(EncodeContractDesc8(message))
+RoundTripContractDesc6 ==
+    \A message \in CheckedContractDesc6 :
+        LET read == DecodeContractDesc6(EncodeContractDesc6(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Contract Desc decodes back to what was encoded, and leaves nothing over *)
-RoundTripContractDesc9 ==
-    \A message \in CheckedContractDesc9 :
-        LET read == DecodeContractDesc9(EncodeContractDesc9(message))
+RoundTripContractDesc7 ==
+    \A message \in CheckedContractDesc7 :
+        LET read == DecodeContractDesc7(EncodeContractDesc7(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

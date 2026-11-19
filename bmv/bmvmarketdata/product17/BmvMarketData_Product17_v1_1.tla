@@ -239,7 +239,7 @@ CheckedWeightedAveragePriceSettlementPricesMessage ==
 CapitalTradesMessage ==
     [ instrumentNumber : Sample(4),
       tradeTime        : Sample(8),
-      volumeInt324     : Sample(4),
+      volume           : Sample(4),
       price            : Sample(8),
       concertationType : Sample(1),
       tradeNumber      : Sample(4),
@@ -254,7 +254,7 @@ CapitalTradesMessage ==
 EncodeCapitalTradesMessage(message) ==
     message.instrumentNumber
         \o message.tradeTime
-        \o message.volumeInt324
+        \o message.volume
         \o message.price
         \o message.concertationType
         \o message.tradeNumber
@@ -269,8 +269,8 @@ EncodeCapitalTradesMessage(message) ==
 DecodeCapitalTradesMessage(bytes) ==
     LET instrumentNumber == ReadBytes(bytes, 4) IN IF ~instrumentNumber.ok THEN Fail ELSE
     LET tradeTime == ReadBytes(instrumentNumber.rest, 8) IN IF ~tradeTime.ok THEN Fail ELSE
-    LET volumeInt324 == ReadBytes(tradeTime.rest, 4) IN IF ~volumeInt324.ok THEN Fail ELSE
-    LET price == ReadBytes(volumeInt324.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    LET volume == ReadBytes(tradeTime.rest, 4) IN IF ~volume.ok THEN Fail ELSE
+    LET price == ReadBytes(volume.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET concertationType == ReadBytes(price.rest, 1) IN IF ~concertationType.ok THEN Fail ELSE
     LET tradeNumber == ReadBytes(concertationType.rest, 4) IN IF ~tradeNumber.ok THEN Fail ELSE
     LET priceSetter == ReadBytes(tradeNumber.rest, 1) IN IF ~priceSetter.ok THEN Fail ELSE
@@ -282,7 +282,7 @@ DecodeCapitalTradesMessage(bytes) ==
     LET auctionIndicator == ReadBytes(settlement.rest, 1) IN IF ~auctionIndicator.ok THEN Fail ELSE
     Ok([ instrumentNumber |-> instrumentNumber.value,
          tradeTime        |-> tradeTime.value,
-         volumeInt324     |-> volumeInt324.value,
+         volume           |-> volume.value,
          price            |-> price.value,
          concertationType |-> concertationType.value,
          tradeNumber      |-> tradeNumber.value,
@@ -297,7 +297,7 @@ DecodeCapitalTradesMessage(bytes) ==
 ZeroCapitalTradesMessage ==
     [ instrumentNumber |-> [i \in 1 .. 4 |-> 0],
       tradeTime        |-> [i \in 1 .. 8 |-> 0],
-      volumeInt324     |-> [i \in 1 .. 4 |-> 0],
+      volume           |-> [i \in 1 .. 4 |-> 0],
       price            |-> [i \in 1 .. 8 |-> 0],
       concertationType |-> [i \in 1 .. 1 |-> 0],
       tradeNumber      |-> [i \in 1 .. 4 |-> 0],
@@ -314,7 +314,7 @@ CheckedCapitalTradesMessage ==
     { ZeroCapitalTradesMessage }
         \cup { [ZeroCapitalTradesMessage EXCEPT !.instrumentNumber = one] : one \in Sample(4) }
         \cup { [ZeroCapitalTradesMessage EXCEPT !.tradeTime = one] : one \in Sample(8) }
-        \cup { [ZeroCapitalTradesMessage EXCEPT !.volumeInt324 = one] : one \in Sample(4) }
+        \cup { [ZeroCapitalTradesMessage EXCEPT !.volume = one] : one \in Sample(4) }
         \cup { [ZeroCapitalTradesMessage EXCEPT !.price = one] : one \in Sample(8) }
         \cup { [ZeroCapitalTradesMessage EXCEPT !.concertationType = one] : one \in Sample(1) }
         \cup { [ZeroCapitalTradesMessage EXCEPT !.tradeNumber = one] : one \in Sample(4) }
@@ -333,32 +333,32 @@ CheckedCapitalTradesMessage ==
 ProbableAllocationPriceMessage ==
     [ instrumentNumber        : Sample(4),
       probableAllocationPrice : Sample(8),
-      volumeInt324            : Sample(4) ]
+      volume                  : Sample(4) ]
 
 EncodeProbableAllocationPriceMessage(message) ==
     message.instrumentNumber
         \o message.probableAllocationPrice
-        \o message.volumeInt324
+        \o message.volume
 
 DecodeProbableAllocationPriceMessage(bytes) ==
     LET instrumentNumber == ReadBytes(bytes, 4) IN IF ~instrumentNumber.ok THEN Fail ELSE
     LET probableAllocationPrice == ReadBytes(instrumentNumber.rest, 8) IN IF ~probableAllocationPrice.ok THEN Fail ELSE
-    LET volumeInt324 == ReadBytes(probableAllocationPrice.rest, 4) IN IF ~volumeInt324.ok THEN Fail ELSE
+    LET volume == ReadBytes(probableAllocationPrice.rest, 4) IN IF ~volume.ok THEN Fail ELSE
     Ok([ instrumentNumber        |-> instrumentNumber.value,
          probableAllocationPrice |-> probableAllocationPrice.value,
-         volumeInt324            |-> volumeInt324.value ], volumeInt324.rest)
+         volume                  |-> volume.value ], volume.rest)
 
 ZeroProbableAllocationPriceMessage ==
     [ instrumentNumber        |-> [i \in 1 .. 4 |-> 0],
       probableAllocationPrice |-> [i \in 1 .. 8 |-> 0],
-      volumeInt324            |-> [i \in 1 .. 4 |-> 0] ]
+      volume                  |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Probable Allocation Price Message at zero, then each field in turn at the values it is checked at *)
 CheckedProbableAllocationPriceMessage ==
     { ZeroProbableAllocationPriceMessage }
         \cup { [ZeroProbableAllocationPriceMessage EXCEPT !.instrumentNumber = one] : one \in Sample(4) }
         \cup { [ZeroProbableAllocationPriceMessage EXCEPT !.probableAllocationPrice = one] : one \in Sample(8) }
-        \cup { [ZeroProbableAllocationPriceMessage EXCEPT !.volumeInt324 = one] : one \in Sample(4) }
+        \cup { [ZeroProbableAllocationPriceMessage EXCEPT !.volume = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Continuous Auctions Beginning Message: 20 bytes                         *)
@@ -580,33 +580,33 @@ CheckedMutualFundTradesMessage ==
 
 BestOfferMessage ==
     [ instrumentNumber : Sample(4),
-      volumeInt324     : Sample(4),
+      volume           : Sample(4),
       priceRate        : Sample(8),
       offerDirection   : Sample(1),
       operationType    : Sample(1) ]
 
 EncodeBestOfferMessage(message) ==
     message.instrumentNumber
-        \o message.volumeInt324
+        \o message.volume
         \o message.priceRate
         \o message.offerDirection
         \o message.operationType
 
 DecodeBestOfferMessage(bytes) ==
     LET instrumentNumber == ReadBytes(bytes, 4) IN IF ~instrumentNumber.ok THEN Fail ELSE
-    LET volumeInt324 == ReadBytes(instrumentNumber.rest, 4) IN IF ~volumeInt324.ok THEN Fail ELSE
-    LET priceRate == ReadBytes(volumeInt324.rest, 8) IN IF ~priceRate.ok THEN Fail ELSE
+    LET volume == ReadBytes(instrumentNumber.rest, 4) IN IF ~volume.ok THEN Fail ELSE
+    LET priceRate == ReadBytes(volume.rest, 8) IN IF ~priceRate.ok THEN Fail ELSE
     LET offerDirection == ReadBytes(priceRate.rest, 1) IN IF ~offerDirection.ok THEN Fail ELSE
     LET operationType == ReadBytes(offerDirection.rest, 1) IN IF ~operationType.ok THEN Fail ELSE
     Ok([ instrumentNumber |-> instrumentNumber.value,
-         volumeInt324     |-> volumeInt324.value,
+         volume           |-> volume.value,
          priceRate        |-> priceRate.value,
          offerDirection   |-> offerDirection.value,
          operationType    |-> operationType.value ], operationType.rest)
 
 ZeroBestOfferMessage ==
     [ instrumentNumber |-> [i \in 1 .. 4 |-> 0],
-      volumeInt324     |-> [i \in 1 .. 4 |-> 0],
+      volume           |-> [i \in 1 .. 4 |-> 0],
       priceRate        |-> [i \in 1 .. 8 |-> 0],
       offerDirection   |-> [i \in 1 .. 1 |-> 0],
       operationType    |-> [i \in 1 .. 1 |-> 0] ]
@@ -615,7 +615,7 @@ ZeroBestOfferMessage ==
 CheckedBestOfferMessage ==
     { ZeroBestOfferMessage }
         \cup { [ZeroBestOfferMessage EXCEPT !.instrumentNumber = one] : one \in Sample(4) }
-        \cup { [ZeroBestOfferMessage EXCEPT !.volumeInt324 = one] : one \in Sample(4) }
+        \cup { [ZeroBestOfferMessage EXCEPT !.volume = one] : one \in Sample(4) }
         \cup { [ZeroBestOfferMessage EXCEPT !.priceRate = one] : one \in Sample(8) }
         \cup { [ZeroBestOfferMessage EXCEPT !.offerDirection = one] : one \in Sample(1) }
         \cup { [ZeroBestOfferMessage EXCEPT !.operationType = one] : one \in Sample(1) }
@@ -627,7 +627,7 @@ CheckedBestOfferMessage ==
 PublicOfferingsMessage ==
     [ instrumentNumber    : Sample(4),
       number              : Sample(4),
-      volumeInt648        : Sample(8),
+      volumeLong          : Sample(8),
       discountRateOrPrice : Sample(8),
       rateOfReturn        : Sample(4),
       termDays            : Sample(2),
@@ -642,7 +642,7 @@ PublicOfferingsMessage ==
 EncodePublicOfferingsMessage(message) ==
     message.instrumentNumber
         \o message.number
-        \o message.volumeInt648
+        \o message.volumeLong
         \o message.discountRateOrPrice
         \o message.rateOfReturn
         \o message.termDays
@@ -657,8 +657,8 @@ EncodePublicOfferingsMessage(message) ==
 DecodePublicOfferingsMessage(bytes) ==
     LET instrumentNumber == ReadBytes(bytes, 4) IN IF ~instrumentNumber.ok THEN Fail ELSE
     LET number == ReadBytes(instrumentNumber.rest, 4) IN IF ~number.ok THEN Fail ELSE
-    LET volumeInt648 == ReadBytes(number.rest, 8) IN IF ~volumeInt648.ok THEN Fail ELSE
-    LET discountRateOrPrice == ReadBytes(volumeInt648.rest, 8) IN IF ~discountRateOrPrice.ok THEN Fail ELSE
+    LET volumeLong == ReadBytes(number.rest, 8) IN IF ~volumeLong.ok THEN Fail ELSE
+    LET discountRateOrPrice == ReadBytes(volumeLong.rest, 8) IN IF ~discountRateOrPrice.ok THEN Fail ELSE
     LET rateOfReturn == ReadBytes(discountRateOrPrice.rest, 4) IN IF ~rateOfReturn.ok THEN Fail ELSE
     LET termDays == ReadBytes(rateOfReturn.rest, 2) IN IF ~termDays.ok THEN Fail ELSE
     LET currencyType == ReadBytes(termDays.rest, 1) IN IF ~currencyType.ok THEN Fail ELSE
@@ -670,7 +670,7 @@ DecodePublicOfferingsMessage(bytes) ==
     LET maturityDate == ReadBytes(issueDate.rest, 8) IN IF ~maturityDate.ok THEN Fail ELSE
     Ok([ instrumentNumber    |-> instrumentNumber.value,
          number              |-> number.value,
-         volumeInt648        |-> volumeInt648.value,
+         volumeLong          |-> volumeLong.value,
          discountRateOrPrice |-> discountRateOrPrice.value,
          rateOfReturn        |-> rateOfReturn.value,
          termDays            |-> termDays.value,
@@ -685,7 +685,7 @@ DecodePublicOfferingsMessage(bytes) ==
 ZeroPublicOfferingsMessage ==
     [ instrumentNumber    |-> [i \in 1 .. 4 |-> 0],
       number              |-> [i \in 1 .. 4 |-> 0],
-      volumeInt648        |-> [i \in 1 .. 8 |-> 0],
+      volumeLong          |-> [i \in 1 .. 8 |-> 0],
       discountRateOrPrice |-> [i \in 1 .. 8 |-> 0],
       rateOfReturn        |-> [i \in 1 .. 4 |-> 0],
       termDays            |-> [i \in 1 .. 2 |-> 0],
@@ -702,7 +702,7 @@ CheckedPublicOfferingsMessage ==
     { ZeroPublicOfferingsMessage }
         \cup { [ZeroPublicOfferingsMessage EXCEPT !.instrumentNumber = one] : one \in Sample(4) }
         \cup { [ZeroPublicOfferingsMessage EXCEPT !.number = one] : one \in Sample(4) }
-        \cup { [ZeroPublicOfferingsMessage EXCEPT !.volumeInt648 = one] : one \in Sample(8) }
+        \cup { [ZeroPublicOfferingsMessage EXCEPT !.volumeLong = one] : one \in Sample(8) }
         \cup { [ZeroPublicOfferingsMessage EXCEPT !.discountRateOrPrice = one] : one \in Sample(8) }
         \cup { [ZeroPublicOfferingsMessage EXCEPT !.rateOfReturn = one] : one \in Sample(4) }
         \cup { [ZeroPublicOfferingsMessage EXCEPT !.termDays = one] : one \in Sample(2) }

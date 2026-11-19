@@ -6,6 +6,29 @@
 (***************************************************************************)
 EXTENDS CoinbaseDerivatives_MarketDataApi_v1_2
 
+EndOfSnapshotMessageCapture ==
+    << 62, 208, 116, 121, 250, 189, 140, 22, 213, 19, 59, 2, 0, 0, 0, 0,
+       49, 175, 2, 2, 216, 0, 0, 0, 136, 0, 123, 0, 111, 0, 177, 4,
+       2, 0, 0, 0, 3, 0, 0, 0, 76, 84, 69, 67, 90, 50, 49, 45,
+       76, 84, 69, 67, 72, 50, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       76, 84, 69, 67, 0, 0, 0, 0, 77, 105, 99, 114, 111, 32, 83, 117,
+       112, 101, 114, 84, 101, 99, 104, 32, 83, 112, 114, 100, 32, 90, 49, 45,
+       72, 50, 0, 0, 0, 0, 0, 0, 0, 225, 245, 5, 0, 0, 0, 0,
+       70, 88, 88, 88, 88, 88, 0, 0, 85, 83, 68, 0, 0, 0, 0, 0,
+       30, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 108, 73, 124, 74,
+       118, 73, 1, 1, 33, 0, 0, 0, 215, 0, 0, 0, 1, 0, 0, 0,
+       176, 0, 160, 0, 122, 0, 177, 4, 2, 0, 1, 0, 1, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 93, 30, 238, 255, 255, 255, 255,
+       0, 93, 30, 238, 255, 255, 255, 255, 0, 93, 30, 238, 255, 255, 255, 255,
+       0, 93, 30, 238, 255, 255, 255, 255, 0, 93, 30, 238, 255, 255, 255, 255,
+       0, 0, 0, 0, 0, 0, 0, 128, 0, 0, 0, 0, 0, 0, 0, 128,
+       0, 0, 0, 0, 0, 0, 0, 128, 0, 0, 0, 0, 0, 0, 0, 128,
+       0, 0, 0, 0, 0, 0, 0, 128, 0, 0, 0, 0, 0, 0, 0, 128,
+       0, 0, 0, 0, 0, 0, 0, 128, 0, 96, 141, 177, 231, 246, 255, 255,
+       0, 160, 114, 78, 24, 9, 0, 0, 0, 0, 0, 128, 0, 0, 0, 0,
+       0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128,
+       0, 0, 0, 0, 0, 0, 0, 128, 0, 0, 0, 0, 0, 0, 0, 0 >>
+
 OrderDeleteMessageCapture ==
     << 44, 4, 56, 175, 250, 189, 140, 22, 21, 20, 59, 2, 0, 0, 0, 0,
        49, 175, 1, 2, 0, 0, 0, 0, 40, 0, 30, 0, 21, 0, 177, 4,
@@ -102,7 +125,7 @@ StartOfSpreadInstrumentSnapshotMessageCapture ==
        0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128,
        0, 0, 0, 0, 0, 0, 0, 128, 0, 0, 0, 0, 0, 0, 0, 0 >>
 
-Captures == { OrderDeleteMessageCapture, OrderPutMessageCapture, OrderSnapshotMessageCapture, StartOfOutrightInstrumentSnapshotMessageCapture, StartOfSpreadInstrumentSnapshotMessageCapture }
+Captures == { EndOfSnapshotMessageCapture, OrderDeleteMessageCapture, OrderPutMessageCapture, OrderSnapshotMessageCapture, StartOfOutrightInstrumentSnapshotMessageCapture, StartOfSpreadInstrumentSnapshotMessageCapture }
 
 (* Every recorded packet reads, reads whole, and writes back unchanged *)
 CapturesRoundTrip ==

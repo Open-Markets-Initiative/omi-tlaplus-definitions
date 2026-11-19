@@ -812,36 +812,41 @@ CheckedStreamIdMessage ==
         \cup { [ZeroStreamIdMessage EXCEPT !.reserved2 = one] : one \in Sample(2) }
 
 (***************************************************************************)
-(* Sequence Number Reset Message: 10 bytes                                 *)
+(* Sequence Number Reset Message: 12 bytes                                 *)
 (***************************************************************************)
 
 SequenceNumberResetMessage ==
     [ sourceTime   : Sample(4),
       sourceTimeNs : Sample(4),
       productId    : Sample(1),
-      channelId    : Sample(1) ]
+      channelId    : Sample(1),
+      reserved2    : Sample(2) ]
 
 EncodeSequenceNumberResetMessage(message) ==
     message.sourceTime
         \o message.sourceTimeNs
         \o message.productId
         \o message.channelId
+        \o message.reserved2
 
 DecodeSequenceNumberResetMessage(bytes) ==
     LET sourceTime == ReadBytes(bytes, 4) IN IF ~sourceTime.ok THEN Fail ELSE
     LET sourceTimeNs == ReadBytes(sourceTime.rest, 4) IN IF ~sourceTimeNs.ok THEN Fail ELSE
     LET productId == ReadBytes(sourceTimeNs.rest, 1) IN IF ~productId.ok THEN Fail ELSE
     LET channelId == ReadBytes(productId.rest, 1) IN IF ~channelId.ok THEN Fail ELSE
+    LET reserved2 == ReadBytes(channelId.rest, 2) IN IF ~reserved2.ok THEN Fail ELSE
     Ok([ sourceTime   |-> sourceTime.value,
          sourceTimeNs |-> sourceTimeNs.value,
          productId    |-> productId.value,
-         channelId    |-> channelId.value ], channelId.rest)
+         channelId    |-> channelId.value,
+         reserved2    |-> reserved2.value ], reserved2.rest)
 
 ZeroSequenceNumberResetMessage ==
     [ sourceTime   |-> [i \in 1 .. 4 |-> 0],
       sourceTimeNs |-> [i \in 1 .. 4 |-> 0],
       productId    |-> [i \in 1 .. 1 |-> 0],
-      channelId    |-> [i \in 1 .. 1 |-> 0] ]
+      channelId    |-> [i \in 1 .. 1 |-> 0],
+      reserved2    |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Sequence Number Reset Message at zero, then each field in turn at the values it is checked at *)
 CheckedSequenceNumberResetMessage ==
@@ -850,6 +855,7 @@ CheckedSequenceNumberResetMessage ==
         \cup { [ZeroSequenceNumberResetMessage EXCEPT !.sourceTimeNs = one] : one \in Sample(4) }
         \cup { [ZeroSequenceNumberResetMessage EXCEPT !.productId = one] : one \in Sample(1) }
         \cup { [ZeroSequenceNumberResetMessage EXCEPT !.channelId = one] : one \in Sample(1) }
+        \cup { [ZeroSequenceNumberResetMessage EXCEPT !.reserved2 = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Payload, selected by Message Type                                       *)

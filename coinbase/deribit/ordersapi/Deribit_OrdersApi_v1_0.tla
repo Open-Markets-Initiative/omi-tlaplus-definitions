@@ -367,33 +367,33 @@ CheckedDetails ==
 (***************************************************************************)
 
 RejectMessage ==
-    [ refSequenceNumber  : Sample(8),
-      reasonRejectReason : Sample(1),
-      details            : Details ]
+    [ refSequenceNumber : Sample(8),
+      rejectReason      : Sample(1),
+      details           : Details ]
 
 EncodeRejectMessage(message) ==
     message.refSequenceNumber
-        \o message.reasonRejectReason
+        \o message.rejectReason
         \o EncodeDetails(message.details)
 
 DecodeRejectMessage(bytes) ==
     LET refSequenceNumber == ReadBytes(bytes, 8) IN IF ~refSequenceNumber.ok THEN Fail ELSE
-    LET reasonRejectReason == ReadBytes(refSequenceNumber.rest, 1) IN IF ~reasonRejectReason.ok THEN Fail ELSE
-    LET details == DecodeDetails(reasonRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
-    Ok([ refSequenceNumber  |-> refSequenceNumber.value,
-         reasonRejectReason |-> reasonRejectReason.value,
-         details            |-> details.value ], details.rest)
+    LET rejectReason == ReadBytes(refSequenceNumber.rest, 1) IN IF ~rejectReason.ok THEN Fail ELSE
+    LET details == DecodeDetails(rejectReason.rest) IN IF ~details.ok THEN Fail ELSE
+    Ok([ refSequenceNumber |-> refSequenceNumber.value,
+         rejectReason      |-> rejectReason.value,
+         details           |-> details.value ], details.rest)
 
 ZeroRejectMessage ==
-    [ refSequenceNumber  |-> [i \in 1 .. 8 |-> 0],
-      reasonRejectReason |-> [i \in 1 .. 1 |-> 0],
-      details            |-> ZeroDetails ]
+    [ refSequenceNumber |-> [i \in 1 .. 8 |-> 0],
+      rejectReason      |-> [i \in 1 .. 1 |-> 0],
+      details           |-> ZeroDetails ]
 
 (* Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedRejectMessage ==
     { ZeroRejectMessage }
         \cup { [ZeroRejectMessage EXCEPT !.refSequenceNumber = one] : one \in Sample(8) }
-        \cup { [ZeroRejectMessage EXCEPT !.reasonRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroRejectMessage EXCEPT !.rejectReason = one] : one \in Sample(1) }
         \cup { [ZeroRejectMessage EXCEPT !.details = one] : one \in CheckedDetails }
 
 (***************************************************************************)
@@ -1442,14 +1442,14 @@ CheckedDetails2 ==
 (***************************************************************************)
 
 NewOrderRejectMessage ==
-    [ timestamp               : Sample(8),
-      execId                  : Sample(8),
-      clientOrderId           : Sample(8),
-      correlationId           : Sample(8),
-      orderId                 : Sample(8),
-      instrumentId            : Sample(8),
-      reasonOrderRejectReason : Sample(1),
-      details                 : Details2 ]
+    [ timestamp         : Sample(8),
+      execId            : Sample(8),
+      clientOrderId     : Sample(8),
+      correlationId     : Sample(8),
+      orderId           : Sample(8),
+      instrumentId      : Sample(8),
+      orderRejectReason : Sample(1),
+      details           : Details2 ]
 
 EncodeNewOrderRejectMessage(message) ==
     message.timestamp
@@ -1458,7 +1458,7 @@ EncodeNewOrderRejectMessage(message) ==
         \o message.correlationId
         \o message.orderId
         \o message.instrumentId
-        \o message.reasonOrderRejectReason
+        \o message.orderRejectReason
         \o EncodeDetails2(message.details)
 
 DecodeNewOrderRejectMessage(bytes) ==
@@ -1468,26 +1468,26 @@ DecodeNewOrderRejectMessage(bytes) ==
     LET correlationId == ReadBytes(clientOrderId.rest, 8) IN IF ~correlationId.ok THEN Fail ELSE
     LET orderId == ReadBytes(correlationId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET instrumentId == ReadBytes(orderId.rest, 8) IN IF ~instrumentId.ok THEN Fail ELSE
-    LET reasonOrderRejectReason == ReadBytes(instrumentId.rest, 1) IN IF ~reasonOrderRejectReason.ok THEN Fail ELSE
-    LET details == DecodeDetails2(reasonOrderRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
-    Ok([ timestamp               |-> timestamp.value,
-         execId                  |-> execId.value,
-         clientOrderId           |-> clientOrderId.value,
-         correlationId           |-> correlationId.value,
-         orderId                 |-> orderId.value,
-         instrumentId            |-> instrumentId.value,
-         reasonOrderRejectReason |-> reasonOrderRejectReason.value,
-         details                 |-> details.value ], details.rest)
+    LET orderRejectReason == ReadBytes(instrumentId.rest, 1) IN IF ~orderRejectReason.ok THEN Fail ELSE
+    LET details == DecodeDetails2(orderRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
+    Ok([ timestamp         |-> timestamp.value,
+         execId            |-> execId.value,
+         clientOrderId     |-> clientOrderId.value,
+         correlationId     |-> correlationId.value,
+         orderId           |-> orderId.value,
+         instrumentId      |-> instrumentId.value,
+         orderRejectReason |-> orderRejectReason.value,
+         details           |-> details.value ], details.rest)
 
 ZeroNewOrderRejectMessage ==
-    [ timestamp               |-> [i \in 1 .. 8 |-> 0],
-      execId                  |-> [i \in 1 .. 8 |-> 0],
-      clientOrderId           |-> [i \in 1 .. 8 |-> 0],
-      correlationId           |-> [i \in 1 .. 8 |-> 0],
-      orderId                 |-> [i \in 1 .. 8 |-> 0],
-      instrumentId            |-> [i \in 1 .. 8 |-> 0],
-      reasonOrderRejectReason |-> [i \in 1 .. 1 |-> 0],
-      details                 |-> ZeroDetails2 ]
+    [ timestamp         |-> [i \in 1 .. 8 |-> 0],
+      execId            |-> [i \in 1 .. 8 |-> 0],
+      clientOrderId     |-> [i \in 1 .. 8 |-> 0],
+      correlationId     |-> [i \in 1 .. 8 |-> 0],
+      orderId           |-> [i \in 1 .. 8 |-> 0],
+      instrumentId      |-> [i \in 1 .. 8 |-> 0],
+      orderRejectReason |-> [i \in 1 .. 1 |-> 0],
+      details           |-> ZeroDetails2 ]
 
 (* New Order Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderRejectMessage ==
@@ -1498,7 +1498,7 @@ CheckedNewOrderRejectMessage ==
         \cup { [ZeroNewOrderRejectMessage EXCEPT !.correlationId = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderRejectMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderRejectMessage EXCEPT !.instrumentId = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderRejectMessage EXCEPT !.reasonOrderRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrderRejectMessage EXCEPT !.orderRejectReason = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderRejectMessage EXCEPT !.details = one] : one \in CheckedDetails2 }
 
 (***************************************************************************)
@@ -1958,14 +1958,14 @@ CheckedDetails3 ==
 (***************************************************************************)
 
 AmendOrderRejectMessage ==
-    [ timestamp               : Sample(8),
-      execId                  : Sample(8),
-      clientOrderId           : Sample(8),
-      correlationId           : Sample(8),
-      orderId                 : Sample(8),
-      instrumentId            : Sample(8),
-      reasonOrderRejectReason : Sample(1),
-      details                 : Details3 ]
+    [ timestamp         : Sample(8),
+      execId            : Sample(8),
+      clientOrderId     : Sample(8),
+      correlationId     : Sample(8),
+      orderId           : Sample(8),
+      instrumentId      : Sample(8),
+      orderRejectReason : Sample(1),
+      details           : Details3 ]
 
 EncodeAmendOrderRejectMessage(message) ==
     message.timestamp
@@ -1974,7 +1974,7 @@ EncodeAmendOrderRejectMessage(message) ==
         \o message.correlationId
         \o message.orderId
         \o message.instrumentId
-        \o message.reasonOrderRejectReason
+        \o message.orderRejectReason
         \o EncodeDetails3(message.details)
 
 DecodeAmendOrderRejectMessage(bytes) ==
@@ -1984,26 +1984,26 @@ DecodeAmendOrderRejectMessage(bytes) ==
     LET correlationId == ReadBytes(clientOrderId.rest, 8) IN IF ~correlationId.ok THEN Fail ELSE
     LET orderId == ReadBytes(correlationId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET instrumentId == ReadBytes(orderId.rest, 8) IN IF ~instrumentId.ok THEN Fail ELSE
-    LET reasonOrderRejectReason == ReadBytes(instrumentId.rest, 1) IN IF ~reasonOrderRejectReason.ok THEN Fail ELSE
-    LET details == DecodeDetails3(reasonOrderRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
-    Ok([ timestamp               |-> timestamp.value,
-         execId                  |-> execId.value,
-         clientOrderId           |-> clientOrderId.value,
-         correlationId           |-> correlationId.value,
-         orderId                 |-> orderId.value,
-         instrumentId            |-> instrumentId.value,
-         reasonOrderRejectReason |-> reasonOrderRejectReason.value,
-         details                 |-> details.value ], details.rest)
+    LET orderRejectReason == ReadBytes(instrumentId.rest, 1) IN IF ~orderRejectReason.ok THEN Fail ELSE
+    LET details == DecodeDetails3(orderRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
+    Ok([ timestamp         |-> timestamp.value,
+         execId            |-> execId.value,
+         clientOrderId     |-> clientOrderId.value,
+         correlationId     |-> correlationId.value,
+         orderId           |-> orderId.value,
+         instrumentId      |-> instrumentId.value,
+         orderRejectReason |-> orderRejectReason.value,
+         details           |-> details.value ], details.rest)
 
 ZeroAmendOrderRejectMessage ==
-    [ timestamp               |-> [i \in 1 .. 8 |-> 0],
-      execId                  |-> [i \in 1 .. 8 |-> 0],
-      clientOrderId           |-> [i \in 1 .. 8 |-> 0],
-      correlationId           |-> [i \in 1 .. 8 |-> 0],
-      orderId                 |-> [i \in 1 .. 8 |-> 0],
-      instrumentId            |-> [i \in 1 .. 8 |-> 0],
-      reasonOrderRejectReason |-> [i \in 1 .. 1 |-> 0],
-      details                 |-> ZeroDetails3 ]
+    [ timestamp         |-> [i \in 1 .. 8 |-> 0],
+      execId            |-> [i \in 1 .. 8 |-> 0],
+      clientOrderId     |-> [i \in 1 .. 8 |-> 0],
+      correlationId     |-> [i \in 1 .. 8 |-> 0],
+      orderId           |-> [i \in 1 .. 8 |-> 0],
+      instrumentId      |-> [i \in 1 .. 8 |-> 0],
+      orderRejectReason |-> [i \in 1 .. 1 |-> 0],
+      details           |-> ZeroDetails3 ]
 
 (* Amend Order Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedAmendOrderRejectMessage ==
@@ -2014,7 +2014,7 @@ CheckedAmendOrderRejectMessage ==
         \cup { [ZeroAmendOrderRejectMessage EXCEPT !.correlationId = one] : one \in Sample(8) }
         \cup { [ZeroAmendOrderRejectMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroAmendOrderRejectMessage EXCEPT !.instrumentId = one] : one \in Sample(8) }
-        \cup { [ZeroAmendOrderRejectMessage EXCEPT !.reasonOrderRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroAmendOrderRejectMessage EXCEPT !.orderRejectReason = one] : one \in Sample(1) }
         \cup { [ZeroAmendOrderRejectMessage EXCEPT !.details = one] : one \in CheckedDetails3 }
 
 (***************************************************************************)
@@ -2104,14 +2104,14 @@ CheckedDetails4 ==
 (***************************************************************************)
 
 CancelOrderRejectMessage ==
-    [ timestamp                     : Sample(8),
-      execId                        : Sample(8),
-      clientOrderId                 : Sample(8),
-      correlationId                 : Sample(8),
-      orderIdOptional               : Sample(8),
-      instrumentId                  : Sample(8),
-      reasonCancelOrderRejectReason : Sample(1),
-      details                       : Details4 ]
+    [ timestamp               : Sample(8),
+      execId                  : Sample(8),
+      clientOrderId           : Sample(8),
+      correlationId           : Sample(8),
+      orderIdOptional         : Sample(8),
+      instrumentId            : Sample(8),
+      cancelOrderRejectReason : Sample(1),
+      details                 : Details4 ]
 
 EncodeCancelOrderRejectMessage(message) ==
     message.timestamp
@@ -2120,7 +2120,7 @@ EncodeCancelOrderRejectMessage(message) ==
         \o message.correlationId
         \o message.orderIdOptional
         \o message.instrumentId
-        \o message.reasonCancelOrderRejectReason
+        \o message.cancelOrderRejectReason
         \o EncodeDetails4(message.details)
 
 DecodeCancelOrderRejectMessage(bytes) ==
@@ -2130,26 +2130,26 @@ DecodeCancelOrderRejectMessage(bytes) ==
     LET correlationId == ReadBytes(clientOrderId.rest, 8) IN IF ~correlationId.ok THEN Fail ELSE
     LET orderIdOptional == ReadBytes(correlationId.rest, 8) IN IF ~orderIdOptional.ok THEN Fail ELSE
     LET instrumentId == ReadBytes(orderIdOptional.rest, 8) IN IF ~instrumentId.ok THEN Fail ELSE
-    LET reasonCancelOrderRejectReason == ReadBytes(instrumentId.rest, 1) IN IF ~reasonCancelOrderRejectReason.ok THEN Fail ELSE
-    LET details == DecodeDetails4(reasonCancelOrderRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
-    Ok([ timestamp                     |-> timestamp.value,
-         execId                        |-> execId.value,
-         clientOrderId                 |-> clientOrderId.value,
-         correlationId                 |-> correlationId.value,
-         orderIdOptional               |-> orderIdOptional.value,
-         instrumentId                  |-> instrumentId.value,
-         reasonCancelOrderRejectReason |-> reasonCancelOrderRejectReason.value,
-         details                       |-> details.value ], details.rest)
+    LET cancelOrderRejectReason == ReadBytes(instrumentId.rest, 1) IN IF ~cancelOrderRejectReason.ok THEN Fail ELSE
+    LET details == DecodeDetails4(cancelOrderRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
+    Ok([ timestamp               |-> timestamp.value,
+         execId                  |-> execId.value,
+         clientOrderId           |-> clientOrderId.value,
+         correlationId           |-> correlationId.value,
+         orderIdOptional         |-> orderIdOptional.value,
+         instrumentId            |-> instrumentId.value,
+         cancelOrderRejectReason |-> cancelOrderRejectReason.value,
+         details                 |-> details.value ], details.rest)
 
 ZeroCancelOrderRejectMessage ==
-    [ timestamp                     |-> [i \in 1 .. 8 |-> 0],
-      execId                        |-> [i \in 1 .. 8 |-> 0],
-      clientOrderId                 |-> [i \in 1 .. 8 |-> 0],
-      correlationId                 |-> [i \in 1 .. 8 |-> 0],
-      orderIdOptional               |-> [i \in 1 .. 8 |-> 0],
-      instrumentId                  |-> [i \in 1 .. 8 |-> 0],
-      reasonCancelOrderRejectReason |-> [i \in 1 .. 1 |-> 0],
-      details                       |-> ZeroDetails4 ]
+    [ timestamp               |-> [i \in 1 .. 8 |-> 0],
+      execId                  |-> [i \in 1 .. 8 |-> 0],
+      clientOrderId           |-> [i \in 1 .. 8 |-> 0],
+      correlationId           |-> [i \in 1 .. 8 |-> 0],
+      orderIdOptional         |-> [i \in 1 .. 8 |-> 0],
+      instrumentId            |-> [i \in 1 .. 8 |-> 0],
+      cancelOrderRejectReason |-> [i \in 1 .. 1 |-> 0],
+      details                 |-> ZeroDetails4 ]
 
 (* Cancel Order Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedCancelOrderRejectMessage ==
@@ -2160,7 +2160,7 @@ CheckedCancelOrderRejectMessage ==
         \cup { [ZeroCancelOrderRejectMessage EXCEPT !.correlationId = one] : one \in Sample(8) }
         \cup { [ZeroCancelOrderRejectMessage EXCEPT !.orderIdOptional = one] : one \in Sample(8) }
         \cup { [ZeroCancelOrderRejectMessage EXCEPT !.instrumentId = one] : one \in Sample(8) }
-        \cup { [ZeroCancelOrderRejectMessage EXCEPT !.reasonCancelOrderRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroCancelOrderRejectMessage EXCEPT !.cancelOrderRejectReason = one] : one \in Sample(1) }
         \cup { [ZeroCancelOrderRejectMessage EXCEPT !.details = one] : one \in CheckedDetails4 }
 
 (***************************************************************************)
@@ -2888,13 +2888,13 @@ CheckedDetails5 ==
 (***************************************************************************)
 
 MassQuoteRejectMessage ==
-    [ timestamp                   : Sample(8),
-      execId                      : Sample(8),
-      quoteId                     : Sample(8),
-      correlationId               : Sample(8),
-      mmpGroupId                  : Sample(8),
-      reasonMassQuoteRejectReason : Sample(1),
-      details                     : Details5 ]
+    [ timestamp             : Sample(8),
+      execId                : Sample(8),
+      quoteId               : Sample(8),
+      correlationId         : Sample(8),
+      mmpGroupId            : Sample(8),
+      massQuoteRejectReason : Sample(1),
+      details               : Details5 ]
 
 EncodeMassQuoteRejectMessage(message) ==
     message.timestamp
@@ -2902,7 +2902,7 @@ EncodeMassQuoteRejectMessage(message) ==
         \o message.quoteId
         \o message.correlationId
         \o message.mmpGroupId
-        \o message.reasonMassQuoteRejectReason
+        \o message.massQuoteRejectReason
         \o EncodeDetails5(message.details)
 
 DecodeMassQuoteRejectMessage(bytes) ==
@@ -2911,24 +2911,24 @@ DecodeMassQuoteRejectMessage(bytes) ==
     LET quoteId == ReadBytes(execId.rest, 8) IN IF ~quoteId.ok THEN Fail ELSE
     LET correlationId == ReadBytes(quoteId.rest, 8) IN IF ~correlationId.ok THEN Fail ELSE
     LET mmpGroupId == ReadBytes(correlationId.rest, 8) IN IF ~mmpGroupId.ok THEN Fail ELSE
-    LET reasonMassQuoteRejectReason == ReadBytes(mmpGroupId.rest, 1) IN IF ~reasonMassQuoteRejectReason.ok THEN Fail ELSE
-    LET details == DecodeDetails5(reasonMassQuoteRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
-    Ok([ timestamp                   |-> timestamp.value,
-         execId                      |-> execId.value,
-         quoteId                     |-> quoteId.value,
-         correlationId               |-> correlationId.value,
-         mmpGroupId                  |-> mmpGroupId.value,
-         reasonMassQuoteRejectReason |-> reasonMassQuoteRejectReason.value,
-         details                     |-> details.value ], details.rest)
+    LET massQuoteRejectReason == ReadBytes(mmpGroupId.rest, 1) IN IF ~massQuoteRejectReason.ok THEN Fail ELSE
+    LET details == DecodeDetails5(massQuoteRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
+    Ok([ timestamp             |-> timestamp.value,
+         execId                |-> execId.value,
+         quoteId               |-> quoteId.value,
+         correlationId         |-> correlationId.value,
+         mmpGroupId            |-> mmpGroupId.value,
+         massQuoteRejectReason |-> massQuoteRejectReason.value,
+         details               |-> details.value ], details.rest)
 
 ZeroMassQuoteRejectMessage ==
-    [ timestamp                   |-> [i \in 1 .. 8 |-> 0],
-      execId                      |-> [i \in 1 .. 8 |-> 0],
-      quoteId                     |-> [i \in 1 .. 8 |-> 0],
-      correlationId               |-> [i \in 1 .. 8 |-> 0],
-      mmpGroupId                  |-> [i \in 1 .. 8 |-> 0],
-      reasonMassQuoteRejectReason |-> [i \in 1 .. 1 |-> 0],
-      details                     |-> ZeroDetails5 ]
+    [ timestamp             |-> [i \in 1 .. 8 |-> 0],
+      execId                |-> [i \in 1 .. 8 |-> 0],
+      quoteId               |-> [i \in 1 .. 8 |-> 0],
+      correlationId         |-> [i \in 1 .. 8 |-> 0],
+      mmpGroupId            |-> [i \in 1 .. 8 |-> 0],
+      massQuoteRejectReason |-> [i \in 1 .. 1 |-> 0],
+      details               |-> ZeroDetails5 ]
 
 (* Mass Quote Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteRejectMessage ==
@@ -2938,7 +2938,7 @@ CheckedMassQuoteRejectMessage ==
         \cup { [ZeroMassQuoteRejectMessage EXCEPT !.quoteId = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteRejectMessage EXCEPT !.correlationId = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteRejectMessage EXCEPT !.mmpGroupId = one] : one \in Sample(8) }
-        \cup { [ZeroMassQuoteRejectMessage EXCEPT !.reasonMassQuoteRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroMassQuoteRejectMessage EXCEPT !.massQuoteRejectReason = one] : one \in Sample(1) }
         \cup { [ZeroMassQuoteRejectMessage EXCEPT !.details = one] : one \in CheckedDetails5 }
 
 (***************************************************************************)
@@ -3016,37 +3016,37 @@ CheckedDetails6 ==
 (***************************************************************************)
 
 MassCancelRejectMessage ==
-    [ timestamp                    : Sample(8),
-      execId                       : Sample(8),
-      correlationId                : Sample(8),
-      reasonMassCancelRejectReason : Sample(1),
-      details                      : Details6 ]
+    [ timestamp              : Sample(8),
+      execId                 : Sample(8),
+      correlationId          : Sample(8),
+      massCancelRejectReason : Sample(1),
+      details                : Details6 ]
 
 EncodeMassCancelRejectMessage(message) ==
     message.timestamp
         \o message.execId
         \o message.correlationId
-        \o message.reasonMassCancelRejectReason
+        \o message.massCancelRejectReason
         \o EncodeDetails6(message.details)
 
 DecodeMassCancelRejectMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 8) IN IF ~timestamp.ok THEN Fail ELSE
     LET execId == ReadBytes(timestamp.rest, 8) IN IF ~execId.ok THEN Fail ELSE
     LET correlationId == ReadBytes(execId.rest, 8) IN IF ~correlationId.ok THEN Fail ELSE
-    LET reasonMassCancelRejectReason == ReadBytes(correlationId.rest, 1) IN IF ~reasonMassCancelRejectReason.ok THEN Fail ELSE
-    LET details == DecodeDetails6(reasonMassCancelRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
-    Ok([ timestamp                    |-> timestamp.value,
-         execId                       |-> execId.value,
-         correlationId                |-> correlationId.value,
-         reasonMassCancelRejectReason |-> reasonMassCancelRejectReason.value,
-         details                      |-> details.value ], details.rest)
+    LET massCancelRejectReason == ReadBytes(correlationId.rest, 1) IN IF ~massCancelRejectReason.ok THEN Fail ELSE
+    LET details == DecodeDetails6(massCancelRejectReason.rest) IN IF ~details.ok THEN Fail ELSE
+    Ok([ timestamp              |-> timestamp.value,
+         execId                 |-> execId.value,
+         correlationId          |-> correlationId.value,
+         massCancelRejectReason |-> massCancelRejectReason.value,
+         details                |-> details.value ], details.rest)
 
 ZeroMassCancelRejectMessage ==
-    [ timestamp                    |-> [i \in 1 .. 8 |-> 0],
-      execId                       |-> [i \in 1 .. 8 |-> 0],
-      correlationId                |-> [i \in 1 .. 8 |-> 0],
-      reasonMassCancelRejectReason |-> [i \in 1 .. 1 |-> 0],
-      details                      |-> ZeroDetails6 ]
+    [ timestamp              |-> [i \in 1 .. 8 |-> 0],
+      execId                 |-> [i \in 1 .. 8 |-> 0],
+      correlationId          |-> [i \in 1 .. 8 |-> 0],
+      massCancelRejectReason |-> [i \in 1 .. 1 |-> 0],
+      details                |-> ZeroDetails6 ]
 
 (* Mass Cancel Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedMassCancelRejectMessage ==
@@ -3054,7 +3054,7 @@ CheckedMassCancelRejectMessage ==
         \cup { [ZeroMassCancelRejectMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
         \cup { [ZeroMassCancelRejectMessage EXCEPT !.execId = one] : one \in Sample(8) }
         \cup { [ZeroMassCancelRejectMessage EXCEPT !.correlationId = one] : one \in Sample(8) }
-        \cup { [ZeroMassCancelRejectMessage EXCEPT !.reasonMassCancelRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroMassCancelRejectMessage EXCEPT !.massCancelRejectReason = one] : one \in Sample(1) }
         \cup { [ZeroMassCancelRejectMessage EXCEPT !.details = one] : one \in CheckedDetails6 }
 
 (***************************************************************************)
@@ -4230,38 +4230,38 @@ CheckedFillQty12 ==
 (***************************************************************************)
 
 MassQuoteOrdersPlacedMessageFillsGroup ==
-    [ matchId       : Sample(8),
-      orderIdFillId : Sample(8),
-      fillPrice     : Sample(8),
-      fillQty       : FillQty12 ]
+    [ matchId   : Sample(8),
+      orderId   : Sample(8),
+      fillPrice : Sample(8),
+      fillQty   : FillQty12 ]
 
 EncodeMassQuoteOrdersPlacedMessageFillsGroup(message) ==
     message.matchId
-        \o message.orderIdFillId
+        \o message.orderId
         \o message.fillPrice
         \o EncodeFillQty12(message.fillQty)
 
 DecodeMassQuoteOrdersPlacedMessageFillsGroup(bytes) ==
     LET matchId == ReadBytes(bytes, 8) IN IF ~matchId.ok THEN Fail ELSE
-    LET orderIdFillId == ReadBytes(matchId.rest, 8) IN IF ~orderIdFillId.ok THEN Fail ELSE
-    LET fillPrice == ReadBytes(orderIdFillId.rest, 8) IN IF ~fillPrice.ok THEN Fail ELSE
+    LET orderId == ReadBytes(matchId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET fillPrice == ReadBytes(orderId.rest, 8) IN IF ~fillPrice.ok THEN Fail ELSE
     LET fillQty == DecodeFillQty12(fillPrice.rest) IN IF ~fillQty.ok THEN Fail ELSE
-    Ok([ matchId       |-> matchId.value,
-         orderIdFillId |-> orderIdFillId.value,
-         fillPrice     |-> fillPrice.value,
-         fillQty       |-> fillQty.value ], fillQty.rest)
+    Ok([ matchId   |-> matchId.value,
+         orderId   |-> orderId.value,
+         fillPrice |-> fillPrice.value,
+         fillQty   |-> fillQty.value ], fillQty.rest)
 
 ZeroMassQuoteOrdersPlacedMessageFillsGroup ==
-    [ matchId       |-> [i \in 1 .. 8 |-> 0],
-      orderIdFillId |-> [i \in 1 .. 8 |-> 0],
-      fillPrice     |-> [i \in 1 .. 8 |-> 0],
-      fillQty       |-> ZeroFillQty12 ]
+    [ matchId   |-> [i \in 1 .. 8 |-> 0],
+      orderId   |-> [i \in 1 .. 8 |-> 0],
+      fillPrice |-> [i \in 1 .. 8 |-> 0],
+      fillQty   |-> ZeroFillQty12 ]
 
 (* Mass Quote Orders Placed Message Fills Group at zero, then each field in turn at the values it is checked at *)
 CheckedMassQuoteOrdersPlacedMessageFillsGroup ==
     { ZeroMassQuoteOrdersPlacedMessageFillsGroup }
         \cup { [ZeroMassQuoteOrdersPlacedMessageFillsGroup EXCEPT !.matchId = one] : one \in Sample(8) }
-        \cup { [ZeroMassQuoteOrdersPlacedMessageFillsGroup EXCEPT !.orderIdFillId = one] : one \in Sample(8) }
+        \cup { [ZeroMassQuoteOrdersPlacedMessageFillsGroup EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteOrdersPlacedMessageFillsGroup EXCEPT !.fillPrice = one] : one \in Sample(8) }
         \cup { [ZeroMassQuoteOrdersPlacedMessageFillsGroup EXCEPT !.fillQty = one] : one \in CheckedFillQty12 }
 

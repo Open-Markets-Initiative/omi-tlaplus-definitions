@@ -2413,28 +2413,28 @@ CheckedInstAttribGroups ==
 (***************************************************************************)
 
 LotTypeRulesGroup ==
-    [ lotType              : Sample(1),
-      minLotSizeDecimalQty : Sample(4) ]
+    [ lotType    : Sample(1),
+      minLotSize : Sample(4) ]
 
 EncodeLotTypeRulesGroup(message) ==
     message.lotType
-        \o message.minLotSizeDecimalQty
+        \o message.minLotSize
 
 DecodeLotTypeRulesGroup(bytes) ==
     LET lotType == ReadBytes(bytes, 1) IN IF ~lotType.ok THEN Fail ELSE
-    LET minLotSizeDecimalQty == ReadBytes(lotType.rest, 4) IN IF ~minLotSizeDecimalQty.ok THEN Fail ELSE
-    Ok([ lotType              |-> lotType.value,
-         minLotSizeDecimalQty |-> minLotSizeDecimalQty.value ], minLotSizeDecimalQty.rest)
+    LET minLotSize == ReadBytes(lotType.rest, 4) IN IF ~minLotSize.ok THEN Fail ELSE
+    Ok([ lotType    |-> lotType.value,
+         minLotSize |-> minLotSize.value ], minLotSize.rest)
 
 ZeroLotTypeRulesGroup ==
-    [ lotType              |-> [i \in 1 .. 1 |-> 0],
-      minLotSizeDecimalQty |-> [i \in 1 .. 4 |-> 0] ]
+    [ lotType    |-> [i \in 1 .. 1 |-> 0],
+      minLotSize |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Lot Type Rules Group at zero, then each field in turn at the values it is checked at *)
 CheckedLotTypeRulesGroup ==
     { ZeroLotTypeRulesGroup }
         \cup { [ZeroLotTypeRulesGroup EXCEPT !.lotType = one] : one \in Sample(1) }
-        \cup { [ZeroLotTypeRulesGroup EXCEPT !.minLotSizeDecimalQty = one] : one \in Sample(4) }
+        \cup { [ZeroLotTypeRulesGroup EXCEPT !.minLotSize = one] : one \in Sample(4) }
 
 (* A run of Lot Type Rules Group, written one after another *)
 RECURSIVE EncodeLotTypeRulesGroupList(_)
@@ -3073,28 +3073,28 @@ CheckedInstAttribGroups2 ==
 (***************************************************************************)
 
 LotTypeRulesGroup2 ==
-    [ lotType              : Sample(1),
-      minLotSizeDecimalQty : Sample(4) ]
+    [ lotType    : Sample(1),
+      minLotSize : Sample(4) ]
 
 EncodeLotTypeRulesGroup2(message) ==
     message.lotType
-        \o message.minLotSizeDecimalQty
+        \o message.minLotSize
 
 DecodeLotTypeRulesGroup2(bytes) ==
     LET lotType == ReadBytes(bytes, 1) IN IF ~lotType.ok THEN Fail ELSE
-    LET minLotSizeDecimalQty == ReadBytes(lotType.rest, 4) IN IF ~minLotSizeDecimalQty.ok THEN Fail ELSE
-    Ok([ lotType              |-> lotType.value,
-         minLotSizeDecimalQty |-> minLotSizeDecimalQty.value ], minLotSizeDecimalQty.rest)
+    LET minLotSize == ReadBytes(lotType.rest, 4) IN IF ~minLotSize.ok THEN Fail ELSE
+    Ok([ lotType    |-> lotType.value,
+         minLotSize |-> minLotSize.value ], minLotSize.rest)
 
 ZeroLotTypeRulesGroup2 ==
-    [ lotType              |-> [i \in 1 .. 1 |-> 0],
-      minLotSizeDecimalQty |-> [i \in 1 .. 4 |-> 0] ]
+    [ lotType    |-> [i \in 1 .. 1 |-> 0],
+      minLotSize |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Lot Type Rules Group at zero, then each field in turn at the values it is checked at *)
 CheckedLotTypeRulesGroup2 ==
     { ZeroLotTypeRulesGroup2 }
         \cup { [ZeroLotTypeRulesGroup2 EXCEPT !.lotType = one] : one \in Sample(1) }
-        \cup { [ZeroLotTypeRulesGroup2 EXCEPT !.minLotSizeDecimalQty = one] : one \in Sample(4) }
+        \cup { [ZeroLotTypeRulesGroup2 EXCEPT !.minLotSize = one] : one \in Sample(4) }
 
 (* A run of Lot Type Rules Group, written one after another *)
 RECURSIVE EncodeLotTypeRulesGroup2List(_)
@@ -3891,28 +3891,28 @@ CheckedInstAttribGroups3 ==
 (***************************************************************************)
 
 LotTypeRulesGroup3 ==
-    [ lotType              : Sample(1),
-      minLotSizeDecimalQty : Sample(4) ]
+    [ lotType    : Sample(1),
+      minLotSize : Sample(4) ]
 
 EncodeLotTypeRulesGroup3(message) ==
     message.lotType
-        \o message.minLotSizeDecimalQty
+        \o message.minLotSize
 
 DecodeLotTypeRulesGroup3(bytes) ==
     LET lotType == ReadBytes(bytes, 1) IN IF ~lotType.ok THEN Fail ELSE
-    LET minLotSizeDecimalQty == ReadBytes(lotType.rest, 4) IN IF ~minLotSizeDecimalQty.ok THEN Fail ELSE
-    Ok([ lotType              |-> lotType.value,
-         minLotSizeDecimalQty |-> minLotSizeDecimalQty.value ], minLotSizeDecimalQty.rest)
+    LET minLotSize == ReadBytes(lotType.rest, 4) IN IF ~minLotSize.ok THEN Fail ELSE
+    Ok([ lotType    |-> lotType.value,
+         minLotSize |-> minLotSize.value ], minLotSize.rest)
 
 ZeroLotTypeRulesGroup3 ==
-    [ lotType              |-> [i \in 1 .. 1 |-> 0],
-      minLotSizeDecimalQty |-> [i \in 1 .. 4 |-> 0] ]
+    [ lotType    |-> [i \in 1 .. 1 |-> 0],
+      minLotSize |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Lot Type Rules Group at zero, then each field in turn at the values it is checked at *)
 CheckedLotTypeRulesGroup3 ==
     { ZeroLotTypeRulesGroup3 }
         \cup { [ZeroLotTypeRulesGroup3 EXCEPT !.lotType = one] : one \in Sample(1) }
-        \cup { [ZeroLotTypeRulesGroup3 EXCEPT !.minLotSizeDecimalQty = one] : one \in Sample(4) }
+        \cup { [ZeroLotTypeRulesGroup3 EXCEPT !.minLotSize = one] : one \in Sample(4) }
 
 (* A run of Lot Type Rules Group, written one after another *)
 RECURSIVE EncodeLotTypeRulesGroup3List(_)
@@ -4602,28 +4602,28 @@ CheckedInstAttribGroups4 ==
 (***************************************************************************)
 
 LotTypeRulesGroup4 ==
-    [ lotType              : Sample(1),
-      minLotSizeDecimalQty : Sample(4) ]
+    [ lotType    : Sample(1),
+      minLotSize : Sample(4) ]
 
 EncodeLotTypeRulesGroup4(message) ==
     message.lotType
-        \o message.minLotSizeDecimalQty
+        \o message.minLotSize
 
 DecodeLotTypeRulesGroup4(bytes) ==
     LET lotType == ReadBytes(bytes, 1) IN IF ~lotType.ok THEN Fail ELSE
-    LET minLotSizeDecimalQty == ReadBytes(lotType.rest, 4) IN IF ~minLotSizeDecimalQty.ok THEN Fail ELSE
-    Ok([ lotType              |-> lotType.value,
-         minLotSizeDecimalQty |-> minLotSizeDecimalQty.value ], minLotSizeDecimalQty.rest)
+    LET minLotSize == ReadBytes(lotType.rest, 4) IN IF ~minLotSize.ok THEN Fail ELSE
+    Ok([ lotType    |-> lotType.value,
+         minLotSize |-> minLotSize.value ], minLotSize.rest)
 
 ZeroLotTypeRulesGroup4 ==
-    [ lotType              |-> [i \in 1 .. 1 |-> 0],
-      minLotSizeDecimalQty |-> [i \in 1 .. 4 |-> 0] ]
+    [ lotType    |-> [i \in 1 .. 1 |-> 0],
+      minLotSize |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Lot Type Rules Group at zero, then each field in turn at the values it is checked at *)
 CheckedLotTypeRulesGroup4 ==
     { ZeroLotTypeRulesGroup4 }
         \cup { [ZeroLotTypeRulesGroup4 EXCEPT !.lotType = one] : one \in Sample(1) }
-        \cup { [ZeroLotTypeRulesGroup4 EXCEPT !.minLotSizeDecimalQty = one] : one \in Sample(4) }
+        \cup { [ZeroLotTypeRulesGroup4 EXCEPT !.minLotSize = one] : one \in Sample(4) }
 
 (* A run of Lot Type Rules Group, written one after another *)
 RECURSIVE EncodeLotTypeRulesGroup4List(_)
@@ -5264,28 +5264,28 @@ CheckedInstAttribGroups5 ==
 (***************************************************************************)
 
 LotTypeRulesGroup5 ==
-    [ lotType              : Sample(1),
-      minLotSizeDecimalQty : Sample(4) ]
+    [ lotType    : Sample(1),
+      minLotSize : Sample(4) ]
 
 EncodeLotTypeRulesGroup5(message) ==
     message.lotType
-        \o message.minLotSizeDecimalQty
+        \o message.minLotSize
 
 DecodeLotTypeRulesGroup5(bytes) ==
     LET lotType == ReadBytes(bytes, 1) IN IF ~lotType.ok THEN Fail ELSE
-    LET minLotSizeDecimalQty == ReadBytes(lotType.rest, 4) IN IF ~minLotSizeDecimalQty.ok THEN Fail ELSE
-    Ok([ lotType              |-> lotType.value,
-         minLotSizeDecimalQty |-> minLotSizeDecimalQty.value ], minLotSizeDecimalQty.rest)
+    LET minLotSize == ReadBytes(lotType.rest, 4) IN IF ~minLotSize.ok THEN Fail ELSE
+    Ok([ lotType    |-> lotType.value,
+         minLotSize |-> minLotSize.value ], minLotSize.rest)
 
 ZeroLotTypeRulesGroup5 ==
-    [ lotType              |-> [i \in 1 .. 1 |-> 0],
-      minLotSizeDecimalQty |-> [i \in 1 .. 4 |-> 0] ]
+    [ lotType    |-> [i \in 1 .. 1 |-> 0],
+      minLotSize |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Lot Type Rules Group at zero, then each field in turn at the values it is checked at *)
 CheckedLotTypeRulesGroup5 ==
     { ZeroLotTypeRulesGroup5 }
         \cup { [ZeroLotTypeRulesGroup5 EXCEPT !.lotType = one] : one \in Sample(1) }
-        \cup { [ZeroLotTypeRulesGroup5 EXCEPT !.minLotSizeDecimalQty = one] : one \in Sample(4) }
+        \cup { [ZeroLotTypeRulesGroup5 EXCEPT !.minLotSize = one] : one \in Sample(4) }
 
 (* A run of Lot Type Rules Group, written one after another *)
 RECURSIVE EncodeLotTypeRulesGroup5List(_)
@@ -6877,28 +6877,28 @@ CheckedInstAttribGroups6 ==
 (***************************************************************************)
 
 FxLotTypeRulesGroup ==
-    [ lotType          : Sample(1),
-      minLotSizeUInt64 : Sample(8) ]
+    [ lotType      : Sample(1),
+      fxMinLotSize : Sample(8) ]
 
 EncodeFxLotTypeRulesGroup(message) ==
     message.lotType
-        \o message.minLotSizeUInt64
+        \o message.fxMinLotSize
 
 DecodeFxLotTypeRulesGroup(bytes) ==
     LET lotType == ReadBytes(bytes, 1) IN IF ~lotType.ok THEN Fail ELSE
-    LET minLotSizeUInt64 == ReadBytes(lotType.rest, 8) IN IF ~minLotSizeUInt64.ok THEN Fail ELSE
-    Ok([ lotType          |-> lotType.value,
-         minLotSizeUInt64 |-> minLotSizeUInt64.value ], minLotSizeUInt64.rest)
+    LET fxMinLotSize == ReadBytes(lotType.rest, 8) IN IF ~fxMinLotSize.ok THEN Fail ELSE
+    Ok([ lotType      |-> lotType.value,
+         fxMinLotSize |-> fxMinLotSize.value ], fxMinLotSize.rest)
 
 ZeroFxLotTypeRulesGroup ==
-    [ lotType          |-> [i \in 1 .. 1 |-> 0],
-      minLotSizeUInt64 |-> [i \in 1 .. 8 |-> 0] ]
+    [ lotType      |-> [i \in 1 .. 1 |-> 0],
+      fxMinLotSize |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Fx Lot Type Rules Group at zero, then each field in turn at the values it is checked at *)
 CheckedFxLotTypeRulesGroup ==
     { ZeroFxLotTypeRulesGroup }
         \cup { [ZeroFxLotTypeRulesGroup EXCEPT !.lotType = one] : one \in Sample(1) }
-        \cup { [ZeroFxLotTypeRulesGroup EXCEPT !.minLotSizeUInt64 = one] : one \in Sample(8) }
+        \cup { [ZeroFxLotTypeRulesGroup EXCEPT !.fxMinLotSize = one] : one \in Sample(8) }
 
 (* A run of Fx Lot Type Rules Group, written one after another *)
 RECURSIVE EncodeFxLotTypeRulesGroupList(_)

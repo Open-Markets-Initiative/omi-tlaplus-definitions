@@ -1856,26 +1856,26 @@ CheckedSettlementMessage ==
 (***************************************************************************)
 
 EndOfDayMessage ==
-    [ timeOffset            : Sample(4),
-      symbol                : Sample(6),
-      tradeDate             : Sample(4),
-      openInterest          : Sample(4),
-      highPriceBinaryPrice8 : Sample(8),
-      lowPriceBinaryPrice8  : Sample(8),
-      openPrice             : Sample(8),
-      closePrice            : Sample(8),
-      totalVolume           : Sample(4),
-      blockVolume           : Sample(4),
-      ecrpVolume            : Sample(4),
-      summaryFlags          : Sample(1) ]
+    [ timeOffset   : Sample(4),
+      symbol       : Sample(6),
+      tradeDate    : Sample(4),
+      openInterest : Sample(4),
+      highPrice    : Sample(8),
+      lowPrice     : Sample(8),
+      openPrice    : Sample(8),
+      closePrice   : Sample(8),
+      totalVolume  : Sample(4),
+      blockVolume  : Sample(4),
+      ecrpVolume   : Sample(4),
+      summaryFlags : Sample(1) ]
 
 EncodeEndOfDayMessage(message) ==
     message.timeOffset
         \o message.symbol
         \o message.tradeDate
         \o message.openInterest
-        \o message.highPriceBinaryPrice8
-        \o message.lowPriceBinaryPrice8
+        \o message.highPrice
+        \o message.lowPrice
         \o message.openPrice
         \o message.closePrice
         \o message.totalVolume
@@ -1888,40 +1888,40 @@ DecodeEndOfDayMessage(bytes) ==
     LET symbol == ReadBytes(timeOffset.rest, 6) IN IF ~symbol.ok THEN Fail ELSE
     LET tradeDate == ReadBytes(symbol.rest, 4) IN IF ~tradeDate.ok THEN Fail ELSE
     LET openInterest == ReadBytes(tradeDate.rest, 4) IN IF ~openInterest.ok THEN Fail ELSE
-    LET highPriceBinaryPrice8 == ReadBytes(openInterest.rest, 8) IN IF ~highPriceBinaryPrice8.ok THEN Fail ELSE
-    LET lowPriceBinaryPrice8 == ReadBytes(highPriceBinaryPrice8.rest, 8) IN IF ~lowPriceBinaryPrice8.ok THEN Fail ELSE
-    LET openPrice == ReadBytes(lowPriceBinaryPrice8.rest, 8) IN IF ~openPrice.ok THEN Fail ELSE
+    LET highPrice == ReadBytes(openInterest.rest, 8) IN IF ~highPrice.ok THEN Fail ELSE
+    LET lowPrice == ReadBytes(highPrice.rest, 8) IN IF ~lowPrice.ok THEN Fail ELSE
+    LET openPrice == ReadBytes(lowPrice.rest, 8) IN IF ~openPrice.ok THEN Fail ELSE
     LET closePrice == ReadBytes(openPrice.rest, 8) IN IF ~closePrice.ok THEN Fail ELSE
     LET totalVolume == ReadBytes(closePrice.rest, 4) IN IF ~totalVolume.ok THEN Fail ELSE
     LET blockVolume == ReadBytes(totalVolume.rest, 4) IN IF ~blockVolume.ok THEN Fail ELSE
     LET ecrpVolume == ReadBytes(blockVolume.rest, 4) IN IF ~ecrpVolume.ok THEN Fail ELSE
     LET summaryFlags == ReadBytes(ecrpVolume.rest, 1) IN IF ~summaryFlags.ok THEN Fail ELSE
-    Ok([ timeOffset            |-> timeOffset.value,
-         symbol                |-> symbol.value,
-         tradeDate             |-> tradeDate.value,
-         openInterest          |-> openInterest.value,
-         highPriceBinaryPrice8 |-> highPriceBinaryPrice8.value,
-         lowPriceBinaryPrice8  |-> lowPriceBinaryPrice8.value,
-         openPrice             |-> openPrice.value,
-         closePrice            |-> closePrice.value,
-         totalVolume           |-> totalVolume.value,
-         blockVolume           |-> blockVolume.value,
-         ecrpVolume            |-> ecrpVolume.value,
-         summaryFlags          |-> summaryFlags.value ], summaryFlags.rest)
+    Ok([ timeOffset   |-> timeOffset.value,
+         symbol       |-> symbol.value,
+         tradeDate    |-> tradeDate.value,
+         openInterest |-> openInterest.value,
+         highPrice    |-> highPrice.value,
+         lowPrice     |-> lowPrice.value,
+         openPrice    |-> openPrice.value,
+         closePrice   |-> closePrice.value,
+         totalVolume  |-> totalVolume.value,
+         blockVolume  |-> blockVolume.value,
+         ecrpVolume   |-> ecrpVolume.value,
+         summaryFlags |-> summaryFlags.value ], summaryFlags.rest)
 
 ZeroEndOfDayMessage ==
-    [ timeOffset            |-> [i \in 1 .. 4 |-> 0],
-      symbol                |-> [i \in 1 .. 6 |-> 0],
-      tradeDate             |-> [i \in 1 .. 4 |-> 0],
-      openInterest          |-> [i \in 1 .. 4 |-> 0],
-      highPriceBinaryPrice8 |-> [i \in 1 .. 8 |-> 0],
-      lowPriceBinaryPrice8  |-> [i \in 1 .. 8 |-> 0],
-      openPrice             |-> [i \in 1 .. 8 |-> 0],
-      closePrice            |-> [i \in 1 .. 8 |-> 0],
-      totalVolume           |-> [i \in 1 .. 4 |-> 0],
-      blockVolume           |-> [i \in 1 .. 4 |-> 0],
-      ecrpVolume            |-> [i \in 1 .. 4 |-> 0],
-      summaryFlags          |-> [i \in 1 .. 1 |-> 0] ]
+    [ timeOffset   |-> [i \in 1 .. 4 |-> 0],
+      symbol       |-> [i \in 1 .. 6 |-> 0],
+      tradeDate    |-> [i \in 1 .. 4 |-> 0],
+      openInterest |-> [i \in 1 .. 4 |-> 0],
+      highPrice    |-> [i \in 1 .. 8 |-> 0],
+      lowPrice     |-> [i \in 1 .. 8 |-> 0],
+      openPrice    |-> [i \in 1 .. 8 |-> 0],
+      closePrice   |-> [i \in 1 .. 8 |-> 0],
+      totalVolume  |-> [i \in 1 .. 4 |-> 0],
+      blockVolume  |-> [i \in 1 .. 4 |-> 0],
+      ecrpVolume   |-> [i \in 1 .. 4 |-> 0],
+      summaryFlags |-> [i \in 1 .. 1 |-> 0] ]
 
 (* End Of Day Message at zero, then each field in turn at the values it is checked at *)
 CheckedEndOfDayMessage ==
@@ -1930,8 +1930,8 @@ CheckedEndOfDayMessage ==
         \cup { [ZeroEndOfDayMessage EXCEPT !.symbol = one] : one \in Sample(6) }
         \cup { [ZeroEndOfDayMessage EXCEPT !.tradeDate = one] : one \in Sample(4) }
         \cup { [ZeroEndOfDayMessage EXCEPT !.openInterest = one] : one \in Sample(4) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.highPriceBinaryPrice8 = one] : one \in Sample(8) }
-        \cup { [ZeroEndOfDayMessage EXCEPT !.lowPriceBinaryPrice8 = one] : one \in Sample(8) }
+        \cup { [ZeroEndOfDayMessage EXCEPT !.highPrice = one] : one \in Sample(8) }
+        \cup { [ZeroEndOfDayMessage EXCEPT !.lowPrice = one] : one \in Sample(8) }
         \cup { [ZeroEndOfDayMessage EXCEPT !.openPrice = one] : one \in Sample(8) }
         \cup { [ZeroEndOfDayMessage EXCEPT !.closePrice = one] : one \in Sample(8) }
         \cup { [ZeroEndOfDayMessage EXCEPT !.totalVolume = one] : one \in Sample(4) }

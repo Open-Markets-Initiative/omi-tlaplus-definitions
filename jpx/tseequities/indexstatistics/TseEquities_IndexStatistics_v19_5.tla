@@ -390,27 +390,27 @@ CheckedServiceHeader ==
 
 TotalMarketValue ==
     [ tradingVolumeTurnoverUnitFlag : Sample(1),
-      totalMarketValueC14           : Sample(14) ]
+      totalMarketValueAmount        : Sample(14) ]
 
 EncodeTotalMarketValue(message) ==
     message.tradingVolumeTurnoverUnitFlag
-        \o message.totalMarketValueC14
+        \o message.totalMarketValueAmount
 
 DecodeTotalMarketValue(bytes) ==
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(bytes, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET totalMarketValueC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~totalMarketValueC14.ok THEN Fail ELSE
+    LET totalMarketValueAmount == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~totalMarketValueAmount.ok THEN Fail ELSE
     Ok([ tradingVolumeTurnoverUnitFlag |-> tradingVolumeTurnoverUnitFlag.value,
-         totalMarketValueC14           |-> totalMarketValueC14.value ], totalMarketValueC14.rest)
+         totalMarketValueAmount        |-> totalMarketValueAmount.value ], totalMarketValueAmount.rest)
 
 ZeroTotalMarketValue ==
     [ tradingVolumeTurnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
-      totalMarketValueC14           |-> [i \in 1 .. 14 |-> 0] ]
+      totalMarketValueAmount        |-> [i \in 1 .. 14 |-> 0] ]
 
 (* Total Market Value at zero, then each field in turn at the values it is checked at *)
 CheckedTotalMarketValue ==
     { ZeroTotalMarketValue }
         \cup { [ZeroTotalMarketValue EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTotalMarketValue EXCEPT !.totalMarketValueC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTotalMarketValue EXCEPT !.totalMarketValueAmount = one] : one \in Sample(14) }
 
 (***************************************************************************)
 (* Market Value Day On Day Comparison: 16 bytes                            *)
@@ -418,32 +418,32 @@ CheckedTotalMarketValue ==
 
 MarketValueDayOnDayComparison ==
     [ tradingVolumeTurnoverUnitFlag : Sample(1),
-      dayOnDayComparisonC14         : Sample(14),
+      dayOnDayComparison            : Sample(14),
       sign                          : Sample(1) ]
 
 EncodeMarketValueDayOnDayComparison(message) ==
     message.tradingVolumeTurnoverUnitFlag
-        \o message.dayOnDayComparisonC14
+        \o message.dayOnDayComparison
         \o message.sign
 
 DecodeMarketValueDayOnDayComparison(bytes) ==
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(bytes, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET dayOnDayComparisonC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~dayOnDayComparisonC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(dayOnDayComparisonC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET dayOnDayComparison == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~dayOnDayComparison.ok THEN Fail ELSE
+    LET sign == ReadBytes(dayOnDayComparison.rest, 1) IN IF ~sign.ok THEN Fail ELSE
     Ok([ tradingVolumeTurnoverUnitFlag |-> tradingVolumeTurnoverUnitFlag.value,
-         dayOnDayComparisonC14         |-> dayOnDayComparisonC14.value,
+         dayOnDayComparison            |-> dayOnDayComparison.value,
          sign                          |-> sign.value ], sign.rest)
 
 ZeroMarketValueDayOnDayComparison ==
     [ tradingVolumeTurnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
-      dayOnDayComparisonC14         |-> [i \in 1 .. 14 |-> 0],
+      dayOnDayComparison            |-> [i \in 1 .. 14 |-> 0],
       sign                          |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Market Value Day On Day Comparison at zero, then each field in turn at the values it is checked at *)
 CheckedMarketValueDayOnDayComparison ==
     { ZeroMarketValueDayOnDayComparison }
         \cup { [ZeroMarketValueDayOnDayComparison EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroMarketValueDayOnDayComparison EXCEPT !.dayOnDayComparisonC14 = one] : one \in Sample(14) }
+        \cup { [ZeroMarketValueDayOnDayComparison EXCEPT !.dayOnDayComparison = one] : one \in Sample(14) }
         \cup { [ZeroMarketValueDayOnDayComparison EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -497,27 +497,27 @@ CheckedMarketValueMessage ==
 (***************************************************************************)
 
 SimpleYield ==
-    [ simpleYieldC8 : Sample(8),
-      sign          : Sample(1) ]
+    [ simpleYieldValue : Sample(8),
+      sign             : Sample(1) ]
 
 EncodeSimpleYield(message) ==
-    message.simpleYieldC8
+    message.simpleYieldValue
         \o message.sign
 
 DecodeSimpleYield(bytes) ==
-    LET simpleYieldC8 == ReadBytes(bytes, 8) IN IF ~simpleYieldC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(simpleYieldC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ simpleYieldC8 |-> simpleYieldC8.value,
-         sign          |-> sign.value ], sign.rest)
+    LET simpleYieldValue == ReadBytes(bytes, 8) IN IF ~simpleYieldValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(simpleYieldValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ simpleYieldValue |-> simpleYieldValue.value,
+         sign             |-> sign.value ], sign.rest)
 
 ZeroSimpleYield ==
-    [ simpleYieldC8 |-> [i \in 1 .. 8 |-> 0],
-      sign          |-> [i \in 1 .. 1 |-> 0] ]
+    [ simpleYieldValue |-> [i \in 1 .. 8 |-> 0],
+      sign             |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Simple Yield at zero, then each field in turn at the values it is checked at *)
 CheckedSimpleYield ==
     { ZeroSimpleYield }
-        \cup { [ZeroSimpleYield EXCEPT !.simpleYieldC8 = one] : one \in Sample(8) }
+        \cup { [ZeroSimpleYield EXCEPT !.simpleYieldValue = one] : one \in Sample(8) }
         \cup { [ZeroSimpleYield EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -525,27 +525,27 @@ CheckedSimpleYield ==
 (***************************************************************************)
 
 YieldDayOnDayComparison ==
-    [ dayOnDayComparisonC8 : Sample(8),
-      sign                 : Sample(1) ]
+    [ dayOnDayComparisonRate : Sample(8),
+      sign                   : Sample(1) ]
 
 EncodeYieldDayOnDayComparison(message) ==
-    message.dayOnDayComparisonC8
+    message.dayOnDayComparisonRate
         \o message.sign
 
 DecodeYieldDayOnDayComparison(bytes) ==
-    LET dayOnDayComparisonC8 == ReadBytes(bytes, 8) IN IF ~dayOnDayComparisonC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(dayOnDayComparisonC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ dayOnDayComparisonC8 |-> dayOnDayComparisonC8.value,
-         sign                 |-> sign.value ], sign.rest)
+    LET dayOnDayComparisonRate == ReadBytes(bytes, 8) IN IF ~dayOnDayComparisonRate.ok THEN Fail ELSE
+    LET sign == ReadBytes(dayOnDayComparisonRate.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ dayOnDayComparisonRate |-> dayOnDayComparisonRate.value,
+         sign                   |-> sign.value ], sign.rest)
 
 ZeroYieldDayOnDayComparison ==
-    [ dayOnDayComparisonC8 |-> [i \in 1 .. 8 |-> 0],
-      sign                 |-> [i \in 1 .. 1 |-> 0] ]
+    [ dayOnDayComparisonRate |-> [i \in 1 .. 8 |-> 0],
+      sign                   |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Yield Day On Day Comparison at zero, then each field in turn at the values it is checked at *)
 CheckedYieldDayOnDayComparison ==
     { ZeroYieldDayOnDayComparison }
-        \cup { [ZeroYieldDayOnDayComparison EXCEPT !.dayOnDayComparisonC8 = one] : one \in Sample(8) }
+        \cup { [ZeroYieldDayOnDayComparison EXCEPT !.dayOnDayComparisonRate = one] : one \in Sample(8) }
         \cup { [ZeroYieldDayOnDayComparison EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -599,27 +599,27 @@ CheckedSimpleYieldMessage ==
 (***************************************************************************)
 
 WeightedYield ==
-    [ weightedYieldC8 : Sample(8),
-      sign            : Sample(1) ]
+    [ weightedYieldValue : Sample(8),
+      sign               : Sample(1) ]
 
 EncodeWeightedYield(message) ==
-    message.weightedYieldC8
+    message.weightedYieldValue
         \o message.sign
 
 DecodeWeightedYield(bytes) ==
-    LET weightedYieldC8 == ReadBytes(bytes, 8) IN IF ~weightedYieldC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(weightedYieldC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ weightedYieldC8 |-> weightedYieldC8.value,
-         sign            |-> sign.value ], sign.rest)
+    LET weightedYieldValue == ReadBytes(bytes, 8) IN IF ~weightedYieldValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(weightedYieldValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ weightedYieldValue |-> weightedYieldValue.value,
+         sign               |-> sign.value ], sign.rest)
 
 ZeroWeightedYield ==
-    [ weightedYieldC8 |-> [i \in 1 .. 8 |-> 0],
-      sign            |-> [i \in 1 .. 1 |-> 0] ]
+    [ weightedYieldValue |-> [i \in 1 .. 8 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Weighted Yield at zero, then each field in turn at the values it is checked at *)
 CheckedWeightedYield ==
     { ZeroWeightedYield }
-        \cup { [ZeroWeightedYield EXCEPT !.weightedYieldC8 = one] : one \in Sample(8) }
+        \cup { [ZeroWeightedYield EXCEPT !.weightedYieldValue = one] : one \in Sample(8) }
         \cup { [ZeroWeightedYield EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -627,27 +627,27 @@ CheckedWeightedYield ==
 (***************************************************************************)
 
 YieldDayOnDayComparison2 ==
-    [ dayOnDayComparisonC8 : Sample(8),
-      sign                 : Sample(1) ]
+    [ dayOnDayComparisonRate : Sample(8),
+      sign                   : Sample(1) ]
 
 EncodeYieldDayOnDayComparison2(message) ==
-    message.dayOnDayComparisonC8
+    message.dayOnDayComparisonRate
         \o message.sign
 
 DecodeYieldDayOnDayComparison2(bytes) ==
-    LET dayOnDayComparisonC8 == ReadBytes(bytes, 8) IN IF ~dayOnDayComparisonC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(dayOnDayComparisonC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ dayOnDayComparisonC8 |-> dayOnDayComparisonC8.value,
-         sign                 |-> sign.value ], sign.rest)
+    LET dayOnDayComparisonRate == ReadBytes(bytes, 8) IN IF ~dayOnDayComparisonRate.ok THEN Fail ELSE
+    LET sign == ReadBytes(dayOnDayComparisonRate.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ dayOnDayComparisonRate |-> dayOnDayComparisonRate.value,
+         sign                   |-> sign.value ], sign.rest)
 
 ZeroYieldDayOnDayComparison2 ==
-    [ dayOnDayComparisonC8 |-> [i \in 1 .. 8 |-> 0],
-      sign                 |-> [i \in 1 .. 1 |-> 0] ]
+    [ dayOnDayComparisonRate |-> [i \in 1 .. 8 |-> 0],
+      sign                   |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Yield Day On Day Comparison at zero, then each field in turn at the values it is checked at *)
 CheckedYieldDayOnDayComparison2 ==
     { ZeroYieldDayOnDayComparison2 }
-        \cup { [ZeroYieldDayOnDayComparison2 EXCEPT !.dayOnDayComparisonC8 = one] : one \in Sample(8) }
+        \cup { [ZeroYieldDayOnDayComparison2 EXCEPT !.dayOnDayComparisonRate = one] : one \in Sample(8) }
         \cup { [ZeroYieldDayOnDayComparison2 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -701,33 +701,33 @@ CheckedWeightedYieldMessage ==
 (***************************************************************************)
 
 SimpleStockPriceAverage ==
-    [ unitFlag                   : Sample(1),
-      simpleStockPriceAverageC14 : Sample(14),
-      sign                       : Sample(1) ]
+    [ unitFlag                     : Sample(1),
+      simpleStockPriceAverageValue : Sample(14),
+      sign                         : Sample(1) ]
 
 EncodeSimpleStockPriceAverage(message) ==
     message.unitFlag
-        \o message.simpleStockPriceAverageC14
+        \o message.simpleStockPriceAverageValue
         \o message.sign
 
 DecodeSimpleStockPriceAverage(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET simpleStockPriceAverageC14 == ReadBytes(unitFlag.rest, 14) IN IF ~simpleStockPriceAverageC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(simpleStockPriceAverageC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag                   |-> unitFlag.value,
-         simpleStockPriceAverageC14 |-> simpleStockPriceAverageC14.value,
-         sign                       |-> sign.value ], sign.rest)
+    LET simpleStockPriceAverageValue == ReadBytes(unitFlag.rest, 14) IN IF ~simpleStockPriceAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(simpleStockPriceAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag                     |-> unitFlag.value,
+         simpleStockPriceAverageValue |-> simpleStockPriceAverageValue.value,
+         sign                         |-> sign.value ], sign.rest)
 
 ZeroSimpleStockPriceAverage ==
-    [ unitFlag                   |-> [i \in 1 .. 1 |-> 0],
-      simpleStockPriceAverageC14 |-> [i \in 1 .. 14 |-> 0],
-      sign                       |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag                     |-> [i \in 1 .. 1 |-> 0],
+      simpleStockPriceAverageValue |-> [i \in 1 .. 14 |-> 0],
+      sign                         |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Simple Stock Price Average at zero, then each field in turn at the values it is checked at *)
 CheckedSimpleStockPriceAverage ==
     { ZeroSimpleStockPriceAverage }
         \cup { [ZeroSimpleStockPriceAverage EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroSimpleStockPriceAverage EXCEPT !.simpleStockPriceAverageC14 = one] : one \in Sample(14) }
+        \cup { [ZeroSimpleStockPriceAverage EXCEPT !.simpleStockPriceAverageValue = one] : one \in Sample(14) }
         \cup { [ZeroSimpleStockPriceAverage EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -735,33 +735,33 @@ CheckedSimpleStockPriceAverage ==
 (***************************************************************************)
 
 StockPriceAverageDayOnDayComparison ==
-    [ unitFlag              : Sample(1),
-      dayOnDayComparisonC14 : Sample(14),
-      sign                  : Sample(1) ]
+    [ unitFlag           : Sample(1),
+      dayOnDayComparison : Sample(14),
+      sign               : Sample(1) ]
 
 EncodeStockPriceAverageDayOnDayComparison(message) ==
     message.unitFlag
-        \o message.dayOnDayComparisonC14
+        \o message.dayOnDayComparison
         \o message.sign
 
 DecodeStockPriceAverageDayOnDayComparison(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET dayOnDayComparisonC14 == ReadBytes(unitFlag.rest, 14) IN IF ~dayOnDayComparisonC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(dayOnDayComparisonC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag              |-> unitFlag.value,
-         dayOnDayComparisonC14 |-> dayOnDayComparisonC14.value,
-         sign                  |-> sign.value ], sign.rest)
+    LET dayOnDayComparison == ReadBytes(unitFlag.rest, 14) IN IF ~dayOnDayComparison.ok THEN Fail ELSE
+    LET sign == ReadBytes(dayOnDayComparison.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag           |-> unitFlag.value,
+         dayOnDayComparison |-> dayOnDayComparison.value,
+         sign               |-> sign.value ], sign.rest)
 
 ZeroStockPriceAverageDayOnDayComparison ==
-    [ unitFlag              |-> [i \in 1 .. 1 |-> 0],
-      dayOnDayComparisonC14 |-> [i \in 1 .. 14 |-> 0],
-      sign                  |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag           |-> [i \in 1 .. 1 |-> 0],
+      dayOnDayComparison |-> [i \in 1 .. 14 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Stock Price Average Day On Day Comparison at zero, then each field in turn at the values it is checked at *)
 CheckedStockPriceAverageDayOnDayComparison ==
     { ZeroStockPriceAverageDayOnDayComparison }
         \cup { [ZeroStockPriceAverageDayOnDayComparison EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroStockPriceAverageDayOnDayComparison EXCEPT !.dayOnDayComparisonC14 = one] : one \in Sample(14) }
+        \cup { [ZeroStockPriceAverageDayOnDayComparison EXCEPT !.dayOnDayComparison = one] : one \in Sample(14) }
         \cup { [ZeroStockPriceAverageDayOnDayComparison EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -815,33 +815,33 @@ CheckedSimpleStockPriceAverageMessage ==
 (***************************************************************************)
 
 WeightedStockPriceAverage ==
-    [ unitFlag                     : Sample(1),
-      weightedStockPriceAverageC14 : Sample(14),
-      sign                         : Sample(1) ]
+    [ unitFlag                       : Sample(1),
+      weightedStockPriceAverageValue : Sample(14),
+      sign                           : Sample(1) ]
 
 EncodeWeightedStockPriceAverage(message) ==
     message.unitFlag
-        \o message.weightedStockPriceAverageC14
+        \o message.weightedStockPriceAverageValue
         \o message.sign
 
 DecodeWeightedStockPriceAverage(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET weightedStockPriceAverageC14 == ReadBytes(unitFlag.rest, 14) IN IF ~weightedStockPriceAverageC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(weightedStockPriceAverageC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag                     |-> unitFlag.value,
-         weightedStockPriceAverageC14 |-> weightedStockPriceAverageC14.value,
-         sign                         |-> sign.value ], sign.rest)
+    LET weightedStockPriceAverageValue == ReadBytes(unitFlag.rest, 14) IN IF ~weightedStockPriceAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(weightedStockPriceAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag                       |-> unitFlag.value,
+         weightedStockPriceAverageValue |-> weightedStockPriceAverageValue.value,
+         sign                           |-> sign.value ], sign.rest)
 
 ZeroWeightedStockPriceAverage ==
-    [ unitFlag                     |-> [i \in 1 .. 1 |-> 0],
-      weightedStockPriceAverageC14 |-> [i \in 1 .. 14 |-> 0],
-      sign                         |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag                       |-> [i \in 1 .. 1 |-> 0],
+      weightedStockPriceAverageValue |-> [i \in 1 .. 14 |-> 0],
+      sign                           |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Weighted Stock Price Average at zero, then each field in turn at the values it is checked at *)
 CheckedWeightedStockPriceAverage ==
     { ZeroWeightedStockPriceAverage }
         \cup { [ZeroWeightedStockPriceAverage EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroWeightedStockPriceAverage EXCEPT !.weightedStockPriceAverageC14 = one] : one \in Sample(14) }
+        \cup { [ZeroWeightedStockPriceAverage EXCEPT !.weightedStockPriceAverageValue = one] : one \in Sample(14) }
         \cup { [ZeroWeightedStockPriceAverage EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -849,33 +849,33 @@ CheckedWeightedStockPriceAverage ==
 (***************************************************************************)
 
 StockPriceAverageDayOnDayComparison2 ==
-    [ unitFlag              : Sample(1),
-      dayOnDayComparisonC14 : Sample(14),
-      sign                  : Sample(1) ]
+    [ unitFlag           : Sample(1),
+      dayOnDayComparison : Sample(14),
+      sign               : Sample(1) ]
 
 EncodeStockPriceAverageDayOnDayComparison2(message) ==
     message.unitFlag
-        \o message.dayOnDayComparisonC14
+        \o message.dayOnDayComparison
         \o message.sign
 
 DecodeStockPriceAverageDayOnDayComparison2(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET dayOnDayComparisonC14 == ReadBytes(unitFlag.rest, 14) IN IF ~dayOnDayComparisonC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(dayOnDayComparisonC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag              |-> unitFlag.value,
-         dayOnDayComparisonC14 |-> dayOnDayComparisonC14.value,
-         sign                  |-> sign.value ], sign.rest)
+    LET dayOnDayComparison == ReadBytes(unitFlag.rest, 14) IN IF ~dayOnDayComparison.ok THEN Fail ELSE
+    LET sign == ReadBytes(dayOnDayComparison.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag           |-> unitFlag.value,
+         dayOnDayComparison |-> dayOnDayComparison.value,
+         sign               |-> sign.value ], sign.rest)
 
 ZeroStockPriceAverageDayOnDayComparison2 ==
-    [ unitFlag              |-> [i \in 1 .. 1 |-> 0],
-      dayOnDayComparisonC14 |-> [i \in 1 .. 14 |-> 0],
-      sign                  |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag           |-> [i \in 1 .. 1 |-> 0],
+      dayOnDayComparison |-> [i \in 1 .. 14 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Stock Price Average Day On Day Comparison at zero, then each field in turn at the values it is checked at *)
 CheckedStockPriceAverageDayOnDayComparison2 ==
     { ZeroStockPriceAverageDayOnDayComparison2 }
         \cup { [ZeroStockPriceAverageDayOnDayComparison2 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroStockPriceAverageDayOnDayComparison2 EXCEPT !.dayOnDayComparisonC14 = one] : one \in Sample(14) }
+        \cup { [ZeroStockPriceAverageDayOnDayComparison2 EXCEPT !.dayOnDayComparison = one] : one \in Sample(14) }
         \cup { [ZeroStockPriceAverageDayOnDayComparison2 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -929,33 +929,33 @@ CheckedWeightedStockPriceAverageMessage ==
 (***************************************************************************)
 
 SimpleStockPriceAverage2 ==
-    [ unitFlag                   : Sample(1),
-      simpleStockPriceAverageC14 : Sample(14),
-      sign                       : Sample(1) ]
+    [ unitFlag                     : Sample(1),
+      simpleStockPriceAverageValue : Sample(14),
+      sign                         : Sample(1) ]
 
 EncodeSimpleStockPriceAverage2(message) ==
     message.unitFlag
-        \o message.simpleStockPriceAverageC14
+        \o message.simpleStockPriceAverageValue
         \o message.sign
 
 DecodeSimpleStockPriceAverage2(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET simpleStockPriceAverageC14 == ReadBytes(unitFlag.rest, 14) IN IF ~simpleStockPriceAverageC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(simpleStockPriceAverageC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag                   |-> unitFlag.value,
-         simpleStockPriceAverageC14 |-> simpleStockPriceAverageC14.value,
-         sign                       |-> sign.value ], sign.rest)
+    LET simpleStockPriceAverageValue == ReadBytes(unitFlag.rest, 14) IN IF ~simpleStockPriceAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(simpleStockPriceAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag                     |-> unitFlag.value,
+         simpleStockPriceAverageValue |-> simpleStockPriceAverageValue.value,
+         sign                         |-> sign.value ], sign.rest)
 
 ZeroSimpleStockPriceAverage2 ==
-    [ unitFlag                   |-> [i \in 1 .. 1 |-> 0],
-      simpleStockPriceAverageC14 |-> [i \in 1 .. 14 |-> 0],
-      sign                       |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag                     |-> [i \in 1 .. 1 |-> 0],
+      simpleStockPriceAverageValue |-> [i \in 1 .. 14 |-> 0],
+      sign                         |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Simple Stock Price Average at zero, then each field in turn at the values it is checked at *)
 CheckedSimpleStockPriceAverage2 ==
     { ZeroSimpleStockPriceAverage2 }
         \cup { [ZeroSimpleStockPriceAverage2 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroSimpleStockPriceAverage2 EXCEPT !.simpleStockPriceAverageC14 = one] : one \in Sample(14) }
+        \cup { [ZeroSimpleStockPriceAverage2 EXCEPT !.simpleStockPriceAverageValue = one] : one \in Sample(14) }
         \cup { [ZeroSimpleStockPriceAverage2 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -963,33 +963,33 @@ CheckedSimpleStockPriceAverage2 ==
 (***************************************************************************)
 
 StockPriceAverageDayOnDayComparison3 ==
-    [ unitFlag              : Sample(1),
-      dayOnDayComparisonC14 : Sample(14),
-      sign                  : Sample(1) ]
+    [ unitFlag           : Sample(1),
+      dayOnDayComparison : Sample(14),
+      sign               : Sample(1) ]
 
 EncodeStockPriceAverageDayOnDayComparison3(message) ==
     message.unitFlag
-        \o message.dayOnDayComparisonC14
+        \o message.dayOnDayComparison
         \o message.sign
 
 DecodeStockPriceAverageDayOnDayComparison3(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET dayOnDayComparisonC14 == ReadBytes(unitFlag.rest, 14) IN IF ~dayOnDayComparisonC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(dayOnDayComparisonC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag              |-> unitFlag.value,
-         dayOnDayComparisonC14 |-> dayOnDayComparisonC14.value,
-         sign                  |-> sign.value ], sign.rest)
+    LET dayOnDayComparison == ReadBytes(unitFlag.rest, 14) IN IF ~dayOnDayComparison.ok THEN Fail ELSE
+    LET sign == ReadBytes(dayOnDayComparison.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag           |-> unitFlag.value,
+         dayOnDayComparison |-> dayOnDayComparison.value,
+         sign               |-> sign.value ], sign.rest)
 
 ZeroStockPriceAverageDayOnDayComparison3 ==
-    [ unitFlag              |-> [i \in 1 .. 1 |-> 0],
-      dayOnDayComparisonC14 |-> [i \in 1 .. 14 |-> 0],
-      sign                  |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag           |-> [i \in 1 .. 1 |-> 0],
+      dayOnDayComparison |-> [i \in 1 .. 14 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Stock Price Average Day On Day Comparison at zero, then each field in turn at the values it is checked at *)
 CheckedStockPriceAverageDayOnDayComparison3 ==
     { ZeroStockPriceAverageDayOnDayComparison3 }
         \cup { [ZeroStockPriceAverageDayOnDayComparison3 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroStockPriceAverageDayOnDayComparison3 EXCEPT !.dayOnDayComparisonC14 = one] : one \in Sample(14) }
+        \cup { [ZeroStockPriceAverageDayOnDayComparison3 EXCEPT !.dayOnDayComparison = one] : one \in Sample(14) }
         \cup { [ZeroStockPriceAverageDayOnDayComparison3 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1043,51 +1043,51 @@ CheckedSimpleStockPriceAverageByIndustryMessage ==
 (***************************************************************************)
 
 OverallSimpleAverage ==
-    [ unitFlag              : Sample(1),
-      simpleAverageC14      : Sample(14),
-      sign                  : Sample(1),
-      secondUnitFlag        : Sample(1),
-      dayOnDayComparisonC14 : Sample(14),
-      secondSign            : Sample(1) ]
+    [ unitFlag           : Sample(1),
+      simpleAverageValue : Sample(14),
+      sign               : Sample(1),
+      secondUnitFlag     : Sample(1),
+      dayOnDayComparison : Sample(14),
+      secondSign         : Sample(1) ]
 
 EncodeOverallSimpleAverage(message) ==
     message.unitFlag
-        \o message.simpleAverageC14
+        \o message.simpleAverageValue
         \o message.sign
         \o message.secondUnitFlag
-        \o message.dayOnDayComparisonC14
+        \o message.dayOnDayComparison
         \o message.secondSign
 
 DecodeOverallSimpleAverage(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET simpleAverageC14 == ReadBytes(unitFlag.rest, 14) IN IF ~simpleAverageC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(simpleAverageC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET simpleAverageValue == ReadBytes(unitFlag.rest, 14) IN IF ~simpleAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(simpleAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
     LET secondUnitFlag == ReadBytes(sign.rest, 1) IN IF ~secondUnitFlag.ok THEN Fail ELSE
-    LET dayOnDayComparisonC14 == ReadBytes(secondUnitFlag.rest, 14) IN IF ~dayOnDayComparisonC14.ok THEN Fail ELSE
-    LET secondSign == ReadBytes(dayOnDayComparisonC14.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
-    Ok([ unitFlag              |-> unitFlag.value,
-         simpleAverageC14      |-> simpleAverageC14.value,
-         sign                  |-> sign.value,
-         secondUnitFlag        |-> secondUnitFlag.value,
-         dayOnDayComparisonC14 |-> dayOnDayComparisonC14.value,
-         secondSign            |-> secondSign.value ], secondSign.rest)
+    LET dayOnDayComparison == ReadBytes(secondUnitFlag.rest, 14) IN IF ~dayOnDayComparison.ok THEN Fail ELSE
+    LET secondSign == ReadBytes(dayOnDayComparison.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
+    Ok([ unitFlag           |-> unitFlag.value,
+         simpleAverageValue |-> simpleAverageValue.value,
+         sign               |-> sign.value,
+         secondUnitFlag     |-> secondUnitFlag.value,
+         dayOnDayComparison |-> dayOnDayComparison.value,
+         secondSign         |-> secondSign.value ], secondSign.rest)
 
 ZeroOverallSimpleAverage ==
-    [ unitFlag              |-> [i \in 1 .. 1 |-> 0],
-      simpleAverageC14      |-> [i \in 1 .. 14 |-> 0],
-      sign                  |-> [i \in 1 .. 1 |-> 0],
-      secondUnitFlag        |-> [i \in 1 .. 1 |-> 0],
-      dayOnDayComparisonC14 |-> [i \in 1 .. 14 |-> 0],
-      secondSign            |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag           |-> [i \in 1 .. 1 |-> 0],
+      simpleAverageValue |-> [i \in 1 .. 14 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0],
+      secondUnitFlag     |-> [i \in 1 .. 1 |-> 0],
+      dayOnDayComparison |-> [i \in 1 .. 14 |-> 0],
+      secondSign         |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Overall Simple Average at zero, then each field in turn at the values it is checked at *)
 CheckedOverallSimpleAverage ==
     { ZeroOverallSimpleAverage }
         \cup { [ZeroOverallSimpleAverage EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroOverallSimpleAverage EXCEPT !.simpleAverageC14 = one] : one \in Sample(14) }
+        \cup { [ZeroOverallSimpleAverage EXCEPT !.simpleAverageValue = one] : one \in Sample(14) }
         \cup { [ZeroOverallSimpleAverage EXCEPT !.sign = one] : one \in Sample(1) }
         \cup { [ZeroOverallSimpleAverage EXCEPT !.secondUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroOverallSimpleAverage EXCEPT !.dayOnDayComparisonC14 = one] : one \in Sample(14) }
+        \cup { [ZeroOverallSimpleAverage EXCEPT !.dayOnDayComparison = one] : one \in Sample(14) }
         \cup { [ZeroOverallSimpleAverage EXCEPT !.secondSign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1095,39 +1095,39 @@ CheckedOverallSimpleAverage ==
 (***************************************************************************)
 
 OverallDivergenceAverage ==
-    [ divergenceAverageC8  : Sample(8),
-      sign                 : Sample(1),
-      dayOnDayComparisonC8 : Sample(8),
-      secondSign           : Sample(1) ]
+    [ divergenceAverageValue : Sample(8),
+      sign                   : Sample(1),
+      dayOnDayComparisonRate : Sample(8),
+      secondSign             : Sample(1) ]
 
 EncodeOverallDivergenceAverage(message) ==
-    message.divergenceAverageC8
+    message.divergenceAverageValue
         \o message.sign
-        \o message.dayOnDayComparisonC8
+        \o message.dayOnDayComparisonRate
         \o message.secondSign
 
 DecodeOverallDivergenceAverage(bytes) ==
-    LET divergenceAverageC8 == ReadBytes(bytes, 8) IN IF ~divergenceAverageC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(divergenceAverageC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    LET dayOnDayComparisonC8 == ReadBytes(sign.rest, 8) IN IF ~dayOnDayComparisonC8.ok THEN Fail ELSE
-    LET secondSign == ReadBytes(dayOnDayComparisonC8.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
-    Ok([ divergenceAverageC8  |-> divergenceAverageC8.value,
-         sign                 |-> sign.value,
-         dayOnDayComparisonC8 |-> dayOnDayComparisonC8.value,
-         secondSign           |-> secondSign.value ], secondSign.rest)
+    LET divergenceAverageValue == ReadBytes(bytes, 8) IN IF ~divergenceAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(divergenceAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET dayOnDayComparisonRate == ReadBytes(sign.rest, 8) IN IF ~dayOnDayComparisonRate.ok THEN Fail ELSE
+    LET secondSign == ReadBytes(dayOnDayComparisonRate.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
+    Ok([ divergenceAverageValue |-> divergenceAverageValue.value,
+         sign                   |-> sign.value,
+         dayOnDayComparisonRate |-> dayOnDayComparisonRate.value,
+         secondSign             |-> secondSign.value ], secondSign.rest)
 
 ZeroOverallDivergenceAverage ==
-    [ divergenceAverageC8  |-> [i \in 1 .. 8 |-> 0],
-      sign                 |-> [i \in 1 .. 1 |-> 0],
-      dayOnDayComparisonC8 |-> [i \in 1 .. 8 |-> 0],
-      secondSign           |-> [i \in 1 .. 1 |-> 0] ]
+    [ divergenceAverageValue |-> [i \in 1 .. 8 |-> 0],
+      sign                   |-> [i \in 1 .. 1 |-> 0],
+      dayOnDayComparisonRate |-> [i \in 1 .. 8 |-> 0],
+      secondSign             |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Overall Divergence Average at zero, then each field in turn at the values it is checked at *)
 CheckedOverallDivergenceAverage ==
     { ZeroOverallDivergenceAverage }
-        \cup { [ZeroOverallDivergenceAverage EXCEPT !.divergenceAverageC8 = one] : one \in Sample(8) }
+        \cup { [ZeroOverallDivergenceAverage EXCEPT !.divergenceAverageValue = one] : one \in Sample(8) }
         \cup { [ZeroOverallDivergenceAverage EXCEPT !.sign = one] : one \in Sample(1) }
-        \cup { [ZeroOverallDivergenceAverage EXCEPT !.dayOnDayComparisonC8 = one] : one \in Sample(8) }
+        \cup { [ZeroOverallDivergenceAverage EXCEPT !.dayOnDayComparisonRate = one] : one \in Sample(8) }
         \cup { [ZeroOverallDivergenceAverage EXCEPT !.secondSign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1135,51 +1135,51 @@ CheckedOverallDivergenceAverage ==
 (***************************************************************************)
 
 OverallParityAverage ==
-    [ unitFlag              : Sample(1),
-      parityAverageC14      : Sample(14),
-      sign                  : Sample(1),
-      secondUnitFlag        : Sample(1),
-      dayOnDayComparisonC14 : Sample(14),
-      secondSign            : Sample(1) ]
+    [ unitFlag           : Sample(1),
+      parityAverageValue : Sample(14),
+      sign               : Sample(1),
+      secondUnitFlag     : Sample(1),
+      dayOnDayComparison : Sample(14),
+      secondSign         : Sample(1) ]
 
 EncodeOverallParityAverage(message) ==
     message.unitFlag
-        \o message.parityAverageC14
+        \o message.parityAverageValue
         \o message.sign
         \o message.secondUnitFlag
-        \o message.dayOnDayComparisonC14
+        \o message.dayOnDayComparison
         \o message.secondSign
 
 DecodeOverallParityAverage(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET parityAverageC14 == ReadBytes(unitFlag.rest, 14) IN IF ~parityAverageC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(parityAverageC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET parityAverageValue == ReadBytes(unitFlag.rest, 14) IN IF ~parityAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(parityAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
     LET secondUnitFlag == ReadBytes(sign.rest, 1) IN IF ~secondUnitFlag.ok THEN Fail ELSE
-    LET dayOnDayComparisonC14 == ReadBytes(secondUnitFlag.rest, 14) IN IF ~dayOnDayComparisonC14.ok THEN Fail ELSE
-    LET secondSign == ReadBytes(dayOnDayComparisonC14.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
-    Ok([ unitFlag              |-> unitFlag.value,
-         parityAverageC14      |-> parityAverageC14.value,
-         sign                  |-> sign.value,
-         secondUnitFlag        |-> secondUnitFlag.value,
-         dayOnDayComparisonC14 |-> dayOnDayComparisonC14.value,
-         secondSign            |-> secondSign.value ], secondSign.rest)
+    LET dayOnDayComparison == ReadBytes(secondUnitFlag.rest, 14) IN IF ~dayOnDayComparison.ok THEN Fail ELSE
+    LET secondSign == ReadBytes(dayOnDayComparison.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
+    Ok([ unitFlag           |-> unitFlag.value,
+         parityAverageValue |-> parityAverageValue.value,
+         sign               |-> sign.value,
+         secondUnitFlag     |-> secondUnitFlag.value,
+         dayOnDayComparison |-> dayOnDayComparison.value,
+         secondSign         |-> secondSign.value ], secondSign.rest)
 
 ZeroOverallParityAverage ==
-    [ unitFlag              |-> [i \in 1 .. 1 |-> 0],
-      parityAverageC14      |-> [i \in 1 .. 14 |-> 0],
-      sign                  |-> [i \in 1 .. 1 |-> 0],
-      secondUnitFlag        |-> [i \in 1 .. 1 |-> 0],
-      dayOnDayComparisonC14 |-> [i \in 1 .. 14 |-> 0],
-      secondSign            |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag           |-> [i \in 1 .. 1 |-> 0],
+      parityAverageValue |-> [i \in 1 .. 14 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0],
+      secondUnitFlag     |-> [i \in 1 .. 1 |-> 0],
+      dayOnDayComparison |-> [i \in 1 .. 14 |-> 0],
+      secondSign         |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Overall Parity Average at zero, then each field in turn at the values it is checked at *)
 CheckedOverallParityAverage ==
     { ZeroOverallParityAverage }
         \cup { [ZeroOverallParityAverage EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroOverallParityAverage EXCEPT !.parityAverageC14 = one] : one \in Sample(14) }
+        \cup { [ZeroOverallParityAverage EXCEPT !.parityAverageValue = one] : one \in Sample(14) }
         \cup { [ZeroOverallParityAverage EXCEPT !.sign = one] : one \in Sample(1) }
         \cup { [ZeroOverallParityAverage EXCEPT !.secondUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroOverallParityAverage EXCEPT !.dayOnDayComparisonC14 = one] : one \in Sample(14) }
+        \cup { [ZeroOverallParityAverage EXCEPT !.dayOnDayComparison = one] : one \in Sample(14) }
         \cup { [ZeroOverallParityAverage EXCEPT !.secondSign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1187,39 +1187,39 @@ CheckedOverallParityAverage ==
 (***************************************************************************)
 
 OverallDirectYieldAverage ==
-    [ directYieldAverageC8 : Sample(8),
-      sign                 : Sample(1),
-      dayOnDayComparisonC8 : Sample(8),
-      secondSign           : Sample(1) ]
+    [ directYieldAverageValue : Sample(8),
+      sign                    : Sample(1),
+      dayOnDayComparisonRate  : Sample(8),
+      secondSign              : Sample(1) ]
 
 EncodeOverallDirectYieldAverage(message) ==
-    message.directYieldAverageC8
+    message.directYieldAverageValue
         \o message.sign
-        \o message.dayOnDayComparisonC8
+        \o message.dayOnDayComparisonRate
         \o message.secondSign
 
 DecodeOverallDirectYieldAverage(bytes) ==
-    LET directYieldAverageC8 == ReadBytes(bytes, 8) IN IF ~directYieldAverageC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(directYieldAverageC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    LET dayOnDayComparisonC8 == ReadBytes(sign.rest, 8) IN IF ~dayOnDayComparisonC8.ok THEN Fail ELSE
-    LET secondSign == ReadBytes(dayOnDayComparisonC8.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
-    Ok([ directYieldAverageC8 |-> directYieldAverageC8.value,
-         sign                 |-> sign.value,
-         dayOnDayComparisonC8 |-> dayOnDayComparisonC8.value,
-         secondSign           |-> secondSign.value ], secondSign.rest)
+    LET directYieldAverageValue == ReadBytes(bytes, 8) IN IF ~directYieldAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(directYieldAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET dayOnDayComparisonRate == ReadBytes(sign.rest, 8) IN IF ~dayOnDayComparisonRate.ok THEN Fail ELSE
+    LET secondSign == ReadBytes(dayOnDayComparisonRate.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
+    Ok([ directYieldAverageValue |-> directYieldAverageValue.value,
+         sign                    |-> sign.value,
+         dayOnDayComparisonRate  |-> dayOnDayComparisonRate.value,
+         secondSign              |-> secondSign.value ], secondSign.rest)
 
 ZeroOverallDirectYieldAverage ==
-    [ directYieldAverageC8 |-> [i \in 1 .. 8 |-> 0],
-      sign                 |-> [i \in 1 .. 1 |-> 0],
-      dayOnDayComparisonC8 |-> [i \in 1 .. 8 |-> 0],
-      secondSign           |-> [i \in 1 .. 1 |-> 0] ]
+    [ directYieldAverageValue |-> [i \in 1 .. 8 |-> 0],
+      sign                    |-> [i \in 1 .. 1 |-> 0],
+      dayOnDayComparisonRate  |-> [i \in 1 .. 8 |-> 0],
+      secondSign              |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Overall Direct Yield Average at zero, then each field in turn at the values it is checked at *)
 CheckedOverallDirectYieldAverage ==
     { ZeroOverallDirectYieldAverage }
-        \cup { [ZeroOverallDirectYieldAverage EXCEPT !.directYieldAverageC8 = one] : one \in Sample(8) }
+        \cup { [ZeroOverallDirectYieldAverage EXCEPT !.directYieldAverageValue = one] : one \in Sample(8) }
         \cup { [ZeroOverallDirectYieldAverage EXCEPT !.sign = one] : one \in Sample(1) }
-        \cup { [ZeroOverallDirectYieldAverage EXCEPT !.dayOnDayComparisonC8 = one] : one \in Sample(8) }
+        \cup { [ZeroOverallDirectYieldAverage EXCEPT !.dayOnDayComparisonRate = one] : one \in Sample(8) }
         \cup { [ZeroOverallDirectYieldAverage EXCEPT !.secondSign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1267,33 +1267,33 @@ CheckedOverall ==
 (***************************************************************************)
 
 SimpleAverage ==
-    [ unitFlag         : Sample(1),
-      simpleAverageC14 : Sample(14),
-      sign             : Sample(1) ]
+    [ unitFlag           : Sample(1),
+      simpleAverageValue : Sample(14),
+      sign               : Sample(1) ]
 
 EncodeSimpleAverage(message) ==
     message.unitFlag
-        \o message.simpleAverageC14
+        \o message.simpleAverageValue
         \o message.sign
 
 DecodeSimpleAverage(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET simpleAverageC14 == ReadBytes(unitFlag.rest, 14) IN IF ~simpleAverageC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(simpleAverageC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag         |-> unitFlag.value,
-         simpleAverageC14 |-> simpleAverageC14.value,
-         sign             |-> sign.value ], sign.rest)
+    LET simpleAverageValue == ReadBytes(unitFlag.rest, 14) IN IF ~simpleAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(simpleAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag           |-> unitFlag.value,
+         simpleAverageValue |-> simpleAverageValue.value,
+         sign               |-> sign.value ], sign.rest)
 
 ZeroSimpleAverage ==
-    [ unitFlag         |-> [i \in 1 .. 1 |-> 0],
-      simpleAverageC14 |-> [i \in 1 .. 14 |-> 0],
-      sign             |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag           |-> [i \in 1 .. 1 |-> 0],
+      simpleAverageValue |-> [i \in 1 .. 14 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Simple Average at zero, then each field in turn at the values it is checked at *)
 CheckedSimpleAverage ==
     { ZeroSimpleAverage }
         \cup { [ZeroSimpleAverage EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroSimpleAverage EXCEPT !.simpleAverageC14 = one] : one \in Sample(14) }
+        \cup { [ZeroSimpleAverage EXCEPT !.simpleAverageValue = one] : one \in Sample(14) }
         \cup { [ZeroSimpleAverage EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1301,27 +1301,27 @@ CheckedSimpleAverage ==
 (***************************************************************************)
 
 DivergenceAverage ==
-    [ divergenceAverageC8 : Sample(8),
-      sign                : Sample(1) ]
+    [ divergenceAverageValue : Sample(8),
+      sign                   : Sample(1) ]
 
 EncodeDivergenceAverage(message) ==
-    message.divergenceAverageC8
+    message.divergenceAverageValue
         \o message.sign
 
 DecodeDivergenceAverage(bytes) ==
-    LET divergenceAverageC8 == ReadBytes(bytes, 8) IN IF ~divergenceAverageC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(divergenceAverageC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ divergenceAverageC8 |-> divergenceAverageC8.value,
-         sign                |-> sign.value ], sign.rest)
+    LET divergenceAverageValue == ReadBytes(bytes, 8) IN IF ~divergenceAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(divergenceAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ divergenceAverageValue |-> divergenceAverageValue.value,
+         sign                   |-> sign.value ], sign.rest)
 
 ZeroDivergenceAverage ==
-    [ divergenceAverageC8 |-> [i \in 1 .. 8 |-> 0],
-      sign                |-> [i \in 1 .. 1 |-> 0] ]
+    [ divergenceAverageValue |-> [i \in 1 .. 8 |-> 0],
+      sign                   |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Divergence Average at zero, then each field in turn at the values it is checked at *)
 CheckedDivergenceAverage ==
     { ZeroDivergenceAverage }
-        \cup { [ZeroDivergenceAverage EXCEPT !.divergenceAverageC8 = one] : one \in Sample(8) }
+        \cup { [ZeroDivergenceAverage EXCEPT !.divergenceAverageValue = one] : one \in Sample(8) }
         \cup { [ZeroDivergenceAverage EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1329,33 +1329,33 @@ CheckedDivergenceAverage ==
 (***************************************************************************)
 
 ParityAverage ==
-    [ unitFlag         : Sample(1),
-      parityAverageC14 : Sample(14),
-      sign             : Sample(1) ]
+    [ unitFlag           : Sample(1),
+      parityAverageValue : Sample(14),
+      sign               : Sample(1) ]
 
 EncodeParityAverage(message) ==
     message.unitFlag
-        \o message.parityAverageC14
+        \o message.parityAverageValue
         \o message.sign
 
 DecodeParityAverage(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET parityAverageC14 == ReadBytes(unitFlag.rest, 14) IN IF ~parityAverageC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(parityAverageC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag         |-> unitFlag.value,
-         parityAverageC14 |-> parityAverageC14.value,
-         sign             |-> sign.value ], sign.rest)
+    LET parityAverageValue == ReadBytes(unitFlag.rest, 14) IN IF ~parityAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(parityAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag           |-> unitFlag.value,
+         parityAverageValue |-> parityAverageValue.value,
+         sign               |-> sign.value ], sign.rest)
 
 ZeroParityAverage ==
-    [ unitFlag         |-> [i \in 1 .. 1 |-> 0],
-      parityAverageC14 |-> [i \in 1 .. 14 |-> 0],
-      sign             |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag           |-> [i \in 1 .. 1 |-> 0],
+      parityAverageValue |-> [i \in 1 .. 14 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Parity Average at zero, then each field in turn at the values it is checked at *)
 CheckedParityAverage ==
     { ZeroParityAverage }
         \cup { [ZeroParityAverage EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroParityAverage EXCEPT !.parityAverageC14 = one] : one \in Sample(14) }
+        \cup { [ZeroParityAverage EXCEPT !.parityAverageValue = one] : one \in Sample(14) }
         \cup { [ZeroParityAverage EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1363,27 +1363,27 @@ CheckedParityAverage ==
 (***************************************************************************)
 
 DirectYieldAverage ==
-    [ directYieldAverageC8 : Sample(8),
-      sign                 : Sample(1) ]
+    [ directYieldAverageValue : Sample(8),
+      sign                    : Sample(1) ]
 
 EncodeDirectYieldAverage(message) ==
-    message.directYieldAverageC8
+    message.directYieldAverageValue
         \o message.sign
 
 DecodeDirectYieldAverage(bytes) ==
-    LET directYieldAverageC8 == ReadBytes(bytes, 8) IN IF ~directYieldAverageC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(directYieldAverageC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ directYieldAverageC8 |-> directYieldAverageC8.value,
-         sign                 |-> sign.value ], sign.rest)
+    LET directYieldAverageValue == ReadBytes(bytes, 8) IN IF ~directYieldAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(directYieldAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ directYieldAverageValue |-> directYieldAverageValue.value,
+         sign                    |-> sign.value ], sign.rest)
 
 ZeroDirectYieldAverage ==
-    [ directYieldAverageC8 |-> [i \in 1 .. 8 |-> 0],
-      sign                 |-> [i \in 1 .. 1 |-> 0] ]
+    [ directYieldAverageValue |-> [i \in 1 .. 8 |-> 0],
+      sign                    |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Direct Yield Average at zero, then each field in turn at the values it is checked at *)
 CheckedDirectYieldAverage ==
     { ZeroDirectYieldAverage }
-        \cup { [ZeroDirectYieldAverage EXCEPT !.directYieldAverageC8 = one] : one \in Sample(8) }
+        \cup { [ZeroDirectYieldAverage EXCEPT !.directYieldAverageValue = one] : one \in Sample(8) }
         \cup { [ZeroDirectYieldAverage EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1431,33 +1431,33 @@ CheckedParity100OrHigher ==
 (***************************************************************************)
 
 SimpleAverage2 ==
-    [ unitFlag         : Sample(1),
-      simpleAverageC14 : Sample(14),
-      sign             : Sample(1) ]
+    [ unitFlag           : Sample(1),
+      simpleAverageValue : Sample(14),
+      sign               : Sample(1) ]
 
 EncodeSimpleAverage2(message) ==
     message.unitFlag
-        \o message.simpleAverageC14
+        \o message.simpleAverageValue
         \o message.sign
 
 DecodeSimpleAverage2(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET simpleAverageC14 == ReadBytes(unitFlag.rest, 14) IN IF ~simpleAverageC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(simpleAverageC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag         |-> unitFlag.value,
-         simpleAverageC14 |-> simpleAverageC14.value,
-         sign             |-> sign.value ], sign.rest)
+    LET simpleAverageValue == ReadBytes(unitFlag.rest, 14) IN IF ~simpleAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(simpleAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag           |-> unitFlag.value,
+         simpleAverageValue |-> simpleAverageValue.value,
+         sign               |-> sign.value ], sign.rest)
 
 ZeroSimpleAverage2 ==
-    [ unitFlag         |-> [i \in 1 .. 1 |-> 0],
-      simpleAverageC14 |-> [i \in 1 .. 14 |-> 0],
-      sign             |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag           |-> [i \in 1 .. 1 |-> 0],
+      simpleAverageValue |-> [i \in 1 .. 14 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Simple Average at zero, then each field in turn at the values it is checked at *)
 CheckedSimpleAverage2 ==
     { ZeroSimpleAverage2 }
         \cup { [ZeroSimpleAverage2 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroSimpleAverage2 EXCEPT !.simpleAverageC14 = one] : one \in Sample(14) }
+        \cup { [ZeroSimpleAverage2 EXCEPT !.simpleAverageValue = one] : one \in Sample(14) }
         \cup { [ZeroSimpleAverage2 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1465,27 +1465,27 @@ CheckedSimpleAverage2 ==
 (***************************************************************************)
 
 DivergenceAverage2 ==
-    [ divergenceAverageC8 : Sample(8),
-      sign                : Sample(1) ]
+    [ divergenceAverageValue : Sample(8),
+      sign                   : Sample(1) ]
 
 EncodeDivergenceAverage2(message) ==
-    message.divergenceAverageC8
+    message.divergenceAverageValue
         \o message.sign
 
 DecodeDivergenceAverage2(bytes) ==
-    LET divergenceAverageC8 == ReadBytes(bytes, 8) IN IF ~divergenceAverageC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(divergenceAverageC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ divergenceAverageC8 |-> divergenceAverageC8.value,
-         sign                |-> sign.value ], sign.rest)
+    LET divergenceAverageValue == ReadBytes(bytes, 8) IN IF ~divergenceAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(divergenceAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ divergenceAverageValue |-> divergenceAverageValue.value,
+         sign                   |-> sign.value ], sign.rest)
 
 ZeroDivergenceAverage2 ==
-    [ divergenceAverageC8 |-> [i \in 1 .. 8 |-> 0],
-      sign                |-> [i \in 1 .. 1 |-> 0] ]
+    [ divergenceAverageValue |-> [i \in 1 .. 8 |-> 0],
+      sign                   |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Divergence Average at zero, then each field in turn at the values it is checked at *)
 CheckedDivergenceAverage2 ==
     { ZeroDivergenceAverage2 }
-        \cup { [ZeroDivergenceAverage2 EXCEPT !.divergenceAverageC8 = one] : one \in Sample(8) }
+        \cup { [ZeroDivergenceAverage2 EXCEPT !.divergenceAverageValue = one] : one \in Sample(8) }
         \cup { [ZeroDivergenceAverage2 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1493,33 +1493,33 @@ CheckedDivergenceAverage2 ==
 (***************************************************************************)
 
 ParityAverage2 ==
-    [ unitFlag         : Sample(1),
-      parityAverageC14 : Sample(14),
-      sign             : Sample(1) ]
+    [ unitFlag           : Sample(1),
+      parityAverageValue : Sample(14),
+      sign               : Sample(1) ]
 
 EncodeParityAverage2(message) ==
     message.unitFlag
-        \o message.parityAverageC14
+        \o message.parityAverageValue
         \o message.sign
 
 DecodeParityAverage2(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET parityAverageC14 == ReadBytes(unitFlag.rest, 14) IN IF ~parityAverageC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(parityAverageC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag         |-> unitFlag.value,
-         parityAverageC14 |-> parityAverageC14.value,
-         sign             |-> sign.value ], sign.rest)
+    LET parityAverageValue == ReadBytes(unitFlag.rest, 14) IN IF ~parityAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(parityAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag           |-> unitFlag.value,
+         parityAverageValue |-> parityAverageValue.value,
+         sign               |-> sign.value ], sign.rest)
 
 ZeroParityAverage2 ==
-    [ unitFlag         |-> [i \in 1 .. 1 |-> 0],
-      parityAverageC14 |-> [i \in 1 .. 14 |-> 0],
-      sign             |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag           |-> [i \in 1 .. 1 |-> 0],
+      parityAverageValue |-> [i \in 1 .. 14 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Parity Average at zero, then each field in turn at the values it is checked at *)
 CheckedParityAverage2 ==
     { ZeroParityAverage2 }
         \cup { [ZeroParityAverage2 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroParityAverage2 EXCEPT !.parityAverageC14 = one] : one \in Sample(14) }
+        \cup { [ZeroParityAverage2 EXCEPT !.parityAverageValue = one] : one \in Sample(14) }
         \cup { [ZeroParityAverage2 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1527,27 +1527,27 @@ CheckedParityAverage2 ==
 (***************************************************************************)
 
 DirectYieldAverage2 ==
-    [ directYieldAverageC8 : Sample(8),
-      sign                 : Sample(1) ]
+    [ directYieldAverageValue : Sample(8),
+      sign                    : Sample(1) ]
 
 EncodeDirectYieldAverage2(message) ==
-    message.directYieldAverageC8
+    message.directYieldAverageValue
         \o message.sign
 
 DecodeDirectYieldAverage2(bytes) ==
-    LET directYieldAverageC8 == ReadBytes(bytes, 8) IN IF ~directYieldAverageC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(directYieldAverageC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ directYieldAverageC8 |-> directYieldAverageC8.value,
-         sign                 |-> sign.value ], sign.rest)
+    LET directYieldAverageValue == ReadBytes(bytes, 8) IN IF ~directYieldAverageValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(directYieldAverageValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ directYieldAverageValue |-> directYieldAverageValue.value,
+         sign                    |-> sign.value ], sign.rest)
 
 ZeroDirectYieldAverage2 ==
-    [ directYieldAverageC8 |-> [i \in 1 .. 8 |-> 0],
-      sign                 |-> [i \in 1 .. 1 |-> 0] ]
+    [ directYieldAverageValue |-> [i \in 1 .. 8 |-> 0],
+      sign                    |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Direct Yield Average at zero, then each field in turn at the values it is checked at *)
 CheckedDirectYieldAverage2 ==
     { ZeroDirectYieldAverage2 }
-        \cup { [ZeroDirectYieldAverage2 EXCEPT !.directYieldAverageC8 = one] : one \in Sample(8) }
+        \cup { [ZeroDirectYieldAverage2 EXCEPT !.directYieldAverageValue = one] : one \in Sample(8) }
         \cup { [ZeroDirectYieldAverage2 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1891,28 +1891,28 @@ CheckedNumberOfGainersDeclinersMessage ==
 (***************************************************************************)
 
 EstimatedTotalTradingVolume ==
-    [ tradingVolumeTurnoverUnitFlag  : Sample(1),
-      estimatedTotalTradingVolumeC14 : Sample(14) ]
+    [ tradingVolumeTurnoverUnitFlag    : Sample(1),
+      estimatedTotalTradingVolumeValue : Sample(14) ]
 
 EncodeEstimatedTotalTradingVolume(message) ==
     message.tradingVolumeTurnoverUnitFlag
-        \o message.estimatedTotalTradingVolumeC14
+        \o message.estimatedTotalTradingVolumeValue
 
 DecodeEstimatedTotalTradingVolume(bytes) ==
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(bytes, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET estimatedTotalTradingVolumeC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~estimatedTotalTradingVolumeC14.ok THEN Fail ELSE
-    Ok([ tradingVolumeTurnoverUnitFlag  |-> tradingVolumeTurnoverUnitFlag.value,
-         estimatedTotalTradingVolumeC14 |-> estimatedTotalTradingVolumeC14.value ], estimatedTotalTradingVolumeC14.rest)
+    LET estimatedTotalTradingVolumeValue == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~estimatedTotalTradingVolumeValue.ok THEN Fail ELSE
+    Ok([ tradingVolumeTurnoverUnitFlag    |-> tradingVolumeTurnoverUnitFlag.value,
+         estimatedTotalTradingVolumeValue |-> estimatedTotalTradingVolumeValue.value ], estimatedTotalTradingVolumeValue.rest)
 
 ZeroEstimatedTotalTradingVolume ==
-    [ tradingVolumeTurnoverUnitFlag  |-> [i \in 1 .. 1 |-> 0],
-      estimatedTotalTradingVolumeC14 |-> [i \in 1 .. 14 |-> 0] ]
+    [ tradingVolumeTurnoverUnitFlag    |-> [i \in 1 .. 1 |-> 0],
+      estimatedTotalTradingVolumeValue |-> [i \in 1 .. 14 |-> 0] ]
 
 (* Estimated Total Trading Volume at zero, then each field in turn at the values it is checked at *)
 CheckedEstimatedTotalTradingVolume ==
     { ZeroEstimatedTotalTradingVolume }
         \cup { [ZeroEstimatedTotalTradingVolume EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroEstimatedTotalTradingVolume EXCEPT !.estimatedTotalTradingVolumeC14 = one] : one \in Sample(14) }
+        \cup { [ZeroEstimatedTotalTradingVolume EXCEPT !.estimatedTotalTradingVolumeValue = one] : one \in Sample(14) }
 
 (***************************************************************************)
 (* Estimated Total Trading Volume Message: 29 bytes                        *)
@@ -1966,32 +1966,32 @@ CheckedEstimatedTotalTradingVolumeMessage ==
 
 EstimatedTotalTurnover ==
     [ tradingVolumeTurnoverUnitFlag : Sample(1),
-      estimatedTotalTurnoverC14     : Sample(14),
+      estimatedTotalTurnoverValue   : Sample(14),
       reserved1                     : Sample(1) ]
 
 EncodeEstimatedTotalTurnover(message) ==
     message.tradingVolumeTurnoverUnitFlag
-        \o message.estimatedTotalTurnoverC14
+        \o message.estimatedTotalTurnoverValue
         \o message.reserved1
 
 DecodeEstimatedTotalTurnover(bytes) ==
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(bytes, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET estimatedTotalTurnoverC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~estimatedTotalTurnoverC14.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(estimatedTotalTurnoverC14.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET estimatedTotalTurnoverValue == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~estimatedTotalTurnoverValue.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(estimatedTotalTurnoverValue.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     Ok([ tradingVolumeTurnoverUnitFlag |-> tradingVolumeTurnoverUnitFlag.value,
-         estimatedTotalTurnoverC14     |-> estimatedTotalTurnoverC14.value,
+         estimatedTotalTurnoverValue   |-> estimatedTotalTurnoverValue.value,
          reserved1                     |-> reserved1.value ], reserved1.rest)
 
 ZeroEstimatedTotalTurnover ==
     [ tradingVolumeTurnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
-      estimatedTotalTurnoverC14     |-> [i \in 1 .. 14 |-> 0],
+      estimatedTotalTurnoverValue   |-> [i \in 1 .. 14 |-> 0],
       reserved1                     |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Estimated Total Turnover at zero, then each field in turn at the values it is checked at *)
 CheckedEstimatedTotalTurnover ==
     { ZeroEstimatedTotalTurnover }
         \cup { [ZeroEstimatedTotalTurnover EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroEstimatedTotalTurnover EXCEPT !.estimatedTotalTurnoverC14 = one] : one \in Sample(14) }
+        \cup { [ZeroEstimatedTotalTurnover EXCEPT !.estimatedTotalTurnoverValue = one] : one \in Sample(14) }
         \cup { [ZeroEstimatedTotalTurnover EXCEPT !.reserved1 = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2045,57 +2045,57 @@ CheckedEstimatedTotalTurnoverMessage ==
 (***************************************************************************)
 
 VwapByMarket ==
-    [ unitFlag              : Sample(1),
-      vwapByMarketC14       : Sample(14),
-      sign                  : Sample(1),
-      reserved1             : Sample(1),
-      secondUnitFlag        : Sample(1),
-      dayOnDayComparisonC14 : Sample(14),
-      secondSign            : Sample(1) ]
+    [ unitFlag           : Sample(1),
+      vwapByMarketValue  : Sample(14),
+      sign               : Sample(1),
+      reserved1          : Sample(1),
+      secondUnitFlag     : Sample(1),
+      dayOnDayComparison : Sample(14),
+      secondSign         : Sample(1) ]
 
 EncodeVwapByMarket(message) ==
     message.unitFlag
-        \o message.vwapByMarketC14
+        \o message.vwapByMarketValue
         \o message.sign
         \o message.reserved1
         \o message.secondUnitFlag
-        \o message.dayOnDayComparisonC14
+        \o message.dayOnDayComparison
         \o message.secondSign
 
 DecodeVwapByMarket(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET vwapByMarketC14 == ReadBytes(unitFlag.rest, 14) IN IF ~vwapByMarketC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(vwapByMarketC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET vwapByMarketValue == ReadBytes(unitFlag.rest, 14) IN IF ~vwapByMarketValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(vwapByMarketValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(sign.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET secondUnitFlag == ReadBytes(reserved1.rest, 1) IN IF ~secondUnitFlag.ok THEN Fail ELSE
-    LET dayOnDayComparisonC14 == ReadBytes(secondUnitFlag.rest, 14) IN IF ~dayOnDayComparisonC14.ok THEN Fail ELSE
-    LET secondSign == ReadBytes(dayOnDayComparisonC14.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
-    Ok([ unitFlag              |-> unitFlag.value,
-         vwapByMarketC14       |-> vwapByMarketC14.value,
-         sign                  |-> sign.value,
-         reserved1             |-> reserved1.value,
-         secondUnitFlag        |-> secondUnitFlag.value,
-         dayOnDayComparisonC14 |-> dayOnDayComparisonC14.value,
-         secondSign            |-> secondSign.value ], secondSign.rest)
+    LET dayOnDayComparison == ReadBytes(secondUnitFlag.rest, 14) IN IF ~dayOnDayComparison.ok THEN Fail ELSE
+    LET secondSign == ReadBytes(dayOnDayComparison.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
+    Ok([ unitFlag           |-> unitFlag.value,
+         vwapByMarketValue  |-> vwapByMarketValue.value,
+         sign               |-> sign.value,
+         reserved1          |-> reserved1.value,
+         secondUnitFlag     |-> secondUnitFlag.value,
+         dayOnDayComparison |-> dayOnDayComparison.value,
+         secondSign         |-> secondSign.value ], secondSign.rest)
 
 ZeroVwapByMarket ==
-    [ unitFlag              |-> [i \in 1 .. 1 |-> 0],
-      vwapByMarketC14       |-> [i \in 1 .. 14 |-> 0],
-      sign                  |-> [i \in 1 .. 1 |-> 0],
-      reserved1             |-> [i \in 1 .. 1 |-> 0],
-      secondUnitFlag        |-> [i \in 1 .. 1 |-> 0],
-      dayOnDayComparisonC14 |-> [i \in 1 .. 14 |-> 0],
-      secondSign            |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag           |-> [i \in 1 .. 1 |-> 0],
+      vwapByMarketValue  |-> [i \in 1 .. 14 |-> 0],
+      sign               |-> [i \in 1 .. 1 |-> 0],
+      reserved1          |-> [i \in 1 .. 1 |-> 0],
+      secondUnitFlag     |-> [i \in 1 .. 1 |-> 0],
+      dayOnDayComparison |-> [i \in 1 .. 14 |-> 0],
+      secondSign         |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Vwap By Market at zero, then each field in turn at the values it is checked at *)
 CheckedVwapByMarket ==
     { ZeroVwapByMarket }
         \cup { [ZeroVwapByMarket EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroVwapByMarket EXCEPT !.vwapByMarketC14 = one] : one \in Sample(14) }
+        \cup { [ZeroVwapByMarket EXCEPT !.vwapByMarketValue = one] : one \in Sample(14) }
         \cup { [ZeroVwapByMarket EXCEPT !.sign = one] : one \in Sample(1) }
         \cup { [ZeroVwapByMarket EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroVwapByMarket EXCEPT !.secondUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroVwapByMarket EXCEPT !.dayOnDayComparisonC14 = one] : one \in Sample(14) }
+        \cup { [ZeroVwapByMarket EXCEPT !.dayOnDayComparison = one] : one \in Sample(14) }
         \cup { [ZeroVwapByMarket EXCEPT !.secondSign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2147,33 +2147,33 @@ TopRankByTradingVolume ==
       rankedIssueCode               : Sample(12),
       reserved1                     : Sample(1),
       tradingVolumeTurnoverUnitFlag : Sample(1),
-      tradingVolumeC14              : Sample(14) ]
+      tradingVolumeValue            : Sample(14) ]
 
 EncodeTopRankByTradingVolume(message) ==
     message.rank
         \o message.rankedIssueCode
         \o message.reserved1
         \o message.tradingVolumeTurnoverUnitFlag
-        \o message.tradingVolumeC14
+        \o message.tradingVolumeValue
 
 DecodeTopRankByTradingVolume(bytes) ==
     LET rank == ReadBytes(bytes, 2) IN IF ~rank.ok THEN Fail ELSE
     LET rankedIssueCode == ReadBytes(rank.rest, 12) IN IF ~rankedIssueCode.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(rankedIssueCode.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(reserved1.rest, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET tradingVolumeC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~tradingVolumeC14.ok THEN Fail ELSE
+    LET tradingVolumeValue == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~tradingVolumeValue.ok THEN Fail ELSE
     Ok([ rank                          |-> rank.value,
          rankedIssueCode               |-> rankedIssueCode.value,
          reserved1                     |-> reserved1.value,
          tradingVolumeTurnoverUnitFlag |-> tradingVolumeTurnoverUnitFlag.value,
-         tradingVolumeC14              |-> tradingVolumeC14.value ], tradingVolumeC14.rest)
+         tradingVolumeValue            |-> tradingVolumeValue.value ], tradingVolumeValue.rest)
 
 ZeroTopRankByTradingVolume ==
     [ rank                          |-> [i \in 1 .. 2 |-> 0],
       rankedIssueCode               |-> [i \in 1 .. 12 |-> 0],
       reserved1                     |-> [i \in 1 .. 1 |-> 0],
       tradingVolumeTurnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
-      tradingVolumeC14              |-> [i \in 1 .. 14 |-> 0] ]
+      tradingVolumeValue            |-> [i \in 1 .. 14 |-> 0] ]
 
 (* Top Rank By Trading Volume at zero, then each field in turn at the values it is checked at *)
 CheckedTopRankByTradingVolume ==
@@ -2182,7 +2182,7 @@ CheckedTopRankByTradingVolume ==
         \cup { [ZeroTopRankByTradingVolume EXCEPT !.rankedIssueCode = one] : one \in Sample(12) }
         \cup { [ZeroTopRankByTradingVolume EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroTopRankByTradingVolume EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTopRankByTradingVolume EXCEPT !.tradingVolumeC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTopRankByTradingVolume EXCEPT !.tradingVolumeValue = one] : one \in Sample(14) }
 
 (* A run of Top Rank By Trading Volume, written one after another *)
 RECURSIVE EncodeTopRankByTradingVolumeList(_)
@@ -2257,33 +2257,33 @@ TopRankByTurnover ==
       rankedIssueCode               : Sample(12),
       reserved1                     : Sample(1),
       tradingVolumeTurnoverUnitFlag : Sample(1),
-      turnoverC14                   : Sample(14) ]
+      turnoverValue                 : Sample(14) ]
 
 EncodeTopRankByTurnover(message) ==
     message.rank
         \o message.rankedIssueCode
         \o message.reserved1
         \o message.tradingVolumeTurnoverUnitFlag
-        \o message.turnoverC14
+        \o message.turnoverValue
 
 DecodeTopRankByTurnover(bytes) ==
     LET rank == ReadBytes(bytes, 2) IN IF ~rank.ok THEN Fail ELSE
     LET rankedIssueCode == ReadBytes(rank.rest, 12) IN IF ~rankedIssueCode.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(rankedIssueCode.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(reserved1.rest, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET turnoverC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~turnoverC14.ok THEN Fail ELSE
+    LET turnoverValue == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~turnoverValue.ok THEN Fail ELSE
     Ok([ rank                          |-> rank.value,
          rankedIssueCode               |-> rankedIssueCode.value,
          reserved1                     |-> reserved1.value,
          tradingVolumeTurnoverUnitFlag |-> tradingVolumeTurnoverUnitFlag.value,
-         turnoverC14                   |-> turnoverC14.value ], turnoverC14.rest)
+         turnoverValue                 |-> turnoverValue.value ], turnoverValue.rest)
 
 ZeroTopRankByTurnover ==
     [ rank                          |-> [i \in 1 .. 2 |-> 0],
       rankedIssueCode               |-> [i \in 1 .. 12 |-> 0],
       reserved1                     |-> [i \in 1 .. 1 |-> 0],
       tradingVolumeTurnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
-      turnoverC14                   |-> [i \in 1 .. 14 |-> 0] ]
+      turnoverValue                 |-> [i \in 1 .. 14 |-> 0] ]
 
 (* Top Rank By Turnover at zero, then each field in turn at the values it is checked at *)
 CheckedTopRankByTurnover ==
@@ -2292,7 +2292,7 @@ CheckedTopRankByTurnover ==
         \cup { [ZeroTopRankByTurnover EXCEPT !.rankedIssueCode = one] : one \in Sample(12) }
         \cup { [ZeroTopRankByTurnover EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroTopRankByTurnover EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTopRankByTurnover EXCEPT !.turnoverC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTopRankByTurnover EXCEPT !.turnoverValue = one] : one \in Sample(14) }
 
 (* A run of Top Rank By Turnover, written one after another *)
 RECURSIVE EncodeTopRankByTurnoverList(_)
@@ -2363,23 +2363,23 @@ CheckedRankingByTurnoverMessage ==
 (***************************************************************************)
 
 TopRankByNetChange ==
-    [ rank            : Sample(2),
-      rankedIssueCode : Sample(12),
-      stateSign       : Sample(1),
-      unitFlag        : Sample(1),
-      currentPriceC14 : Sample(14),
-      sign            : Sample(1),
-      comparisonType  : Sample(1),
-      secondUnitFlag  : Sample(1),
-      netChange       : Sample(14),
-      secondSign      : Sample(1) ]
+    [ rank              : Sample(2),
+      rankedIssueCode   : Sample(12),
+      stateSign         : Sample(1),
+      unitFlag          : Sample(1),
+      currentPriceValue : Sample(14),
+      sign              : Sample(1),
+      comparisonType    : Sample(1),
+      secondUnitFlag    : Sample(1),
+      netChange         : Sample(14),
+      secondSign        : Sample(1) ]
 
 EncodeTopRankByNetChange(message) ==
     message.rank
         \o message.rankedIssueCode
         \o message.stateSign
         \o message.unitFlag
-        \o message.currentPriceC14
+        \o message.currentPriceValue
         \o message.sign
         \o message.comparisonType
         \o message.secondUnitFlag
@@ -2391,34 +2391,34 @@ DecodeTopRankByNetChange(bytes) ==
     LET rankedIssueCode == ReadBytes(rank.rest, 12) IN IF ~rankedIssueCode.ok THEN Fail ELSE
     LET stateSign == ReadBytes(rankedIssueCode.rest, 1) IN IF ~stateSign.ok THEN Fail ELSE
     LET unitFlag == ReadBytes(stateSign.rest, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET currentPriceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~currentPriceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(currentPriceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET currentPriceValue == ReadBytes(unitFlag.rest, 14) IN IF ~currentPriceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(currentPriceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
     LET comparisonType == ReadBytes(sign.rest, 1) IN IF ~comparisonType.ok THEN Fail ELSE
     LET secondUnitFlag == ReadBytes(comparisonType.rest, 1) IN IF ~secondUnitFlag.ok THEN Fail ELSE
     LET netChange == ReadBytes(secondUnitFlag.rest, 14) IN IF ~netChange.ok THEN Fail ELSE
     LET secondSign == ReadBytes(netChange.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
-    Ok([ rank            |-> rank.value,
-         rankedIssueCode |-> rankedIssueCode.value,
-         stateSign       |-> stateSign.value,
-         unitFlag        |-> unitFlag.value,
-         currentPriceC14 |-> currentPriceC14.value,
-         sign            |-> sign.value,
-         comparisonType  |-> comparisonType.value,
-         secondUnitFlag  |-> secondUnitFlag.value,
-         netChange       |-> netChange.value,
-         secondSign      |-> secondSign.value ], secondSign.rest)
+    Ok([ rank              |-> rank.value,
+         rankedIssueCode   |-> rankedIssueCode.value,
+         stateSign         |-> stateSign.value,
+         unitFlag          |-> unitFlag.value,
+         currentPriceValue |-> currentPriceValue.value,
+         sign              |-> sign.value,
+         comparisonType    |-> comparisonType.value,
+         secondUnitFlag    |-> secondUnitFlag.value,
+         netChange         |-> netChange.value,
+         secondSign        |-> secondSign.value ], secondSign.rest)
 
 ZeroTopRankByNetChange ==
-    [ rank            |-> [i \in 1 .. 2 |-> 0],
-      rankedIssueCode |-> [i \in 1 .. 12 |-> 0],
-      stateSign       |-> [i \in 1 .. 1 |-> 0],
-      unitFlag        |-> [i \in 1 .. 1 |-> 0],
-      currentPriceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign            |-> [i \in 1 .. 1 |-> 0],
-      comparisonType  |-> [i \in 1 .. 1 |-> 0],
-      secondUnitFlag  |-> [i \in 1 .. 1 |-> 0],
-      netChange       |-> [i \in 1 .. 14 |-> 0],
-      secondSign      |-> [i \in 1 .. 1 |-> 0] ]
+    [ rank              |-> [i \in 1 .. 2 |-> 0],
+      rankedIssueCode   |-> [i \in 1 .. 12 |-> 0],
+      stateSign         |-> [i \in 1 .. 1 |-> 0],
+      unitFlag          |-> [i \in 1 .. 1 |-> 0],
+      currentPriceValue |-> [i \in 1 .. 14 |-> 0],
+      sign              |-> [i \in 1 .. 1 |-> 0],
+      comparisonType    |-> [i \in 1 .. 1 |-> 0],
+      secondUnitFlag    |-> [i \in 1 .. 1 |-> 0],
+      netChange         |-> [i \in 1 .. 14 |-> 0],
+      secondSign        |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Top Rank By Net Change at zero, then each field in turn at the values it is checked at *)
 CheckedTopRankByNetChange ==
@@ -2427,7 +2427,7 @@ CheckedTopRankByNetChange ==
         \cup { [ZeroTopRankByNetChange EXCEPT !.rankedIssueCode = one] : one \in Sample(12) }
         \cup { [ZeroTopRankByNetChange EXCEPT !.stateSign = one] : one \in Sample(1) }
         \cup { [ZeroTopRankByNetChange EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTopRankByNetChange EXCEPT !.currentPriceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTopRankByNetChange EXCEPT !.currentPriceValue = one] : one \in Sample(14) }
         \cup { [ZeroTopRankByNetChange EXCEPT !.sign = one] : one \in Sample(1) }
         \cup { [ZeroTopRankByNetChange EXCEPT !.comparisonType = one] : one \in Sample(1) }
         \cup { [ZeroTopRankByNetChange EXCEPT !.secondUnitFlag = one] : one \in Sample(1) }
@@ -2509,22 +2509,22 @@ CheckedRankingByNetChangeMessage ==
 (***************************************************************************)
 
 TopRankByNetChangeRate ==
-    [ rank            : Sample(2),
-      rankedIssueCode : Sample(12),
-      stateSign       : Sample(1),
-      unitFlag        : Sample(1),
-      currentPriceC14 : Sample(14),
-      sign            : Sample(1),
-      comparisonType  : Sample(1),
-      netChangeRate   : Sample(8),
-      secondSign      : Sample(1) ]
+    [ rank              : Sample(2),
+      rankedIssueCode   : Sample(12),
+      stateSign         : Sample(1),
+      unitFlag          : Sample(1),
+      currentPriceValue : Sample(14),
+      sign              : Sample(1),
+      comparisonType    : Sample(1),
+      netChangeRate     : Sample(8),
+      secondSign        : Sample(1) ]
 
 EncodeTopRankByNetChangeRate(message) ==
     message.rank
         \o message.rankedIssueCode
         \o message.stateSign
         \o message.unitFlag
-        \o message.currentPriceC14
+        \o message.currentPriceValue
         \o message.sign
         \o message.comparisonType
         \o message.netChangeRate
@@ -2535,31 +2535,31 @@ DecodeTopRankByNetChangeRate(bytes) ==
     LET rankedIssueCode == ReadBytes(rank.rest, 12) IN IF ~rankedIssueCode.ok THEN Fail ELSE
     LET stateSign == ReadBytes(rankedIssueCode.rest, 1) IN IF ~stateSign.ok THEN Fail ELSE
     LET unitFlag == ReadBytes(stateSign.rest, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET currentPriceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~currentPriceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(currentPriceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET currentPriceValue == ReadBytes(unitFlag.rest, 14) IN IF ~currentPriceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(currentPriceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
     LET comparisonType == ReadBytes(sign.rest, 1) IN IF ~comparisonType.ok THEN Fail ELSE
     LET netChangeRate == ReadBytes(comparisonType.rest, 8) IN IF ~netChangeRate.ok THEN Fail ELSE
     LET secondSign == ReadBytes(netChangeRate.rest, 1) IN IF ~secondSign.ok THEN Fail ELSE
-    Ok([ rank            |-> rank.value,
-         rankedIssueCode |-> rankedIssueCode.value,
-         stateSign       |-> stateSign.value,
-         unitFlag        |-> unitFlag.value,
-         currentPriceC14 |-> currentPriceC14.value,
-         sign            |-> sign.value,
-         comparisonType  |-> comparisonType.value,
-         netChangeRate   |-> netChangeRate.value,
-         secondSign      |-> secondSign.value ], secondSign.rest)
+    Ok([ rank              |-> rank.value,
+         rankedIssueCode   |-> rankedIssueCode.value,
+         stateSign         |-> stateSign.value,
+         unitFlag          |-> unitFlag.value,
+         currentPriceValue |-> currentPriceValue.value,
+         sign              |-> sign.value,
+         comparisonType    |-> comparisonType.value,
+         netChangeRate     |-> netChangeRate.value,
+         secondSign        |-> secondSign.value ], secondSign.rest)
 
 ZeroTopRankByNetChangeRate ==
-    [ rank            |-> [i \in 1 .. 2 |-> 0],
-      rankedIssueCode |-> [i \in 1 .. 12 |-> 0],
-      stateSign       |-> [i \in 1 .. 1 |-> 0],
-      unitFlag        |-> [i \in 1 .. 1 |-> 0],
-      currentPriceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign            |-> [i \in 1 .. 1 |-> 0],
-      comparisonType  |-> [i \in 1 .. 1 |-> 0],
-      netChangeRate   |-> [i \in 1 .. 8 |-> 0],
-      secondSign      |-> [i \in 1 .. 1 |-> 0] ]
+    [ rank              |-> [i \in 1 .. 2 |-> 0],
+      rankedIssueCode   |-> [i \in 1 .. 12 |-> 0],
+      stateSign         |-> [i \in 1 .. 1 |-> 0],
+      unitFlag          |-> [i \in 1 .. 1 |-> 0],
+      currentPriceValue |-> [i \in 1 .. 14 |-> 0],
+      sign              |-> [i \in 1 .. 1 |-> 0],
+      comparisonType    |-> [i \in 1 .. 1 |-> 0],
+      netChangeRate     |-> [i \in 1 .. 8 |-> 0],
+      secondSign        |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Top Rank By Net Change Rate at zero, then each field in turn at the values it is checked at *)
 CheckedTopRankByNetChangeRate ==
@@ -2568,7 +2568,7 @@ CheckedTopRankByNetChangeRate ==
         \cup { [ZeroTopRankByNetChangeRate EXCEPT !.rankedIssueCode = one] : one \in Sample(12) }
         \cup { [ZeroTopRankByNetChangeRate EXCEPT !.stateSign = one] : one \in Sample(1) }
         \cup { [ZeroTopRankByNetChangeRate EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTopRankByNetChangeRate EXCEPT !.currentPriceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTopRankByNetChangeRate EXCEPT !.currentPriceValue = one] : one \in Sample(14) }
         \cup { [ZeroTopRankByNetChangeRate EXCEPT !.sign = one] : one \in Sample(1) }
         \cup { [ZeroTopRankByNetChangeRate EXCEPT !.comparisonType = one] : one \in Sample(1) }
         \cup { [ZeroTopRankByNetChangeRate EXCEPT !.netChangeRate = one] : one \in Sample(8) }
@@ -2650,49 +2650,49 @@ CheckedRankingByNetChangeRateMessage ==
 
 TradingVolume ==
     [ tradingVolumeTurnoverUnitFlag       : Sample(1),
-      singleIssueTransactionC14           : Sample(14),
+      singleIssueTransaction              : Sample(14),
       secondTradingVolumeturnoverUnitFlag : Sample(1),
       closingPriceTransaction             : Sample(14),
       thirdTradingVolumeturnoverUnitFlag  : Sample(1),
-      basketTransactionC14                : Sample(14),
+      basketTransaction                   : Sample(14),
       fourthTradingVolumeturnoverUnitFlag : Sample(1),
       aggregateTradingVolume              : Sample(14) ]
 
 EncodeTradingVolume(message) ==
     message.tradingVolumeTurnoverUnitFlag
-        \o message.singleIssueTransactionC14
+        \o message.singleIssueTransaction
         \o message.secondTradingVolumeturnoverUnitFlag
         \o message.closingPriceTransaction
         \o message.thirdTradingVolumeturnoverUnitFlag
-        \o message.basketTransactionC14
+        \o message.basketTransaction
         \o message.fourthTradingVolumeturnoverUnitFlag
         \o message.aggregateTradingVolume
 
 DecodeTradingVolume(bytes) ==
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(bytes, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET singleIssueTransactionC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~singleIssueTransactionC14.ok THEN Fail ELSE
-    LET secondTradingVolumeturnoverUnitFlag == ReadBytes(singleIssueTransactionC14.rest, 1) IN IF ~secondTradingVolumeturnoverUnitFlag.ok THEN Fail ELSE
+    LET singleIssueTransaction == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~singleIssueTransaction.ok THEN Fail ELSE
+    LET secondTradingVolumeturnoverUnitFlag == ReadBytes(singleIssueTransaction.rest, 1) IN IF ~secondTradingVolumeturnoverUnitFlag.ok THEN Fail ELSE
     LET closingPriceTransaction == ReadBytes(secondTradingVolumeturnoverUnitFlag.rest, 14) IN IF ~closingPriceTransaction.ok THEN Fail ELSE
     LET thirdTradingVolumeturnoverUnitFlag == ReadBytes(closingPriceTransaction.rest, 1) IN IF ~thirdTradingVolumeturnoverUnitFlag.ok THEN Fail ELSE
-    LET basketTransactionC14 == ReadBytes(thirdTradingVolumeturnoverUnitFlag.rest, 14) IN IF ~basketTransactionC14.ok THEN Fail ELSE
-    LET fourthTradingVolumeturnoverUnitFlag == ReadBytes(basketTransactionC14.rest, 1) IN IF ~fourthTradingVolumeturnoverUnitFlag.ok THEN Fail ELSE
+    LET basketTransaction == ReadBytes(thirdTradingVolumeturnoverUnitFlag.rest, 14) IN IF ~basketTransaction.ok THEN Fail ELSE
+    LET fourthTradingVolumeturnoverUnitFlag == ReadBytes(basketTransaction.rest, 1) IN IF ~fourthTradingVolumeturnoverUnitFlag.ok THEN Fail ELSE
     LET aggregateTradingVolume == ReadBytes(fourthTradingVolumeturnoverUnitFlag.rest, 14) IN IF ~aggregateTradingVolume.ok THEN Fail ELSE
     Ok([ tradingVolumeTurnoverUnitFlag       |-> tradingVolumeTurnoverUnitFlag.value,
-         singleIssueTransactionC14           |-> singleIssueTransactionC14.value,
+         singleIssueTransaction              |-> singleIssueTransaction.value,
          secondTradingVolumeturnoverUnitFlag |-> secondTradingVolumeturnoverUnitFlag.value,
          closingPriceTransaction             |-> closingPriceTransaction.value,
          thirdTradingVolumeturnoverUnitFlag  |-> thirdTradingVolumeturnoverUnitFlag.value,
-         basketTransactionC14                |-> basketTransactionC14.value,
+         basketTransaction                   |-> basketTransaction.value,
          fourthTradingVolumeturnoverUnitFlag |-> fourthTradingVolumeturnoverUnitFlag.value,
          aggregateTradingVolume              |-> aggregateTradingVolume.value ], aggregateTradingVolume.rest)
 
 ZeroTradingVolume ==
     [ tradingVolumeTurnoverUnitFlag       |-> [i \in 1 .. 1 |-> 0],
-      singleIssueTransactionC14           |-> [i \in 1 .. 14 |-> 0],
+      singleIssueTransaction              |-> [i \in 1 .. 14 |-> 0],
       secondTradingVolumeturnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
       closingPriceTransaction             |-> [i \in 1 .. 14 |-> 0],
       thirdTradingVolumeturnoverUnitFlag  |-> [i \in 1 .. 1 |-> 0],
-      basketTransactionC14                |-> [i \in 1 .. 14 |-> 0],
+      basketTransaction                   |-> [i \in 1 .. 14 |-> 0],
       fourthTradingVolumeturnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
       aggregateTradingVolume              |-> [i \in 1 .. 14 |-> 0] ]
 
@@ -2700,11 +2700,11 @@ ZeroTradingVolume ==
 CheckedTradingVolume ==
     { ZeroTradingVolume }
         \cup { [ZeroTradingVolume EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradingVolume EXCEPT !.singleIssueTransactionC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTradingVolume EXCEPT !.singleIssueTransaction = one] : one \in Sample(14) }
         \cup { [ZeroTradingVolume EXCEPT !.secondTradingVolumeturnoverUnitFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradingVolume EXCEPT !.closingPriceTransaction = one] : one \in Sample(14) }
         \cup { [ZeroTradingVolume EXCEPT !.thirdTradingVolumeturnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradingVolume EXCEPT !.basketTransactionC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTradingVolume EXCEPT !.basketTransaction = one] : one \in Sample(14) }
         \cup { [ZeroTradingVolume EXCEPT !.fourthTradingVolumeturnoverUnitFlag = one] : one \in Sample(1) }
         \cup { [ZeroTradingVolume EXCEPT !.aggregateTradingVolume = one] : one \in Sample(14) }
 
@@ -2714,49 +2714,49 @@ CheckedTradingVolume ==
 
 Turnover ==
     [ tradingVolumeTurnoverUnitFlag       : Sample(1),
-      singleIssueTransactionC14           : Sample(14),
+      singleIssueTransaction              : Sample(14),
       secondTradingVolumeturnoverUnitFlag : Sample(1),
       closingPriceTransaction             : Sample(14),
       thirdTradingVolumeturnoverUnitFlag  : Sample(1),
-      basketTransactionC14                : Sample(14),
+      basketTransaction                   : Sample(14),
       fourthTradingVolumeturnoverUnitFlag : Sample(1),
       aggregateTurnover                   : Sample(14) ]
 
 EncodeTurnover(message) ==
     message.tradingVolumeTurnoverUnitFlag
-        \o message.singleIssueTransactionC14
+        \o message.singleIssueTransaction
         \o message.secondTradingVolumeturnoverUnitFlag
         \o message.closingPriceTransaction
         \o message.thirdTradingVolumeturnoverUnitFlag
-        \o message.basketTransactionC14
+        \o message.basketTransaction
         \o message.fourthTradingVolumeturnoverUnitFlag
         \o message.aggregateTurnover
 
 DecodeTurnover(bytes) ==
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(bytes, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET singleIssueTransactionC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~singleIssueTransactionC14.ok THEN Fail ELSE
-    LET secondTradingVolumeturnoverUnitFlag == ReadBytes(singleIssueTransactionC14.rest, 1) IN IF ~secondTradingVolumeturnoverUnitFlag.ok THEN Fail ELSE
+    LET singleIssueTransaction == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~singleIssueTransaction.ok THEN Fail ELSE
+    LET secondTradingVolumeturnoverUnitFlag == ReadBytes(singleIssueTransaction.rest, 1) IN IF ~secondTradingVolumeturnoverUnitFlag.ok THEN Fail ELSE
     LET closingPriceTransaction == ReadBytes(secondTradingVolumeturnoverUnitFlag.rest, 14) IN IF ~closingPriceTransaction.ok THEN Fail ELSE
     LET thirdTradingVolumeturnoverUnitFlag == ReadBytes(closingPriceTransaction.rest, 1) IN IF ~thirdTradingVolumeturnoverUnitFlag.ok THEN Fail ELSE
-    LET basketTransactionC14 == ReadBytes(thirdTradingVolumeturnoverUnitFlag.rest, 14) IN IF ~basketTransactionC14.ok THEN Fail ELSE
-    LET fourthTradingVolumeturnoverUnitFlag == ReadBytes(basketTransactionC14.rest, 1) IN IF ~fourthTradingVolumeturnoverUnitFlag.ok THEN Fail ELSE
+    LET basketTransaction == ReadBytes(thirdTradingVolumeturnoverUnitFlag.rest, 14) IN IF ~basketTransaction.ok THEN Fail ELSE
+    LET fourthTradingVolumeturnoverUnitFlag == ReadBytes(basketTransaction.rest, 1) IN IF ~fourthTradingVolumeturnoverUnitFlag.ok THEN Fail ELSE
     LET aggregateTurnover == ReadBytes(fourthTradingVolumeturnoverUnitFlag.rest, 14) IN IF ~aggregateTurnover.ok THEN Fail ELSE
     Ok([ tradingVolumeTurnoverUnitFlag       |-> tradingVolumeTurnoverUnitFlag.value,
-         singleIssueTransactionC14           |-> singleIssueTransactionC14.value,
+         singleIssueTransaction              |-> singleIssueTransaction.value,
          secondTradingVolumeturnoverUnitFlag |-> secondTradingVolumeturnoverUnitFlag.value,
          closingPriceTransaction             |-> closingPriceTransaction.value,
          thirdTradingVolumeturnoverUnitFlag  |-> thirdTradingVolumeturnoverUnitFlag.value,
-         basketTransactionC14                |-> basketTransactionC14.value,
+         basketTransaction                   |-> basketTransaction.value,
          fourthTradingVolumeturnoverUnitFlag |-> fourthTradingVolumeturnoverUnitFlag.value,
          aggregateTurnover                   |-> aggregateTurnover.value ], aggregateTurnover.rest)
 
 ZeroTurnover ==
     [ tradingVolumeTurnoverUnitFlag       |-> [i \in 1 .. 1 |-> 0],
-      singleIssueTransactionC14           |-> [i \in 1 .. 14 |-> 0],
+      singleIssueTransaction              |-> [i \in 1 .. 14 |-> 0],
       secondTradingVolumeturnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
       closingPriceTransaction             |-> [i \in 1 .. 14 |-> 0],
       thirdTradingVolumeturnoverUnitFlag  |-> [i \in 1 .. 1 |-> 0],
-      basketTransactionC14                |-> [i \in 1 .. 14 |-> 0],
+      basketTransaction                   |-> [i \in 1 .. 14 |-> 0],
       fourthTradingVolumeturnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
       aggregateTurnover                   |-> [i \in 1 .. 14 |-> 0] ]
 
@@ -2764,11 +2764,11 @@ ZeroTurnover ==
 CheckedTurnover ==
     { ZeroTurnover }
         \cup { [ZeroTurnover EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTurnover EXCEPT !.singleIssueTransactionC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTurnover EXCEPT !.singleIssueTransaction = one] : one \in Sample(14) }
         \cup { [ZeroTurnover EXCEPT !.secondTradingVolumeturnoverUnitFlag = one] : one \in Sample(1) }
         \cup { [ZeroTurnover EXCEPT !.closingPriceTransaction = one] : one \in Sample(14) }
         \cup { [ZeroTurnover EXCEPT !.thirdTradingVolumeturnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTurnover EXCEPT !.basketTransactionC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTurnover EXCEPT !.basketTransaction = one] : one \in Sample(14) }
         \cup { [ZeroTurnover EXCEPT !.fourthTradingVolumeturnoverUnitFlag = one] : one \in Sample(1) }
         \cup { [ZeroTurnover EXCEPT !.aggregateTurnover = one] : one \in Sample(14) }
 
@@ -2777,28 +2777,28 @@ CheckedTurnover ==
 (***************************************************************************)
 
 NumberOfTransactions ==
-    [ singleIssueTransactionC8 : Sample(8),
-      basketTransactionC8      : Sample(8) ]
+    [ singleIssueTransactionCount : Sample(8),
+      basketTransactionCount      : Sample(8) ]
 
 EncodeNumberOfTransactions(message) ==
-    message.singleIssueTransactionC8
-        \o message.basketTransactionC8
+    message.singleIssueTransactionCount
+        \o message.basketTransactionCount
 
 DecodeNumberOfTransactions(bytes) ==
-    LET singleIssueTransactionC8 == ReadBytes(bytes, 8) IN IF ~singleIssueTransactionC8.ok THEN Fail ELSE
-    LET basketTransactionC8 == ReadBytes(singleIssueTransactionC8.rest, 8) IN IF ~basketTransactionC8.ok THEN Fail ELSE
-    Ok([ singleIssueTransactionC8 |-> singleIssueTransactionC8.value,
-         basketTransactionC8      |-> basketTransactionC8.value ], basketTransactionC8.rest)
+    LET singleIssueTransactionCount == ReadBytes(bytes, 8) IN IF ~singleIssueTransactionCount.ok THEN Fail ELSE
+    LET basketTransactionCount == ReadBytes(singleIssueTransactionCount.rest, 8) IN IF ~basketTransactionCount.ok THEN Fail ELSE
+    Ok([ singleIssueTransactionCount |-> singleIssueTransactionCount.value,
+         basketTransactionCount      |-> basketTransactionCount.value ], basketTransactionCount.rest)
 
 ZeroNumberOfTransactions ==
-    [ singleIssueTransactionC8 |-> [i \in 1 .. 8 |-> 0],
-      basketTransactionC8      |-> [i \in 1 .. 8 |-> 0] ]
+    [ singleIssueTransactionCount |-> [i \in 1 .. 8 |-> 0],
+      basketTransactionCount      |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Number Of Transactions at zero, then each field in turn at the values it is checked at *)
 CheckedNumberOfTransactions ==
     { ZeroNumberOfTransactions }
-        \cup { [ZeroNumberOfTransactions EXCEPT !.singleIssueTransactionC8 = one] : one \in Sample(8) }
-        \cup { [ZeroNumberOfTransactions EXCEPT !.basketTransactionC8 = one] : one \in Sample(8) }
+        \cup { [ZeroNumberOfTransactions EXCEPT !.singleIssueTransactionCount = one] : one \in Sample(8) }
+        \cup { [ZeroNumberOfTransactions EXCEPT !.basketTransactionCount = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* ToSTNeT Statistics Message: 146 bytes                                   *)

@@ -461,18 +461,18 @@ CheckedCollarGroup ==
 (***************************************************************************)
 
 ExternalUnderlying ==
-    [ externalUnderlyingId                       : Sample(4),
-      productIdentificationProductIdentification : Sample(30),
-      productIdentificationType                  : Sample(1),
-      productCode                                : Sample(20),
-      productName                                : Sample(50),
-      mic                                        : Sample(4),
-      nominalCurrency                            : Sample(2),
-      tradingCurrency                            : Sample(2) ]
+    [ externalUnderlyingId      : Sample(4),
+      productIdentification     : Sample(30),
+      productIdentificationType : Sample(1),
+      productCode               : Sample(20),
+      productName               : Sample(50),
+      mic                       : Sample(4),
+      nominalCurrency           : Sample(2),
+      tradingCurrency           : Sample(2) ]
 
 EncodeExternalUnderlying(message) ==
     message.externalUnderlyingId
-        \o message.productIdentificationProductIdentification
+        \o message.productIdentification
         \o message.productIdentificationType
         \o message.productCode
         \o message.productName
@@ -482,37 +482,37 @@ EncodeExternalUnderlying(message) ==
 
 DecodeExternalUnderlying(bytes) ==
     LET externalUnderlyingId == ReadBytes(bytes, 4) IN IF ~externalUnderlyingId.ok THEN Fail ELSE
-    LET productIdentificationProductIdentification == ReadBytes(externalUnderlyingId.rest, 30) IN IF ~productIdentificationProductIdentification.ok THEN Fail ELSE
-    LET productIdentificationType == ReadBytes(productIdentificationProductIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
+    LET productIdentification == ReadBytes(externalUnderlyingId.rest, 30) IN IF ~productIdentification.ok THEN Fail ELSE
+    LET productIdentificationType == ReadBytes(productIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
     LET productCode == ReadBytes(productIdentificationType.rest, 20) IN IF ~productCode.ok THEN Fail ELSE
     LET productName == ReadBytes(productCode.rest, 50) IN IF ~productName.ok THEN Fail ELSE
     LET mic == ReadBytes(productName.rest, 4) IN IF ~mic.ok THEN Fail ELSE
     LET nominalCurrency == ReadBytes(mic.rest, 2) IN IF ~nominalCurrency.ok THEN Fail ELSE
     LET tradingCurrency == ReadBytes(nominalCurrency.rest, 2) IN IF ~tradingCurrency.ok THEN Fail ELSE
-    Ok([ externalUnderlyingId                       |-> externalUnderlyingId.value,
-         productIdentificationProductIdentification |-> productIdentificationProductIdentification.value,
-         productIdentificationType                  |-> productIdentificationType.value,
-         productCode                                |-> productCode.value,
-         productName                                |-> productName.value,
-         mic                                        |-> mic.value,
-         nominalCurrency                            |-> nominalCurrency.value,
-         tradingCurrency                            |-> tradingCurrency.value ], tradingCurrency.rest)
+    Ok([ externalUnderlyingId      |-> externalUnderlyingId.value,
+         productIdentification     |-> productIdentification.value,
+         productIdentificationType |-> productIdentificationType.value,
+         productCode               |-> productCode.value,
+         productName               |-> productName.value,
+         mic                       |-> mic.value,
+         nominalCurrency           |-> nominalCurrency.value,
+         tradingCurrency           |-> tradingCurrency.value ], tradingCurrency.rest)
 
 ZeroExternalUnderlying ==
-    [ externalUnderlyingId                       |-> [i \in 1 .. 4 |-> 0],
-      productIdentificationProductIdentification |-> [i \in 1 .. 30 |-> 0],
-      productIdentificationType                  |-> [i \in 1 .. 1 |-> 0],
-      productCode                                |-> [i \in 1 .. 20 |-> 0],
-      productName                                |-> [i \in 1 .. 50 |-> 0],
-      mic                                        |-> [i \in 1 .. 4 |-> 0],
-      nominalCurrency                            |-> [i \in 1 .. 2 |-> 0],
-      tradingCurrency                            |-> [i \in 1 .. 2 |-> 0] ]
+    [ externalUnderlyingId      |-> [i \in 1 .. 4 |-> 0],
+      productIdentification     |-> [i \in 1 .. 30 |-> 0],
+      productIdentificationType |-> [i \in 1 .. 1 |-> 0],
+      productCode               |-> [i \in 1 .. 20 |-> 0],
+      productName               |-> [i \in 1 .. 50 |-> 0],
+      mic                       |-> [i \in 1 .. 4 |-> 0],
+      nominalCurrency           |-> [i \in 1 .. 2 |-> 0],
+      tradingCurrency           |-> [i \in 1 .. 2 |-> 0] ]
 
 (* External Underlying at zero, then each field in turn at the values it is checked at *)
 CheckedExternalUnderlying ==
     { ZeroExternalUnderlying }
         \cup { [ZeroExternalUnderlying EXCEPT !.externalUnderlyingId = one] : one \in Sample(4) }
-        \cup { [ZeroExternalUnderlying EXCEPT !.productIdentificationProductIdentification = one] : one \in Sample(30) }
+        \cup { [ZeroExternalUnderlying EXCEPT !.productIdentification = one] : one \in Sample(30) }
         \cup { [ZeroExternalUnderlying EXCEPT !.productIdentificationType = one] : one \in Sample(1) }
         \cup { [ZeroExternalUnderlying EXCEPT !.productCode = one] : one \in Sample(20) }
         \cup { [ZeroExternalUnderlying EXCEPT !.productName = one] : one \in Sample(50) }
@@ -525,67 +525,67 @@ CheckedExternalUnderlying ==
 (***************************************************************************)
 
 Instrument ==
-    [ instrumentId                               : Sample(4),
-      productType                                : Sample(1),
-      productSubtype                             : Sample(1),
-      firstTradingDate                           : Sample(4),
-      lastTradingDate                            : Sample(4),
-      productId                                  : Sample(4),
-      currency                                   : Sample(2),
-      icebergMinValue                            : Sample(8),
-      lotSize                                    : Sample(4),
-      priceExpressionType                        : Sample(1),
-      calendarId                                 : Sample(4),
-      marketStructureId                          : Sample(4),
-      tickTableId                                : Sample(4),
-      referenceInstrumentId                      : Sample(4),
-      collarGroupId                              : Sample(4),
-      tradingScheduleId                          : Sample(4),
-      description                                : Sample(64),
-      mic                                        : Sample(4),
-      nominalValuePrice                          : Sample(8),
-      nominalValueType                           : Sample(1),
-      multiplierMultiplier                       : Sample(8),
-      strikePrice                                : Sample(8),
-      strikePriceCurrency                        : Sample(2),
-      productIdentificationProductIdentification : Sample(30),
-      productIdentificationType                  : Sample(1),
-      settlementCalendarId                       : Sample(4),
-      bondCouponType                             : Sample(1),
-      preTradeCheckMinPrice                      : Sample(8),
-      preTradeCheckMaxPrice                      : Sample(8),
-      preTradeCheckMinQuantity                   : Sample(8),
-      preTradeCheckMaxQuantity                   : Sample(8),
-      preTradeCheckMaxValue                      : Sample(8),
-      preTradeCheckMinValue                      : Sample(8),
-      liquidity                                  : Sample(1),
-      marketModelType                            : Sample(1),
-      issuer                                     : Sample(150),
-      issuerRegCountry                           : Sample(2),
-      underlyingInstrumentId                     : Sample(4),
-      productCode                                : Sample(20),
-      cfi                                        : Sample(6),
-      fisn                                       : Sample(35),
-      issueSize                                  : Sample(8),
-      nominalCurrency                            : Sample(2),
-      usIndicator                                : Sample(1),
-      expiryDate                                 : Sample(4),
-      versionNumber                              : Sample(1),
-      settlementType                             : Sample(1),
-      optionType                                 : Sample(1),
-      exerciseType                               : Sample(1),
-      productName                                : Sample(50),
-      referencePrice                             : Sample(8),
-      status                                     : Sample(1),
-      initialPhaseId                             : Sample(4),
-      thresholdMax                               : Sample(8),
-      thresholdMin                               : Sample(8),
-      isLeverage                                 : Sample(1),
-      accruedInterestValue                       : Sample(8),
-      kid                                        : Sample(128),
-      kidIssueDate                               : Sample(4),
-      valueAtRisk                                : Sample(1),
-      externalUnderlyingId                       : Sample(4) ]
+    [ instrumentId              : Sample(4),
+      productType               : Sample(1),
+      productSubtype            : Sample(1),
+      firstTradingDate          : Sample(4),
+      lastTradingDate           : Sample(4),
+      productId                 : Sample(4),
+      currency                  : Sample(2),
+      icebergMinValue           : Sample(8),
+      lotSize                   : Sample(4),
+      priceExpressionType       : Sample(1),
+      calendarId                : Sample(4),
+      marketStructureId         : Sample(4),
+      tickTableId               : Sample(4),
+      referenceInstrumentId     : Sample(4),
+      collarGroupId             : Sample(4),
+      tradingScheduleId         : Sample(4),
+      description               : Sample(64),
+      mic                       : Sample(4),
+      nominalValue              : Sample(8),
+      nominalValueType          : Sample(1),
+      multiplier                : Sample(8),
+      strikePrice               : Sample(8),
+      strikePriceCurrency       : Sample(2),
+      productIdentification     : Sample(30),
+      productIdentificationType : Sample(1),
+      settlementCalendarId      : Sample(4),
+      bondCouponType            : Sample(1),
+      preTradeCheckMinPrice     : Sample(8),
+      preTradeCheckMaxPrice     : Sample(8),
+      preTradeCheckMinQuantity  : Sample(8),
+      preTradeCheckMaxQuantity  : Sample(8),
+      preTradeCheckMaxValue     : Sample(8),
+      preTradeCheckMinValue     : Sample(8),
+      liquidity                 : Sample(1),
+      marketModelType           : Sample(1),
+      issuer                    : Sample(150),
+      issuerRegCountry          : Sample(2),
+      underlyingInstrumentId    : Sample(4),
+      productCode               : Sample(20),
+      cfi                       : Sample(6),
+      fisn                      : Sample(35),
+      issueSize                 : Sample(8),
+      nominalCurrency           : Sample(2),
+      usIndicator               : Sample(1),
+      expiryDate                : Sample(4),
+      versionNumber             : Sample(1),
+      settlementType            : Sample(1),
+      optionType                : Sample(1),
+      exerciseType              : Sample(1),
+      productName               : Sample(50),
+      referencePrice            : Sample(8),
+      status                    : Sample(1),
+      initialPhaseId            : Sample(4),
+      thresholdMax              : Sample(8),
+      thresholdMin              : Sample(8),
+      isLeverage                : Sample(1),
+      accruedInterestValue      : Sample(8),
+      kid                       : Sample(128),
+      kidIssueDate              : Sample(4),
+      valueAtRisk               : Sample(1),
+      externalUnderlyingId      : Sample(4) ]
 
 EncodeInstrument(message) ==
     message.instrumentId
@@ -606,12 +606,12 @@ EncodeInstrument(message) ==
         \o message.tradingScheduleId
         \o message.description
         \o message.mic
-        \o message.nominalValuePrice
+        \o message.nominalValue
         \o message.nominalValueType
-        \o message.multiplierMultiplier
+        \o message.multiplier
         \o message.strikePrice
         \o message.strikePriceCurrency
-        \o message.productIdentificationProductIdentification
+        \o message.productIdentification
         \o message.productIdentificationType
         \o message.settlementCalendarId
         \o message.bondCouponType
@@ -669,13 +669,13 @@ DecodeInstrument(bytes) ==
     LET tradingScheduleId == ReadBytes(collarGroupId.rest, 4) IN IF ~tradingScheduleId.ok THEN Fail ELSE
     LET description == ReadBytes(tradingScheduleId.rest, 64) IN IF ~description.ok THEN Fail ELSE
     LET mic == ReadBytes(description.rest, 4) IN IF ~mic.ok THEN Fail ELSE
-    LET nominalValuePrice == ReadBytes(mic.rest, 8) IN IF ~nominalValuePrice.ok THEN Fail ELSE
-    LET nominalValueType == ReadBytes(nominalValuePrice.rest, 1) IN IF ~nominalValueType.ok THEN Fail ELSE
-    LET multiplierMultiplier == ReadBytes(nominalValueType.rest, 8) IN IF ~multiplierMultiplier.ok THEN Fail ELSE
-    LET strikePrice == ReadBytes(multiplierMultiplier.rest, 8) IN IF ~strikePrice.ok THEN Fail ELSE
+    LET nominalValue == ReadBytes(mic.rest, 8) IN IF ~nominalValue.ok THEN Fail ELSE
+    LET nominalValueType == ReadBytes(nominalValue.rest, 1) IN IF ~nominalValueType.ok THEN Fail ELSE
+    LET multiplier == ReadBytes(nominalValueType.rest, 8) IN IF ~multiplier.ok THEN Fail ELSE
+    LET strikePrice == ReadBytes(multiplier.rest, 8) IN IF ~strikePrice.ok THEN Fail ELSE
     LET strikePriceCurrency == ReadBytes(strikePrice.rest, 2) IN IF ~strikePriceCurrency.ok THEN Fail ELSE
-    LET productIdentificationProductIdentification == ReadBytes(strikePriceCurrency.rest, 30) IN IF ~productIdentificationProductIdentification.ok THEN Fail ELSE
-    LET productIdentificationType == ReadBytes(productIdentificationProductIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
+    LET productIdentification == ReadBytes(strikePriceCurrency.rest, 30) IN IF ~productIdentification.ok THEN Fail ELSE
+    LET productIdentificationType == ReadBytes(productIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
     LET settlementCalendarId == ReadBytes(productIdentificationType.rest, 4) IN IF ~settlementCalendarId.ok THEN Fail ELSE
     LET bondCouponType == ReadBytes(settlementCalendarId.rest, 1) IN IF ~bondCouponType.ok THEN Fail ELSE
     LET preTradeCheckMinPrice == ReadBytes(bondCouponType.rest, 8) IN IF ~preTradeCheckMinPrice.ok THEN Fail ELSE
@@ -712,130 +712,130 @@ DecodeInstrument(bytes) ==
     LET kidIssueDate == ReadBytes(kid.rest, 4) IN IF ~kidIssueDate.ok THEN Fail ELSE
     LET valueAtRisk == ReadBytes(kidIssueDate.rest, 1) IN IF ~valueAtRisk.ok THEN Fail ELSE
     LET externalUnderlyingId == ReadBytes(valueAtRisk.rest, 4) IN IF ~externalUnderlyingId.ok THEN Fail ELSE
-    Ok([ instrumentId                               |-> instrumentId.value,
-         productType                                |-> productType.value,
-         productSubtype                             |-> productSubtype.value,
-         firstTradingDate                           |-> firstTradingDate.value,
-         lastTradingDate                            |-> lastTradingDate.value,
-         productId                                  |-> productId.value,
-         currency                                   |-> currency.value,
-         icebergMinValue                            |-> icebergMinValue.value,
-         lotSize                                    |-> lotSize.value,
-         priceExpressionType                        |-> priceExpressionType.value,
-         calendarId                                 |-> calendarId.value,
-         marketStructureId                          |-> marketStructureId.value,
-         tickTableId                                |-> tickTableId.value,
-         referenceInstrumentId                      |-> referenceInstrumentId.value,
-         collarGroupId                              |-> collarGroupId.value,
-         tradingScheduleId                          |-> tradingScheduleId.value,
-         description                                |-> description.value,
-         mic                                        |-> mic.value,
-         nominalValuePrice                          |-> nominalValuePrice.value,
-         nominalValueType                           |-> nominalValueType.value,
-         multiplierMultiplier                       |-> multiplierMultiplier.value,
-         strikePrice                                |-> strikePrice.value,
-         strikePriceCurrency                        |-> strikePriceCurrency.value,
-         productIdentificationProductIdentification |-> productIdentificationProductIdentification.value,
-         productIdentificationType                  |-> productIdentificationType.value,
-         settlementCalendarId                       |-> settlementCalendarId.value,
-         bondCouponType                             |-> bondCouponType.value,
-         preTradeCheckMinPrice                      |-> preTradeCheckMinPrice.value,
-         preTradeCheckMaxPrice                      |-> preTradeCheckMaxPrice.value,
-         preTradeCheckMinQuantity                   |-> preTradeCheckMinQuantity.value,
-         preTradeCheckMaxQuantity                   |-> preTradeCheckMaxQuantity.value,
-         preTradeCheckMaxValue                      |-> preTradeCheckMaxValue.value,
-         preTradeCheckMinValue                      |-> preTradeCheckMinValue.value,
-         liquidity                                  |-> liquidity.value,
-         marketModelType                            |-> marketModelType.value,
-         issuer                                     |-> issuer.value,
-         issuerRegCountry                           |-> issuerRegCountry.value,
-         underlyingInstrumentId                     |-> underlyingInstrumentId.value,
-         productCode                                |-> productCode.value,
-         cfi                                        |-> cfi.value,
-         fisn                                       |-> fisn.value,
-         issueSize                                  |-> issueSize.value,
-         nominalCurrency                            |-> nominalCurrency.value,
-         usIndicator                                |-> usIndicator.value,
-         expiryDate                                 |-> expiryDate.value,
-         versionNumber                              |-> versionNumber.value,
-         settlementType                             |-> settlementType.value,
-         optionType                                 |-> optionType.value,
-         exerciseType                               |-> exerciseType.value,
-         productName                                |-> productName.value,
-         referencePrice                             |-> referencePrice.value,
-         status                                     |-> status.value,
-         initialPhaseId                             |-> initialPhaseId.value,
-         thresholdMax                               |-> thresholdMax.value,
-         thresholdMin                               |-> thresholdMin.value,
-         isLeverage                                 |-> isLeverage.value,
-         accruedInterestValue                       |-> accruedInterestValue.value,
-         kid                                        |-> kid.value,
-         kidIssueDate                               |-> kidIssueDate.value,
-         valueAtRisk                                |-> valueAtRisk.value,
-         externalUnderlyingId                       |-> externalUnderlyingId.value ], externalUnderlyingId.rest)
+    Ok([ instrumentId              |-> instrumentId.value,
+         productType               |-> productType.value,
+         productSubtype            |-> productSubtype.value,
+         firstTradingDate          |-> firstTradingDate.value,
+         lastTradingDate           |-> lastTradingDate.value,
+         productId                 |-> productId.value,
+         currency                  |-> currency.value,
+         icebergMinValue           |-> icebergMinValue.value,
+         lotSize                   |-> lotSize.value,
+         priceExpressionType       |-> priceExpressionType.value,
+         calendarId                |-> calendarId.value,
+         marketStructureId         |-> marketStructureId.value,
+         tickTableId               |-> tickTableId.value,
+         referenceInstrumentId     |-> referenceInstrumentId.value,
+         collarGroupId             |-> collarGroupId.value,
+         tradingScheduleId         |-> tradingScheduleId.value,
+         description               |-> description.value,
+         mic                       |-> mic.value,
+         nominalValue              |-> nominalValue.value,
+         nominalValueType          |-> nominalValueType.value,
+         multiplier                |-> multiplier.value,
+         strikePrice               |-> strikePrice.value,
+         strikePriceCurrency       |-> strikePriceCurrency.value,
+         productIdentification     |-> productIdentification.value,
+         productIdentificationType |-> productIdentificationType.value,
+         settlementCalendarId      |-> settlementCalendarId.value,
+         bondCouponType            |-> bondCouponType.value,
+         preTradeCheckMinPrice     |-> preTradeCheckMinPrice.value,
+         preTradeCheckMaxPrice     |-> preTradeCheckMaxPrice.value,
+         preTradeCheckMinQuantity  |-> preTradeCheckMinQuantity.value,
+         preTradeCheckMaxQuantity  |-> preTradeCheckMaxQuantity.value,
+         preTradeCheckMaxValue     |-> preTradeCheckMaxValue.value,
+         preTradeCheckMinValue     |-> preTradeCheckMinValue.value,
+         liquidity                 |-> liquidity.value,
+         marketModelType           |-> marketModelType.value,
+         issuer                    |-> issuer.value,
+         issuerRegCountry          |-> issuerRegCountry.value,
+         underlyingInstrumentId    |-> underlyingInstrumentId.value,
+         productCode               |-> productCode.value,
+         cfi                       |-> cfi.value,
+         fisn                      |-> fisn.value,
+         issueSize                 |-> issueSize.value,
+         nominalCurrency           |-> nominalCurrency.value,
+         usIndicator               |-> usIndicator.value,
+         expiryDate                |-> expiryDate.value,
+         versionNumber             |-> versionNumber.value,
+         settlementType            |-> settlementType.value,
+         optionType                |-> optionType.value,
+         exerciseType              |-> exerciseType.value,
+         productName               |-> productName.value,
+         referencePrice            |-> referencePrice.value,
+         status                    |-> status.value,
+         initialPhaseId            |-> initialPhaseId.value,
+         thresholdMax              |-> thresholdMax.value,
+         thresholdMin              |-> thresholdMin.value,
+         isLeverage                |-> isLeverage.value,
+         accruedInterestValue      |-> accruedInterestValue.value,
+         kid                       |-> kid.value,
+         kidIssueDate              |-> kidIssueDate.value,
+         valueAtRisk               |-> valueAtRisk.value,
+         externalUnderlyingId      |-> externalUnderlyingId.value ], externalUnderlyingId.rest)
 
 ZeroInstrument ==
-    [ instrumentId                               |-> [i \in 1 .. 4 |-> 0],
-      productType                                |-> [i \in 1 .. 1 |-> 0],
-      productSubtype                             |-> [i \in 1 .. 1 |-> 0],
-      firstTradingDate                           |-> [i \in 1 .. 4 |-> 0],
-      lastTradingDate                            |-> [i \in 1 .. 4 |-> 0],
-      productId                                  |-> [i \in 1 .. 4 |-> 0],
-      currency                                   |-> [i \in 1 .. 2 |-> 0],
-      icebergMinValue                            |-> [i \in 1 .. 8 |-> 0],
-      lotSize                                    |-> [i \in 1 .. 4 |-> 0],
-      priceExpressionType                        |-> [i \in 1 .. 1 |-> 0],
-      calendarId                                 |-> [i \in 1 .. 4 |-> 0],
-      marketStructureId                          |-> [i \in 1 .. 4 |-> 0],
-      tickTableId                                |-> [i \in 1 .. 4 |-> 0],
-      referenceInstrumentId                      |-> [i \in 1 .. 4 |-> 0],
-      collarGroupId                              |-> [i \in 1 .. 4 |-> 0],
-      tradingScheduleId                          |-> [i \in 1 .. 4 |-> 0],
-      description                                |-> [i \in 1 .. 64 |-> 0],
-      mic                                        |-> [i \in 1 .. 4 |-> 0],
-      nominalValuePrice                          |-> [i \in 1 .. 8 |-> 0],
-      nominalValueType                           |-> [i \in 1 .. 1 |-> 0],
-      multiplierMultiplier                       |-> [i \in 1 .. 8 |-> 0],
-      strikePrice                                |-> [i \in 1 .. 8 |-> 0],
-      strikePriceCurrency                        |-> [i \in 1 .. 2 |-> 0],
-      productIdentificationProductIdentification |-> [i \in 1 .. 30 |-> 0],
-      productIdentificationType                  |-> [i \in 1 .. 1 |-> 0],
-      settlementCalendarId                       |-> [i \in 1 .. 4 |-> 0],
-      bondCouponType                             |-> [i \in 1 .. 1 |-> 0],
-      preTradeCheckMinPrice                      |-> [i \in 1 .. 8 |-> 0],
-      preTradeCheckMaxPrice                      |-> [i \in 1 .. 8 |-> 0],
-      preTradeCheckMinQuantity                   |-> [i \in 1 .. 8 |-> 0],
-      preTradeCheckMaxQuantity                   |-> [i \in 1 .. 8 |-> 0],
-      preTradeCheckMaxValue                      |-> [i \in 1 .. 8 |-> 0],
-      preTradeCheckMinValue                      |-> [i \in 1 .. 8 |-> 0],
-      liquidity                                  |-> [i \in 1 .. 1 |-> 0],
-      marketModelType                            |-> [i \in 1 .. 1 |-> 0],
-      issuer                                     |-> [i \in 1 .. 150 |-> 0],
-      issuerRegCountry                           |-> [i \in 1 .. 2 |-> 0],
-      underlyingInstrumentId                     |-> [i \in 1 .. 4 |-> 0],
-      productCode                                |-> [i \in 1 .. 20 |-> 0],
-      cfi                                        |-> [i \in 1 .. 6 |-> 0],
-      fisn                                       |-> [i \in 1 .. 35 |-> 0],
-      issueSize                                  |-> [i \in 1 .. 8 |-> 0],
-      nominalCurrency                            |-> [i \in 1 .. 2 |-> 0],
-      usIndicator                                |-> [i \in 1 .. 1 |-> 0],
-      expiryDate                                 |-> [i \in 1 .. 4 |-> 0],
-      versionNumber                              |-> [i \in 1 .. 1 |-> 0],
-      settlementType                             |-> [i \in 1 .. 1 |-> 0],
-      optionType                                 |-> [i \in 1 .. 1 |-> 0],
-      exerciseType                               |-> [i \in 1 .. 1 |-> 0],
-      productName                                |-> [i \in 1 .. 50 |-> 0],
-      referencePrice                             |-> [i \in 1 .. 8 |-> 0],
-      status                                     |-> [i \in 1 .. 1 |-> 0],
-      initialPhaseId                             |-> [i \in 1 .. 4 |-> 0],
-      thresholdMax                               |-> [i \in 1 .. 8 |-> 0],
-      thresholdMin                               |-> [i \in 1 .. 8 |-> 0],
-      isLeverage                                 |-> [i \in 1 .. 1 |-> 0],
-      accruedInterestValue                       |-> [i \in 1 .. 8 |-> 0],
-      kid                                        |-> [i \in 1 .. 128 |-> 0],
-      kidIssueDate                               |-> [i \in 1 .. 4 |-> 0],
-      valueAtRisk                                |-> [i \in 1 .. 1 |-> 0],
-      externalUnderlyingId                       |-> [i \in 1 .. 4 |-> 0] ]
+    [ instrumentId              |-> [i \in 1 .. 4 |-> 0],
+      productType               |-> [i \in 1 .. 1 |-> 0],
+      productSubtype            |-> [i \in 1 .. 1 |-> 0],
+      firstTradingDate          |-> [i \in 1 .. 4 |-> 0],
+      lastTradingDate           |-> [i \in 1 .. 4 |-> 0],
+      productId                 |-> [i \in 1 .. 4 |-> 0],
+      currency                  |-> [i \in 1 .. 2 |-> 0],
+      icebergMinValue           |-> [i \in 1 .. 8 |-> 0],
+      lotSize                   |-> [i \in 1 .. 4 |-> 0],
+      priceExpressionType       |-> [i \in 1 .. 1 |-> 0],
+      calendarId                |-> [i \in 1 .. 4 |-> 0],
+      marketStructureId         |-> [i \in 1 .. 4 |-> 0],
+      tickTableId               |-> [i \in 1 .. 4 |-> 0],
+      referenceInstrumentId     |-> [i \in 1 .. 4 |-> 0],
+      collarGroupId             |-> [i \in 1 .. 4 |-> 0],
+      tradingScheduleId         |-> [i \in 1 .. 4 |-> 0],
+      description               |-> [i \in 1 .. 64 |-> 0],
+      mic                       |-> [i \in 1 .. 4 |-> 0],
+      nominalValue              |-> [i \in 1 .. 8 |-> 0],
+      nominalValueType          |-> [i \in 1 .. 1 |-> 0],
+      multiplier                |-> [i \in 1 .. 8 |-> 0],
+      strikePrice               |-> [i \in 1 .. 8 |-> 0],
+      strikePriceCurrency       |-> [i \in 1 .. 2 |-> 0],
+      productIdentification     |-> [i \in 1 .. 30 |-> 0],
+      productIdentificationType |-> [i \in 1 .. 1 |-> 0],
+      settlementCalendarId      |-> [i \in 1 .. 4 |-> 0],
+      bondCouponType            |-> [i \in 1 .. 1 |-> 0],
+      preTradeCheckMinPrice     |-> [i \in 1 .. 8 |-> 0],
+      preTradeCheckMaxPrice     |-> [i \in 1 .. 8 |-> 0],
+      preTradeCheckMinQuantity  |-> [i \in 1 .. 8 |-> 0],
+      preTradeCheckMaxQuantity  |-> [i \in 1 .. 8 |-> 0],
+      preTradeCheckMaxValue     |-> [i \in 1 .. 8 |-> 0],
+      preTradeCheckMinValue     |-> [i \in 1 .. 8 |-> 0],
+      liquidity                 |-> [i \in 1 .. 1 |-> 0],
+      marketModelType           |-> [i \in 1 .. 1 |-> 0],
+      issuer                    |-> [i \in 1 .. 150 |-> 0],
+      issuerRegCountry          |-> [i \in 1 .. 2 |-> 0],
+      underlyingInstrumentId    |-> [i \in 1 .. 4 |-> 0],
+      productCode               |-> [i \in 1 .. 20 |-> 0],
+      cfi                       |-> [i \in 1 .. 6 |-> 0],
+      fisn                      |-> [i \in 1 .. 35 |-> 0],
+      issueSize                 |-> [i \in 1 .. 8 |-> 0],
+      nominalCurrency           |-> [i \in 1 .. 2 |-> 0],
+      usIndicator               |-> [i \in 1 .. 1 |-> 0],
+      expiryDate                |-> [i \in 1 .. 4 |-> 0],
+      versionNumber             |-> [i \in 1 .. 1 |-> 0],
+      settlementType            |-> [i \in 1 .. 1 |-> 0],
+      optionType                |-> [i \in 1 .. 1 |-> 0],
+      exerciseType              |-> [i \in 1 .. 1 |-> 0],
+      productName               |-> [i \in 1 .. 50 |-> 0],
+      referencePrice            |-> [i \in 1 .. 8 |-> 0],
+      status                    |-> [i \in 1 .. 1 |-> 0],
+      initialPhaseId            |-> [i \in 1 .. 4 |-> 0],
+      thresholdMax              |-> [i \in 1 .. 8 |-> 0],
+      thresholdMin              |-> [i \in 1 .. 8 |-> 0],
+      isLeverage                |-> [i \in 1 .. 1 |-> 0],
+      accruedInterestValue      |-> [i \in 1 .. 8 |-> 0],
+      kid                       |-> [i \in 1 .. 128 |-> 0],
+      kidIssueDate              |-> [i \in 1 .. 4 |-> 0],
+      valueAtRisk               |-> [i \in 1 .. 1 |-> 0],
+      externalUnderlyingId      |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Instrument at zero, then each field in turn at the values it is checked at *)
 CheckedInstrument ==
@@ -858,12 +858,12 @@ CheckedInstrument ==
         \cup { [ZeroInstrument EXCEPT !.tradingScheduleId = one] : one \in Sample(4) }
         \cup { [ZeroInstrument EXCEPT !.description = one] : one \in Sample(64) }
         \cup { [ZeroInstrument EXCEPT !.mic = one] : one \in Sample(4) }
-        \cup { [ZeroInstrument EXCEPT !.nominalValuePrice = one] : one \in Sample(8) }
+        \cup { [ZeroInstrument EXCEPT !.nominalValue = one] : one \in Sample(8) }
         \cup { [ZeroInstrument EXCEPT !.nominalValueType = one] : one \in Sample(1) }
-        \cup { [ZeroInstrument EXCEPT !.multiplierMultiplier = one] : one \in Sample(8) }
+        \cup { [ZeroInstrument EXCEPT !.multiplier = one] : one \in Sample(8) }
         \cup { [ZeroInstrument EXCEPT !.strikePrice = one] : one \in Sample(8) }
         \cup { [ZeroInstrument EXCEPT !.strikePriceCurrency = one] : one \in Sample(2) }
-        \cup { [ZeroInstrument EXCEPT !.productIdentificationProductIdentification = one] : one \in Sample(30) }
+        \cup { [ZeroInstrument EXCEPT !.productIdentification = one] : one \in Sample(30) }
         \cup { [ZeroInstrument EXCEPT !.productIdentificationType = one] : one \in Sample(1) }
         \cup { [ZeroInstrument EXCEPT !.settlementCalendarId = one] : one \in Sample(4) }
         \cup { [ZeroInstrument EXCEPT !.bondCouponType = one] : one \in Sample(1) }
@@ -975,27 +975,27 @@ CheckedIndexationTableEntry ==
 (***************************************************************************)
 
 ProductIdentificationPublicProductIdentification ==
-    [ productIdentificationProductIdentification : Sample(30),
-      productIdentificationType                  : Sample(1) ]
+    [ productIdentification     : Sample(30),
+      productIdentificationType : Sample(1) ]
 
 EncodeProductIdentificationPublicProductIdentification(message) ==
-    message.productIdentificationProductIdentification
+    message.productIdentification
         \o message.productIdentificationType
 
 DecodeProductIdentificationPublicProductIdentification(bytes) ==
-    LET productIdentificationProductIdentification == ReadBytes(bytes, 30) IN IF ~productIdentificationProductIdentification.ok THEN Fail ELSE
-    LET productIdentificationType == ReadBytes(productIdentificationProductIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
-    Ok([ productIdentificationProductIdentification |-> productIdentificationProductIdentification.value,
-         productIdentificationType                  |-> productIdentificationType.value ], productIdentificationType.rest)
+    LET productIdentification == ReadBytes(bytes, 30) IN IF ~productIdentification.ok THEN Fail ELSE
+    LET productIdentificationType == ReadBytes(productIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
+    Ok([ productIdentification     |-> productIdentification.value,
+         productIdentificationType |-> productIdentificationType.value ], productIdentificationType.rest)
 
 ZeroProductIdentificationPublicProductIdentification ==
-    [ productIdentificationProductIdentification |-> [i \in 1 .. 30 |-> 0],
-      productIdentificationType                  |-> [i \in 1 .. 1 |-> 0] ]
+    [ productIdentification     |-> [i \in 1 .. 30 |-> 0],
+      productIdentificationType |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Product Identification Public Product Identification at zero, then each field in turn at the values it is checked at *)
 CheckedProductIdentificationPublicProductIdentification ==
     { ZeroProductIdentificationPublicProductIdentification }
-        \cup { [ZeroProductIdentificationPublicProductIdentification EXCEPT !.productIdentificationProductIdentification = one] : one \in Sample(30) }
+        \cup { [ZeroProductIdentificationPublicProductIdentification EXCEPT !.productIdentification = one] : one \in Sample(30) }
         \cup { [ZeroProductIdentificationPublicProductIdentification EXCEPT !.productIdentificationType = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1211,27 +1211,27 @@ CheckedIndexParams ==
 (***************************************************************************)
 
 PublicProductIdentification ==
-    [ productIdentificationProductIdentification : Sample(30),
-      productIdentificationType                  : Sample(1) ]
+    [ productIdentification     : Sample(30),
+      productIdentificationType : Sample(1) ]
 
 EncodePublicProductIdentification(message) ==
-    message.productIdentificationProductIdentification
+    message.productIdentification
         \o message.productIdentificationType
 
 DecodePublicProductIdentification(bytes) ==
-    LET productIdentificationProductIdentification == ReadBytes(bytes, 30) IN IF ~productIdentificationProductIdentification.ok THEN Fail ELSE
-    LET productIdentificationType == ReadBytes(productIdentificationProductIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
-    Ok([ productIdentificationProductIdentification |-> productIdentificationProductIdentification.value,
-         productIdentificationType                  |-> productIdentificationType.value ], productIdentificationType.rest)
+    LET productIdentification == ReadBytes(bytes, 30) IN IF ~productIdentification.ok THEN Fail ELSE
+    LET productIdentificationType == ReadBytes(productIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
+    Ok([ productIdentification     |-> productIdentification.value,
+         productIdentificationType |-> productIdentificationType.value ], productIdentificationType.rest)
 
 ZeroPublicProductIdentification ==
-    [ productIdentificationProductIdentification |-> [i \in 1 .. 30 |-> 0],
-      productIdentificationType                  |-> [i \in 1 .. 1 |-> 0] ]
+    [ productIdentification     |-> [i \in 1 .. 30 |-> 0],
+      productIdentificationType |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Public Product Identification at zero, then each field in turn at the values it is checked at *)
 CheckedPublicProductIdentification ==
     { ZeroPublicProductIdentification }
-        \cup { [ZeroPublicProductIdentification EXCEPT !.productIdentificationProductIdentification = one] : one \in Sample(30) }
+        \cup { [ZeroPublicProductIdentification EXCEPT !.productIdentification = one] : one \in Sample(30) }
         \cup { [ZeroPublicProductIdentification EXCEPT !.productIdentificationType = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1713,27 +1713,27 @@ CheckedTopPriceLevelUpdate ==
 (***************************************************************************)
 
 PublicProductIdentification2 ==
-    [ productIdentificationProductIdentification : Sample(30),
-      productIdentificationType                  : Sample(1) ]
+    [ productIdentification     : Sample(30),
+      productIdentificationType : Sample(1) ]
 
 EncodePublicProductIdentification2(message) ==
-    message.productIdentificationProductIdentification
+    message.productIdentification
         \o message.productIdentificationType
 
 DecodePublicProductIdentification2(bytes) ==
-    LET productIdentificationProductIdentification == ReadBytes(bytes, 30) IN IF ~productIdentificationProductIdentification.ok THEN Fail ELSE
-    LET productIdentificationType == ReadBytes(productIdentificationProductIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
-    Ok([ productIdentificationProductIdentification |-> productIdentificationProductIdentification.value,
-         productIdentificationType                  |-> productIdentificationType.value ], productIdentificationType.rest)
+    LET productIdentification == ReadBytes(bytes, 30) IN IF ~productIdentification.ok THEN Fail ELSE
+    LET productIdentificationType == ReadBytes(productIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
+    Ok([ productIdentification     |-> productIdentification.value,
+         productIdentificationType |-> productIdentificationType.value ], productIdentificationType.rest)
 
 ZeroPublicProductIdentification2 ==
-    [ productIdentificationProductIdentification |-> [i \in 1 .. 30 |-> 0],
-      productIdentificationType                  |-> [i \in 1 .. 1 |-> 0] ]
+    [ productIdentification     |-> [i \in 1 .. 30 |-> 0],
+      productIdentificationType |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Public Product Identification at zero, then each field in turn at the values it is checked at *)
 CheckedPublicProductIdentification2 ==
     { ZeroPublicProductIdentification2 }
-        \cup { [ZeroPublicProductIdentification2 EXCEPT !.productIdentificationProductIdentification = one] : one \in Sample(30) }
+        \cup { [ZeroPublicProductIdentification2 EXCEPT !.productIdentification = one] : one \in Sample(30) }
         \cup { [ZeroPublicProductIdentification2 EXCEPT !.productIdentificationType = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1742,7 +1742,7 @@ CheckedPublicProductIdentification2 ==
 
 Trade ==
     [ instrumentId                        : Sample(4),
-      settlementValueValue                : Sample(8),
+      tradeSettlementValue                : Sample(8),
       settlementDate                      : Sample(4),
       tradingTimestamp                    : Sample(8),
       publicProductIdentification         : PublicProductIdentification2,
@@ -1750,7 +1750,7 @@ Trade ==
       priceCurrency                       : Sample(2),
       priceNotation                       : Sample(1),
       quantity                            : Sample(8),
-      nominalValueValue                   : Sample(8),
+      tradeNominalValue                   : Sample(8),
       nominalCurrency                     : Sample(2),
       mic                                 : Sample(4),
       publicationTimestamp                : Sample(8),
@@ -1780,7 +1780,7 @@ Trade ==
 
 EncodeTrade(message) ==
     message.instrumentId
-        \o message.settlementValueValue
+        \o message.tradeSettlementValue
         \o message.settlementDate
         \o message.tradingTimestamp
         \o EncodePublicProductIdentification2(message.publicProductIdentification)
@@ -1788,7 +1788,7 @@ EncodeTrade(message) ==
         \o message.priceCurrency
         \o message.priceNotation
         \o message.quantity
-        \o message.nominalValueValue
+        \o message.tradeNominalValue
         \o message.nominalCurrency
         \o message.mic
         \o message.publicationTimestamp
@@ -1818,16 +1818,16 @@ EncodeTrade(message) ==
 
 DecodeTrade(bytes) ==
     LET instrumentId == ReadBytes(bytes, 4) IN IF ~instrumentId.ok THEN Fail ELSE
-    LET settlementValueValue == ReadBytes(instrumentId.rest, 8) IN IF ~settlementValueValue.ok THEN Fail ELSE
-    LET settlementDate == ReadBytes(settlementValueValue.rest, 4) IN IF ~settlementDate.ok THEN Fail ELSE
+    LET tradeSettlementValue == ReadBytes(instrumentId.rest, 8) IN IF ~tradeSettlementValue.ok THEN Fail ELSE
+    LET settlementDate == ReadBytes(tradeSettlementValue.rest, 4) IN IF ~settlementDate.ok THEN Fail ELSE
     LET tradingTimestamp == ReadBytes(settlementDate.rest, 8) IN IF ~tradingTimestamp.ok THEN Fail ELSE
     LET publicProductIdentification == DecodePublicProductIdentification2(tradingTimestamp.rest) IN IF ~publicProductIdentification.ok THEN Fail ELSE
     LET price == ReadBytes(publicProductIdentification.rest, 8) IN IF ~price.ok THEN Fail ELSE
     LET priceCurrency == ReadBytes(price.rest, 2) IN IF ~priceCurrency.ok THEN Fail ELSE
     LET priceNotation == ReadBytes(priceCurrency.rest, 1) IN IF ~priceNotation.ok THEN Fail ELSE
     LET quantity == ReadBytes(priceNotation.rest, 8) IN IF ~quantity.ok THEN Fail ELSE
-    LET nominalValueValue == ReadBytes(quantity.rest, 8) IN IF ~nominalValueValue.ok THEN Fail ELSE
-    LET nominalCurrency == ReadBytes(nominalValueValue.rest, 2) IN IF ~nominalCurrency.ok THEN Fail ELSE
+    LET tradeNominalValue == ReadBytes(quantity.rest, 8) IN IF ~tradeNominalValue.ok THEN Fail ELSE
+    LET nominalCurrency == ReadBytes(tradeNominalValue.rest, 2) IN IF ~nominalCurrency.ok THEN Fail ELSE
     LET mic == ReadBytes(nominalCurrency.rest, 4) IN IF ~mic.ok THEN Fail ELSE
     LET publicationTimestamp == ReadBytes(mic.rest, 8) IN IF ~publicationTimestamp.ok THEN Fail ELSE
     LET tradeId == ReadBytes(publicationTimestamp.rest, 4) IN IF ~tradeId.ok THEN Fail ELSE
@@ -1854,7 +1854,7 @@ DecodeTrade(bytes) ==
     LET mmtPostTradeDeferralReason == ReadBytes(mmtAlgorithmicIndicator.rest, 1) IN IF ~mmtPostTradeDeferralReason.ok THEN Fail ELSE
     LET mmtPostTradeDeferralType == ReadBytes(mmtPostTradeDeferralReason.rest, 1) IN IF ~mmtPostTradeDeferralType.ok THEN Fail ELSE
     Ok([ instrumentId                        |-> instrumentId.value,
-         settlementValueValue                |-> settlementValueValue.value,
+         tradeSettlementValue                |-> tradeSettlementValue.value,
          settlementDate                      |-> settlementDate.value,
          tradingTimestamp                    |-> tradingTimestamp.value,
          publicProductIdentification         |-> publicProductIdentification.value,
@@ -1862,7 +1862,7 @@ DecodeTrade(bytes) ==
          priceCurrency                       |-> priceCurrency.value,
          priceNotation                       |-> priceNotation.value,
          quantity                            |-> quantity.value,
-         nominalValueValue                   |-> nominalValueValue.value,
+         tradeNominalValue                   |-> tradeNominalValue.value,
          nominalCurrency                     |-> nominalCurrency.value,
          mic                                 |-> mic.value,
          publicationTimestamp                |-> publicationTimestamp.value,
@@ -1892,7 +1892,7 @@ DecodeTrade(bytes) ==
 
 ZeroTrade ==
     [ instrumentId                        |-> [i \in 1 .. 4 |-> 0],
-      settlementValueValue                |-> [i \in 1 .. 8 |-> 0],
+      tradeSettlementValue                |-> [i \in 1 .. 8 |-> 0],
       settlementDate                      |-> [i \in 1 .. 4 |-> 0],
       tradingTimestamp                    |-> [i \in 1 .. 8 |-> 0],
       publicProductIdentification         |-> ZeroPublicProductIdentification2,
@@ -1900,7 +1900,7 @@ ZeroTrade ==
       priceCurrency                       |-> [i \in 1 .. 2 |-> 0],
       priceNotation                       |-> [i \in 1 .. 1 |-> 0],
       quantity                            |-> [i \in 1 .. 8 |-> 0],
-      nominalValueValue                   |-> [i \in 1 .. 8 |-> 0],
+      tradeNominalValue                   |-> [i \in 1 .. 8 |-> 0],
       nominalCurrency                     |-> [i \in 1 .. 2 |-> 0],
       mic                                 |-> [i \in 1 .. 4 |-> 0],
       publicationTimestamp                |-> [i \in 1 .. 8 |-> 0],
@@ -1932,7 +1932,7 @@ ZeroTrade ==
 CheckedTrade ==
     { ZeroTrade }
         \cup { [ZeroTrade EXCEPT !.instrumentId = one] : one \in Sample(4) }
-        \cup { [ZeroTrade EXCEPT !.settlementValueValue = one] : one \in Sample(8) }
+        \cup { [ZeroTrade EXCEPT !.tradeSettlementValue = one] : one \in Sample(8) }
         \cup { [ZeroTrade EXCEPT !.settlementDate = one] : one \in Sample(4) }
         \cup { [ZeroTrade EXCEPT !.tradingTimestamp = one] : one \in Sample(8) }
         \cup { [ZeroTrade EXCEPT !.publicProductIdentification = one] : one \in CheckedPublicProductIdentification2 }
@@ -1940,7 +1940,7 @@ CheckedTrade ==
         \cup { [ZeroTrade EXCEPT !.priceCurrency = one] : one \in Sample(2) }
         \cup { [ZeroTrade EXCEPT !.priceNotation = one] : one \in Sample(1) }
         \cup { [ZeroTrade EXCEPT !.quantity = one] : one \in Sample(8) }
-        \cup { [ZeroTrade EXCEPT !.nominalValueValue = one] : one \in Sample(8) }
+        \cup { [ZeroTrade EXCEPT !.tradeNominalValue = one] : one \in Sample(8) }
         \cup { [ZeroTrade EXCEPT !.nominalCurrency = one] : one \in Sample(2) }
         \cup { [ZeroTrade EXCEPT !.mic = one] : one \in Sample(4) }
         \cup { [ZeroTrade EXCEPT !.publicationTimestamp = one] : one \in Sample(8) }
@@ -1973,27 +1973,27 @@ CheckedTrade ==
 (***************************************************************************)
 
 PublicProductIdentification3 ==
-    [ productIdentificationProductIdentification : Sample(30),
-      productIdentificationType                  : Sample(1) ]
+    [ productIdentification     : Sample(30),
+      productIdentificationType : Sample(1) ]
 
 EncodePublicProductIdentification3(message) ==
-    message.productIdentificationProductIdentification
+    message.productIdentification
         \o message.productIdentificationType
 
 DecodePublicProductIdentification3(bytes) ==
-    LET productIdentificationProductIdentification == ReadBytes(bytes, 30) IN IF ~productIdentificationProductIdentification.ok THEN Fail ELSE
-    LET productIdentificationType == ReadBytes(productIdentificationProductIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
-    Ok([ productIdentificationProductIdentification |-> productIdentificationProductIdentification.value,
-         productIdentificationType                  |-> productIdentificationType.value ], productIdentificationType.rest)
+    LET productIdentification == ReadBytes(bytes, 30) IN IF ~productIdentification.ok THEN Fail ELSE
+    LET productIdentificationType == ReadBytes(productIdentification.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
+    Ok([ productIdentification     |-> productIdentification.value,
+         productIdentificationType |-> productIdentificationType.value ], productIdentificationType.rest)
 
 ZeroPublicProductIdentification3 ==
-    [ productIdentificationProductIdentification |-> [i \in 1 .. 30 |-> 0],
-      productIdentificationType                  |-> [i \in 1 .. 1 |-> 0] ]
+    [ productIdentification     |-> [i \in 1 .. 30 |-> 0],
+      productIdentificationType |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Public Product Identification at zero, then each field in turn at the values it is checked at *)
 CheckedPublicProductIdentification3 ==
     { ZeroPublicProductIdentification3 }
-        \cup { [ZeroPublicProductIdentification3 EXCEPT !.productIdentificationProductIdentification = one] : one \in Sample(30) }
+        \cup { [ZeroPublicProductIdentification3 EXCEPT !.productIdentification = one] : one \in Sample(30) }
         \cup { [ZeroPublicProductIdentification3 EXCEPT !.productIdentificationType = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2313,7 +2313,7 @@ ClobInstrument ==
       maxPrice                   : Sample(8),
       minPrice                   : Sample(8),
       settlementPrice            : Sample(8),
-      settlementValuePrice       : Sample(8),
+      settlementValue            : Sample(8),
       endTradingDate             : Sample(4),
       lastTradeDate              : Sample(4) ]
 
@@ -2334,7 +2334,7 @@ EncodeClobInstrument(message) ==
         \o message.maxPrice
         \o message.minPrice
         \o message.settlementPrice
-        \o message.settlementValuePrice
+        \o message.settlementValue
         \o message.endTradingDate
         \o message.lastTradeDate
 
@@ -2355,8 +2355,8 @@ DecodeClobInstrument(bytes) ==
     LET maxPrice == ReadBytes(openingPrice.rest, 8) IN IF ~maxPrice.ok THEN Fail ELSE
     LET minPrice == ReadBytes(maxPrice.rest, 8) IN IF ~minPrice.ok THEN Fail ELSE
     LET settlementPrice == ReadBytes(minPrice.rest, 8) IN IF ~settlementPrice.ok THEN Fail ELSE
-    LET settlementValuePrice == ReadBytes(settlementPrice.rest, 8) IN IF ~settlementValuePrice.ok THEN Fail ELSE
-    LET endTradingDate == ReadBytes(settlementValuePrice.rest, 4) IN IF ~endTradingDate.ok THEN Fail ELSE
+    LET settlementValue == ReadBytes(settlementPrice.rest, 8) IN IF ~settlementValue.ok THEN Fail ELSE
+    LET endTradingDate == ReadBytes(settlementValue.rest, 4) IN IF ~endTradingDate.ok THEN Fail ELSE
     LET lastTradeDate == ReadBytes(endTradingDate.rest, 4) IN IF ~lastTradeDate.ok THEN Fail ELSE
     Ok([ instrumentId               |-> instrumentId.value,
          marketModelType            |-> marketModelType.value,
@@ -2374,7 +2374,7 @@ DecodeClobInstrument(bytes) ==
          maxPrice                   |-> maxPrice.value,
          minPrice                   |-> minPrice.value,
          settlementPrice            |-> settlementPrice.value,
-         settlementValuePrice       |-> settlementValuePrice.value,
+         settlementValue            |-> settlementValue.value,
          endTradingDate             |-> endTradingDate.value,
          lastTradeDate              |-> lastTradeDate.value ], lastTradeDate.rest)
 
@@ -2395,7 +2395,7 @@ ZeroClobInstrument ==
       maxPrice                   |-> [i \in 1 .. 8 |-> 0],
       minPrice                   |-> [i \in 1 .. 8 |-> 0],
       settlementPrice            |-> [i \in 1 .. 8 |-> 0],
-      settlementValuePrice       |-> [i \in 1 .. 8 |-> 0],
+      settlementValue            |-> [i \in 1 .. 8 |-> 0],
       endTradingDate             |-> [i \in 1 .. 4 |-> 0],
       lastTradeDate              |-> [i \in 1 .. 4 |-> 0] ]
 
@@ -2418,7 +2418,7 @@ CheckedClobInstrument ==
         \cup { [ZeroClobInstrument EXCEPT !.maxPrice = one] : one \in Sample(8) }
         \cup { [ZeroClobInstrument EXCEPT !.minPrice = one] : one \in Sample(8) }
         \cup { [ZeroClobInstrument EXCEPT !.settlementPrice = one] : one \in Sample(8) }
-        \cup { [ZeroClobInstrument EXCEPT !.settlementValuePrice = one] : one \in Sample(8) }
+        \cup { [ZeroClobInstrument EXCEPT !.settlementValue = one] : one \in Sample(8) }
         \cup { [ZeroClobInstrument EXCEPT !.endTradingDate = one] : one \in Sample(4) }
         \cup { [ZeroClobInstrument EXCEPT !.lastTradeDate = one] : one \in Sample(4) }
 
@@ -2443,7 +2443,7 @@ CrossInstrument ==
       maxPrice                   : Sample(8),
       minPrice                   : Sample(8),
       settlementPrice            : Sample(8),
-      settlementValuePrice       : Sample(8),
+      settlementValue            : Sample(8),
       endTradingDate             : Sample(4),
       lastTradeDate              : Sample(4) ]
 
@@ -2464,7 +2464,7 @@ EncodeCrossInstrument(message) ==
         \o message.maxPrice
         \o message.minPrice
         \o message.settlementPrice
-        \o message.settlementValuePrice
+        \o message.settlementValue
         \o message.endTradingDate
         \o message.lastTradeDate
 
@@ -2485,8 +2485,8 @@ DecodeCrossInstrument(bytes) ==
     LET maxPrice == ReadBytes(openingPrice.rest, 8) IN IF ~maxPrice.ok THEN Fail ELSE
     LET minPrice == ReadBytes(maxPrice.rest, 8) IN IF ~minPrice.ok THEN Fail ELSE
     LET settlementPrice == ReadBytes(minPrice.rest, 8) IN IF ~settlementPrice.ok THEN Fail ELSE
-    LET settlementValuePrice == ReadBytes(settlementPrice.rest, 8) IN IF ~settlementValuePrice.ok THEN Fail ELSE
-    LET endTradingDate == ReadBytes(settlementValuePrice.rest, 4) IN IF ~endTradingDate.ok THEN Fail ELSE
+    LET settlementValue == ReadBytes(settlementPrice.rest, 8) IN IF ~settlementValue.ok THEN Fail ELSE
+    LET endTradingDate == ReadBytes(settlementValue.rest, 4) IN IF ~endTradingDate.ok THEN Fail ELSE
     LET lastTradeDate == ReadBytes(endTradingDate.rest, 4) IN IF ~lastTradeDate.ok THEN Fail ELSE
     Ok([ instrumentId               |-> instrumentId.value,
          marketModelType            |-> marketModelType.value,
@@ -2504,7 +2504,7 @@ DecodeCrossInstrument(bytes) ==
          maxPrice                   |-> maxPrice.value,
          minPrice                   |-> minPrice.value,
          settlementPrice            |-> settlementPrice.value,
-         settlementValuePrice       |-> settlementValuePrice.value,
+         settlementValue            |-> settlementValue.value,
          endTradingDate             |-> endTradingDate.value,
          lastTradeDate              |-> lastTradeDate.value ], lastTradeDate.rest)
 
@@ -2525,7 +2525,7 @@ ZeroCrossInstrument ==
       maxPrice                   |-> [i \in 1 .. 8 |-> 0],
       minPrice                   |-> [i \in 1 .. 8 |-> 0],
       settlementPrice            |-> [i \in 1 .. 8 |-> 0],
-      settlementValuePrice       |-> [i \in 1 .. 8 |-> 0],
+      settlementValue            |-> [i \in 1 .. 8 |-> 0],
       endTradingDate             |-> [i \in 1 .. 4 |-> 0],
       lastTradeDate              |-> [i \in 1 .. 4 |-> 0] ]
 
@@ -2548,7 +2548,7 @@ CheckedCrossInstrument ==
         \cup { [ZeroCrossInstrument EXCEPT !.maxPrice = one] : one \in Sample(8) }
         \cup { [ZeroCrossInstrument EXCEPT !.minPrice = one] : one \in Sample(8) }
         \cup { [ZeroCrossInstrument EXCEPT !.settlementPrice = one] : one \in Sample(8) }
-        \cup { [ZeroCrossInstrument EXCEPT !.settlementValuePrice = one] : one \in Sample(8) }
+        \cup { [ZeroCrossInstrument EXCEPT !.settlementValue = one] : one \in Sample(8) }
         \cup { [ZeroCrossInstrument EXCEPT !.endTradingDate = one] : one \in Sample(4) }
         \cup { [ZeroCrossInstrument EXCEPT !.lastTradeDate = one] : one \in Sample(4) }
 
@@ -2573,7 +2573,7 @@ BlockInstrument ==
       maxPrice                   : Sample(8),
       minPrice                   : Sample(8),
       settlementPrice            : Sample(8),
-      settlementValuePrice       : Sample(8),
+      settlementValue            : Sample(8),
       endTradingDate             : Sample(4),
       lastTradeDate              : Sample(4) ]
 
@@ -2594,7 +2594,7 @@ EncodeBlockInstrument(message) ==
         \o message.maxPrice
         \o message.minPrice
         \o message.settlementPrice
-        \o message.settlementValuePrice
+        \o message.settlementValue
         \o message.endTradingDate
         \o message.lastTradeDate
 
@@ -2615,8 +2615,8 @@ DecodeBlockInstrument(bytes) ==
     LET maxPrice == ReadBytes(openingPrice.rest, 8) IN IF ~maxPrice.ok THEN Fail ELSE
     LET minPrice == ReadBytes(maxPrice.rest, 8) IN IF ~minPrice.ok THEN Fail ELSE
     LET settlementPrice == ReadBytes(minPrice.rest, 8) IN IF ~settlementPrice.ok THEN Fail ELSE
-    LET settlementValuePrice == ReadBytes(settlementPrice.rest, 8) IN IF ~settlementValuePrice.ok THEN Fail ELSE
-    LET endTradingDate == ReadBytes(settlementValuePrice.rest, 4) IN IF ~endTradingDate.ok THEN Fail ELSE
+    LET settlementValue == ReadBytes(settlementPrice.rest, 8) IN IF ~settlementValue.ok THEN Fail ELSE
+    LET endTradingDate == ReadBytes(settlementValue.rest, 4) IN IF ~endTradingDate.ok THEN Fail ELSE
     LET lastTradeDate == ReadBytes(endTradingDate.rest, 4) IN IF ~lastTradeDate.ok THEN Fail ELSE
     Ok([ instrumentId               |-> instrumentId.value,
          marketModelType            |-> marketModelType.value,
@@ -2634,7 +2634,7 @@ DecodeBlockInstrument(bytes) ==
          maxPrice                   |-> maxPrice.value,
          minPrice                   |-> minPrice.value,
          settlementPrice            |-> settlementPrice.value,
-         settlementValuePrice       |-> settlementValuePrice.value,
+         settlementValue            |-> settlementValue.value,
          endTradingDate             |-> endTradingDate.value,
          lastTradeDate              |-> lastTradeDate.value ], lastTradeDate.rest)
 
@@ -2655,7 +2655,7 @@ ZeroBlockInstrument ==
       maxPrice                   |-> [i \in 1 .. 8 |-> 0],
       minPrice                   |-> [i \in 1 .. 8 |-> 0],
       settlementPrice            |-> [i \in 1 .. 8 |-> 0],
-      settlementValuePrice       |-> [i \in 1 .. 8 |-> 0],
+      settlementValue            |-> [i \in 1 .. 8 |-> 0],
       endTradingDate             |-> [i \in 1 .. 4 |-> 0],
       lastTradeDate              |-> [i \in 1 .. 4 |-> 0] ]
 
@@ -2678,7 +2678,7 @@ CheckedBlockInstrument ==
         \cup { [ZeroBlockInstrument EXCEPT !.maxPrice = one] : one \in Sample(8) }
         \cup { [ZeroBlockInstrument EXCEPT !.minPrice = one] : one \in Sample(8) }
         \cup { [ZeroBlockInstrument EXCEPT !.settlementPrice = one] : one \in Sample(8) }
-        \cup { [ZeroBlockInstrument EXCEPT !.settlementValuePrice = one] : one \in Sample(8) }
+        \cup { [ZeroBlockInstrument EXCEPT !.settlementValue = one] : one \in Sample(8) }
         \cup { [ZeroBlockInstrument EXCEPT !.endTradingDate = one] : one \in Sample(4) }
         \cup { [ZeroBlockInstrument EXCEPT !.lastTradeDate = one] : one \in Sample(4) }
 
@@ -2703,7 +2703,7 @@ HybridInstrument ==
       maxPrice                   : Sample(8),
       minPrice                   : Sample(8),
       settlementPrice            : Sample(8),
-      settlementValuePrice       : Sample(8),
+      settlementValue            : Sample(8),
       endTradingDate             : Sample(4),
       lastTradeDate              : Sample(4) ]
 
@@ -2724,7 +2724,7 @@ EncodeHybridInstrument(message) ==
         \o message.maxPrice
         \o message.minPrice
         \o message.settlementPrice
-        \o message.settlementValuePrice
+        \o message.settlementValue
         \o message.endTradingDate
         \o message.lastTradeDate
 
@@ -2745,8 +2745,8 @@ DecodeHybridInstrument(bytes) ==
     LET maxPrice == ReadBytes(openingPrice.rest, 8) IN IF ~maxPrice.ok THEN Fail ELSE
     LET minPrice == ReadBytes(maxPrice.rest, 8) IN IF ~minPrice.ok THEN Fail ELSE
     LET settlementPrice == ReadBytes(minPrice.rest, 8) IN IF ~settlementPrice.ok THEN Fail ELSE
-    LET settlementValuePrice == ReadBytes(settlementPrice.rest, 8) IN IF ~settlementValuePrice.ok THEN Fail ELSE
-    LET endTradingDate == ReadBytes(settlementValuePrice.rest, 4) IN IF ~endTradingDate.ok THEN Fail ELSE
+    LET settlementValue == ReadBytes(settlementPrice.rest, 8) IN IF ~settlementValue.ok THEN Fail ELSE
+    LET endTradingDate == ReadBytes(settlementValue.rest, 4) IN IF ~endTradingDate.ok THEN Fail ELSE
     LET lastTradeDate == ReadBytes(endTradingDate.rest, 4) IN IF ~lastTradeDate.ok THEN Fail ELSE
     Ok([ instrumentId               |-> instrumentId.value,
          marketModelType            |-> marketModelType.value,
@@ -2764,7 +2764,7 @@ DecodeHybridInstrument(bytes) ==
          maxPrice                   |-> maxPrice.value,
          minPrice                   |-> minPrice.value,
          settlementPrice            |-> settlementPrice.value,
-         settlementValuePrice       |-> settlementValuePrice.value,
+         settlementValue            |-> settlementValue.value,
          endTradingDate             |-> endTradingDate.value,
          lastTradeDate              |-> lastTradeDate.value ], lastTradeDate.rest)
 
@@ -2785,7 +2785,7 @@ ZeroHybridInstrument ==
       maxPrice                   |-> [i \in 1 .. 8 |-> 0],
       minPrice                   |-> [i \in 1 .. 8 |-> 0],
       settlementPrice            |-> [i \in 1 .. 8 |-> 0],
-      settlementValuePrice       |-> [i \in 1 .. 8 |-> 0],
+      settlementValue            |-> [i \in 1 .. 8 |-> 0],
       endTradingDate             |-> [i \in 1 .. 4 |-> 0],
       lastTradeDate              |-> [i \in 1 .. 4 |-> 0] ]
 
@@ -2808,7 +2808,7 @@ CheckedHybridInstrument ==
         \cup { [ZeroHybridInstrument EXCEPT !.maxPrice = one] : one \in Sample(8) }
         \cup { [ZeroHybridInstrument EXCEPT !.minPrice = one] : one \in Sample(8) }
         \cup { [ZeroHybridInstrument EXCEPT !.settlementPrice = one] : one \in Sample(8) }
-        \cup { [ZeroHybridInstrument EXCEPT !.settlementValuePrice = one] : one \in Sample(8) }
+        \cup { [ZeroHybridInstrument EXCEPT !.settlementValue = one] : one \in Sample(8) }
         \cup { [ZeroHybridInstrument EXCEPT !.endTradingDate = one] : one \in Sample(4) }
         \cup { [ZeroHybridInstrument EXCEPT !.lastTradeDate = one] : one \in Sample(4) }
 
@@ -2817,39 +2817,39 @@ CheckedHybridInstrument ==
 (***************************************************************************)
 
 ProductSummary ==
-    [ clobInstrument                             : ClobInstrument,
-      crossInstrument                            : CrossInstrument,
-      blockInstrument                            : BlockInstrument,
-      hybridInstrument                           : HybridInstrument,
-      productIdentificationType                  : Sample(1),
-      productIdentificationProductIdentification : Sample(30),
-      productId                                  : Sample(4),
-      mic                                        : Sample(4),
-      accumulatedInterest                        : Sample(8),
-      interestRate                               : Sample(8),
-      currency                                   : Sample(2),
-      sessionDate                                : Sample(4),
-      tradingValueCurrency                       : Sample(8),
-      status                                     : Sample(1),
-      sector                                     : Sample(2),
-      market                                     : Sample(1),
-      markerPriceChange                          : Sample(1),
-      lowerLiquidity                             : Sample(1),
-      multiplierNumber                           : Sample(8),
-      dividendRate                               : Sample(8),
-      delta                                      : Sample(8),
-      gamma                                      : Sample(8),
-      rho                                        : Sample(8),
-      theta                                      : Sample(8),
-      vega                                       : Sample(8),
-      volatility                                 : Sample(8),
-      optionsStrikePrice                         : Sample(8),
-      dividend                                   : Sample(1),
-      subscriptionRight                          : Sample(1),
-      interimDividendRight                       : Sample(1),
-      split                                      : Sample(1),
-      quotationSystem                            : Sample(1),
-      liquiditySupportPge                        : Sample(1) ]
+    [ clobInstrument            : ClobInstrument,
+      crossInstrument           : CrossInstrument,
+      blockInstrument           : BlockInstrument,
+      hybridInstrument          : HybridInstrument,
+      productIdentificationType : Sample(1),
+      productIdentification     : Sample(30),
+      productId                 : Sample(4),
+      mic                       : Sample(4),
+      accumulatedInterest       : Sample(8),
+      interestRate              : Sample(8),
+      currency                  : Sample(2),
+      sessionDate               : Sample(4),
+      tradingValueCurrency      : Sample(8),
+      status                    : Sample(1),
+      sector                    : Sample(2),
+      market                    : Sample(1),
+      markerPriceChange         : Sample(1),
+      lowerLiquidity            : Sample(1),
+      productSummaryMultiplier  : Sample(8),
+      dividendRate              : Sample(8),
+      delta                     : Sample(8),
+      gamma                     : Sample(8),
+      rho                       : Sample(8),
+      theta                     : Sample(8),
+      vega                      : Sample(8),
+      volatility                : Sample(8),
+      optionsStrikePrice        : Sample(8),
+      dividend                  : Sample(1),
+      subscriptionRight         : Sample(1),
+      interimDividendRight      : Sample(1),
+      split                     : Sample(1),
+      quotationSystem           : Sample(1),
+      liquiditySupportPge       : Sample(1) ]
 
 EncodeProductSummary(message) ==
     EncodeClobInstrument(message.clobInstrument)
@@ -2857,7 +2857,7 @@ EncodeProductSummary(message) ==
         \o EncodeBlockInstrument(message.blockInstrument)
         \o EncodeHybridInstrument(message.hybridInstrument)
         \o message.productIdentificationType
-        \o message.productIdentificationProductIdentification
+        \o message.productIdentification
         \o message.productId
         \o message.mic
         \o message.accumulatedInterest
@@ -2870,7 +2870,7 @@ EncodeProductSummary(message) ==
         \o message.market
         \o message.markerPriceChange
         \o message.lowerLiquidity
-        \o message.multiplierNumber
+        \o message.productSummaryMultiplier
         \o message.dividendRate
         \o message.delta
         \o message.gamma
@@ -2892,8 +2892,8 @@ DecodeProductSummary(bytes) ==
     LET blockInstrument == DecodeBlockInstrument(crossInstrument.rest) IN IF ~blockInstrument.ok THEN Fail ELSE
     LET hybridInstrument == DecodeHybridInstrument(blockInstrument.rest) IN IF ~hybridInstrument.ok THEN Fail ELSE
     LET productIdentificationType == ReadBytes(hybridInstrument.rest, 1) IN IF ~productIdentificationType.ok THEN Fail ELSE
-    LET productIdentificationProductIdentification == ReadBytes(productIdentificationType.rest, 30) IN IF ~productIdentificationProductIdentification.ok THEN Fail ELSE
-    LET productId == ReadBytes(productIdentificationProductIdentification.rest, 4) IN IF ~productId.ok THEN Fail ELSE
+    LET productIdentification == ReadBytes(productIdentificationType.rest, 30) IN IF ~productIdentification.ok THEN Fail ELSE
+    LET productId == ReadBytes(productIdentification.rest, 4) IN IF ~productId.ok THEN Fail ELSE
     LET mic == ReadBytes(productId.rest, 4) IN IF ~mic.ok THEN Fail ELSE
     LET accumulatedInterest == ReadBytes(mic.rest, 8) IN IF ~accumulatedInterest.ok THEN Fail ELSE
     LET interestRate == ReadBytes(accumulatedInterest.rest, 8) IN IF ~interestRate.ok THEN Fail ELSE
@@ -2905,8 +2905,8 @@ DecodeProductSummary(bytes) ==
     LET market == ReadBytes(sector.rest, 1) IN IF ~market.ok THEN Fail ELSE
     LET markerPriceChange == ReadBytes(market.rest, 1) IN IF ~markerPriceChange.ok THEN Fail ELSE
     LET lowerLiquidity == ReadBytes(markerPriceChange.rest, 1) IN IF ~lowerLiquidity.ok THEN Fail ELSE
-    LET multiplierNumber == ReadBytes(lowerLiquidity.rest, 8) IN IF ~multiplierNumber.ok THEN Fail ELSE
-    LET dividendRate == ReadBytes(multiplierNumber.rest, 8) IN IF ~dividendRate.ok THEN Fail ELSE
+    LET productSummaryMultiplier == ReadBytes(lowerLiquidity.rest, 8) IN IF ~productSummaryMultiplier.ok THEN Fail ELSE
+    LET dividendRate == ReadBytes(productSummaryMultiplier.rest, 8) IN IF ~dividendRate.ok THEN Fail ELSE
     LET delta == ReadBytes(dividendRate.rest, 8) IN IF ~delta.ok THEN Fail ELSE
     LET gamma == ReadBytes(delta.rest, 8) IN IF ~gamma.ok THEN Fail ELSE
     LET rho == ReadBytes(gamma.rest, 8) IN IF ~rho.ok THEN Fail ELSE
@@ -2920,74 +2920,74 @@ DecodeProductSummary(bytes) ==
     LET split == ReadBytes(interimDividendRight.rest, 1) IN IF ~split.ok THEN Fail ELSE
     LET quotationSystem == ReadBytes(split.rest, 1) IN IF ~quotationSystem.ok THEN Fail ELSE
     LET liquiditySupportPge == ReadBytes(quotationSystem.rest, 1) IN IF ~liquiditySupportPge.ok THEN Fail ELSE
-    Ok([ clobInstrument                             |-> clobInstrument.value,
-         crossInstrument                            |-> crossInstrument.value,
-         blockInstrument                            |-> blockInstrument.value,
-         hybridInstrument                           |-> hybridInstrument.value,
-         productIdentificationType                  |-> productIdentificationType.value,
-         productIdentificationProductIdentification |-> productIdentificationProductIdentification.value,
-         productId                                  |-> productId.value,
-         mic                                        |-> mic.value,
-         accumulatedInterest                        |-> accumulatedInterest.value,
-         interestRate                               |-> interestRate.value,
-         currency                                   |-> currency.value,
-         sessionDate                                |-> sessionDate.value,
-         tradingValueCurrency                       |-> tradingValueCurrency.value,
-         status                                     |-> status.value,
-         sector                                     |-> sector.value,
-         market                                     |-> market.value,
-         markerPriceChange                          |-> markerPriceChange.value,
-         lowerLiquidity                             |-> lowerLiquidity.value,
-         multiplierNumber                           |-> multiplierNumber.value,
-         dividendRate                               |-> dividendRate.value,
-         delta                                      |-> delta.value,
-         gamma                                      |-> gamma.value,
-         rho                                        |-> rho.value,
-         theta                                      |-> theta.value,
-         vega                                       |-> vega.value,
-         volatility                                 |-> volatility.value,
-         optionsStrikePrice                         |-> optionsStrikePrice.value,
-         dividend                                   |-> dividend.value,
-         subscriptionRight                          |-> subscriptionRight.value,
-         interimDividendRight                       |-> interimDividendRight.value,
-         split                                      |-> split.value,
-         quotationSystem                            |-> quotationSystem.value,
-         liquiditySupportPge                        |-> liquiditySupportPge.value ], liquiditySupportPge.rest)
+    Ok([ clobInstrument            |-> clobInstrument.value,
+         crossInstrument           |-> crossInstrument.value,
+         blockInstrument           |-> blockInstrument.value,
+         hybridInstrument          |-> hybridInstrument.value,
+         productIdentificationType |-> productIdentificationType.value,
+         productIdentification     |-> productIdentification.value,
+         productId                 |-> productId.value,
+         mic                       |-> mic.value,
+         accumulatedInterest       |-> accumulatedInterest.value,
+         interestRate              |-> interestRate.value,
+         currency                  |-> currency.value,
+         sessionDate               |-> sessionDate.value,
+         tradingValueCurrency      |-> tradingValueCurrency.value,
+         status                    |-> status.value,
+         sector                    |-> sector.value,
+         market                    |-> market.value,
+         markerPriceChange         |-> markerPriceChange.value,
+         lowerLiquidity            |-> lowerLiquidity.value,
+         productSummaryMultiplier  |-> productSummaryMultiplier.value,
+         dividendRate              |-> dividendRate.value,
+         delta                     |-> delta.value,
+         gamma                     |-> gamma.value,
+         rho                       |-> rho.value,
+         theta                     |-> theta.value,
+         vega                      |-> vega.value,
+         volatility                |-> volatility.value,
+         optionsStrikePrice        |-> optionsStrikePrice.value,
+         dividend                  |-> dividend.value,
+         subscriptionRight         |-> subscriptionRight.value,
+         interimDividendRight      |-> interimDividendRight.value,
+         split                     |-> split.value,
+         quotationSystem           |-> quotationSystem.value,
+         liquiditySupportPge       |-> liquiditySupportPge.value ], liquiditySupportPge.rest)
 
 ZeroProductSummary ==
-    [ clobInstrument                             |-> ZeroClobInstrument,
-      crossInstrument                            |-> ZeroCrossInstrument,
-      blockInstrument                            |-> ZeroBlockInstrument,
-      hybridInstrument                           |-> ZeroHybridInstrument,
-      productIdentificationType                  |-> [i \in 1 .. 1 |-> 0],
-      productIdentificationProductIdentification |-> [i \in 1 .. 30 |-> 0],
-      productId                                  |-> [i \in 1 .. 4 |-> 0],
-      mic                                        |-> [i \in 1 .. 4 |-> 0],
-      accumulatedInterest                        |-> [i \in 1 .. 8 |-> 0],
-      interestRate                               |-> [i \in 1 .. 8 |-> 0],
-      currency                                   |-> [i \in 1 .. 2 |-> 0],
-      sessionDate                                |-> [i \in 1 .. 4 |-> 0],
-      tradingValueCurrency                       |-> [i \in 1 .. 8 |-> 0],
-      status                                     |-> [i \in 1 .. 1 |-> 0],
-      sector                                     |-> [i \in 1 .. 2 |-> 0],
-      market                                     |-> [i \in 1 .. 1 |-> 0],
-      markerPriceChange                          |-> [i \in 1 .. 1 |-> 0],
-      lowerLiquidity                             |-> [i \in 1 .. 1 |-> 0],
-      multiplierNumber                           |-> [i \in 1 .. 8 |-> 0],
-      dividendRate                               |-> [i \in 1 .. 8 |-> 0],
-      delta                                      |-> [i \in 1 .. 8 |-> 0],
-      gamma                                      |-> [i \in 1 .. 8 |-> 0],
-      rho                                        |-> [i \in 1 .. 8 |-> 0],
-      theta                                      |-> [i \in 1 .. 8 |-> 0],
-      vega                                       |-> [i \in 1 .. 8 |-> 0],
-      volatility                                 |-> [i \in 1 .. 8 |-> 0],
-      optionsStrikePrice                         |-> [i \in 1 .. 8 |-> 0],
-      dividend                                   |-> [i \in 1 .. 1 |-> 0],
-      subscriptionRight                          |-> [i \in 1 .. 1 |-> 0],
-      interimDividendRight                       |-> [i \in 1 .. 1 |-> 0],
-      split                                      |-> [i \in 1 .. 1 |-> 0],
-      quotationSystem                            |-> [i \in 1 .. 1 |-> 0],
-      liquiditySupportPge                        |-> [i \in 1 .. 1 |-> 0] ]
+    [ clobInstrument            |-> ZeroClobInstrument,
+      crossInstrument           |-> ZeroCrossInstrument,
+      blockInstrument           |-> ZeroBlockInstrument,
+      hybridInstrument          |-> ZeroHybridInstrument,
+      productIdentificationType |-> [i \in 1 .. 1 |-> 0],
+      productIdentification     |-> [i \in 1 .. 30 |-> 0],
+      productId                 |-> [i \in 1 .. 4 |-> 0],
+      mic                       |-> [i \in 1 .. 4 |-> 0],
+      accumulatedInterest       |-> [i \in 1 .. 8 |-> 0],
+      interestRate              |-> [i \in 1 .. 8 |-> 0],
+      currency                  |-> [i \in 1 .. 2 |-> 0],
+      sessionDate               |-> [i \in 1 .. 4 |-> 0],
+      tradingValueCurrency      |-> [i \in 1 .. 8 |-> 0],
+      status                    |-> [i \in 1 .. 1 |-> 0],
+      sector                    |-> [i \in 1 .. 2 |-> 0],
+      market                    |-> [i \in 1 .. 1 |-> 0],
+      markerPriceChange         |-> [i \in 1 .. 1 |-> 0],
+      lowerLiquidity            |-> [i \in 1 .. 1 |-> 0],
+      productSummaryMultiplier  |-> [i \in 1 .. 8 |-> 0],
+      dividendRate              |-> [i \in 1 .. 8 |-> 0],
+      delta                     |-> [i \in 1 .. 8 |-> 0],
+      gamma                     |-> [i \in 1 .. 8 |-> 0],
+      rho                       |-> [i \in 1 .. 8 |-> 0],
+      theta                     |-> [i \in 1 .. 8 |-> 0],
+      vega                      |-> [i \in 1 .. 8 |-> 0],
+      volatility                |-> [i \in 1 .. 8 |-> 0],
+      optionsStrikePrice        |-> [i \in 1 .. 8 |-> 0],
+      dividend                  |-> [i \in 1 .. 1 |-> 0],
+      subscriptionRight         |-> [i \in 1 .. 1 |-> 0],
+      interimDividendRight      |-> [i \in 1 .. 1 |-> 0],
+      split                     |-> [i \in 1 .. 1 |-> 0],
+      quotationSystem           |-> [i \in 1 .. 1 |-> 0],
+      liquiditySupportPge       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Product Summary at zero, then each field in turn at the values it is checked at *)
 CheckedProductSummary ==
@@ -2997,7 +2997,7 @@ CheckedProductSummary ==
         \cup { [ZeroProductSummary EXCEPT !.blockInstrument = one] : one \in CheckedBlockInstrument }
         \cup { [ZeroProductSummary EXCEPT !.hybridInstrument = one] : one \in CheckedHybridInstrument }
         \cup { [ZeroProductSummary EXCEPT !.productIdentificationType = one] : one \in Sample(1) }
-        \cup { [ZeroProductSummary EXCEPT !.productIdentificationProductIdentification = one] : one \in Sample(30) }
+        \cup { [ZeroProductSummary EXCEPT !.productIdentification = one] : one \in Sample(30) }
         \cup { [ZeroProductSummary EXCEPT !.productId = one] : one \in Sample(4) }
         \cup { [ZeroProductSummary EXCEPT !.mic = one] : one \in Sample(4) }
         \cup { [ZeroProductSummary EXCEPT !.accumulatedInterest = one] : one \in Sample(8) }
@@ -3010,7 +3010,7 @@ CheckedProductSummary ==
         \cup { [ZeroProductSummary EXCEPT !.market = one] : one \in Sample(1) }
         \cup { [ZeroProductSummary EXCEPT !.markerPriceChange = one] : one \in Sample(1) }
         \cup { [ZeroProductSummary EXCEPT !.lowerLiquidity = one] : one \in Sample(1) }
-        \cup { [ZeroProductSummary EXCEPT !.multiplierNumber = one] : one \in Sample(8) }
+        \cup { [ZeroProductSummary EXCEPT !.productSummaryMultiplier = one] : one \in Sample(8) }
         \cup { [ZeroProductSummary EXCEPT !.dividendRate = one] : one \in Sample(8) }
         \cup { [ZeroProductSummary EXCEPT !.delta = one] : one \in Sample(8) }
         \cup { [ZeroProductSummary EXCEPT !.gamma = one] : one \in Sample(8) }

@@ -451,32 +451,32 @@ CheckedSystemStateNotification ==
 (***************************************************************************)
 
 NewOrderNotification ==
-    [ matchingEngineTime               : Sample(8),
-      mpid                             : Sample(4),
-      orderId                          : Sample(8),
-      clientOrderId                    : Sample(20),
-      symbolId                         : Sample(4),
-      price                            : Sample(8),
-      size                             : Sample(4),
-      newOrderInstructions             : Sample(2),
-      timeInForce                      : Sample(1),
-      orderType                        : Sample(1),
-      priceSlidingAndRepriceFrequency  : Sample(1),
-      selfTradeProtection              : Sample(1),
-      selfTradeProtectionGroup         : Sample(1),
-      routing                          : Sample(1),
-      tradingCollarDollarValuePrice6u8 : Sample(8),
-      capacity                         : Sample(1),
-      account                          : Sample(16),
-      clearingAccount                  : Sample(4),
-      minQty                           : Sample(4),
-      maxFloorQty                      : Sample(4),
-      displayRangeQty                  : Sample(4),
-      pegOffset                        : Sample(8),
-      locateAccount                    : Sample(4),
-      purgeGroup                       : Sample(1),
-      originalOrderCapacity            : Sample(1),
-      reserved18                       : Sample(18) ]
+    [ matchingEngineTime              : Sample(8),
+      mpid                            : Sample(4),
+      orderId                         : Sample(8),
+      clientOrderId                   : Sample(20),
+      symbolId                        : Sample(4),
+      price                           : Sample(8),
+      size                            : Sample(4),
+      newOrderInstructions            : Sample(2),
+      timeInForce                     : Sample(1),
+      orderType                       : Sample(1),
+      priceSlidingAndRepriceFrequency : Sample(1),
+      selfTradeProtection             : Sample(1),
+      selfTradeProtectionGroup        : Sample(1),
+      routing                         : Sample(1),
+      tradingCollarDollarValue        : Sample(8),
+      capacity                        : Sample(1),
+      account                         : Sample(16),
+      clearingAccount                 : Sample(4),
+      minQty                          : Sample(4),
+      maxFloorQty                     : Sample(4),
+      displayRangeQty                 : Sample(4),
+      pegOffset                       : Sample(8),
+      locateAccount                   : Sample(4),
+      purgeGroup                      : Sample(1),
+      originalOrderCapacity           : Sample(1),
+      reserved18                      : Sample(18) ]
 
 EncodeNewOrderNotification(message) ==
     message.matchingEngineTime
@@ -493,7 +493,7 @@ EncodeNewOrderNotification(message) ==
         \o message.selfTradeProtection
         \o message.selfTradeProtectionGroup
         \o message.routing
-        \o message.tradingCollarDollarValuePrice6u8
+        \o message.tradingCollarDollarValue
         \o message.capacity
         \o message.account
         \o message.clearingAccount
@@ -521,8 +521,8 @@ DecodeNewOrderNotification(bytes) ==
     LET selfTradeProtection == ReadBytes(priceSlidingAndRepriceFrequency.rest, 1) IN IF ~selfTradeProtection.ok THEN Fail ELSE
     LET selfTradeProtectionGroup == ReadBytes(selfTradeProtection.rest, 1) IN IF ~selfTradeProtectionGroup.ok THEN Fail ELSE
     LET routing == ReadBytes(selfTradeProtectionGroup.rest, 1) IN IF ~routing.ok THEN Fail ELSE
-    LET tradingCollarDollarValuePrice6u8 == ReadBytes(routing.rest, 8) IN IF ~tradingCollarDollarValuePrice6u8.ok THEN Fail ELSE
-    LET capacity == ReadBytes(tradingCollarDollarValuePrice6u8.rest, 1) IN IF ~capacity.ok THEN Fail ELSE
+    LET tradingCollarDollarValue == ReadBytes(routing.rest, 8) IN IF ~tradingCollarDollarValue.ok THEN Fail ELSE
+    LET capacity == ReadBytes(tradingCollarDollarValue.rest, 1) IN IF ~capacity.ok THEN Fail ELSE
     LET account == ReadBytes(capacity.rest, 16) IN IF ~account.ok THEN Fail ELSE
     LET clearingAccount == ReadBytes(account.rest, 4) IN IF ~clearingAccount.ok THEN Fail ELSE
     LET minQty == ReadBytes(clearingAccount.rest, 4) IN IF ~minQty.ok THEN Fail ELSE
@@ -533,60 +533,60 @@ DecodeNewOrderNotification(bytes) ==
     LET purgeGroup == ReadBytes(locateAccount.rest, 1) IN IF ~purgeGroup.ok THEN Fail ELSE
     LET originalOrderCapacity == ReadBytes(purgeGroup.rest, 1) IN IF ~originalOrderCapacity.ok THEN Fail ELSE
     LET reserved18 == ReadBytes(originalOrderCapacity.rest, 18) IN IF ~reserved18.ok THEN Fail ELSE
-    Ok([ matchingEngineTime               |-> matchingEngineTime.value,
-         mpid                             |-> mpid.value,
-         orderId                          |-> orderId.value,
-         clientOrderId                    |-> clientOrderId.value,
-         symbolId                         |-> symbolId.value,
-         price                            |-> price.value,
-         size                             |-> size.value,
-         newOrderInstructions             |-> newOrderInstructions.value,
-         timeInForce                      |-> timeInForce.value,
-         orderType                        |-> orderType.value,
-         priceSlidingAndRepriceFrequency  |-> priceSlidingAndRepriceFrequency.value,
-         selfTradeProtection              |-> selfTradeProtection.value,
-         selfTradeProtectionGroup         |-> selfTradeProtectionGroup.value,
-         routing                          |-> routing.value,
-         tradingCollarDollarValuePrice6u8 |-> tradingCollarDollarValuePrice6u8.value,
-         capacity                         |-> capacity.value,
-         account                          |-> account.value,
-         clearingAccount                  |-> clearingAccount.value,
-         minQty                           |-> minQty.value,
-         maxFloorQty                      |-> maxFloorQty.value,
-         displayRangeQty                  |-> displayRangeQty.value,
-         pegOffset                        |-> pegOffset.value,
-         locateAccount                    |-> locateAccount.value,
-         purgeGroup                       |-> purgeGroup.value,
-         originalOrderCapacity            |-> originalOrderCapacity.value,
-         reserved18                       |-> reserved18.value ], reserved18.rest)
+    Ok([ matchingEngineTime              |-> matchingEngineTime.value,
+         mpid                            |-> mpid.value,
+         orderId                         |-> orderId.value,
+         clientOrderId                   |-> clientOrderId.value,
+         symbolId                        |-> symbolId.value,
+         price                           |-> price.value,
+         size                            |-> size.value,
+         newOrderInstructions            |-> newOrderInstructions.value,
+         timeInForce                     |-> timeInForce.value,
+         orderType                       |-> orderType.value,
+         priceSlidingAndRepriceFrequency |-> priceSlidingAndRepriceFrequency.value,
+         selfTradeProtection             |-> selfTradeProtection.value,
+         selfTradeProtectionGroup        |-> selfTradeProtectionGroup.value,
+         routing                         |-> routing.value,
+         tradingCollarDollarValue        |-> tradingCollarDollarValue.value,
+         capacity                        |-> capacity.value,
+         account                         |-> account.value,
+         clearingAccount                 |-> clearingAccount.value,
+         minQty                          |-> minQty.value,
+         maxFloorQty                     |-> maxFloorQty.value,
+         displayRangeQty                 |-> displayRangeQty.value,
+         pegOffset                       |-> pegOffset.value,
+         locateAccount                   |-> locateAccount.value,
+         purgeGroup                      |-> purgeGroup.value,
+         originalOrderCapacity           |-> originalOrderCapacity.value,
+         reserved18                      |-> reserved18.value ], reserved18.rest)
 
 ZeroNewOrderNotification ==
-    [ matchingEngineTime               |-> [i \in 1 .. 8 |-> 0],
-      mpid                             |-> [i \in 1 .. 4 |-> 0],
-      orderId                          |-> [i \in 1 .. 8 |-> 0],
-      clientOrderId                    |-> [i \in 1 .. 20 |-> 0],
-      symbolId                         |-> [i \in 1 .. 4 |-> 0],
-      price                            |-> [i \in 1 .. 8 |-> 0],
-      size                             |-> [i \in 1 .. 4 |-> 0],
-      newOrderInstructions             |-> [i \in 1 .. 2 |-> 0],
-      timeInForce                      |-> [i \in 1 .. 1 |-> 0],
-      orderType                        |-> [i \in 1 .. 1 |-> 0],
-      priceSlidingAndRepriceFrequency  |-> [i \in 1 .. 1 |-> 0],
-      selfTradeProtection              |-> [i \in 1 .. 1 |-> 0],
-      selfTradeProtectionGroup         |-> [i \in 1 .. 1 |-> 0],
-      routing                          |-> [i \in 1 .. 1 |-> 0],
-      tradingCollarDollarValuePrice6u8 |-> [i \in 1 .. 8 |-> 0],
-      capacity                         |-> [i \in 1 .. 1 |-> 0],
-      account                          |-> [i \in 1 .. 16 |-> 0],
-      clearingAccount                  |-> [i \in 1 .. 4 |-> 0],
-      minQty                           |-> [i \in 1 .. 4 |-> 0],
-      maxFloorQty                      |-> [i \in 1 .. 4 |-> 0],
-      displayRangeQty                  |-> [i \in 1 .. 4 |-> 0],
-      pegOffset                        |-> [i \in 1 .. 8 |-> 0],
-      locateAccount                    |-> [i \in 1 .. 4 |-> 0],
-      purgeGroup                       |-> [i \in 1 .. 1 |-> 0],
-      originalOrderCapacity            |-> [i \in 1 .. 1 |-> 0],
-      reserved18                       |-> [i \in 1 .. 18 |-> 0] ]
+    [ matchingEngineTime              |-> [i \in 1 .. 8 |-> 0],
+      mpid                            |-> [i \in 1 .. 4 |-> 0],
+      orderId                         |-> [i \in 1 .. 8 |-> 0],
+      clientOrderId                   |-> [i \in 1 .. 20 |-> 0],
+      symbolId                        |-> [i \in 1 .. 4 |-> 0],
+      price                           |-> [i \in 1 .. 8 |-> 0],
+      size                            |-> [i \in 1 .. 4 |-> 0],
+      newOrderInstructions            |-> [i \in 1 .. 2 |-> 0],
+      timeInForce                     |-> [i \in 1 .. 1 |-> 0],
+      orderType                       |-> [i \in 1 .. 1 |-> 0],
+      priceSlidingAndRepriceFrequency |-> [i \in 1 .. 1 |-> 0],
+      selfTradeProtection             |-> [i \in 1 .. 1 |-> 0],
+      selfTradeProtectionGroup        |-> [i \in 1 .. 1 |-> 0],
+      routing                         |-> [i \in 1 .. 1 |-> 0],
+      tradingCollarDollarValue        |-> [i \in 1 .. 8 |-> 0],
+      capacity                        |-> [i \in 1 .. 1 |-> 0],
+      account                         |-> [i \in 1 .. 16 |-> 0],
+      clearingAccount                 |-> [i \in 1 .. 4 |-> 0],
+      minQty                          |-> [i \in 1 .. 4 |-> 0],
+      maxFloorQty                     |-> [i \in 1 .. 4 |-> 0],
+      displayRangeQty                 |-> [i \in 1 .. 4 |-> 0],
+      pegOffset                       |-> [i \in 1 .. 8 |-> 0],
+      locateAccount                   |-> [i \in 1 .. 4 |-> 0],
+      purgeGroup                      |-> [i \in 1 .. 1 |-> 0],
+      originalOrderCapacity           |-> [i \in 1 .. 1 |-> 0],
+      reserved18                      |-> [i \in 1 .. 18 |-> 0] ]
 
 (* New Order Notification at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderNotification ==
@@ -605,7 +605,7 @@ CheckedNewOrderNotification ==
         \cup { [ZeroNewOrderNotification EXCEPT !.selfTradeProtection = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderNotification EXCEPT !.selfTradeProtectionGroup = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderNotification EXCEPT !.routing = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderNotification EXCEPT !.tradingCollarDollarValuePrice6u8 = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderNotification EXCEPT !.tradingCollarDollarValue = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderNotification EXCEPT !.capacity = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderNotification EXCEPT !.account = one] : one \in Sample(16) }
         \cup { [ZeroNewOrderNotification EXCEPT !.clearingAccount = one] : one \in Sample(4) }
@@ -1155,30 +1155,30 @@ CheckedSequencedDataPacket ==
 (***************************************************************************)
 
 NewOrderRequestMessage ==
-    [ reserved8                        : Sample(8),
-      mpid                             : Sample(4),
-      clientOrderId                    : Sample(20),
-      symbolId                         : Sample(4),
-      price                            : Sample(8),
-      size                             : Sample(4),
-      newOrderInstructions             : Sample(2),
-      timeInForce                      : Sample(1),
-      orderType                        : Sample(1),
-      priceSlidingAndRepriceFrequency  : Sample(1),
-      selfTradeProtection              : Sample(1),
-      selfTradeProtectionGroup         : Sample(1),
-      routing                          : Sample(1),
-      tradingCollarDollarValuePrice6s8 : Sample(8),
-      capacity                         : Sample(1),
-      account                          : Sample(16),
-      clearingAccount                  : Sample(4),
-      minQty                           : Sample(4),
-      maxFloorQty                      : Sample(4),
-      displayRangeQty                  : Sample(4),
-      pegOffset                        : Sample(8),
-      locateAccount                    : Sample(4),
-      purgeGroup                       : Sample(1),
-      reserved19                       : Sample(19) ]
+    [ reserved8                       : Sample(8),
+      mpid                            : Sample(4),
+      clientOrderId                   : Sample(20),
+      symbolId                        : Sample(4),
+      price                           : Sample(8),
+      size                            : Sample(4),
+      newOrderInstructions            : Sample(2),
+      timeInForce                     : Sample(1),
+      orderType                       : Sample(1),
+      priceSlidingAndRepriceFrequency : Sample(1),
+      selfTradeProtection             : Sample(1),
+      selfTradeProtectionGroup        : Sample(1),
+      routing                         : Sample(1),
+      tradingCollarDollarValue        : Sample(8),
+      capacity                        : Sample(1),
+      account                         : Sample(16),
+      clearingAccount                 : Sample(4),
+      minQty                          : Sample(4),
+      maxFloorQty                     : Sample(4),
+      displayRangeQty                 : Sample(4),
+      pegOffset                       : Sample(8),
+      locateAccount                   : Sample(4),
+      purgeGroup                      : Sample(1),
+      reserved19                      : Sample(19) ]
 
 EncodeNewOrderRequestMessage(message) ==
     message.reserved8
@@ -1194,7 +1194,7 @@ EncodeNewOrderRequestMessage(message) ==
         \o message.selfTradeProtection
         \o message.selfTradeProtectionGroup
         \o message.routing
-        \o message.tradingCollarDollarValuePrice6s8
+        \o message.tradingCollarDollarValue
         \o message.capacity
         \o message.account
         \o message.clearingAccount
@@ -1220,8 +1220,8 @@ DecodeNewOrderRequestMessage(bytes) ==
     LET selfTradeProtection == ReadBytes(priceSlidingAndRepriceFrequency.rest, 1) IN IF ~selfTradeProtection.ok THEN Fail ELSE
     LET selfTradeProtectionGroup == ReadBytes(selfTradeProtection.rest, 1) IN IF ~selfTradeProtectionGroup.ok THEN Fail ELSE
     LET routing == ReadBytes(selfTradeProtectionGroup.rest, 1) IN IF ~routing.ok THEN Fail ELSE
-    LET tradingCollarDollarValuePrice6s8 == ReadBytes(routing.rest, 8) IN IF ~tradingCollarDollarValuePrice6s8.ok THEN Fail ELSE
-    LET capacity == ReadBytes(tradingCollarDollarValuePrice6s8.rest, 1) IN IF ~capacity.ok THEN Fail ELSE
+    LET tradingCollarDollarValue == ReadBytes(routing.rest, 8) IN IF ~tradingCollarDollarValue.ok THEN Fail ELSE
+    LET capacity == ReadBytes(tradingCollarDollarValue.rest, 1) IN IF ~capacity.ok THEN Fail ELSE
     LET account == ReadBytes(capacity.rest, 16) IN IF ~account.ok THEN Fail ELSE
     LET clearingAccount == ReadBytes(account.rest, 4) IN IF ~clearingAccount.ok THEN Fail ELSE
     LET minQty == ReadBytes(clearingAccount.rest, 4) IN IF ~minQty.ok THEN Fail ELSE
@@ -1231,56 +1231,56 @@ DecodeNewOrderRequestMessage(bytes) ==
     LET locateAccount == ReadBytes(pegOffset.rest, 4) IN IF ~locateAccount.ok THEN Fail ELSE
     LET purgeGroup == ReadBytes(locateAccount.rest, 1) IN IF ~purgeGroup.ok THEN Fail ELSE
     LET reserved19 == ReadBytes(purgeGroup.rest, 19) IN IF ~reserved19.ok THEN Fail ELSE
-    Ok([ reserved8                        |-> reserved8.value,
-         mpid                             |-> mpid.value,
-         clientOrderId                    |-> clientOrderId.value,
-         symbolId                         |-> symbolId.value,
-         price                            |-> price.value,
-         size                             |-> size.value,
-         newOrderInstructions             |-> newOrderInstructions.value,
-         timeInForce                      |-> timeInForce.value,
-         orderType                        |-> orderType.value,
-         priceSlidingAndRepriceFrequency  |-> priceSlidingAndRepriceFrequency.value,
-         selfTradeProtection              |-> selfTradeProtection.value,
-         selfTradeProtectionGroup         |-> selfTradeProtectionGroup.value,
-         routing                          |-> routing.value,
-         tradingCollarDollarValuePrice6s8 |-> tradingCollarDollarValuePrice6s8.value,
-         capacity                         |-> capacity.value,
-         account                          |-> account.value,
-         clearingAccount                  |-> clearingAccount.value,
-         minQty                           |-> minQty.value,
-         maxFloorQty                      |-> maxFloorQty.value,
-         displayRangeQty                  |-> displayRangeQty.value,
-         pegOffset                        |-> pegOffset.value,
-         locateAccount                    |-> locateAccount.value,
-         purgeGroup                       |-> purgeGroup.value,
-         reserved19                       |-> reserved19.value ], reserved19.rest)
+    Ok([ reserved8                       |-> reserved8.value,
+         mpid                            |-> mpid.value,
+         clientOrderId                   |-> clientOrderId.value,
+         symbolId                        |-> symbolId.value,
+         price                           |-> price.value,
+         size                            |-> size.value,
+         newOrderInstructions            |-> newOrderInstructions.value,
+         timeInForce                     |-> timeInForce.value,
+         orderType                       |-> orderType.value,
+         priceSlidingAndRepriceFrequency |-> priceSlidingAndRepriceFrequency.value,
+         selfTradeProtection             |-> selfTradeProtection.value,
+         selfTradeProtectionGroup        |-> selfTradeProtectionGroup.value,
+         routing                         |-> routing.value,
+         tradingCollarDollarValue        |-> tradingCollarDollarValue.value,
+         capacity                        |-> capacity.value,
+         account                         |-> account.value,
+         clearingAccount                 |-> clearingAccount.value,
+         minQty                          |-> minQty.value,
+         maxFloorQty                     |-> maxFloorQty.value,
+         displayRangeQty                 |-> displayRangeQty.value,
+         pegOffset                       |-> pegOffset.value,
+         locateAccount                   |-> locateAccount.value,
+         purgeGroup                      |-> purgeGroup.value,
+         reserved19                      |-> reserved19.value ], reserved19.rest)
 
 ZeroNewOrderRequestMessage ==
-    [ reserved8                        |-> [i \in 1 .. 8 |-> 0],
-      mpid                             |-> [i \in 1 .. 4 |-> 0],
-      clientOrderId                    |-> [i \in 1 .. 20 |-> 0],
-      symbolId                         |-> [i \in 1 .. 4 |-> 0],
-      price                            |-> [i \in 1 .. 8 |-> 0],
-      size                             |-> [i \in 1 .. 4 |-> 0],
-      newOrderInstructions             |-> [i \in 1 .. 2 |-> 0],
-      timeInForce                      |-> [i \in 1 .. 1 |-> 0],
-      orderType                        |-> [i \in 1 .. 1 |-> 0],
-      priceSlidingAndRepriceFrequency  |-> [i \in 1 .. 1 |-> 0],
-      selfTradeProtection              |-> [i \in 1 .. 1 |-> 0],
-      selfTradeProtectionGroup         |-> [i \in 1 .. 1 |-> 0],
-      routing                          |-> [i \in 1 .. 1 |-> 0],
-      tradingCollarDollarValuePrice6s8 |-> [i \in 1 .. 8 |-> 0],
-      capacity                         |-> [i \in 1 .. 1 |-> 0],
-      account                          |-> [i \in 1 .. 16 |-> 0],
-      clearingAccount                  |-> [i \in 1 .. 4 |-> 0],
-      minQty                           |-> [i \in 1 .. 4 |-> 0],
-      maxFloorQty                      |-> [i \in 1 .. 4 |-> 0],
-      displayRangeQty                  |-> [i \in 1 .. 4 |-> 0],
-      pegOffset                        |-> [i \in 1 .. 8 |-> 0],
-      locateAccount                    |-> [i \in 1 .. 4 |-> 0],
-      purgeGroup                       |-> [i \in 1 .. 1 |-> 0],
-      reserved19                       |-> [i \in 1 .. 19 |-> 0] ]
+    [ reserved8                       |-> [i \in 1 .. 8 |-> 0],
+      mpid                            |-> [i \in 1 .. 4 |-> 0],
+      clientOrderId                   |-> [i \in 1 .. 20 |-> 0],
+      symbolId                        |-> [i \in 1 .. 4 |-> 0],
+      price                           |-> [i \in 1 .. 8 |-> 0],
+      size                            |-> [i \in 1 .. 4 |-> 0],
+      newOrderInstructions            |-> [i \in 1 .. 2 |-> 0],
+      timeInForce                     |-> [i \in 1 .. 1 |-> 0],
+      orderType                       |-> [i \in 1 .. 1 |-> 0],
+      priceSlidingAndRepriceFrequency |-> [i \in 1 .. 1 |-> 0],
+      selfTradeProtection             |-> [i \in 1 .. 1 |-> 0],
+      selfTradeProtectionGroup        |-> [i \in 1 .. 1 |-> 0],
+      routing                         |-> [i \in 1 .. 1 |-> 0],
+      tradingCollarDollarValue        |-> [i \in 1 .. 8 |-> 0],
+      capacity                        |-> [i \in 1 .. 1 |-> 0],
+      account                         |-> [i \in 1 .. 16 |-> 0],
+      clearingAccount                 |-> [i \in 1 .. 4 |-> 0],
+      minQty                          |-> [i \in 1 .. 4 |-> 0],
+      maxFloorQty                     |-> [i \in 1 .. 4 |-> 0],
+      displayRangeQty                 |-> [i \in 1 .. 4 |-> 0],
+      pegOffset                       |-> [i \in 1 .. 8 |-> 0],
+      locateAccount                   |-> [i \in 1 .. 4 |-> 0],
+      purgeGroup                      |-> [i \in 1 .. 1 |-> 0],
+      reserved19                      |-> [i \in 1 .. 19 |-> 0] ]
 
 (* New Order Request Message at zero, then each field in turn at the values it is checked at *)
 CheckedNewOrderRequestMessage ==
@@ -1298,7 +1298,7 @@ CheckedNewOrderRequestMessage ==
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.selfTradeProtection = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.selfTradeProtectionGroup = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.routing = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderRequestMessage EXCEPT !.tradingCollarDollarValuePrice6s8 = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrderRequestMessage EXCEPT !.tradingCollarDollarValue = one] : one \in Sample(8) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.capacity = one] : one \in Sample(1) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.account = one] : one \in Sample(16) }
         \cup { [ZeroNewOrderRequestMessage EXCEPT !.clearingAccount = one] : one \in Sample(4) }

@@ -163,10 +163,10 @@ CheckedSequenceResetMessage ==
         \cup { [ZeroSequenceResetMessage EXCEPT !.newSeqNo = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Order Book Snapshot Message No M D Entries Group: 57 bytes              *)
+(* Order Book Snapshot Message No Md Entries Group: 57 bytes               *)
 (***************************************************************************)
 
-OrderBookSnapshotMessageNoMDEntriesGroup ==
+OrderBookSnapshotMessageNoMdEntriesGroup ==
     [ mdEntryIdOptional   : Sample(8),
       transactTime        : Sample(8),
       mdEntryPxOptional   : Sample(8),
@@ -176,7 +176,7 @@ OrderBookSnapshotMessageNoMDEntriesGroup ==
       mdFlags2            : Sample(8),
       mdEntryType         : Sample(1) ]
 
-EncodeOrderBookSnapshotMessageNoMDEntriesGroup(message) ==
+EncodeOrderBookSnapshotMessageNoMdEntriesGroup(message) ==
     message.mdEntryIdOptional
         \o message.transactTime
         \o message.mdEntryPxOptional
@@ -186,7 +186,7 @@ EncodeOrderBookSnapshotMessageNoMDEntriesGroup(message) ==
         \o message.mdFlags2
         \o message.mdEntryType
 
-DecodeOrderBookSnapshotMessageNoMDEntriesGroup(bytes) ==
+DecodeOrderBookSnapshotMessageNoMdEntriesGroup(bytes) ==
     LET mdEntryIdOptional == ReadBytes(bytes, 8) IN IF ~mdEntryIdOptional.ok THEN Fail ELSE
     LET transactTime == ReadBytes(mdEntryIdOptional.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
     LET mdEntryPxOptional == ReadBytes(transactTime.rest, 8) IN IF ~mdEntryPxOptional.ok THEN Fail ELSE
@@ -204,7 +204,7 @@ DecodeOrderBookSnapshotMessageNoMDEntriesGroup(bytes) ==
          mdFlags2            |-> mdFlags2.value,
          mdEntryType         |-> mdEntryType.value ], mdEntryType.rest)
 
-ZeroOrderBookSnapshotMessageNoMDEntriesGroup ==
+ZeroOrderBookSnapshotMessageNoMdEntriesGroup ==
     [ mdEntryIdOptional   |-> [i \in 1 .. 8 |-> 0],
       transactTime        |-> [i \in 1 .. 8 |-> 0],
       mdEntryPxOptional   |-> [i \in 1 .. 8 |-> 0],
@@ -214,68 +214,68 @@ ZeroOrderBookSnapshotMessageNoMDEntriesGroup ==
       mdFlags2            |-> [i \in 1 .. 8 |-> 0],
       mdEntryType         |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Order Book Snapshot Message No M D Entries Group at zero, then each field in turn at the values it is checked at *)
-CheckedOrderBookSnapshotMessageNoMDEntriesGroup ==
-    { ZeroOrderBookSnapshotMessageNoMDEntriesGroup }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntryIdOptional = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.tradeIdOptional = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdFlags = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdFlags2 = one] : one \in Sample(8) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroup EXCEPT !.mdEntryType = one] : one \in Sample(1) }
+(* Order Book Snapshot Message No Md Entries Group at zero, then each field in turn at the values it is checked at *)
+CheckedOrderBookSnapshotMessageNoMdEntriesGroup ==
+    { ZeroOrderBookSnapshotMessageNoMdEntriesGroup }
+        \cup { [ZeroOrderBookSnapshotMessageNoMdEntriesGroup EXCEPT !.mdEntryIdOptional = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMdEntriesGroup EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMdEntriesGroup EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMdEntriesGroup EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMdEntriesGroup EXCEPT !.tradeIdOptional = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMdEntriesGroup EXCEPT !.mdFlags = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMdEntriesGroup EXCEPT !.mdFlags2 = one] : one \in Sample(8) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMdEntriesGroup EXCEPT !.mdEntryType = one] : one \in Sample(1) }
 
-(* A run of Order Book Snapshot Message No M D Entries Group, written one after another *)
-RECURSIVE EncodeOrderBookSnapshotMessageNoMDEntriesGroupList(_)
-EncodeOrderBookSnapshotMessageNoMDEntriesGroupList(messages) ==
+(* A run of Order Book Snapshot Message No Md Entries Group, written one after another *)
+RECURSIVE EncodeOrderBookSnapshotMessageNoMdEntriesGroupList(_)
+EncodeOrderBookSnapshotMessageNoMdEntriesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeOrderBookSnapshotMessageNoMDEntriesGroup(Head(messages)) \o EncodeOrderBookSnapshotMessageNoMDEntriesGroupList(Tail(messages))
+    ELSE EncodeOrderBookSnapshotMessageNoMdEntriesGroup(Head(messages)) \o EncodeOrderBookSnapshotMessageNoMdEntriesGroupList(Tail(messages))
 
-(* As many Order Book Snapshot Message No M D Entries Group as the field that counts them says *)
-RECURSIVE ReadOrderBookSnapshotMessageNoMDEntriesGroupList(_, _)
-ReadOrderBookSnapshotMessageNoMDEntriesGroupList(bytes, count) ==
+(* As many Order Book Snapshot Message No Md Entries Group as the field that counts them says *)
+RECURSIVE ReadOrderBookSnapshotMessageNoMdEntriesGroupList(_, _)
+ReadOrderBookSnapshotMessageNoMdEntriesGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeOrderBookSnapshotMessageNoMDEntriesGroup(bytes)
+    ELSE LET one == DecodeOrderBookSnapshotMessageNoMdEntriesGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadOrderBookSnapshotMessageNoMDEntriesGroupList(one.rest, count - 1)
+             ELSE LET more == ReadOrderBookSnapshotMessageNoMdEntriesGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Order Book Snapshot Message No M D Entries Group of each kind, for the lists that carry them *)
-OneOrderBookSnapshotMessageNoMDEntriesGroup == { ZeroOrderBookSnapshotMessageNoMDEntriesGroup }
+(* One Order Book Snapshot Message No Md Entries Group of each kind, for the lists that carry them *)
+OneOrderBookSnapshotMessageNoMdEntriesGroup == { ZeroOrderBookSnapshotMessageNoMdEntriesGroup }
 
 (***************************************************************************)
-(* Order Book Snapshot Message No M D Entries Groups                       *)
+(* Order Book Snapshot Message No Md Entries Groups                        *)
 (***************************************************************************)
 
-OrderBookSnapshotMessageNoMDEntriesGroups ==
+OrderBookSnapshotMessageNoMdEntriesGroups ==
     [ blockLength                              : Sample(2),
-      orderBookSnapshotMessageNoMDEntriesGroup : SampleLists(OneOrderBookSnapshotMessageNoMDEntriesGroup) ]
+      orderBookSnapshotMessageNoMdEntriesGroup : SampleLists(OneOrderBookSnapshotMessageNoMdEntriesGroup) ]
 
-EncodeOrderBookSnapshotMessageNoMDEntriesGroups(message) ==
+EncodeOrderBookSnapshotMessageNoMdEntriesGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.orderBookSnapshotMessageNoMDEntriesGroup), 1)
-        \o EncodeOrderBookSnapshotMessageNoMDEntriesGroupList(message.orderBookSnapshotMessageNoMDEntriesGroup)
+        \o EncodeUIntBE(Len(message.orderBookSnapshotMessageNoMdEntriesGroup), 1)
+        \o EncodeOrderBookSnapshotMessageNoMdEntriesGroupList(message.orderBookSnapshotMessageNoMdEntriesGroup)
 
-DecodeOrderBookSnapshotMessageNoMDEntriesGroups(bytes) ==
+DecodeOrderBookSnapshotMessageNoMdEntriesGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroupUint8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroupUint8.ok THEN Fail ELSE
-    LET orderBookSnapshotMessageNoMDEntriesGroup == ReadOrderBookSnapshotMessageNoMDEntriesGroupList(numInGroupUint8.rest, numInGroupUint8.value) IN IF ~orderBookSnapshotMessageNoMDEntriesGroup.ok THEN Fail ELSE
+    LET orderBookSnapshotMessageNoMdEntriesGroup == ReadOrderBookSnapshotMessageNoMdEntriesGroupList(numInGroupUint8.rest, numInGroupUint8.value) IN IF ~orderBookSnapshotMessageNoMdEntriesGroup.ok THEN Fail ELSE
     Ok([ blockLength                              |-> blockLength.value,
-         orderBookSnapshotMessageNoMDEntriesGroup |-> orderBookSnapshotMessageNoMDEntriesGroup.value ], orderBookSnapshotMessageNoMDEntriesGroup.rest)
+         orderBookSnapshotMessageNoMdEntriesGroup |-> orderBookSnapshotMessageNoMdEntriesGroup.value ], orderBookSnapshotMessageNoMdEntriesGroup.rest)
 
-ZeroOrderBookSnapshotMessageNoMDEntriesGroups ==
+ZeroOrderBookSnapshotMessageNoMdEntriesGroups ==
     [ blockLength                              |-> [i \in 1 .. 2 |-> 0],
-      orderBookSnapshotMessageNoMDEntriesGroup |-> << >> ]
+      orderBookSnapshotMessageNoMdEntriesGroup |-> << >> ]
 
-(* Order Book Snapshot Message No M D Entries Groups at zero, then each field in turn at the values it is checked at *)
-CheckedOrderBookSnapshotMessageNoMDEntriesGroups ==
-    { ZeroOrderBookSnapshotMessageNoMDEntriesGroups }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroOrderBookSnapshotMessageNoMDEntriesGroups EXCEPT !.orderBookSnapshotMessageNoMDEntriesGroup = one] : one \in SampleLists(OneOrderBookSnapshotMessageNoMDEntriesGroup) }
+(* Order Book Snapshot Message No Md Entries Groups at zero, then each field in turn at the values it is checked at *)
+CheckedOrderBookSnapshotMessageNoMdEntriesGroups ==
+    { ZeroOrderBookSnapshotMessageNoMdEntriesGroups }
+        \cup { [ZeroOrderBookSnapshotMessageNoMdEntriesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroOrderBookSnapshotMessageNoMdEntriesGroups EXCEPT !.orderBookSnapshotMessageNoMdEntriesGroup = one] : one \in SampleLists(OneOrderBookSnapshotMessageNoMdEntriesGroup) }
 
 (***************************************************************************)
 (* Order Book Snapshot Message                                             *)
@@ -286,33 +286,33 @@ OrderBookSnapshotMessage ==
       lastMsgSeqNumProcessed                    : Sample(4),
       rptSeq                                    : Sample(4),
       exchangeTradingSessionId                  : Sample(4),
-      orderBookSnapshotMessageNoMDEntriesGroups : OrderBookSnapshotMessageNoMDEntriesGroups ]
+      orderBookSnapshotMessageNoMdEntriesGroups : OrderBookSnapshotMessageNoMdEntriesGroups ]
 
 EncodeOrderBookSnapshotMessage(message) ==
     message.securityId
         \o message.lastMsgSeqNumProcessed
         \o message.rptSeq
         \o message.exchangeTradingSessionId
-        \o EncodeOrderBookSnapshotMessageNoMDEntriesGroups(message.orderBookSnapshotMessageNoMDEntriesGroups)
+        \o EncodeOrderBookSnapshotMessageNoMdEntriesGroups(message.orderBookSnapshotMessageNoMdEntriesGroups)
 
 DecodeOrderBookSnapshotMessage(bytes) ==
     LET securityId == ReadBytes(bytes, 4) IN IF ~securityId.ok THEN Fail ELSE
     LET lastMsgSeqNumProcessed == ReadBytes(securityId.rest, 4) IN IF ~lastMsgSeqNumProcessed.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(lastMsgSeqNumProcessed.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
     LET exchangeTradingSessionId == ReadBytes(rptSeq.rest, 4) IN IF ~exchangeTradingSessionId.ok THEN Fail ELSE
-    LET orderBookSnapshotMessageNoMDEntriesGroups == DecodeOrderBookSnapshotMessageNoMDEntriesGroups(exchangeTradingSessionId.rest) IN IF ~orderBookSnapshotMessageNoMDEntriesGroups.ok THEN Fail ELSE
+    LET orderBookSnapshotMessageNoMdEntriesGroups == DecodeOrderBookSnapshotMessageNoMdEntriesGroups(exchangeTradingSessionId.rest) IN IF ~orderBookSnapshotMessageNoMdEntriesGroups.ok THEN Fail ELSE
     Ok([ securityId                                |-> securityId.value,
          lastMsgSeqNumProcessed                    |-> lastMsgSeqNumProcessed.value,
          rptSeq                                    |-> rptSeq.value,
          exchangeTradingSessionId                  |-> exchangeTradingSessionId.value,
-         orderBookSnapshotMessageNoMDEntriesGroups |-> orderBookSnapshotMessageNoMDEntriesGroups.value ], orderBookSnapshotMessageNoMDEntriesGroups.rest)
+         orderBookSnapshotMessageNoMdEntriesGroups |-> orderBookSnapshotMessageNoMdEntriesGroups.value ], orderBookSnapshotMessageNoMdEntriesGroups.rest)
 
 ZeroOrderBookSnapshotMessage ==
     [ securityId                                |-> [i \in 1 .. 4 |-> 0],
       lastMsgSeqNumProcessed                    |-> [i \in 1 .. 4 |-> 0],
       rptSeq                                    |-> [i \in 1 .. 4 |-> 0],
       exchangeTradingSessionId                  |-> [i \in 1 .. 4 |-> 0],
-      orderBookSnapshotMessageNoMDEntriesGroups |-> ZeroOrderBookSnapshotMessageNoMDEntriesGroups ]
+      orderBookSnapshotMessageNoMdEntriesGroups |-> ZeroOrderBookSnapshotMessageNoMdEntriesGroups ]
 
 (* Order Book Snapshot Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderBookSnapshotMessage ==
@@ -321,7 +321,7 @@ CheckedOrderBookSnapshotMessage ==
         \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.lastMsgSeqNumProcessed = one] : one \in Sample(4) }
         \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.rptSeq = one] : one \in Sample(4) }
         \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.exchangeTradingSessionId = one] : one \in Sample(4) }
-        \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.orderBookSnapshotMessageNoMDEntriesGroups = one] : one \in CheckedOrderBookSnapshotMessageNoMDEntriesGroups }
+        \cup { [ZeroOrderBookSnapshotMessage EXCEPT !.orderBookSnapshotMessageNoMdEntriesGroups = one] : one \in CheckedOrderBookSnapshotMessageNoMdEntriesGroups }
 
 (***************************************************************************)
 (* Payload, selected by Template Id                                        *)
@@ -484,18 +484,18 @@ RoundTripSequenceResetMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Book Snapshot Message No M D Entries Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderBookSnapshotMessageNoMDEntriesGroup ==
-    \A message \in CheckedOrderBookSnapshotMessageNoMDEntriesGroup :
-        LET read == DecodeOrderBookSnapshotMessageNoMDEntriesGroup(EncodeOrderBookSnapshotMessageNoMDEntriesGroup(message))
+(* Every Order Book Snapshot Message No Md Entries Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderBookSnapshotMessageNoMdEntriesGroup ==
+    \A message \in CheckedOrderBookSnapshotMessageNoMdEntriesGroup :
+        LET read == DecodeOrderBookSnapshotMessageNoMdEntriesGroup(EncodeOrderBookSnapshotMessageNoMdEntriesGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Book Snapshot Message No M D Entries Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderBookSnapshotMessageNoMDEntriesGroups ==
-    \A message \in CheckedOrderBookSnapshotMessageNoMDEntriesGroups :
-        LET read == DecodeOrderBookSnapshotMessageNoMDEntriesGroups(EncodeOrderBookSnapshotMessageNoMDEntriesGroups(message))
+(* Every Order Book Snapshot Message No Md Entries Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderBookSnapshotMessageNoMdEntriesGroups ==
+    \A message \in CheckedOrderBookSnapshotMessageNoMdEntriesGroups :
+        LET read == DecodeOrderBookSnapshotMessageNoMdEntriesGroups(EncodeOrderBookSnapshotMessageNoMdEntriesGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

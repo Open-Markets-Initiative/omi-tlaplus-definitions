@@ -436,33 +436,33 @@ StatusInformationMessage ==
     [ reserved2         : Sample(2),
       changeFlag        : Sample(1),
       statusInformation : StatusInformation,
-      timeC12           : Sample(12),
+      preciseTime       : Sample(12),
       reserved4         : Sample(4) ]
 
 EncodeStatusInformationMessage(message) ==
     message.reserved2
         \o message.changeFlag
         \o EncodeStatusInformation(message.statusInformation)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.reserved4
 
 DecodeStatusInformationMessage(bytes) ==
     LET reserved2 == ReadBytes(bytes, 2) IN IF ~reserved2.ok THEN Fail ELSE
     LET changeFlag == ReadBytes(reserved2.rest, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET statusInformation == DecodeStatusInformation(changeFlag.rest) IN IF ~statusInformation.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(statusInformation.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET reserved4 == ReadBytes(timeC12.rest, 4) IN IF ~reserved4.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(statusInformation.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET reserved4 == ReadBytes(preciseTime.rest, 4) IN IF ~reserved4.ok THEN Fail ELSE
     Ok([ reserved2         |-> reserved2.value,
          changeFlag        |-> changeFlag.value,
          statusInformation |-> statusInformation.value,
-         timeC12           |-> timeC12.value,
+         preciseTime       |-> preciseTime.value,
          reserved4         |-> reserved4.value ], reserved4.rest)
 
 ZeroStatusInformationMessage ==
     [ reserved2         |-> [i \in 1 .. 2 |-> 0],
       changeFlag        |-> [i \in 1 .. 1 |-> 0],
       statusInformation |-> ZeroStatusInformation,
-      timeC12           |-> [i \in 1 .. 12 |-> 0],
+      preciseTime       |-> [i \in 1 .. 12 |-> 0],
       reserved4         |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Status Information Message at zero, then each field in turn at the values it is checked at *)
@@ -471,7 +471,7 @@ CheckedStatusInformationMessage ==
         \cup { [ZeroStatusInformationMessage EXCEPT !.reserved2 = one] : one \in Sample(2) }
         \cup { [ZeroStatusInformationMessage EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroStatusInformationMessage EXCEPT !.statusInformation = one] : one \in CheckedStatusInformation }
-        \cup { [ZeroStatusInformationMessage EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroStatusInformationMessage EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroStatusInformationMessage EXCEPT !.reserved4 = one] : one \in Sample(4) }
 
 (***************************************************************************)
@@ -479,33 +479,33 @@ CheckedStatusInformationMessage ==
 (***************************************************************************)
 
 Price ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice ==
     { ZeroPrice }
         \cup { [ZeroPrice EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -514,32 +514,32 @@ CheckedPrice ==
 
 Open ==
     [ price      : Price,
-      timeC6     : Sample(6),
+      time       : Sample(6),
       changeFlag : Sample(1) ]
 
 EncodeOpen(message) ==
     EncodePrice(message.price)
-        \o message.timeC6
+        \o message.time
         \o message.changeFlag
 
 DecodeOpen(bytes) ==
     LET price == DecodePrice(bytes) IN IF ~price.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(price.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
-    LET changeFlag == ReadBytes(timeC6.rest, 1) IN IF ~changeFlag.ok THEN Fail ELSE
+    LET time == ReadBytes(price.rest, 6) IN IF ~time.ok THEN Fail ELSE
+    LET changeFlag == ReadBytes(time.rest, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     Ok([ price      |-> price.value,
-         timeC6     |-> timeC6.value,
+         time       |-> time.value,
          changeFlag |-> changeFlag.value ], changeFlag.rest)
 
 ZeroOpen ==
     [ price      |-> ZeroPrice,
-      timeC6     |-> [i \in 1 .. 6 |-> 0],
+      time       |-> [i \in 1 .. 6 |-> 0],
       changeFlag |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Open at zero, then each field in turn at the values it is checked at *)
 CheckedOpen ==
     { ZeroOpen }
         \cup { [ZeroOpen EXCEPT !.price = one] : one \in CheckedPrice }
-        \cup { [ZeroOpen EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroOpen EXCEPT !.time = one] : one \in Sample(6) }
         \cup { [ZeroOpen EXCEPT !.changeFlag = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -547,33 +547,33 @@ CheckedOpen ==
 (***************************************************************************)
 
 Price2 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice2(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice2(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice2 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice2 ==
     { ZeroPrice2 }
         \cup { [ZeroPrice2 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice2 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice2 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice2 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -583,29 +583,29 @@ CheckedPrice2 ==
 High ==
     [ limitUpFlag : Sample(1),
       price       : Price2,
-      timeC6      : Sample(6),
+      time        : Sample(6),
       changeFlag  : Sample(1) ]
 
 EncodeHigh(message) ==
     message.limitUpFlag
         \o EncodePrice2(message.price)
-        \o message.timeC6
+        \o message.time
         \o message.changeFlag
 
 DecodeHigh(bytes) ==
     LET limitUpFlag == ReadBytes(bytes, 1) IN IF ~limitUpFlag.ok THEN Fail ELSE
     LET price == DecodePrice2(limitUpFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(price.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
-    LET changeFlag == ReadBytes(timeC6.rest, 1) IN IF ~changeFlag.ok THEN Fail ELSE
+    LET time == ReadBytes(price.rest, 6) IN IF ~time.ok THEN Fail ELSE
+    LET changeFlag == ReadBytes(time.rest, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     Ok([ limitUpFlag |-> limitUpFlag.value,
          price       |-> price.value,
-         timeC6      |-> timeC6.value,
+         time        |-> time.value,
          changeFlag  |-> changeFlag.value ], changeFlag.rest)
 
 ZeroHigh ==
     [ limitUpFlag |-> [i \in 1 .. 1 |-> 0],
       price       |-> ZeroPrice2,
-      timeC6      |-> [i \in 1 .. 6 |-> 0],
+      time        |-> [i \in 1 .. 6 |-> 0],
       changeFlag  |-> [i \in 1 .. 1 |-> 0] ]
 
 (* High at zero, then each field in turn at the values it is checked at *)
@@ -613,7 +613,7 @@ CheckedHigh ==
     { ZeroHigh }
         \cup { [ZeroHigh EXCEPT !.limitUpFlag = one] : one \in Sample(1) }
         \cup { [ZeroHigh EXCEPT !.price = one] : one \in CheckedPrice2 }
-        \cup { [ZeroHigh EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroHigh EXCEPT !.time = one] : one \in Sample(6) }
         \cup { [ZeroHigh EXCEPT !.changeFlag = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -621,33 +621,33 @@ CheckedHigh ==
 (***************************************************************************)
 
 Price3 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice3(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice3(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice3 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice3 ==
     { ZeroPrice3 }
         \cup { [ZeroPrice3 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice3 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice3 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice3 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -657,29 +657,29 @@ CheckedPrice3 ==
 Low ==
     [ limitDownFlag : Sample(1),
       price         : Price3,
-      timeC6        : Sample(6),
+      time          : Sample(6),
       changeFlag    : Sample(1) ]
 
 EncodeLow(message) ==
     message.limitDownFlag
         \o EncodePrice3(message.price)
-        \o message.timeC6
+        \o message.time
         \o message.changeFlag
 
 DecodeLow(bytes) ==
     LET limitDownFlag == ReadBytes(bytes, 1) IN IF ~limitDownFlag.ok THEN Fail ELSE
     LET price == DecodePrice3(limitDownFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(price.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
-    LET changeFlag == ReadBytes(timeC6.rest, 1) IN IF ~changeFlag.ok THEN Fail ELSE
+    LET time == ReadBytes(price.rest, 6) IN IF ~time.ok THEN Fail ELSE
+    LET changeFlag == ReadBytes(time.rest, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     Ok([ limitDownFlag |-> limitDownFlag.value,
          price         |-> price.value,
-         timeC6        |-> timeC6.value,
+         time          |-> time.value,
          changeFlag    |-> changeFlag.value ], changeFlag.rest)
 
 ZeroLow ==
     [ limitDownFlag |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice3,
-      timeC6        |-> [i \in 1 .. 6 |-> 0],
+      time          |-> [i \in 1 .. 6 |-> 0],
       changeFlag    |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Low at zero, then each field in turn at the values it is checked at *)
@@ -687,7 +687,7 @@ CheckedLow ==
     { ZeroLow }
         \cup { [ZeroLow EXCEPT !.limitDownFlag = one] : one \in Sample(1) }
         \cup { [ZeroLow EXCEPT !.price = one] : one \in CheckedPrice3 }
-        \cup { [ZeroLow EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroLow EXCEPT !.time = one] : one \in Sample(6) }
         \cup { [ZeroLow EXCEPT !.changeFlag = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -695,33 +695,33 @@ CheckedLow ==
 (***************************************************************************)
 
 Price4 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice4(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice4(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice4 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice4 ==
     { ZeroPrice4 }
         \cup { [ZeroPrice4 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice4 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice4 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice4 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -730,7 +730,7 @@ CheckedPrice4 ==
 
 Current ==
     [ price                 : Price4,
-      timeC12               : Sample(12),
+      preciseTime           : Sample(12),
       currentChangeFlag     : Sample(1),
       stqReferencePointFlag : Sample(1),
       reserved1             : Sample(1),
@@ -738,7 +738,7 @@ Current ==
 
 EncodeCurrent(message) ==
     EncodePrice4(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.currentChangeFlag
         \o message.stqReferencePointFlag
         \o message.reserved1
@@ -746,13 +746,13 @@ EncodeCurrent(message) ==
 
 DecodeCurrent(bytes) ==
     LET price == DecodePrice4(bytes) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET currentChangeFlag == ReadBytes(timeC12.rest, 1) IN IF ~currentChangeFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET currentChangeFlag == ReadBytes(preciseTime.rest, 1) IN IF ~currentChangeFlag.ok THEN Fail ELSE
     LET stqReferencePointFlag == ReadBytes(currentChangeFlag.rest, 1) IN IF ~stqReferencePointFlag.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(stqReferencePointFlag.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET closingPriceInputFlag == ReadBytes(reserved1.rest, 1) IN IF ~closingPriceInputFlag.ok THEN Fail ELSE
     Ok([ price                 |-> price.value,
-         timeC12               |-> timeC12.value,
+         preciseTime           |-> preciseTime.value,
          currentChangeFlag     |-> currentChangeFlag.value,
          stqReferencePointFlag |-> stqReferencePointFlag.value,
          reserved1             |-> reserved1.value,
@@ -760,7 +760,7 @@ DecodeCurrent(bytes) ==
 
 ZeroCurrent ==
     [ price                 |-> ZeroPrice4,
-      timeC12               |-> [i \in 1 .. 12 |-> 0],
+      preciseTime           |-> [i \in 1 .. 12 |-> 0],
       currentChangeFlag     |-> [i \in 1 .. 1 |-> 0],
       stqReferencePointFlag |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
@@ -770,7 +770,7 @@ ZeroCurrent ==
 CheckedCurrent ==
     { ZeroCurrent }
         \cup { [ZeroCurrent EXCEPT !.price = one] : one \in CheckedPrice4 }
-        \cup { [ZeroCurrent EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroCurrent EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroCurrent EXCEPT !.currentChangeFlag = one] : one \in Sample(1) }
         \cup { [ZeroCurrent EXCEPT !.stqReferencePointFlag = one] : one \in Sample(1) }
         \cup { [ZeroCurrent EXCEPT !.reserved1 = one] : one \in Sample(1) }
@@ -827,33 +827,33 @@ CheckedOpenHighLowAndCurrentPriceMessage ==
 (***************************************************************************)
 
 Price5 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice5(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice5(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice5 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice5 ==
     { ZeroPrice5 }
         \cup { [ZeroPrice5 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice5 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice5 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice5 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -897,33 +897,33 @@ CheckedQuoteQuantity ==
 AskQuote ==
     [ changeFlag    : Sample(1),
       price         : Price5,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity ]
 
 EncodeAskQuote(message) ==
     message.changeFlag
         \o EncodePrice5(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity(message.quoteQuantity)
 
 DecodeAskQuote(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice5(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroAskQuote ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice5,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity ]
 
@@ -932,7 +932,7 @@ CheckedAskQuote ==
     { ZeroAskQuote }
         \cup { [ZeroAskQuote EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote EXCEPT !.price = one] : one \in CheckedPrice5 }
-        \cup { [ZeroAskQuote EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroAskQuote EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroAskQuote EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity }
 
@@ -941,33 +941,33 @@ CheckedAskQuote ==
 (***************************************************************************)
 
 Price6 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice6(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice6(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice6 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice6 ==
     { ZeroPrice6 }
         \cup { [ZeroPrice6 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice6 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice6 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice6 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1011,33 +1011,33 @@ CheckedQuoteQuantity2 ==
 BidQuote ==
     [ changeFlag    : Sample(1),
       price         : Price6,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity2 ]
 
 EncodeBidQuote(message) ==
     message.changeFlag
         \o EncodePrice6(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity2(message.quoteQuantity)
 
 DecodeBidQuote(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice6(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity2(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBidQuote ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice6,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity2 ]
 
@@ -1046,7 +1046,7 @@ CheckedBidQuote ==
     { ZeroBidQuote }
         \cup { [ZeroBidQuote EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote EXCEPT !.price = one] : one \in CheckedPrice6 }
-        \cup { [ZeroBidQuote EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBidQuote EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBidQuote EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity2 }
 
@@ -1089,33 +1089,33 @@ CheckedQuote1Message ==
 (***************************************************************************)
 
 Price7 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice7(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice7(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice7 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice7 ==
     { ZeroPrice7 }
         \cup { [ZeroPrice7 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice7 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice7 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice7 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1159,33 +1159,33 @@ CheckedQuoteQuantity3 ==
 AskQuote2 ==
     [ changeFlag    : Sample(1),
       price         : Price7,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity3 ]
 
 EncodeAskQuote2(message) ==
     message.changeFlag
         \o EncodePrice7(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity3(message.quoteQuantity)
 
 DecodeAskQuote2(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice7(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity3(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroAskQuote2 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice7,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity3 ]
 
@@ -1194,7 +1194,7 @@ CheckedAskQuote2 ==
     { ZeroAskQuote2 }
         \cup { [ZeroAskQuote2 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote2 EXCEPT !.price = one] : one \in CheckedPrice7 }
-        \cup { [ZeroAskQuote2 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroAskQuote2 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroAskQuote2 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote2 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity3 }
 
@@ -1203,33 +1203,33 @@ CheckedAskQuote2 ==
 (***************************************************************************)
 
 Price8 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice8(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice8(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice8 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice8 ==
     { ZeroPrice8 }
         \cup { [ZeroPrice8 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice8 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice8 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice8 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1273,33 +1273,33 @@ CheckedQuoteQuantity4 ==
 BidQuote2 ==
     [ changeFlag    : Sample(1),
       price         : Price8,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity4 ]
 
 EncodeBidQuote2(message) ==
     message.changeFlag
         \o EncodePrice8(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity4(message.quoteQuantity)
 
 DecodeBidQuote2(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice8(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity4(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBidQuote2 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice8,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity4 ]
 
@@ -1308,7 +1308,7 @@ CheckedBidQuote2 ==
     { ZeroBidQuote2 }
         \cup { [ZeroBidQuote2 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote2 EXCEPT !.price = one] : one \in CheckedPrice8 }
-        \cup { [ZeroBidQuote2 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBidQuote2 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBidQuote2 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote2 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity4 }
 
@@ -1351,33 +1351,33 @@ CheckedQuote2Message ==
 (***************************************************************************)
 
 Price9 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice9(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice9(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice9 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice9 ==
     { ZeroPrice9 }
         \cup { [ZeroPrice9 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice9 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice9 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice9 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1421,33 +1421,33 @@ CheckedQuoteQuantity5 ==
 AskQuote3 ==
     [ changeFlag    : Sample(1),
       price         : Price9,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity5 ]
 
 EncodeAskQuote3(message) ==
     message.changeFlag
         \o EncodePrice9(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity5(message.quoteQuantity)
 
 DecodeAskQuote3(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice9(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity5(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroAskQuote3 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice9,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity5 ]
 
@@ -1456,7 +1456,7 @@ CheckedAskQuote3 ==
     { ZeroAskQuote3 }
         \cup { [ZeroAskQuote3 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote3 EXCEPT !.price = one] : one \in CheckedPrice9 }
-        \cup { [ZeroAskQuote3 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroAskQuote3 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroAskQuote3 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote3 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity5 }
 
@@ -1465,33 +1465,33 @@ CheckedAskQuote3 ==
 (***************************************************************************)
 
 Price10 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice10(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice10(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice10 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice10 ==
     { ZeroPrice10 }
         \cup { [ZeroPrice10 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice10 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice10 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice10 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1535,33 +1535,33 @@ CheckedQuoteQuantity6 ==
 BidQuote3 ==
     [ changeFlag    : Sample(1),
       price         : Price10,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity6 ]
 
 EncodeBidQuote3(message) ==
     message.changeFlag
         \o EncodePrice10(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity6(message.quoteQuantity)
 
 DecodeBidQuote3(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice10(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity6(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBidQuote3 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice10,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity6 ]
 
@@ -1570,7 +1570,7 @@ CheckedBidQuote3 ==
     { ZeroBidQuote3 }
         \cup { [ZeroBidQuote3 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote3 EXCEPT !.price = one] : one \in CheckedPrice10 }
-        \cup { [ZeroBidQuote3 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBidQuote3 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBidQuote3 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote3 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity6 }
 
@@ -1613,33 +1613,33 @@ CheckedQuote3Message ==
 (***************************************************************************)
 
 Price11 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice11(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice11(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice11 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice11 ==
     { ZeroPrice11 }
         \cup { [ZeroPrice11 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice11 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice11 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice11 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1683,33 +1683,33 @@ CheckedQuoteQuantity7 ==
 AskQuote4 ==
     [ changeFlag    : Sample(1),
       price         : Price11,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity7 ]
 
 EncodeAskQuote4(message) ==
     message.changeFlag
         \o EncodePrice11(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity7(message.quoteQuantity)
 
 DecodeAskQuote4(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice11(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity7(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroAskQuote4 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice11,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity7 ]
 
@@ -1718,7 +1718,7 @@ CheckedAskQuote4 ==
     { ZeroAskQuote4 }
         \cup { [ZeroAskQuote4 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote4 EXCEPT !.price = one] : one \in CheckedPrice11 }
-        \cup { [ZeroAskQuote4 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroAskQuote4 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroAskQuote4 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote4 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity7 }
 
@@ -1727,33 +1727,33 @@ CheckedAskQuote4 ==
 (***************************************************************************)
 
 Price12 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice12(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice12(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice12 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice12 ==
     { ZeroPrice12 }
         \cup { [ZeroPrice12 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice12 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice12 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice12 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1797,33 +1797,33 @@ CheckedQuoteQuantity8 ==
 BidQuote4 ==
     [ changeFlag    : Sample(1),
       price         : Price12,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity8 ]
 
 EncodeBidQuote4(message) ==
     message.changeFlag
         \o EncodePrice12(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity8(message.quoteQuantity)
 
 DecodeBidQuote4(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice12(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity8(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBidQuote4 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice12,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity8 ]
 
@@ -1832,7 +1832,7 @@ CheckedBidQuote4 ==
     { ZeroBidQuote4 }
         \cup { [ZeroBidQuote4 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote4 EXCEPT !.price = one] : one \in CheckedPrice12 }
-        \cup { [ZeroBidQuote4 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBidQuote4 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBidQuote4 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote4 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity8 }
 
@@ -1875,33 +1875,33 @@ CheckedQuote4Message ==
 (***************************************************************************)
 
 Price13 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice13(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice13(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice13 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice13 ==
     { ZeroPrice13 }
         \cup { [ZeroPrice13 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice13 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice13 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice13 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -1945,33 +1945,33 @@ CheckedQuoteQuantity9 ==
 AskQuote5 ==
     [ changeFlag    : Sample(1),
       price         : Price13,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity9 ]
 
 EncodeAskQuote5(message) ==
     message.changeFlag
         \o EncodePrice13(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity9(message.quoteQuantity)
 
 DecodeAskQuote5(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice13(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity9(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroAskQuote5 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice13,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity9 ]
 
@@ -1980,7 +1980,7 @@ CheckedAskQuote5 ==
     { ZeroAskQuote5 }
         \cup { [ZeroAskQuote5 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote5 EXCEPT !.price = one] : one \in CheckedPrice13 }
-        \cup { [ZeroAskQuote5 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroAskQuote5 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroAskQuote5 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote5 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity9 }
 
@@ -1989,33 +1989,33 @@ CheckedAskQuote5 ==
 (***************************************************************************)
 
 Price14 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice14(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice14(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice14 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice14 ==
     { ZeroPrice14 }
         \cup { [ZeroPrice14 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice14 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice14 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice14 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2059,33 +2059,33 @@ CheckedQuoteQuantity10 ==
 BidQuote5 ==
     [ changeFlag    : Sample(1),
       price         : Price14,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity10 ]
 
 EncodeBidQuote5(message) ==
     message.changeFlag
         \o EncodePrice14(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity10(message.quoteQuantity)
 
 DecodeBidQuote5(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice14(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity10(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBidQuote5 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice14,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity10 ]
 
@@ -2094,7 +2094,7 @@ CheckedBidQuote5 ==
     { ZeroBidQuote5 }
         \cup { [ZeroBidQuote5 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote5 EXCEPT !.price = one] : one \in CheckedPrice14 }
-        \cup { [ZeroBidQuote5 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBidQuote5 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBidQuote5 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote5 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity10 }
 
@@ -2137,33 +2137,33 @@ CheckedQuote5Message ==
 (***************************************************************************)
 
 Price15 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice15(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice15(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice15 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice15 ==
     { ZeroPrice15 }
         \cup { [ZeroPrice15 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice15 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice15 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice15 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2207,33 +2207,33 @@ CheckedQuoteQuantity11 ==
 AskQuote6 ==
     [ changeFlag    : Sample(1),
       price         : Price15,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity11 ]
 
 EncodeAskQuote6(message) ==
     message.changeFlag
         \o EncodePrice15(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity11(message.quoteQuantity)
 
 DecodeAskQuote6(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice15(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity11(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroAskQuote6 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice15,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity11 ]
 
@@ -2242,7 +2242,7 @@ CheckedAskQuote6 ==
     { ZeroAskQuote6 }
         \cup { [ZeroAskQuote6 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote6 EXCEPT !.price = one] : one \in CheckedPrice15 }
-        \cup { [ZeroAskQuote6 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroAskQuote6 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroAskQuote6 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote6 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity11 }
 
@@ -2251,33 +2251,33 @@ CheckedAskQuote6 ==
 (***************************************************************************)
 
 Price16 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice16(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice16(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice16 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice16 ==
     { ZeroPrice16 }
         \cup { [ZeroPrice16 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice16 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice16 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice16 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2321,33 +2321,33 @@ CheckedQuoteQuantity12 ==
 BidQuote6 ==
     [ changeFlag    : Sample(1),
       price         : Price16,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity12 ]
 
 EncodeBidQuote6(message) ==
     message.changeFlag
         \o EncodePrice16(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity12(message.quoteQuantity)
 
 DecodeBidQuote6(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice16(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity12(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBidQuote6 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice16,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity12 ]
 
@@ -2356,7 +2356,7 @@ CheckedBidQuote6 ==
     { ZeroBidQuote6 }
         \cup { [ZeroBidQuote6 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote6 EXCEPT !.price = one] : one \in CheckedPrice16 }
-        \cup { [ZeroBidQuote6 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBidQuote6 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBidQuote6 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote6 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity12 }
 
@@ -2399,33 +2399,33 @@ CheckedQuote6Message ==
 (***************************************************************************)
 
 Price17 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice17(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice17(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice17 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice17 ==
     { ZeroPrice17 }
         \cup { [ZeroPrice17 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice17 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice17 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice17 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2469,33 +2469,33 @@ CheckedQuoteQuantity13 ==
 AskQuote7 ==
     [ changeFlag    : Sample(1),
       price         : Price17,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity13 ]
 
 EncodeAskQuote7(message) ==
     message.changeFlag
         \o EncodePrice17(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity13(message.quoteQuantity)
 
 DecodeAskQuote7(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice17(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity13(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroAskQuote7 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice17,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity13 ]
 
@@ -2504,7 +2504,7 @@ CheckedAskQuote7 ==
     { ZeroAskQuote7 }
         \cup { [ZeroAskQuote7 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote7 EXCEPT !.price = one] : one \in CheckedPrice17 }
-        \cup { [ZeroAskQuote7 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroAskQuote7 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroAskQuote7 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote7 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity13 }
 
@@ -2513,33 +2513,33 @@ CheckedAskQuote7 ==
 (***************************************************************************)
 
 Price18 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice18(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice18(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice18 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice18 ==
     { ZeroPrice18 }
         \cup { [ZeroPrice18 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice18 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice18 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice18 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2583,33 +2583,33 @@ CheckedQuoteQuantity14 ==
 BidQuote7 ==
     [ changeFlag    : Sample(1),
       price         : Price18,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity14 ]
 
 EncodeBidQuote7(message) ==
     message.changeFlag
         \o EncodePrice18(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity14(message.quoteQuantity)
 
 DecodeBidQuote7(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice18(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity14(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBidQuote7 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice18,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity14 ]
 
@@ -2618,7 +2618,7 @@ CheckedBidQuote7 ==
     { ZeroBidQuote7 }
         \cup { [ZeroBidQuote7 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote7 EXCEPT !.price = one] : one \in CheckedPrice18 }
-        \cup { [ZeroBidQuote7 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBidQuote7 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBidQuote7 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote7 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity14 }
 
@@ -2661,33 +2661,33 @@ CheckedQuote7Message ==
 (***************************************************************************)
 
 Price19 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice19(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice19(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice19 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice19 ==
     { ZeroPrice19 }
         \cup { [ZeroPrice19 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice19 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice19 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice19 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2731,33 +2731,33 @@ CheckedQuoteQuantity15 ==
 AskQuote8 ==
     [ changeFlag    : Sample(1),
       price         : Price19,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity15 ]
 
 EncodeAskQuote8(message) ==
     message.changeFlag
         \o EncodePrice19(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity15(message.quoteQuantity)
 
 DecodeAskQuote8(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice19(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity15(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroAskQuote8 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice19,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity15 ]
 
@@ -2766,7 +2766,7 @@ CheckedAskQuote8 ==
     { ZeroAskQuote8 }
         \cup { [ZeroAskQuote8 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote8 EXCEPT !.price = one] : one \in CheckedPrice19 }
-        \cup { [ZeroAskQuote8 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroAskQuote8 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroAskQuote8 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote8 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity15 }
 
@@ -2775,33 +2775,33 @@ CheckedAskQuote8 ==
 (***************************************************************************)
 
 Price20 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice20(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice20(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice20 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice20 ==
     { ZeroPrice20 }
         \cup { [ZeroPrice20 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice20 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice20 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice20 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2845,33 +2845,33 @@ CheckedQuoteQuantity16 ==
 BidQuote8 ==
     [ changeFlag    : Sample(1),
       price         : Price20,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity16 ]
 
 EncodeBidQuote8(message) ==
     message.changeFlag
         \o EncodePrice20(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity16(message.quoteQuantity)
 
 DecodeBidQuote8(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice20(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity16(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBidQuote8 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice20,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity16 ]
 
@@ -2880,7 +2880,7 @@ CheckedBidQuote8 ==
     { ZeroBidQuote8 }
         \cup { [ZeroBidQuote8 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote8 EXCEPT !.price = one] : one \in CheckedPrice20 }
-        \cup { [ZeroBidQuote8 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBidQuote8 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBidQuote8 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote8 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity16 }
 
@@ -2923,33 +2923,33 @@ CheckedQuote8Message ==
 (***************************************************************************)
 
 Price21 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice21(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice21(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice21 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice21 ==
     { ZeroPrice21 }
         \cup { [ZeroPrice21 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice21 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice21 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice21 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -2993,33 +2993,33 @@ CheckedQuoteQuantity17 ==
 AskQuote9 ==
     [ changeFlag    : Sample(1),
       price         : Price21,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity17 ]
 
 EncodeAskQuote9(message) ==
     message.changeFlag
         \o EncodePrice21(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity17(message.quoteQuantity)
 
 DecodeAskQuote9(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice21(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity17(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroAskQuote9 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice21,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity17 ]
 
@@ -3028,7 +3028,7 @@ CheckedAskQuote9 ==
     { ZeroAskQuote9 }
         \cup { [ZeroAskQuote9 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote9 EXCEPT !.price = one] : one \in CheckedPrice21 }
-        \cup { [ZeroAskQuote9 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroAskQuote9 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroAskQuote9 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote9 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity17 }
 
@@ -3037,33 +3037,33 @@ CheckedAskQuote9 ==
 (***************************************************************************)
 
 Price22 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice22(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice22(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice22 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice22 ==
     { ZeroPrice22 }
         \cup { [ZeroPrice22 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice22 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice22 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice22 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -3107,33 +3107,33 @@ CheckedQuoteQuantity18 ==
 BidQuote9 ==
     [ changeFlag    : Sample(1),
       price         : Price22,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity18 ]
 
 EncodeBidQuote9(message) ==
     message.changeFlag
         \o EncodePrice22(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity18(message.quoteQuantity)
 
 DecodeBidQuote9(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice22(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity18(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBidQuote9 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice22,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity18 ]
 
@@ -3142,7 +3142,7 @@ CheckedBidQuote9 ==
     { ZeroBidQuote9 }
         \cup { [ZeroBidQuote9 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote9 EXCEPT !.price = one] : one \in CheckedPrice22 }
-        \cup { [ZeroBidQuote9 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBidQuote9 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBidQuote9 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote9 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity18 }
 
@@ -3185,33 +3185,33 @@ CheckedQuote9Message ==
 (***************************************************************************)
 
 Price23 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice23(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice23(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice23 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice23 ==
     { ZeroPrice23 }
         \cup { [ZeroPrice23 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice23 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice23 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice23 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -3255,33 +3255,33 @@ CheckedQuoteQuantity19 ==
 AskQuote10 ==
     [ changeFlag    : Sample(1),
       price         : Price23,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity19 ]
 
 EncodeAskQuote10(message) ==
     message.changeFlag
         \o EncodePrice23(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity19(message.quoteQuantity)
 
 DecodeAskQuote10(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice23(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity19(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroAskQuote10 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice23,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity19 ]
 
@@ -3290,7 +3290,7 @@ CheckedAskQuote10 ==
     { ZeroAskQuote10 }
         \cup { [ZeroAskQuote10 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote10 EXCEPT !.price = one] : one \in CheckedPrice23 }
-        \cup { [ZeroAskQuote10 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroAskQuote10 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroAskQuote10 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroAskQuote10 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity19 }
 
@@ -3299,33 +3299,33 @@ CheckedAskQuote10 ==
 (***************************************************************************)
 
 Price24 ==
-    [ unitFlag : Sample(1),
-      priceC14 : Sample(14),
-      sign     : Sample(1) ]
+    [ unitFlag   : Sample(1),
+      priceValue : Sample(14),
+      sign       : Sample(1) ]
 
 EncodePrice24(message) ==
     message.unitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
 
 DecodePrice24(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ unitFlag |-> unitFlag.value,
-         priceC14 |-> priceC14.value,
-         sign     |-> sign.value ], sign.rest)
+    LET priceValue == ReadBytes(unitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ unitFlag   |-> unitFlag.value,
+         priceValue |-> priceValue.value,
+         sign       |-> sign.value ], sign.rest)
 
 ZeroPrice24 ==
-    [ unitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign     |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag   |-> [i \in 1 .. 1 |-> 0],
+      priceValue |-> [i \in 1 .. 14 |-> 0],
+      sign       |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice24 ==
     { ZeroPrice24 }
         \cup { [ZeroPrice24 EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice24 EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice24 EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice24 EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -3369,33 +3369,33 @@ CheckedQuoteQuantity20 ==
 BidQuote10 ==
     [ changeFlag    : Sample(1),
       price         : Price24,
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteFlag     : Sample(1),
       quoteQuantity : QuoteQuantity20 ]
 
 EncodeBidQuote10(message) ==
     message.changeFlag
         \o EncodePrice24(message.price)
-        \o message.timeC12
+        \o message.preciseTime
         \o message.quoteFlag
         \o EncodeQuoteQuantity20(message.quoteQuantity)
 
 DecodeBidQuote10(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
     LET price == DecodePrice24(changeFlag.rest) IN IF ~price.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(price.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteFlag == ReadBytes(timeC12.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(price.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteFlag == ReadBytes(preciseTime.rest, 1) IN IF ~quoteFlag.ok THEN Fail ELSE
     LET quoteQuantity == DecodeQuoteQuantity20(quoteFlag.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
          price         |-> price.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteFlag     |-> quoteFlag.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBidQuote10 ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
       price         |-> ZeroPrice24,
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteFlag     |-> [i \in 1 .. 1 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity20 ]
 
@@ -3404,7 +3404,7 @@ CheckedBidQuote10 ==
     { ZeroBidQuote10 }
         \cup { [ZeroBidQuote10 EXCEPT !.changeFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote10 EXCEPT !.price = one] : one \in CheckedPrice24 }
-        \cup { [ZeroBidQuote10 EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBidQuote10 EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBidQuote10 EXCEPT !.quoteFlag = one] : one \in Sample(1) }
         \cup { [ZeroBidQuote10 EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity20 }
 
@@ -3482,32 +3482,32 @@ CheckedQuoteQuantity21 ==
 
 SellOrder ==
     [ changeFlag    : Sample(1),
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteQuantity : QuoteQuantity21 ]
 
 EncodeSellOrder(message) ==
     message.changeFlag
-        \o message.timeC12
+        \o message.preciseTime
         \o EncodeQuoteQuantity21(message.quoteQuantity)
 
 DecodeSellOrder(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(changeFlag.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteQuantity == DecodeQuoteQuantity21(timeC12.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(changeFlag.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteQuantity == DecodeQuoteQuantity21(preciseTime.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroSellOrder ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity21 ]
 
 (* Sell Order at zero, then each field in turn at the values it is checked at *)
 CheckedSellOrder ==
     { ZeroSellOrder }
         \cup { [ZeroSellOrder EXCEPT !.changeFlag = one] : one \in Sample(1) }
-        \cup { [ZeroSellOrder EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroSellOrder EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroSellOrder EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity21 }
 
 (***************************************************************************)
@@ -3550,32 +3550,32 @@ CheckedQuoteQuantity22 ==
 
 BuyOrder ==
     [ changeFlag    : Sample(1),
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteQuantity : QuoteQuantity22 ]
 
 EncodeBuyOrder(message) ==
     message.changeFlag
-        \o message.timeC12
+        \o message.preciseTime
         \o EncodeQuoteQuantity22(message.quoteQuantity)
 
 DecodeBuyOrder(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(changeFlag.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteQuantity == DecodeQuoteQuantity22(timeC12.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(changeFlag.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteQuantity == DecodeQuoteQuantity22(preciseTime.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroBuyOrder ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity22 ]
 
 (* Buy Order at zero, then each field in turn at the values it is checked at *)
 CheckedBuyOrder ==
     { ZeroBuyOrder }
         \cup { [ZeroBuyOrder EXCEPT !.changeFlag = one] : one \in Sample(1) }
-        \cup { [ZeroBuyOrder EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroBuyOrder EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroBuyOrder EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity22 }
 
 (***************************************************************************)
@@ -3652,32 +3652,32 @@ CheckedQuoteQuantity23 ==
 
 OverQuote ==
     [ changeFlag    : Sample(1),
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteQuantity : QuoteQuantity23 ]
 
 EncodeOverQuote(message) ==
     message.changeFlag
-        \o message.timeC12
+        \o message.preciseTime
         \o EncodeQuoteQuantity23(message.quoteQuantity)
 
 DecodeOverQuote(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(changeFlag.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteQuantity == DecodeQuoteQuantity23(timeC12.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(changeFlag.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteQuantity == DecodeQuoteQuantity23(preciseTime.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroOverQuote ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity23 ]
 
 (* Over Quote at zero, then each field in turn at the values it is checked at *)
 CheckedOverQuote ==
     { ZeroOverQuote }
         \cup { [ZeroOverQuote EXCEPT !.changeFlag = one] : one \in Sample(1) }
-        \cup { [ZeroOverQuote EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroOverQuote EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroOverQuote EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity23 }
 
 (***************************************************************************)
@@ -3720,32 +3720,32 @@ CheckedQuoteQuantity24 ==
 
 UnderQuote ==
     [ changeFlag    : Sample(1),
-      timeC12       : Sample(12),
+      preciseTime   : Sample(12),
       quoteQuantity : QuoteQuantity24 ]
 
 EncodeUnderQuote(message) ==
     message.changeFlag
-        \o message.timeC12
+        \o message.preciseTime
         \o EncodeQuoteQuantity24(message.quoteQuantity)
 
 DecodeUnderQuote(bytes) ==
     LET changeFlag == ReadBytes(bytes, 1) IN IF ~changeFlag.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(changeFlag.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
-    LET quoteQuantity == DecodeQuoteQuantity24(timeC12.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(changeFlag.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
+    LET quoteQuantity == DecodeQuoteQuantity24(preciseTime.rest) IN IF ~quoteQuantity.ok THEN Fail ELSE
     Ok([ changeFlag    |-> changeFlag.value,
-         timeC12       |-> timeC12.value,
+         preciseTime   |-> preciseTime.value,
          quoteQuantity |-> quoteQuantity.value ], quoteQuantity.rest)
 
 ZeroUnderQuote ==
     [ changeFlag    |-> [i \in 1 .. 1 |-> 0],
-      timeC12       |-> [i \in 1 .. 12 |-> 0],
+      preciseTime   |-> [i \in 1 .. 12 |-> 0],
       quoteQuantity |-> ZeroQuoteQuantity24 ]
 
 (* Under Quote at zero, then each field in turn at the values it is checked at *)
 CheckedUnderQuote ==
     { ZeroUnderQuote }
         \cup { [ZeroUnderQuote EXCEPT !.changeFlag = one] : one \in Sample(1) }
-        \cup { [ZeroUnderQuote EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroUnderQuote EXCEPT !.preciseTime = one] : one \in Sample(12) }
         \cup { [ZeroUnderQuote EXCEPT !.quoteQuantity = one] : one \in CheckedQuoteQuantity24 }
 
 (***************************************************************************)
@@ -3789,34 +3789,34 @@ CheckedOverUnderMessage ==
 TradingVolume ==
     [ reserved1                     : Sample(1),
       tradingVolumeTurnoverUnitFlag : Sample(1),
-      tradingVolumeC14              : Sample(14),
-      timeC6                        : Sample(6),
+      tradingVolumeValue            : Sample(14),
+      time                          : Sample(6),
       secondReserved1               : Sample(1) ]
 
 EncodeTradingVolume(message) ==
     message.reserved1
         \o message.tradingVolumeTurnoverUnitFlag
-        \o message.tradingVolumeC14
-        \o message.timeC6
+        \o message.tradingVolumeValue
+        \o message.time
         \o message.secondReserved1
 
 DecodeTradingVolume(bytes) ==
     LET reserved1 == ReadBytes(bytes, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(reserved1.rest, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET tradingVolumeC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~tradingVolumeC14.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(tradingVolumeC14.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
-    LET secondReserved1 == ReadBytes(timeC6.rest, 1) IN IF ~secondReserved1.ok THEN Fail ELSE
+    LET tradingVolumeValue == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~tradingVolumeValue.ok THEN Fail ELSE
+    LET time == ReadBytes(tradingVolumeValue.rest, 6) IN IF ~time.ok THEN Fail ELSE
+    LET secondReserved1 == ReadBytes(time.rest, 1) IN IF ~secondReserved1.ok THEN Fail ELSE
     Ok([ reserved1                     |-> reserved1.value,
          tradingVolumeTurnoverUnitFlag |-> tradingVolumeTurnoverUnitFlag.value,
-         tradingVolumeC14              |-> tradingVolumeC14.value,
-         timeC6                        |-> timeC6.value,
+         tradingVolumeValue            |-> tradingVolumeValue.value,
+         time                          |-> time.value,
          secondReserved1               |-> secondReserved1.value ], secondReserved1.rest)
 
 ZeroTradingVolume ==
     [ reserved1                     |-> [i \in 1 .. 1 |-> 0],
       tradingVolumeTurnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
-      tradingVolumeC14              |-> [i \in 1 .. 14 |-> 0],
-      timeC6                        |-> [i \in 1 .. 6 |-> 0],
+      tradingVolumeValue            |-> [i \in 1 .. 14 |-> 0],
+      time                          |-> [i \in 1 .. 6 |-> 0],
       secondReserved1               |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Trading Volume at zero, then each field in turn at the values it is checked at *)
@@ -3824,8 +3824,8 @@ CheckedTradingVolume ==
     { ZeroTradingVolume }
         \cup { [ZeroTradingVolume EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroTradingVolume EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradingVolume EXCEPT !.tradingVolumeC14 = one] : one \in Sample(14) }
-        \cup { [ZeroTradingVolume EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroTradingVolume EXCEPT !.tradingVolumeValue = one] : one \in Sample(14) }
+        \cup { [ZeroTradingVolume EXCEPT !.time = one] : one \in Sample(6) }
         \cup { [ZeroTradingVolume EXCEPT !.secondReserved1 = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -3864,33 +3864,33 @@ TurnoverInYenValue ==
     [ reserved1                     : Sample(1),
       tradingVolumeTurnoverUnitFlag : Sample(1),
       turnoverValue                 : Sample(14),
-      timeC6                        : Sample(6),
+      time                          : Sample(6),
       secondReserved1               : Sample(1) ]
 
 EncodeTurnoverInYenValue(message) ==
     message.reserved1
         \o message.tradingVolumeTurnoverUnitFlag
         \o message.turnoverValue
-        \o message.timeC6
+        \o message.time
         \o message.secondReserved1
 
 DecodeTurnoverInYenValue(bytes) ==
     LET reserved1 == ReadBytes(bytes, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(reserved1.rest, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
     LET turnoverValue == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~turnoverValue.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(turnoverValue.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
-    LET secondReserved1 == ReadBytes(timeC6.rest, 1) IN IF ~secondReserved1.ok THEN Fail ELSE
+    LET time == ReadBytes(turnoverValue.rest, 6) IN IF ~time.ok THEN Fail ELSE
+    LET secondReserved1 == ReadBytes(time.rest, 1) IN IF ~secondReserved1.ok THEN Fail ELSE
     Ok([ reserved1                     |-> reserved1.value,
          tradingVolumeTurnoverUnitFlag |-> tradingVolumeTurnoverUnitFlag.value,
          turnoverValue                 |-> turnoverValue.value,
-         timeC6                        |-> timeC6.value,
+         time                          |-> time.value,
          secondReserved1               |-> secondReserved1.value ], secondReserved1.rest)
 
 ZeroTurnoverInYenValue ==
     [ reserved1                     |-> [i \in 1 .. 1 |-> 0],
       tradingVolumeTurnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
       turnoverValue                 |-> [i \in 1 .. 14 |-> 0],
-      timeC6                        |-> [i \in 1 .. 6 |-> 0],
+      time                          |-> [i \in 1 .. 6 |-> 0],
       secondReserved1               |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Turnover In Yen Value at zero, then each field in turn at the values it is checked at *)
@@ -3899,7 +3899,7 @@ CheckedTurnoverInYenValue ==
         \cup { [ZeroTurnoverInYenValue EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroTurnoverInYenValue EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
         \cup { [ZeroTurnoverInYenValue EXCEPT !.turnoverValue = one] : one \in Sample(14) }
-        \cup { [ZeroTurnoverInYenValue EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroTurnoverInYenValue EXCEPT !.time = one] : one \in Sample(6) }
         \cup { [ZeroTurnoverInYenValue EXCEPT !.secondReserved1 = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -3937,39 +3937,39 @@ CheckedTurnoverMessage ==
 AllDayVwap ==
     [ reserved1       : Sample(1),
       lotSizeUnitFlag : Sample(1),
-      allDayVwapC14   : Sample(14),
+      allDayVwapValue : Sample(14),
       sign            : Sample(1),
-      timeC6          : Sample(6),
+      time            : Sample(6),
       secondReserved1 : Sample(1) ]
 
 EncodeAllDayVwap(message) ==
     message.reserved1
         \o message.lotSizeUnitFlag
-        \o message.allDayVwapC14
+        \o message.allDayVwapValue
         \o message.sign
-        \o message.timeC6
+        \o message.time
         \o message.secondReserved1
 
 DecodeAllDayVwap(bytes) ==
     LET reserved1 == ReadBytes(bytes, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET lotSizeUnitFlag == ReadBytes(reserved1.rest, 1) IN IF ~lotSizeUnitFlag.ok THEN Fail ELSE
-    LET allDayVwapC14 == ReadBytes(lotSizeUnitFlag.rest, 14) IN IF ~allDayVwapC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(allDayVwapC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(sign.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
-    LET secondReserved1 == ReadBytes(timeC6.rest, 1) IN IF ~secondReserved1.ok THEN Fail ELSE
+    LET allDayVwapValue == ReadBytes(lotSizeUnitFlag.rest, 14) IN IF ~allDayVwapValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(allDayVwapValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET time == ReadBytes(sign.rest, 6) IN IF ~time.ok THEN Fail ELSE
+    LET secondReserved1 == ReadBytes(time.rest, 1) IN IF ~secondReserved1.ok THEN Fail ELSE
     Ok([ reserved1       |-> reserved1.value,
          lotSizeUnitFlag |-> lotSizeUnitFlag.value,
-         allDayVwapC14   |-> allDayVwapC14.value,
+         allDayVwapValue |-> allDayVwapValue.value,
          sign            |-> sign.value,
-         timeC6          |-> timeC6.value,
+         time            |-> time.value,
          secondReserved1 |-> secondReserved1.value ], secondReserved1.rest)
 
 ZeroAllDayVwap ==
     [ reserved1       |-> [i \in 1 .. 1 |-> 0],
       lotSizeUnitFlag |-> [i \in 1 .. 1 |-> 0],
-      allDayVwapC14   |-> [i \in 1 .. 14 |-> 0],
+      allDayVwapValue |-> [i \in 1 .. 14 |-> 0],
       sign            |-> [i \in 1 .. 1 |-> 0],
-      timeC6          |-> [i \in 1 .. 6 |-> 0],
+      time            |-> [i \in 1 .. 6 |-> 0],
       secondReserved1 |-> [i \in 1 .. 1 |-> 0] ]
 
 (* All Day Vwap at zero, then each field in turn at the values it is checked at *)
@@ -3977,9 +3977,9 @@ CheckedAllDayVwap ==
     { ZeroAllDayVwap }
         \cup { [ZeroAllDayVwap EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroAllDayVwap EXCEPT !.lotSizeUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroAllDayVwap EXCEPT !.allDayVwapC14 = one] : one \in Sample(14) }
+        \cup { [ZeroAllDayVwap EXCEPT !.allDayVwapValue = one] : one \in Sample(14) }
         \cup { [ZeroAllDayVwap EXCEPT !.sign = one] : one \in Sample(1) }
-        \cup { [ZeroAllDayVwap EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroAllDayVwap EXCEPT !.time = one] : one \in Sample(6) }
         \cup { [ZeroAllDayVwap EXCEPT !.secondReserved1 = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -3987,51 +3987,51 @@ CheckedAllDayVwap ==
 (***************************************************************************)
 
 CurrentSessionVwap ==
-    [ reserved1             : Sample(1),
-      lotSizeUnitFlag       : Sample(1),
-      currentSessionVwapC14 : Sample(14),
-      sign                  : Sample(1),
-      timeC6                : Sample(6),
-      secondReserved1       : Sample(1) ]
+    [ reserved1               : Sample(1),
+      lotSizeUnitFlag         : Sample(1),
+      currentSessionVwapValue : Sample(14),
+      sign                    : Sample(1),
+      time                    : Sample(6),
+      secondReserved1         : Sample(1) ]
 
 EncodeCurrentSessionVwap(message) ==
     message.reserved1
         \o message.lotSizeUnitFlag
-        \o message.currentSessionVwapC14
+        \o message.currentSessionVwapValue
         \o message.sign
-        \o message.timeC6
+        \o message.time
         \o message.secondReserved1
 
 DecodeCurrentSessionVwap(bytes) ==
     LET reserved1 == ReadBytes(bytes, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET lotSizeUnitFlag == ReadBytes(reserved1.rest, 1) IN IF ~lotSizeUnitFlag.ok THEN Fail ELSE
-    LET currentSessionVwapC14 == ReadBytes(lotSizeUnitFlag.rest, 14) IN IF ~currentSessionVwapC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(currentSessionVwapC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(sign.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
-    LET secondReserved1 == ReadBytes(timeC6.rest, 1) IN IF ~secondReserved1.ok THEN Fail ELSE
-    Ok([ reserved1             |-> reserved1.value,
-         lotSizeUnitFlag       |-> lotSizeUnitFlag.value,
-         currentSessionVwapC14 |-> currentSessionVwapC14.value,
-         sign                  |-> sign.value,
-         timeC6                |-> timeC6.value,
-         secondReserved1       |-> secondReserved1.value ], secondReserved1.rest)
+    LET currentSessionVwapValue == ReadBytes(lotSizeUnitFlag.rest, 14) IN IF ~currentSessionVwapValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(currentSessionVwapValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET time == ReadBytes(sign.rest, 6) IN IF ~time.ok THEN Fail ELSE
+    LET secondReserved1 == ReadBytes(time.rest, 1) IN IF ~secondReserved1.ok THEN Fail ELSE
+    Ok([ reserved1               |-> reserved1.value,
+         lotSizeUnitFlag         |-> lotSizeUnitFlag.value,
+         currentSessionVwapValue |-> currentSessionVwapValue.value,
+         sign                    |-> sign.value,
+         time                    |-> time.value,
+         secondReserved1         |-> secondReserved1.value ], secondReserved1.rest)
 
 ZeroCurrentSessionVwap ==
-    [ reserved1             |-> [i \in 1 .. 1 |-> 0],
-      lotSizeUnitFlag       |-> [i \in 1 .. 1 |-> 0],
-      currentSessionVwapC14 |-> [i \in 1 .. 14 |-> 0],
-      sign                  |-> [i \in 1 .. 1 |-> 0],
-      timeC6                |-> [i \in 1 .. 6 |-> 0],
-      secondReserved1       |-> [i \in 1 .. 1 |-> 0] ]
+    [ reserved1               |-> [i \in 1 .. 1 |-> 0],
+      lotSizeUnitFlag         |-> [i \in 1 .. 1 |-> 0],
+      currentSessionVwapValue |-> [i \in 1 .. 14 |-> 0],
+      sign                    |-> [i \in 1 .. 1 |-> 0],
+      time                    |-> [i \in 1 .. 6 |-> 0],
+      secondReserved1         |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Current Session Vwap at zero, then each field in turn at the values it is checked at *)
 CheckedCurrentSessionVwap ==
     { ZeroCurrentSessionVwap }
         \cup { [ZeroCurrentSessionVwap EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroCurrentSessionVwap EXCEPT !.lotSizeUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroCurrentSessionVwap EXCEPT !.currentSessionVwapC14 = one] : one \in Sample(14) }
+        \cup { [ZeroCurrentSessionVwap EXCEPT !.currentSessionVwapValue = one] : one \in Sample(14) }
         \cup { [ZeroCurrentSessionVwap EXCEPT !.sign = one] : one \in Sample(1) }
-        \cup { [ZeroCurrentSessionVwap EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroCurrentSessionVwap EXCEPT !.time = one] : one \in Sample(6) }
         \cup { [ZeroCurrentSessionVwap EXCEPT !.secondReserved1 = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -4073,45 +4073,45 @@ CheckedVwapMessage ==
 (***************************************************************************)
 
 ParityEstimatedPrice ==
-    [ unitFlag                : Sample(1),
-      parityEstimatedPriceC14 : Sample(14),
-      sign                    : Sample(1),
-      timeC6                  : Sample(6),
-      reserved1               : Sample(1) ]
+    [ unitFlag                  : Sample(1),
+      parityEstimatedPriceValue : Sample(14),
+      sign                      : Sample(1),
+      time                      : Sample(6),
+      reserved1                 : Sample(1) ]
 
 EncodeParityEstimatedPrice(message) ==
     message.unitFlag
-        \o message.parityEstimatedPriceC14
+        \o message.parityEstimatedPriceValue
         \o message.sign
-        \o message.timeC6
+        \o message.time
         \o message.reserved1
 
 DecodeParityEstimatedPrice(bytes) ==
     LET unitFlag == ReadBytes(bytes, 1) IN IF ~unitFlag.ok THEN Fail ELSE
-    LET parityEstimatedPriceC14 == ReadBytes(unitFlag.rest, 14) IN IF ~parityEstimatedPriceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(parityEstimatedPriceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(sign.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(timeC6.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
-    Ok([ unitFlag                |-> unitFlag.value,
-         parityEstimatedPriceC14 |-> parityEstimatedPriceC14.value,
-         sign                    |-> sign.value,
-         timeC6                  |-> timeC6.value,
-         reserved1               |-> reserved1.value ], reserved1.rest)
+    LET parityEstimatedPriceValue == ReadBytes(unitFlag.rest, 14) IN IF ~parityEstimatedPriceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(parityEstimatedPriceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET time == ReadBytes(sign.rest, 6) IN IF ~time.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(time.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    Ok([ unitFlag                  |-> unitFlag.value,
+         parityEstimatedPriceValue |-> parityEstimatedPriceValue.value,
+         sign                      |-> sign.value,
+         time                      |-> time.value,
+         reserved1                 |-> reserved1.value ], reserved1.rest)
 
 ZeroParityEstimatedPrice ==
-    [ unitFlag                |-> [i \in 1 .. 1 |-> 0],
-      parityEstimatedPriceC14 |-> [i \in 1 .. 14 |-> 0],
-      sign                    |-> [i \in 1 .. 1 |-> 0],
-      timeC6                  |-> [i \in 1 .. 6 |-> 0],
-      reserved1               |-> [i \in 1 .. 1 |-> 0] ]
+    [ unitFlag                  |-> [i \in 1 .. 1 |-> 0],
+      parityEstimatedPriceValue |-> [i \in 1 .. 14 |-> 0],
+      sign                      |-> [i \in 1 .. 1 |-> 0],
+      time                      |-> [i \in 1 .. 6 |-> 0],
+      reserved1                 |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Parity Estimated Price at zero, then each field in turn at the values it is checked at *)
 CheckedParityEstimatedPrice ==
     { ZeroParityEstimatedPrice }
         \cup { [ZeroParityEstimatedPrice EXCEPT !.unitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroParityEstimatedPrice EXCEPT !.parityEstimatedPriceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroParityEstimatedPrice EXCEPT !.parityEstimatedPriceValue = one] : one \in Sample(14) }
         \cup { [ZeroParityEstimatedPrice EXCEPT !.sign = one] : one \in Sample(1) }
-        \cup { [ZeroParityEstimatedPrice EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroParityEstimatedPrice EXCEPT !.time = one] : one \in Sample(6) }
         \cup { [ZeroParityEstimatedPrice EXCEPT !.reserved1 = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -4147,27 +4147,27 @@ CheckedParityMessage ==
 (***************************************************************************)
 
 DirectYield ==
-    [ directYieldC8 : Sample(8),
-      sign          : Sample(1) ]
+    [ directYieldValue : Sample(8),
+      sign             : Sample(1) ]
 
 EncodeDirectYield(message) ==
-    message.directYieldC8
+    message.directYieldValue
         \o message.sign
 
 DecodeDirectYield(bytes) ==
-    LET directYieldC8 == ReadBytes(bytes, 8) IN IF ~directYieldC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(directYieldC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ directYieldC8 |-> directYieldC8.value,
-         sign          |-> sign.value ], sign.rest)
+    LET directYieldValue == ReadBytes(bytes, 8) IN IF ~directYieldValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(directYieldValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ directYieldValue |-> directYieldValue.value,
+         sign             |-> sign.value ], sign.rest)
 
 ZeroDirectYield ==
-    [ directYieldC8 |-> [i \in 1 .. 8 |-> 0],
-      sign          |-> [i \in 1 .. 1 |-> 0] ]
+    [ directYieldValue |-> [i \in 1 .. 8 |-> 0],
+      sign             |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Direct Yield at zero, then each field in turn at the values it is checked at *)
 CheckedDirectYield ==
     { ZeroDirectYield }
-        \cup { [ZeroDirectYield EXCEPT !.directYieldC8 = one] : one \in Sample(8) }
+        \cup { [ZeroDirectYield EXCEPT !.directYieldValue = one] : one \in Sample(8) }
         \cup { [ZeroDirectYield EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -4175,27 +4175,27 @@ CheckedDirectYield ==
 (***************************************************************************)
 
 FinalYield ==
-    [ finalYieldC8 : Sample(8),
-      sign         : Sample(1) ]
+    [ finalYieldValue : Sample(8),
+      sign            : Sample(1) ]
 
 EncodeFinalYield(message) ==
-    message.finalYieldC8
+    message.finalYieldValue
         \o message.sign
 
 DecodeFinalYield(bytes) ==
-    LET finalYieldC8 == ReadBytes(bytes, 8) IN IF ~finalYieldC8.ok THEN Fail ELSE
-    LET sign == ReadBytes(finalYieldC8.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    Ok([ finalYieldC8 |-> finalYieldC8.value,
-         sign         |-> sign.value ], sign.rest)
+    LET finalYieldValue == ReadBytes(bytes, 8) IN IF ~finalYieldValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(finalYieldValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    Ok([ finalYieldValue |-> finalYieldValue.value,
+         sign            |-> sign.value ], sign.rest)
 
 ZeroFinalYield ==
-    [ finalYieldC8 |-> [i \in 1 .. 8 |-> 0],
-      sign         |-> [i \in 1 .. 1 |-> 0] ]
+    [ finalYieldValue |-> [i \in 1 .. 8 |-> 0],
+      sign            |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Final Yield at zero, then each field in turn at the values it is checked at *)
 CheckedFinalYield ==
     { ZeroFinalYield }
-        \cup { [ZeroFinalYield EXCEPT !.finalYieldC8 = one] : one \in Sample(8) }
+        \cup { [ZeroFinalYield EXCEPT !.finalYieldValue = one] : one \in Sample(8) }
         \cup { [ZeroFinalYield EXCEPT !.sign = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -4206,33 +4206,33 @@ YieldMessage ==
     [ reserved2   : Sample(2),
       directYield : DirectYield,
       finalYield  : FinalYield,
-      timeC6      : Sample(6),
+      time        : Sample(6),
       reserved1   : Sample(1) ]
 
 EncodeYieldMessage(message) ==
     message.reserved2
         \o EncodeDirectYield(message.directYield)
         \o EncodeFinalYield(message.finalYield)
-        \o message.timeC6
+        \o message.time
         \o message.reserved1
 
 DecodeYieldMessage(bytes) ==
     LET reserved2 == ReadBytes(bytes, 2) IN IF ~reserved2.ok THEN Fail ELSE
     LET directYield == DecodeDirectYield(reserved2.rest) IN IF ~directYield.ok THEN Fail ELSE
     LET finalYield == DecodeFinalYield(directYield.rest) IN IF ~finalYield.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(finalYield.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(timeC6.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET time == ReadBytes(finalYield.rest, 6) IN IF ~time.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(time.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     Ok([ reserved2   |-> reserved2.value,
          directYield |-> directYield.value,
          finalYield  |-> finalYield.value,
-         timeC6      |-> timeC6.value,
+         time        |-> time.value,
          reserved1   |-> reserved1.value ], reserved1.rest)
 
 ZeroYieldMessage ==
     [ reserved2   |-> [i \in 1 .. 2 |-> 0],
       directYield |-> ZeroDirectYield,
       finalYield  |-> ZeroFinalYield,
-      timeC6      |-> [i \in 1 .. 6 |-> 0],
+      time        |-> [i \in 1 .. 6 |-> 0],
       reserved1   |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Yield Message at zero, then each field in turn at the values it is checked at *)
@@ -4241,7 +4241,7 @@ CheckedYieldMessage ==
         \cup { [ZeroYieldMessage EXCEPT !.reserved2 = one] : one \in Sample(2) }
         \cup { [ZeroYieldMessage EXCEPT !.directYield = one] : one \in CheckedDirectYield }
         \cup { [ZeroYieldMessage EXCEPT !.finalYield = one] : one \in CheckedFinalYield }
-        \cup { [ZeroYieldMessage EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroYieldMessage EXCEPT !.time = one] : one \in Sample(6) }
         \cup { [ZeroYieldMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -4252,29 +4252,29 @@ ControlMessage ==
     [ reserved2    : Sample(2),
       testModeFlag : Sample(1),
       startEndFlag : Sample(1),
-      timeC6       : Sample(6) ]
+      time         : Sample(6) ]
 
 EncodeControlMessage(message) ==
     message.reserved2
         \o message.testModeFlag
         \o message.startEndFlag
-        \o message.timeC6
+        \o message.time
 
 DecodeControlMessage(bytes) ==
     LET reserved2 == ReadBytes(bytes, 2) IN IF ~reserved2.ok THEN Fail ELSE
     LET testModeFlag == ReadBytes(reserved2.rest, 1) IN IF ~testModeFlag.ok THEN Fail ELSE
     LET startEndFlag == ReadBytes(testModeFlag.rest, 1) IN IF ~startEndFlag.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(startEndFlag.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
+    LET time == ReadBytes(startEndFlag.rest, 6) IN IF ~time.ok THEN Fail ELSE
     Ok([ reserved2    |-> reserved2.value,
          testModeFlag |-> testModeFlag.value,
          startEndFlag |-> startEndFlag.value,
-         timeC6       |-> timeC6.value ], timeC6.rest)
+         time         |-> time.value ], time.rest)
 
 ZeroControlMessage ==
     [ reserved2    |-> [i \in 1 .. 2 |-> 0],
       testModeFlag |-> [i \in 1 .. 1 |-> 0],
       startEndFlag |-> [i \in 1 .. 1 |-> 0],
-      timeC6       |-> [i \in 1 .. 6 |-> 0] ]
+      time         |-> [i \in 1 .. 6 |-> 0] ]
 
 (* Control Message at zero, then each field in turn at the values it is checked at *)
 CheckedControlMessage ==
@@ -4282,7 +4282,7 @@ CheckedControlMessage ==
         \cup { [ZeroControlMessage EXCEPT !.reserved2 = one] : one \in Sample(2) }
         \cup { [ZeroControlMessage EXCEPT !.testModeFlag = one] : one \in Sample(1) }
         \cup { [ZeroControlMessage EXCEPT !.startEndFlag = one] : one \in Sample(1) }
-        \cup { [ZeroControlMessage EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroControlMessage EXCEPT !.time = one] : one \in Sample(6) }
 
 (***************************************************************************)
 (* Payload, selected by Tag ID                                             *)

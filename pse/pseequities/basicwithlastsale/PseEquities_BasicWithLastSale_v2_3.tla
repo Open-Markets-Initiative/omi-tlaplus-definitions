@@ -213,39 +213,39 @@ CheckedTradingScheduleMessage ==
 (***************************************************************************)
 
 PriceTickSizeMessage ==
-    [ timestamp        : Sample(4),
-      tickSizeTableId  : Sample(4),
-      tickSizeInteger4 : Sample(4),
-      priceStart       : Sample(4) ]
+    [ timestamp       : Sample(4),
+      tickSizeTableId : Sample(4),
+      priceTickSize   : Sample(4),
+      priceStart      : Sample(4) ]
 
 EncodePriceTickSizeMessage(message) ==
     message.timestamp
         \o message.tickSizeTableId
-        \o message.tickSizeInteger4
+        \o message.priceTickSize
         \o message.priceStart
 
 DecodePriceTickSizeMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 4) IN IF ~timestamp.ok THEN Fail ELSE
     LET tickSizeTableId == ReadBytes(timestamp.rest, 4) IN IF ~tickSizeTableId.ok THEN Fail ELSE
-    LET tickSizeInteger4 == ReadBytes(tickSizeTableId.rest, 4) IN IF ~tickSizeInteger4.ok THEN Fail ELSE
-    LET priceStart == ReadBytes(tickSizeInteger4.rest, 4) IN IF ~priceStart.ok THEN Fail ELSE
-    Ok([ timestamp        |-> timestamp.value,
-         tickSizeTableId  |-> tickSizeTableId.value,
-         tickSizeInteger4 |-> tickSizeInteger4.value,
-         priceStart       |-> priceStart.value ], priceStart.rest)
+    LET priceTickSize == ReadBytes(tickSizeTableId.rest, 4) IN IF ~priceTickSize.ok THEN Fail ELSE
+    LET priceStart == ReadBytes(priceTickSize.rest, 4) IN IF ~priceStart.ok THEN Fail ELSE
+    Ok([ timestamp       |-> timestamp.value,
+         tickSizeTableId |-> tickSizeTableId.value,
+         priceTickSize   |-> priceTickSize.value,
+         priceStart      |-> priceStart.value ], priceStart.rest)
 
 ZeroPriceTickSizeMessage ==
-    [ timestamp        |-> [i \in 1 .. 4 |-> 0],
-      tickSizeTableId  |-> [i \in 1 .. 4 |-> 0],
-      tickSizeInteger4 |-> [i \in 1 .. 4 |-> 0],
-      priceStart       |-> [i \in 1 .. 4 |-> 0] ]
+    [ timestamp       |-> [i \in 1 .. 4 |-> 0],
+      tickSizeTableId |-> [i \in 1 .. 4 |-> 0],
+      priceTickSize   |-> [i \in 1 .. 4 |-> 0],
+      priceStart      |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Price Tick Size Message at zero, then each field in turn at the values it is checked at *)
 CheckedPriceTickSizeMessage ==
     { ZeroPriceTickSizeMessage }
         \cup { [ZeroPriceTickSizeMessage EXCEPT !.timestamp = one] : one \in Sample(4) }
         \cup { [ZeroPriceTickSizeMessage EXCEPT !.tickSizeTableId = one] : one \in Sample(4) }
-        \cup { [ZeroPriceTickSizeMessage EXCEPT !.tickSizeInteger4 = one] : one \in Sample(4) }
+        \cup { [ZeroPriceTickSizeMessage EXCEPT !.priceTickSize = one] : one \in Sample(4) }
         \cup { [ZeroPriceTickSizeMessage EXCEPT !.priceStart = one] : one \in Sample(4) }
 
 (***************************************************************************)
@@ -255,29 +255,29 @@ CheckedPriceTickSizeMessage ==
 QuantityTickSizeMessage ==
     [ timestamp        : Sample(4),
       tickSizeTableId  : Sample(4),
-      tickSizeInteger8 : Sample(8),
+      quantityTickSize : Sample(8),
       quantityStart    : Sample(8) ]
 
 EncodeQuantityTickSizeMessage(message) ==
     message.timestamp
         \o message.tickSizeTableId
-        \o message.tickSizeInteger8
+        \o message.quantityTickSize
         \o message.quantityStart
 
 DecodeQuantityTickSizeMessage(bytes) ==
     LET timestamp == ReadBytes(bytes, 4) IN IF ~timestamp.ok THEN Fail ELSE
     LET tickSizeTableId == ReadBytes(timestamp.rest, 4) IN IF ~tickSizeTableId.ok THEN Fail ELSE
-    LET tickSizeInteger8 == ReadBytes(tickSizeTableId.rest, 8) IN IF ~tickSizeInteger8.ok THEN Fail ELSE
-    LET quantityStart == ReadBytes(tickSizeInteger8.rest, 8) IN IF ~quantityStart.ok THEN Fail ELSE
+    LET quantityTickSize == ReadBytes(tickSizeTableId.rest, 8) IN IF ~quantityTickSize.ok THEN Fail ELSE
+    LET quantityStart == ReadBytes(quantityTickSize.rest, 8) IN IF ~quantityStart.ok THEN Fail ELSE
     Ok([ timestamp        |-> timestamp.value,
          tickSizeTableId  |-> tickSizeTableId.value,
-         tickSizeInteger8 |-> tickSizeInteger8.value,
+         quantityTickSize |-> quantityTickSize.value,
          quantityStart    |-> quantityStart.value ], quantityStart.rest)
 
 ZeroQuantityTickSizeMessage ==
     [ timestamp        |-> [i \in 1 .. 4 |-> 0],
       tickSizeTableId  |-> [i \in 1 .. 4 |-> 0],
-      tickSizeInteger8 |-> [i \in 1 .. 8 |-> 0],
+      quantityTickSize |-> [i \in 1 .. 8 |-> 0],
       quantityStart    |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Quantity Tick Size Message at zero, then each field in turn at the values it is checked at *)
@@ -285,7 +285,7 @@ CheckedQuantityTickSizeMessage ==
     { ZeroQuantityTickSizeMessage }
         \cup { [ZeroQuantityTickSizeMessage EXCEPT !.timestamp = one] : one \in Sample(4) }
         \cup { [ZeroQuantityTickSizeMessage EXCEPT !.tickSizeTableId = one] : one \in Sample(4) }
-        \cup { [ZeroQuantityTickSizeMessage EXCEPT !.tickSizeInteger8 = one] : one \in Sample(8) }
+        \cup { [ZeroQuantityTickSizeMessage EXCEPT !.quantityTickSize = one] : one \in Sample(8) }
         \cup { [ZeroQuantityTickSizeMessage EXCEPT !.quantityStart = one] : one \in Sample(8) }
 
 (***************************************************************************)

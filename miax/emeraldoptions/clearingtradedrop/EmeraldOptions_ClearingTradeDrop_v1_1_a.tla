@@ -112,29 +112,29 @@ SampleLists(entries) ==
 SystemState ==
     [ notificationTime : Sample(8),
       ctdVersion       : Sample(8),
-      sessionId        : Sample(4),
+      tradingSessionId : Sample(4),
       systemStatus     : Sample(1) ]
 
 EncodeSystemState(message) ==
     message.notificationTime
         \o message.ctdVersion
-        \o message.sessionId
+        \o message.tradingSessionId
         \o message.systemStatus
 
 DecodeSystemState(bytes) ==
     LET notificationTime == ReadBytes(bytes, 8) IN IF ~notificationTime.ok THEN Fail ELSE
     LET ctdVersion == ReadBytes(notificationTime.rest, 8) IN IF ~ctdVersion.ok THEN Fail ELSE
-    LET sessionId == ReadBytes(ctdVersion.rest, 4) IN IF ~sessionId.ok THEN Fail ELSE
-    LET systemStatus == ReadBytes(sessionId.rest, 1) IN IF ~systemStatus.ok THEN Fail ELSE
+    LET tradingSessionId == ReadBytes(ctdVersion.rest, 4) IN IF ~tradingSessionId.ok THEN Fail ELSE
+    LET systemStatus == ReadBytes(tradingSessionId.rest, 1) IN IF ~systemStatus.ok THEN Fail ELSE
     Ok([ notificationTime |-> notificationTime.value,
          ctdVersion       |-> ctdVersion.value,
-         sessionId        |-> sessionId.value,
+         tradingSessionId |-> tradingSessionId.value,
          systemStatus     |-> systemStatus.value ], systemStatus.rest)
 
 ZeroSystemState ==
     [ notificationTime |-> [i \in 1 .. 8 |-> 0],
       ctdVersion       |-> [i \in 1 .. 8 |-> 0],
-      sessionId        |-> [i \in 1 .. 4 |-> 0],
+      tradingSessionId |-> [i \in 1 .. 4 |-> 0],
       systemStatus     |-> [i \in 1 .. 1 |-> 0] ]
 
 (* System State at zero, then each field in turn at the values it is checked at *)
@@ -142,7 +142,7 @@ CheckedSystemState ==
     { ZeroSystemState }
         \cup { [ZeroSystemState EXCEPT !.notificationTime = one] : one \in Sample(8) }
         \cup { [ZeroSystemState EXCEPT !.ctdVersion = one] : one \in Sample(8) }
-        \cup { [ZeroSystemState EXCEPT !.sessionId = one] : one \in Sample(4) }
+        \cup { [ZeroSystemState EXCEPT !.tradingSessionId = one] : one \in Sample(4) }
         \cup { [ZeroSystemState EXCEPT !.systemStatus = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -163,7 +163,7 @@ TradeMessage ==
       referenceTradeId                    : Sample(4),
       referenceCorrectionNumber           : Sample(1),
       correctionType                      : Sample(1),
-      eventIdBinaryU4                     : Sample(4),
+      eventId                             : Sample(4),
       strategyId                          : Sample(4),
       reserved12                          : Sample(12),
       productId                           : Sample(4),
@@ -245,7 +245,7 @@ EncodeTradeMessage(message) ==
         \o message.referenceTradeId
         \o message.referenceCorrectionNumber
         \o message.correctionType
-        \o message.eventIdBinaryU4
+        \o message.eventId
         \o message.strategyId
         \o message.reserved12
         \o message.productId
@@ -327,8 +327,8 @@ DecodeTradeMessage(bytes) ==
     LET referenceTradeId == ReadBytes(referenceTradeTime.rest, 4) IN IF ~referenceTradeId.ok THEN Fail ELSE
     LET referenceCorrectionNumber == ReadBytes(referenceTradeId.rest, 1) IN IF ~referenceCorrectionNumber.ok THEN Fail ELSE
     LET correctionType == ReadBytes(referenceCorrectionNumber.rest, 1) IN IF ~correctionType.ok THEN Fail ELSE
-    LET eventIdBinaryU4 == ReadBytes(correctionType.rest, 4) IN IF ~eventIdBinaryU4.ok THEN Fail ELSE
-    LET strategyId == ReadBytes(eventIdBinaryU4.rest, 4) IN IF ~strategyId.ok THEN Fail ELSE
+    LET eventId == ReadBytes(correctionType.rest, 4) IN IF ~eventId.ok THEN Fail ELSE
+    LET strategyId == ReadBytes(eventId.rest, 4) IN IF ~strategyId.ok THEN Fail ELSE
     LET reserved12 == ReadBytes(strategyId.rest, 12) IN IF ~reserved12.ok THEN Fail ELSE
     LET productId == ReadBytes(reserved12.rest, 4) IN IF ~productId.ok THEN Fail ELSE
     LET underlyingSymbol == ReadBytes(productId.rest, 11) IN IF ~underlyingSymbol.ok THEN Fail ELSE
@@ -407,7 +407,7 @@ DecodeTradeMessage(bytes) ==
          referenceTradeId                    |-> referenceTradeId.value,
          referenceCorrectionNumber           |-> referenceCorrectionNumber.value,
          correctionType                      |-> correctionType.value,
-         eventIdBinaryU4                     |-> eventIdBinaryU4.value,
+         eventId                             |-> eventId.value,
          strategyId                          |-> strategyId.value,
          reserved12                          |-> reserved12.value,
          productId                           |-> productId.value,
@@ -489,7 +489,7 @@ ZeroTradeMessage ==
       referenceTradeId                    |-> [i \in 1 .. 4 |-> 0],
       referenceCorrectionNumber           |-> [i \in 1 .. 1 |-> 0],
       correctionType                      |-> [i \in 1 .. 1 |-> 0],
-      eventIdBinaryU4                     |-> [i \in 1 .. 4 |-> 0],
+      eventId                             |-> [i \in 1 .. 4 |-> 0],
       strategyId                          |-> [i \in 1 .. 4 |-> 0],
       reserved12                          |-> [i \in 1 .. 12 |-> 0],
       productId                           |-> [i \in 1 .. 4 |-> 0],
@@ -573,7 +573,7 @@ CheckedTradeMessage ==
         \cup { [ZeroTradeMessage EXCEPT !.referenceTradeId = one] : one \in Sample(4) }
         \cup { [ZeroTradeMessage EXCEPT !.referenceCorrectionNumber = one] : one \in Sample(1) }
         \cup { [ZeroTradeMessage EXCEPT !.correctionType = one] : one \in Sample(1) }
-        \cup { [ZeroTradeMessage EXCEPT !.eventIdBinaryU4 = one] : one \in Sample(4) }
+        \cup { [ZeroTradeMessage EXCEPT !.eventId = one] : one \in Sample(4) }
         \cup { [ZeroTradeMessage EXCEPT !.strategyId = one] : one \in Sample(4) }
         \cup { [ZeroTradeMessage EXCEPT !.reserved12 = one] : one \in Sample(12) }
         \cup { [ZeroTradeMessage EXCEPT !.productId = one] : one \in Sample(4) }
@@ -653,7 +653,7 @@ RiskNotificationMessage ==
       metricType                   : Sample(1),
       protectionType               : Sample(1),
       eventType                    : Sample(1),
-      eventIdBinary4u4             : Sample(4),
+      eventId                      : Sample(4),
       configuredCountingTimePeriod : Sample(4),
       configuredMaxQuantity        : Sample(4),
       currentQuantity              : Sample(4),
@@ -669,7 +669,7 @@ EncodeRiskNotificationMessage(message) ==
         \o message.metricType
         \o message.protectionType
         \o message.eventType
-        \o message.eventIdBinary4u4
+        \o message.eventId
         \o message.configuredCountingTimePeriod
         \o message.configuredMaxQuantity
         \o message.currentQuantity
@@ -685,8 +685,8 @@ DecodeRiskNotificationMessage(bytes) ==
     LET metricType == ReadBytes(routeId.rest, 1) IN IF ~metricType.ok THEN Fail ELSE
     LET protectionType == ReadBytes(metricType.rest, 1) IN IF ~protectionType.ok THEN Fail ELSE
     LET eventType == ReadBytes(protectionType.rest, 1) IN IF ~eventType.ok THEN Fail ELSE
-    LET eventIdBinary4u4 == ReadBytes(eventType.rest, 4) IN IF ~eventIdBinary4u4.ok THEN Fail ELSE
-    LET configuredCountingTimePeriod == ReadBytes(eventIdBinary4u4.rest, 4) IN IF ~configuredCountingTimePeriod.ok THEN Fail ELSE
+    LET eventId == ReadBytes(eventType.rest, 4) IN IF ~eventId.ok THEN Fail ELSE
+    LET configuredCountingTimePeriod == ReadBytes(eventId.rest, 4) IN IF ~configuredCountingTimePeriod.ok THEN Fail ELSE
     LET configuredMaxQuantity == ReadBytes(configuredCountingTimePeriod.rest, 4) IN IF ~configuredMaxQuantity.ok THEN Fail ELSE
     LET currentQuantity == ReadBytes(configuredMaxQuantity.rest, 4) IN IF ~currentQuantity.ok THEN Fail ELSE
     LET maxPeakQuantity == ReadBytes(currentQuantity.rest, 4) IN IF ~maxPeakQuantity.ok THEN Fail ELSE
@@ -699,7 +699,7 @@ DecodeRiskNotificationMessage(bytes) ==
          metricType                   |-> metricType.value,
          protectionType               |-> protectionType.value,
          eventType                    |-> eventType.value,
-         eventIdBinary4u4             |-> eventIdBinary4u4.value,
+         eventId                      |-> eventId.value,
          configuredCountingTimePeriod |-> configuredCountingTimePeriod.value,
          configuredMaxQuantity        |-> configuredMaxQuantity.value,
          currentQuantity              |-> currentQuantity.value,
@@ -715,7 +715,7 @@ ZeroRiskNotificationMessage ==
       metricType                   |-> [i \in 1 .. 1 |-> 0],
       protectionType               |-> [i \in 1 .. 1 |-> 0],
       eventType                    |-> [i \in 1 .. 1 |-> 0],
-      eventIdBinary4u4             |-> [i \in 1 .. 4 |-> 0],
+      eventId                      |-> [i \in 1 .. 4 |-> 0],
       configuredCountingTimePeriod |-> [i \in 1 .. 4 |-> 0],
       configuredMaxQuantity        |-> [i \in 1 .. 4 |-> 0],
       currentQuantity              |-> [i \in 1 .. 4 |-> 0],
@@ -733,7 +733,7 @@ CheckedRiskNotificationMessage ==
         \cup { [ZeroRiskNotificationMessage EXCEPT !.metricType = one] : one \in Sample(1) }
         \cup { [ZeroRiskNotificationMessage EXCEPT !.protectionType = one] : one \in Sample(1) }
         \cup { [ZeroRiskNotificationMessage EXCEPT !.eventType = one] : one \in Sample(1) }
-        \cup { [ZeroRiskNotificationMessage EXCEPT !.eventIdBinary4u4 = one] : one \in Sample(4) }
+        \cup { [ZeroRiskNotificationMessage EXCEPT !.eventId = one] : one \in Sample(4) }
         \cup { [ZeroRiskNotificationMessage EXCEPT !.configuredCountingTimePeriod = one] : one \in Sample(4) }
         \cup { [ZeroRiskNotificationMessage EXCEPT !.configuredMaxQuantity = one] : one \in Sample(4) }
         \cup { [ZeroRiskNotificationMessage EXCEPT !.currentQuantity = one] : one \in Sample(4) }
@@ -817,7 +817,7 @@ RiskNotificationMessage2 ==
       metricType                   : Sample(1),
       protectionType               : Sample(1),
       eventType                    : Sample(1),
-      eventIdBinary4u4             : Sample(4),
+      eventId                      : Sample(4),
       configuredCountingTimePeriod : Sample(4),
       configuredMaxQuantity        : Sample(4),
       currentQuantity              : Sample(4),
@@ -833,7 +833,7 @@ EncodeRiskNotificationMessage2(message) ==
         \o message.metricType
         \o message.protectionType
         \o message.eventType
-        \o message.eventIdBinary4u4
+        \o message.eventId
         \o message.configuredCountingTimePeriod
         \o message.configuredMaxQuantity
         \o message.currentQuantity
@@ -849,8 +849,8 @@ DecodeRiskNotificationMessage2(bytes) ==
     LET metricType == ReadBytes(routeId.rest, 1) IN IF ~metricType.ok THEN Fail ELSE
     LET protectionType == ReadBytes(metricType.rest, 1) IN IF ~protectionType.ok THEN Fail ELSE
     LET eventType == ReadBytes(protectionType.rest, 1) IN IF ~eventType.ok THEN Fail ELSE
-    LET eventIdBinary4u4 == ReadBytes(eventType.rest, 4) IN IF ~eventIdBinary4u4.ok THEN Fail ELSE
-    LET configuredCountingTimePeriod == ReadBytes(eventIdBinary4u4.rest, 4) IN IF ~configuredCountingTimePeriod.ok THEN Fail ELSE
+    LET eventId == ReadBytes(eventType.rest, 4) IN IF ~eventId.ok THEN Fail ELSE
+    LET configuredCountingTimePeriod == ReadBytes(eventId.rest, 4) IN IF ~configuredCountingTimePeriod.ok THEN Fail ELSE
     LET configuredMaxQuantity == ReadBytes(configuredCountingTimePeriod.rest, 4) IN IF ~configuredMaxQuantity.ok THEN Fail ELSE
     LET currentQuantity == ReadBytes(configuredMaxQuantity.rest, 4) IN IF ~currentQuantity.ok THEN Fail ELSE
     LET maxPeakQuantity == ReadBytes(currentQuantity.rest, 4) IN IF ~maxPeakQuantity.ok THEN Fail ELSE
@@ -863,7 +863,7 @@ DecodeRiskNotificationMessage2(bytes) ==
          metricType                   |-> metricType.value,
          protectionType               |-> protectionType.value,
          eventType                    |-> eventType.value,
-         eventIdBinary4u4             |-> eventIdBinary4u4.value,
+         eventId                      |-> eventId.value,
          configuredCountingTimePeriod |-> configuredCountingTimePeriod.value,
          configuredMaxQuantity        |-> configuredMaxQuantity.value,
          currentQuantity              |-> currentQuantity.value,
@@ -879,7 +879,7 @@ ZeroRiskNotificationMessage2 ==
       metricType                   |-> [i \in 1 .. 1 |-> 0],
       protectionType               |-> [i \in 1 .. 1 |-> 0],
       eventType                    |-> [i \in 1 .. 1 |-> 0],
-      eventIdBinary4u4             |-> [i \in 1 .. 4 |-> 0],
+      eventId                      |-> [i \in 1 .. 4 |-> 0],
       configuredCountingTimePeriod |-> [i \in 1 .. 4 |-> 0],
       configuredMaxQuantity        |-> [i \in 1 .. 4 |-> 0],
       currentQuantity              |-> [i \in 1 .. 4 |-> 0],
@@ -897,7 +897,7 @@ CheckedRiskNotificationMessage2 ==
         \cup { [ZeroRiskNotificationMessage2 EXCEPT !.metricType = one] : one \in Sample(1) }
         \cup { [ZeroRiskNotificationMessage2 EXCEPT !.protectionType = one] : one \in Sample(1) }
         \cup { [ZeroRiskNotificationMessage2 EXCEPT !.eventType = one] : one \in Sample(1) }
-        \cup { [ZeroRiskNotificationMessage2 EXCEPT !.eventIdBinary4u4 = one] : one \in Sample(4) }
+        \cup { [ZeroRiskNotificationMessage2 EXCEPT !.eventId = one] : one \in Sample(4) }
         \cup { [ZeroRiskNotificationMessage2 EXCEPT !.configuredCountingTimePeriod = one] : one \in Sample(4) }
         \cup { [ZeroRiskNotificationMessage2 EXCEPT !.configuredMaxQuantity = one] : one \in Sample(4) }
         \cup { [ZeroRiskNotificationMessage2 EXCEPT !.currentQuantity = one] : one \in Sample(4) }

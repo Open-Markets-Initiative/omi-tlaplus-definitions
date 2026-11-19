@@ -309,47 +309,47 @@ CheckedUnitClearMessage ==
 (***************************************************************************)
 
 AddOrderLongMessage ==
-    [ timeOffset            : Sample(4),
-      orderId               : Sample(8),
-      sideIndicator         : Sample(1),
-      quantityBinary4       : Sample(4),
-      symbolShort           : Sample(6),
-      priceBinaryLongPrice8 : Sample(8),
-      addFlags              : Sample(1) ]
+    [ timeOffset    : Sample(4),
+      orderId       : Sample(8),
+      sideIndicator : Sample(1),
+      quantityLong  : Sample(4),
+      symbolShort   : Sample(6),
+      priceLong     : Sample(8),
+      addFlags      : Sample(1) ]
 
 EncodeAddOrderLongMessage(message) ==
     message.timeOffset
         \o message.orderId
         \o message.sideIndicator
-        \o message.quantityBinary4
+        \o message.quantityLong
         \o message.symbolShort
-        \o message.priceBinaryLongPrice8
+        \o message.priceLong
         \o message.addFlags
 
 DecodeAddOrderLongMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
-    LET quantityBinary4 == ReadBytes(sideIndicator.rest, 4) IN IF ~quantityBinary4.ok THEN Fail ELSE
-    LET symbolShort == ReadBytes(quantityBinary4.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
-    LET priceBinaryLongPrice8 == ReadBytes(symbolShort.rest, 8) IN IF ~priceBinaryLongPrice8.ok THEN Fail ELSE
-    LET addFlags == ReadBytes(priceBinaryLongPrice8.rest, 1) IN IF ~addFlags.ok THEN Fail ELSE
-    Ok([ timeOffset            |-> timeOffset.value,
-         orderId               |-> orderId.value,
-         sideIndicator         |-> sideIndicator.value,
-         quantityBinary4       |-> quantityBinary4.value,
-         symbolShort           |-> symbolShort.value,
-         priceBinaryLongPrice8 |-> priceBinaryLongPrice8.value,
-         addFlags              |-> addFlags.value ], addFlags.rest)
+    LET quantityLong == ReadBytes(sideIndicator.rest, 4) IN IF ~quantityLong.ok THEN Fail ELSE
+    LET symbolShort == ReadBytes(quantityLong.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
+    LET priceLong == ReadBytes(symbolShort.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
+    LET addFlags == ReadBytes(priceLong.rest, 1) IN IF ~addFlags.ok THEN Fail ELSE
+    Ok([ timeOffset    |-> timeOffset.value,
+         orderId       |-> orderId.value,
+         sideIndicator |-> sideIndicator.value,
+         quantityLong  |-> quantityLong.value,
+         symbolShort   |-> symbolShort.value,
+         priceLong     |-> priceLong.value,
+         addFlags      |-> addFlags.value ], addFlags.rest)
 
 ZeroAddOrderLongMessage ==
-    [ timeOffset            |-> [i \in 1 .. 4 |-> 0],
-      orderId               |-> [i \in 1 .. 8 |-> 0],
-      sideIndicator         |-> [i \in 1 .. 1 |-> 0],
-      quantityBinary4       |-> [i \in 1 .. 4 |-> 0],
-      symbolShort           |-> [i \in 1 .. 6 |-> 0],
-      priceBinaryLongPrice8 |-> [i \in 1 .. 8 |-> 0],
-      addFlags              |-> [i \in 1 .. 1 |-> 0] ]
+    [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
+      orderId       |-> [i \in 1 .. 8 |-> 0],
+      sideIndicator |-> [i \in 1 .. 1 |-> 0],
+      quantityLong  |-> [i \in 1 .. 4 |-> 0],
+      symbolShort   |-> [i \in 1 .. 6 |-> 0],
+      priceLong     |-> [i \in 1 .. 8 |-> 0],
+      addFlags      |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Add Order Long Message at zero, then each field in turn at the values it is checked at *)
 CheckedAddOrderLongMessage ==
@@ -357,9 +357,9 @@ CheckedAddOrderLongMessage ==
         \cup { [ZeroAddOrderLongMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroAddOrderLongMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroAddOrderLongMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroAddOrderLongMessage EXCEPT !.quantityBinary4 = one] : one \in Sample(4) }
+        \cup { [ZeroAddOrderLongMessage EXCEPT !.quantityLong = one] : one \in Sample(4) }
         \cup { [ZeroAddOrderLongMessage EXCEPT !.symbolShort = one] : one \in Sample(6) }
-        \cup { [ZeroAddOrderLongMessage EXCEPT !.priceBinaryLongPrice8 = one] : one \in Sample(8) }
+        \cup { [ZeroAddOrderLongMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
         \cup { [ZeroAddOrderLongMessage EXCEPT !.addFlags = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -367,47 +367,47 @@ CheckedAddOrderLongMessage ==
 (***************************************************************************)
 
 AddOrderShortMessage ==
-    [ timeOffset             : Sample(4),
-      orderId                : Sample(8),
-      sideIndicator          : Sample(1),
-      quantityBinary2        : Sample(2),
-      symbolShort            : Sample(6),
-      priceBinaryShortPrice2 : Sample(2),
-      addFlags               : Sample(1) ]
+    [ timeOffset    : Sample(4),
+      orderId       : Sample(8),
+      sideIndicator : Sample(1),
+      quantityShort : Sample(2),
+      symbolShort   : Sample(6),
+      priceShort    : Sample(2),
+      addFlags      : Sample(1) ]
 
 EncodeAddOrderShortMessage(message) ==
     message.timeOffset
         \o message.orderId
         \o message.sideIndicator
-        \o message.quantityBinary2
+        \o message.quantityShort
         \o message.symbolShort
-        \o message.priceBinaryShortPrice2
+        \o message.priceShort
         \o message.addFlags
 
 DecodeAddOrderShortMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
-    LET quantityBinary2 == ReadBytes(sideIndicator.rest, 2) IN IF ~quantityBinary2.ok THEN Fail ELSE
-    LET symbolShort == ReadBytes(quantityBinary2.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
-    LET priceBinaryShortPrice2 == ReadBytes(symbolShort.rest, 2) IN IF ~priceBinaryShortPrice2.ok THEN Fail ELSE
-    LET addFlags == ReadBytes(priceBinaryShortPrice2.rest, 1) IN IF ~addFlags.ok THEN Fail ELSE
-    Ok([ timeOffset             |-> timeOffset.value,
-         orderId                |-> orderId.value,
-         sideIndicator          |-> sideIndicator.value,
-         quantityBinary2        |-> quantityBinary2.value,
-         symbolShort            |-> symbolShort.value,
-         priceBinaryShortPrice2 |-> priceBinaryShortPrice2.value,
-         addFlags               |-> addFlags.value ], addFlags.rest)
+    LET quantityShort == ReadBytes(sideIndicator.rest, 2) IN IF ~quantityShort.ok THEN Fail ELSE
+    LET symbolShort == ReadBytes(quantityShort.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
+    LET priceShort == ReadBytes(symbolShort.rest, 2) IN IF ~priceShort.ok THEN Fail ELSE
+    LET addFlags == ReadBytes(priceShort.rest, 1) IN IF ~addFlags.ok THEN Fail ELSE
+    Ok([ timeOffset    |-> timeOffset.value,
+         orderId       |-> orderId.value,
+         sideIndicator |-> sideIndicator.value,
+         quantityShort |-> quantityShort.value,
+         symbolShort   |-> symbolShort.value,
+         priceShort    |-> priceShort.value,
+         addFlags      |-> addFlags.value ], addFlags.rest)
 
 ZeroAddOrderShortMessage ==
-    [ timeOffset             |-> [i \in 1 .. 4 |-> 0],
-      orderId                |-> [i \in 1 .. 8 |-> 0],
-      sideIndicator          |-> [i \in 1 .. 1 |-> 0],
-      quantityBinary2        |-> [i \in 1 .. 2 |-> 0],
-      symbolShort            |-> [i \in 1 .. 6 |-> 0],
-      priceBinaryShortPrice2 |-> [i \in 1 .. 2 |-> 0],
-      addFlags               |-> [i \in 1 .. 1 |-> 0] ]
+    [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
+      orderId       |-> [i \in 1 .. 8 |-> 0],
+      sideIndicator |-> [i \in 1 .. 1 |-> 0],
+      quantityShort |-> [i \in 1 .. 2 |-> 0],
+      symbolShort   |-> [i \in 1 .. 6 |-> 0],
+      priceShort    |-> [i \in 1 .. 2 |-> 0],
+      addFlags      |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Add Order Short Message at zero, then each field in turn at the values it is checked at *)
 CheckedAddOrderShortMessage ==
@@ -415,9 +415,9 @@ CheckedAddOrderShortMessage ==
         \cup { [ZeroAddOrderShortMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroAddOrderShortMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroAddOrderShortMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroAddOrderShortMessage EXCEPT !.quantityBinary2 = one] : one \in Sample(2) }
+        \cup { [ZeroAddOrderShortMessage EXCEPT !.quantityShort = one] : one \in Sample(2) }
         \cup { [ZeroAddOrderShortMessage EXCEPT !.symbolShort = one] : one \in Sample(6) }
-        \cup { [ZeroAddOrderShortMessage EXCEPT !.priceBinaryShortPrice2 = one] : one \in Sample(2) }
+        \cup { [ZeroAddOrderShortMessage EXCEPT !.priceShort = one] : one \in Sample(2) }
         \cup { [ZeroAddOrderShortMessage EXCEPT !.addFlags = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -425,22 +425,22 @@ CheckedAddOrderShortMessage ==
 (***************************************************************************)
 
 AddOrderExpandedMessage ==
-    [ timeOffset            : Sample(4),
-      orderId               : Sample(8),
-      sideIndicator         : Sample(1),
-      quantityBinary4       : Sample(4),
-      symbolLong            : Sample(8),
-      priceBinaryLongPrice8 : Sample(8),
-      addFlags              : Sample(1),
-      participantId         : Sample(4) ]
+    [ timeOffset    : Sample(4),
+      orderId       : Sample(8),
+      sideIndicator : Sample(1),
+      quantityLong  : Sample(4),
+      symbolLong    : Sample(8),
+      priceLong     : Sample(8),
+      addFlags      : Sample(1),
+      participantId : Sample(4) ]
 
 EncodeAddOrderExpandedMessage(message) ==
     message.timeOffset
         \o message.orderId
         \o message.sideIndicator
-        \o message.quantityBinary4
+        \o message.quantityLong
         \o message.symbolLong
-        \o message.priceBinaryLongPrice8
+        \o message.priceLong
         \o message.addFlags
         \o message.participantId
 
@@ -448,29 +448,29 @@ DecodeAddOrderExpandedMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
-    LET quantityBinary4 == ReadBytes(sideIndicator.rest, 4) IN IF ~quantityBinary4.ok THEN Fail ELSE
-    LET symbolLong == ReadBytes(quantityBinary4.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
-    LET priceBinaryLongPrice8 == ReadBytes(symbolLong.rest, 8) IN IF ~priceBinaryLongPrice8.ok THEN Fail ELSE
-    LET addFlags == ReadBytes(priceBinaryLongPrice8.rest, 1) IN IF ~addFlags.ok THEN Fail ELSE
+    LET quantityLong == ReadBytes(sideIndicator.rest, 4) IN IF ~quantityLong.ok THEN Fail ELSE
+    LET symbolLong == ReadBytes(quantityLong.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
+    LET priceLong == ReadBytes(symbolLong.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
+    LET addFlags == ReadBytes(priceLong.rest, 1) IN IF ~addFlags.ok THEN Fail ELSE
     LET participantId == ReadBytes(addFlags.rest, 4) IN IF ~participantId.ok THEN Fail ELSE
-    Ok([ timeOffset            |-> timeOffset.value,
-         orderId               |-> orderId.value,
-         sideIndicator         |-> sideIndicator.value,
-         quantityBinary4       |-> quantityBinary4.value,
-         symbolLong            |-> symbolLong.value,
-         priceBinaryLongPrice8 |-> priceBinaryLongPrice8.value,
-         addFlags              |-> addFlags.value,
-         participantId         |-> participantId.value ], participantId.rest)
+    Ok([ timeOffset    |-> timeOffset.value,
+         orderId       |-> orderId.value,
+         sideIndicator |-> sideIndicator.value,
+         quantityLong  |-> quantityLong.value,
+         symbolLong    |-> symbolLong.value,
+         priceLong     |-> priceLong.value,
+         addFlags      |-> addFlags.value,
+         participantId |-> participantId.value ], participantId.rest)
 
 ZeroAddOrderExpandedMessage ==
-    [ timeOffset            |-> [i \in 1 .. 4 |-> 0],
-      orderId               |-> [i \in 1 .. 8 |-> 0],
-      sideIndicator         |-> [i \in 1 .. 1 |-> 0],
-      quantityBinary4       |-> [i \in 1 .. 4 |-> 0],
-      symbolLong            |-> [i \in 1 .. 8 |-> 0],
-      priceBinaryLongPrice8 |-> [i \in 1 .. 8 |-> 0],
-      addFlags              |-> [i \in 1 .. 1 |-> 0],
-      participantId         |-> [i \in 1 .. 4 |-> 0] ]
+    [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
+      orderId       |-> [i \in 1 .. 8 |-> 0],
+      sideIndicator |-> [i \in 1 .. 1 |-> 0],
+      quantityLong  |-> [i \in 1 .. 4 |-> 0],
+      symbolLong    |-> [i \in 1 .. 8 |-> 0],
+      priceLong     |-> [i \in 1 .. 8 |-> 0],
+      addFlags      |-> [i \in 1 .. 1 |-> 0],
+      participantId |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Add Order Expanded Message at zero, then each field in turn at the values it is checked at *)
 CheckedAddOrderExpandedMessage ==
@@ -478,9 +478,9 @@ CheckedAddOrderExpandedMessage ==
         \cup { [ZeroAddOrderExpandedMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroAddOrderExpandedMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroAddOrderExpandedMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroAddOrderExpandedMessage EXCEPT !.quantityBinary4 = one] : one \in Sample(4) }
+        \cup { [ZeroAddOrderExpandedMessage EXCEPT !.quantityLong = one] : one \in Sample(4) }
         \cup { [ZeroAddOrderExpandedMessage EXCEPT !.symbolLong = one] : one \in Sample(8) }
-        \cup { [ZeroAddOrderExpandedMessage EXCEPT !.priceBinaryLongPrice8 = one] : one \in Sample(8) }
+        \cup { [ZeroAddOrderExpandedMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
         \cup { [ZeroAddOrderExpandedMessage EXCEPT !.addFlags = one] : one \in Sample(1) }
         \cup { [ZeroAddOrderExpandedMessage EXCEPT !.participantId = one] : one \in Sample(4) }
 
@@ -529,12 +529,12 @@ CheckedOrderExecutedMessage ==
 (***************************************************************************)
 
 OrderExecutedAtPriceSizeMessage ==
-    [ timeOffset            : Sample(4),
-      orderId               : Sample(8),
-      executedQuantity      : Sample(4),
-      remainingQuantity     : Sample(4),
-      executionId           : Sample(8),
-      priceBinaryLongPrice8 : Sample(8) ]
+    [ timeOffset        : Sample(4),
+      orderId           : Sample(8),
+      executedQuantity  : Sample(4),
+      remainingQuantity : Sample(4),
+      executionId       : Sample(8),
+      priceLong         : Sample(8) ]
 
 EncodeOrderExecutedAtPriceSizeMessage(message) ==
     message.timeOffset
@@ -542,7 +542,7 @@ EncodeOrderExecutedAtPriceSizeMessage(message) ==
         \o message.executedQuantity
         \o message.remainingQuantity
         \o message.executionId
-        \o message.priceBinaryLongPrice8
+        \o message.priceLong
 
 DecodeOrderExecutedAtPriceSizeMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
@@ -550,21 +550,21 @@ DecodeOrderExecutedAtPriceSizeMessage(bytes) ==
     LET executedQuantity == ReadBytes(orderId.rest, 4) IN IF ~executedQuantity.ok THEN Fail ELSE
     LET remainingQuantity == ReadBytes(executedQuantity.rest, 4) IN IF ~remainingQuantity.ok THEN Fail ELSE
     LET executionId == ReadBytes(remainingQuantity.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
-    LET priceBinaryLongPrice8 == ReadBytes(executionId.rest, 8) IN IF ~priceBinaryLongPrice8.ok THEN Fail ELSE
-    Ok([ timeOffset            |-> timeOffset.value,
-         orderId               |-> orderId.value,
-         executedQuantity      |-> executedQuantity.value,
-         remainingQuantity     |-> remainingQuantity.value,
-         executionId           |-> executionId.value,
-         priceBinaryLongPrice8 |-> priceBinaryLongPrice8.value ], priceBinaryLongPrice8.rest)
+    LET priceLong == ReadBytes(executionId.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
+    Ok([ timeOffset        |-> timeOffset.value,
+         orderId           |-> orderId.value,
+         executedQuantity  |-> executedQuantity.value,
+         remainingQuantity |-> remainingQuantity.value,
+         executionId       |-> executionId.value,
+         priceLong         |-> priceLong.value ], priceLong.rest)
 
 ZeroOrderExecutedAtPriceSizeMessage ==
-    [ timeOffset            |-> [i \in 1 .. 4 |-> 0],
-      orderId               |-> [i \in 1 .. 8 |-> 0],
-      executedQuantity      |-> [i \in 1 .. 4 |-> 0],
-      remainingQuantity     |-> [i \in 1 .. 4 |-> 0],
-      executionId           |-> [i \in 1 .. 8 |-> 0],
-      priceBinaryLongPrice8 |-> [i \in 1 .. 8 |-> 0] ]
+    [ timeOffset        |-> [i \in 1 .. 4 |-> 0],
+      orderId           |-> [i \in 1 .. 8 |-> 0],
+      executedQuantity  |-> [i \in 1 .. 4 |-> 0],
+      remainingQuantity |-> [i \in 1 .. 4 |-> 0],
+      executionId       |-> [i \in 1 .. 8 |-> 0],
+      priceLong         |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Order Executed At Price Size Message at zero, then each field in turn at the values it is checked at *)
 CheckedOrderExecutedAtPriceSizeMessage ==
@@ -574,120 +574,120 @@ CheckedOrderExecutedAtPriceSizeMessage ==
         \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.executedQuantity = one] : one \in Sample(4) }
         \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.remainingQuantity = one] : one \in Sample(4) }
         \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.executionId = one] : one \in Sample(8) }
-        \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.priceBinaryLongPrice8 = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecutedAtPriceSizeMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Reduce Size Long Message: 16 bytes                                      *)
 (***************************************************************************)
 
 ReduceSizeLongMessage ==
-    [ timeOffset              : Sample(4),
-      orderId                 : Sample(8),
-      canceledQuantityBinary4 : Sample(4) ]
+    [ timeOffset           : Sample(4),
+      orderId              : Sample(8),
+      canceledQuantityLong : Sample(4) ]
 
 EncodeReduceSizeLongMessage(message) ==
     message.timeOffset
         \o message.orderId
-        \o message.canceledQuantityBinary4
+        \o message.canceledQuantityLong
 
 DecodeReduceSizeLongMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET canceledQuantityBinary4 == ReadBytes(orderId.rest, 4) IN IF ~canceledQuantityBinary4.ok THEN Fail ELSE
-    Ok([ timeOffset              |-> timeOffset.value,
-         orderId                 |-> orderId.value,
-         canceledQuantityBinary4 |-> canceledQuantityBinary4.value ], canceledQuantityBinary4.rest)
+    LET canceledQuantityLong == ReadBytes(orderId.rest, 4) IN IF ~canceledQuantityLong.ok THEN Fail ELSE
+    Ok([ timeOffset           |-> timeOffset.value,
+         orderId              |-> orderId.value,
+         canceledQuantityLong |-> canceledQuantityLong.value ], canceledQuantityLong.rest)
 
 ZeroReduceSizeLongMessage ==
-    [ timeOffset              |-> [i \in 1 .. 4 |-> 0],
-      orderId                 |-> [i \in 1 .. 8 |-> 0],
-      canceledQuantityBinary4 |-> [i \in 1 .. 4 |-> 0] ]
+    [ timeOffset           |-> [i \in 1 .. 4 |-> 0],
+      orderId              |-> [i \in 1 .. 8 |-> 0],
+      canceledQuantityLong |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Reduce Size Long Message at zero, then each field in turn at the values it is checked at *)
 CheckedReduceSizeLongMessage ==
     { ZeroReduceSizeLongMessage }
         \cup { [ZeroReduceSizeLongMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroReduceSizeLongMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroReduceSizeLongMessage EXCEPT !.canceledQuantityBinary4 = one] : one \in Sample(4) }
+        \cup { [ZeroReduceSizeLongMessage EXCEPT !.canceledQuantityLong = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Reduce Size Short Message: 14 bytes                                     *)
 (***************************************************************************)
 
 ReduceSizeShortMessage ==
-    [ timeOffset              : Sample(4),
-      orderId                 : Sample(8),
-      canceledQuantityBinary2 : Sample(2) ]
+    [ timeOffset            : Sample(4),
+      orderId               : Sample(8),
+      canceledQuantityShort : Sample(2) ]
 
 EncodeReduceSizeShortMessage(message) ==
     message.timeOffset
         \o message.orderId
-        \o message.canceledQuantityBinary2
+        \o message.canceledQuantityShort
 
 DecodeReduceSizeShortMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET canceledQuantityBinary2 == ReadBytes(orderId.rest, 2) IN IF ~canceledQuantityBinary2.ok THEN Fail ELSE
-    Ok([ timeOffset              |-> timeOffset.value,
-         orderId                 |-> orderId.value,
-         canceledQuantityBinary2 |-> canceledQuantityBinary2.value ], canceledQuantityBinary2.rest)
+    LET canceledQuantityShort == ReadBytes(orderId.rest, 2) IN IF ~canceledQuantityShort.ok THEN Fail ELSE
+    Ok([ timeOffset            |-> timeOffset.value,
+         orderId               |-> orderId.value,
+         canceledQuantityShort |-> canceledQuantityShort.value ], canceledQuantityShort.rest)
 
 ZeroReduceSizeShortMessage ==
-    [ timeOffset              |-> [i \in 1 .. 4 |-> 0],
-      orderId                 |-> [i \in 1 .. 8 |-> 0],
-      canceledQuantityBinary2 |-> [i \in 1 .. 2 |-> 0] ]
+    [ timeOffset            |-> [i \in 1 .. 4 |-> 0],
+      orderId               |-> [i \in 1 .. 8 |-> 0],
+      canceledQuantityShort |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Reduce Size Short Message at zero, then each field in turn at the values it is checked at *)
 CheckedReduceSizeShortMessage ==
     { ZeroReduceSizeShortMessage }
         \cup { [ZeroReduceSizeShortMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroReduceSizeShortMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroReduceSizeShortMessage EXCEPT !.canceledQuantityBinary2 = one] : one \in Sample(2) }
+        \cup { [ZeroReduceSizeShortMessage EXCEPT !.canceledQuantityShort = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Modify Order Long Message: 25 bytes                                     *)
 (***************************************************************************)
 
 ModifyOrderLongMessage ==
-    [ timeOffset            : Sample(4),
-      orderId               : Sample(8),
-      quantityBinary4       : Sample(4),
-      priceBinaryLongPrice8 : Sample(8),
-      modifyFlags           : Sample(1) ]
+    [ timeOffset   : Sample(4),
+      orderId      : Sample(8),
+      quantityLong : Sample(4),
+      priceLong    : Sample(8),
+      modifyFlags  : Sample(1) ]
 
 EncodeModifyOrderLongMessage(message) ==
     message.timeOffset
         \o message.orderId
-        \o message.quantityBinary4
-        \o message.priceBinaryLongPrice8
+        \o message.quantityLong
+        \o message.priceLong
         \o message.modifyFlags
 
 DecodeModifyOrderLongMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET quantityBinary4 == ReadBytes(orderId.rest, 4) IN IF ~quantityBinary4.ok THEN Fail ELSE
-    LET priceBinaryLongPrice8 == ReadBytes(quantityBinary4.rest, 8) IN IF ~priceBinaryLongPrice8.ok THEN Fail ELSE
-    LET modifyFlags == ReadBytes(priceBinaryLongPrice8.rest, 1) IN IF ~modifyFlags.ok THEN Fail ELSE
-    Ok([ timeOffset            |-> timeOffset.value,
-         orderId               |-> orderId.value,
-         quantityBinary4       |-> quantityBinary4.value,
-         priceBinaryLongPrice8 |-> priceBinaryLongPrice8.value,
-         modifyFlags           |-> modifyFlags.value ], modifyFlags.rest)
+    LET quantityLong == ReadBytes(orderId.rest, 4) IN IF ~quantityLong.ok THEN Fail ELSE
+    LET priceLong == ReadBytes(quantityLong.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
+    LET modifyFlags == ReadBytes(priceLong.rest, 1) IN IF ~modifyFlags.ok THEN Fail ELSE
+    Ok([ timeOffset   |-> timeOffset.value,
+         orderId      |-> orderId.value,
+         quantityLong |-> quantityLong.value,
+         priceLong    |-> priceLong.value,
+         modifyFlags  |-> modifyFlags.value ], modifyFlags.rest)
 
 ZeroModifyOrderLongMessage ==
-    [ timeOffset            |-> [i \in 1 .. 4 |-> 0],
-      orderId               |-> [i \in 1 .. 8 |-> 0],
-      quantityBinary4       |-> [i \in 1 .. 4 |-> 0],
-      priceBinaryLongPrice8 |-> [i \in 1 .. 8 |-> 0],
-      modifyFlags           |-> [i \in 1 .. 1 |-> 0] ]
+    [ timeOffset   |-> [i \in 1 .. 4 |-> 0],
+      orderId      |-> [i \in 1 .. 8 |-> 0],
+      quantityLong |-> [i \in 1 .. 4 |-> 0],
+      priceLong    |-> [i \in 1 .. 8 |-> 0],
+      modifyFlags  |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Modify Order Long Message at zero, then each field in turn at the values it is checked at *)
 CheckedModifyOrderLongMessage ==
     { ZeroModifyOrderLongMessage }
         \cup { [ZeroModifyOrderLongMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroModifyOrderLongMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroModifyOrderLongMessage EXCEPT !.quantityBinary4 = one] : one \in Sample(4) }
-        \cup { [ZeroModifyOrderLongMessage EXCEPT !.priceBinaryLongPrice8 = one] : one \in Sample(8) }
+        \cup { [ZeroModifyOrderLongMessage EXCEPT !.quantityLong = one] : one \in Sample(4) }
+        \cup { [ZeroModifyOrderLongMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
         \cup { [ZeroModifyOrderLongMessage EXCEPT !.modifyFlags = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -695,45 +695,45 @@ CheckedModifyOrderLongMessage ==
 (***************************************************************************)
 
 ModifyOrderShortMessage ==
-    [ timeOffset             : Sample(4),
-      orderId                : Sample(8),
-      quantityBinary2        : Sample(2),
-      priceBinaryShortPrice2 : Sample(2),
-      modifyFlags            : Sample(1) ]
+    [ timeOffset    : Sample(4),
+      orderId       : Sample(8),
+      quantityShort : Sample(2),
+      priceShort    : Sample(2),
+      modifyFlags   : Sample(1) ]
 
 EncodeModifyOrderShortMessage(message) ==
     message.timeOffset
         \o message.orderId
-        \o message.quantityBinary2
-        \o message.priceBinaryShortPrice2
+        \o message.quantityShort
+        \o message.priceShort
         \o message.modifyFlags
 
 DecodeModifyOrderShortMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET quantityBinary2 == ReadBytes(orderId.rest, 2) IN IF ~quantityBinary2.ok THEN Fail ELSE
-    LET priceBinaryShortPrice2 == ReadBytes(quantityBinary2.rest, 2) IN IF ~priceBinaryShortPrice2.ok THEN Fail ELSE
-    LET modifyFlags == ReadBytes(priceBinaryShortPrice2.rest, 1) IN IF ~modifyFlags.ok THEN Fail ELSE
-    Ok([ timeOffset             |-> timeOffset.value,
-         orderId                |-> orderId.value,
-         quantityBinary2        |-> quantityBinary2.value,
-         priceBinaryShortPrice2 |-> priceBinaryShortPrice2.value,
-         modifyFlags            |-> modifyFlags.value ], modifyFlags.rest)
+    LET quantityShort == ReadBytes(orderId.rest, 2) IN IF ~quantityShort.ok THEN Fail ELSE
+    LET priceShort == ReadBytes(quantityShort.rest, 2) IN IF ~priceShort.ok THEN Fail ELSE
+    LET modifyFlags == ReadBytes(priceShort.rest, 1) IN IF ~modifyFlags.ok THEN Fail ELSE
+    Ok([ timeOffset    |-> timeOffset.value,
+         orderId       |-> orderId.value,
+         quantityShort |-> quantityShort.value,
+         priceShort    |-> priceShort.value,
+         modifyFlags   |-> modifyFlags.value ], modifyFlags.rest)
 
 ZeroModifyOrderShortMessage ==
-    [ timeOffset             |-> [i \in 1 .. 4 |-> 0],
-      orderId                |-> [i \in 1 .. 8 |-> 0],
-      quantityBinary2        |-> [i \in 1 .. 2 |-> 0],
-      priceBinaryShortPrice2 |-> [i \in 1 .. 2 |-> 0],
-      modifyFlags            |-> [i \in 1 .. 1 |-> 0] ]
+    [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
+      orderId       |-> [i \in 1 .. 8 |-> 0],
+      quantityShort |-> [i \in 1 .. 2 |-> 0],
+      priceShort    |-> [i \in 1 .. 2 |-> 0],
+      modifyFlags   |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Modify Order Short Message at zero, then each field in turn at the values it is checked at *)
 CheckedModifyOrderShortMessage ==
     { ZeroModifyOrderShortMessage }
         \cup { [ZeroModifyOrderShortMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroModifyOrderShortMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroModifyOrderShortMessage EXCEPT !.quantityBinary2 = one] : one \in Sample(2) }
-        \cup { [ZeroModifyOrderShortMessage EXCEPT !.priceBinaryShortPrice2 = one] : one \in Sample(2) }
+        \cup { [ZeroModifyOrderShortMessage EXCEPT !.quantityShort = one] : one \in Sample(2) }
+        \cup { [ZeroModifyOrderShortMessage EXCEPT !.priceShort = one] : one \in Sample(2) }
         \cup { [ZeroModifyOrderShortMessage EXCEPT !.modifyFlags = one] : one \in Sample(1) }
 
 (***************************************************************************)
@@ -769,47 +769,47 @@ CheckedDeleteOrderMessage ==
 (***************************************************************************)
 
 TradeLongMessage ==
-    [ timeOffset            : Sample(4),
-      orderId               : Sample(8),
-      sideIndicator         : Sample(1),
-      quantityBinary4       : Sample(4),
-      symbolShort           : Sample(6),
-      priceBinaryLongPrice8 : Sample(8),
-      executionId           : Sample(8) ]
+    [ timeOffset    : Sample(4),
+      orderId       : Sample(8),
+      sideIndicator : Sample(1),
+      quantityLong  : Sample(4),
+      symbolShort   : Sample(6),
+      priceLong     : Sample(8),
+      executionId   : Sample(8) ]
 
 EncodeTradeLongMessage(message) ==
     message.timeOffset
         \o message.orderId
         \o message.sideIndicator
-        \o message.quantityBinary4
+        \o message.quantityLong
         \o message.symbolShort
-        \o message.priceBinaryLongPrice8
+        \o message.priceLong
         \o message.executionId
 
 DecodeTradeLongMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
-    LET quantityBinary4 == ReadBytes(sideIndicator.rest, 4) IN IF ~quantityBinary4.ok THEN Fail ELSE
-    LET symbolShort == ReadBytes(quantityBinary4.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
-    LET priceBinaryLongPrice8 == ReadBytes(symbolShort.rest, 8) IN IF ~priceBinaryLongPrice8.ok THEN Fail ELSE
-    LET executionId == ReadBytes(priceBinaryLongPrice8.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
-    Ok([ timeOffset            |-> timeOffset.value,
-         orderId               |-> orderId.value,
-         sideIndicator         |-> sideIndicator.value,
-         quantityBinary4       |-> quantityBinary4.value,
-         symbolShort           |-> symbolShort.value,
-         priceBinaryLongPrice8 |-> priceBinaryLongPrice8.value,
-         executionId           |-> executionId.value ], executionId.rest)
+    LET quantityLong == ReadBytes(sideIndicator.rest, 4) IN IF ~quantityLong.ok THEN Fail ELSE
+    LET symbolShort == ReadBytes(quantityLong.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
+    LET priceLong == ReadBytes(symbolShort.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
+    LET executionId == ReadBytes(priceLong.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
+    Ok([ timeOffset    |-> timeOffset.value,
+         orderId       |-> orderId.value,
+         sideIndicator |-> sideIndicator.value,
+         quantityLong  |-> quantityLong.value,
+         symbolShort   |-> symbolShort.value,
+         priceLong     |-> priceLong.value,
+         executionId   |-> executionId.value ], executionId.rest)
 
 ZeroTradeLongMessage ==
-    [ timeOffset            |-> [i \in 1 .. 4 |-> 0],
-      orderId               |-> [i \in 1 .. 8 |-> 0],
-      sideIndicator         |-> [i \in 1 .. 1 |-> 0],
-      quantityBinary4       |-> [i \in 1 .. 4 |-> 0],
-      symbolShort           |-> [i \in 1 .. 6 |-> 0],
-      priceBinaryLongPrice8 |-> [i \in 1 .. 8 |-> 0],
-      executionId           |-> [i \in 1 .. 8 |-> 0] ]
+    [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
+      orderId       |-> [i \in 1 .. 8 |-> 0],
+      sideIndicator |-> [i \in 1 .. 1 |-> 0],
+      quantityLong  |-> [i \in 1 .. 4 |-> 0],
+      symbolShort   |-> [i \in 1 .. 6 |-> 0],
+      priceLong     |-> [i \in 1 .. 8 |-> 0],
+      executionId   |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Trade Long Message at zero, then each field in turn at the values it is checked at *)
 CheckedTradeLongMessage ==
@@ -817,9 +817,9 @@ CheckedTradeLongMessage ==
         \cup { [ZeroTradeLongMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroTradeLongMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroTradeLongMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroTradeLongMessage EXCEPT !.quantityBinary4 = one] : one \in Sample(4) }
+        \cup { [ZeroTradeLongMessage EXCEPT !.quantityLong = one] : one \in Sample(4) }
         \cup { [ZeroTradeLongMessage EXCEPT !.symbolShort = one] : one \in Sample(6) }
-        \cup { [ZeroTradeLongMessage EXCEPT !.priceBinaryLongPrice8 = one] : one \in Sample(8) }
+        \cup { [ZeroTradeLongMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
         \cup { [ZeroTradeLongMessage EXCEPT !.executionId = one] : one \in Sample(8) }
 
 (***************************************************************************)
@@ -827,47 +827,47 @@ CheckedTradeLongMessage ==
 (***************************************************************************)
 
 TradeShortMessage ==
-    [ timeOffset             : Sample(4),
-      orderId                : Sample(8),
-      sideIndicator          : Sample(1),
-      quantityBinary2        : Sample(2),
-      symbolShort            : Sample(6),
-      priceBinaryShortPrice2 : Sample(2),
-      executionId            : Sample(8) ]
+    [ timeOffset    : Sample(4),
+      orderId       : Sample(8),
+      sideIndicator : Sample(1),
+      quantityShort : Sample(2),
+      symbolShort   : Sample(6),
+      priceShort    : Sample(2),
+      executionId   : Sample(8) ]
 
 EncodeTradeShortMessage(message) ==
     message.timeOffset
         \o message.orderId
         \o message.sideIndicator
-        \o message.quantityBinary2
+        \o message.quantityShort
         \o message.symbolShort
-        \o message.priceBinaryShortPrice2
+        \o message.priceShort
         \o message.executionId
 
 DecodeTradeShortMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
-    LET quantityBinary2 == ReadBytes(sideIndicator.rest, 2) IN IF ~quantityBinary2.ok THEN Fail ELSE
-    LET symbolShort == ReadBytes(quantityBinary2.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
-    LET priceBinaryShortPrice2 == ReadBytes(symbolShort.rest, 2) IN IF ~priceBinaryShortPrice2.ok THEN Fail ELSE
-    LET executionId == ReadBytes(priceBinaryShortPrice2.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
-    Ok([ timeOffset             |-> timeOffset.value,
-         orderId                |-> orderId.value,
-         sideIndicator          |-> sideIndicator.value,
-         quantityBinary2        |-> quantityBinary2.value,
-         symbolShort            |-> symbolShort.value,
-         priceBinaryShortPrice2 |-> priceBinaryShortPrice2.value,
-         executionId            |-> executionId.value ], executionId.rest)
+    LET quantityShort == ReadBytes(sideIndicator.rest, 2) IN IF ~quantityShort.ok THEN Fail ELSE
+    LET symbolShort == ReadBytes(quantityShort.rest, 6) IN IF ~symbolShort.ok THEN Fail ELSE
+    LET priceShort == ReadBytes(symbolShort.rest, 2) IN IF ~priceShort.ok THEN Fail ELSE
+    LET executionId == ReadBytes(priceShort.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
+    Ok([ timeOffset    |-> timeOffset.value,
+         orderId       |-> orderId.value,
+         sideIndicator |-> sideIndicator.value,
+         quantityShort |-> quantityShort.value,
+         symbolShort   |-> symbolShort.value,
+         priceShort    |-> priceShort.value,
+         executionId   |-> executionId.value ], executionId.rest)
 
 ZeroTradeShortMessage ==
-    [ timeOffset             |-> [i \in 1 .. 4 |-> 0],
-      orderId                |-> [i \in 1 .. 8 |-> 0],
-      sideIndicator          |-> [i \in 1 .. 1 |-> 0],
-      quantityBinary2        |-> [i \in 1 .. 2 |-> 0],
-      symbolShort            |-> [i \in 1 .. 6 |-> 0],
-      priceBinaryShortPrice2 |-> [i \in 1 .. 2 |-> 0],
-      executionId            |-> [i \in 1 .. 8 |-> 0] ]
+    [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
+      orderId       |-> [i \in 1 .. 8 |-> 0],
+      sideIndicator |-> [i \in 1 .. 1 |-> 0],
+      quantityShort |-> [i \in 1 .. 2 |-> 0],
+      symbolShort   |-> [i \in 1 .. 6 |-> 0],
+      priceShort    |-> [i \in 1 .. 2 |-> 0],
+      executionId   |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Trade Short Message at zero, then each field in turn at the values it is checked at *)
 CheckedTradeShortMessage ==
@@ -875,9 +875,9 @@ CheckedTradeShortMessage ==
         \cup { [ZeroTradeShortMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroTradeShortMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroTradeShortMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroTradeShortMessage EXCEPT !.quantityBinary2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeShortMessage EXCEPT !.quantityShort = one] : one \in Sample(2) }
         \cup { [ZeroTradeShortMessage EXCEPT !.symbolShort = one] : one \in Sample(6) }
-        \cup { [ZeroTradeShortMessage EXCEPT !.priceBinaryShortPrice2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeShortMessage EXCEPT !.priceShort = one] : one \in Sample(2) }
         \cup { [ZeroTradeShortMessage EXCEPT !.executionId = one] : one \in Sample(8) }
 
 (***************************************************************************)
@@ -885,47 +885,47 @@ CheckedTradeShortMessage ==
 (***************************************************************************)
 
 TradeExpandedMessage ==
-    [ timeOffset            : Sample(4),
-      orderId               : Sample(8),
-      sideIndicator         : Sample(1),
-      quantityBinary4       : Sample(4),
-      symbolLong            : Sample(8),
-      priceBinaryLongPrice8 : Sample(8),
-      executionId           : Sample(8) ]
+    [ timeOffset    : Sample(4),
+      orderId       : Sample(8),
+      sideIndicator : Sample(1),
+      quantityLong  : Sample(4),
+      symbolLong    : Sample(8),
+      priceLong     : Sample(8),
+      executionId   : Sample(8) ]
 
 EncodeTradeExpandedMessage(message) ==
     message.timeOffset
         \o message.orderId
         \o message.sideIndicator
-        \o message.quantityBinary4
+        \o message.quantityLong
         \o message.symbolLong
-        \o message.priceBinaryLongPrice8
+        \o message.priceLong
         \o message.executionId
 
 DecodeTradeExpandedMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET orderId == ReadBytes(timeOffset.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET sideIndicator == ReadBytes(orderId.rest, 1) IN IF ~sideIndicator.ok THEN Fail ELSE
-    LET quantityBinary4 == ReadBytes(sideIndicator.rest, 4) IN IF ~quantityBinary4.ok THEN Fail ELSE
-    LET symbolLong == ReadBytes(quantityBinary4.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
-    LET priceBinaryLongPrice8 == ReadBytes(symbolLong.rest, 8) IN IF ~priceBinaryLongPrice8.ok THEN Fail ELSE
-    LET executionId == ReadBytes(priceBinaryLongPrice8.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
-    Ok([ timeOffset            |-> timeOffset.value,
-         orderId               |-> orderId.value,
-         sideIndicator         |-> sideIndicator.value,
-         quantityBinary4       |-> quantityBinary4.value,
-         symbolLong            |-> symbolLong.value,
-         priceBinaryLongPrice8 |-> priceBinaryLongPrice8.value,
-         executionId           |-> executionId.value ], executionId.rest)
+    LET quantityLong == ReadBytes(sideIndicator.rest, 4) IN IF ~quantityLong.ok THEN Fail ELSE
+    LET symbolLong == ReadBytes(quantityLong.rest, 8) IN IF ~symbolLong.ok THEN Fail ELSE
+    LET priceLong == ReadBytes(symbolLong.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
+    LET executionId == ReadBytes(priceLong.rest, 8) IN IF ~executionId.ok THEN Fail ELSE
+    Ok([ timeOffset    |-> timeOffset.value,
+         orderId       |-> orderId.value,
+         sideIndicator |-> sideIndicator.value,
+         quantityLong  |-> quantityLong.value,
+         symbolLong    |-> symbolLong.value,
+         priceLong     |-> priceLong.value,
+         executionId   |-> executionId.value ], executionId.rest)
 
 ZeroTradeExpandedMessage ==
-    [ timeOffset            |-> [i \in 1 .. 4 |-> 0],
-      orderId               |-> [i \in 1 .. 8 |-> 0],
-      sideIndicator         |-> [i \in 1 .. 1 |-> 0],
-      quantityBinary4       |-> [i \in 1 .. 4 |-> 0],
-      symbolLong            |-> [i \in 1 .. 8 |-> 0],
-      priceBinaryLongPrice8 |-> [i \in 1 .. 8 |-> 0],
-      executionId           |-> [i \in 1 .. 8 |-> 0] ]
+    [ timeOffset    |-> [i \in 1 .. 4 |-> 0],
+      orderId       |-> [i \in 1 .. 8 |-> 0],
+      sideIndicator |-> [i \in 1 .. 1 |-> 0],
+      quantityLong  |-> [i \in 1 .. 4 |-> 0],
+      symbolLong    |-> [i \in 1 .. 8 |-> 0],
+      priceLong     |-> [i \in 1 .. 8 |-> 0],
+      executionId   |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Trade Expanded Message at zero, then each field in turn at the values it is checked at *)
 CheckedTradeExpandedMessage ==
@@ -933,9 +933,9 @@ CheckedTradeExpandedMessage ==
         \cup { [ZeroTradeExpandedMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroTradeExpandedMessage EXCEPT !.orderId = one] : one \in Sample(8) }
         \cup { [ZeroTradeExpandedMessage EXCEPT !.sideIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroTradeExpandedMessage EXCEPT !.quantityBinary4 = one] : one \in Sample(4) }
+        \cup { [ZeroTradeExpandedMessage EXCEPT !.quantityLong = one] : one \in Sample(4) }
         \cup { [ZeroTradeExpandedMessage EXCEPT !.symbolLong = one] : one \in Sample(8) }
-        \cup { [ZeroTradeExpandedMessage EXCEPT !.priceBinaryLongPrice8 = one] : one \in Sample(8) }
+        \cup { [ZeroTradeExpandedMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
         \cup { [ZeroTradeExpandedMessage EXCEPT !.executionId = one] : one \in Sample(8) }
 
 (***************************************************************************)
@@ -1143,37 +1143,37 @@ CheckedAuctionUpdateMessage ==
 (***************************************************************************)
 
 AuctionSummaryMessage ==
-    [ timeOffset   : Sample(4),
-      stockSymbol  : Sample(8),
-      auctionType  : Sample(1),
-      priceBinary8 : Sample(8),
-      shares       : Sample(4) ]
+    [ timeOffset  : Sample(4),
+      stockSymbol : Sample(8),
+      auctionType : Sample(1),
+      priceLong   : Sample(8),
+      shares      : Sample(4) ]
 
 EncodeAuctionSummaryMessage(message) ==
     message.timeOffset
         \o message.stockSymbol
         \o message.auctionType
-        \o message.priceBinary8
+        \o message.priceLong
         \o message.shares
 
 DecodeAuctionSummaryMessage(bytes) ==
     LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
     LET stockSymbol == ReadBytes(timeOffset.rest, 8) IN IF ~stockSymbol.ok THEN Fail ELSE
     LET auctionType == ReadBytes(stockSymbol.rest, 1) IN IF ~auctionType.ok THEN Fail ELSE
-    LET priceBinary8 == ReadBytes(auctionType.rest, 8) IN IF ~priceBinary8.ok THEN Fail ELSE
-    LET shares == ReadBytes(priceBinary8.rest, 4) IN IF ~shares.ok THEN Fail ELSE
-    Ok([ timeOffset   |-> timeOffset.value,
-         stockSymbol  |-> stockSymbol.value,
-         auctionType  |-> auctionType.value,
-         priceBinary8 |-> priceBinary8.value,
-         shares       |-> shares.value ], shares.rest)
+    LET priceLong == ReadBytes(auctionType.rest, 8) IN IF ~priceLong.ok THEN Fail ELSE
+    LET shares == ReadBytes(priceLong.rest, 4) IN IF ~shares.ok THEN Fail ELSE
+    Ok([ timeOffset  |-> timeOffset.value,
+         stockSymbol |-> stockSymbol.value,
+         auctionType |-> auctionType.value,
+         priceLong   |-> priceLong.value,
+         shares      |-> shares.value ], shares.rest)
 
 ZeroAuctionSummaryMessage ==
-    [ timeOffset   |-> [i \in 1 .. 4 |-> 0],
-      stockSymbol  |-> [i \in 1 .. 8 |-> 0],
-      auctionType  |-> [i \in 1 .. 1 |-> 0],
-      priceBinary8 |-> [i \in 1 .. 8 |-> 0],
-      shares       |-> [i \in 1 .. 4 |-> 0] ]
+    [ timeOffset  |-> [i \in 1 .. 4 |-> 0],
+      stockSymbol |-> [i \in 1 .. 8 |-> 0],
+      auctionType |-> [i \in 1 .. 1 |-> 0],
+      priceLong   |-> [i \in 1 .. 8 |-> 0],
+      shares      |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Auction Summary Message at zero, then each field in turn at the values it is checked at *)
 CheckedAuctionSummaryMessage ==
@@ -1181,7 +1181,7 @@ CheckedAuctionSummaryMessage ==
         \cup { [ZeroAuctionSummaryMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroAuctionSummaryMessage EXCEPT !.stockSymbol = one] : one \in Sample(8) }
         \cup { [ZeroAuctionSummaryMessage EXCEPT !.auctionType = one] : one \in Sample(1) }
-        \cup { [ZeroAuctionSummaryMessage EXCEPT !.priceBinary8 = one] : one \in Sample(8) }
+        \cup { [ZeroAuctionSummaryMessage EXCEPT !.priceLong = one] : one \in Sample(8) }
         \cup { [ZeroAuctionSummaryMessage EXCEPT !.shares = one] : one \in Sample(4) }
 
 (***************************************************************************)

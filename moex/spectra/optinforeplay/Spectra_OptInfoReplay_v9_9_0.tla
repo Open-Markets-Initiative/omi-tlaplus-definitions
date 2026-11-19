@@ -163,20 +163,20 @@ CheckedSequenceResetMessage ==
         \cup { [ZeroSequenceResetMessage EXCEPT !.newSeqNo = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Security Definition Message No M D Feed Types Group: 33 bytes           *)
+(* Security Definition Message No Md Feed Types Group: 33 bytes            *)
 (***************************************************************************)
 
-SecurityDefinitionMessageNoMDFeedTypesGroup ==
+SecurityDefinitionMessageNoMdFeedTypesGroup ==
     [ mdFeedType  : Sample(25),
       marketDepth : Sample(4),
       mdBookType  : Sample(4) ]
 
-EncodeSecurityDefinitionMessageNoMDFeedTypesGroup(message) ==
+EncodeSecurityDefinitionMessageNoMdFeedTypesGroup(message) ==
     message.mdFeedType
         \o message.marketDepth
         \o message.mdBookType
 
-DecodeSecurityDefinitionMessageNoMDFeedTypesGroup(bytes) ==
+DecodeSecurityDefinitionMessageNoMdFeedTypesGroup(bytes) ==
     LET mdFeedType == ReadBytes(bytes, 25) IN IF ~mdFeedType.ok THEN Fail ELSE
     LET marketDepth == ReadBytes(mdFeedType.rest, 4) IN IF ~marketDepth.ok THEN Fail ELSE
     LET mdBookType == ReadBytes(marketDepth.rest, 4) IN IF ~mdBookType.ok THEN Fail ELSE
@@ -184,68 +184,68 @@ DecodeSecurityDefinitionMessageNoMDFeedTypesGroup(bytes) ==
          marketDepth |-> marketDepth.value,
          mdBookType  |-> mdBookType.value ], mdBookType.rest)
 
-ZeroSecurityDefinitionMessageNoMDFeedTypesGroup ==
+ZeroSecurityDefinitionMessageNoMdFeedTypesGroup ==
     [ mdFeedType  |-> [i \in 1 .. 25 |-> 0],
       marketDepth |-> [i \in 1 .. 4 |-> 0],
       mdBookType  |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Security Definition Message No M D Feed Types Group at zero, then each field in turn at the values it is checked at *)
-CheckedSecurityDefinitionMessageNoMDFeedTypesGroup ==
-    { ZeroSecurityDefinitionMessageNoMDFeedTypesGroup }
-        \cup { [ZeroSecurityDefinitionMessageNoMDFeedTypesGroup EXCEPT !.mdFeedType = one] : one \in Sample(25) }
-        \cup { [ZeroSecurityDefinitionMessageNoMDFeedTypesGroup EXCEPT !.marketDepth = one] : one \in Sample(4) }
-        \cup { [ZeroSecurityDefinitionMessageNoMDFeedTypesGroup EXCEPT !.mdBookType = one] : one \in Sample(4) }
+(* Security Definition Message No Md Feed Types Group at zero, then each field in turn at the values it is checked at *)
+CheckedSecurityDefinitionMessageNoMdFeedTypesGroup ==
+    { ZeroSecurityDefinitionMessageNoMdFeedTypesGroup }
+        \cup { [ZeroSecurityDefinitionMessageNoMdFeedTypesGroup EXCEPT !.mdFeedType = one] : one \in Sample(25) }
+        \cup { [ZeroSecurityDefinitionMessageNoMdFeedTypesGroup EXCEPT !.marketDepth = one] : one \in Sample(4) }
+        \cup { [ZeroSecurityDefinitionMessageNoMdFeedTypesGroup EXCEPT !.mdBookType = one] : one \in Sample(4) }
 
-(* A run of Security Definition Message No M D Feed Types Group, written one after another *)
-RECURSIVE EncodeSecurityDefinitionMessageNoMDFeedTypesGroupList(_)
-EncodeSecurityDefinitionMessageNoMDFeedTypesGroupList(messages) ==
+(* A run of Security Definition Message No Md Feed Types Group, written one after another *)
+RECURSIVE EncodeSecurityDefinitionMessageNoMdFeedTypesGroupList(_)
+EncodeSecurityDefinitionMessageNoMdFeedTypesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeSecurityDefinitionMessageNoMDFeedTypesGroup(Head(messages)) \o EncodeSecurityDefinitionMessageNoMDFeedTypesGroupList(Tail(messages))
+    ELSE EncodeSecurityDefinitionMessageNoMdFeedTypesGroup(Head(messages)) \o EncodeSecurityDefinitionMessageNoMdFeedTypesGroupList(Tail(messages))
 
-(* As many Security Definition Message No M D Feed Types Group as the field that counts them says *)
-RECURSIVE ReadSecurityDefinitionMessageNoMDFeedTypesGroupList(_, _)
-ReadSecurityDefinitionMessageNoMDFeedTypesGroupList(bytes, count) ==
+(* As many Security Definition Message No Md Feed Types Group as the field that counts them says *)
+RECURSIVE ReadSecurityDefinitionMessageNoMdFeedTypesGroupList(_, _)
+ReadSecurityDefinitionMessageNoMdFeedTypesGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeSecurityDefinitionMessageNoMDFeedTypesGroup(bytes)
+    ELSE LET one == DecodeSecurityDefinitionMessageNoMdFeedTypesGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadSecurityDefinitionMessageNoMDFeedTypesGroupList(one.rest, count - 1)
+             ELSE LET more == ReadSecurityDefinitionMessageNoMdFeedTypesGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Security Definition Message No M D Feed Types Group of each kind, for the lists that carry them *)
-OneSecurityDefinitionMessageNoMDFeedTypesGroup == { ZeroSecurityDefinitionMessageNoMDFeedTypesGroup }
+(* One Security Definition Message No Md Feed Types Group of each kind, for the lists that carry them *)
+OneSecurityDefinitionMessageNoMdFeedTypesGroup == { ZeroSecurityDefinitionMessageNoMdFeedTypesGroup }
 
 (***************************************************************************)
-(* Security Definition Message No M D Feed Types Groups                    *)
+(* Security Definition Message No Md Feed Types Groups                     *)
 (***************************************************************************)
 
-SecurityDefinitionMessageNoMDFeedTypesGroups ==
+SecurityDefinitionMessageNoMdFeedTypesGroups ==
     [ blockLength                                 : Sample(2),
-      securityDefinitionMessageNoMDFeedTypesGroup : SampleLists(OneSecurityDefinitionMessageNoMDFeedTypesGroup) ]
+      securityDefinitionMessageNoMdFeedTypesGroup : SampleLists(OneSecurityDefinitionMessageNoMdFeedTypesGroup) ]
 
-EncodeSecurityDefinitionMessageNoMDFeedTypesGroups(message) ==
+EncodeSecurityDefinitionMessageNoMdFeedTypesGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.securityDefinitionMessageNoMDFeedTypesGroup), 1)
-        \o EncodeSecurityDefinitionMessageNoMDFeedTypesGroupList(message.securityDefinitionMessageNoMDFeedTypesGroup)
+        \o EncodeUIntBE(Len(message.securityDefinitionMessageNoMdFeedTypesGroup), 1)
+        \o EncodeSecurityDefinitionMessageNoMdFeedTypesGroupList(message.securityDefinitionMessageNoMdFeedTypesGroup)
 
-DecodeSecurityDefinitionMessageNoMDFeedTypesGroups(bytes) ==
+DecodeSecurityDefinitionMessageNoMdFeedTypesGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroupUint8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroupUint8.ok THEN Fail ELSE
-    LET securityDefinitionMessageNoMDFeedTypesGroup == ReadSecurityDefinitionMessageNoMDFeedTypesGroupList(numInGroupUint8.rest, numInGroupUint8.value) IN IF ~securityDefinitionMessageNoMDFeedTypesGroup.ok THEN Fail ELSE
+    LET securityDefinitionMessageNoMdFeedTypesGroup == ReadSecurityDefinitionMessageNoMdFeedTypesGroupList(numInGroupUint8.rest, numInGroupUint8.value) IN IF ~securityDefinitionMessageNoMdFeedTypesGroup.ok THEN Fail ELSE
     Ok([ blockLength                                 |-> blockLength.value,
-         securityDefinitionMessageNoMDFeedTypesGroup |-> securityDefinitionMessageNoMDFeedTypesGroup.value ], securityDefinitionMessageNoMDFeedTypesGroup.rest)
+         securityDefinitionMessageNoMdFeedTypesGroup |-> securityDefinitionMessageNoMdFeedTypesGroup.value ], securityDefinitionMessageNoMdFeedTypesGroup.rest)
 
-ZeroSecurityDefinitionMessageNoMDFeedTypesGroups ==
+ZeroSecurityDefinitionMessageNoMdFeedTypesGroups ==
     [ blockLength                                 |-> [i \in 1 .. 2 |-> 0],
-      securityDefinitionMessageNoMDFeedTypesGroup |-> << >> ]
+      securityDefinitionMessageNoMdFeedTypesGroup |-> << >> ]
 
-(* Security Definition Message No M D Feed Types Groups at zero, then each field in turn at the values it is checked at *)
-CheckedSecurityDefinitionMessageNoMDFeedTypesGroups ==
-    { ZeroSecurityDefinitionMessageNoMDFeedTypesGroups }
-        \cup { [ZeroSecurityDefinitionMessageNoMDFeedTypesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroSecurityDefinitionMessageNoMDFeedTypesGroups EXCEPT !.securityDefinitionMessageNoMDFeedTypesGroup = one] : one \in SampleLists(OneSecurityDefinitionMessageNoMDFeedTypesGroup) }
+(* Security Definition Message No Md Feed Types Groups at zero, then each field in turn at the values it is checked at *)
+CheckedSecurityDefinitionMessageNoMdFeedTypesGroups ==
+    { ZeroSecurityDefinitionMessageNoMdFeedTypesGroups }
+        \cup { [ZeroSecurityDefinitionMessageNoMdFeedTypesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroSecurityDefinitionMessageNoMdFeedTypesGroups EXCEPT !.securityDefinitionMessageNoMdFeedTypesGroup = one] : one \in SampleLists(OneSecurityDefinitionMessageNoMdFeedTypesGroup) }
 
 (***************************************************************************)
 (* Security Definition Message No Underlyings Group: 37 bytes              *)
@@ -690,7 +690,7 @@ SecurityDefinitionMessage ==
       highLimitPxWeekend                           : Sample(8),
       lowLimitPxWeekend                            : Sample(8),
       clearingSettlPrice                           : Sample(8),
-      securityDefinitionMessageNoMDFeedTypesGroups : SecurityDefinitionMessageNoMDFeedTypesGroups,
+      securityDefinitionMessageNoMdFeedTypesGroups : SecurityDefinitionMessageNoMdFeedTypesGroups,
       securityDefinitionMessageNoUnderlyingsGroups : SecurityDefinitionMessageNoUnderlyingsGroups,
       securityDefinitionMessageNoLegsGroups        : SecurityDefinitionMessageNoLegsGroups,
       securityDefinitionMessageNoInstrAttribGroups : SecurityDefinitionMessageNoInstrAttribGroups,
@@ -749,7 +749,7 @@ EncodeSecurityDefinitionMessage(message) ==
         \o message.highLimitPxWeekend
         \o message.lowLimitPxWeekend
         \o message.clearingSettlPrice
-        \o EncodeSecurityDefinitionMessageNoMDFeedTypesGroups(message.securityDefinitionMessageNoMDFeedTypesGroups)
+        \o EncodeSecurityDefinitionMessageNoMdFeedTypesGroups(message.securityDefinitionMessageNoMdFeedTypesGroups)
         \o EncodeSecurityDefinitionMessageNoUnderlyingsGroups(message.securityDefinitionMessageNoUnderlyingsGroups)
         \o EncodeSecurityDefinitionMessageNoLegsGroups(message.securityDefinitionMessageNoLegsGroups)
         \o EncodeSecurityDefinitionMessageNoInstrAttribGroups(message.securityDefinitionMessageNoInstrAttribGroups)
@@ -808,8 +808,8 @@ DecodeSecurityDefinitionMessage(bytes) ==
     LET highLimitPxWeekend == ReadBytes(tradePeriodAccess.rest, 8) IN IF ~highLimitPxWeekend.ok THEN Fail ELSE
     LET lowLimitPxWeekend == ReadBytes(highLimitPxWeekend.rest, 8) IN IF ~lowLimitPxWeekend.ok THEN Fail ELSE
     LET clearingSettlPrice == ReadBytes(lowLimitPxWeekend.rest, 8) IN IF ~clearingSettlPrice.ok THEN Fail ELSE
-    LET securityDefinitionMessageNoMDFeedTypesGroups == DecodeSecurityDefinitionMessageNoMDFeedTypesGroups(clearingSettlPrice.rest) IN IF ~securityDefinitionMessageNoMDFeedTypesGroups.ok THEN Fail ELSE
-    LET securityDefinitionMessageNoUnderlyingsGroups == DecodeSecurityDefinitionMessageNoUnderlyingsGroups(securityDefinitionMessageNoMDFeedTypesGroups.rest) IN IF ~securityDefinitionMessageNoUnderlyingsGroups.ok THEN Fail ELSE
+    LET securityDefinitionMessageNoMdFeedTypesGroups == DecodeSecurityDefinitionMessageNoMdFeedTypesGroups(clearingSettlPrice.rest) IN IF ~securityDefinitionMessageNoMdFeedTypesGroups.ok THEN Fail ELSE
+    LET securityDefinitionMessageNoUnderlyingsGroups == DecodeSecurityDefinitionMessageNoUnderlyingsGroups(securityDefinitionMessageNoMdFeedTypesGroups.rest) IN IF ~securityDefinitionMessageNoUnderlyingsGroups.ok THEN Fail ELSE
     LET securityDefinitionMessageNoLegsGroups == DecodeSecurityDefinitionMessageNoLegsGroups(securityDefinitionMessageNoUnderlyingsGroups.rest) IN IF ~securityDefinitionMessageNoLegsGroups.ok THEN Fail ELSE
     LET securityDefinitionMessageNoInstrAttribGroups == DecodeSecurityDefinitionMessageNoInstrAttribGroups(securityDefinitionMessageNoLegsGroups.rest) IN IF ~securityDefinitionMessageNoInstrAttribGroups.ok THEN Fail ELSE
     LET securityDefinitionMessageNoEventsGroups == DecodeSecurityDefinitionMessageNoEventsGroups(securityDefinitionMessageNoInstrAttribGroups.rest) IN IF ~securityDefinitionMessageNoEventsGroups.ok THEN Fail ELSE
@@ -865,7 +865,7 @@ DecodeSecurityDefinitionMessage(bytes) ==
          highLimitPxWeekend                           |-> highLimitPxWeekend.value,
          lowLimitPxWeekend                            |-> lowLimitPxWeekend.value,
          clearingSettlPrice                           |-> clearingSettlPrice.value,
-         securityDefinitionMessageNoMDFeedTypesGroups |-> securityDefinitionMessageNoMDFeedTypesGroups.value,
+         securityDefinitionMessageNoMdFeedTypesGroups |-> securityDefinitionMessageNoMdFeedTypesGroups.value,
          securityDefinitionMessageNoUnderlyingsGroups |-> securityDefinitionMessageNoUnderlyingsGroups.value,
          securityDefinitionMessageNoLegsGroups        |-> securityDefinitionMessageNoLegsGroups.value,
          securityDefinitionMessageNoInstrAttribGroups |-> securityDefinitionMessageNoInstrAttribGroups.value,
@@ -924,7 +924,7 @@ ZeroSecurityDefinitionMessage ==
       highLimitPxWeekend                           |-> [i \in 1 .. 8 |-> 0],
       lowLimitPxWeekend                            |-> [i \in 1 .. 8 |-> 0],
       clearingSettlPrice                           |-> [i \in 1 .. 8 |-> 0],
-      securityDefinitionMessageNoMDFeedTypesGroups |-> ZeroSecurityDefinitionMessageNoMDFeedTypesGroups,
+      securityDefinitionMessageNoMdFeedTypesGroups |-> ZeroSecurityDefinitionMessageNoMdFeedTypesGroups,
       securityDefinitionMessageNoUnderlyingsGroups |-> ZeroSecurityDefinitionMessageNoUnderlyingsGroups,
       securityDefinitionMessageNoLegsGroups        |-> ZeroSecurityDefinitionMessageNoLegsGroups,
       securityDefinitionMessageNoInstrAttribGroups |-> ZeroSecurityDefinitionMessageNoInstrAttribGroups,
@@ -985,7 +985,7 @@ CheckedSecurityDefinitionMessage ==
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.highLimitPxWeekend = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.lowLimitPxWeekend = one] : one \in Sample(8) }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.clearingSettlPrice = one] : one \in Sample(8) }
-        \cup { [ZeroSecurityDefinitionMessage EXCEPT !.securityDefinitionMessageNoMDFeedTypesGroups = one] : one \in CheckedSecurityDefinitionMessageNoMDFeedTypesGroups }
+        \cup { [ZeroSecurityDefinitionMessage EXCEPT !.securityDefinitionMessageNoMdFeedTypesGroups = one] : one \in CheckedSecurityDefinitionMessageNoMdFeedTypesGroups }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.securityDefinitionMessageNoUnderlyingsGroups = one] : one \in CheckedSecurityDefinitionMessageNoUnderlyingsGroups }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.securityDefinitionMessageNoLegsGroups = one] : one \in CheckedSecurityDefinitionMessageNoLegsGroups }
         \cup { [ZeroSecurityDefinitionMessage EXCEPT !.securityDefinitionMessageNoInstrAttribGroups = one] : one \in CheckedSecurityDefinitionMessageNoInstrAttribGroups }
@@ -1306,18 +1306,18 @@ RoundTripSequenceResetMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Message No M D Feed Types Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripSecurityDefinitionMessageNoMDFeedTypesGroup ==
-    \A message \in CheckedSecurityDefinitionMessageNoMDFeedTypesGroup :
-        LET read == DecodeSecurityDefinitionMessageNoMDFeedTypesGroup(EncodeSecurityDefinitionMessageNoMDFeedTypesGroup(message))
+(* Every Security Definition Message No Md Feed Types Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripSecurityDefinitionMessageNoMdFeedTypesGroup ==
+    \A message \in CheckedSecurityDefinitionMessageNoMdFeedTypesGroup :
+        LET read == DecodeSecurityDefinitionMessageNoMdFeedTypesGroup(EncodeSecurityDefinitionMessageNoMdFeedTypesGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Security Definition Message No M D Feed Types Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripSecurityDefinitionMessageNoMDFeedTypesGroups ==
-    \A message \in CheckedSecurityDefinitionMessageNoMDFeedTypesGroups :
-        LET read == DecodeSecurityDefinitionMessageNoMDFeedTypesGroups(EncodeSecurityDefinitionMessageNoMDFeedTypesGroups(message))
+(* Every Security Definition Message No Md Feed Types Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripSecurityDefinitionMessageNoMdFeedTypesGroups ==
+    \A message \in CheckedSecurityDefinitionMessageNoMdFeedTypesGroups :
+        LET read == DecodeSecurityDefinitionMessageNoMdFeedTypesGroups(EncodeSecurityDefinitionMessageNoMdFeedTypesGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

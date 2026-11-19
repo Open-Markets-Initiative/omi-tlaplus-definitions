@@ -353,11 +353,11 @@ TradeConfirmationMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -383,11 +383,11 @@ EncodeTradeConfirmationMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -413,12 +413,12 @@ DecodeTradeConfirmationMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -441,11 +441,11 @@ DecodeTradeConfirmationMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -471,11 +471,11 @@ ZeroTradeConfirmationMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -503,11 +503,11 @@ CheckedTradeConfirmationMessage ==
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroTradeConfirmationMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeConfirmationMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroTradeConfirmationMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeConfirmationMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -537,11 +537,11 @@ TradeCancelConfirmMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -567,11 +567,11 @@ EncodeTradeCancelConfirmMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -597,12 +597,12 @@ DecodeTradeCancelConfirmMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -625,11 +625,11 @@ DecodeTradeCancelConfirmMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -655,11 +655,11 @@ ZeroTradeCancelConfirmMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -687,11 +687,11 @@ CheckedTradeCancelConfirmMessage ==
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -721,11 +721,11 @@ TradeCancelRejectMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -751,11 +751,11 @@ EncodeTradeCancelRejectMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -781,12 +781,12 @@ DecodeTradeCancelRejectMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -809,11 +809,11 @@ DecodeTradeCancelRejectMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -839,11 +839,11 @@ ZeroTradeCancelRejectMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -871,11 +871,11 @@ CheckedTradeCancelRejectMessage ==
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroTradeCancelRejectMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeCancelRejectMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelRejectMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeCancelRejectMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -905,11 +905,11 @@ TradeModifyConfirmMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -935,11 +935,11 @@ EncodeTradeModifyConfirmMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -965,12 +965,12 @@ DecodeTradeModifyConfirmMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -993,11 +993,11 @@ DecodeTradeModifyConfirmMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -1023,11 +1023,11 @@ ZeroTradeModifyConfirmMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -1055,11 +1055,11 @@ CheckedTradeModifyConfirmMessage ==
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -1089,11 +1089,11 @@ TradeModifyRejectedMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -1119,11 +1119,11 @@ EncodeTradeModifyRejectedMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -1149,12 +1149,12 @@ DecodeTradeModifyRejectedMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -1177,11 +1177,11 @@ DecodeTradeModifyRejectedMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -1207,11 +1207,11 @@ ZeroTradeModifyRejectedMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -1239,11 +1239,11 @@ CheckedTradeModifyRejectedMessage ==
         \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroTradeModifyRejectedMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -1273,11 +1273,11 @@ GiveupAppConfirmMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -1303,11 +1303,11 @@ EncodeGiveupAppConfirmMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -1333,12 +1333,12 @@ DecodeGiveupAppConfirmMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -1361,11 +1361,11 @@ DecodeGiveupAppConfirmMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -1391,11 +1391,11 @@ ZeroGiveupAppConfirmMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -1423,11 +1423,11 @@ CheckedGiveupAppConfirmMessage ==
         \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroGiveupAppConfirmMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -1457,11 +1457,11 @@ GiveupRejConfirmMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -1487,11 +1487,11 @@ EncodeGiveupRejConfirmMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -1517,12 +1517,12 @@ DecodeGiveupRejConfirmMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -1545,11 +1545,11 @@ DecodeGiveupRejConfirmMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -1575,11 +1575,11 @@ ZeroGiveupRejConfirmMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -1607,11 +1607,11 @@ CheckedGiveupRejConfirmMessage ==
         \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroGiveupRejConfirmMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -1649,10 +1649,10 @@ PriceConfirmationMessage ==
       suspended             : Sample(1),
       openClose             : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       reserved1             : Sample(1),
       settlor               : Sample(12),
       referenceId           : Sample(4) ]
@@ -1680,10 +1680,10 @@ EncodePriceConfirmationMessage(message) ==
         \o message.suspended
         \o message.openClose
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.reserved1
         \o message.settlor
         \o message.referenceId
@@ -1711,11 +1711,11 @@ DecodePriceConfirmationMessage(bytes) ==
     LET suspended == ReadBytes(thirdReserved2.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET openClose == ReadBytes(suspended.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET pan == ReadBytes(openClose.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(proClientChar1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(proClientChar.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor == ReadBytes(reserved1.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     LET referenceId == ReadBytes(settlor.rest, 4) IN IF ~referenceId.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
@@ -1740,10 +1740,10 @@ DecodePriceConfirmationMessage(bytes) ==
          suspended             |-> suspended.value,
          openClose             |-> openClose.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          reserved1             |-> reserved1.value,
          settlor               |-> settlor.value,
          referenceId           |-> referenceId.value ], referenceId.rest)
@@ -1771,10 +1771,10 @@ ZeroPriceConfirmationMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       openClose             |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0],
       referenceId           |-> [i \in 1 .. 4 |-> 0] ]
@@ -1804,10 +1804,10 @@ CheckedPriceConfirmationMessage ==
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroPriceConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroPriceConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroPriceConfirmationMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroPriceConfirmationMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.settlor = one] : one \in Sample(12) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.referenceId = one] : one \in Sample(4) }
@@ -1839,10 +1839,10 @@ OrderModRejectMessage ==
       suspended             : Sample(1),
       openClose             : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       reserved1             : Sample(1),
       settlor               : Sample(12),
       referenceId           : Sample(4) ]
@@ -1870,10 +1870,10 @@ EncodeOrderModRejectMessage(message) ==
         \o message.suspended
         \o message.openClose
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.reserved1
         \o message.settlor
         \o message.referenceId
@@ -1901,11 +1901,11 @@ DecodeOrderModRejectMessage(bytes) ==
     LET suspended == ReadBytes(thirdReserved2.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET openClose == ReadBytes(suspended.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET pan == ReadBytes(openClose.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(proClientChar1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(proClientChar.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor == ReadBytes(reserved1.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     LET referenceId == ReadBytes(settlor.rest, 4) IN IF ~referenceId.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
@@ -1930,10 +1930,10 @@ DecodeOrderModRejectMessage(bytes) ==
          suspended             |-> suspended.value,
          openClose             |-> openClose.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          reserved1             |-> reserved1.value,
          settlor               |-> settlor.value,
          referenceId           |-> referenceId.value ], referenceId.rest)
@@ -1961,10 +1961,10 @@ ZeroOrderModRejectMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       openClose             |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0],
       referenceId           |-> [i \in 1 .. 4 |-> 0] ]
@@ -1994,10 +1994,10 @@ CheckedOrderModRejectMessage ==
         \cup { [ZeroOrderModRejectMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderModRejectMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModRejectMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderModRejectMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModRejectMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.settlor = one] : one \in Sample(12) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.referenceId = one] : one \in Sample(4) }
@@ -2029,10 +2029,10 @@ OrderCancelRejectMessage ==
       suspended             : Sample(1),
       openClose             : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       reserved1             : Sample(1),
       settlor               : Sample(12),
       referenceId           : Sample(4) ]
@@ -2060,10 +2060,10 @@ EncodeOrderCancelRejectMessage(message) ==
         \o message.suspended
         \o message.openClose
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.reserved1
         \o message.settlor
         \o message.referenceId
@@ -2091,11 +2091,11 @@ DecodeOrderCancelRejectMessage(bytes) ==
     LET suspended == ReadBytes(thirdReserved2.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET openClose == ReadBytes(suspended.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET pan == ReadBytes(openClose.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(proClientChar1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(proClientChar.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor == ReadBytes(reserved1.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     LET referenceId == ReadBytes(settlor.rest, 4) IN IF ~referenceId.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
@@ -2120,10 +2120,10 @@ DecodeOrderCancelRejectMessage(bytes) ==
          suspended             |-> suspended.value,
          openClose             |-> openClose.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          reserved1             |-> reserved1.value,
          settlor               |-> settlor.value,
          referenceId           |-> referenceId.value ], referenceId.rest)
@@ -2151,10 +2151,10 @@ ZeroOrderCancelRejectMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       openClose             |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0],
       referenceId           |-> [i \in 1 .. 4 |-> 0] ]
@@ -2184,10 +2184,10 @@ CheckedOrderCancelRejectMessage ==
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderCancelRejectMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelRejectMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderCancelRejectMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelRejectMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.settlor = one] : one \in Sample(12) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.referenceId = one] : one \in Sample(4) }
@@ -2219,10 +2219,10 @@ OrderConfirmationMessage ==
       suspended             : Sample(1),
       openClose             : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       reserved1             : Sample(1),
       settlor               : Sample(12),
       referenceId           : Sample(4) ]
@@ -2250,10 +2250,10 @@ EncodeOrderConfirmationMessage(message) ==
         \o message.suspended
         \o message.openClose
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.reserved1
         \o message.settlor
         \o message.referenceId
@@ -2281,11 +2281,11 @@ DecodeOrderConfirmationMessage(bytes) ==
     LET suspended == ReadBytes(thirdReserved2.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET openClose == ReadBytes(suspended.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET pan == ReadBytes(openClose.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(proClientChar1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(proClientChar.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor == ReadBytes(reserved1.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     LET referenceId == ReadBytes(settlor.rest, 4) IN IF ~referenceId.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
@@ -2310,10 +2310,10 @@ DecodeOrderConfirmationMessage(bytes) ==
          suspended             |-> suspended.value,
          openClose             |-> openClose.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          reserved1             |-> reserved1.value,
          settlor               |-> settlor.value,
          referenceId           |-> referenceId.value ], referenceId.rest)
@@ -2341,10 +2341,10 @@ ZeroOrderConfirmationMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       openClose             |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0],
       referenceId           |-> [i \in 1 .. 4 |-> 0] ]
@@ -2374,10 +2374,10 @@ CheckedOrderConfirmationMessage ==
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderConfirmationMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderConfirmationMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.settlor = one] : one \in Sample(12) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.referenceId = one] : one \in Sample(4) }
@@ -2409,10 +2409,10 @@ OrderModConfirmationMessage ==
       suspended             : Sample(1),
       openClose             : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       reserved1             : Sample(1),
       settlor               : Sample(12),
       referenceId           : Sample(4) ]
@@ -2440,10 +2440,10 @@ EncodeOrderModConfirmationMessage(message) ==
         \o message.suspended
         \o message.openClose
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.reserved1
         \o message.settlor
         \o message.referenceId
@@ -2471,11 +2471,11 @@ DecodeOrderModConfirmationMessage(bytes) ==
     LET suspended == ReadBytes(thirdReserved2.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET openClose == ReadBytes(suspended.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET pan == ReadBytes(openClose.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(proClientChar1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(proClientChar.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor == ReadBytes(reserved1.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     LET referenceId == ReadBytes(settlor.rest, 4) IN IF ~referenceId.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
@@ -2500,10 +2500,10 @@ DecodeOrderModConfirmationMessage(bytes) ==
          suspended             |-> suspended.value,
          openClose             |-> openClose.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          reserved1             |-> reserved1.value,
          settlor               |-> settlor.value,
          referenceId           |-> referenceId.value ], referenceId.rest)
@@ -2531,10 +2531,10 @@ ZeroOrderModConfirmationMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       openClose             |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0],
       referenceId           |-> [i \in 1 .. 4 |-> 0] ]
@@ -2564,10 +2564,10 @@ CheckedOrderModConfirmationMessage ==
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderModConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderModConfirmationMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModConfirmationMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.settlor = one] : one \in Sample(12) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.referenceId = one] : one \in Sample(4) }
@@ -2599,10 +2599,10 @@ OrderCancelConfirmationMessage ==
       suspended             : Sample(1),
       openClose             : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       reserved1             : Sample(1),
       settlor               : Sample(12),
       referenceId           : Sample(4) ]
@@ -2630,10 +2630,10 @@ EncodeOrderCancelConfirmationMessage(message) ==
         \o message.suspended
         \o message.openClose
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.reserved1
         \o message.settlor
         \o message.referenceId
@@ -2661,11 +2661,11 @@ DecodeOrderCancelConfirmationMessage(bytes) ==
     LET suspended == ReadBytes(thirdReserved2.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET openClose == ReadBytes(suspended.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET pan == ReadBytes(openClose.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(proClientChar1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(proClientChar.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor == ReadBytes(reserved1.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     LET referenceId == ReadBytes(settlor.rest, 4) IN IF ~referenceId.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
@@ -2690,10 +2690,10 @@ DecodeOrderCancelConfirmationMessage(bytes) ==
          suspended             |-> suspended.value,
          openClose             |-> openClose.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          reserved1             |-> reserved1.value,
          settlor               |-> settlor.value,
          referenceId           |-> referenceId.value ], referenceId.rest)
@@ -2721,10 +2721,10 @@ ZeroOrderCancelConfirmationMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       openClose             |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0],
       referenceId           |-> [i \in 1 .. 4 |-> 0] ]
@@ -2754,10 +2754,10 @@ CheckedOrderCancelConfirmationMessage ==
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.settlor = one] : one \in Sample(12) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.referenceId = one] : one \in Sample(4) }
@@ -2789,10 +2789,10 @@ FreezeToControlMessage ==
       suspended             : Sample(1),
       openClose             : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       reserved1             : Sample(1),
       settlor               : Sample(12),
       referenceId           : Sample(4) ]
@@ -2820,10 +2820,10 @@ EncodeFreezeToControlMessage(message) ==
         \o message.suspended
         \o message.openClose
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.reserved1
         \o message.settlor
         \o message.referenceId
@@ -2851,11 +2851,11 @@ DecodeFreezeToControlMessage(bytes) ==
     LET suspended == ReadBytes(thirdReserved2.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET openClose == ReadBytes(suspended.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET pan == ReadBytes(openClose.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(proClientChar1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(proClientChar.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor == ReadBytes(reserved1.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     LET referenceId == ReadBytes(settlor.rest, 4) IN IF ~referenceId.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
@@ -2880,10 +2880,10 @@ DecodeFreezeToControlMessage(bytes) ==
          suspended             |-> suspended.value,
          openClose             |-> openClose.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          reserved1             |-> reserved1.value,
          settlor               |-> settlor.value,
          referenceId           |-> referenceId.value ], referenceId.rest)
@@ -2911,10 +2911,10 @@ ZeroFreezeToControlMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       openClose             |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0],
       referenceId           |-> [i \in 1 .. 4 |-> 0] ]
@@ -2944,10 +2944,10 @@ CheckedFreezeToControlMessage ==
         \cup { [ZeroFreezeToControlMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroFreezeToControlMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroFreezeToControlMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroFreezeToControlMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroFreezeToControlMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.settlor = one] : one \in Sample(12) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.referenceId = one] : one \in Sample(4) }
@@ -2979,10 +2979,10 @@ OnStopNotificationMessage ==
       suspended             : Sample(1),
       openClose             : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       reserved1             : Sample(1),
       settlor               : Sample(12),
       referenceId           : Sample(4) ]
@@ -3010,10 +3010,10 @@ EncodeOnStopNotificationMessage(message) ==
         \o message.suspended
         \o message.openClose
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.reserved1
         \o message.settlor
         \o message.referenceId
@@ -3041,11 +3041,11 @@ DecodeOnStopNotificationMessage(bytes) ==
     LET suspended == ReadBytes(thirdReserved2.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET openClose == ReadBytes(suspended.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET pan == ReadBytes(openClose.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(proClientChar1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(proClientChar.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor == ReadBytes(reserved1.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     LET referenceId == ReadBytes(settlor.rest, 4) IN IF ~referenceId.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
@@ -3070,10 +3070,10 @@ DecodeOnStopNotificationMessage(bytes) ==
          suspended             |-> suspended.value,
          openClose             |-> openClose.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          reserved1             |-> reserved1.value,
          settlor               |-> settlor.value,
          referenceId           |-> referenceId.value ], referenceId.rest)
@@ -3101,10 +3101,10 @@ ZeroOnStopNotificationMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       openClose             |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0],
       referenceId           |-> [i \in 1 .. 4 |-> 0] ]
@@ -3134,10 +3134,10 @@ CheckedOnStopNotificationMessage ==
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOnStopNotificationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOnStopNotificationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOnStopNotificationMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOnStopNotificationMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.settlor = one] : one \in Sample(12) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.referenceId = one] : one \in Sample(4) }
@@ -3169,10 +3169,10 @@ OrderErrorMessage ==
       suspended             : Sample(1),
       openClose             : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       reserved1             : Sample(1),
       settlor               : Sample(12),
       referenceId           : Sample(4) ]
@@ -3200,10 +3200,10 @@ EncodeOrderErrorMessage(message) ==
         \o message.suspended
         \o message.openClose
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.reserved1
         \o message.settlor
         \o message.referenceId
@@ -3231,11 +3231,11 @@ DecodeOrderErrorMessage(bytes) ==
     LET suspended == ReadBytes(thirdReserved2.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET openClose == ReadBytes(suspended.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET pan == ReadBytes(openClose.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(proClientChar1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(proClientChar.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor == ReadBytes(reserved1.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     LET referenceId == ReadBytes(settlor.rest, 4) IN IF ~referenceId.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
@@ -3260,10 +3260,10 @@ DecodeOrderErrorMessage(bytes) ==
          suspended             |-> suspended.value,
          openClose             |-> openClose.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          reserved1             |-> reserved1.value,
          settlor               |-> settlor.value,
          referenceId           |-> referenceId.value ], referenceId.rest)
@@ -3291,10 +3291,10 @@ ZeroOrderErrorMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       openClose             |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0],
       referenceId           |-> [i \in 1 .. 4 |-> 0] ]
@@ -3324,10 +3324,10 @@ CheckedOrderErrorMessage ==
         \cup { [ZeroOrderErrorMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderErrorMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderErrorMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderErrorMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderErrorMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.settlor = one] : one \in Sample(12) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.referenceId = one] : one \in Sample(4) }
@@ -3359,10 +3359,10 @@ BatchOrderCancelMessage ==
       suspended             : Sample(1),
       openClose             : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       reserved1             : Sample(1),
       settlor               : Sample(12),
       referenceId           : Sample(4) ]
@@ -3390,10 +3390,10 @@ EncodeBatchOrderCancelMessage(message) ==
         \o message.suspended
         \o message.openClose
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.reserved1
         \o message.settlor
         \o message.referenceId
@@ -3421,11 +3421,11 @@ DecodeBatchOrderCancelMessage(bytes) ==
     LET suspended == ReadBytes(thirdReserved2.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET openClose == ReadBytes(suspended.rest, 1) IN IF ~openClose.ok THEN Fail ELSE
     LET pan == ReadBytes(openClose.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET reserved1 == ReadBytes(proClientChar1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET reserved1 == ReadBytes(proClientChar.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor == ReadBytes(reserved1.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     LET referenceId == ReadBytes(settlor.rest, 4) IN IF ~referenceId.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
@@ -3450,10 +3450,10 @@ DecodeBatchOrderCancelMessage(bytes) ==
          suspended             |-> suspended.value,
          openClose             |-> openClose.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          reserved1             |-> reserved1.value,
          settlor               |-> settlor.value,
          referenceId           |-> referenceId.value ], referenceId.rest)
@@ -3481,10 +3481,10 @@ ZeroBatchOrderCancelMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       openClose             |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       reserved1             |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0],
       referenceId           |-> [i \in 1 .. 4 |-> 0] ]
@@ -3514,10 +3514,10 @@ CheckedBatchOrderCancelMessage ==
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.openClose = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroBatchOrderCancelMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroBatchOrderCancelMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroBatchOrderCancelMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroBatchOrderCancelMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.settlor = one] : one \in Sample(12) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.referenceId = one] : one \in Sample(4) }
@@ -3657,7 +3657,7 @@ SpOrderConfirmationMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -3682,7 +3682,7 @@ EncodeSpOrderConfirmationMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -3707,8 +3707,8 @@ DecodeSpOrderConfirmationMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -3730,7 +3730,7 @@ DecodeSpOrderConfirmationMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -3755,7 +3755,7 @@ ZeroSpOrderConfirmationMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -3782,7 +3782,7 @@ CheckedSpOrderConfirmationMessage ==
         \cup { [ZeroSpOrderConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderConfirmationMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderConfirmationMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroSpOrderConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroSpOrderConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderConfirmationMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderConfirmationMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -3927,7 +3927,7 @@ TwolOrderConfirmationMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -3952,7 +3952,7 @@ EncodeTwolOrderConfirmationMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -3977,8 +3977,8 @@ DecodeTwolOrderConfirmationMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -4000,7 +4000,7 @@ DecodeTwolOrderConfirmationMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -4025,7 +4025,7 @@ ZeroTwolOrderConfirmationMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -4052,7 +4052,7 @@ CheckedTwolOrderConfirmationMessage ==
         \cup { [ZeroTwolOrderConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroTwolOrderConfirmationMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroTwolOrderConfirmationMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroTwolOrderConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroTwolOrderConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroTwolOrderConfirmationMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroTwolOrderConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroTwolOrderConfirmationMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -4197,7 +4197,7 @@ ThrlOrderConfirmationMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -4222,7 +4222,7 @@ EncodeThrlOrderConfirmationMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -4247,8 +4247,8 @@ DecodeThrlOrderConfirmationMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -4270,7 +4270,7 @@ DecodeThrlOrderConfirmationMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -4295,7 +4295,7 @@ ZeroThrlOrderConfirmationMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -4322,7 +4322,7 @@ CheckedThrlOrderConfirmationMessage ==
         \cup { [ZeroThrlOrderConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroThrlOrderConfirmationMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroThrlOrderConfirmationMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroThrlOrderConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroThrlOrderConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroThrlOrderConfirmationMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroThrlOrderConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroThrlOrderConfirmationMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -4467,7 +4467,7 @@ SpOrderCxlRejectedMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -4492,7 +4492,7 @@ EncodeSpOrderCxlRejectedMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -4517,8 +4517,8 @@ DecodeSpOrderCxlRejectedMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -4540,7 +4540,7 @@ DecodeSpOrderCxlRejectedMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -4565,7 +4565,7 @@ ZeroSpOrderCxlRejectedMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -4592,7 +4592,7 @@ CheckedSpOrderCxlRejectedMessage ==
         \cup { [ZeroSpOrderCxlRejectedMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderCxlRejectedMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderCxlRejectedMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroSpOrderCxlRejectedMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroSpOrderCxlRejectedMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderCxlRejectedMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderCxlRejectedMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderCxlRejectedMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -4737,7 +4737,7 @@ SpOrderCxlConfirmationMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -4762,7 +4762,7 @@ EncodeSpOrderCxlConfirmationMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -4787,8 +4787,8 @@ DecodeSpOrderCxlConfirmationMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -4810,7 +4810,7 @@ DecodeSpOrderCxlConfirmationMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -4835,7 +4835,7 @@ ZeroSpOrderCxlConfirmationMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -4862,7 +4862,7 @@ CheckedSpOrderCxlConfirmationMessage ==
         \cup { [ZeroSpOrderCxlConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderCxlConfirmationMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderCxlConfirmationMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroSpOrderCxlConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroSpOrderCxlConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderCxlConfirmationMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderCxlConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderCxlConfirmationMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -5007,7 +5007,7 @@ TwolOrderCxlConfirmationMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -5032,7 +5032,7 @@ EncodeTwolOrderCxlConfirmationMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -5057,8 +5057,8 @@ DecodeTwolOrderCxlConfirmationMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -5080,7 +5080,7 @@ DecodeTwolOrderCxlConfirmationMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -5105,7 +5105,7 @@ ZeroTwolOrderCxlConfirmationMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -5132,7 +5132,7 @@ CheckedTwolOrderCxlConfirmationMessage ==
         \cup { [ZeroTwolOrderCxlConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroTwolOrderCxlConfirmationMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroTwolOrderCxlConfirmationMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroTwolOrderCxlConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroTwolOrderCxlConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroTwolOrderCxlConfirmationMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroTwolOrderCxlConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroTwolOrderCxlConfirmationMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -5277,7 +5277,7 @@ ThrlOrderCxlConfirmationMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -5302,7 +5302,7 @@ EncodeThrlOrderCxlConfirmationMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -5327,8 +5327,8 @@ DecodeThrlOrderCxlConfirmationMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -5350,7 +5350,7 @@ DecodeThrlOrderCxlConfirmationMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -5375,7 +5375,7 @@ ZeroThrlOrderCxlConfirmationMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -5402,7 +5402,7 @@ CheckedThrlOrderCxlConfirmationMessage ==
         \cup { [ZeroThrlOrderCxlConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroThrlOrderCxlConfirmationMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroThrlOrderCxlConfirmationMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroThrlOrderCxlConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroThrlOrderCxlConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroThrlOrderCxlConfirmationMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroThrlOrderCxlConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroThrlOrderCxlConfirmationMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -5547,7 +5547,7 @@ SpOrderModRejectMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -5572,7 +5572,7 @@ EncodeSpOrderModRejectMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -5597,8 +5597,8 @@ DecodeSpOrderModRejectMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -5620,7 +5620,7 @@ DecodeSpOrderModRejectMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -5645,7 +5645,7 @@ ZeroSpOrderModRejectMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -5672,7 +5672,7 @@ CheckedSpOrderModRejectMessage ==
         \cup { [ZeroSpOrderModRejectMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderModRejectMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderModRejectMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroSpOrderModRejectMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroSpOrderModRejectMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderModRejectMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderModRejectMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderModRejectMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -5817,7 +5817,7 @@ SpOrderModConfirmationMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -5842,7 +5842,7 @@ EncodeSpOrderModConfirmationMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -5867,8 +5867,8 @@ DecodeSpOrderModConfirmationMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -5890,7 +5890,7 @@ DecodeSpOrderModConfirmationMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -5915,7 +5915,7 @@ ZeroSpOrderModConfirmationMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -5942,7 +5942,7 @@ CheckedSpOrderModConfirmationMessage ==
         \cup { [ZeroSpOrderModConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderModConfirmationMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderModConfirmationMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroSpOrderModConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroSpOrderModConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderModConfirmationMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderModConfirmationMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderModConfirmationMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -6087,7 +6087,7 @@ SpOrderRejectedMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -6112,7 +6112,7 @@ EncodeSpOrderRejectedMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -6137,8 +6137,8 @@ DecodeSpOrderRejectedMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -6160,7 +6160,7 @@ DecodeSpOrderRejectedMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -6185,7 +6185,7 @@ ZeroSpOrderRejectedMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -6212,7 +6212,7 @@ CheckedSpOrderRejectedMessage ==
         \cup { [ZeroSpOrderRejectedMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderRejectedMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroSpOrderRejectedMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroSpOrderRejectedMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroSpOrderRejectedMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderRejectedMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderRejectedMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroSpOrderRejectedMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -6357,7 +6357,7 @@ TwolOrderErrorMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -6382,7 +6382,7 @@ EncodeTwolOrderErrorMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -6407,8 +6407,8 @@ DecodeTwolOrderErrorMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -6430,7 +6430,7 @@ DecodeTwolOrderErrorMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -6455,7 +6455,7 @@ ZeroTwolOrderErrorMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -6482,7 +6482,7 @@ CheckedTwolOrderErrorMessage ==
         \cup { [ZeroTwolOrderErrorMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroTwolOrderErrorMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroTwolOrderErrorMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroTwolOrderErrorMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroTwolOrderErrorMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroTwolOrderErrorMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroTwolOrderErrorMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroTwolOrderErrorMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -6627,7 +6627,7 @@ ThrlOrderErrorMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -6652,7 +6652,7 @@ EncodeThrlOrderErrorMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -6677,8 +6677,8 @@ DecodeThrlOrderErrorMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -6700,7 +6700,7 @@ DecodeThrlOrderErrorMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -6725,7 +6725,7 @@ ZeroThrlOrderErrorMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -6752,7 +6752,7 @@ CheckedThrlOrderErrorMessage ==
         \cup { [ZeroThrlOrderErrorMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroThrlOrderErrorMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroThrlOrderErrorMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroThrlOrderErrorMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroThrlOrderErrorMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroThrlOrderErrorMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroThrlOrderErrorMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroThrlOrderErrorMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }
@@ -6897,7 +6897,7 @@ BatchSpreadCxlOutMessage ==
       pan                 : Sample(10),
       accountNumber1      : Sample(10),
       proClient1          : Sample(1),
-      segmentChar1        : Sample(1),
+      segmentChar         : Sample(1),
       openClose1          : Sample(1),
       reserved1           : Sample(1),
       settlor1            : Sample(12),
@@ -6922,7 +6922,7 @@ EncodeBatchSpreadCxlOutMessage(message) ==
         \o message.pan
         \o message.accountNumber1
         \o message.proClient1
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.openClose1
         \o message.reserved1
         \o message.settlor1
@@ -6947,8 +6947,8 @@ DecodeBatchSpreadCxlOutMessage(bytes) ==
     LET pan == ReadBytes(activityTimeInNanos.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber1 == ReadBytes(pan.rest, 10) IN IF ~accountNumber1.ok THEN Fail ELSE
     LET proClient1 == ReadBytes(accountNumber1.rest, 1) IN IF ~proClient1.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET openClose1 == ReadBytes(segmentChar1.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(proClient1.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET openClose1 == ReadBytes(segmentChar.rest, 1) IN IF ~openClose1.ok THEN Fail ELSE
     LET reserved1 == ReadBytes(openClose1.rest, 1) IN IF ~reserved1.ok THEN Fail ELSE
     LET settlor1 == ReadBytes(reserved1.rest, 12) IN IF ~settlor1.ok THEN Fail ELSE
     LET priceDiff == ReadBytes(settlor1.rest, 4) IN IF ~priceDiff.ok THEN Fail ELSE
@@ -6970,7 +6970,7 @@ DecodeBatchSpreadCxlOutMessage(bytes) ==
          pan                 |-> pan.value,
          accountNumber1      |-> accountNumber1.value,
          proClient1          |-> proClient1.value,
-         segmentChar1        |-> segmentChar1.value,
+         segmentChar         |-> segmentChar.value,
          openClose1          |-> openClose1.value,
          reserved1           |-> reserved1.value,
          settlor1            |-> settlor1.value,
@@ -6995,7 +6995,7 @@ ZeroBatchSpreadCxlOutMessage ==
       pan                 |-> [i \in 1 .. 10 |-> 0],
       accountNumber1      |-> [i \in 1 .. 10 |-> 0],
       proClient1          |-> [i \in 1 .. 1 |-> 0],
-      segmentChar1        |-> [i \in 1 .. 1 |-> 0],
+      segmentChar         |-> [i \in 1 .. 1 |-> 0],
       openClose1          |-> [i \in 1 .. 1 |-> 0],
       reserved1           |-> [i \in 1 .. 1 |-> 0],
       settlor1            |-> [i \in 1 .. 12 |-> 0],
@@ -7022,7 +7022,7 @@ CheckedBatchSpreadCxlOutMessage ==
         \cup { [ZeroBatchSpreadCxlOutMessage EXCEPT !.pan = one] : one \in Sample(10) }
         \cup { [ZeroBatchSpreadCxlOutMessage EXCEPT !.accountNumber1 = one] : one \in Sample(10) }
         \cup { [ZeroBatchSpreadCxlOutMessage EXCEPT !.proClient1 = one] : one \in Sample(1) }
-        \cup { [ZeroBatchSpreadCxlOutMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroBatchSpreadCxlOutMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroBatchSpreadCxlOutMessage EXCEPT !.openClose1 = one] : one \in Sample(1) }
         \cup { [ZeroBatchSpreadCxlOutMessage EXCEPT !.reserved1 = one] : one \in Sample(1) }
         \cup { [ZeroBatchSpreadCxlOutMessage EXCEPT !.settlor1 = one] : one \in Sample(12) }

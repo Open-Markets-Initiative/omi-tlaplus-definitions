@@ -193,7 +193,7 @@ BoardLotInMessage ==
       orderType                : Sample(2),
       orderNumber              : Sample(8),
       accountNumber            : Sample(10),
-      bookTypeShort2           : Sample(2),
+      bookType                 : Sample(2),
       buySellIndicator         : Sample(2),
       disclosedVolume          : Sample(4),
       disclosedVolumeRemaining : Sample(4),
@@ -245,7 +245,7 @@ EncodeBoardLotInMessage(message) ==
         \o message.orderType
         \o message.orderNumber
         \o message.accountNumber
-        \o message.bookTypeShort2
+        \o message.bookType
         \o message.buySellIndicator
         \o message.disclosedVolume
         \o message.disclosedVolumeRemaining
@@ -297,8 +297,8 @@ DecodeBoardLotInMessage(bytes) ==
     LET orderType == ReadBytes(fourthReserved1.rest, 2) IN IF ~orderType.ok THEN Fail ELSE
     LET orderNumber == ReadBytes(orderType.rest, 8) IN IF ~orderNumber.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(orderNumber.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET bookTypeShort2 == ReadBytes(accountNumber.rest, 2) IN IF ~bookTypeShort2.ok THEN Fail ELSE
-    LET buySellIndicator == ReadBytes(bookTypeShort2.rest, 2) IN IF ~buySellIndicator.ok THEN Fail ELSE
+    LET bookType == ReadBytes(accountNumber.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
+    LET buySellIndicator == ReadBytes(bookType.rest, 2) IN IF ~buySellIndicator.ok THEN Fail ELSE
     LET disclosedVolume == ReadBytes(buySellIndicator.rest, 4) IN IF ~disclosedVolume.ok THEN Fail ELSE
     LET disclosedVolumeRemaining == ReadBytes(disclosedVolume.rest, 4) IN IF ~disclosedVolumeRemaining.ok THEN Fail ELSE
     LET totalVolumeRemaining == ReadBytes(disclosedVolumeRemaining.rest, 4) IN IF ~totalVolumeRemaining.ok THEN Fail ELSE
@@ -347,7 +347,7 @@ DecodeBoardLotInMessage(bytes) ==
          orderType                |-> orderType.value,
          orderNumber              |-> orderNumber.value,
          accountNumber            |-> accountNumber.value,
-         bookTypeShort2           |-> bookTypeShort2.value,
+         bookType                 |-> bookType.value,
          buySellIndicator         |-> buySellIndicator.value,
          disclosedVolume          |-> disclosedVolume.value,
          disclosedVolumeRemaining |-> disclosedVolumeRemaining.value,
@@ -399,7 +399,7 @@ ZeroBoardLotInMessage ==
       orderType                |-> [i \in 1 .. 2 |-> 0],
       orderNumber              |-> [i \in 1 .. 8 |-> 0],
       accountNumber            |-> [i \in 1 .. 10 |-> 0],
-      bookTypeShort2           |-> [i \in 1 .. 2 |-> 0],
+      bookType                 |-> [i \in 1 .. 2 |-> 0],
       buySellIndicator         |-> [i \in 1 .. 2 |-> 0],
       disclosedVolume          |-> [i \in 1 .. 4 |-> 0],
       disclosedVolumeRemaining |-> [i \in 1 .. 4 |-> 0],
@@ -453,7 +453,7 @@ CheckedBoardLotInMessage ==
         \cup { [ZeroBoardLotInMessage EXCEPT !.orderType = one] : one \in Sample(2) }
         \cup { [ZeroBoardLotInMessage EXCEPT !.orderNumber = one] : one \in Sample(8) }
         \cup { [ZeroBoardLotInMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroBoardLotInMessage EXCEPT !.bookTypeShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroBoardLotInMessage EXCEPT !.bookType = one] : one \in Sample(2) }
         \cup { [ZeroBoardLotInMessage EXCEPT !.buySellIndicator = one] : one \in Sample(2) }
         \cup { [ZeroBoardLotInMessage EXCEPT !.disclosedVolume = one] : one \in Sample(4) }
         \cup { [ZeroBoardLotInMessage EXCEPT !.disclosedVolumeRemaining = one] : one \in Sample(4) }
@@ -561,7 +561,7 @@ OrderModInMessage ==
       orderType                : Sample(2),
       orderNumber              : Sample(8),
       accountNumber            : Sample(10),
-      bookTypeShort2           : Sample(2),
+      bookType                 : Sample(2),
       buySellIndicator         : Sample(2),
       disclosedVolume          : Sample(4),
       disclosedVolumeRemaining : Sample(4),
@@ -613,7 +613,7 @@ EncodeOrderModInMessage(message) ==
         \o message.orderType
         \o message.orderNumber
         \o message.accountNumber
-        \o message.bookTypeShort2
+        \o message.bookType
         \o message.buySellIndicator
         \o message.disclosedVolume
         \o message.disclosedVolumeRemaining
@@ -665,8 +665,8 @@ DecodeOrderModInMessage(bytes) ==
     LET orderType == ReadBytes(fourthReserved1.rest, 2) IN IF ~orderType.ok THEN Fail ELSE
     LET orderNumber == ReadBytes(orderType.rest, 8) IN IF ~orderNumber.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(orderNumber.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET bookTypeShort2 == ReadBytes(accountNumber.rest, 2) IN IF ~bookTypeShort2.ok THEN Fail ELSE
-    LET buySellIndicator == ReadBytes(bookTypeShort2.rest, 2) IN IF ~buySellIndicator.ok THEN Fail ELSE
+    LET bookType == ReadBytes(accountNumber.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
+    LET buySellIndicator == ReadBytes(bookType.rest, 2) IN IF ~buySellIndicator.ok THEN Fail ELSE
     LET disclosedVolume == ReadBytes(buySellIndicator.rest, 4) IN IF ~disclosedVolume.ok THEN Fail ELSE
     LET disclosedVolumeRemaining == ReadBytes(disclosedVolume.rest, 4) IN IF ~disclosedVolumeRemaining.ok THEN Fail ELSE
     LET totalVolumeRemaining == ReadBytes(disclosedVolumeRemaining.rest, 4) IN IF ~totalVolumeRemaining.ok THEN Fail ELSE
@@ -715,7 +715,7 @@ DecodeOrderModInMessage(bytes) ==
          orderType                |-> orderType.value,
          orderNumber              |-> orderNumber.value,
          accountNumber            |-> accountNumber.value,
-         bookTypeShort2           |-> bookTypeShort2.value,
+         bookType                 |-> bookType.value,
          buySellIndicator         |-> buySellIndicator.value,
          disclosedVolume          |-> disclosedVolume.value,
          disclosedVolumeRemaining |-> disclosedVolumeRemaining.value,
@@ -767,7 +767,7 @@ ZeroOrderModInMessage ==
       orderType                |-> [i \in 1 .. 2 |-> 0],
       orderNumber              |-> [i \in 1 .. 8 |-> 0],
       accountNumber            |-> [i \in 1 .. 10 |-> 0],
-      bookTypeShort2           |-> [i \in 1 .. 2 |-> 0],
+      bookType                 |-> [i \in 1 .. 2 |-> 0],
       buySellIndicator         |-> [i \in 1 .. 2 |-> 0],
       disclosedVolume          |-> [i \in 1 .. 4 |-> 0],
       disclosedVolumeRemaining |-> [i \in 1 .. 4 |-> 0],
@@ -821,7 +821,7 @@ CheckedOrderModInMessage ==
         \cup { [ZeroOrderModInMessage EXCEPT !.orderType = one] : one \in Sample(2) }
         \cup { [ZeroOrderModInMessage EXCEPT !.orderNumber = one] : one \in Sample(8) }
         \cup { [ZeroOrderModInMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderModInMessage EXCEPT !.bookTypeShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroOrderModInMessage EXCEPT !.bookType = one] : one \in Sample(2) }
         \cup { [ZeroOrderModInMessage EXCEPT !.buySellIndicator = one] : one \in Sample(2) }
         \cup { [ZeroOrderModInMessage EXCEPT !.disclosedVolume = one] : one \in Sample(4) }
         \cup { [ZeroOrderModInMessage EXCEPT !.disclosedVolumeRemaining = one] : one \in Sample(4) }
@@ -929,7 +929,7 @@ OrderCancelInMessage ==
       orderType                : Sample(2),
       orderNumber              : Sample(8),
       accountNumber            : Sample(10),
-      bookTypeShort2           : Sample(2),
+      bookType                 : Sample(2),
       buySellIndicator         : Sample(2),
       disclosedVolume          : Sample(4),
       disclosedVolumeRemaining : Sample(4),
@@ -981,7 +981,7 @@ EncodeOrderCancelInMessage(message) ==
         \o message.orderType
         \o message.orderNumber
         \o message.accountNumber
-        \o message.bookTypeShort2
+        \o message.bookType
         \o message.buySellIndicator
         \o message.disclosedVolume
         \o message.disclosedVolumeRemaining
@@ -1033,8 +1033,8 @@ DecodeOrderCancelInMessage(bytes) ==
     LET orderType == ReadBytes(fourthReserved1.rest, 2) IN IF ~orderType.ok THEN Fail ELSE
     LET orderNumber == ReadBytes(orderType.rest, 8) IN IF ~orderNumber.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(orderNumber.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET bookTypeShort2 == ReadBytes(accountNumber.rest, 2) IN IF ~bookTypeShort2.ok THEN Fail ELSE
-    LET buySellIndicator == ReadBytes(bookTypeShort2.rest, 2) IN IF ~buySellIndicator.ok THEN Fail ELSE
+    LET bookType == ReadBytes(accountNumber.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
+    LET buySellIndicator == ReadBytes(bookType.rest, 2) IN IF ~buySellIndicator.ok THEN Fail ELSE
     LET disclosedVolume == ReadBytes(buySellIndicator.rest, 4) IN IF ~disclosedVolume.ok THEN Fail ELSE
     LET disclosedVolumeRemaining == ReadBytes(disclosedVolume.rest, 4) IN IF ~disclosedVolumeRemaining.ok THEN Fail ELSE
     LET totalVolumeRemaining == ReadBytes(disclosedVolumeRemaining.rest, 4) IN IF ~totalVolumeRemaining.ok THEN Fail ELSE
@@ -1083,7 +1083,7 @@ DecodeOrderCancelInMessage(bytes) ==
          orderType                |-> orderType.value,
          orderNumber              |-> orderNumber.value,
          accountNumber            |-> accountNumber.value,
-         bookTypeShort2           |-> bookTypeShort2.value,
+         bookType                 |-> bookType.value,
          buySellIndicator         |-> buySellIndicator.value,
          disclosedVolume          |-> disclosedVolume.value,
          disclosedVolumeRemaining |-> disclosedVolumeRemaining.value,
@@ -1135,7 +1135,7 @@ ZeroOrderCancelInMessage ==
       orderType                |-> [i \in 1 .. 2 |-> 0],
       orderNumber              |-> [i \in 1 .. 8 |-> 0],
       accountNumber            |-> [i \in 1 .. 10 |-> 0],
-      bookTypeShort2           |-> [i \in 1 .. 2 |-> 0],
+      bookType                 |-> [i \in 1 .. 2 |-> 0],
       buySellIndicator         |-> [i \in 1 .. 2 |-> 0],
       disclosedVolume          |-> [i \in 1 .. 4 |-> 0],
       disclosedVolumeRemaining |-> [i \in 1 .. 4 |-> 0],
@@ -1189,7 +1189,7 @@ CheckedOrderCancelInMessage ==
         \cup { [ZeroOrderCancelInMessage EXCEPT !.orderType = one] : one \in Sample(2) }
         \cup { [ZeroOrderCancelInMessage EXCEPT !.orderNumber = one] : one \in Sample(8) }
         \cup { [ZeroOrderCancelInMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderCancelInMessage EXCEPT !.bookTypeShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroOrderCancelInMessage EXCEPT !.bookType = one] : one \in Sample(2) }
         \cup { [ZeroOrderCancelInMessage EXCEPT !.buySellIndicator = one] : one \in Sample(2) }
         \cup { [ZeroOrderCancelInMessage EXCEPT !.disclosedVolume = one] : one \in Sample(4) }
         \cup { [ZeroOrderCancelInMessage EXCEPT !.disclosedVolumeRemaining = one] : one \in Sample(4) }

@@ -8063,7 +8063,7 @@ MassQuoteResponseEntriesGroup ==
       quoteEntryId                   : Sample(4),
       quoteSetId                     : Sample(2),
       securityId                     : Sample(4),
-      sideSide                       : Sample(1),
+      quoteSide                      : Sample(1),
       quoteEntryRejectReasonOptional : Sample(1) ]
 
 EncodeMassQuoteResponseEntriesGroup(message) ==
@@ -8071,7 +8071,7 @@ EncodeMassQuoteResponseEntriesGroup(message) ==
         \o message.quoteEntryId
         \o message.quoteSetId
         \o message.securityId
-        \o message.sideSide
+        \o message.quoteSide
         \o message.quoteEntryRejectReasonOptional
 
 DecodeMassQuoteResponseEntriesGroup(bytes) ==
@@ -8079,13 +8079,13 @@ DecodeMassQuoteResponseEntriesGroup(bytes) ==
     LET quoteEntryId == ReadBytes(orderIdOptional.rest, 4) IN IF ~quoteEntryId.ok THEN Fail ELSE
     LET quoteSetId == ReadBytes(quoteEntryId.rest, 2) IN IF ~quoteSetId.ok THEN Fail ELSE
     LET securityId == ReadBytes(quoteSetId.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET sideSide == ReadBytes(securityId.rest, 1) IN IF ~sideSide.ok THEN Fail ELSE
-    LET quoteEntryRejectReasonOptional == ReadBytes(sideSide.rest, 1) IN IF ~quoteEntryRejectReasonOptional.ok THEN Fail ELSE
+    LET quoteSide == ReadBytes(securityId.rest, 1) IN IF ~quoteSide.ok THEN Fail ELSE
+    LET quoteEntryRejectReasonOptional == ReadBytes(quoteSide.rest, 1) IN IF ~quoteEntryRejectReasonOptional.ok THEN Fail ELSE
     Ok([ orderIdOptional                |-> orderIdOptional.value,
          quoteEntryId                   |-> quoteEntryId.value,
          quoteSetId                     |-> quoteSetId.value,
          securityId                     |-> securityId.value,
-         sideSide                       |-> sideSide.value,
+         quoteSide                      |-> quoteSide.value,
          quoteEntryRejectReasonOptional |-> quoteEntryRejectReasonOptional.value ], quoteEntryRejectReasonOptional.rest)
 
 ZeroMassQuoteResponseEntriesGroup ==
@@ -8093,7 +8093,7 @@ ZeroMassQuoteResponseEntriesGroup ==
       quoteEntryId                   |-> [i \in 1 .. 4 |-> 0],
       quoteSetId                     |-> [i \in 1 .. 2 |-> 0],
       securityId                     |-> [i \in 1 .. 4 |-> 0],
-      sideSide                       |-> [i \in 1 .. 1 |-> 0],
+      quoteSide                      |-> [i \in 1 .. 1 |-> 0],
       quoteEntryRejectReasonOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Mass Quote Response Entries Group at zero, then each field in turn at the values it is checked at *)
@@ -8103,7 +8103,7 @@ CheckedMassQuoteResponseEntriesGroup ==
         \cup { [ZeroMassQuoteResponseEntriesGroup EXCEPT !.quoteEntryId = one] : one \in Sample(4) }
         \cup { [ZeroMassQuoteResponseEntriesGroup EXCEPT !.quoteSetId = one] : one \in Sample(2) }
         \cup { [ZeroMassQuoteResponseEntriesGroup EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroMassQuoteResponseEntriesGroup EXCEPT !.sideSide = one] : one \in Sample(1) }
+        \cup { [ZeroMassQuoteResponseEntriesGroup EXCEPT !.quoteSide = one] : one \in Sample(1) }
         \cup { [ZeroMassQuoteResponseEntriesGroup EXCEPT !.quoteEntryRejectReasonOptional = one] : one \in Sample(1) }
 
 (* A run of Mass Quote Response Entries Group, written one after another *)

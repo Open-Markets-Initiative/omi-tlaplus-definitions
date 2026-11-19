@@ -319,7 +319,7 @@ OrderModifyCancelRequestTrimmedMessage ==
       logTime               : Sample(4),
       userId                : Sample(4),
       errorCode             : Sample(2),
-      timeStamp1LongLong8   : Sample(8),
+      timeStamp1            : Sample(8),
       timeStamp2            : Sample(1),
       modifiedCancelledBy   : Sample(1),
       reasonCode            : Sample(2),
@@ -357,7 +357,7 @@ EncodeOrderModifyCancelRequestTrimmedMessage(message) ==
         \o message.logTime
         \o message.userId
         \o message.errorCode
-        \o message.timeStamp1LongLong8
+        \o message.timeStamp1
         \o message.timeStamp2
         \o message.modifiedCancelledBy
         \o message.reasonCode
@@ -395,8 +395,8 @@ DecodeOrderModifyCancelRequestTrimmedMessage(bytes) ==
     LET logTime == ReadBytes(transactionCode.rest, 4) IN IF ~logTime.ok THEN Fail ELSE
     LET userId == ReadBytes(logTime.rest, 4) IN IF ~userId.ok THEN Fail ELSE
     LET errorCode == ReadBytes(userId.rest, 2) IN IF ~errorCode.ok THEN Fail ELSE
-    LET timeStamp1LongLong8 == ReadBytes(errorCode.rest, 8) IN IF ~timeStamp1LongLong8.ok THEN Fail ELSE
-    LET timeStamp2 == ReadBytes(timeStamp1LongLong8.rest, 1) IN IF ~timeStamp2.ok THEN Fail ELSE
+    LET timeStamp1 == ReadBytes(errorCode.rest, 8) IN IF ~timeStamp1.ok THEN Fail ELSE
+    LET timeStamp2 == ReadBytes(timeStamp1.rest, 1) IN IF ~timeStamp2.ok THEN Fail ELSE
     LET modifiedCancelledBy == ReadBytes(timeStamp2.rest, 1) IN IF ~modifiedCancelledBy.ok THEN Fail ELSE
     LET reasonCode == ReadBytes(modifiedCancelledBy.rest, 2) IN IF ~reasonCode.ok THEN Fail ELSE
     LET secInfo == DecodeSecInfo2(reasonCode.rest) IN IF ~secInfo.ok THEN Fail ELSE
@@ -431,7 +431,7 @@ DecodeOrderModifyCancelRequestTrimmedMessage(bytes) ==
          logTime               |-> logTime.value,
          userId                |-> userId.value,
          errorCode             |-> errorCode.value,
-         timeStamp1LongLong8   |-> timeStamp1LongLong8.value,
+         timeStamp1            |-> timeStamp1.value,
          timeStamp2            |-> timeStamp2.value,
          modifiedCancelledBy   |-> modifiedCancelledBy.value,
          reasonCode            |-> reasonCode.value,
@@ -469,7 +469,7 @@ ZeroOrderModifyCancelRequestTrimmedMessage ==
       logTime               |-> [i \in 1 .. 4 |-> 0],
       userId                |-> [i \in 1 .. 4 |-> 0],
       errorCode             |-> [i \in 1 .. 2 |-> 0],
-      timeStamp1LongLong8   |-> [i \in 1 .. 8 |-> 0],
+      timeStamp1            |-> [i \in 1 .. 8 |-> 0],
       timeStamp2            |-> [i \in 1 .. 1 |-> 0],
       modifiedCancelledBy   |-> [i \in 1 .. 1 |-> 0],
       reasonCode            |-> [i \in 1 .. 2 |-> 0],
@@ -509,7 +509,7 @@ CheckedOrderModifyCancelRequestTrimmedMessage ==
         \cup { [ZeroOrderModifyCancelRequestTrimmedMessage EXCEPT !.logTime = one] : one \in Sample(4) }
         \cup { [ZeroOrderModifyCancelRequestTrimmedMessage EXCEPT !.userId = one] : one \in Sample(4) }
         \cup { [ZeroOrderModifyCancelRequestTrimmedMessage EXCEPT !.errorCode = one] : one \in Sample(2) }
-        \cup { [ZeroOrderModifyCancelRequestTrimmedMessage EXCEPT !.timeStamp1LongLong8 = one] : one \in Sample(8) }
+        \cup { [ZeroOrderModifyCancelRequestTrimmedMessage EXCEPT !.timeStamp1 = one] : one \in Sample(8) }
         \cup { [ZeroOrderModifyCancelRequestTrimmedMessage EXCEPT !.timeStamp2 = one] : one \in Sample(1) }
         \cup { [ZeroOrderModifyCancelRequestTrimmedMessage EXCEPT !.modifiedCancelledBy = one] : one \in Sample(1) }
         \cup { [ZeroOrderModifyCancelRequestTrimmedMessage EXCEPT !.reasonCode = one] : one \in Sample(2) }
@@ -579,7 +579,7 @@ OrderModifyCancelResponseTrimmedMessage ==
       logTime               : Sample(4),
       userId                : Sample(4),
       errorCode             : Sample(2),
-      timeStamp1LongLong8   : Sample(8),
+      timeStamp1            : Sample(8),
       timeStamp2            : Sample(1),
       modifiedCancelledBy   : Sample(1),
       reasonCode            : Sample(2),
@@ -618,7 +618,7 @@ EncodeOrderModifyCancelResponseTrimmedMessage(message) ==
         \o message.logTime
         \o message.userId
         \o message.errorCode
-        \o message.timeStamp1LongLong8
+        \o message.timeStamp1
         \o message.timeStamp2
         \o message.modifiedCancelledBy
         \o message.reasonCode
@@ -657,8 +657,8 @@ DecodeOrderModifyCancelResponseTrimmedMessage(bytes) ==
     LET logTime == ReadBytes(transactionCode.rest, 4) IN IF ~logTime.ok THEN Fail ELSE
     LET userId == ReadBytes(logTime.rest, 4) IN IF ~userId.ok THEN Fail ELSE
     LET errorCode == ReadBytes(userId.rest, 2) IN IF ~errorCode.ok THEN Fail ELSE
-    LET timeStamp1LongLong8 == ReadBytes(errorCode.rest, 8) IN IF ~timeStamp1LongLong8.ok THEN Fail ELSE
-    LET timeStamp2 == ReadBytes(timeStamp1LongLong8.rest, 1) IN IF ~timeStamp2.ok THEN Fail ELSE
+    LET timeStamp1 == ReadBytes(errorCode.rest, 8) IN IF ~timeStamp1.ok THEN Fail ELSE
+    LET timeStamp2 == ReadBytes(timeStamp1.rest, 1) IN IF ~timeStamp2.ok THEN Fail ELSE
     LET modifiedCancelledBy == ReadBytes(timeStamp2.rest, 1) IN IF ~modifiedCancelledBy.ok THEN Fail ELSE
     LET reasonCode == ReadBytes(modifiedCancelledBy.rest, 2) IN IF ~reasonCode.ok THEN Fail ELSE
     LET secInfo == DecodeSecInfo3(reasonCode.rest) IN IF ~secInfo.ok THEN Fail ELSE
@@ -694,7 +694,7 @@ DecodeOrderModifyCancelResponseTrimmedMessage(bytes) ==
          logTime               |-> logTime.value,
          userId                |-> userId.value,
          errorCode             |-> errorCode.value,
-         timeStamp1LongLong8   |-> timeStamp1LongLong8.value,
+         timeStamp1            |-> timeStamp1.value,
          timeStamp2            |-> timeStamp2.value,
          modifiedCancelledBy   |-> modifiedCancelledBy.value,
          reasonCode            |-> reasonCode.value,
@@ -733,7 +733,7 @@ ZeroOrderModifyCancelResponseTrimmedMessage ==
       logTime               |-> [i \in 1 .. 4 |-> 0],
       userId                |-> [i \in 1 .. 4 |-> 0],
       errorCode             |-> [i \in 1 .. 2 |-> 0],
-      timeStamp1LongLong8   |-> [i \in 1 .. 8 |-> 0],
+      timeStamp1            |-> [i \in 1 .. 8 |-> 0],
       timeStamp2            |-> [i \in 1 .. 1 |-> 0],
       modifiedCancelledBy   |-> [i \in 1 .. 1 |-> 0],
       reasonCode            |-> [i \in 1 .. 2 |-> 0],
@@ -774,7 +774,7 @@ CheckedOrderModifyCancelResponseTrimmedMessage ==
         \cup { [ZeroOrderModifyCancelResponseTrimmedMessage EXCEPT !.logTime = one] : one \in Sample(4) }
         \cup { [ZeroOrderModifyCancelResponseTrimmedMessage EXCEPT !.userId = one] : one \in Sample(4) }
         \cup { [ZeroOrderModifyCancelResponseTrimmedMessage EXCEPT !.errorCode = one] : one \in Sample(2) }
-        \cup { [ZeroOrderModifyCancelResponseTrimmedMessage EXCEPT !.timeStamp1LongLong8 = one] : one \in Sample(8) }
+        \cup { [ZeroOrderModifyCancelResponseTrimmedMessage EXCEPT !.timeStamp1 = one] : one \in Sample(8) }
         \cup { [ZeroOrderModifyCancelResponseTrimmedMessage EXCEPT !.timeStamp2 = one] : one \in Sample(1) }
         \cup { [ZeroOrderModifyCancelResponseTrimmedMessage EXCEPT !.modifiedCancelledBy = one] : one \in Sample(1) }
         \cup { [ZeroOrderModifyCancelResponseTrimmedMessage EXCEPT !.reasonCode = one] : one \in Sample(2) }
@@ -845,7 +845,7 @@ TradeConfirmationTrimmedMessage ==
       logTime               : Sample(4),
       userId                : Sample(4),
       timestamp             : Sample(8),
-      timeStamp1Char8       : Sample(8),
+      timeStamp1Char        : Sample(8),
       responseOrderNumber   : Sample(8),
       timeStamp2            : Sample(1),
       brokerId              : Sample(5),
@@ -878,7 +878,7 @@ EncodeTradeConfirmationTrimmedMessage(message) ==
         \o message.logTime
         \o message.userId
         \o message.timestamp
-        \o message.timeStamp1Char8
+        \o message.timeStamp1Char
         \o message.responseOrderNumber
         \o message.timeStamp2
         \o message.brokerId
@@ -911,8 +911,8 @@ DecodeTradeConfirmationTrimmedMessage(bytes) ==
     LET logTime == ReadBytes(transactionCode.rest, 4) IN IF ~logTime.ok THEN Fail ELSE
     LET userId == ReadBytes(logTime.rest, 4) IN IF ~userId.ok THEN Fail ELSE
     LET timestamp == ReadBytes(userId.rest, 8) IN IF ~timestamp.ok THEN Fail ELSE
-    LET timeStamp1Char8 == ReadBytes(timestamp.rest, 8) IN IF ~timeStamp1Char8.ok THEN Fail ELSE
-    LET responseOrderNumber == ReadBytes(timeStamp1Char8.rest, 8) IN IF ~responseOrderNumber.ok THEN Fail ELSE
+    LET timeStamp1Char == ReadBytes(timestamp.rest, 8) IN IF ~timeStamp1Char.ok THEN Fail ELSE
+    LET responseOrderNumber == ReadBytes(timeStamp1Char.rest, 8) IN IF ~responseOrderNumber.ok THEN Fail ELSE
     LET timeStamp2 == ReadBytes(responseOrderNumber.rest, 1) IN IF ~timeStamp2.ok THEN Fail ELSE
     LET brokerId == ReadBytes(timeStamp2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET traderNum == ReadBytes(brokerId.rest, 4) IN IF ~traderNum.ok THEN Fail ELSE
@@ -942,7 +942,7 @@ DecodeTradeConfirmationTrimmedMessage(bytes) ==
          logTime               |-> logTime.value,
          userId                |-> userId.value,
          timestamp             |-> timestamp.value,
-         timeStamp1Char8       |-> timeStamp1Char8.value,
+         timeStamp1Char        |-> timeStamp1Char.value,
          responseOrderNumber   |-> responseOrderNumber.value,
          timeStamp2            |-> timeStamp2.value,
          brokerId              |-> brokerId.value,
@@ -975,7 +975,7 @@ ZeroTradeConfirmationTrimmedMessage ==
       logTime               |-> [i \in 1 .. 4 |-> 0],
       userId                |-> [i \in 1 .. 4 |-> 0],
       timestamp             |-> [i \in 1 .. 8 |-> 0],
-      timeStamp1Char8       |-> [i \in 1 .. 8 |-> 0],
+      timeStamp1Char        |-> [i \in 1 .. 8 |-> 0],
       responseOrderNumber   |-> [i \in 1 .. 8 |-> 0],
       timeStamp2            |-> [i \in 1 .. 1 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
@@ -1010,7 +1010,7 @@ CheckedTradeConfirmationTrimmedMessage ==
         \cup { [ZeroTradeConfirmationTrimmedMessage EXCEPT !.logTime = one] : one \in Sample(4) }
         \cup { [ZeroTradeConfirmationTrimmedMessage EXCEPT !.userId = one] : one \in Sample(4) }
         \cup { [ZeroTradeConfirmationTrimmedMessage EXCEPT !.timestamp = one] : one \in Sample(8) }
-        \cup { [ZeroTradeConfirmationTrimmedMessage EXCEPT !.timeStamp1Char8 = one] : one \in Sample(8) }
+        \cup { [ZeroTradeConfirmationTrimmedMessage EXCEPT !.timeStamp1Char = one] : one \in Sample(8) }
         \cup { [ZeroTradeConfirmationTrimmedMessage EXCEPT !.responseOrderNumber = one] : one \in Sample(8) }
         \cup { [ZeroTradeConfirmationTrimmedMessage EXCEPT !.timeStamp2 = one] : one \in Sample(1) }
         \cup { [ZeroTradeConfirmationTrimmedMessage EXCEPT !.brokerId = one] : one \in Sample(5) }

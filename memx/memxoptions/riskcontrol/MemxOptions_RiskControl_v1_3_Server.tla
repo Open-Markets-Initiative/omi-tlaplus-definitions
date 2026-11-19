@@ -351,44 +351,44 @@ CheckedActiveRiskThresholdStateMessage ==
 (***************************************************************************)
 
 ActiveRiskThresholdChangeRejMessage ==
-    [ clordid                                        : Sample(20),
-      underlierActiveRiskThresholdChangeRejUnderlier : Sample(6),
-      efidActiveRiskThresholdChangeRejEfid           : Sample(4),
-      thresholdQuantity                              : Sample(4),
-      rejectReason                                   : Sample(2) ]
+    [ clordid           : Sample(20),
+      underlier         : Sample(6),
+      efid              : Sample(4),
+      thresholdQuantity : Sample(4),
+      rejectReason      : Sample(2) ]
 
 EncodeActiveRiskThresholdChangeRejMessage(message) ==
     message.clordid
-        \o message.underlierActiveRiskThresholdChangeRejUnderlier
-        \o message.efidActiveRiskThresholdChangeRejEfid
+        \o message.underlier
+        \o message.efid
         \o message.thresholdQuantity
         \o message.rejectReason
 
 DecodeActiveRiskThresholdChangeRejMessage(bytes) ==
     LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierActiveRiskThresholdChangeRejUnderlier == ReadBytes(clordid.rest, 6) IN IF ~underlierActiveRiskThresholdChangeRejUnderlier.ok THEN Fail ELSE
-    LET efidActiveRiskThresholdChangeRejEfid == ReadBytes(underlierActiveRiskThresholdChangeRejUnderlier.rest, 4) IN IF ~efidActiveRiskThresholdChangeRejEfid.ok THEN Fail ELSE
-    LET thresholdQuantity == ReadBytes(efidActiveRiskThresholdChangeRejEfid.rest, 4) IN IF ~thresholdQuantity.ok THEN Fail ELSE
+    LET underlier == ReadBytes(clordid.rest, 6) IN IF ~underlier.ok THEN Fail ELSE
+    LET efid == ReadBytes(underlier.rest, 4) IN IF ~efid.ok THEN Fail ELSE
+    LET thresholdQuantity == ReadBytes(efid.rest, 4) IN IF ~thresholdQuantity.ok THEN Fail ELSE
     LET rejectReason == ReadBytes(thresholdQuantity.rest, 2) IN IF ~rejectReason.ok THEN Fail ELSE
-    Ok([ clordid                                        |-> clordid.value,
-         underlierActiveRiskThresholdChangeRejUnderlier |-> underlierActiveRiskThresholdChangeRejUnderlier.value,
-         efidActiveRiskThresholdChangeRejEfid           |-> efidActiveRiskThresholdChangeRejEfid.value,
-         thresholdQuantity                              |-> thresholdQuantity.value,
-         rejectReason                                   |-> rejectReason.value ], rejectReason.rest)
+    Ok([ clordid           |-> clordid.value,
+         underlier         |-> underlier.value,
+         efid              |-> efid.value,
+         thresholdQuantity |-> thresholdQuantity.value,
+         rejectReason      |-> rejectReason.value ], rejectReason.rest)
 
 ZeroActiveRiskThresholdChangeRejMessage ==
-    [ clordid                                        |-> [i \in 1 .. 20 |-> 0],
-      underlierActiveRiskThresholdChangeRejUnderlier |-> [i \in 1 .. 6 |-> 0],
-      efidActiveRiskThresholdChangeRejEfid           |-> [i \in 1 .. 4 |-> 0],
-      thresholdQuantity                              |-> [i \in 1 .. 4 |-> 0],
-      rejectReason                                   |-> [i \in 1 .. 2 |-> 0] ]
+    [ clordid           |-> [i \in 1 .. 20 |-> 0],
+      underlier         |-> [i \in 1 .. 6 |-> 0],
+      efid              |-> [i \in 1 .. 4 |-> 0],
+      thresholdQuantity |-> [i \in 1 .. 4 |-> 0],
+      rejectReason      |-> [i \in 1 .. 2 |-> 0] ]
 
 (* Active Risk Threshold Change Rej Message at zero, then each field in turn at the values it is checked at *)
 CheckedActiveRiskThresholdChangeRejMessage ==
     { ZeroActiveRiskThresholdChangeRejMessage }
         \cup { [ZeroActiveRiskThresholdChangeRejMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroActiveRiskThresholdChangeRejMessage EXCEPT !.underlierActiveRiskThresholdChangeRejUnderlier = one] : one \in Sample(6) }
-        \cup { [ZeroActiveRiskThresholdChangeRejMessage EXCEPT !.efidActiveRiskThresholdChangeRejEfid = one] : one \in Sample(4) }
+        \cup { [ZeroActiveRiskThresholdChangeRejMessage EXCEPT !.underlier = one] : one \in Sample(6) }
+        \cup { [ZeroActiveRiskThresholdChangeRejMessage EXCEPT !.efid = one] : one \in Sample(4) }
         \cup { [ZeroActiveRiskThresholdChangeRejMessage EXCEPT !.thresholdQuantity = one] : one \in Sample(4) }
         \cup { [ZeroActiveRiskThresholdChangeRejMessage EXCEPT !.rejectReason = one] : one \in Sample(2) }
 

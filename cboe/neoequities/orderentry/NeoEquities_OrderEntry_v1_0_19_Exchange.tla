@@ -1225,29 +1225,29 @@ DoneForDayCaEquitiesV1 ==
     [ transactionTime : Sample(8),
       clOrdId         : Sample(20),
       brokerId        : Sample(2),
-      symbol8         : Sample(8) ]
+      symbolShort     : Sample(8) ]
 
 EncodeDoneForDayCaEquitiesV1(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.brokerId
-        \o message.symbol8
+        \o message.symbolShort
 
 DecodeDoneForDayCaEquitiesV1(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET brokerId == ReadBytes(clOrdId.rest, 2) IN IF ~brokerId.ok THEN Fail ELSE
-    LET symbol8 == ReadBytes(brokerId.rest, 8) IN IF ~symbol8.ok THEN Fail ELSE
+    LET symbolShort == ReadBytes(brokerId.rest, 8) IN IF ~symbolShort.ok THEN Fail ELSE
     Ok([ transactionTime |-> transactionTime.value,
          clOrdId         |-> clOrdId.value,
          brokerId        |-> brokerId.value,
-         symbol8         |-> symbol8.value ], symbol8.rest)
+         symbolShort     |-> symbolShort.value ], symbolShort.rest)
 
 ZeroDoneForDayCaEquitiesV1 ==
     [ transactionTime |-> [i \in 1 .. 8 |-> 0],
       clOrdId         |-> [i \in 1 .. 20 |-> 0],
       brokerId        |-> [i \in 1 .. 2 |-> 0],
-      symbol8         |-> [i \in 1 .. 8 |-> 0] ]
+      symbolShort     |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Done For Day Ca Equities V 1 at zero, then each field in turn at the values it is checked at *)
 CheckedDoneForDayCaEquitiesV1 ==
@@ -1255,7 +1255,7 @@ CheckedDoneForDayCaEquitiesV1 ==
         \cup { [ZeroDoneForDayCaEquitiesV1 EXCEPT !.transactionTime = one] : one \in Sample(8) }
         \cup { [ZeroDoneForDayCaEquitiesV1 EXCEPT !.clOrdId = one] : one \in Sample(20) }
         \cup { [ZeroDoneForDayCaEquitiesV1 EXCEPT !.brokerId = one] : one \in Sample(2) }
-        \cup { [ZeroDoneForDayCaEquitiesV1 EXCEPT !.symbol8 = one] : one \in Sample(8) }
+        \cup { [ZeroDoneForDayCaEquitiesV1 EXCEPT !.symbolShort = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Trade Cancel Correct Ca Equities V 1: 119 bytes                         *)

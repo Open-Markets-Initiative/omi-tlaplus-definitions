@@ -389,32 +389,32 @@ CheckedSymbolMappingMessage ==
 (***************************************************************************)
 
 ComplexLeg ==
-    [ legSymbolPrintableAscii8 : Sample(8),
-      legRatio                 : Sample(4),
-      legSecurityType          : Sample(1) ]
+    [ legSymbolLong   : Sample(8),
+      legRatio        : Sample(4),
+      legSecurityType : Sample(1) ]
 
 EncodeComplexLeg(message) ==
-    message.legSymbolPrintableAscii8
+    message.legSymbolLong
         \o message.legRatio
         \o message.legSecurityType
 
 DecodeComplexLeg(bytes) ==
-    LET legSymbolPrintableAscii8 == ReadBytes(bytes, 8) IN IF ~legSymbolPrintableAscii8.ok THEN Fail ELSE
-    LET legRatio == ReadBytes(legSymbolPrintableAscii8.rest, 4) IN IF ~legRatio.ok THEN Fail ELSE
+    LET legSymbolLong == ReadBytes(bytes, 8) IN IF ~legSymbolLong.ok THEN Fail ELSE
+    LET legRatio == ReadBytes(legSymbolLong.rest, 4) IN IF ~legRatio.ok THEN Fail ELSE
     LET legSecurityType == ReadBytes(legRatio.rest, 1) IN IF ~legSecurityType.ok THEN Fail ELSE
-    Ok([ legSymbolPrintableAscii8 |-> legSymbolPrintableAscii8.value,
-         legRatio                 |-> legRatio.value,
-         legSecurityType          |-> legSecurityType.value ], legSecurityType.rest)
+    Ok([ legSymbolLong   |-> legSymbolLong.value,
+         legRatio        |-> legRatio.value,
+         legSecurityType |-> legSecurityType.value ], legSecurityType.rest)
 
 ZeroComplexLeg ==
-    [ legSymbolPrintableAscii8 |-> [i \in 1 .. 8 |-> 0],
-      legRatio                 |-> [i \in 1 .. 4 |-> 0],
-      legSecurityType          |-> [i \in 1 .. 1 |-> 0] ]
+    [ legSymbolLong   |-> [i \in 1 .. 8 |-> 0],
+      legRatio        |-> [i \in 1 .. 4 |-> 0],
+      legSecurityType |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Complex Leg at zero, then each field in turn at the values it is checked at *)
 CheckedComplexLeg ==
     { ZeroComplexLeg }
-        \cup { [ZeroComplexLeg EXCEPT !.legSymbolPrintableAscii8 = one] : one \in Sample(8) }
+        \cup { [ZeroComplexLeg EXCEPT !.legSymbolLong = one] : one \in Sample(8) }
         \cup { [ZeroComplexLeg EXCEPT !.legRatio = one] : one \in Sample(4) }
         \cup { [ZeroComplexLeg EXCEPT !.legSecurityType = one] : one \in Sample(1) }
 
@@ -492,27 +492,27 @@ CheckedComplexInstrumentDefinitionExpandedMessage ==
 (***************************************************************************)
 
 EdcidLeg ==
-    [ legSymbolPrintableAscii6 : Sample(6),
-      legRatio                 : Sample(4) ]
+    [ legSymbolShort : Sample(6),
+      legRatio       : Sample(4) ]
 
 EncodeEdcidLeg(message) ==
-    message.legSymbolPrintableAscii6
+    message.legSymbolShort
         \o message.legRatio
 
 DecodeEdcidLeg(bytes) ==
-    LET legSymbolPrintableAscii6 == ReadBytes(bytes, 6) IN IF ~legSymbolPrintableAscii6.ok THEN Fail ELSE
-    LET legRatio == ReadBytes(legSymbolPrintableAscii6.rest, 4) IN IF ~legRatio.ok THEN Fail ELSE
-    Ok([ legSymbolPrintableAscii6 |-> legSymbolPrintableAscii6.value,
-         legRatio                 |-> legRatio.value ], legRatio.rest)
+    LET legSymbolShort == ReadBytes(bytes, 6) IN IF ~legSymbolShort.ok THEN Fail ELSE
+    LET legRatio == ReadBytes(legSymbolShort.rest, 4) IN IF ~legRatio.ok THEN Fail ELSE
+    Ok([ legSymbolShort |-> legSymbolShort.value,
+         legRatio       |-> legRatio.value ], legRatio.rest)
 
 ZeroEdcidLeg ==
-    [ legSymbolPrintableAscii6 |-> [i \in 1 .. 6 |-> 0],
-      legRatio                 |-> [i \in 1 .. 4 |-> 0] ]
+    [ legSymbolShort |-> [i \in 1 .. 6 |-> 0],
+      legRatio       |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Edcid Leg at zero, then each field in turn at the values it is checked at *)
 CheckedEdcidLeg ==
     { ZeroEdcidLeg }
-        \cup { [ZeroEdcidLeg EXCEPT !.legSymbolPrintableAscii6 = one] : one \in Sample(6) }
+        \cup { [ZeroEdcidLeg EXCEPT !.legSymbolShort = one] : one \in Sample(6) }
         \cup { [ZeroEdcidLeg EXCEPT !.legRatio = one] : one \in Sample(4) }
 
 (* A run of Edcid Leg, written one after another *)

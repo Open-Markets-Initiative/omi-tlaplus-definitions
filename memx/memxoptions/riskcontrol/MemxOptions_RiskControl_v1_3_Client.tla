@@ -235,39 +235,39 @@ CheckedRiskSettingsQueryMessage ==
 (***************************************************************************)
 
 ActiveRiskThresholdChangeReqMessage ==
-    [ clordid                                        : Sample(20),
-      underlierActiveRiskThresholdChangeReqUnderlier : Sample(6),
-      efidActiveRiskThresholdChangeReqEfid           : Sample(4),
-      thresholdQuantity                              : Sample(4) ]
+    [ clordid           : Sample(20),
+      underlier         : Sample(6),
+      efid              : Sample(4),
+      thresholdQuantity : Sample(4) ]
 
 EncodeActiveRiskThresholdChangeReqMessage(message) ==
     message.clordid
-        \o message.underlierActiveRiskThresholdChangeReqUnderlier
-        \o message.efidActiveRiskThresholdChangeReqEfid
+        \o message.underlier
+        \o message.efid
         \o message.thresholdQuantity
 
 DecodeActiveRiskThresholdChangeReqMessage(bytes) ==
     LET clordid == ReadBytes(bytes, 20) IN IF ~clordid.ok THEN Fail ELSE
-    LET underlierActiveRiskThresholdChangeReqUnderlier == ReadBytes(clordid.rest, 6) IN IF ~underlierActiveRiskThresholdChangeReqUnderlier.ok THEN Fail ELSE
-    LET efidActiveRiskThresholdChangeReqEfid == ReadBytes(underlierActiveRiskThresholdChangeReqUnderlier.rest, 4) IN IF ~efidActiveRiskThresholdChangeReqEfid.ok THEN Fail ELSE
-    LET thresholdQuantity == ReadBytes(efidActiveRiskThresholdChangeReqEfid.rest, 4) IN IF ~thresholdQuantity.ok THEN Fail ELSE
-    Ok([ clordid                                        |-> clordid.value,
-         underlierActiveRiskThresholdChangeReqUnderlier |-> underlierActiveRiskThresholdChangeReqUnderlier.value,
-         efidActiveRiskThresholdChangeReqEfid           |-> efidActiveRiskThresholdChangeReqEfid.value,
-         thresholdQuantity                              |-> thresholdQuantity.value ], thresholdQuantity.rest)
+    LET underlier == ReadBytes(clordid.rest, 6) IN IF ~underlier.ok THEN Fail ELSE
+    LET efid == ReadBytes(underlier.rest, 4) IN IF ~efid.ok THEN Fail ELSE
+    LET thresholdQuantity == ReadBytes(efid.rest, 4) IN IF ~thresholdQuantity.ok THEN Fail ELSE
+    Ok([ clordid           |-> clordid.value,
+         underlier         |-> underlier.value,
+         efid              |-> efid.value,
+         thresholdQuantity |-> thresholdQuantity.value ], thresholdQuantity.rest)
 
 ZeroActiveRiskThresholdChangeReqMessage ==
-    [ clordid                                        |-> [i \in 1 .. 20 |-> 0],
-      underlierActiveRiskThresholdChangeReqUnderlier |-> [i \in 1 .. 6 |-> 0],
-      efidActiveRiskThresholdChangeReqEfid           |-> [i \in 1 .. 4 |-> 0],
-      thresholdQuantity                              |-> [i \in 1 .. 4 |-> 0] ]
+    [ clordid           |-> [i \in 1 .. 20 |-> 0],
+      underlier         |-> [i \in 1 .. 6 |-> 0],
+      efid              |-> [i \in 1 .. 4 |-> 0],
+      thresholdQuantity |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Active Risk Threshold Change Req Message at zero, then each field in turn at the values it is checked at *)
 CheckedActiveRiskThresholdChangeReqMessage ==
     { ZeroActiveRiskThresholdChangeReqMessage }
         \cup { [ZeroActiveRiskThresholdChangeReqMessage EXCEPT !.clordid = one] : one \in Sample(20) }
-        \cup { [ZeroActiveRiskThresholdChangeReqMessage EXCEPT !.underlierActiveRiskThresholdChangeReqUnderlier = one] : one \in Sample(6) }
-        \cup { [ZeroActiveRiskThresholdChangeReqMessage EXCEPT !.efidActiveRiskThresholdChangeReqEfid = one] : one \in Sample(4) }
+        \cup { [ZeroActiveRiskThresholdChangeReqMessage EXCEPT !.underlier = one] : one \in Sample(6) }
+        \cup { [ZeroActiveRiskThresholdChangeReqMessage EXCEPT !.efid = one] : one \in Sample(4) }
         \cup { [ZeroActiveRiskThresholdChangeReqMessage EXCEPT !.thresholdQuantity = one] : one \in Sample(4) }
 
 (***************************************************************************)

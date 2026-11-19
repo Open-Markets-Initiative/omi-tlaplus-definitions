@@ -378,27 +378,27 @@ CheckedServiceHeader ==
 
 TradingHalt ==
     [ stateFlag : Sample(2),
-      timeC6    : Sample(6) ]
+      time      : Sample(6) ]
 
 EncodeTradingHalt(message) ==
     message.stateFlag
-        \o message.timeC6
+        \o message.time
 
 DecodeTradingHalt(bytes) ==
     LET stateFlag == ReadBytes(bytes, 2) IN IF ~stateFlag.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(stateFlag.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
+    LET time == ReadBytes(stateFlag.rest, 6) IN IF ~time.ok THEN Fail ELSE
     Ok([ stateFlag |-> stateFlag.value,
-         timeC6    |-> timeC6.value ], timeC6.rest)
+         time      |-> time.value ], time.rest)
 
 ZeroTradingHalt ==
     [ stateFlag |-> [i \in 1 .. 2 |-> 0],
-      timeC6    |-> [i \in 1 .. 6 |-> 0] ]
+      time      |-> [i \in 1 .. 6 |-> 0] ]
 
 (* Trading Halt at zero, then each field in turn at the values it is checked at *)
 CheckedTradingHalt ==
     { ZeroTradingHalt }
         \cup { [ZeroTradingHalt EXCEPT !.stateFlag = one] : one \in Sample(2) }
-        \cup { [ZeroTradingHalt EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroTradingHalt EXCEPT !.time = one] : one \in Sample(6) }
 
 (***************************************************************************)
 (* Price: 30 bytes                                                         *)
@@ -407,44 +407,44 @@ CheckedTradingHalt ==
 Price ==
     [ priceCode       : Sample(2),
       lotSizeUnitFlag : Sample(1),
-      priceC14        : Sample(14),
+      priceValue      : Sample(14),
       sign            : Sample(1),
-      timeC12         : Sample(12) ]
+      preciseTime     : Sample(12) ]
 
 EncodePrice(message) ==
     message.priceCode
         \o message.lotSizeUnitFlag
-        \o message.priceC14
+        \o message.priceValue
         \o message.sign
-        \o message.timeC12
+        \o message.preciseTime
 
 DecodePrice(bytes) ==
     LET priceCode == ReadBytes(bytes, 2) IN IF ~priceCode.ok THEN Fail ELSE
     LET lotSizeUnitFlag == ReadBytes(priceCode.rest, 1) IN IF ~lotSizeUnitFlag.ok THEN Fail ELSE
-    LET priceC14 == ReadBytes(lotSizeUnitFlag.rest, 14) IN IF ~priceC14.ok THEN Fail ELSE
-    LET sign == ReadBytes(priceC14.rest, 1) IN IF ~sign.ok THEN Fail ELSE
-    LET timeC12 == ReadBytes(sign.rest, 12) IN IF ~timeC12.ok THEN Fail ELSE
+    LET priceValue == ReadBytes(lotSizeUnitFlag.rest, 14) IN IF ~priceValue.ok THEN Fail ELSE
+    LET sign == ReadBytes(priceValue.rest, 1) IN IF ~sign.ok THEN Fail ELSE
+    LET preciseTime == ReadBytes(sign.rest, 12) IN IF ~preciseTime.ok THEN Fail ELSE
     Ok([ priceCode       |-> priceCode.value,
          lotSizeUnitFlag |-> lotSizeUnitFlag.value,
-         priceC14        |-> priceC14.value,
+         priceValue      |-> priceValue.value,
          sign            |-> sign.value,
-         timeC12         |-> timeC12.value ], timeC12.rest)
+         preciseTime     |-> preciseTime.value ], preciseTime.rest)
 
 ZeroPrice ==
     [ priceCode       |-> [i \in 1 .. 2 |-> 0],
       lotSizeUnitFlag |-> [i \in 1 .. 1 |-> 0],
-      priceC14        |-> [i \in 1 .. 14 |-> 0],
+      priceValue      |-> [i \in 1 .. 14 |-> 0],
       sign            |-> [i \in 1 .. 1 |-> 0],
-      timeC12         |-> [i \in 1 .. 12 |-> 0] ]
+      preciseTime     |-> [i \in 1 .. 12 |-> 0] ]
 
 (* Price at zero, then each field in turn at the values it is checked at *)
 CheckedPrice ==
     { ZeroPrice }
         \cup { [ZeroPrice EXCEPT !.priceCode = one] : one \in Sample(2) }
         \cup { [ZeroPrice EXCEPT !.lotSizeUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroPrice EXCEPT !.priceC14 = one] : one \in Sample(14) }
+        \cup { [ZeroPrice EXCEPT !.priceValue = one] : one \in Sample(14) }
         \cup { [ZeroPrice EXCEPT !.sign = one] : one \in Sample(1) }
-        \cup { [ZeroPrice EXCEPT !.timeC12 = one] : one \in Sample(12) }
+        \cup { [ZeroPrice EXCEPT !.preciseTime = one] : one \in Sample(12) }
 
 (***************************************************************************)
 (* Trading Volume: 15 bytes                                                *)
@@ -452,27 +452,27 @@ CheckedPrice ==
 
 TradingVolume ==
     [ tradingVolumeTurnoverUnitFlag : Sample(1),
-      tradingVolumeC14              : Sample(14) ]
+      tradingVolumeValue            : Sample(14) ]
 
 EncodeTradingVolume(message) ==
     message.tradingVolumeTurnoverUnitFlag
-        \o message.tradingVolumeC14
+        \o message.tradingVolumeValue
 
 DecodeTradingVolume(bytes) ==
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(bytes, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET tradingVolumeC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~tradingVolumeC14.ok THEN Fail ELSE
+    LET tradingVolumeValue == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~tradingVolumeValue.ok THEN Fail ELSE
     Ok([ tradingVolumeTurnoverUnitFlag |-> tradingVolumeTurnoverUnitFlag.value,
-         tradingVolumeC14              |-> tradingVolumeC14.value ], tradingVolumeC14.rest)
+         tradingVolumeValue            |-> tradingVolumeValue.value ], tradingVolumeValue.rest)
 
 ZeroTradingVolume ==
     [ tradingVolumeTurnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
-      tradingVolumeC14              |-> [i \in 1 .. 14 |-> 0] ]
+      tradingVolumeValue            |-> [i \in 1 .. 14 |-> 0] ]
 
 (* Trading Volume at zero, then each field in turn at the values it is checked at *)
 CheckedTradingVolume ==
     { ZeroTradingVolume }
         \cup { [ZeroTradingVolume EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTradingVolume EXCEPT !.tradingVolumeC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTradingVolume EXCEPT !.tradingVolumeValue = one] : one \in Sample(14) }
 
 (***************************************************************************)
 (* Turnover: 15 bytes                                                      *)
@@ -480,27 +480,27 @@ CheckedTradingVolume ==
 
 Turnover ==
     [ tradingVolumeTurnoverUnitFlag : Sample(1),
-      turnoverC14                   : Sample(14) ]
+      turnoverValue                 : Sample(14) ]
 
 EncodeTurnover(message) ==
     message.tradingVolumeTurnoverUnitFlag
-        \o message.turnoverC14
+        \o message.turnoverValue
 
 DecodeTurnover(bytes) ==
     LET tradingVolumeTurnoverUnitFlag == ReadBytes(bytes, 1) IN IF ~tradingVolumeTurnoverUnitFlag.ok THEN Fail ELSE
-    LET turnoverC14 == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~turnoverC14.ok THEN Fail ELSE
+    LET turnoverValue == ReadBytes(tradingVolumeTurnoverUnitFlag.rest, 14) IN IF ~turnoverValue.ok THEN Fail ELSE
     Ok([ tradingVolumeTurnoverUnitFlag |-> tradingVolumeTurnoverUnitFlag.value,
-         turnoverC14                   |-> turnoverC14.value ], turnoverC14.rest)
+         turnoverValue                 |-> turnoverValue.value ], turnoverValue.rest)
 
 ZeroTurnover ==
     [ tradingVolumeTurnoverUnitFlag |-> [i \in 1 .. 1 |-> 0],
-      turnoverC14                   |-> [i \in 1 .. 14 |-> 0] ]
+      turnoverValue                 |-> [i \in 1 .. 14 |-> 0] ]
 
 (* Turnover at zero, then each field in turn at the values it is checked at *)
 CheckedTurnover ==
     { ZeroTurnover }
         \cup { [ZeroTurnover EXCEPT !.tradingVolumeTurnoverUnitFlag = one] : one \in Sample(1) }
-        \cup { [ZeroTurnover EXCEPT !.turnoverC14 = one] : one \in Sample(14) }
+        \cup { [ZeroTurnover EXCEPT !.turnoverValue = one] : one \in Sample(14) }
 
 (***************************************************************************)
 (* ToSTNeT By-Issue Information Message: 72 bytes                          *)
@@ -566,27 +566,27 @@ CheckedTostnetByissueInformationMessage ==
 
 State ==
     [ marketStateFlag : Sample(2),
-      timeC6          : Sample(6) ]
+      time            : Sample(6) ]
 
 EncodeState(message) ==
     message.marketStateFlag
-        \o message.timeC6
+        \o message.time
 
 DecodeState(bytes) ==
     LET marketStateFlag == ReadBytes(bytes, 2) IN IF ~marketStateFlag.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(marketStateFlag.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
+    LET time == ReadBytes(marketStateFlag.rest, 6) IN IF ~time.ok THEN Fail ELSE
     Ok([ marketStateFlag |-> marketStateFlag.value,
-         timeC6          |-> timeC6.value ], timeC6.rest)
+         time            |-> time.value ], time.rest)
 
 ZeroState ==
     [ marketStateFlag |-> [i \in 1 .. 2 |-> 0],
-      timeC6          |-> [i \in 1 .. 6 |-> 0] ]
+      time            |-> [i \in 1 .. 6 |-> 0] ]
 
 (* State at zero, then each field in turn at the values it is checked at *)
 CheckedState ==
     { ZeroState }
         \cup { [ZeroState EXCEPT !.marketStateFlag = one] : one \in Sample(2) }
-        \cup { [ZeroState EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroState EXCEPT !.time = one] : one \in Sample(6) }
 
 (***************************************************************************)
 (* ToSTNeT Market Information Message: 11 bytes                            *)
@@ -630,29 +630,29 @@ ControlMessage ==
     [ reserved2    : Sample(2),
       testModeFlag : Sample(1),
       startEndFlag : Sample(1),
-      timeC6       : Sample(6) ]
+      time         : Sample(6) ]
 
 EncodeControlMessage(message) ==
     message.reserved2
         \o message.testModeFlag
         \o message.startEndFlag
-        \o message.timeC6
+        \o message.time
 
 DecodeControlMessage(bytes) ==
     LET reserved2 == ReadBytes(bytes, 2) IN IF ~reserved2.ok THEN Fail ELSE
     LET testModeFlag == ReadBytes(reserved2.rest, 1) IN IF ~testModeFlag.ok THEN Fail ELSE
     LET startEndFlag == ReadBytes(testModeFlag.rest, 1) IN IF ~startEndFlag.ok THEN Fail ELSE
-    LET timeC6 == ReadBytes(startEndFlag.rest, 6) IN IF ~timeC6.ok THEN Fail ELSE
+    LET time == ReadBytes(startEndFlag.rest, 6) IN IF ~time.ok THEN Fail ELSE
     Ok([ reserved2    |-> reserved2.value,
          testModeFlag |-> testModeFlag.value,
          startEndFlag |-> startEndFlag.value,
-         timeC6       |-> timeC6.value ], timeC6.rest)
+         time         |-> time.value ], time.rest)
 
 ZeroControlMessage ==
     [ reserved2    |-> [i \in 1 .. 2 |-> 0],
       testModeFlag |-> [i \in 1 .. 1 |-> 0],
       startEndFlag |-> [i \in 1 .. 1 |-> 0],
-      timeC6       |-> [i \in 1 .. 6 |-> 0] ]
+      time         |-> [i \in 1 .. 6 |-> 0] ]
 
 (* Control Message at zero, then each field in turn at the values it is checked at *)
 CheckedControlMessage ==
@@ -660,7 +660,7 @@ CheckedControlMessage ==
         \cup { [ZeroControlMessage EXCEPT !.reserved2 = one] : one \in Sample(2) }
         \cup { [ZeroControlMessage EXCEPT !.testModeFlag = one] : one \in Sample(1) }
         \cup { [ZeroControlMessage EXCEPT !.startEndFlag = one] : one \in Sample(1) }
-        \cup { [ZeroControlMessage EXCEPT !.timeC6 = one] : one \in Sample(6) }
+        \cup { [ZeroControlMessage EXCEPT !.time = one] : one \in Sample(6) }
 
 (***************************************************************************)
 (* Payload, selected by Tag ID                                             *)

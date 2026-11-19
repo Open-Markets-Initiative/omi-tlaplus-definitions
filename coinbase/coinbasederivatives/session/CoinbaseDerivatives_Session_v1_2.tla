@@ -157,44 +157,44 @@ CheckedLogonConfMessage ==
 (***************************************************************************)
 
 LogoutMessage ==
-    [ reasonString64 : Sample(64) ]
+    [ logoutReason : Sample(64) ]
 
 EncodeLogoutMessage(message) ==
-    message.reasonString64
+    message.logoutReason
 
 DecodeLogoutMessage(bytes) ==
-    LET reasonString64 == ReadBytes(bytes, 64) IN IF ~reasonString64.ok THEN Fail ELSE
-    Ok([ reasonString64 |-> reasonString64.value ], reasonString64.rest)
+    LET logoutReason == ReadBytes(bytes, 64) IN IF ~logoutReason.ok THEN Fail ELSE
+    Ok([ logoutReason |-> logoutReason.value ], logoutReason.rest)
 
 ZeroLogoutMessage ==
-    [ reasonString64 |-> [i \in 1 .. 64 |-> 0] ]
+    [ logoutReason |-> [i \in 1 .. 64 |-> 0] ]
 
 (* Logout Message at zero, then each field in turn at the values it is checked at *)
 CheckedLogoutMessage ==
     { ZeroLogoutMessage }
-        \cup { [ZeroLogoutMessage EXCEPT !.reasonString64 = one] : one \in Sample(64) }
+        \cup { [ZeroLogoutMessage EXCEPT !.logoutReason = one] : one \in Sample(64) }
 
 (***************************************************************************)
 (* Logged Out Message: 64 bytes                                            *)
 (***************************************************************************)
 
 LoggedOutMessage ==
-    [ reasonString64 : Sample(64) ]
+    [ logoutReason : Sample(64) ]
 
 EncodeLoggedOutMessage(message) ==
-    message.reasonString64
+    message.logoutReason
 
 DecodeLoggedOutMessage(bytes) ==
-    LET reasonString64 == ReadBytes(bytes, 64) IN IF ~reasonString64.ok THEN Fail ELSE
-    Ok([ reasonString64 |-> reasonString64.value ], reasonString64.rest)
+    LET logoutReason == ReadBytes(bytes, 64) IN IF ~logoutReason.ok THEN Fail ELSE
+    Ok([ logoutReason |-> logoutReason.value ], logoutReason.rest)
 
 ZeroLoggedOutMessage ==
-    [ reasonString64 |-> [i \in 1 .. 64 |-> 0] ]
+    [ logoutReason |-> [i \in 1 .. 64 |-> 0] ]
 
 (* Logged Out Message at zero, then each field in turn at the values it is checked at *)
 CheckedLoggedOutMessage ==
     { ZeroLoggedOutMessage }
-        \cup { [ZeroLoggedOutMessage EXCEPT !.reasonString64 = one] : one \in Sample(64) }
+        \cup { [ZeroLoggedOutMessage EXCEPT !.logoutReason = one] : one \in Sample(64) }
 
 (***************************************************************************)
 (* Heartbeat Message: 8 bytes                                              *)

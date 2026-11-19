@@ -307,11 +307,11 @@ TradeConfirmationMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -333,11 +333,11 @@ EncodeTradeConfirmationMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -359,12 +359,12 @@ DecodeTradeConfirmationMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -383,11 +383,11 @@ DecodeTradeConfirmationMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -409,11 +409,11 @@ ZeroTradeConfirmationMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -437,11 +437,11 @@ CheckedTradeConfirmationMessage ==
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroTradeConfirmationMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeConfirmationMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroTradeConfirmationMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeConfirmationMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroTradeConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -467,11 +467,11 @@ TradeCancelConfirmMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -493,11 +493,11 @@ EncodeTradeCancelConfirmMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -519,12 +519,12 @@ DecodeTradeCancelConfirmMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -543,11 +543,11 @@ DecodeTradeCancelConfirmMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -569,11 +569,11 @@ ZeroTradeCancelConfirmMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -597,11 +597,11 @@ CheckedTradeCancelConfirmMessage ==
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroTradeCancelConfirmMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -627,11 +627,11 @@ TradeCancelRejectMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -653,11 +653,11 @@ EncodeTradeCancelRejectMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -679,12 +679,12 @@ DecodeTradeCancelRejectMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -703,11 +703,11 @@ DecodeTradeCancelRejectMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -729,11 +729,11 @@ ZeroTradeCancelRejectMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -757,11 +757,11 @@ CheckedTradeCancelRejectMessage ==
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroTradeCancelRejectMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeCancelRejectMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelRejectMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeCancelRejectMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroTradeCancelRejectMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -787,11 +787,11 @@ TradeModifyConfirmMessage ==
       fillPrice             : Sample(4),
       token                 : Sample(4),
       bookType              : Sample(2),
-      proClientShort2       : Sample(2),
+      proClient             : Sample(2),
       algoId                : Sample(4),
       activityTimeInNanos   : Sample(8),
       nnfField              : Sample(8),
-      segmentShort2         : Sample(2),
+      segment               : Sample(2),
       brokerId              : Sample(5),
       filler                : Sample(1),
       pan                   : Sample(10),
@@ -813,11 +813,11 @@ EncodeTradeModifyConfirmMessage(message) ==
         \o message.fillPrice
         \o message.token
         \o message.bookType
-        \o message.proClientShort2
+        \o message.proClient
         \o message.algoId
         \o message.activityTimeInNanos
         \o message.nnfField
-        \o message.segmentShort2
+        \o message.segment
         \o message.brokerId
         \o message.filler
         \o message.pan
@@ -839,12 +839,12 @@ DecodeTradeModifyConfirmMessage(bytes) ==
     LET fillPrice == ReadBytes(fillQty.rest, 4) IN IF ~fillPrice.ok THEN Fail ELSE
     LET token == ReadBytes(fillPrice.rest, 4) IN IF ~token.ok THEN Fail ELSE
     LET bookType == ReadBytes(token.rest, 2) IN IF ~bookType.ok THEN Fail ELSE
-    LET proClientShort2 == ReadBytes(bookType.rest, 2) IN IF ~proClientShort2.ok THEN Fail ELSE
-    LET algoId == ReadBytes(proClientShort2.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
+    LET proClient == ReadBytes(bookType.rest, 2) IN IF ~proClient.ok THEN Fail ELSE
+    LET algoId == ReadBytes(proClient.rest, 4) IN IF ~algoId.ok THEN Fail ELSE
     LET activityTimeInNanos == ReadBytes(algoId.rest, 8) IN IF ~activityTimeInNanos.ok THEN Fail ELSE
     LET nnfField == ReadBytes(activityTimeInNanos.rest, 8) IN IF ~nnfField.ok THEN Fail ELSE
-    LET segmentShort2 == ReadBytes(nnfField.rest, 2) IN IF ~segmentShort2.ok THEN Fail ELSE
-    LET brokerId == ReadBytes(segmentShort2.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
+    LET segment == ReadBytes(nnfField.rest, 2) IN IF ~segment.ok THEN Fail ELSE
+    LET brokerId == ReadBytes(segment.rest, 5) IN IF ~brokerId.ok THEN Fail ELSE
     LET filler == ReadBytes(brokerId.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(pan.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
@@ -863,11 +863,11 @@ DecodeTradeModifyConfirmMessage(bytes) ==
          fillPrice             |-> fillPrice.value,
          token                 |-> token.value,
          bookType              |-> bookType.value,
-         proClientShort2       |-> proClientShort2.value,
+         proClient             |-> proClient.value,
          algoId                |-> algoId.value,
          activityTimeInNanos   |-> activityTimeInNanos.value,
          nnfField              |-> nnfField.value,
-         segmentShort2         |-> segmentShort2.value,
+         segment               |-> segment.value,
          brokerId              |-> brokerId.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
@@ -889,11 +889,11 @@ ZeroTradeModifyConfirmMessage ==
       fillPrice             |-> [i \in 1 .. 4 |-> 0],
       token                 |-> [i \in 1 .. 4 |-> 0],
       bookType              |-> [i \in 1 .. 2 |-> 0],
-      proClientShort2       |-> [i \in 1 .. 2 |-> 0],
+      proClient             |-> [i \in 1 .. 2 |-> 0],
       algoId                |-> [i \in 1 .. 4 |-> 0],
       activityTimeInNanos   |-> [i \in 1 .. 8 |-> 0],
       nnfField              |-> [i \in 1 .. 8 |-> 0],
-      segmentShort2         |-> [i \in 1 .. 2 |-> 0],
+      segment               |-> [i \in 1 .. 2 |-> 0],
       brokerId              |-> [i \in 1 .. 5 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
@@ -917,11 +917,11 @@ CheckedTradeModifyConfirmMessage ==
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.fillPrice = one] : one \in Sample(4) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.token = one] : one \in Sample(4) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.bookType = one] : one \in Sample(2) }
-        \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.proClientShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.proClient = one] : one \in Sample(2) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.algoId = one] : one \in Sample(4) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.activityTimeInNanos = one] : one \in Sample(8) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.nnfField = one] : one \in Sample(8) }
-        \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.segmentShort2 = one] : one \in Sample(2) }
+        \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.segment = one] : one \in Sample(2) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.brokerId = one] : one \in Sample(5) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroTradeModifyConfirmMessage EXCEPT !.pan = one] : one \in Sample(10) }
@@ -955,10 +955,10 @@ PriceConfirmationMessage ==
       suspended             : Sample(1),
       filler                : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       settlementType        : Sample(1),
       settlor               : Sample(12) ]
 
@@ -985,10 +985,10 @@ EncodePriceConfirmationMessage(message) ==
         \o message.suspended
         \o message.filler
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.settlementType
         \o message.settlor
 
@@ -1015,11 +1015,11 @@ DecodePriceConfirmationMessage(bytes) ==
     LET suspended == ReadBytes(auctionNumber.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET filler == ReadBytes(suspended.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET settlementType == ReadBytes(proClientChar1.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET settlementType == ReadBytes(proClientChar.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
     LET settlor == ReadBytes(settlementType.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
          token                 |-> token.value,
@@ -1043,10 +1043,10 @@ DecodePriceConfirmationMessage(bytes) ==
          suspended             |-> suspended.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          settlementType        |-> settlementType.value,
          settlor               |-> settlor.value ], settlor.rest)
 
@@ -1073,10 +1073,10 @@ ZeroPriceConfirmationMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       settlementType        |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0] ]
 
@@ -1105,10 +1105,10 @@ CheckedPriceConfirmationMessage ==
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroPriceConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroPriceConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroPriceConfirmationMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroPriceConfirmationMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.settlementType = one] : one \in Sample(1) }
         \cup { [ZeroPriceConfirmationMessage EXCEPT !.settlor = one] : one \in Sample(12) }
 
@@ -1139,10 +1139,10 @@ OrderModRejectMessage ==
       suspended             : Sample(1),
       filler                : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       settlementType        : Sample(1),
       settlor               : Sample(12) ]
 
@@ -1169,10 +1169,10 @@ EncodeOrderModRejectMessage(message) ==
         \o message.suspended
         \o message.filler
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.settlementType
         \o message.settlor
 
@@ -1199,11 +1199,11 @@ DecodeOrderModRejectMessage(bytes) ==
     LET suspended == ReadBytes(auctionNumber.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET filler == ReadBytes(suspended.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET settlementType == ReadBytes(proClientChar1.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET settlementType == ReadBytes(proClientChar.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
     LET settlor == ReadBytes(settlementType.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
          token                 |-> token.value,
@@ -1227,10 +1227,10 @@ DecodeOrderModRejectMessage(bytes) ==
          suspended             |-> suspended.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          settlementType        |-> settlementType.value,
          settlor               |-> settlor.value ], settlor.rest)
 
@@ -1257,10 +1257,10 @@ ZeroOrderModRejectMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       settlementType        |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0] ]
 
@@ -1289,10 +1289,10 @@ CheckedOrderModRejectMessage ==
         \cup { [ZeroOrderModRejectMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderModRejectMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModRejectMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderModRejectMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModRejectMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.settlementType = one] : one \in Sample(1) }
         \cup { [ZeroOrderModRejectMessage EXCEPT !.settlor = one] : one \in Sample(12) }
 
@@ -1323,10 +1323,10 @@ OrderCancelRejectMessage ==
       suspended             : Sample(1),
       filler                : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       settlementType        : Sample(1),
       settlor               : Sample(12) ]
 
@@ -1353,10 +1353,10 @@ EncodeOrderCancelRejectMessage(message) ==
         \o message.suspended
         \o message.filler
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.settlementType
         \o message.settlor
 
@@ -1383,11 +1383,11 @@ DecodeOrderCancelRejectMessage(bytes) ==
     LET suspended == ReadBytes(auctionNumber.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET filler == ReadBytes(suspended.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET settlementType == ReadBytes(proClientChar1.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET settlementType == ReadBytes(proClientChar.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
     LET settlor == ReadBytes(settlementType.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
          token                 |-> token.value,
@@ -1411,10 +1411,10 @@ DecodeOrderCancelRejectMessage(bytes) ==
          suspended             |-> suspended.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          settlementType        |-> settlementType.value,
          settlor               |-> settlor.value ], settlor.rest)
 
@@ -1441,10 +1441,10 @@ ZeroOrderCancelRejectMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       settlementType        |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0] ]
 
@@ -1473,10 +1473,10 @@ CheckedOrderCancelRejectMessage ==
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderCancelRejectMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelRejectMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderCancelRejectMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelRejectMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.settlementType = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelRejectMessage EXCEPT !.settlor = one] : one \in Sample(12) }
 
@@ -1507,10 +1507,10 @@ OrderConfirmationMessage ==
       suspended             : Sample(1),
       filler                : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       settlementType        : Sample(1),
       settlor               : Sample(12) ]
 
@@ -1537,10 +1537,10 @@ EncodeOrderConfirmationMessage(message) ==
         \o message.suspended
         \o message.filler
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.settlementType
         \o message.settlor
 
@@ -1567,11 +1567,11 @@ DecodeOrderConfirmationMessage(bytes) ==
     LET suspended == ReadBytes(auctionNumber.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET filler == ReadBytes(suspended.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET settlementType == ReadBytes(proClientChar1.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET settlementType == ReadBytes(proClientChar.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
     LET settlor == ReadBytes(settlementType.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
          token                 |-> token.value,
@@ -1595,10 +1595,10 @@ DecodeOrderConfirmationMessage(bytes) ==
          suspended             |-> suspended.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          settlementType        |-> settlementType.value,
          settlor               |-> settlor.value ], settlor.rest)
 
@@ -1625,10 +1625,10 @@ ZeroOrderConfirmationMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       settlementType        |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0] ]
 
@@ -1657,10 +1657,10 @@ CheckedOrderConfirmationMessage ==
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderConfirmationMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderConfirmationMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.settlementType = one] : one \in Sample(1) }
         \cup { [ZeroOrderConfirmationMessage EXCEPT !.settlor = one] : one \in Sample(12) }
 
@@ -1691,10 +1691,10 @@ OrderModConfirmationMessage ==
       suspended             : Sample(1),
       filler                : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       settlementType        : Sample(1),
       settlor               : Sample(12) ]
 
@@ -1721,10 +1721,10 @@ EncodeOrderModConfirmationMessage(message) ==
         \o message.suspended
         \o message.filler
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.settlementType
         \o message.settlor
 
@@ -1751,11 +1751,11 @@ DecodeOrderModConfirmationMessage(bytes) ==
     LET suspended == ReadBytes(auctionNumber.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET filler == ReadBytes(suspended.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET settlementType == ReadBytes(proClientChar1.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET settlementType == ReadBytes(proClientChar.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
     LET settlor == ReadBytes(settlementType.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
          token                 |-> token.value,
@@ -1779,10 +1779,10 @@ DecodeOrderModConfirmationMessage(bytes) ==
          suspended             |-> suspended.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          settlementType        |-> settlementType.value,
          settlor               |-> settlor.value ], settlor.rest)
 
@@ -1809,10 +1809,10 @@ ZeroOrderModConfirmationMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       settlementType        |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0] ]
 
@@ -1841,10 +1841,10 @@ CheckedOrderModConfirmationMessage ==
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderModConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderModConfirmationMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModConfirmationMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.settlementType = one] : one \in Sample(1) }
         \cup { [ZeroOrderModConfirmationMessage EXCEPT !.settlor = one] : one \in Sample(12) }
 
@@ -1875,10 +1875,10 @@ OrderCancelConfirmationMessage ==
       suspended             : Sample(1),
       filler                : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       settlementType        : Sample(1),
       settlor               : Sample(12) ]
 
@@ -1905,10 +1905,10 @@ EncodeOrderCancelConfirmationMessage(message) ==
         \o message.suspended
         \o message.filler
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.settlementType
         \o message.settlor
 
@@ -1935,11 +1935,11 @@ DecodeOrderCancelConfirmationMessage(bytes) ==
     LET suspended == ReadBytes(auctionNumber.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET filler == ReadBytes(suspended.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET settlementType == ReadBytes(proClientChar1.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET settlementType == ReadBytes(proClientChar.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
     LET settlor == ReadBytes(settlementType.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
          token                 |-> token.value,
@@ -1963,10 +1963,10 @@ DecodeOrderCancelConfirmationMessage(bytes) ==
          suspended             |-> suspended.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          settlementType        |-> settlementType.value,
          settlor               |-> settlor.value ], settlor.rest)
 
@@ -1993,10 +1993,10 @@ ZeroOrderCancelConfirmationMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       settlementType        |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0] ]
 
@@ -2025,10 +2025,10 @@ CheckedOrderCancelConfirmationMessage ==
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.settlementType = one] : one \in Sample(1) }
         \cup { [ZeroOrderCancelConfirmationMessage EXCEPT !.settlor = one] : one \in Sample(12) }
 
@@ -2059,10 +2059,10 @@ FreezeToControlMessage ==
       suspended             : Sample(1),
       filler                : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       settlementType        : Sample(1),
       settlor               : Sample(12) ]
 
@@ -2089,10 +2089,10 @@ EncodeFreezeToControlMessage(message) ==
         \o message.suspended
         \o message.filler
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.settlementType
         \o message.settlor
 
@@ -2119,11 +2119,11 @@ DecodeFreezeToControlMessage(bytes) ==
     LET suspended == ReadBytes(auctionNumber.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET filler == ReadBytes(suspended.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET settlementType == ReadBytes(proClientChar1.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET settlementType == ReadBytes(proClientChar.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
     LET settlor == ReadBytes(settlementType.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
          token                 |-> token.value,
@@ -2147,10 +2147,10 @@ DecodeFreezeToControlMessage(bytes) ==
          suspended             |-> suspended.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          settlementType        |-> settlementType.value,
          settlor               |-> settlor.value ], settlor.rest)
 
@@ -2177,10 +2177,10 @@ ZeroFreezeToControlMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       settlementType        |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0] ]
 
@@ -2209,10 +2209,10 @@ CheckedFreezeToControlMessage ==
         \cup { [ZeroFreezeToControlMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroFreezeToControlMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroFreezeToControlMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroFreezeToControlMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroFreezeToControlMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.settlementType = one] : one \in Sample(1) }
         \cup { [ZeroFreezeToControlMessage EXCEPT !.settlor = one] : one \in Sample(12) }
 
@@ -2243,10 +2243,10 @@ OnStopNotificationMessage ==
       suspended             : Sample(1),
       filler                : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       settlementType        : Sample(1),
       settlor               : Sample(12) ]
 
@@ -2273,10 +2273,10 @@ EncodeOnStopNotificationMessage(message) ==
         \o message.suspended
         \o message.filler
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.settlementType
         \o message.settlor
 
@@ -2303,11 +2303,11 @@ DecodeOnStopNotificationMessage(bytes) ==
     LET suspended == ReadBytes(auctionNumber.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET filler == ReadBytes(suspended.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET settlementType == ReadBytes(proClientChar1.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET settlementType == ReadBytes(proClientChar.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
     LET settlor == ReadBytes(settlementType.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
          token                 |-> token.value,
@@ -2331,10 +2331,10 @@ DecodeOnStopNotificationMessage(bytes) ==
          suspended             |-> suspended.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          settlementType        |-> settlementType.value,
          settlor               |-> settlor.value ], settlor.rest)
 
@@ -2361,10 +2361,10 @@ ZeroOnStopNotificationMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       settlementType        |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0] ]
 
@@ -2393,10 +2393,10 @@ CheckedOnStopNotificationMessage ==
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOnStopNotificationMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOnStopNotificationMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOnStopNotificationMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOnStopNotificationMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.settlementType = one] : one \in Sample(1) }
         \cup { [ZeroOnStopNotificationMessage EXCEPT !.settlor = one] : one \in Sample(12) }
 
@@ -2427,10 +2427,10 @@ OrderErrorMessage ==
       suspended             : Sample(1),
       filler                : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       settlementType        : Sample(1),
       settlor               : Sample(12) ]
 
@@ -2457,10 +2457,10 @@ EncodeOrderErrorMessage(message) ==
         \o message.suspended
         \o message.filler
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.settlementType
         \o message.settlor
 
@@ -2487,11 +2487,11 @@ DecodeOrderErrorMessage(bytes) ==
     LET suspended == ReadBytes(auctionNumber.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET filler == ReadBytes(suspended.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET settlementType == ReadBytes(proClientChar1.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET settlementType == ReadBytes(proClientChar.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
     LET settlor == ReadBytes(settlementType.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
          token                 |-> token.value,
@@ -2515,10 +2515,10 @@ DecodeOrderErrorMessage(bytes) ==
          suspended             |-> suspended.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          settlementType        |-> settlementType.value,
          settlor               |-> settlor.value ], settlor.rest)
 
@@ -2545,10 +2545,10 @@ ZeroOrderErrorMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       settlementType        |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0] ]
 
@@ -2577,10 +2577,10 @@ CheckedOrderErrorMessage ==
         \cup { [ZeroOrderErrorMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroOrderErrorMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderErrorMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroOrderErrorMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroOrderErrorMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.settlementType = one] : one \in Sample(1) }
         \cup { [ZeroOrderErrorMessage EXCEPT !.settlor = one] : one \in Sample(12) }
 
@@ -2611,10 +2611,10 @@ BatchOrderCancelMessage ==
       suspended             : Sample(1),
       filler                : Sample(1),
       pan                   : Sample(10),
-      segmentChar1          : Sample(1),
+      segmentChar           : Sample(1),
       participantType       : Sample(1),
       accountNumber         : Sample(10),
-      proClientChar1        : Sample(1),
+      proClientChar         : Sample(1),
       settlementType        : Sample(1),
       settlor               : Sample(12) ]
 
@@ -2641,10 +2641,10 @@ EncodeBatchOrderCancelMessage(message) ==
         \o message.suspended
         \o message.filler
         \o message.pan
-        \o message.segmentChar1
+        \o message.segmentChar
         \o message.participantType
         \o message.accountNumber
-        \o message.proClientChar1
+        \o message.proClientChar
         \o message.settlementType
         \o message.settlor
 
@@ -2671,11 +2671,11 @@ DecodeBatchOrderCancelMessage(bytes) ==
     LET suspended == ReadBytes(auctionNumber.rest, 1) IN IF ~suspended.ok THEN Fail ELSE
     LET filler == ReadBytes(suspended.rest, 1) IN IF ~filler.ok THEN Fail ELSE
     LET pan == ReadBytes(filler.rest, 10) IN IF ~pan.ok THEN Fail ELSE
-    LET segmentChar1 == ReadBytes(pan.rest, 1) IN IF ~segmentChar1.ok THEN Fail ELSE
-    LET participantType == ReadBytes(segmentChar1.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
+    LET segmentChar == ReadBytes(pan.rest, 1) IN IF ~segmentChar.ok THEN Fail ELSE
+    LET participantType == ReadBytes(segmentChar.rest, 1) IN IF ~participantType.ok THEN Fail ELSE
     LET accountNumber == ReadBytes(participantType.rest, 10) IN IF ~accountNumber.ok THEN Fail ELSE
-    LET proClientChar1 == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar1.ok THEN Fail ELSE
-    LET settlementType == ReadBytes(proClientChar1.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
+    LET proClientChar == ReadBytes(accountNumber.rest, 1) IN IF ~proClientChar.ok THEN Fail ELSE
+    LET settlementType == ReadBytes(proClientChar.rest, 1) IN IF ~settlementType.ok THEN Fail ELSE
     LET settlor == ReadBytes(settlementType.rest, 12) IN IF ~settlor.ok THEN Fail ELSE
     Ok([ reasonCode            |-> reasonCode.value,
          token                 |-> token.value,
@@ -2699,10 +2699,10 @@ DecodeBatchOrderCancelMessage(bytes) ==
          suspended             |-> suspended.value,
          filler                |-> filler.value,
          pan                   |-> pan.value,
-         segmentChar1          |-> segmentChar1.value,
+         segmentChar           |-> segmentChar.value,
          participantType       |-> participantType.value,
          accountNumber         |-> accountNumber.value,
-         proClientChar1        |-> proClientChar1.value,
+         proClientChar         |-> proClientChar.value,
          settlementType        |-> settlementType.value,
          settlor               |-> settlor.value ], settlor.rest)
 
@@ -2729,10 +2729,10 @@ ZeroBatchOrderCancelMessage ==
       suspended             |-> [i \in 1 .. 1 |-> 0],
       filler                |-> [i \in 1 .. 1 |-> 0],
       pan                   |-> [i \in 1 .. 10 |-> 0],
-      segmentChar1          |-> [i \in 1 .. 1 |-> 0],
+      segmentChar           |-> [i \in 1 .. 1 |-> 0],
       participantType       |-> [i \in 1 .. 1 |-> 0],
       accountNumber         |-> [i \in 1 .. 10 |-> 0],
-      proClientChar1        |-> [i \in 1 .. 1 |-> 0],
+      proClientChar         |-> [i \in 1 .. 1 |-> 0],
       settlementType        |-> [i \in 1 .. 1 |-> 0],
       settlor               |-> [i \in 1 .. 12 |-> 0] ]
 
@@ -2761,10 +2761,10 @@ CheckedBatchOrderCancelMessage ==
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.suspended = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.filler = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.pan = one] : one \in Sample(10) }
-        \cup { [ZeroBatchOrderCancelMessage EXCEPT !.segmentChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroBatchOrderCancelMessage EXCEPT !.segmentChar = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.participantType = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.accountNumber = one] : one \in Sample(10) }
-        \cup { [ZeroBatchOrderCancelMessage EXCEPT !.proClientChar1 = one] : one \in Sample(1) }
+        \cup { [ZeroBatchOrderCancelMessage EXCEPT !.proClientChar = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.settlementType = one] : one \in Sample(1) }
         \cup { [ZeroBatchOrderCancelMessage EXCEPT !.settlor = one] : one \in Sample(12) }
 

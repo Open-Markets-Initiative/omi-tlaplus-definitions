@@ -129,17 +129,17 @@ CheckedBinaryPacketHeader ==
 (***************************************************************************)
 
 IncrementalRefreshSpectrumGroup ==
-    [ mdEntryTypeSpectrumEntryType : Sample(1),
-      financialInstrumentFullName  : Sample(35),
-      symbol                       : Sample(20),
-      instrumentGuid               : Sample(8),
-      securityId                   : Sample(4),
-      mdEntryPx                    : Sample(8),
-      mdEntrySize                  : Sample(8),
-      mdEntryTime                  : Sample(8) ]
+    [ spectrumMdEntryType         : Sample(1),
+      financialInstrumentFullName : Sample(35),
+      symbol                      : Sample(20),
+      instrumentGuid              : Sample(8),
+      securityId                  : Sample(4),
+      mdEntryPx                   : Sample(8),
+      mdEntrySize                 : Sample(8),
+      mdEntryTime                 : Sample(8) ]
 
 EncodeIncrementalRefreshSpectrumGroup(message) ==
-    message.mdEntryTypeSpectrumEntryType
+    message.spectrumMdEntryType
         \o message.financialInstrumentFullName
         \o message.symbol
         \o message.instrumentGuid
@@ -149,37 +149,37 @@ EncodeIncrementalRefreshSpectrumGroup(message) ==
         \o message.mdEntryTime
 
 DecodeIncrementalRefreshSpectrumGroup(bytes) ==
-    LET mdEntryTypeSpectrumEntryType == ReadBytes(bytes, 1) IN IF ~mdEntryTypeSpectrumEntryType.ok THEN Fail ELSE
-    LET financialInstrumentFullName == ReadBytes(mdEntryTypeSpectrumEntryType.rest, 35) IN IF ~financialInstrumentFullName.ok THEN Fail ELSE
+    LET spectrumMdEntryType == ReadBytes(bytes, 1) IN IF ~spectrumMdEntryType.ok THEN Fail ELSE
+    LET financialInstrumentFullName == ReadBytes(spectrumMdEntryType.rest, 35) IN IF ~financialInstrumentFullName.ok THEN Fail ELSE
     LET symbol == ReadBytes(financialInstrumentFullName.rest, 20) IN IF ~symbol.ok THEN Fail ELSE
     LET instrumentGuid == ReadBytes(symbol.rest, 8) IN IF ~instrumentGuid.ok THEN Fail ELSE
     LET securityId == ReadBytes(instrumentGuid.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
     LET mdEntryPx == ReadBytes(securityId.rest, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
     LET mdEntrySize == ReadBytes(mdEntryPx.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
     LET mdEntryTime == ReadBytes(mdEntrySize.rest, 8) IN IF ~mdEntryTime.ok THEN Fail ELSE
-    Ok([ mdEntryTypeSpectrumEntryType |-> mdEntryTypeSpectrumEntryType.value,
-         financialInstrumentFullName  |-> financialInstrumentFullName.value,
-         symbol                       |-> symbol.value,
-         instrumentGuid               |-> instrumentGuid.value,
-         securityId                   |-> securityId.value,
-         mdEntryPx                    |-> mdEntryPx.value,
-         mdEntrySize                  |-> mdEntrySize.value,
-         mdEntryTime                  |-> mdEntryTime.value ], mdEntryTime.rest)
+    Ok([ spectrumMdEntryType         |-> spectrumMdEntryType.value,
+         financialInstrumentFullName |-> financialInstrumentFullName.value,
+         symbol                      |-> symbol.value,
+         instrumentGuid              |-> instrumentGuid.value,
+         securityId                  |-> securityId.value,
+         mdEntryPx                   |-> mdEntryPx.value,
+         mdEntrySize                 |-> mdEntrySize.value,
+         mdEntryTime                 |-> mdEntryTime.value ], mdEntryTime.rest)
 
 ZeroIncrementalRefreshSpectrumGroup ==
-    [ mdEntryTypeSpectrumEntryType |-> [i \in 1 .. 1 |-> 0],
-      financialInstrumentFullName  |-> [i \in 1 .. 35 |-> 0],
-      symbol                       |-> [i \in 1 .. 20 |-> 0],
-      instrumentGuid               |-> [i \in 1 .. 8 |-> 0],
-      securityId                   |-> [i \in 1 .. 4 |-> 0],
-      mdEntryPx                    |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySize                  |-> [i \in 1 .. 8 |-> 0],
-      mdEntryTime                  |-> [i \in 1 .. 8 |-> 0] ]
+    [ spectrumMdEntryType         |-> [i \in 1 .. 1 |-> 0],
+      financialInstrumentFullName |-> [i \in 1 .. 35 |-> 0],
+      symbol                      |-> [i \in 1 .. 20 |-> 0],
+      instrumentGuid              |-> [i \in 1 .. 8 |-> 0],
+      securityId                  |-> [i \in 1 .. 4 |-> 0],
+      mdEntryPx                   |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize                 |-> [i \in 1 .. 8 |-> 0],
+      mdEntryTime                 |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Incremental Refresh Spectrum Group at zero, then each field in turn at the values it is checked at *)
 CheckedIncrementalRefreshSpectrumGroup ==
     { ZeroIncrementalRefreshSpectrumGroup }
-        \cup { [ZeroIncrementalRefreshSpectrumGroup EXCEPT !.mdEntryTypeSpectrumEntryType = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshSpectrumGroup EXCEPT !.spectrumMdEntryType = one] : one \in Sample(1) }
         \cup { [ZeroIncrementalRefreshSpectrumGroup EXCEPT !.financialInstrumentFullName = one] : one \in Sample(35) }
         \cup { [ZeroIncrementalRefreshSpectrumGroup EXCEPT !.symbol = one] : one \in Sample(20) }
         \cup { [ZeroIncrementalRefreshSpectrumGroup EXCEPT !.instrumentGuid = one] : one \in Sample(8) }
@@ -278,7 +278,7 @@ CheckedMdIncrementalRefreshSpectrum ==
 (***************************************************************************)
 
 IncrementalRefreshTickerGroup ==
-    [ mdEntryTypeTickerEntryType  : Sample(1),
+    [ tickerMdEntryType           : Sample(1),
       securityId                  : Sample(4),
       symbol                      : Sample(20),
       instrumentGuid              : Sample(8),
@@ -291,7 +291,7 @@ IncrementalRefreshTickerGroup ==
       aggressorSide               : Sample(1) ]
 
 EncodeIncrementalRefreshTickerGroup(message) ==
-    message.mdEntryTypeTickerEntryType
+    message.tickerMdEntryType
         \o message.securityId
         \o message.symbol
         \o message.instrumentGuid
@@ -304,8 +304,8 @@ EncodeIncrementalRefreshTickerGroup(message) ==
         \o message.aggressorSide
 
 DecodeIncrementalRefreshTickerGroup(bytes) ==
-    LET mdEntryTypeTickerEntryType == ReadBytes(bytes, 1) IN IF ~mdEntryTypeTickerEntryType.ok THEN Fail ELSE
-    LET securityId == ReadBytes(mdEntryTypeTickerEntryType.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET tickerMdEntryType == ReadBytes(bytes, 1) IN IF ~tickerMdEntryType.ok THEN Fail ELSE
+    LET securityId == ReadBytes(tickerMdEntryType.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
     LET symbol == ReadBytes(securityId.rest, 20) IN IF ~symbol.ok THEN Fail ELSE
     LET instrumentGuid == ReadBytes(symbol.rest, 8) IN IF ~instrumentGuid.ok THEN Fail ELSE
     LET financialInstrumentFullName == ReadBytes(instrumentGuid.rest, 35) IN IF ~financialInstrumentFullName.ok THEN Fail ELSE
@@ -315,7 +315,7 @@ DecodeIncrementalRefreshTickerGroup(bytes) ==
     LET openCloseSettlFlag == ReadBytes(mdEntryTime.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
     LET tradingSessionId == ReadBytes(openCloseSettlFlag.rest, 1) IN IF ~tradingSessionId.ok THEN Fail ELSE
     LET aggressorSide == ReadBytes(tradingSessionId.rest, 1) IN IF ~aggressorSide.ok THEN Fail ELSE
-    Ok([ mdEntryTypeTickerEntryType  |-> mdEntryTypeTickerEntryType.value,
+    Ok([ tickerMdEntryType           |-> tickerMdEntryType.value,
          securityId                  |-> securityId.value,
          symbol                      |-> symbol.value,
          instrumentGuid              |-> instrumentGuid.value,
@@ -328,7 +328,7 @@ DecodeIncrementalRefreshTickerGroup(bytes) ==
          aggressorSide               |-> aggressorSide.value ], aggressorSide.rest)
 
 ZeroIncrementalRefreshTickerGroup ==
-    [ mdEntryTypeTickerEntryType  |-> [i \in 1 .. 1 |-> 0],
+    [ tickerMdEntryType           |-> [i \in 1 .. 1 |-> 0],
       securityId                  |-> [i \in 1 .. 4 |-> 0],
       symbol                      |-> [i \in 1 .. 20 |-> 0],
       instrumentGuid              |-> [i \in 1 .. 8 |-> 0],
@@ -343,7 +343,7 @@ ZeroIncrementalRefreshTickerGroup ==
 (* Incremental Refresh Ticker Group at zero, then each field in turn at the values it is checked at *)
 CheckedIncrementalRefreshTickerGroup ==
     { ZeroIncrementalRefreshTickerGroup }
-        \cup { [ZeroIncrementalRefreshTickerGroup EXCEPT !.mdEntryTypeTickerEntryType = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshTickerGroup EXCEPT !.tickerMdEntryType = one] : one \in Sample(1) }
         \cup { [ZeroIncrementalRefreshTickerGroup EXCEPT !.securityId = one] : one \in Sample(4) }
         \cup { [ZeroIncrementalRefreshTickerGroup EXCEPT !.symbol = one] : one \in Sample(20) }
         \cup { [ZeroIncrementalRefreshTickerGroup EXCEPT !.instrumentGuid = one] : one \in Sample(8) }
@@ -445,37 +445,37 @@ CheckedMdIncrementalRefreshTicker ==
 (***************************************************************************)
 
 SnapshotRefreshSpectrumGroup ==
-    [ mdEntryTypeSpectrumEntryType : Sample(1),
-      mdEntryPx                    : Sample(8),
-      mdEntrySize                  : Sample(8),
-      mdEntryTime                  : Sample(8) ]
+    [ spectrumMdEntryType : Sample(1),
+      mdEntryPx           : Sample(8),
+      mdEntrySize         : Sample(8),
+      mdEntryTime         : Sample(8) ]
 
 EncodeSnapshotRefreshSpectrumGroup(message) ==
-    message.mdEntryTypeSpectrumEntryType
+    message.spectrumMdEntryType
         \o message.mdEntryPx
         \o message.mdEntrySize
         \o message.mdEntryTime
 
 DecodeSnapshotRefreshSpectrumGroup(bytes) ==
-    LET mdEntryTypeSpectrumEntryType == ReadBytes(bytes, 1) IN IF ~mdEntryTypeSpectrumEntryType.ok THEN Fail ELSE
-    LET mdEntryPx == ReadBytes(mdEntryTypeSpectrumEntryType.rest, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
+    LET spectrumMdEntryType == ReadBytes(bytes, 1) IN IF ~spectrumMdEntryType.ok THEN Fail ELSE
+    LET mdEntryPx == ReadBytes(spectrumMdEntryType.rest, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
     LET mdEntrySize == ReadBytes(mdEntryPx.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
     LET mdEntryTime == ReadBytes(mdEntrySize.rest, 8) IN IF ~mdEntryTime.ok THEN Fail ELSE
-    Ok([ mdEntryTypeSpectrumEntryType |-> mdEntryTypeSpectrumEntryType.value,
-         mdEntryPx                    |-> mdEntryPx.value,
-         mdEntrySize                  |-> mdEntrySize.value,
-         mdEntryTime                  |-> mdEntryTime.value ], mdEntryTime.rest)
+    Ok([ spectrumMdEntryType |-> spectrumMdEntryType.value,
+         mdEntryPx           |-> mdEntryPx.value,
+         mdEntrySize         |-> mdEntrySize.value,
+         mdEntryTime         |-> mdEntryTime.value ], mdEntryTime.rest)
 
 ZeroSnapshotRefreshSpectrumGroup ==
-    [ mdEntryTypeSpectrumEntryType |-> [i \in 1 .. 1 |-> 0],
-      mdEntryPx                    |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySize                  |-> [i \in 1 .. 8 |-> 0],
-      mdEntryTime                  |-> [i \in 1 .. 8 |-> 0] ]
+    [ spectrumMdEntryType |-> [i \in 1 .. 1 |-> 0],
+      mdEntryPx           |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize         |-> [i \in 1 .. 8 |-> 0],
+      mdEntryTime         |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Snapshot Refresh Spectrum Group at zero, then each field in turn at the values it is checked at *)
 CheckedSnapshotRefreshSpectrumGroup ==
     { ZeroSnapshotRefreshSpectrumGroup }
-        \cup { [ZeroSnapshotRefreshSpectrumGroup EXCEPT !.mdEntryTypeSpectrumEntryType = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotRefreshSpectrumGroup EXCEPT !.spectrumMdEntryType = one] : one \in Sample(1) }
         \cup { [ZeroSnapshotRefreshSpectrumGroup EXCEPT !.mdEntryPx = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotRefreshSpectrumGroup EXCEPT !.mdEntrySize = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotRefreshSpectrumGroup EXCEPT !.mdEntryTime = one] : one \in Sample(8) }
@@ -594,16 +594,16 @@ CheckedMdSnapshotRefreshSpectrum ==
 (***************************************************************************)
 
 SnapshotRefreshTickerGroup ==
-    [ mdEntryTypeTickerEntryType : Sample(1),
-      mdEntryPx                  : Sample(8),
-      mdEntrySize                : Sample(8),
-      mdEntryTime                : Sample(8),
-      openCloseSettlFlag         : Sample(1),
-      tradingSessionId           : Sample(1),
-      aggressorSide              : Sample(1) ]
+    [ tickerMdEntryType  : Sample(1),
+      mdEntryPx          : Sample(8),
+      mdEntrySize        : Sample(8),
+      mdEntryTime        : Sample(8),
+      openCloseSettlFlag : Sample(1),
+      tradingSessionId   : Sample(1),
+      aggressorSide      : Sample(1) ]
 
 EncodeSnapshotRefreshTickerGroup(message) ==
-    message.mdEntryTypeTickerEntryType
+    message.tickerMdEntryType
         \o message.mdEntryPx
         \o message.mdEntrySize
         \o message.mdEntryTime
@@ -612,34 +612,34 @@ EncodeSnapshotRefreshTickerGroup(message) ==
         \o message.aggressorSide
 
 DecodeSnapshotRefreshTickerGroup(bytes) ==
-    LET mdEntryTypeTickerEntryType == ReadBytes(bytes, 1) IN IF ~mdEntryTypeTickerEntryType.ok THEN Fail ELSE
-    LET mdEntryPx == ReadBytes(mdEntryTypeTickerEntryType.rest, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
+    LET tickerMdEntryType == ReadBytes(bytes, 1) IN IF ~tickerMdEntryType.ok THEN Fail ELSE
+    LET mdEntryPx == ReadBytes(tickerMdEntryType.rest, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
     LET mdEntrySize == ReadBytes(mdEntryPx.rest, 8) IN IF ~mdEntrySize.ok THEN Fail ELSE
     LET mdEntryTime == ReadBytes(mdEntrySize.rest, 8) IN IF ~mdEntryTime.ok THEN Fail ELSE
     LET openCloseSettlFlag == ReadBytes(mdEntryTime.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
     LET tradingSessionId == ReadBytes(openCloseSettlFlag.rest, 1) IN IF ~tradingSessionId.ok THEN Fail ELSE
     LET aggressorSide == ReadBytes(tradingSessionId.rest, 1) IN IF ~aggressorSide.ok THEN Fail ELSE
-    Ok([ mdEntryTypeTickerEntryType |-> mdEntryTypeTickerEntryType.value,
-         mdEntryPx                  |-> mdEntryPx.value,
-         mdEntrySize                |-> mdEntrySize.value,
-         mdEntryTime                |-> mdEntryTime.value,
-         openCloseSettlFlag         |-> openCloseSettlFlag.value,
-         tradingSessionId           |-> tradingSessionId.value,
-         aggressorSide              |-> aggressorSide.value ], aggressorSide.rest)
+    Ok([ tickerMdEntryType  |-> tickerMdEntryType.value,
+         mdEntryPx          |-> mdEntryPx.value,
+         mdEntrySize        |-> mdEntrySize.value,
+         mdEntryTime        |-> mdEntryTime.value,
+         openCloseSettlFlag |-> openCloseSettlFlag.value,
+         tradingSessionId   |-> tradingSessionId.value,
+         aggressorSide      |-> aggressorSide.value ], aggressorSide.rest)
 
 ZeroSnapshotRefreshTickerGroup ==
-    [ mdEntryTypeTickerEntryType |-> [i \in 1 .. 1 |-> 0],
-      mdEntryPx                  |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySize                |-> [i \in 1 .. 8 |-> 0],
-      mdEntryTime                |-> [i \in 1 .. 8 |-> 0],
-      openCloseSettlFlag         |-> [i \in 1 .. 1 |-> 0],
-      tradingSessionId           |-> [i \in 1 .. 1 |-> 0],
-      aggressorSide              |-> [i \in 1 .. 1 |-> 0] ]
+    [ tickerMdEntryType  |-> [i \in 1 .. 1 |-> 0],
+      mdEntryPx          |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySize        |-> [i \in 1 .. 8 |-> 0],
+      mdEntryTime        |-> [i \in 1 .. 8 |-> 0],
+      openCloseSettlFlag |-> [i \in 1 .. 1 |-> 0],
+      tradingSessionId   |-> [i \in 1 .. 1 |-> 0],
+      aggressorSide      |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Snapshot Refresh Ticker Group at zero, then each field in turn at the values it is checked at *)
 CheckedSnapshotRefreshTickerGroup ==
     { ZeroSnapshotRefreshTickerGroup }
-        \cup { [ZeroSnapshotRefreshTickerGroup EXCEPT !.mdEntryTypeTickerEntryType = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotRefreshTickerGroup EXCEPT !.tickerMdEntryType = one] : one \in Sample(1) }
         \cup { [ZeroSnapshotRefreshTickerGroup EXCEPT !.mdEntryPx = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotRefreshTickerGroup EXCEPT !.mdEntrySize = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotRefreshTickerGroup EXCEPT !.mdEntryTime = one] : one \in Sample(8) }

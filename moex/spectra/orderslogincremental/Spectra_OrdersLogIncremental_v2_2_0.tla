@@ -191,22 +191,22 @@ CheckedSequenceResetMessage ==
         \cup { [ZeroSequenceResetMessage EXCEPT !.newSeqNo = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Best Prices Message No M D Entries Group: 21 bytes                      *)
+(* Best Prices Message No Md Entries Group: 21 bytes                       *)
 (***************************************************************************)
 
-BestPricesMessageNoMDEntriesGroup ==
+BestPricesMessageNoMdEntriesGroup ==
     [ mktBidPx   : Sample(8),
       mktOfferPx : Sample(8),
       bpFlags    : Sample(1),
       securityId : Sample(4) ]
 
-EncodeBestPricesMessageNoMDEntriesGroup(message) ==
+EncodeBestPricesMessageNoMdEntriesGroup(message) ==
     message.mktBidPx
         \o message.mktOfferPx
         \o message.bpFlags
         \o message.securityId
 
-DecodeBestPricesMessageNoMDEntriesGroup(bytes) ==
+DecodeBestPricesMessageNoMdEntriesGroup(bytes) ==
     LET mktBidPx == ReadBytes(bytes, 8) IN IF ~mktBidPx.ok THEN Fail ELSE
     LET mktOfferPx == ReadBytes(mktBidPx.rest, 8) IN IF ~mktOfferPx.ok THEN Fail ELSE
     LET bpFlags == ReadBytes(mktOfferPx.rest, 1) IN IF ~bpFlags.ok THEN Fail ELSE
@@ -216,92 +216,92 @@ DecodeBestPricesMessageNoMDEntriesGroup(bytes) ==
          bpFlags    |-> bpFlags.value,
          securityId |-> securityId.value ], securityId.rest)
 
-ZeroBestPricesMessageNoMDEntriesGroup ==
+ZeroBestPricesMessageNoMdEntriesGroup ==
     [ mktBidPx   |-> [i \in 1 .. 8 |-> 0],
       mktOfferPx |-> [i \in 1 .. 8 |-> 0],
       bpFlags    |-> [i \in 1 .. 1 |-> 0],
       securityId |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Best Prices Message No M D Entries Group at zero, then each field in turn at the values it is checked at *)
-CheckedBestPricesMessageNoMDEntriesGroup ==
-    { ZeroBestPricesMessageNoMDEntriesGroup }
-        \cup { [ZeroBestPricesMessageNoMDEntriesGroup EXCEPT !.mktBidPx = one] : one \in Sample(8) }
-        \cup { [ZeroBestPricesMessageNoMDEntriesGroup EXCEPT !.mktOfferPx = one] : one \in Sample(8) }
-        \cup { [ZeroBestPricesMessageNoMDEntriesGroup EXCEPT !.bpFlags = one] : one \in Sample(1) }
-        \cup { [ZeroBestPricesMessageNoMDEntriesGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+(* Best Prices Message No Md Entries Group at zero, then each field in turn at the values it is checked at *)
+CheckedBestPricesMessageNoMdEntriesGroup ==
+    { ZeroBestPricesMessageNoMdEntriesGroup }
+        \cup { [ZeroBestPricesMessageNoMdEntriesGroup EXCEPT !.mktBidPx = one] : one \in Sample(8) }
+        \cup { [ZeroBestPricesMessageNoMdEntriesGroup EXCEPT !.mktOfferPx = one] : one \in Sample(8) }
+        \cup { [ZeroBestPricesMessageNoMdEntriesGroup EXCEPT !.bpFlags = one] : one \in Sample(1) }
+        \cup { [ZeroBestPricesMessageNoMdEntriesGroup EXCEPT !.securityId = one] : one \in Sample(4) }
 
-(* A run of Best Prices Message No M D Entries Group, written one after another *)
-RECURSIVE EncodeBestPricesMessageNoMDEntriesGroupList(_)
-EncodeBestPricesMessageNoMDEntriesGroupList(messages) ==
+(* A run of Best Prices Message No Md Entries Group, written one after another *)
+RECURSIVE EncodeBestPricesMessageNoMdEntriesGroupList(_)
+EncodeBestPricesMessageNoMdEntriesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeBestPricesMessageNoMDEntriesGroup(Head(messages)) \o EncodeBestPricesMessageNoMDEntriesGroupList(Tail(messages))
+    ELSE EncodeBestPricesMessageNoMdEntriesGroup(Head(messages)) \o EncodeBestPricesMessageNoMdEntriesGroupList(Tail(messages))
 
-(* As many Best Prices Message No M D Entries Group as the field that counts them says *)
-RECURSIVE ReadBestPricesMessageNoMDEntriesGroupList(_, _)
-ReadBestPricesMessageNoMDEntriesGroupList(bytes, count) ==
+(* As many Best Prices Message No Md Entries Group as the field that counts them says *)
+RECURSIVE ReadBestPricesMessageNoMdEntriesGroupList(_, _)
+ReadBestPricesMessageNoMdEntriesGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeBestPricesMessageNoMDEntriesGroup(bytes)
+    ELSE LET one == DecodeBestPricesMessageNoMdEntriesGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadBestPricesMessageNoMDEntriesGroupList(one.rest, count - 1)
+             ELSE LET more == ReadBestPricesMessageNoMdEntriesGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Best Prices Message No M D Entries Group of each kind, for the lists that carry them *)
-OneBestPricesMessageNoMDEntriesGroup == { ZeroBestPricesMessageNoMDEntriesGroup }
+(* One Best Prices Message No Md Entries Group of each kind, for the lists that carry them *)
+OneBestPricesMessageNoMdEntriesGroup == { ZeroBestPricesMessageNoMdEntriesGroup }
 
 (***************************************************************************)
-(* Best Prices Message No M D Entries Groups                               *)
+(* Best Prices Message No Md Entries Groups                                *)
 (***************************************************************************)
 
-BestPricesMessageNoMDEntriesGroups ==
+BestPricesMessageNoMdEntriesGroups ==
     [ blockLength                       : Sample(2),
-      bestPricesMessageNoMDEntriesGroup : SampleLists(OneBestPricesMessageNoMDEntriesGroup) ]
+      bestPricesMessageNoMdEntriesGroup : SampleLists(OneBestPricesMessageNoMdEntriesGroup) ]
 
-EncodeBestPricesMessageNoMDEntriesGroups(message) ==
+EncodeBestPricesMessageNoMdEntriesGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.bestPricesMessageNoMDEntriesGroup), 1)
-        \o EncodeBestPricesMessageNoMDEntriesGroupList(message.bestPricesMessageNoMDEntriesGroup)
+        \o EncodeUIntBE(Len(message.bestPricesMessageNoMdEntriesGroup), 1)
+        \o EncodeBestPricesMessageNoMdEntriesGroupList(message.bestPricesMessageNoMdEntriesGroup)
 
-DecodeBestPricesMessageNoMDEntriesGroups(bytes) ==
+DecodeBestPricesMessageNoMdEntriesGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET bestPricesMessageNoMDEntriesGroup == ReadBestPricesMessageNoMDEntriesGroupList(numInGroup.rest, numInGroup.value) IN IF ~bestPricesMessageNoMDEntriesGroup.ok THEN Fail ELSE
+    LET bestPricesMessageNoMdEntriesGroup == ReadBestPricesMessageNoMdEntriesGroupList(numInGroup.rest, numInGroup.value) IN IF ~bestPricesMessageNoMdEntriesGroup.ok THEN Fail ELSE
     Ok([ blockLength                       |-> blockLength.value,
-         bestPricesMessageNoMDEntriesGroup |-> bestPricesMessageNoMDEntriesGroup.value ], bestPricesMessageNoMDEntriesGroup.rest)
+         bestPricesMessageNoMdEntriesGroup |-> bestPricesMessageNoMdEntriesGroup.value ], bestPricesMessageNoMdEntriesGroup.rest)
 
-ZeroBestPricesMessageNoMDEntriesGroups ==
+ZeroBestPricesMessageNoMdEntriesGroups ==
     [ blockLength                       |-> [i \in 1 .. 2 |-> 0],
-      bestPricesMessageNoMDEntriesGroup |-> << >> ]
+      bestPricesMessageNoMdEntriesGroup |-> << >> ]
 
-(* Best Prices Message No M D Entries Groups at zero, then each field in turn at the values it is checked at *)
-CheckedBestPricesMessageNoMDEntriesGroups ==
-    { ZeroBestPricesMessageNoMDEntriesGroups }
-        \cup { [ZeroBestPricesMessageNoMDEntriesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroBestPricesMessageNoMDEntriesGroups EXCEPT !.bestPricesMessageNoMDEntriesGroup = one] : one \in SampleLists(OneBestPricesMessageNoMDEntriesGroup) }
+(* Best Prices Message No Md Entries Groups at zero, then each field in turn at the values it is checked at *)
+CheckedBestPricesMessageNoMdEntriesGroups ==
+    { ZeroBestPricesMessageNoMdEntriesGroups }
+        \cup { [ZeroBestPricesMessageNoMdEntriesGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroBestPricesMessageNoMdEntriesGroups EXCEPT !.bestPricesMessageNoMdEntriesGroup = one] : one \in SampleLists(OneBestPricesMessageNoMdEntriesGroup) }
 
 (***************************************************************************)
 (* Best Prices Message                                                     *)
 (***************************************************************************)
 
 BestPricesMessage ==
-    [ bestPricesMessageNoMDEntriesGroups : BestPricesMessageNoMDEntriesGroups ]
+    [ bestPricesMessageNoMdEntriesGroups : BestPricesMessageNoMdEntriesGroups ]
 
 EncodeBestPricesMessage(message) ==
-    EncodeBestPricesMessageNoMDEntriesGroups(message.bestPricesMessageNoMDEntriesGroups)
+    EncodeBestPricesMessageNoMdEntriesGroups(message.bestPricesMessageNoMdEntriesGroups)
 
 DecodeBestPricesMessage(bytes) ==
-    LET bestPricesMessageNoMDEntriesGroups == DecodeBestPricesMessageNoMDEntriesGroups(bytes) IN IF ~bestPricesMessageNoMDEntriesGroups.ok THEN Fail ELSE
-    Ok([ bestPricesMessageNoMDEntriesGroups |-> bestPricesMessageNoMDEntriesGroups.value ], bestPricesMessageNoMDEntriesGroups.rest)
+    LET bestPricesMessageNoMdEntriesGroups == DecodeBestPricesMessageNoMdEntriesGroups(bytes) IN IF ~bestPricesMessageNoMdEntriesGroups.ok THEN Fail ELSE
+    Ok([ bestPricesMessageNoMdEntriesGroups |-> bestPricesMessageNoMdEntriesGroups.value ], bestPricesMessageNoMdEntriesGroups.rest)
 
 ZeroBestPricesMessage ==
-    [ bestPricesMessageNoMDEntriesGroups |-> ZeroBestPricesMessageNoMDEntriesGroups ]
+    [ bestPricesMessageNoMdEntriesGroups |-> ZeroBestPricesMessageNoMdEntriesGroups ]
 
 (* Best Prices Message at zero, then each field in turn at the values it is checked at *)
 CheckedBestPricesMessage ==
     { ZeroBestPricesMessage }
-        \cup { [ZeroBestPricesMessage EXCEPT !.bestPricesMessageNoMDEntriesGroups = one] : one \in CheckedBestPricesMessageNoMDEntriesGroups }
+        \cup { [ZeroBestPricesMessage EXCEPT !.bestPricesMessageNoMdEntriesGroups = one] : one \in CheckedBestPricesMessageNoMdEntriesGroups }
 
 (***************************************************************************)
 (* Empty Book Message: 4 bytes                                             *)
@@ -664,18 +664,18 @@ RoundTripSequenceResetMessage ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Best Prices Message No M D Entries Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripBestPricesMessageNoMDEntriesGroup ==
-    \A message \in CheckedBestPricesMessageNoMDEntriesGroup :
-        LET read == DecodeBestPricesMessageNoMDEntriesGroup(EncodeBestPricesMessageNoMDEntriesGroup(message))
+(* Every Best Prices Message No Md Entries Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripBestPricesMessageNoMdEntriesGroup ==
+    \A message \in CheckedBestPricesMessageNoMdEntriesGroup :
+        LET read == DecodeBestPricesMessageNoMdEntriesGroup(EncodeBestPricesMessageNoMdEntriesGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Best Prices Message No M D Entries Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripBestPricesMessageNoMDEntriesGroups ==
-    \A message \in CheckedBestPricesMessageNoMDEntriesGroups :
-        LET read == DecodeBestPricesMessageNoMDEntriesGroups(EncodeBestPricesMessageNoMDEntriesGroups(message))
+(* Every Best Prices Message No Md Entries Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripBestPricesMessageNoMdEntriesGroups ==
+    \A message \in CheckedBestPricesMessageNoMdEntriesGroups :
+        LET read == DecodeBestPricesMessageNoMdEntriesGroups(EncodeBestPricesMessageNoMdEntriesGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

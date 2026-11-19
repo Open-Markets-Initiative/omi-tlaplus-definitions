@@ -823,27 +823,27 @@ CheckedFinalSettlementFuturesPrice ==
 (***************************************************************************)
 
 ErisSecurityAltIdGroup ==
-    [ securityAltId50             : Sample(26),
+    [ securityAltId               : Sample(26),
       securityAltIdSourceOptional : Sample(1) ]
 
 EncodeErisSecurityAltIdGroup(message) ==
-    message.securityAltId50
+    message.securityAltId
         \o message.securityAltIdSourceOptional
 
 DecodeErisSecurityAltIdGroup(bytes) ==
-    LET securityAltId50 == ReadBytes(bytes, 26) IN IF ~securityAltId50.ok THEN Fail ELSE
-    LET securityAltIdSourceOptional == ReadBytes(securityAltId50.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
-    Ok([ securityAltId50             |-> securityAltId50.value,
+    LET securityAltId == ReadBytes(bytes, 26) IN IF ~securityAltId.ok THEN Fail ELSE
+    LET securityAltIdSourceOptional == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
+    Ok([ securityAltId               |-> securityAltId.value,
          securityAltIdSourceOptional |-> securityAltIdSourceOptional.value ], securityAltIdSourceOptional.rest)
 
 ZeroErisSecurityAltIdGroup ==
-    [ securityAltId50             |-> [i \in 1 .. 26 |-> 0],
+    [ securityAltId               |-> [i \in 1 .. 26 |-> 0],
       securityAltIdSourceOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Eris Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
 CheckedErisSecurityAltIdGroup ==
     { ZeroErisSecurityAltIdGroup }
-        \cup { [ZeroErisSecurityAltIdGroup EXCEPT !.securityAltId50 = one] : one \in Sample(26) }
+        \cup { [ZeroErisSecurityAltIdGroup EXCEPT !.securityAltId = one] : one \in Sample(26) }
         \cup { [ZeroErisSecurityAltIdGroup EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
 
 (* A run of Eris Security Alt Id Group, written one after another *)
@@ -1733,32 +1733,32 @@ CheckedUnderlyingMaturityMonthYear ==
 (***************************************************************************)
 
 TradeBlocksUnderlyingsGroup ==
-    [ underlyingSymbol                  : Sample(50),
-      underlyingMaturityMonthYear       : UnderlyingMaturityMonthYear,
-      underlyingSecurityType            : Sample(9),
-      underlyingSecurityExchangeString4 : Sample(4) ]
+    [ underlyingSymbol            : Sample(50),
+      underlyingMaturityMonthYear : UnderlyingMaturityMonthYear,
+      underlyingSecurityType      : Sample(9),
+      underlyingSecurityExchange  : Sample(4) ]
 
 EncodeTradeBlocksUnderlyingsGroup(message) ==
     message.underlyingSymbol
         \o EncodeUnderlyingMaturityMonthYear(message.underlyingMaturityMonthYear)
         \o message.underlyingSecurityType
-        \o message.underlyingSecurityExchangeString4
+        \o message.underlyingSecurityExchange
 
 DecodeTradeBlocksUnderlyingsGroup(bytes) ==
     LET underlyingSymbol == ReadBytes(bytes, 50) IN IF ~underlyingSymbol.ok THEN Fail ELSE
     LET underlyingMaturityMonthYear == DecodeUnderlyingMaturityMonthYear(underlyingSymbol.rest) IN IF ~underlyingMaturityMonthYear.ok THEN Fail ELSE
     LET underlyingSecurityType == ReadBytes(underlyingMaturityMonthYear.rest, 9) IN IF ~underlyingSecurityType.ok THEN Fail ELSE
-    LET underlyingSecurityExchangeString4 == ReadBytes(underlyingSecurityType.rest, 4) IN IF ~underlyingSecurityExchangeString4.ok THEN Fail ELSE
-    Ok([ underlyingSymbol                  |-> underlyingSymbol.value,
-         underlyingMaturityMonthYear       |-> underlyingMaturityMonthYear.value,
-         underlyingSecurityType            |-> underlyingSecurityType.value,
-         underlyingSecurityExchangeString4 |-> underlyingSecurityExchangeString4.value ], underlyingSecurityExchangeString4.rest)
+    LET underlyingSecurityExchange == ReadBytes(underlyingSecurityType.rest, 4) IN IF ~underlyingSecurityExchange.ok THEN Fail ELSE
+    Ok([ underlyingSymbol            |-> underlyingSymbol.value,
+         underlyingMaturityMonthYear |-> underlyingMaturityMonthYear.value,
+         underlyingSecurityType      |-> underlyingSecurityType.value,
+         underlyingSecurityExchange  |-> underlyingSecurityExchange.value ], underlyingSecurityExchange.rest)
 
 ZeroTradeBlocksUnderlyingsGroup ==
-    [ underlyingSymbol                  |-> [i \in 1 .. 50 |-> 0],
-      underlyingMaturityMonthYear       |-> ZeroUnderlyingMaturityMonthYear,
-      underlyingSecurityType            |-> [i \in 1 .. 9 |-> 0],
-      underlyingSecurityExchangeString4 |-> [i \in 1 .. 4 |-> 0] ]
+    [ underlyingSymbol            |-> [i \in 1 .. 50 |-> 0],
+      underlyingMaturityMonthYear |-> ZeroUnderlyingMaturityMonthYear,
+      underlyingSecurityType      |-> [i \in 1 .. 9 |-> 0],
+      underlyingSecurityExchange  |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Trade Blocks Underlyings Group at zero, then each field in turn at the values it is checked at *)
 CheckedTradeBlocksUnderlyingsGroup ==
@@ -1766,7 +1766,7 @@ CheckedTradeBlocksUnderlyingsGroup ==
         \cup { [ZeroTradeBlocksUnderlyingsGroup EXCEPT !.underlyingSymbol = one] : one \in Sample(50) }
         \cup { [ZeroTradeBlocksUnderlyingsGroup EXCEPT !.underlyingMaturityMonthYear = one] : one \in CheckedUnderlyingMaturityMonthYear }
         \cup { [ZeroTradeBlocksUnderlyingsGroup EXCEPT !.underlyingSecurityType = one] : one \in Sample(9) }
-        \cup { [ZeroTradeBlocksUnderlyingsGroup EXCEPT !.underlyingSecurityExchangeString4 = one] : one \in Sample(4) }
+        \cup { [ZeroTradeBlocksUnderlyingsGroup EXCEPT !.underlyingSecurityExchange = one] : one \in Sample(4) }
 
 (* A run of Trade Blocks Underlyings Group, written one after another *)
 RECURSIVE EncodeTradeBlocksUnderlyingsGroupList(_)
@@ -1954,7 +1954,7 @@ TradeBlocksOriginalLegsGroup ==
       legUnitOfMeasure         : Sample(5),
       legUnitOfMeasureQty      : Sample(8),
       legSecurityExchange      : Sample(4),
-      legRatioQtyUInt16Null    : Sample(2),
+      legRatioQty              : Sample(2),
       legSide                  : Sample(1),
       legPutOrCall             : Sample(1),
       legUnitOfMeasureCurrency : Sample(3) ]
@@ -1971,7 +1971,7 @@ EncodeTradeBlocksOriginalLegsGroup(message) ==
         \o message.legUnitOfMeasure
         \o message.legUnitOfMeasureQty
         \o message.legSecurityExchange
-        \o message.legRatioQtyUInt16Null
+        \o message.legRatioQty
         \o message.legSide
         \o message.legPutOrCall
         \o message.legUnitOfMeasureCurrency
@@ -1988,8 +1988,8 @@ DecodeTradeBlocksOriginalLegsGroup(bytes) ==
     LET legUnitOfMeasure == ReadBytes(legStrikePrice.rest, 5) IN IF ~legUnitOfMeasure.ok THEN Fail ELSE
     LET legUnitOfMeasureQty == ReadBytes(legUnitOfMeasure.rest, 8) IN IF ~legUnitOfMeasureQty.ok THEN Fail ELSE
     LET legSecurityExchange == ReadBytes(legUnitOfMeasureQty.rest, 4) IN IF ~legSecurityExchange.ok THEN Fail ELSE
-    LET legRatioQtyUInt16Null == ReadBytes(legSecurityExchange.rest, 2) IN IF ~legRatioQtyUInt16Null.ok THEN Fail ELSE
-    LET legSide == ReadBytes(legRatioQtyUInt16Null.rest, 1) IN IF ~legSide.ok THEN Fail ELSE
+    LET legRatioQty == ReadBytes(legSecurityExchange.rest, 2) IN IF ~legRatioQty.ok THEN Fail ELSE
+    LET legSide == ReadBytes(legRatioQty.rest, 1) IN IF ~legSide.ok THEN Fail ELSE
     LET legPutOrCall == ReadBytes(legSide.rest, 1) IN IF ~legPutOrCall.ok THEN Fail ELSE
     LET legUnitOfMeasureCurrency == ReadBytes(legPutOrCall.rest, 3) IN IF ~legUnitOfMeasureCurrency.ok THEN Fail ELSE
     Ok([ legSymbol                |-> legSymbol.value,
@@ -2003,7 +2003,7 @@ DecodeTradeBlocksOriginalLegsGroup(bytes) ==
          legUnitOfMeasure         |-> legUnitOfMeasure.value,
          legUnitOfMeasureQty      |-> legUnitOfMeasureQty.value,
          legSecurityExchange      |-> legSecurityExchange.value,
-         legRatioQtyUInt16Null    |-> legRatioQtyUInt16Null.value,
+         legRatioQty              |-> legRatioQty.value,
          legSide                  |-> legSide.value,
          legPutOrCall             |-> legPutOrCall.value,
          legUnitOfMeasureCurrency |-> legUnitOfMeasureCurrency.value ], legUnitOfMeasureCurrency.rest)
@@ -2020,7 +2020,7 @@ ZeroTradeBlocksOriginalLegsGroup ==
       legUnitOfMeasure         |-> [i \in 1 .. 5 |-> 0],
       legUnitOfMeasureQty      |-> [i \in 1 .. 8 |-> 0],
       legSecurityExchange      |-> [i \in 1 .. 4 |-> 0],
-      legRatioQtyUInt16Null    |-> [i \in 1 .. 2 |-> 0],
+      legRatioQty              |-> [i \in 1 .. 2 |-> 0],
       legSide                  |-> [i \in 1 .. 1 |-> 0],
       legPutOrCall             |-> [i \in 1 .. 1 |-> 0],
       legUnitOfMeasureCurrency |-> [i \in 1 .. 3 |-> 0] ]
@@ -2039,7 +2039,7 @@ CheckedTradeBlocksOriginalLegsGroup ==
         \cup { [ZeroTradeBlocksOriginalLegsGroup EXCEPT !.legUnitOfMeasure = one] : one \in Sample(5) }
         \cup { [ZeroTradeBlocksOriginalLegsGroup EXCEPT !.legUnitOfMeasureQty = one] : one \in Sample(8) }
         \cup { [ZeroTradeBlocksOriginalLegsGroup EXCEPT !.legSecurityExchange = one] : one \in Sample(4) }
-        \cup { [ZeroTradeBlocksOriginalLegsGroup EXCEPT !.legRatioQtyUInt16Null = one] : one \in Sample(2) }
+        \cup { [ZeroTradeBlocksOriginalLegsGroup EXCEPT !.legRatioQty = one] : one \in Sample(2) }
         \cup { [ZeroTradeBlocksOriginalLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
         \cup { [ZeroTradeBlocksOriginalLegsGroup EXCEPT !.legPutOrCall = one] : one \in Sample(1) }
         \cup { [ZeroTradeBlocksOriginalLegsGroup EXCEPT !.legUnitOfMeasureCurrency = one] : one \in Sample(3) }
@@ -3324,32 +3324,32 @@ CheckedUnderlyingMaturityMonthYear2 ==
 (***************************************************************************)
 
 TradeBlocksUnderlyingsGroup2 ==
-    [ underlyingSymbol                  : Sample(50),
-      underlyingMaturityMonthYear       : UnderlyingMaturityMonthYear2,
-      underlyingSecurityType            : Sample(9),
-      underlyingSecurityExchangeString4 : Sample(4) ]
+    [ underlyingSymbol            : Sample(50),
+      underlyingMaturityMonthYear : UnderlyingMaturityMonthYear2,
+      underlyingSecurityType      : Sample(9),
+      underlyingSecurityExchange  : Sample(4) ]
 
 EncodeTradeBlocksUnderlyingsGroup2(message) ==
     message.underlyingSymbol
         \o EncodeUnderlyingMaturityMonthYear2(message.underlyingMaturityMonthYear)
         \o message.underlyingSecurityType
-        \o message.underlyingSecurityExchangeString4
+        \o message.underlyingSecurityExchange
 
 DecodeTradeBlocksUnderlyingsGroup2(bytes) ==
     LET underlyingSymbol == ReadBytes(bytes, 50) IN IF ~underlyingSymbol.ok THEN Fail ELSE
     LET underlyingMaturityMonthYear == DecodeUnderlyingMaturityMonthYear2(underlyingSymbol.rest) IN IF ~underlyingMaturityMonthYear.ok THEN Fail ELSE
     LET underlyingSecurityType == ReadBytes(underlyingMaturityMonthYear.rest, 9) IN IF ~underlyingSecurityType.ok THEN Fail ELSE
-    LET underlyingSecurityExchangeString4 == ReadBytes(underlyingSecurityType.rest, 4) IN IF ~underlyingSecurityExchangeString4.ok THEN Fail ELSE
-    Ok([ underlyingSymbol                  |-> underlyingSymbol.value,
-         underlyingMaturityMonthYear       |-> underlyingMaturityMonthYear.value,
-         underlyingSecurityType            |-> underlyingSecurityType.value,
-         underlyingSecurityExchangeString4 |-> underlyingSecurityExchangeString4.value ], underlyingSecurityExchangeString4.rest)
+    LET underlyingSecurityExchange == ReadBytes(underlyingSecurityType.rest, 4) IN IF ~underlyingSecurityExchange.ok THEN Fail ELSE
+    Ok([ underlyingSymbol            |-> underlyingSymbol.value,
+         underlyingMaturityMonthYear |-> underlyingMaturityMonthYear.value,
+         underlyingSecurityType      |-> underlyingSecurityType.value,
+         underlyingSecurityExchange  |-> underlyingSecurityExchange.value ], underlyingSecurityExchange.rest)
 
 ZeroTradeBlocksUnderlyingsGroup2 ==
-    [ underlyingSymbol                  |-> [i \in 1 .. 50 |-> 0],
-      underlyingMaturityMonthYear       |-> ZeroUnderlyingMaturityMonthYear2,
-      underlyingSecurityType            |-> [i \in 1 .. 9 |-> 0],
-      underlyingSecurityExchangeString4 |-> [i \in 1 .. 4 |-> 0] ]
+    [ underlyingSymbol            |-> [i \in 1 .. 50 |-> 0],
+      underlyingMaturityMonthYear |-> ZeroUnderlyingMaturityMonthYear2,
+      underlyingSecurityType      |-> [i \in 1 .. 9 |-> 0],
+      underlyingSecurityExchange  |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Trade Blocks Underlyings Group at zero, then each field in turn at the values it is checked at *)
 CheckedTradeBlocksUnderlyingsGroup2 ==
@@ -3357,7 +3357,7 @@ CheckedTradeBlocksUnderlyingsGroup2 ==
         \cup { [ZeroTradeBlocksUnderlyingsGroup2 EXCEPT !.underlyingSymbol = one] : one \in Sample(50) }
         \cup { [ZeroTradeBlocksUnderlyingsGroup2 EXCEPT !.underlyingMaturityMonthYear = one] : one \in CheckedUnderlyingMaturityMonthYear2 }
         \cup { [ZeroTradeBlocksUnderlyingsGroup2 EXCEPT !.underlyingSecurityType = one] : one \in Sample(9) }
-        \cup { [ZeroTradeBlocksUnderlyingsGroup2 EXCEPT !.underlyingSecurityExchangeString4 = one] : one \in Sample(4) }
+        \cup { [ZeroTradeBlocksUnderlyingsGroup2 EXCEPT !.underlyingSecurityExchange = one] : one \in Sample(4) }
 
 (* A run of Trade Blocks Underlyings Group, written one after another *)
 RECURSIVE EncodeTradeBlocksUnderlyingsGroup2List(_)
@@ -3545,7 +3545,7 @@ TradeBlocksOriginalLegsGroup2 ==
       legUnitOfMeasure         : Sample(5),
       legUnitOfMeasureQty      : Sample(8),
       legSecurityExchange      : Sample(4),
-      legRatioQtyUInt16Null    : Sample(2),
+      legRatioQty              : Sample(2),
       legSide                  : Sample(1),
       legPutOrCall             : Sample(1),
       legUnitOfMeasureCurrency : Sample(3) ]
@@ -3562,7 +3562,7 @@ EncodeTradeBlocksOriginalLegsGroup2(message) ==
         \o message.legUnitOfMeasure
         \o message.legUnitOfMeasureQty
         \o message.legSecurityExchange
-        \o message.legRatioQtyUInt16Null
+        \o message.legRatioQty
         \o message.legSide
         \o message.legPutOrCall
         \o message.legUnitOfMeasureCurrency
@@ -3579,8 +3579,8 @@ DecodeTradeBlocksOriginalLegsGroup2(bytes) ==
     LET legUnitOfMeasure == ReadBytes(legStrikePrice.rest, 5) IN IF ~legUnitOfMeasure.ok THEN Fail ELSE
     LET legUnitOfMeasureQty == ReadBytes(legUnitOfMeasure.rest, 8) IN IF ~legUnitOfMeasureQty.ok THEN Fail ELSE
     LET legSecurityExchange == ReadBytes(legUnitOfMeasureQty.rest, 4) IN IF ~legSecurityExchange.ok THEN Fail ELSE
-    LET legRatioQtyUInt16Null == ReadBytes(legSecurityExchange.rest, 2) IN IF ~legRatioQtyUInt16Null.ok THEN Fail ELSE
-    LET legSide == ReadBytes(legRatioQtyUInt16Null.rest, 1) IN IF ~legSide.ok THEN Fail ELSE
+    LET legRatioQty == ReadBytes(legSecurityExchange.rest, 2) IN IF ~legRatioQty.ok THEN Fail ELSE
+    LET legSide == ReadBytes(legRatioQty.rest, 1) IN IF ~legSide.ok THEN Fail ELSE
     LET legPutOrCall == ReadBytes(legSide.rest, 1) IN IF ~legPutOrCall.ok THEN Fail ELSE
     LET legUnitOfMeasureCurrency == ReadBytes(legPutOrCall.rest, 3) IN IF ~legUnitOfMeasureCurrency.ok THEN Fail ELSE
     Ok([ legSymbol                |-> legSymbol.value,
@@ -3594,7 +3594,7 @@ DecodeTradeBlocksOriginalLegsGroup2(bytes) ==
          legUnitOfMeasure         |-> legUnitOfMeasure.value,
          legUnitOfMeasureQty      |-> legUnitOfMeasureQty.value,
          legSecurityExchange      |-> legSecurityExchange.value,
-         legRatioQtyUInt16Null    |-> legRatioQtyUInt16Null.value,
+         legRatioQty              |-> legRatioQty.value,
          legSide                  |-> legSide.value,
          legPutOrCall             |-> legPutOrCall.value,
          legUnitOfMeasureCurrency |-> legUnitOfMeasureCurrency.value ], legUnitOfMeasureCurrency.rest)
@@ -3611,7 +3611,7 @@ ZeroTradeBlocksOriginalLegsGroup2 ==
       legUnitOfMeasure         |-> [i \in 1 .. 5 |-> 0],
       legUnitOfMeasureQty      |-> [i \in 1 .. 8 |-> 0],
       legSecurityExchange      |-> [i \in 1 .. 4 |-> 0],
-      legRatioQtyUInt16Null    |-> [i \in 1 .. 2 |-> 0],
+      legRatioQty              |-> [i \in 1 .. 2 |-> 0],
       legSide                  |-> [i \in 1 .. 1 |-> 0],
       legPutOrCall             |-> [i \in 1 .. 1 |-> 0],
       legUnitOfMeasureCurrency |-> [i \in 1 .. 3 |-> 0] ]
@@ -3630,7 +3630,7 @@ CheckedTradeBlocksOriginalLegsGroup2 ==
         \cup { [ZeroTradeBlocksOriginalLegsGroup2 EXCEPT !.legUnitOfMeasure = one] : one \in Sample(5) }
         \cup { [ZeroTradeBlocksOriginalLegsGroup2 EXCEPT !.legUnitOfMeasureQty = one] : one \in Sample(8) }
         \cup { [ZeroTradeBlocksOriginalLegsGroup2 EXCEPT !.legSecurityExchange = one] : one \in Sample(4) }
-        \cup { [ZeroTradeBlocksOriginalLegsGroup2 EXCEPT !.legRatioQtyUInt16Null = one] : one \in Sample(2) }
+        \cup { [ZeroTradeBlocksOriginalLegsGroup2 EXCEPT !.legRatioQty = one] : one \in Sample(2) }
         \cup { [ZeroTradeBlocksOriginalLegsGroup2 EXCEPT !.legSide = one] : one \in Sample(1) }
         \cup { [ZeroTradeBlocksOriginalLegsGroup2 EXCEPT !.legPutOrCall = one] : one \in Sample(1) }
         \cup { [ZeroTradeBlocksOriginalLegsGroup2 EXCEPT !.legUnitOfMeasureCurrency = one] : one \in Sample(3) }
@@ -4052,27 +4052,27 @@ CheckedCalFutPx ==
 (***************************************************************************)
 
 ErisSecurityAltIdGroup2 ==
-    [ securityAltId50             : Sample(26),
+    [ securityAltId               : Sample(26),
       securityAltIdSourceOptional : Sample(1) ]
 
 EncodeErisSecurityAltIdGroup2(message) ==
-    message.securityAltId50
+    message.securityAltId
         \o message.securityAltIdSourceOptional
 
 DecodeErisSecurityAltIdGroup2(bytes) ==
-    LET securityAltId50 == ReadBytes(bytes, 26) IN IF ~securityAltId50.ok THEN Fail ELSE
-    LET securityAltIdSourceOptional == ReadBytes(securityAltId50.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
-    Ok([ securityAltId50             |-> securityAltId50.value,
+    LET securityAltId == ReadBytes(bytes, 26) IN IF ~securityAltId.ok THEN Fail ELSE
+    LET securityAltIdSourceOptional == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
+    Ok([ securityAltId               |-> securityAltId.value,
          securityAltIdSourceOptional |-> securityAltIdSourceOptional.value ], securityAltIdSourceOptional.rest)
 
 ZeroErisSecurityAltIdGroup2 ==
-    [ securityAltId50             |-> [i \in 1 .. 26 |-> 0],
+    [ securityAltId               |-> [i \in 1 .. 26 |-> 0],
       securityAltIdSourceOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Eris Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
 CheckedErisSecurityAltIdGroup2 ==
     { ZeroErisSecurityAltIdGroup2 }
-        \cup { [ZeroErisSecurityAltIdGroup2 EXCEPT !.securityAltId50 = one] : one \in Sample(26) }
+        \cup { [ZeroErisSecurityAltIdGroup2 EXCEPT !.securityAltId = one] : one \in Sample(26) }
         \cup { [ZeroErisSecurityAltIdGroup2 EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
 
 (* A run of Eris Security Alt Id Group, written one after another *)
@@ -4487,27 +4487,27 @@ CheckedCalFutPx2 ==
 (***************************************************************************)
 
 ErisSecurityAltIdGroup3 ==
-    [ securityAltId50             : Sample(26),
+    [ securityAltId               : Sample(26),
       securityAltIdSourceOptional : Sample(1) ]
 
 EncodeErisSecurityAltIdGroup3(message) ==
-    message.securityAltId50
+    message.securityAltId
         \o message.securityAltIdSourceOptional
 
 DecodeErisSecurityAltIdGroup3(bytes) ==
-    LET securityAltId50 == ReadBytes(bytes, 26) IN IF ~securityAltId50.ok THEN Fail ELSE
-    LET securityAltIdSourceOptional == ReadBytes(securityAltId50.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
-    Ok([ securityAltId50             |-> securityAltId50.value,
+    LET securityAltId == ReadBytes(bytes, 26) IN IF ~securityAltId.ok THEN Fail ELSE
+    LET securityAltIdSourceOptional == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
+    Ok([ securityAltId               |-> securityAltId.value,
          securityAltIdSourceOptional |-> securityAltIdSourceOptional.value ], securityAltIdSourceOptional.rest)
 
 ZeroErisSecurityAltIdGroup3 ==
-    [ securityAltId50             |-> [i \in 1 .. 26 |-> 0],
+    [ securityAltId               |-> [i \in 1 .. 26 |-> 0],
       securityAltIdSourceOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Eris Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
 CheckedErisSecurityAltIdGroup3 ==
     { ZeroErisSecurityAltIdGroup3 }
-        \cup { [ZeroErisSecurityAltIdGroup3 EXCEPT !.securityAltId50 = one] : one \in Sample(26) }
+        \cup { [ZeroErisSecurityAltIdGroup3 EXCEPT !.securityAltId = one] : one \in Sample(26) }
         \cup { [ZeroErisSecurityAltIdGroup3 EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
 
 (* A run of Eris Security Alt Id Group, written one after another *)
@@ -5036,32 +5036,32 @@ CheckedUnderlyingMaturityMonthYear3 ==
 (***************************************************************************)
 
 OtcUnderlyingsGroup ==
-    [ underlyingSymbol                           : Sample(50),
-      underlyingMaturityMonthYear                : UnderlyingMaturityMonthYear3,
-      underlyingSecurityType                     : Sample(9),
-      underlyingSecurityExchangeSecurityExchange : Sample(4) ]
+    [ underlyingSymbol            : Sample(50),
+      underlyingMaturityMonthYear : UnderlyingMaturityMonthYear3,
+      underlyingSecurityType      : Sample(9),
+      underlyingSecurityExchange  : Sample(4) ]
 
 EncodeOtcUnderlyingsGroup(message) ==
     message.underlyingSymbol
         \o EncodeUnderlyingMaturityMonthYear3(message.underlyingMaturityMonthYear)
         \o message.underlyingSecurityType
-        \o message.underlyingSecurityExchangeSecurityExchange
+        \o message.underlyingSecurityExchange
 
 DecodeOtcUnderlyingsGroup(bytes) ==
     LET underlyingSymbol == ReadBytes(bytes, 50) IN IF ~underlyingSymbol.ok THEN Fail ELSE
     LET underlyingMaturityMonthYear == DecodeUnderlyingMaturityMonthYear3(underlyingSymbol.rest) IN IF ~underlyingMaturityMonthYear.ok THEN Fail ELSE
     LET underlyingSecurityType == ReadBytes(underlyingMaturityMonthYear.rest, 9) IN IF ~underlyingSecurityType.ok THEN Fail ELSE
-    LET underlyingSecurityExchangeSecurityExchange == ReadBytes(underlyingSecurityType.rest, 4) IN IF ~underlyingSecurityExchangeSecurityExchange.ok THEN Fail ELSE
-    Ok([ underlyingSymbol                           |-> underlyingSymbol.value,
-         underlyingMaturityMonthYear                |-> underlyingMaturityMonthYear.value,
-         underlyingSecurityType                     |-> underlyingSecurityType.value,
-         underlyingSecurityExchangeSecurityExchange |-> underlyingSecurityExchangeSecurityExchange.value ], underlyingSecurityExchangeSecurityExchange.rest)
+    LET underlyingSecurityExchange == ReadBytes(underlyingSecurityType.rest, 4) IN IF ~underlyingSecurityExchange.ok THEN Fail ELSE
+    Ok([ underlyingSymbol            |-> underlyingSymbol.value,
+         underlyingMaturityMonthYear |-> underlyingMaturityMonthYear.value,
+         underlyingSecurityType      |-> underlyingSecurityType.value,
+         underlyingSecurityExchange  |-> underlyingSecurityExchange.value ], underlyingSecurityExchange.rest)
 
 ZeroOtcUnderlyingsGroup ==
-    [ underlyingSymbol                           |-> [i \in 1 .. 50 |-> 0],
-      underlyingMaturityMonthYear                |-> ZeroUnderlyingMaturityMonthYear3,
-      underlyingSecurityType                     |-> [i \in 1 .. 9 |-> 0],
-      underlyingSecurityExchangeSecurityExchange |-> [i \in 1 .. 4 |-> 0] ]
+    [ underlyingSymbol            |-> [i \in 1 .. 50 |-> 0],
+      underlyingMaturityMonthYear |-> ZeroUnderlyingMaturityMonthYear3,
+      underlyingSecurityType      |-> [i \in 1 .. 9 |-> 0],
+      underlyingSecurityExchange  |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Otc Underlyings Group at zero, then each field in turn at the values it is checked at *)
 CheckedOtcUnderlyingsGroup ==
@@ -5069,7 +5069,7 @@ CheckedOtcUnderlyingsGroup ==
         \cup { [ZeroOtcUnderlyingsGroup EXCEPT !.underlyingSymbol = one] : one \in Sample(50) }
         \cup { [ZeroOtcUnderlyingsGroup EXCEPT !.underlyingMaturityMonthYear = one] : one \in CheckedUnderlyingMaturityMonthYear3 }
         \cup { [ZeroOtcUnderlyingsGroup EXCEPT !.underlyingSecurityType = one] : one \in Sample(9) }
-        \cup { [ZeroOtcUnderlyingsGroup EXCEPT !.underlyingSecurityExchangeSecurityExchange = one] : one \in Sample(4) }
+        \cup { [ZeroOtcUnderlyingsGroup EXCEPT !.underlyingSecurityExchange = one] : one \in Sample(4) }
 
 (* A run of Otc Underlyings Group, written one after another *)
 RECURSIVE EncodeOtcUnderlyingsGroupList(_)
@@ -5127,27 +5127,27 @@ CheckedOtcUnderlyingsGroups ==
 (***************************************************************************)
 
 OtcSecurityAltIdGroup ==
-    [ securityAltIDStringLength50 : Sample(50),
-      securityAltIdSource         : Sample(1) ]
+    [ securityAltId50     : Sample(50),
+      securityAltIdSource : Sample(1) ]
 
 EncodeOtcSecurityAltIdGroup(message) ==
-    message.securityAltIDStringLength50
+    message.securityAltId50
         \o message.securityAltIdSource
 
 DecodeOtcSecurityAltIdGroup(bytes) ==
-    LET securityAltIDStringLength50 == ReadBytes(bytes, 50) IN IF ~securityAltIDStringLength50.ok THEN Fail ELSE
-    LET securityAltIdSource == ReadBytes(securityAltIDStringLength50.rest, 1) IN IF ~securityAltIdSource.ok THEN Fail ELSE
-    Ok([ securityAltIDStringLength50 |-> securityAltIDStringLength50.value,
-         securityAltIdSource         |-> securityAltIdSource.value ], securityAltIdSource.rest)
+    LET securityAltId50 == ReadBytes(bytes, 50) IN IF ~securityAltId50.ok THEN Fail ELSE
+    LET securityAltIdSource == ReadBytes(securityAltId50.rest, 1) IN IF ~securityAltIdSource.ok THEN Fail ELSE
+    Ok([ securityAltId50     |-> securityAltId50.value,
+         securityAltIdSource |-> securityAltIdSource.value ], securityAltIdSource.rest)
 
 ZeroOtcSecurityAltIdGroup ==
-    [ securityAltIDStringLength50 |-> [i \in 1 .. 50 |-> 0],
-      securityAltIdSource         |-> [i \in 1 .. 1 |-> 0] ]
+    [ securityAltId50     |-> [i \in 1 .. 50 |-> 0],
+      securityAltIdSource |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Otc Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
 CheckedOtcSecurityAltIdGroup ==
     { ZeroOtcSecurityAltIdGroup }
-        \cup { [ZeroOtcSecurityAltIdGroup EXCEPT !.securityAltIDStringLength50 = one] : one \in Sample(50) }
+        \cup { [ZeroOtcSecurityAltIdGroup EXCEPT !.securityAltId50 = one] : one \in Sample(50) }
         \cup { [ZeroOtcSecurityAltIdGroup EXCEPT !.securityAltIdSource = one] : one \in Sample(1) }
 
 (* A run of Otc Security Alt Id Group, written one after another *)
@@ -5709,27 +5709,27 @@ CheckedEventsGroups6 ==
 (***************************************************************************)
 
 ErisSecurityAltIdGroup4 ==
-    [ securityAltId50             : Sample(26),
+    [ securityAltId               : Sample(26),
       securityAltIdSourceOptional : Sample(1) ]
 
 EncodeErisSecurityAltIdGroup4(message) ==
-    message.securityAltId50
+    message.securityAltId
         \o message.securityAltIdSourceOptional
 
 DecodeErisSecurityAltIdGroup4(bytes) ==
-    LET securityAltId50 == ReadBytes(bytes, 26) IN IF ~securityAltId50.ok THEN Fail ELSE
-    LET securityAltIdSourceOptional == ReadBytes(securityAltId50.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
-    Ok([ securityAltId50             |-> securityAltId50.value,
+    LET securityAltId == ReadBytes(bytes, 26) IN IF ~securityAltId.ok THEN Fail ELSE
+    LET securityAltIdSourceOptional == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
+    Ok([ securityAltId               |-> securityAltId.value,
          securityAltIdSourceOptional |-> securityAltIdSourceOptional.value ], securityAltIdSourceOptional.rest)
 
 ZeroErisSecurityAltIdGroup4 ==
-    [ securityAltId50             |-> [i \in 1 .. 26 |-> 0],
+    [ securityAltId               |-> [i \in 1 .. 26 |-> 0],
       securityAltIdSourceOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Eris Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
 CheckedErisSecurityAltIdGroup4 ==
     { ZeroErisSecurityAltIdGroup4 }
-        \cup { [ZeroErisSecurityAltIdGroup4 EXCEPT !.securityAltId50 = one] : one \in Sample(26) }
+        \cup { [ZeroErisSecurityAltIdGroup4 EXCEPT !.securityAltId = one] : one \in Sample(26) }
         \cup { [ZeroErisSecurityAltIdGroup4 EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
 
 (* A run of Eris Security Alt Id Group, written one after another *)
@@ -5844,27 +5844,27 @@ CheckedInterpolationFactor ==
 (***************************************************************************)
 
 ErisSecurityAltIdGroup5 ==
-    [ securityAltId50             : Sample(26),
+    [ securityAltId               : Sample(26),
       securityAltIdSourceOptional : Sample(1) ]
 
 EncodeErisSecurityAltIdGroup5(message) ==
-    message.securityAltId50
+    message.securityAltId
         \o message.securityAltIdSourceOptional
 
 DecodeErisSecurityAltIdGroup5(bytes) ==
-    LET securityAltId50 == ReadBytes(bytes, 26) IN IF ~securityAltId50.ok THEN Fail ELSE
-    LET securityAltIdSourceOptional == ReadBytes(securityAltId50.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
-    Ok([ securityAltId50             |-> securityAltId50.value,
+    LET securityAltId == ReadBytes(bytes, 26) IN IF ~securityAltId.ok THEN Fail ELSE
+    LET securityAltIdSourceOptional == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
+    Ok([ securityAltId               |-> securityAltId.value,
          securityAltIdSourceOptional |-> securityAltIdSourceOptional.value ], securityAltIdSourceOptional.rest)
 
 ZeroErisSecurityAltIdGroup5 ==
-    [ securityAltId50             |-> [i \in 1 .. 26 |-> 0],
+    [ securityAltId               |-> [i \in 1 .. 26 |-> 0],
       securityAltIdSourceOptional |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Eris Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
 CheckedErisSecurityAltIdGroup5 ==
     { ZeroErisSecurityAltIdGroup5 }
-        \cup { [ZeroErisSecurityAltIdGroup5 EXCEPT !.securityAltId50 = one] : one \in Sample(26) }
+        \cup { [ZeroErisSecurityAltIdGroup5 EXCEPT !.securityAltId = one] : one \in Sample(26) }
         \cup { [ZeroErisSecurityAltIdGroup5 EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
 
 (* A run of Eris Security Alt Id Group, written one after another *)
@@ -5929,7 +5929,7 @@ ErisLegsGroup ==
       legPayFrequencey        : Sample(3),
       previousFixingRate      : PreviousFixingRate,
       legSymbol               : Sample(50),
-      legRatioQtyInt32Null    : Sample(4),
+      erisLegRatioQty         : Sample(4),
       legSide                 : Sample(1),
       legCurrency             : Sample(3),
       legSecurityType4        : Sample(8),
@@ -5945,7 +5945,7 @@ EncodeErisLegsGroup(message) ==
         \o message.legPayFrequencey
         \o EncodePreviousFixingRate(message.previousFixingRate)
         \o message.legSymbol
-        \o message.legRatioQtyInt32Null
+        \o message.erisLegRatioQty
         \o message.legSide
         \o message.legCurrency
         \o message.legSecurityType4
@@ -5961,8 +5961,8 @@ DecodeErisLegsGroup(bytes) ==
     LET legPayFrequencey == ReadBytes(previousFixingDate.rest, 3) IN IF ~legPayFrequencey.ok THEN Fail ELSE
     LET previousFixingRate == DecodePreviousFixingRate(legPayFrequencey.rest) IN IF ~previousFixingRate.ok THEN Fail ELSE
     LET legSymbol == ReadBytes(previousFixingRate.rest, 50) IN IF ~legSymbol.ok THEN Fail ELSE
-    LET legRatioQtyInt32Null == ReadBytes(legSymbol.rest, 4) IN IF ~legRatioQtyInt32Null.ok THEN Fail ELSE
-    LET legSide == ReadBytes(legRatioQtyInt32Null.rest, 1) IN IF ~legSide.ok THEN Fail ELSE
+    LET erisLegRatioQty == ReadBytes(legSymbol.rest, 4) IN IF ~erisLegRatioQty.ok THEN Fail ELSE
+    LET legSide == ReadBytes(erisLegRatioQty.rest, 1) IN IF ~legSide.ok THEN Fail ELSE
     LET legCurrency == ReadBytes(legSide.rest, 3) IN IF ~legCurrency.ok THEN Fail ELSE
     LET legSecurityType4 == ReadBytes(legCurrency.rest, 8) IN IF ~legSecurityType4.ok THEN Fail ELSE
     LET legSecurityGroup == ReadBytes(legSecurityType4.rest, 12) IN IF ~legSecurityGroup.ok THEN Fail ELSE
@@ -5975,7 +5975,7 @@ DecodeErisLegsGroup(bytes) ==
          legPayFrequencey        |-> legPayFrequencey.value,
          previousFixingRate      |-> previousFixingRate.value,
          legSymbol               |-> legSymbol.value,
-         legRatioQtyInt32Null    |-> legRatioQtyInt32Null.value,
+         erisLegRatioQty         |-> erisLegRatioQty.value,
          legSide                 |-> legSide.value,
          legCurrency             |-> legCurrency.value,
          legSecurityType4        |-> legSecurityType4.value,
@@ -5991,7 +5991,7 @@ ZeroErisLegsGroup ==
       legPayFrequencey        |-> [i \in 1 .. 3 |-> 0],
       previousFixingRate      |-> ZeroPreviousFixingRate,
       legSymbol               |-> [i \in 1 .. 50 |-> 0],
-      legRatioQtyInt32Null    |-> [i \in 1 .. 4 |-> 0],
+      erisLegRatioQty         |-> [i \in 1 .. 4 |-> 0],
       legSide                 |-> [i \in 1 .. 1 |-> 0],
       legCurrency             |-> [i \in 1 .. 3 |-> 0],
       legSecurityType4        |-> [i \in 1 .. 8 |-> 0],
@@ -6009,7 +6009,7 @@ CheckedErisLegsGroup ==
         \cup { [ZeroErisLegsGroup EXCEPT !.legPayFrequencey = one] : one \in Sample(3) }
         \cup { [ZeroErisLegsGroup EXCEPT !.previousFixingRate = one] : one \in CheckedPreviousFixingRate }
         \cup { [ZeroErisLegsGroup EXCEPT !.legSymbol = one] : one \in Sample(50) }
-        \cup { [ZeroErisLegsGroup EXCEPT !.legRatioQtyInt32Null = one] : one \in Sample(4) }
+        \cup { [ZeroErisLegsGroup EXCEPT !.erisLegRatioQty = one] : one \in Sample(4) }
         \cup { [ZeroErisLegsGroup EXCEPT !.legSide = one] : one \in Sample(1) }
         \cup { [ZeroErisLegsGroup EXCEPT !.legCurrency = one] : one \in Sample(3) }
         \cup { [ZeroErisLegsGroup EXCEPT !.legSecurityType4 = one] : one \in Sample(8) }

@@ -157,44 +157,44 @@ CheckedLogonConfMessage ==
 (***************************************************************************)
 
 LogoutMessage ==
-    [ reason : Sample(64) ]
+    [ logoutReason : Sample(64) ]
 
 EncodeLogoutMessage(message) ==
-    message.reason
+    message.logoutReason
 
 DecodeLogoutMessage(bytes) ==
-    LET reason == ReadBytes(bytes, 64) IN IF ~reason.ok THEN Fail ELSE
-    Ok([ reason |-> reason.value ], reason.rest)
+    LET logoutReason == ReadBytes(bytes, 64) IN IF ~logoutReason.ok THEN Fail ELSE
+    Ok([ logoutReason |-> logoutReason.value ], logoutReason.rest)
 
 ZeroLogoutMessage ==
-    [ reason |-> [i \in 1 .. 64 |-> 0] ]
+    [ logoutReason |-> [i \in 1 .. 64 |-> 0] ]
 
 (* Logout Message at zero, then each field in turn at the values it is checked at *)
 CheckedLogoutMessage ==
     { ZeroLogoutMessage }
-        \cup { [ZeroLogoutMessage EXCEPT !.reason = one] : one \in Sample(64) }
+        \cup { [ZeroLogoutMessage EXCEPT !.logoutReason = one] : one \in Sample(64) }
 
 (***************************************************************************)
 (* Logged Out Message: 64 bytes                                            *)
 (***************************************************************************)
 
 LoggedOutMessage ==
-    [ reason : Sample(64) ]
+    [ logoutReason : Sample(64) ]
 
 EncodeLoggedOutMessage(message) ==
-    message.reason
+    message.logoutReason
 
 DecodeLoggedOutMessage(bytes) ==
-    LET reason == ReadBytes(bytes, 64) IN IF ~reason.ok THEN Fail ELSE
-    Ok([ reason |-> reason.value ], reason.rest)
+    LET logoutReason == ReadBytes(bytes, 64) IN IF ~logoutReason.ok THEN Fail ELSE
+    Ok([ logoutReason |-> logoutReason.value ], logoutReason.rest)
 
 ZeroLoggedOutMessage ==
-    [ reason |-> [i \in 1 .. 64 |-> 0] ]
+    [ logoutReason |-> [i \in 1 .. 64 |-> 0] ]
 
 (* Logged Out Message at zero, then each field in turn at the values it is checked at *)
 CheckedLoggedOutMessage ==
     { ZeroLoggedOutMessage }
-        \cup { [ZeroLoggedOutMessage EXCEPT !.reason = one] : one \in Sample(64) }
+        \cup { [ZeroLoggedOutMessage EXCEPT !.logoutReason = one] : one \in Sample(64) }
 
 (***************************************************************************)
 (* Heartbeat Message: 8 bytes                                              *)

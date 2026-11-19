@@ -922,33 +922,33 @@ CheckedIpoQuotingPeriodUpdateMessage ==
 OperationalHaltMessage ==
     [ trackingNumber        : Sample(2),
       timestamp             : Sample(6),
-      stockAlpha8           : Sample(8),
+      stock                 : Sample(8),
       marketCode            : Sample(1),
       operationalHaltAction : Sample(1) ]
 
 EncodeOperationalHaltMessage(message) ==
     message.trackingNumber
         \o message.timestamp
-        \o message.stockAlpha8
+        \o message.stock
         \o message.marketCode
         \o message.operationalHaltAction
 
 DecodeOperationalHaltMessage(bytes) ==
     LET trackingNumber == ReadBytes(bytes, 2) IN IF ~trackingNumber.ok THEN Fail ELSE
     LET timestamp == ReadBytes(trackingNumber.rest, 6) IN IF ~timestamp.ok THEN Fail ELSE
-    LET stockAlpha8 == ReadBytes(timestamp.rest, 8) IN IF ~stockAlpha8.ok THEN Fail ELSE
-    LET marketCode == ReadBytes(stockAlpha8.rest, 1) IN IF ~marketCode.ok THEN Fail ELSE
+    LET stock == ReadBytes(timestamp.rest, 8) IN IF ~stock.ok THEN Fail ELSE
+    LET marketCode == ReadBytes(stock.rest, 1) IN IF ~marketCode.ok THEN Fail ELSE
     LET operationalHaltAction == ReadBytes(marketCode.rest, 1) IN IF ~operationalHaltAction.ok THEN Fail ELSE
     Ok([ trackingNumber        |-> trackingNumber.value,
          timestamp             |-> timestamp.value,
-         stockAlpha8           |-> stockAlpha8.value,
+         stock                 |-> stock.value,
          marketCode            |-> marketCode.value,
          operationalHaltAction |-> operationalHaltAction.value ], operationalHaltAction.rest)
 
 ZeroOperationalHaltMessage ==
     [ trackingNumber        |-> [i \in 1 .. 2 |-> 0],
       timestamp             |-> [i \in 1 .. 6 |-> 0],
-      stockAlpha8           |-> [i \in 1 .. 8 |-> 0],
+      stock                 |-> [i \in 1 .. 8 |-> 0],
       marketCode            |-> [i \in 1 .. 1 |-> 0],
       operationalHaltAction |-> [i \in 1 .. 1 |-> 0] ]
 
@@ -957,7 +957,7 @@ CheckedOperationalHaltMessage ==
     { ZeroOperationalHaltMessage }
         \cup { [ZeroOperationalHaltMessage EXCEPT !.trackingNumber = one] : one \in Sample(2) }
         \cup { [ZeroOperationalHaltMessage EXCEPT !.timestamp = one] : one \in Sample(6) }
-        \cup { [ZeroOperationalHaltMessage EXCEPT !.stockAlpha8 = one] : one \in Sample(8) }
+        \cup { [ZeroOperationalHaltMessage EXCEPT !.stock = one] : one \in Sample(8) }
         \cup { [ZeroOperationalHaltMessage EXCEPT !.marketCode = one] : one \in Sample(1) }
         \cup { [ZeroOperationalHaltMessage EXCEPT !.operationalHaltAction = one] : one \in Sample(1) }
 

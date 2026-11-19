@@ -112,29 +112,29 @@ SampleLists(entries) ==
 SystemState ==
     [ notificationTime : Sample(8),
       ctdVersion       : Sample(8),
-      sessionId        : Sample(4),
+      tradingSessionId : Sample(4),
       systemStatus     : Sample(1) ]
 
 EncodeSystemState(message) ==
     message.notificationTime
         \o message.ctdVersion
-        \o message.sessionId
+        \o message.tradingSessionId
         \o message.systemStatus
 
 DecodeSystemState(bytes) ==
     LET notificationTime == ReadBytes(bytes, 8) IN IF ~notificationTime.ok THEN Fail ELSE
     LET ctdVersion == ReadBytes(notificationTime.rest, 8) IN IF ~ctdVersion.ok THEN Fail ELSE
-    LET sessionId == ReadBytes(ctdVersion.rest, 4) IN IF ~sessionId.ok THEN Fail ELSE
-    LET systemStatus == ReadBytes(sessionId.rest, 1) IN IF ~systemStatus.ok THEN Fail ELSE
+    LET tradingSessionId == ReadBytes(ctdVersion.rest, 4) IN IF ~tradingSessionId.ok THEN Fail ELSE
+    LET systemStatus == ReadBytes(tradingSessionId.rest, 1) IN IF ~systemStatus.ok THEN Fail ELSE
     Ok([ notificationTime |-> notificationTime.value,
          ctdVersion       |-> ctdVersion.value,
-         sessionId        |-> sessionId.value,
+         tradingSessionId |-> tradingSessionId.value,
          systemStatus     |-> systemStatus.value ], systemStatus.rest)
 
 ZeroSystemState ==
     [ notificationTime |-> [i \in 1 .. 8 |-> 0],
       ctdVersion       |-> [i \in 1 .. 8 |-> 0],
-      sessionId        |-> [i \in 1 .. 4 |-> 0],
+      tradingSessionId |-> [i \in 1 .. 4 |-> 0],
       systemStatus     |-> [i \in 1 .. 1 |-> 0] ]
 
 (* System State at zero, then each field in turn at the values it is checked at *)
@@ -142,7 +142,7 @@ CheckedSystemState ==
     { ZeroSystemState }
         \cup { [ZeroSystemState EXCEPT !.notificationTime = one] : one \in Sample(8) }
         \cup { [ZeroSystemState EXCEPT !.ctdVersion = one] : one \in Sample(8) }
-        \cup { [ZeroSystemState EXCEPT !.sessionId = one] : one \in Sample(4) }
+        \cup { [ZeroSystemState EXCEPT !.tradingSessionId = one] : one \in Sample(4) }
         \cup { [ZeroSystemState EXCEPT !.systemStatus = one] : one \in Sample(1) }
 
 (***************************************************************************)

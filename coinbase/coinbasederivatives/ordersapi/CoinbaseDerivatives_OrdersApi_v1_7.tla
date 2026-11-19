@@ -157,44 +157,44 @@ CheckedLogonConfMessage ==
 (***************************************************************************)
 
 LogoutMessage ==
-    [ reason : Sample(64) ]
+    [ logoutReason : Sample(64) ]
 
 EncodeLogoutMessage(message) ==
-    message.reason
+    message.logoutReason
 
 DecodeLogoutMessage(bytes) ==
-    LET reason == ReadBytes(bytes, 64) IN IF ~reason.ok THEN Fail ELSE
-    Ok([ reason |-> reason.value ], reason.rest)
+    LET logoutReason == ReadBytes(bytes, 64) IN IF ~logoutReason.ok THEN Fail ELSE
+    Ok([ logoutReason |-> logoutReason.value ], logoutReason.rest)
 
 ZeroLogoutMessage ==
-    [ reason |-> [i \in 1 .. 64 |-> 0] ]
+    [ logoutReason |-> [i \in 1 .. 64 |-> 0] ]
 
 (* Logout Message at zero, then each field in turn at the values it is checked at *)
 CheckedLogoutMessage ==
     { ZeroLogoutMessage }
-        \cup { [ZeroLogoutMessage EXCEPT !.reason = one] : one \in Sample(64) }
+        \cup { [ZeroLogoutMessage EXCEPT !.logoutReason = one] : one \in Sample(64) }
 
 (***************************************************************************)
 (* Logged Out Message: 64 bytes                                            *)
 (***************************************************************************)
 
 LoggedOutMessage ==
-    [ reason : Sample(64) ]
+    [ logoutReason : Sample(64) ]
 
 EncodeLoggedOutMessage(message) ==
-    message.reason
+    message.logoutReason
 
 DecodeLoggedOutMessage(bytes) ==
-    LET reason == ReadBytes(bytes, 64) IN IF ~reason.ok THEN Fail ELSE
-    Ok([ reason |-> reason.value ], reason.rest)
+    LET logoutReason == ReadBytes(bytes, 64) IN IF ~logoutReason.ok THEN Fail ELSE
+    Ok([ logoutReason |-> logoutReason.value ], logoutReason.rest)
 
 ZeroLoggedOutMessage ==
-    [ reason |-> [i \in 1 .. 64 |-> 0] ]
+    [ logoutReason |-> [i \in 1 .. 64 |-> 0] ]
 
 (* Logged Out Message at zero, then each field in turn at the values it is checked at *)
 CheckedLoggedOutMessage ==
     { ZeroLoggedOutMessage }
-        \cup { [ZeroLoggedOutMessage EXCEPT !.reason = one] : one \in Sample(64) }
+        \cup { [ZeroLoggedOutMessage EXCEPT !.logoutReason = one] : one \in Sample(64) }
 
 (***************************************************************************)
 (* Heartbeat Message: 8 bytes                                              *)
@@ -1707,34 +1707,34 @@ CheckedEventResendCompleteMessage ==
 (***************************************************************************)
 
 EventResendRejectMessage ==
-    [ correlationId      : Sample(8),
-      resendRejectReason : Sample(1),
-      detailsString55    : Sample(55) ]
+    [ correlationId            : Sample(8),
+      resendRejectReason       : Sample(1),
+      eventResendRejectDetails : Sample(55) ]
 
 EncodeEventResendRejectMessage(message) ==
     message.correlationId
         \o message.resendRejectReason
-        \o message.detailsString55
+        \o message.eventResendRejectDetails
 
 DecodeEventResendRejectMessage(bytes) ==
     LET correlationId == ReadBytes(bytes, 8) IN IF ~correlationId.ok THEN Fail ELSE
     LET resendRejectReason == ReadBytes(correlationId.rest, 1) IN IF ~resendRejectReason.ok THEN Fail ELSE
-    LET detailsString55 == ReadBytes(resendRejectReason.rest, 55) IN IF ~detailsString55.ok THEN Fail ELSE
-    Ok([ correlationId      |-> correlationId.value,
-         resendRejectReason |-> resendRejectReason.value,
-         detailsString55    |-> detailsString55.value ], detailsString55.rest)
+    LET eventResendRejectDetails == ReadBytes(resendRejectReason.rest, 55) IN IF ~eventResendRejectDetails.ok THEN Fail ELSE
+    Ok([ correlationId            |-> correlationId.value,
+         resendRejectReason       |-> resendRejectReason.value,
+         eventResendRejectDetails |-> eventResendRejectDetails.value ], eventResendRejectDetails.rest)
 
 ZeroEventResendRejectMessage ==
-    [ correlationId      |-> [i \in 1 .. 8 |-> 0],
-      resendRejectReason |-> [i \in 1 .. 1 |-> 0],
-      detailsString55    |-> [i \in 1 .. 55 |-> 0] ]
+    [ correlationId            |-> [i \in 1 .. 8 |-> 0],
+      resendRejectReason       |-> [i \in 1 .. 1 |-> 0],
+      eventResendRejectDetails |-> [i \in 1 .. 55 |-> 0] ]
 
 (* Event Resend Reject Message at zero, then each field in turn at the values it is checked at *)
 CheckedEventResendRejectMessage ==
     { ZeroEventResendRejectMessage }
         \cup { [ZeroEventResendRejectMessage EXCEPT !.correlationId = one] : one \in Sample(8) }
         \cup { [ZeroEventResendRejectMessage EXCEPT !.resendRejectReason = one] : one \in Sample(1) }
-        \cup { [ZeroEventResendRejectMessage EXCEPT !.detailsString55 = one] : one \in Sample(55) }
+        \cup { [ZeroEventResendRejectMessage EXCEPT !.eventResendRejectDetails = one] : one \in Sample(55) }
 
 (***************************************************************************)
 (* Payload, selected by Schema Id and Template Id                          *)
