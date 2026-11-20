@@ -1,10 +1,10 @@
----------------- MODULE C1Options_Complex_v2_1_18_Captures -----------------
+------------- MODULE C1Options_Complex_Pitch_v2_1_18_Captures --------------
 (***************************************************************************)
 (* Recorded Chicago Board Options Exchange Complex v2.1.18 packets, as the *)
 (* bytes they were captured as. Each one decodes, consumes the whole       *)
 (* packet, and encodes back to exactly the bytes it was read from.         *)
 (***************************************************************************)
-EXTENDS C1Options_Complex_v2_1_18
+EXTENDS C1Options_Complex_Pitch_v2_1_18
 
 AuctionCancelMessageCapture ==
     << 48, 0, 2, 33, 175, 50, 152, 0, 14, 174, 144, 224, 200, 57, 116, 22,
