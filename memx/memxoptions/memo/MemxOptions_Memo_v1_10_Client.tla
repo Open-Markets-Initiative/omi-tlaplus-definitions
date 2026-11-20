@@ -773,124 +773,124 @@ CheckedPartiesGroups3 ==
         \cup { [ZeroPartiesGroups3 EXCEPT !.partiesGroup = one] : one \in SampleLists(OnePartiesGroup3) }
 
 (***************************************************************************)
-(* Two Sided Quotes Group: 17 bytes                                        *)
+(* Long Two Sided Quotes Group: 33 bytes                                   *)
 (***************************************************************************)
 
-TwoSidedQuotesGroup2 ==
-    [ listSeqNo  : Sample(1),
-      securityId : Sample(8),
-      bidSize    : Sample(2),
-      bidPx      : Sample(2),
-      offerSize  : Sample(2),
-      offerPx    : Sample(2) ]
+LongTwoSidedQuotesGroup ==
+    [ listSeqNo                                               : Sample(1),
+      optionsSecurityIdLongTwoSidedBulkQuoteOptionsSecurityId : Sample(8),
+      bidSizeUint32                                           : Sample(4),
+      bidPxPriceType                                          : Sample(8),
+      offerSizeUint32                                         : Sample(4),
+      offerPxPriceType                                        : Sample(8) ]
 
-EncodeTwoSidedQuotesGroup2(message) ==
+EncodeLongTwoSidedQuotesGroup(message) ==
     message.listSeqNo
-        \o message.securityId
-        \o message.bidSize
-        \o message.bidPx
-        \o message.offerSize
-        \o message.offerPx
+        \o message.optionsSecurityIdLongTwoSidedBulkQuoteOptionsSecurityId
+        \o message.bidSizeUint32
+        \o message.bidPxPriceType
+        \o message.offerSizeUint32
+        \o message.offerPxPriceType
 
-DecodeTwoSidedQuotesGroup2(bytes) ==
+DecodeLongTwoSidedQuotesGroup(bytes) ==
     LET listSeqNo == ReadBytes(bytes, 1) IN IF ~listSeqNo.ok THEN Fail ELSE
-    LET securityId == ReadBytes(listSeqNo.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
-    LET bidSize == ReadBytes(securityId.rest, 2) IN IF ~bidSize.ok THEN Fail ELSE
-    LET bidPx == ReadBytes(bidSize.rest, 2) IN IF ~bidPx.ok THEN Fail ELSE
-    LET offerSize == ReadBytes(bidPx.rest, 2) IN IF ~offerSize.ok THEN Fail ELSE
-    LET offerPx == ReadBytes(offerSize.rest, 2) IN IF ~offerPx.ok THEN Fail ELSE
-    Ok([ listSeqNo  |-> listSeqNo.value,
-         securityId |-> securityId.value,
-         bidSize    |-> bidSize.value,
-         bidPx      |-> bidPx.value,
-         offerSize  |-> offerSize.value,
-         offerPx    |-> offerPx.value ], offerPx.rest)
+    LET optionsSecurityIdLongTwoSidedBulkQuoteOptionsSecurityId == ReadBytes(listSeqNo.rest, 8) IN IF ~optionsSecurityIdLongTwoSidedBulkQuoteOptionsSecurityId.ok THEN Fail ELSE
+    LET bidSizeUint32 == ReadBytes(optionsSecurityIdLongTwoSidedBulkQuoteOptionsSecurityId.rest, 4) IN IF ~bidSizeUint32.ok THEN Fail ELSE
+    LET bidPxPriceType == ReadBytes(bidSizeUint32.rest, 8) IN IF ~bidPxPriceType.ok THEN Fail ELSE
+    LET offerSizeUint32 == ReadBytes(bidPxPriceType.rest, 4) IN IF ~offerSizeUint32.ok THEN Fail ELSE
+    LET offerPxPriceType == ReadBytes(offerSizeUint32.rest, 8) IN IF ~offerPxPriceType.ok THEN Fail ELSE
+    Ok([ listSeqNo                                               |-> listSeqNo.value,
+         optionsSecurityIdLongTwoSidedBulkQuoteOptionsSecurityId |-> optionsSecurityIdLongTwoSidedBulkQuoteOptionsSecurityId.value,
+         bidSizeUint32                                           |-> bidSizeUint32.value,
+         bidPxPriceType                                          |-> bidPxPriceType.value,
+         offerSizeUint32                                         |-> offerSizeUint32.value,
+         offerPxPriceType                                        |-> offerPxPriceType.value ], offerPxPriceType.rest)
 
-ZeroTwoSidedQuotesGroup2 ==
-    [ listSeqNo  |-> [i \in 1 .. 1 |-> 0],
-      securityId |-> [i \in 1 .. 8 |-> 0],
-      bidSize    |-> [i \in 1 .. 2 |-> 0],
-      bidPx      |-> [i \in 1 .. 2 |-> 0],
-      offerSize  |-> [i \in 1 .. 2 |-> 0],
-      offerPx    |-> [i \in 1 .. 2 |-> 0] ]
+ZeroLongTwoSidedQuotesGroup ==
+    [ listSeqNo                                               |-> [i \in 1 .. 1 |-> 0],
+      optionsSecurityIdLongTwoSidedBulkQuoteOptionsSecurityId |-> [i \in 1 .. 8 |-> 0],
+      bidSizeUint32                                           |-> [i \in 1 .. 4 |-> 0],
+      bidPxPriceType                                          |-> [i \in 1 .. 8 |-> 0],
+      offerSizeUint32                                         |-> [i \in 1 .. 4 |-> 0],
+      offerPxPriceType                                        |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Two Sided Quotes Group at zero, then each field in turn at the values it is checked at *)
-CheckedTwoSidedQuotesGroup2 ==
-    { ZeroTwoSidedQuotesGroup2 }
-        \cup { [ZeroTwoSidedQuotesGroup2 EXCEPT !.listSeqNo = one] : one \in Sample(1) }
-        \cup { [ZeroTwoSidedQuotesGroup2 EXCEPT !.securityId = one] : one \in Sample(8) }
-        \cup { [ZeroTwoSidedQuotesGroup2 EXCEPT !.bidSize = one] : one \in Sample(2) }
-        \cup { [ZeroTwoSidedQuotesGroup2 EXCEPT !.bidPx = one] : one \in Sample(2) }
-        \cup { [ZeroTwoSidedQuotesGroup2 EXCEPT !.offerSize = one] : one \in Sample(2) }
-        \cup { [ZeroTwoSidedQuotesGroup2 EXCEPT !.offerPx = one] : one \in Sample(2) }
+(* Long Two Sided Quotes Group at zero, then each field in turn at the values it is checked at *)
+CheckedLongTwoSidedQuotesGroup ==
+    { ZeroLongTwoSidedQuotesGroup }
+        \cup { [ZeroLongTwoSidedQuotesGroup EXCEPT !.listSeqNo = one] : one \in Sample(1) }
+        \cup { [ZeroLongTwoSidedQuotesGroup EXCEPT !.optionsSecurityIdLongTwoSidedBulkQuoteOptionsSecurityId = one] : one \in Sample(8) }
+        \cup { [ZeroLongTwoSidedQuotesGroup EXCEPT !.bidSizeUint32 = one] : one \in Sample(4) }
+        \cup { [ZeroLongTwoSidedQuotesGroup EXCEPT !.bidPxPriceType = one] : one \in Sample(8) }
+        \cup { [ZeroLongTwoSidedQuotesGroup EXCEPT !.offerSizeUint32 = one] : one \in Sample(4) }
+        \cup { [ZeroLongTwoSidedQuotesGroup EXCEPT !.offerPxPriceType = one] : one \in Sample(8) }
 
-(* A run of Two Sided Quotes Group, written one after another *)
-RECURSIVE EncodeTwoSidedQuotesGroup2List(_)
-EncodeTwoSidedQuotesGroup2List(messages) ==
+(* A run of Long Two Sided Quotes Group, written one after another *)
+RECURSIVE EncodeLongTwoSidedQuotesGroupList(_)
+EncodeLongTwoSidedQuotesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeTwoSidedQuotesGroup2(Head(messages)) \o EncodeTwoSidedQuotesGroup2List(Tail(messages))
+    ELSE EncodeLongTwoSidedQuotesGroup(Head(messages)) \o EncodeLongTwoSidedQuotesGroupList(Tail(messages))
 
-(* As many Two Sided Quotes Group as the field that counts them says *)
-RECURSIVE ReadTwoSidedQuotesGroup2List(_, _)
-ReadTwoSidedQuotesGroup2List(bytes, count) ==
+(* As many Long Two Sided Quotes Group as the field that counts them says *)
+RECURSIVE ReadLongTwoSidedQuotesGroupList(_, _)
+ReadLongTwoSidedQuotesGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeTwoSidedQuotesGroup2(bytes)
+    ELSE LET one == DecodeLongTwoSidedQuotesGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadTwoSidedQuotesGroup2List(one.rest, count - 1)
+             ELSE LET more == ReadLongTwoSidedQuotesGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Two Sided Quotes Group of each kind, for the lists that carry them *)
-OneTwoSidedQuotesGroup2 == { ZeroTwoSidedQuotesGroup2 }
+(* One Long Two Sided Quotes Group of each kind, for the lists that carry them *)
+OneLongTwoSidedQuotesGroup == { ZeroLongTwoSidedQuotesGroup }
 
 (***************************************************************************)
-(* Two Sided Quotes Groups                                                 *)
+(* Long Two Sided Quotes Groups                                            *)
 (***************************************************************************)
 
-TwoSidedQuotesGroups2 ==
-    [ blockLengthShort    : Sample(1),
-      twoSidedQuotesGroup : SampleLists(OneTwoSidedQuotesGroup2) ]
+LongTwoSidedQuotesGroups ==
+    [ blockLengthShort        : Sample(1),
+      longTwoSidedQuotesGroup : SampleLists(OneLongTwoSidedQuotesGroup) ]
 
-EncodeTwoSidedQuotesGroups2(message) ==
+EncodeLongTwoSidedQuotesGroups(message) ==
     message.blockLengthShort
-        \o EncodeUIntBE(Len(message.twoSidedQuotesGroup), 1)
-        \o EncodeTwoSidedQuotesGroup2List(message.twoSidedQuotesGroup)
+        \o EncodeUIntBE(Len(message.longTwoSidedQuotesGroup), 1)
+        \o EncodeLongTwoSidedQuotesGroupList(message.longTwoSidedQuotesGroup)
 
-DecodeTwoSidedQuotesGroups2(bytes) ==
+DecodeLongTwoSidedQuotesGroups(bytes) ==
     LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET twoSidedQuotesGroup == ReadTwoSidedQuotesGroup2List(numInGroup.rest, numInGroup.value) IN IF ~twoSidedQuotesGroup.ok THEN Fail ELSE
-    Ok([ blockLengthShort    |-> blockLengthShort.value,
-         twoSidedQuotesGroup |-> twoSidedQuotesGroup.value ], twoSidedQuotesGroup.rest)
+    LET longTwoSidedQuotesGroup == ReadLongTwoSidedQuotesGroupList(numInGroup.rest, numInGroup.value) IN IF ~longTwoSidedQuotesGroup.ok THEN Fail ELSE
+    Ok([ blockLengthShort        |-> blockLengthShort.value,
+         longTwoSidedQuotesGroup |-> longTwoSidedQuotesGroup.value ], longTwoSidedQuotesGroup.rest)
 
-ZeroTwoSidedQuotesGroups2 ==
-    [ blockLengthShort    |-> [i \in 1 .. 1 |-> 0],
-      twoSidedQuotesGroup |-> << >> ]
+ZeroLongTwoSidedQuotesGroups ==
+    [ blockLengthShort        |-> [i \in 1 .. 1 |-> 0],
+      longTwoSidedQuotesGroup |-> << >> ]
 
-(* Two Sided Quotes Groups at zero, then each field in turn at the values it is checked at *)
-CheckedTwoSidedQuotesGroups2 ==
-    { ZeroTwoSidedQuotesGroups2 }
-        \cup { [ZeroTwoSidedQuotesGroups2 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
-        \cup { [ZeroTwoSidedQuotesGroups2 EXCEPT !.twoSidedQuotesGroup = one] : one \in SampleLists(OneTwoSidedQuotesGroup2) }
+(* Long Two Sided Quotes Groups at zero, then each field in turn at the values it is checked at *)
+CheckedLongTwoSidedQuotesGroups ==
+    { ZeroLongTwoSidedQuotesGroups }
+        \cup { [ZeroLongTwoSidedQuotesGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroLongTwoSidedQuotesGroups EXCEPT !.longTwoSidedQuotesGroup = one] : one \in SampleLists(OneLongTwoSidedQuotesGroup) }
 
 (***************************************************************************)
 (* Long Two Sided Bulk Quote Message                                       *)
 (***************************************************************************)
 
 LongTwoSidedBulkQuoteMessage ==
-    [ sendingTime          : Sample(8),
-      clordid              : Sample(20),
-      timeInForce          : Sample(1),
-      execInst             : Sample(2),
-      tradingCapacity      : Sample(1),
-      mtpGroupId           : Sample(2),
-      matchTradePrevention : Sample(1),
-      cancelGroupId        : Sample(2),
-      riskGroupId          : Sample(2),
-      partiesGroups        : PartiesGroups3,
-      twoSidedQuotesGroups : TwoSidedQuotesGroups2 ]
+    [ sendingTime              : Sample(8),
+      clordid                  : Sample(20),
+      timeInForce              : Sample(1),
+      execInst                 : Sample(2),
+      tradingCapacity          : Sample(1),
+      mtpGroupId               : Sample(2),
+      matchTradePrevention     : Sample(1),
+      cancelGroupId            : Sample(2),
+      riskGroupId              : Sample(2),
+      partiesGroups            : PartiesGroups3,
+      longTwoSidedQuotesGroups : LongTwoSidedQuotesGroups ]
 
 EncodeLongTwoSidedBulkQuoteMessage(message) ==
     message.sendingTime
@@ -903,7 +903,7 @@ EncodeLongTwoSidedBulkQuoteMessage(message) ==
         \o message.cancelGroupId
         \o message.riskGroupId
         \o EncodePartiesGroups3(message.partiesGroups)
-        \o EncodeTwoSidedQuotesGroups2(message.twoSidedQuotesGroups)
+        \o EncodeLongTwoSidedQuotesGroups(message.longTwoSidedQuotesGroups)
 
 DecodeLongTwoSidedBulkQuoteMessage(bytes) ==
     LET sendingTime == ReadBytes(bytes, 8) IN IF ~sendingTime.ok THEN Fail ELSE
@@ -916,31 +916,31 @@ DecodeLongTwoSidedBulkQuoteMessage(bytes) ==
     LET cancelGroupId == ReadBytes(matchTradePrevention.rest, 2) IN IF ~cancelGroupId.ok THEN Fail ELSE
     LET riskGroupId == ReadBytes(cancelGroupId.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
     LET partiesGroups == DecodePartiesGroups3(riskGroupId.rest) IN IF ~partiesGroups.ok THEN Fail ELSE
-    LET twoSidedQuotesGroups == DecodeTwoSidedQuotesGroups2(partiesGroups.rest) IN IF ~twoSidedQuotesGroups.ok THEN Fail ELSE
-    Ok([ sendingTime          |-> sendingTime.value,
-         clordid              |-> clordid.value,
-         timeInForce          |-> timeInForce.value,
-         execInst             |-> execInst.value,
-         tradingCapacity      |-> tradingCapacity.value,
-         mtpGroupId           |-> mtpGroupId.value,
-         matchTradePrevention |-> matchTradePrevention.value,
-         cancelGroupId        |-> cancelGroupId.value,
-         riskGroupId          |-> riskGroupId.value,
-         partiesGroups        |-> partiesGroups.value,
-         twoSidedQuotesGroups |-> twoSidedQuotesGroups.value ], twoSidedQuotesGroups.rest)
+    LET longTwoSidedQuotesGroups == DecodeLongTwoSidedQuotesGroups(partiesGroups.rest) IN IF ~longTwoSidedQuotesGroups.ok THEN Fail ELSE
+    Ok([ sendingTime              |-> sendingTime.value,
+         clordid                  |-> clordid.value,
+         timeInForce              |-> timeInForce.value,
+         execInst                 |-> execInst.value,
+         tradingCapacity          |-> tradingCapacity.value,
+         mtpGroupId               |-> mtpGroupId.value,
+         matchTradePrevention     |-> matchTradePrevention.value,
+         cancelGroupId            |-> cancelGroupId.value,
+         riskGroupId              |-> riskGroupId.value,
+         partiesGroups            |-> partiesGroups.value,
+         longTwoSidedQuotesGroups |-> longTwoSidedQuotesGroups.value ], longTwoSidedQuotesGroups.rest)
 
 ZeroLongTwoSidedBulkQuoteMessage ==
-    [ sendingTime          |-> [i \in 1 .. 8 |-> 0],
-      clordid              |-> [i \in 1 .. 20 |-> 0],
-      timeInForce          |-> [i \in 1 .. 1 |-> 0],
-      execInst             |-> [i \in 1 .. 2 |-> 0],
-      tradingCapacity      |-> [i \in 1 .. 1 |-> 0],
-      mtpGroupId           |-> [i \in 1 .. 2 |-> 0],
-      matchTradePrevention |-> [i \in 1 .. 1 |-> 0],
-      cancelGroupId        |-> [i \in 1 .. 2 |-> 0],
-      riskGroupId          |-> [i \in 1 .. 2 |-> 0],
-      partiesGroups        |-> ZeroPartiesGroups3,
-      twoSidedQuotesGroups |-> ZeroTwoSidedQuotesGroups2 ]
+    [ sendingTime              |-> [i \in 1 .. 8 |-> 0],
+      clordid                  |-> [i \in 1 .. 20 |-> 0],
+      timeInForce              |-> [i \in 1 .. 1 |-> 0],
+      execInst                 |-> [i \in 1 .. 2 |-> 0],
+      tradingCapacity          |-> [i \in 1 .. 1 |-> 0],
+      mtpGroupId               |-> [i \in 1 .. 2 |-> 0],
+      matchTradePrevention     |-> [i \in 1 .. 1 |-> 0],
+      cancelGroupId            |-> [i \in 1 .. 2 |-> 0],
+      riskGroupId              |-> [i \in 1 .. 2 |-> 0],
+      partiesGroups            |-> ZeroPartiesGroups3,
+      longTwoSidedQuotesGroups |-> ZeroLongTwoSidedQuotesGroups ]
 
 (* Long Two Sided Bulk Quote Message at zero, then each field in turn at the values it is checked at *)
 CheckedLongTwoSidedBulkQuoteMessage ==
@@ -955,7 +955,7 @@ CheckedLongTwoSidedBulkQuoteMessage ==
         \cup { [ZeroLongTwoSidedBulkQuoteMessage EXCEPT !.cancelGroupId = one] : one \in Sample(2) }
         \cup { [ZeroLongTwoSidedBulkQuoteMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
         \cup { [ZeroLongTwoSidedBulkQuoteMessage EXCEPT !.partiesGroups = one] : one \in CheckedPartiesGroups3 }
-        \cup { [ZeroLongTwoSidedBulkQuoteMessage EXCEPT !.twoSidedQuotesGroups = one] : one \in CheckedTwoSidedQuotesGroups2 }
+        \cup { [ZeroLongTwoSidedBulkQuoteMessage EXCEPT !.longTwoSidedQuotesGroups = one] : one \in CheckedLongTwoSidedQuotesGroups }
 
 (***************************************************************************)
 (* Parties Group: 18 bytes                                                 *)
@@ -1307,118 +1307,118 @@ CheckedPartiesGroups5 ==
         \cup { [ZeroPartiesGroups5 EXCEPT !.partiesGroup = one] : one \in SampleLists(OnePartiesGroup5) }
 
 (***************************************************************************)
-(* One Sided Quotes Group: 14 bytes                                        *)
+(* Long One Sided Quotes Group: 22 bytes                                   *)
 (***************************************************************************)
 
-OneSidedQuotesGroup2 ==
-    [ listSeqNo  : Sample(1),
-      securityId : Sample(8),
-      side       : Sample(1),
-      quantity   : Sample(2),
-      priceShort : Sample(2) ]
+LongOneSidedQuotesGroup ==
+    [ listSeqNo                                               : Sample(1),
+      optionsSecurityIdLongOneSidedBulkQuoteOptionsSecurityId : Sample(8),
+      side                                                    : Sample(1),
+      quantityLong                                            : Sample(4),
+      price                                                   : Sample(8) ]
 
-EncodeOneSidedQuotesGroup2(message) ==
+EncodeLongOneSidedQuotesGroup(message) ==
     message.listSeqNo
-        \o message.securityId
+        \o message.optionsSecurityIdLongOneSidedBulkQuoteOptionsSecurityId
         \o message.side
-        \o message.quantity
-        \o message.priceShort
+        \o message.quantityLong
+        \o message.price
 
-DecodeOneSidedQuotesGroup2(bytes) ==
+DecodeLongOneSidedQuotesGroup(bytes) ==
     LET listSeqNo == ReadBytes(bytes, 1) IN IF ~listSeqNo.ok THEN Fail ELSE
-    LET securityId == ReadBytes(listSeqNo.rest, 8) IN IF ~securityId.ok THEN Fail ELSE
-    LET side == ReadBytes(securityId.rest, 1) IN IF ~side.ok THEN Fail ELSE
-    LET quantity == ReadBytes(side.rest, 2) IN IF ~quantity.ok THEN Fail ELSE
-    LET priceShort == ReadBytes(quantity.rest, 2) IN IF ~priceShort.ok THEN Fail ELSE
-    Ok([ listSeqNo  |-> listSeqNo.value,
-         securityId |-> securityId.value,
-         side       |-> side.value,
-         quantity   |-> quantity.value,
-         priceShort |-> priceShort.value ], priceShort.rest)
+    LET optionsSecurityIdLongOneSidedBulkQuoteOptionsSecurityId == ReadBytes(listSeqNo.rest, 8) IN IF ~optionsSecurityIdLongOneSidedBulkQuoteOptionsSecurityId.ok THEN Fail ELSE
+    LET side == ReadBytes(optionsSecurityIdLongOneSidedBulkQuoteOptionsSecurityId.rest, 1) IN IF ~side.ok THEN Fail ELSE
+    LET quantityLong == ReadBytes(side.rest, 4) IN IF ~quantityLong.ok THEN Fail ELSE
+    LET price == ReadBytes(quantityLong.rest, 8) IN IF ~price.ok THEN Fail ELSE
+    Ok([ listSeqNo                                               |-> listSeqNo.value,
+         optionsSecurityIdLongOneSidedBulkQuoteOptionsSecurityId |-> optionsSecurityIdLongOneSidedBulkQuoteOptionsSecurityId.value,
+         side                                                    |-> side.value,
+         quantityLong                                            |-> quantityLong.value,
+         price                                                   |-> price.value ], price.rest)
 
-ZeroOneSidedQuotesGroup2 ==
-    [ listSeqNo  |-> [i \in 1 .. 1 |-> 0],
-      securityId |-> [i \in 1 .. 8 |-> 0],
-      side       |-> [i \in 1 .. 1 |-> 0],
-      quantity   |-> [i \in 1 .. 2 |-> 0],
-      priceShort |-> [i \in 1 .. 2 |-> 0] ]
+ZeroLongOneSidedQuotesGroup ==
+    [ listSeqNo                                               |-> [i \in 1 .. 1 |-> 0],
+      optionsSecurityIdLongOneSidedBulkQuoteOptionsSecurityId |-> [i \in 1 .. 8 |-> 0],
+      side                                                    |-> [i \in 1 .. 1 |-> 0],
+      quantityLong                                            |-> [i \in 1 .. 4 |-> 0],
+      price                                                   |-> [i \in 1 .. 8 |-> 0] ]
 
-(* One Sided Quotes Group at zero, then each field in turn at the values it is checked at *)
-CheckedOneSidedQuotesGroup2 ==
-    { ZeroOneSidedQuotesGroup2 }
-        \cup { [ZeroOneSidedQuotesGroup2 EXCEPT !.listSeqNo = one] : one \in Sample(1) }
-        \cup { [ZeroOneSidedQuotesGroup2 EXCEPT !.securityId = one] : one \in Sample(8) }
-        \cup { [ZeroOneSidedQuotesGroup2 EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroOneSidedQuotesGroup2 EXCEPT !.quantity = one] : one \in Sample(2) }
-        \cup { [ZeroOneSidedQuotesGroup2 EXCEPT !.priceShort = one] : one \in Sample(2) }
+(* Long One Sided Quotes Group at zero, then each field in turn at the values it is checked at *)
+CheckedLongOneSidedQuotesGroup ==
+    { ZeroLongOneSidedQuotesGroup }
+        \cup { [ZeroLongOneSidedQuotesGroup EXCEPT !.listSeqNo = one] : one \in Sample(1) }
+        \cup { [ZeroLongOneSidedQuotesGroup EXCEPT !.optionsSecurityIdLongOneSidedBulkQuoteOptionsSecurityId = one] : one \in Sample(8) }
+        \cup { [ZeroLongOneSidedQuotesGroup EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroLongOneSidedQuotesGroup EXCEPT !.quantityLong = one] : one \in Sample(4) }
+        \cup { [ZeroLongOneSidedQuotesGroup EXCEPT !.price = one] : one \in Sample(8) }
 
-(* A run of One Sided Quotes Group, written one after another *)
-RECURSIVE EncodeOneSidedQuotesGroup2List(_)
-EncodeOneSidedQuotesGroup2List(messages) ==
+(* A run of Long One Sided Quotes Group, written one after another *)
+RECURSIVE EncodeLongOneSidedQuotesGroupList(_)
+EncodeLongOneSidedQuotesGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeOneSidedQuotesGroup2(Head(messages)) \o EncodeOneSidedQuotesGroup2List(Tail(messages))
+    ELSE EncodeLongOneSidedQuotesGroup(Head(messages)) \o EncodeLongOneSidedQuotesGroupList(Tail(messages))
 
-(* As many One Sided Quotes Group as the field that counts them says *)
-RECURSIVE ReadOneSidedQuotesGroup2List(_, _)
-ReadOneSidedQuotesGroup2List(bytes, count) ==
+(* As many Long One Sided Quotes Group as the field that counts them says *)
+RECURSIVE ReadLongOneSidedQuotesGroupList(_, _)
+ReadLongOneSidedQuotesGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeOneSidedQuotesGroup2(bytes)
+    ELSE LET one == DecodeLongOneSidedQuotesGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadOneSidedQuotesGroup2List(one.rest, count - 1)
+             ELSE LET more == ReadLongOneSidedQuotesGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One One Sided Quotes Group of each kind, for the lists that carry them *)
-OneOneSidedQuotesGroup2 == { ZeroOneSidedQuotesGroup2 }
+(* One Long One Sided Quotes Group of each kind, for the lists that carry them *)
+OneLongOneSidedQuotesGroup == { ZeroLongOneSidedQuotesGroup }
 
 (***************************************************************************)
-(* One Sided Quotes Groups                                                 *)
+(* Long One Sided Quotes Groups                                            *)
 (***************************************************************************)
 
-OneSidedQuotesGroups2 ==
-    [ blockLengthShort    : Sample(1),
-      oneSidedQuotesGroup : SampleLists(OneOneSidedQuotesGroup2) ]
+LongOneSidedQuotesGroups ==
+    [ blockLengthShort        : Sample(1),
+      longOneSidedQuotesGroup : SampleLists(OneLongOneSidedQuotesGroup) ]
 
-EncodeOneSidedQuotesGroups2(message) ==
+EncodeLongOneSidedQuotesGroups(message) ==
     message.blockLengthShort
-        \o EncodeUIntBE(Len(message.oneSidedQuotesGroup), 1)
-        \o EncodeOneSidedQuotesGroup2List(message.oneSidedQuotesGroup)
+        \o EncodeUIntBE(Len(message.longOneSidedQuotesGroup), 1)
+        \o EncodeLongOneSidedQuotesGroupList(message.longOneSidedQuotesGroup)
 
-DecodeOneSidedQuotesGroups2(bytes) ==
+DecodeLongOneSidedQuotesGroups(bytes) ==
     LET blockLengthShort == ReadBytes(bytes, 1) IN IF ~blockLengthShort.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLengthShort.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET oneSidedQuotesGroup == ReadOneSidedQuotesGroup2List(numInGroup.rest, numInGroup.value) IN IF ~oneSidedQuotesGroup.ok THEN Fail ELSE
-    Ok([ blockLengthShort    |-> blockLengthShort.value,
-         oneSidedQuotesGroup |-> oneSidedQuotesGroup.value ], oneSidedQuotesGroup.rest)
+    LET longOneSidedQuotesGroup == ReadLongOneSidedQuotesGroupList(numInGroup.rest, numInGroup.value) IN IF ~longOneSidedQuotesGroup.ok THEN Fail ELSE
+    Ok([ blockLengthShort        |-> blockLengthShort.value,
+         longOneSidedQuotesGroup |-> longOneSidedQuotesGroup.value ], longOneSidedQuotesGroup.rest)
 
-ZeroOneSidedQuotesGroups2 ==
-    [ blockLengthShort    |-> [i \in 1 .. 1 |-> 0],
-      oneSidedQuotesGroup |-> << >> ]
+ZeroLongOneSidedQuotesGroups ==
+    [ blockLengthShort        |-> [i \in 1 .. 1 |-> 0],
+      longOneSidedQuotesGroup |-> << >> ]
 
-(* One Sided Quotes Groups at zero, then each field in turn at the values it is checked at *)
-CheckedOneSidedQuotesGroups2 ==
-    { ZeroOneSidedQuotesGroups2 }
-        \cup { [ZeroOneSidedQuotesGroups2 EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
-        \cup { [ZeroOneSidedQuotesGroups2 EXCEPT !.oneSidedQuotesGroup = one] : one \in SampleLists(OneOneSidedQuotesGroup2) }
+(* Long One Sided Quotes Groups at zero, then each field in turn at the values it is checked at *)
+CheckedLongOneSidedQuotesGroups ==
+    { ZeroLongOneSidedQuotesGroups }
+        \cup { [ZeroLongOneSidedQuotesGroups EXCEPT !.blockLengthShort = one] : one \in Sample(1) }
+        \cup { [ZeroLongOneSidedQuotesGroups EXCEPT !.longOneSidedQuotesGroup = one] : one \in SampleLists(OneLongOneSidedQuotesGroup) }
 
 (***************************************************************************)
 (* Long One Sided Bulk Quote Message                                       *)
 (***************************************************************************)
 
 LongOneSidedBulkQuoteMessage ==
-    [ sendingTime          : Sample(8),
-      clordid              : Sample(20),
-      timeInForce          : Sample(1),
-      execInst             : Sample(2),
-      tradingCapacity      : Sample(1),
-      mtpGroupId           : Sample(2),
-      matchTradePrevention : Sample(1),
-      cancelGroupId        : Sample(2),
-      riskGroupId          : Sample(2),
-      partiesGroups        : PartiesGroups5,
-      oneSidedQuotesGroups : OneSidedQuotesGroups2 ]
+    [ sendingTime              : Sample(8),
+      clordid                  : Sample(20),
+      timeInForce              : Sample(1),
+      execInst                 : Sample(2),
+      tradingCapacity          : Sample(1),
+      mtpGroupId               : Sample(2),
+      matchTradePrevention     : Sample(1),
+      cancelGroupId            : Sample(2),
+      riskGroupId              : Sample(2),
+      partiesGroups            : PartiesGroups5,
+      longOneSidedQuotesGroups : LongOneSidedQuotesGroups ]
 
 EncodeLongOneSidedBulkQuoteMessage(message) ==
     message.sendingTime
@@ -1431,7 +1431,7 @@ EncodeLongOneSidedBulkQuoteMessage(message) ==
         \o message.cancelGroupId
         \o message.riskGroupId
         \o EncodePartiesGroups5(message.partiesGroups)
-        \o EncodeOneSidedQuotesGroups2(message.oneSidedQuotesGroups)
+        \o EncodeLongOneSidedQuotesGroups(message.longOneSidedQuotesGroups)
 
 DecodeLongOneSidedBulkQuoteMessage(bytes) ==
     LET sendingTime == ReadBytes(bytes, 8) IN IF ~sendingTime.ok THEN Fail ELSE
@@ -1444,31 +1444,31 @@ DecodeLongOneSidedBulkQuoteMessage(bytes) ==
     LET cancelGroupId == ReadBytes(matchTradePrevention.rest, 2) IN IF ~cancelGroupId.ok THEN Fail ELSE
     LET riskGroupId == ReadBytes(cancelGroupId.rest, 2) IN IF ~riskGroupId.ok THEN Fail ELSE
     LET partiesGroups == DecodePartiesGroups5(riskGroupId.rest) IN IF ~partiesGroups.ok THEN Fail ELSE
-    LET oneSidedQuotesGroups == DecodeOneSidedQuotesGroups2(partiesGroups.rest) IN IF ~oneSidedQuotesGroups.ok THEN Fail ELSE
-    Ok([ sendingTime          |-> sendingTime.value,
-         clordid              |-> clordid.value,
-         timeInForce          |-> timeInForce.value,
-         execInst             |-> execInst.value,
-         tradingCapacity      |-> tradingCapacity.value,
-         mtpGroupId           |-> mtpGroupId.value,
-         matchTradePrevention |-> matchTradePrevention.value,
-         cancelGroupId        |-> cancelGroupId.value,
-         riskGroupId          |-> riskGroupId.value,
-         partiesGroups        |-> partiesGroups.value,
-         oneSidedQuotesGroups |-> oneSidedQuotesGroups.value ], oneSidedQuotesGroups.rest)
+    LET longOneSidedQuotesGroups == DecodeLongOneSidedQuotesGroups(partiesGroups.rest) IN IF ~longOneSidedQuotesGroups.ok THEN Fail ELSE
+    Ok([ sendingTime              |-> sendingTime.value,
+         clordid                  |-> clordid.value,
+         timeInForce              |-> timeInForce.value,
+         execInst                 |-> execInst.value,
+         tradingCapacity          |-> tradingCapacity.value,
+         mtpGroupId               |-> mtpGroupId.value,
+         matchTradePrevention     |-> matchTradePrevention.value,
+         cancelGroupId            |-> cancelGroupId.value,
+         riskGroupId              |-> riskGroupId.value,
+         partiesGroups            |-> partiesGroups.value,
+         longOneSidedQuotesGroups |-> longOneSidedQuotesGroups.value ], longOneSidedQuotesGroups.rest)
 
 ZeroLongOneSidedBulkQuoteMessage ==
-    [ sendingTime          |-> [i \in 1 .. 8 |-> 0],
-      clordid              |-> [i \in 1 .. 20 |-> 0],
-      timeInForce          |-> [i \in 1 .. 1 |-> 0],
-      execInst             |-> [i \in 1 .. 2 |-> 0],
-      tradingCapacity      |-> [i \in 1 .. 1 |-> 0],
-      mtpGroupId           |-> [i \in 1 .. 2 |-> 0],
-      matchTradePrevention |-> [i \in 1 .. 1 |-> 0],
-      cancelGroupId        |-> [i \in 1 .. 2 |-> 0],
-      riskGroupId          |-> [i \in 1 .. 2 |-> 0],
-      partiesGroups        |-> ZeroPartiesGroups5,
-      oneSidedQuotesGroups |-> ZeroOneSidedQuotesGroups2 ]
+    [ sendingTime              |-> [i \in 1 .. 8 |-> 0],
+      clordid                  |-> [i \in 1 .. 20 |-> 0],
+      timeInForce              |-> [i \in 1 .. 1 |-> 0],
+      execInst                 |-> [i \in 1 .. 2 |-> 0],
+      tradingCapacity          |-> [i \in 1 .. 1 |-> 0],
+      mtpGroupId               |-> [i \in 1 .. 2 |-> 0],
+      matchTradePrevention     |-> [i \in 1 .. 1 |-> 0],
+      cancelGroupId            |-> [i \in 1 .. 2 |-> 0],
+      riskGroupId              |-> [i \in 1 .. 2 |-> 0],
+      partiesGroups            |-> ZeroPartiesGroups5,
+      longOneSidedQuotesGroups |-> ZeroLongOneSidedQuotesGroups ]
 
 (* Long One Sided Bulk Quote Message at zero, then each field in turn at the values it is checked at *)
 CheckedLongOneSidedBulkQuoteMessage ==
@@ -1483,7 +1483,7 @@ CheckedLongOneSidedBulkQuoteMessage ==
         \cup { [ZeroLongOneSidedBulkQuoteMessage EXCEPT !.cancelGroupId = one] : one \in Sample(2) }
         \cup { [ZeroLongOneSidedBulkQuoteMessage EXCEPT !.riskGroupId = one] : one \in Sample(2) }
         \cup { [ZeroLongOneSidedBulkQuoteMessage EXCEPT !.partiesGroups = one] : one \in CheckedPartiesGroups5 }
-        \cup { [ZeroLongOneSidedBulkQuoteMessage EXCEPT !.oneSidedQuotesGroups = one] : one \in CheckedOneSidedQuotesGroups2 }
+        \cup { [ZeroLongOneSidedBulkQuoteMessage EXCEPT !.longOneSidedQuotesGroups = one] : one \in CheckedLongOneSidedQuotesGroups }
 
 (***************************************************************************)
 (* Order Cancel Replace Request Message: 79 bytes                          *)
@@ -2474,18 +2474,18 @@ RoundTripPartiesGroups3 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Two Sided Quotes Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripTwoSidedQuotesGroup2 ==
-    \A message \in CheckedTwoSidedQuotesGroup2 :
-        LET read == DecodeTwoSidedQuotesGroup2(EncodeTwoSidedQuotesGroup2(message))
+(* Every Long Two Sided Quotes Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripLongTwoSidedQuotesGroup ==
+    \A message \in CheckedLongTwoSidedQuotesGroup :
+        LET read == DecodeLongTwoSidedQuotesGroup(EncodeLongTwoSidedQuotesGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Two Sided Quotes Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripTwoSidedQuotesGroups2 ==
-    \A message \in CheckedTwoSidedQuotesGroups2 :
-        LET read == DecodeTwoSidedQuotesGroups2(EncodeTwoSidedQuotesGroups2(message))
+(* Every Long Two Sided Quotes Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripLongTwoSidedQuotesGroups ==
+    \A message \in CheckedLongTwoSidedQuotesGroups :
+        LET read == DecodeLongTwoSidedQuotesGroups(EncodeLongTwoSidedQuotesGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2554,18 +2554,18 @@ RoundTripPartiesGroups5 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every One Sided Quotes Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripOneSidedQuotesGroup2 ==
-    \A message \in CheckedOneSidedQuotesGroup2 :
-        LET read == DecodeOneSidedQuotesGroup2(EncodeOneSidedQuotesGroup2(message))
+(* Every Long One Sided Quotes Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripLongOneSidedQuotesGroup ==
+    \A message \in CheckedLongOneSidedQuotesGroup :
+        LET read == DecodeLongOneSidedQuotesGroup(EncodeLongOneSidedQuotesGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every One Sided Quotes Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripOneSidedQuotesGroups2 ==
-    \A message \in CheckedOneSidedQuotesGroups2 :
-        LET read == DecodeOneSidedQuotesGroups2(EncodeOneSidedQuotesGroups2(message))
+(* Every Long One Sided Quotes Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripLongOneSidedQuotesGroups ==
+    \A message \in CheckedLongOneSidedQuotesGroups :
+        LET read == DecodeLongOneSidedQuotesGroups(EncodeLongOneSidedQuotesGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

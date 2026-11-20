@@ -1721,11 +1721,11 @@ CheckedSecurityStatus ==
         \cup { [ZeroSecurityStatus EXCEPT !.securityTradingEvent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Incremental Refresh Book Group: 32 bytes                                *)
+(* Incremental Refresh Book Legacy Group: 32 bytes                         *)
 (***************************************************************************)
 
-IncrementalRefreshBookGroup ==
-    [ mdEntryPxOptionalEx      : Sample(8),
+IncrementalRefreshBookLegacyGroup ==
+    [ mdEntryPxOptional        : Sample(8),
       mdEntrySizeShortOptional : Sample(4),
       securityId               : Sample(4),
       rptSeq                   : Sample(4),
@@ -1735,8 +1735,8 @@ IncrementalRefreshBookGroup ==
       mdEntryTypeBook          : Sample(1),
       padding5                 : Sample(5) ]
 
-EncodeIncrementalRefreshBookGroup(message) ==
-    message.mdEntryPxOptionalEx
+EncodeIncrementalRefreshBookLegacyGroup(message) ==
+    message.mdEntryPxOptional
         \o message.mdEntrySizeShortOptional
         \o message.securityId
         \o message.rptSeq
@@ -1746,9 +1746,9 @@ EncodeIncrementalRefreshBookGroup(message) ==
         \o message.mdEntryTypeBook
         \o message.padding5
 
-DecodeIncrementalRefreshBookGroup(bytes) ==
-    LET mdEntryPxOptionalEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
-    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
+DecodeIncrementalRefreshBookLegacyGroup(bytes) ==
+    LET mdEntryPxOptional == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptional.ok THEN Fail ELSE
+    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptional.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
     LET securityId == ReadBytes(mdEntrySizeShortOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
     LET numberOfOrdersOptional == ReadBytes(rptSeq.rest, 4) IN IF ~numberOfOrdersOptional.ok THEN Fail ELSE
@@ -1756,7 +1756,7 @@ DecodeIncrementalRefreshBookGroup(bytes) ==
     LET mdUpdateAction == ReadBytes(mdPriceLevel.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
     LET mdEntryTypeBook == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeBook.ok THEN Fail ELSE
     LET padding5 == ReadBytes(mdEntryTypeBook.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
-    Ok([ mdEntryPxOptionalEx      |-> mdEntryPxOptionalEx.value,
+    Ok([ mdEntryPxOptional        |-> mdEntryPxOptional.value,
          mdEntrySizeShortOptional |-> mdEntrySizeShortOptional.value,
          securityId               |-> securityId.value,
          rptSeq                   |-> rptSeq.value,
@@ -1766,8 +1766,8 @@ DecodeIncrementalRefreshBookGroup(bytes) ==
          mdEntryTypeBook          |-> mdEntryTypeBook.value,
          padding5                 |-> padding5.value ], padding5.rest)
 
-ZeroIncrementalRefreshBookGroup ==
-    [ mdEntryPxOptionalEx      |-> [i \in 1 .. 8 |-> 0],
+ZeroIncrementalRefreshBookLegacyGroup ==
+    [ mdEntryPxOptional        |-> [i \in 1 .. 8 |-> 0],
       mdEntrySizeShortOptional |-> [i \in 1 .. 4 |-> 0],
       securityId               |-> [i \in 1 .. 4 |-> 0],
       rptSeq                   |-> [i \in 1 .. 4 |-> 0],
@@ -1777,69 +1777,69 @@ ZeroIncrementalRefreshBookGroup ==
       mdEntryTypeBook          |-> [i \in 1 .. 1 |-> 0],
       padding5                 |-> [i \in 1 .. 5 |-> 0] ]
 
-(* Incremental Refresh Book Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshBookGroup ==
-    { ZeroIncrementalRefreshBookGroup }
-        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.numberOfOrdersOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdPriceLevel = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.padding5 = one] : one \in Sample(5) }
+(* Incremental Refresh Book Legacy Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshBookLegacyGroup ==
+    { ZeroIncrementalRefreshBookLegacyGroup }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroup EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroup EXCEPT !.numberOfOrdersOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroup EXCEPT !.mdPriceLevel = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroup EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroup EXCEPT !.padding5 = one] : one \in Sample(5) }
 
-(* A run of Incremental Refresh Book Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshBookGroupList(_)
-EncodeIncrementalRefreshBookGroupList(messages) ==
+(* A run of Incremental Refresh Book Legacy Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshBookLegacyGroupList(_)
+EncodeIncrementalRefreshBookLegacyGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeIncrementalRefreshBookGroup(Head(messages)) \o EncodeIncrementalRefreshBookGroupList(Tail(messages))
+    ELSE EncodeIncrementalRefreshBookLegacyGroup(Head(messages)) \o EncodeIncrementalRefreshBookLegacyGroupList(Tail(messages))
 
-(* As many Incremental Refresh Book Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshBookGroupList(_, _)
-ReadIncrementalRefreshBookGroupList(bytes, count) ==
+(* As many Incremental Refresh Book Legacy Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshBookLegacyGroupList(_, _)
+ReadIncrementalRefreshBookLegacyGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshBookGroup(bytes)
+    ELSE LET one == DecodeIncrementalRefreshBookLegacyGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshBookGroupList(one.rest, count - 1)
+             ELSE LET more == ReadIncrementalRefreshBookLegacyGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Incremental Refresh Book Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshBookGroup == { ZeroIncrementalRefreshBookGroup }
+(* One Incremental Refresh Book Legacy Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshBookLegacyGroup == { ZeroIncrementalRefreshBookLegacyGroup }
 
 (***************************************************************************)
-(* Incremental Refresh Book Groups                                         *)
+(* Incremental Refresh Book Legacy Groups                                  *)
 (***************************************************************************)
 
-IncrementalRefreshBookGroups ==
-    [ blockLength                 : Sample(2),
-      incrementalRefreshBookGroup : SampleLists(OneIncrementalRefreshBookGroup) ]
+IncrementalRefreshBookLegacyGroups ==
+    [ blockLength                       : Sample(2),
+      incrementalRefreshBookLegacyGroup : SampleLists(OneIncrementalRefreshBookLegacyGroup) ]
 
-EncodeIncrementalRefreshBookGroups(message) ==
+EncodeIncrementalRefreshBookLegacyGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshBookGroup), 1)
-        \o EncodeIncrementalRefreshBookGroupList(message.incrementalRefreshBookGroup)
+        \o EncodeUIntBE(Len(message.incrementalRefreshBookLegacyGroup), 1)
+        \o EncodeIncrementalRefreshBookLegacyGroupList(message.incrementalRefreshBookLegacyGroup)
 
-DecodeIncrementalRefreshBookGroups(bytes) ==
+DecodeIncrementalRefreshBookLegacyGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshBookGroup == ReadIncrementalRefreshBookGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshBookGroup.ok THEN Fail ELSE
-    Ok([ blockLength                 |-> blockLength.value,
-         incrementalRefreshBookGroup |-> incrementalRefreshBookGroup.value ], incrementalRefreshBookGroup.rest)
+    LET incrementalRefreshBookLegacyGroup == ReadIncrementalRefreshBookLegacyGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshBookLegacyGroup.ok THEN Fail ELSE
+    Ok([ blockLength                       |-> blockLength.value,
+         incrementalRefreshBookLegacyGroup |-> incrementalRefreshBookLegacyGroup.value ], incrementalRefreshBookLegacyGroup.rest)
 
-ZeroIncrementalRefreshBookGroups ==
-    [ blockLength                 |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshBookGroup |-> << >> ]
+ZeroIncrementalRefreshBookLegacyGroups ==
+    [ blockLength                       |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshBookLegacyGroup |-> << >> ]
 
-(* Incremental Refresh Book Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshBookGroups ==
-    { ZeroIncrementalRefreshBookGroups }
-        \cup { [ZeroIncrementalRefreshBookGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshBookGroups EXCEPT !.incrementalRefreshBookGroup = one] : one \in SampleLists(OneIncrementalRefreshBookGroup) }
+(* Incremental Refresh Book Legacy Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshBookLegacyGroups ==
+    { ZeroIncrementalRefreshBookLegacyGroups }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshBookLegacyGroups EXCEPT !.incrementalRefreshBookLegacyGroup = one] : one \in SampleLists(OneIncrementalRefreshBookLegacyGroup) }
 
 (***************************************************************************)
 (* Incremental Refresh Book Order Id Group: 24 bytes                       *)
@@ -1958,33 +1958,33 @@ MdIncrementalRefreshBookLegacy ==
     [ transactTime                        : Sample(8),
       matchEventIndicator                 : Sample(1),
       padding2                            : Sample(2),
-      incrementalRefreshBookGroups        : IncrementalRefreshBookGroups,
+      incrementalRefreshBookLegacyGroups  : IncrementalRefreshBookLegacyGroups,
       incrementalRefreshBookOrderIdGroups : IncrementalRefreshBookOrderIdGroups ]
 
 EncodeMdIncrementalRefreshBookLegacy(message) ==
     message.transactTime
         \o message.matchEventIndicator
         \o message.padding2
-        \o EncodeIncrementalRefreshBookGroups(message.incrementalRefreshBookGroups)
+        \o EncodeIncrementalRefreshBookLegacyGroups(message.incrementalRefreshBookLegacyGroups)
         \o EncodeIncrementalRefreshBookOrderIdGroups(message.incrementalRefreshBookOrderIdGroups)
 
 DecodeMdIncrementalRefreshBookLegacy(bytes) ==
     LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
     LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
     LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshBookGroups == DecodeIncrementalRefreshBookGroups(padding2.rest) IN IF ~incrementalRefreshBookGroups.ok THEN Fail ELSE
-    LET incrementalRefreshBookOrderIdGroups == DecodeIncrementalRefreshBookOrderIdGroups(incrementalRefreshBookGroups.rest) IN IF ~incrementalRefreshBookOrderIdGroups.ok THEN Fail ELSE
+    LET incrementalRefreshBookLegacyGroups == DecodeIncrementalRefreshBookLegacyGroups(padding2.rest) IN IF ~incrementalRefreshBookLegacyGroups.ok THEN Fail ELSE
+    LET incrementalRefreshBookOrderIdGroups == DecodeIncrementalRefreshBookOrderIdGroups(incrementalRefreshBookLegacyGroups.rest) IN IF ~incrementalRefreshBookOrderIdGroups.ok THEN Fail ELSE
     Ok([ transactTime                        |-> transactTime.value,
          matchEventIndicator                 |-> matchEventIndicator.value,
          padding2                            |-> padding2.value,
-         incrementalRefreshBookGroups        |-> incrementalRefreshBookGroups.value,
+         incrementalRefreshBookLegacyGroups  |-> incrementalRefreshBookLegacyGroups.value,
          incrementalRefreshBookOrderIdGroups |-> incrementalRefreshBookOrderIdGroups.value ], incrementalRefreshBookOrderIdGroups.rest)
 
 ZeroMdIncrementalRefreshBookLegacy ==
     [ transactTime                        |-> [i \in 1 .. 8 |-> 0],
       matchEventIndicator                 |-> [i \in 1 .. 1 |-> 0],
       padding2                            |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshBookGroups        |-> ZeroIncrementalRefreshBookGroups,
+      incrementalRefreshBookLegacyGroups  |-> ZeroIncrementalRefreshBookLegacyGroups,
       incrementalRefreshBookOrderIdGroups |-> ZeroIncrementalRefreshBookOrderIdGroups ]
 
 (* Md Incremental Refresh Book Legacy at zero, then each field in turn at the values it is checked at *)
@@ -1993,15 +1993,15 @@ CheckedMdIncrementalRefreshBookLegacy ==
         \cup { [ZeroMdIncrementalRefreshBookLegacy EXCEPT !.transactTime = one] : one \in Sample(8) }
         \cup { [ZeroMdIncrementalRefreshBookLegacy EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
         \cup { [ZeroMdIncrementalRefreshBookLegacy EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshBookLegacy EXCEPT !.incrementalRefreshBookGroups = one] : one \in CheckedIncrementalRefreshBookGroups }
+        \cup { [ZeroMdIncrementalRefreshBookLegacy EXCEPT !.incrementalRefreshBookLegacyGroups = one] : one \in CheckedIncrementalRefreshBookLegacyGroups }
         \cup { [ZeroMdIncrementalRefreshBookLegacy EXCEPT !.incrementalRefreshBookOrderIdGroups = one] : one \in CheckedIncrementalRefreshBookOrderIdGroups }
 
 (***************************************************************************)
-(* Incremental Refresh Daily Statistics Group: 32 bytes                    *)
+(* Incremental Refresh Daily Statistics Legacy Group: 32 bytes             *)
 (***************************************************************************)
 
-IncrementalRefreshDailyStatisticsGroup ==
-    [ mdEntryPxOptionalEx        : Sample(8),
+IncrementalRefreshDailyStatisticsLegacyGroup ==
+    [ mdEntryPxOptional          : Sample(8),
       mdEntrySizeShortOptional   : Sample(4),
       securityId                 : Sample(4),
       rptSeq                     : Sample(4),
@@ -2011,8 +2011,8 @@ IncrementalRefreshDailyStatisticsGroup ==
       mdEntryTypeDailyStatistics : Sample(1),
       padding7                   : Sample(7) ]
 
-EncodeIncrementalRefreshDailyStatisticsGroup(message) ==
-    message.mdEntryPxOptionalEx
+EncodeIncrementalRefreshDailyStatisticsLegacyGroup(message) ==
+    message.mdEntryPxOptional
         \o message.mdEntrySizeShortOptional
         \o message.securityId
         \o message.rptSeq
@@ -2022,9 +2022,9 @@ EncodeIncrementalRefreshDailyStatisticsGroup(message) ==
         \o message.mdEntryTypeDailyStatistics
         \o message.padding7
 
-DecodeIncrementalRefreshDailyStatisticsGroup(bytes) ==
-    LET mdEntryPxOptionalEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
-    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
+DecodeIncrementalRefreshDailyStatisticsLegacyGroup(bytes) ==
+    LET mdEntryPxOptional == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptional.ok THEN Fail ELSE
+    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptional.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
     LET securityId == ReadBytes(mdEntrySizeShortOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
     LET tradingReferenceDate == ReadBytes(rptSeq.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
@@ -2032,7 +2032,7 @@ DecodeIncrementalRefreshDailyStatisticsGroup(bytes) ==
     LET mdUpdateAction == ReadBytes(settlPriceType.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
     LET mdEntryTypeDailyStatistics == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeDailyStatistics.ok THEN Fail ELSE
     LET padding7 == ReadBytes(mdEntryTypeDailyStatistics.rest, 7) IN IF ~padding7.ok THEN Fail ELSE
-    Ok([ mdEntryPxOptionalEx        |-> mdEntryPxOptionalEx.value,
+    Ok([ mdEntryPxOptional          |-> mdEntryPxOptional.value,
          mdEntrySizeShortOptional   |-> mdEntrySizeShortOptional.value,
          securityId                 |-> securityId.value,
          rptSeq                     |-> rptSeq.value,
@@ -2042,8 +2042,8 @@ DecodeIncrementalRefreshDailyStatisticsGroup(bytes) ==
          mdEntryTypeDailyStatistics |-> mdEntryTypeDailyStatistics.value,
          padding7                   |-> padding7.value ], padding7.rest)
 
-ZeroIncrementalRefreshDailyStatisticsGroup ==
-    [ mdEntryPxOptionalEx        |-> [i \in 1 .. 8 |-> 0],
+ZeroIncrementalRefreshDailyStatisticsLegacyGroup ==
+    [ mdEntryPxOptional          |-> [i \in 1 .. 8 |-> 0],
       mdEntrySizeShortOptional   |-> [i \in 1 .. 4 |-> 0],
       securityId                 |-> [i \in 1 .. 4 |-> 0],
       rptSeq                     |-> [i \in 1 .. 4 |-> 0],
@@ -2053,101 +2053,101 @@ ZeroIncrementalRefreshDailyStatisticsGroup ==
       mdEntryTypeDailyStatistics |-> [i \in 1 .. 1 |-> 0],
       padding7                   |-> [i \in 1 .. 7 |-> 0] ]
 
-(* Incremental Refresh Daily Statistics Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshDailyStatisticsGroup ==
-    { ZeroIncrementalRefreshDailyStatisticsGroup }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.settlPriceType = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdEntryTypeDailyStatistics = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.padding7 = one] : one \in Sample(7) }
+(* Incremental Refresh Daily Statistics Legacy Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshDailyStatisticsLegacyGroup ==
+    { ZeroIncrementalRefreshDailyStatisticsLegacyGroup }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroup EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroup EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroup EXCEPT !.settlPriceType = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroup EXCEPT !.mdEntryTypeDailyStatistics = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroup EXCEPT !.padding7 = one] : one \in Sample(7) }
 
-(* A run of Incremental Refresh Daily Statistics Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshDailyStatisticsGroupList(_)
-EncodeIncrementalRefreshDailyStatisticsGroupList(messages) ==
+(* A run of Incremental Refresh Daily Statistics Legacy Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshDailyStatisticsLegacyGroupList(_)
+EncodeIncrementalRefreshDailyStatisticsLegacyGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeIncrementalRefreshDailyStatisticsGroup(Head(messages)) \o EncodeIncrementalRefreshDailyStatisticsGroupList(Tail(messages))
+    ELSE EncodeIncrementalRefreshDailyStatisticsLegacyGroup(Head(messages)) \o EncodeIncrementalRefreshDailyStatisticsLegacyGroupList(Tail(messages))
 
-(* As many Incremental Refresh Daily Statistics Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshDailyStatisticsGroupList(_, _)
-ReadIncrementalRefreshDailyStatisticsGroupList(bytes, count) ==
+(* As many Incremental Refresh Daily Statistics Legacy Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshDailyStatisticsLegacyGroupList(_, _)
+ReadIncrementalRefreshDailyStatisticsLegacyGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshDailyStatisticsGroup(bytes)
+    ELSE LET one == DecodeIncrementalRefreshDailyStatisticsLegacyGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshDailyStatisticsGroupList(one.rest, count - 1)
+             ELSE LET more == ReadIncrementalRefreshDailyStatisticsLegacyGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Incremental Refresh Daily Statistics Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshDailyStatisticsGroup == { ZeroIncrementalRefreshDailyStatisticsGroup }
+(* One Incremental Refresh Daily Statistics Legacy Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshDailyStatisticsLegacyGroup == { ZeroIncrementalRefreshDailyStatisticsLegacyGroup }
 
 (***************************************************************************)
-(* Incremental Refresh Daily Statistics Groups                             *)
+(* Incremental Refresh Daily Statistics Legacy Groups                      *)
 (***************************************************************************)
 
-IncrementalRefreshDailyStatisticsGroups ==
-    [ blockLength                            : Sample(2),
-      incrementalRefreshDailyStatisticsGroup : SampleLists(OneIncrementalRefreshDailyStatisticsGroup) ]
+IncrementalRefreshDailyStatisticsLegacyGroups ==
+    [ blockLength                                  : Sample(2),
+      incrementalRefreshDailyStatisticsLegacyGroup : SampleLists(OneIncrementalRefreshDailyStatisticsLegacyGroup) ]
 
-EncodeIncrementalRefreshDailyStatisticsGroups(message) ==
+EncodeIncrementalRefreshDailyStatisticsLegacyGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshDailyStatisticsGroup), 1)
-        \o EncodeIncrementalRefreshDailyStatisticsGroupList(message.incrementalRefreshDailyStatisticsGroup)
+        \o EncodeUIntBE(Len(message.incrementalRefreshDailyStatisticsLegacyGroup), 1)
+        \o EncodeIncrementalRefreshDailyStatisticsLegacyGroupList(message.incrementalRefreshDailyStatisticsLegacyGroup)
 
-DecodeIncrementalRefreshDailyStatisticsGroups(bytes) ==
+DecodeIncrementalRefreshDailyStatisticsLegacyGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshDailyStatisticsGroup == ReadIncrementalRefreshDailyStatisticsGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshDailyStatisticsGroup.ok THEN Fail ELSE
-    Ok([ blockLength                            |-> blockLength.value,
-         incrementalRefreshDailyStatisticsGroup |-> incrementalRefreshDailyStatisticsGroup.value ], incrementalRefreshDailyStatisticsGroup.rest)
+    LET incrementalRefreshDailyStatisticsLegacyGroup == ReadIncrementalRefreshDailyStatisticsLegacyGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshDailyStatisticsLegacyGroup.ok THEN Fail ELSE
+    Ok([ blockLength                                  |-> blockLength.value,
+         incrementalRefreshDailyStatisticsLegacyGroup |-> incrementalRefreshDailyStatisticsLegacyGroup.value ], incrementalRefreshDailyStatisticsLegacyGroup.rest)
 
-ZeroIncrementalRefreshDailyStatisticsGroups ==
-    [ blockLength                            |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshDailyStatisticsGroup |-> << >> ]
+ZeroIncrementalRefreshDailyStatisticsLegacyGroups ==
+    [ blockLength                                  |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshDailyStatisticsLegacyGroup |-> << >> ]
 
-(* Incremental Refresh Daily Statistics Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshDailyStatisticsGroups ==
-    { ZeroIncrementalRefreshDailyStatisticsGroups }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroups EXCEPT !.incrementalRefreshDailyStatisticsGroup = one] : one \in SampleLists(OneIncrementalRefreshDailyStatisticsGroup) }
+(* Incremental Refresh Daily Statistics Legacy Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshDailyStatisticsLegacyGroups ==
+    { ZeroIncrementalRefreshDailyStatisticsLegacyGroups }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsLegacyGroups EXCEPT !.incrementalRefreshDailyStatisticsLegacyGroup = one] : one \in SampleLists(OneIncrementalRefreshDailyStatisticsLegacyGroup) }
 
 (***************************************************************************)
 (* Md Incremental Refresh Daily Statistics Legacy                          *)
 (***************************************************************************)
 
 MdIncrementalRefreshDailyStatisticsLegacy ==
-    [ transactTime                            : Sample(8),
-      matchEventIndicator                     : Sample(1),
-      padding2                                : Sample(2),
-      incrementalRefreshDailyStatisticsGroups : IncrementalRefreshDailyStatisticsGroups ]
+    [ transactTime                                  : Sample(8),
+      matchEventIndicator                           : Sample(1),
+      padding2                                      : Sample(2),
+      incrementalRefreshDailyStatisticsLegacyGroups : IncrementalRefreshDailyStatisticsLegacyGroups ]
 
 EncodeMdIncrementalRefreshDailyStatisticsLegacy(message) ==
     message.transactTime
         \o message.matchEventIndicator
         \o message.padding2
-        \o EncodeIncrementalRefreshDailyStatisticsGroups(message.incrementalRefreshDailyStatisticsGroups)
+        \o EncodeIncrementalRefreshDailyStatisticsLegacyGroups(message.incrementalRefreshDailyStatisticsLegacyGroups)
 
 DecodeMdIncrementalRefreshDailyStatisticsLegacy(bytes) ==
     LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
     LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
     LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshDailyStatisticsGroups == DecodeIncrementalRefreshDailyStatisticsGroups(padding2.rest) IN IF ~incrementalRefreshDailyStatisticsGroups.ok THEN Fail ELSE
-    Ok([ transactTime                            |-> transactTime.value,
-         matchEventIndicator                     |-> matchEventIndicator.value,
-         padding2                                |-> padding2.value,
-         incrementalRefreshDailyStatisticsGroups |-> incrementalRefreshDailyStatisticsGroups.value ], incrementalRefreshDailyStatisticsGroups.rest)
+    LET incrementalRefreshDailyStatisticsLegacyGroups == DecodeIncrementalRefreshDailyStatisticsLegacyGroups(padding2.rest) IN IF ~incrementalRefreshDailyStatisticsLegacyGroups.ok THEN Fail ELSE
+    Ok([ transactTime                                  |-> transactTime.value,
+         matchEventIndicator                           |-> matchEventIndicator.value,
+         padding2                                      |-> padding2.value,
+         incrementalRefreshDailyStatisticsLegacyGroups |-> incrementalRefreshDailyStatisticsLegacyGroups.value ], incrementalRefreshDailyStatisticsLegacyGroups.rest)
 
 ZeroMdIncrementalRefreshDailyStatisticsLegacy ==
-    [ transactTime                            |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator                     |-> [i \in 1 .. 1 |-> 0],
-      padding2                                |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshDailyStatisticsGroups |-> ZeroIncrementalRefreshDailyStatisticsGroups ]
+    [ transactTime                                  |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                           |-> [i \in 1 .. 1 |-> 0],
+      padding2                                      |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshDailyStatisticsLegacyGroups |-> ZeroIncrementalRefreshDailyStatisticsLegacyGroups ]
 
 (* Md Incremental Refresh Daily Statistics Legacy at zero, then each field in turn at the values it is checked at *)
 CheckedMdIncrementalRefreshDailyStatisticsLegacy ==
@@ -2155,136 +2155,136 @@ CheckedMdIncrementalRefreshDailyStatisticsLegacy ==
         \cup { [ZeroMdIncrementalRefreshDailyStatisticsLegacy EXCEPT !.transactTime = one] : one \in Sample(8) }
         \cup { [ZeroMdIncrementalRefreshDailyStatisticsLegacy EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
         \cup { [ZeroMdIncrementalRefreshDailyStatisticsLegacy EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshDailyStatisticsLegacy EXCEPT !.incrementalRefreshDailyStatisticsGroups = one] : one \in CheckedIncrementalRefreshDailyStatisticsGroups }
+        \cup { [ZeroMdIncrementalRefreshDailyStatisticsLegacy EXCEPT !.incrementalRefreshDailyStatisticsLegacyGroups = one] : one \in CheckedIncrementalRefreshDailyStatisticsLegacyGroups }
 
 (***************************************************************************)
-(* Incremental Refresh Limits Banding Group: 32 bytes                      *)
+(* Incremental Refresh Limits Banding Legacy Group: 32 bytes               *)
 (***************************************************************************)
 
-IncrementalRefreshLimitsBandingGroup ==
-    [ highLimitPriceEx    : Sample(8),
-      lowLimitPriceEx     : Sample(8),
-      maxPriceVariationEx : Sample(8),
-      securityId          : Sample(4),
-      rptSeq              : Sample(4) ]
+IncrementalRefreshLimitsBandingLegacyGroup ==
+    [ highLimitPrice    : Sample(8),
+      lowLimitPrice     : Sample(8),
+      maxPriceVariation : Sample(8),
+      securityId        : Sample(4),
+      rptSeq            : Sample(4) ]
 
-EncodeIncrementalRefreshLimitsBandingGroup(message) ==
-    message.highLimitPriceEx
-        \o message.lowLimitPriceEx
-        \o message.maxPriceVariationEx
+EncodeIncrementalRefreshLimitsBandingLegacyGroup(message) ==
+    message.highLimitPrice
+        \o message.lowLimitPrice
+        \o message.maxPriceVariation
         \o message.securityId
         \o message.rptSeq
 
-DecodeIncrementalRefreshLimitsBandingGroup(bytes) ==
-    LET highLimitPriceEx == ReadBytes(bytes, 8) IN IF ~highLimitPriceEx.ok THEN Fail ELSE
-    LET lowLimitPriceEx == ReadBytes(highLimitPriceEx.rest, 8) IN IF ~lowLimitPriceEx.ok THEN Fail ELSE
-    LET maxPriceVariationEx == ReadBytes(lowLimitPriceEx.rest, 8) IN IF ~maxPriceVariationEx.ok THEN Fail ELSE
-    LET securityId == ReadBytes(maxPriceVariationEx.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+DecodeIncrementalRefreshLimitsBandingLegacyGroup(bytes) ==
+    LET highLimitPrice == ReadBytes(bytes, 8) IN IF ~highLimitPrice.ok THEN Fail ELSE
+    LET lowLimitPrice == ReadBytes(highLimitPrice.rest, 8) IN IF ~lowLimitPrice.ok THEN Fail ELSE
+    LET maxPriceVariation == ReadBytes(lowLimitPrice.rest, 8) IN IF ~maxPriceVariation.ok THEN Fail ELSE
+    LET securityId == ReadBytes(maxPriceVariation.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
-    Ok([ highLimitPriceEx    |-> highLimitPriceEx.value,
-         lowLimitPriceEx     |-> lowLimitPriceEx.value,
-         maxPriceVariationEx |-> maxPriceVariationEx.value,
-         securityId          |-> securityId.value,
-         rptSeq              |-> rptSeq.value ], rptSeq.rest)
+    Ok([ highLimitPrice    |-> highLimitPrice.value,
+         lowLimitPrice     |-> lowLimitPrice.value,
+         maxPriceVariation |-> maxPriceVariation.value,
+         securityId        |-> securityId.value,
+         rptSeq            |-> rptSeq.value ], rptSeq.rest)
 
-ZeroIncrementalRefreshLimitsBandingGroup ==
-    [ highLimitPriceEx    |-> [i \in 1 .. 8 |-> 0],
-      lowLimitPriceEx     |-> [i \in 1 .. 8 |-> 0],
-      maxPriceVariationEx |-> [i \in 1 .. 8 |-> 0],
-      securityId          |-> [i \in 1 .. 4 |-> 0],
-      rptSeq              |-> [i \in 1 .. 4 |-> 0] ]
+ZeroIncrementalRefreshLimitsBandingLegacyGroup ==
+    [ highLimitPrice    |-> [i \in 1 .. 8 |-> 0],
+      lowLimitPrice     |-> [i \in 1 .. 8 |-> 0],
+      maxPriceVariation |-> [i \in 1 .. 8 |-> 0],
+      securityId        |-> [i \in 1 .. 4 |-> 0],
+      rptSeq            |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Incremental Refresh Limits Banding Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshLimitsBandingGroup ==
-    { ZeroIncrementalRefreshLimitsBandingGroup }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.highLimitPriceEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.lowLimitPriceEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.maxPriceVariationEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+(* Incremental Refresh Limits Banding Legacy Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshLimitsBandingLegacyGroup ==
+    { ZeroIncrementalRefreshLimitsBandingLegacyGroup }
+        \cup { [ZeroIncrementalRefreshLimitsBandingLegacyGroup EXCEPT !.highLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingLegacyGroup EXCEPT !.lowLimitPrice = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingLegacyGroup EXCEPT !.maxPriceVariation = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingLegacyGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingLegacyGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
 
-(* A run of Incremental Refresh Limits Banding Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshLimitsBandingGroupList(_)
-EncodeIncrementalRefreshLimitsBandingGroupList(messages) ==
+(* A run of Incremental Refresh Limits Banding Legacy Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshLimitsBandingLegacyGroupList(_)
+EncodeIncrementalRefreshLimitsBandingLegacyGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeIncrementalRefreshLimitsBandingGroup(Head(messages)) \o EncodeIncrementalRefreshLimitsBandingGroupList(Tail(messages))
+    ELSE EncodeIncrementalRefreshLimitsBandingLegacyGroup(Head(messages)) \o EncodeIncrementalRefreshLimitsBandingLegacyGroupList(Tail(messages))
 
-(* As many Incremental Refresh Limits Banding Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshLimitsBandingGroupList(_, _)
-ReadIncrementalRefreshLimitsBandingGroupList(bytes, count) ==
+(* As many Incremental Refresh Limits Banding Legacy Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshLimitsBandingLegacyGroupList(_, _)
+ReadIncrementalRefreshLimitsBandingLegacyGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshLimitsBandingGroup(bytes)
+    ELSE LET one == DecodeIncrementalRefreshLimitsBandingLegacyGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshLimitsBandingGroupList(one.rest, count - 1)
+             ELSE LET more == ReadIncrementalRefreshLimitsBandingLegacyGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Incremental Refresh Limits Banding Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshLimitsBandingGroup == { ZeroIncrementalRefreshLimitsBandingGroup }
+(* One Incremental Refresh Limits Banding Legacy Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshLimitsBandingLegacyGroup == { ZeroIncrementalRefreshLimitsBandingLegacyGroup }
 
 (***************************************************************************)
-(* Incremental Refresh Limits Banding Groups                               *)
+(* Incremental Refresh Limits Banding Legacy Groups                        *)
 (***************************************************************************)
 
-IncrementalRefreshLimitsBandingGroups ==
-    [ blockLength                          : Sample(2),
-      incrementalRefreshLimitsBandingGroup : SampleLists(OneIncrementalRefreshLimitsBandingGroup) ]
+IncrementalRefreshLimitsBandingLegacyGroups ==
+    [ blockLength                                : Sample(2),
+      incrementalRefreshLimitsBandingLegacyGroup : SampleLists(OneIncrementalRefreshLimitsBandingLegacyGroup) ]
 
-EncodeIncrementalRefreshLimitsBandingGroups(message) ==
+EncodeIncrementalRefreshLimitsBandingLegacyGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshLimitsBandingGroup), 1)
-        \o EncodeIncrementalRefreshLimitsBandingGroupList(message.incrementalRefreshLimitsBandingGroup)
+        \o EncodeUIntBE(Len(message.incrementalRefreshLimitsBandingLegacyGroup), 1)
+        \o EncodeIncrementalRefreshLimitsBandingLegacyGroupList(message.incrementalRefreshLimitsBandingLegacyGroup)
 
-DecodeIncrementalRefreshLimitsBandingGroups(bytes) ==
+DecodeIncrementalRefreshLimitsBandingLegacyGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshLimitsBandingGroup == ReadIncrementalRefreshLimitsBandingGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshLimitsBandingGroup.ok THEN Fail ELSE
-    Ok([ blockLength                          |-> blockLength.value,
-         incrementalRefreshLimitsBandingGroup |-> incrementalRefreshLimitsBandingGroup.value ], incrementalRefreshLimitsBandingGroup.rest)
+    LET incrementalRefreshLimitsBandingLegacyGroup == ReadIncrementalRefreshLimitsBandingLegacyGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshLimitsBandingLegacyGroup.ok THEN Fail ELSE
+    Ok([ blockLength                                |-> blockLength.value,
+         incrementalRefreshLimitsBandingLegacyGroup |-> incrementalRefreshLimitsBandingLegacyGroup.value ], incrementalRefreshLimitsBandingLegacyGroup.rest)
 
-ZeroIncrementalRefreshLimitsBandingGroups ==
-    [ blockLength                          |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshLimitsBandingGroup |-> << >> ]
+ZeroIncrementalRefreshLimitsBandingLegacyGroups ==
+    [ blockLength                                |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshLimitsBandingLegacyGroup |-> << >> ]
 
-(* Incremental Refresh Limits Banding Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshLimitsBandingGroups ==
-    { ZeroIncrementalRefreshLimitsBandingGroups }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroups EXCEPT !.incrementalRefreshLimitsBandingGroup = one] : one \in SampleLists(OneIncrementalRefreshLimitsBandingGroup) }
+(* Incremental Refresh Limits Banding Legacy Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshLimitsBandingLegacyGroups ==
+    { ZeroIncrementalRefreshLimitsBandingLegacyGroups }
+        \cup { [ZeroIncrementalRefreshLimitsBandingLegacyGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingLegacyGroups EXCEPT !.incrementalRefreshLimitsBandingLegacyGroup = one] : one \in SampleLists(OneIncrementalRefreshLimitsBandingLegacyGroup) }
 
 (***************************************************************************)
 (* Md Incremental Refresh Limits Banding Legacy                            *)
 (***************************************************************************)
 
 MdIncrementalRefreshLimitsBandingLegacy ==
-    [ transactTime                          : Sample(8),
-      matchEventIndicator                   : Sample(1),
-      padding2                              : Sample(2),
-      incrementalRefreshLimitsBandingGroups : IncrementalRefreshLimitsBandingGroups ]
+    [ transactTime                                : Sample(8),
+      matchEventIndicator                         : Sample(1),
+      padding2                                    : Sample(2),
+      incrementalRefreshLimitsBandingLegacyGroups : IncrementalRefreshLimitsBandingLegacyGroups ]
 
 EncodeMdIncrementalRefreshLimitsBandingLegacy(message) ==
     message.transactTime
         \o message.matchEventIndicator
         \o message.padding2
-        \o EncodeIncrementalRefreshLimitsBandingGroups(message.incrementalRefreshLimitsBandingGroups)
+        \o EncodeIncrementalRefreshLimitsBandingLegacyGroups(message.incrementalRefreshLimitsBandingLegacyGroups)
 
 DecodeMdIncrementalRefreshLimitsBandingLegacy(bytes) ==
     LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
     LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
     LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshLimitsBandingGroups == DecodeIncrementalRefreshLimitsBandingGroups(padding2.rest) IN IF ~incrementalRefreshLimitsBandingGroups.ok THEN Fail ELSE
-    Ok([ transactTime                          |-> transactTime.value,
-         matchEventIndicator                   |-> matchEventIndicator.value,
-         padding2                              |-> padding2.value,
-         incrementalRefreshLimitsBandingGroups |-> incrementalRefreshLimitsBandingGroups.value ], incrementalRefreshLimitsBandingGroups.rest)
+    LET incrementalRefreshLimitsBandingLegacyGroups == DecodeIncrementalRefreshLimitsBandingLegacyGroups(padding2.rest) IN IF ~incrementalRefreshLimitsBandingLegacyGroups.ok THEN Fail ELSE
+    Ok([ transactTime                                |-> transactTime.value,
+         matchEventIndicator                         |-> matchEventIndicator.value,
+         padding2                                    |-> padding2.value,
+         incrementalRefreshLimitsBandingLegacyGroups |-> incrementalRefreshLimitsBandingLegacyGroups.value ], incrementalRefreshLimitsBandingLegacyGroups.rest)
 
 ZeroMdIncrementalRefreshLimitsBandingLegacy ==
-    [ transactTime                          |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator                   |-> [i \in 1 .. 1 |-> 0],
-      padding2                              |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshLimitsBandingGroups |-> ZeroIncrementalRefreshLimitsBandingGroups ]
+    [ transactTime                                |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                         |-> [i \in 1 .. 1 |-> 0],
+      padding2                                    |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshLimitsBandingLegacyGroups |-> ZeroIncrementalRefreshLimitsBandingLegacyGroups ]
 
 (* Md Incremental Refresh Limits Banding Legacy at zero, then each field in turn at the values it is checked at *)
 CheckedMdIncrementalRefreshLimitsBandingLegacy ==
@@ -2292,14 +2292,14 @@ CheckedMdIncrementalRefreshLimitsBandingLegacy ==
         \cup { [ZeroMdIncrementalRefreshLimitsBandingLegacy EXCEPT !.transactTime = one] : one \in Sample(8) }
         \cup { [ZeroMdIncrementalRefreshLimitsBandingLegacy EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
         \cup { [ZeroMdIncrementalRefreshLimitsBandingLegacy EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshLimitsBandingLegacy EXCEPT !.incrementalRefreshLimitsBandingGroups = one] : one \in CheckedIncrementalRefreshLimitsBandingGroups }
+        \cup { [ZeroMdIncrementalRefreshLimitsBandingLegacy EXCEPT !.incrementalRefreshLimitsBandingLegacyGroups = one] : one \in CheckedIncrementalRefreshLimitsBandingLegacyGroups }
 
 (***************************************************************************)
-(* Incremental Refresh Session Statistics Group: 24 bytes                  *)
+(* Incremental Refresh Session Statistics Legacy Group: 24 bytes           *)
 (***************************************************************************)
 
-IncrementalRefreshSessionStatisticsGroup ==
-    [ mdEntryPxEx              : Sample(8),
+IncrementalRefreshSessionStatisticsLegacyGroup ==
+    [ mdEntryPx                : Sample(8),
       securityId               : Sample(4),
       rptSeq                   : Sample(4),
       openCloseSettlFlag       : Sample(1),
@@ -2308,8 +2308,8 @@ IncrementalRefreshSessionStatisticsGroup ==
       mdEntrySizeShortOptional : Sample(4),
       padding1                 : Sample(1) ]
 
-EncodeIncrementalRefreshSessionStatisticsGroup(message) ==
-    message.mdEntryPxEx
+EncodeIncrementalRefreshSessionStatisticsLegacyGroup(message) ==
+    message.mdEntryPx
         \o message.securityId
         \o message.rptSeq
         \o message.openCloseSettlFlag
@@ -2318,16 +2318,16 @@ EncodeIncrementalRefreshSessionStatisticsGroup(message) ==
         \o message.mdEntrySizeShortOptional
         \o message.padding1
 
-DecodeIncrementalRefreshSessionStatisticsGroup(bytes) ==
-    LET mdEntryPxEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxEx.ok THEN Fail ELSE
-    LET securityId == ReadBytes(mdEntryPxEx.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+DecodeIncrementalRefreshSessionStatisticsLegacyGroup(bytes) ==
+    LET mdEntryPx == ReadBytes(bytes, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntryPx.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
     LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
     LET openCloseSettlFlag == ReadBytes(rptSeq.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
     LET mdUpdateAction == ReadBytes(openCloseSettlFlag.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
     LET mdEntryTypeStatistics == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeStatistics.ok THEN Fail ELSE
     LET mdEntrySizeShortOptional == ReadBytes(mdEntryTypeStatistics.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
     LET padding1 == ReadBytes(mdEntrySizeShortOptional.rest, 1) IN IF ~padding1.ok THEN Fail ELSE
-    Ok([ mdEntryPxEx              |-> mdEntryPxEx.value,
+    Ok([ mdEntryPx                |-> mdEntryPx.value,
          securityId               |-> securityId.value,
          rptSeq                   |-> rptSeq.value,
          openCloseSettlFlag       |-> openCloseSettlFlag.value,
@@ -2336,8 +2336,8 @@ DecodeIncrementalRefreshSessionStatisticsGroup(bytes) ==
          mdEntrySizeShortOptional |-> mdEntrySizeShortOptional.value,
          padding1                 |-> padding1.value ], padding1.rest)
 
-ZeroIncrementalRefreshSessionStatisticsGroup ==
-    [ mdEntryPxEx              |-> [i \in 1 .. 8 |-> 0],
+ZeroIncrementalRefreshSessionStatisticsLegacyGroup ==
+    [ mdEntryPx                |-> [i \in 1 .. 8 |-> 0],
       securityId               |-> [i \in 1 .. 4 |-> 0],
       rptSeq                   |-> [i \in 1 .. 4 |-> 0],
       openCloseSettlFlag       |-> [i \in 1 .. 1 |-> 0],
@@ -2346,100 +2346,100 @@ ZeroIncrementalRefreshSessionStatisticsGroup ==
       mdEntrySizeShortOptional |-> [i \in 1 .. 4 |-> 0],
       padding1                 |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Incremental Refresh Session Statistics Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshSessionStatisticsGroup ==
-    { ZeroIncrementalRefreshSessionStatisticsGroup }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdEntryPxEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdEntryTypeStatistics = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.padding1 = one] : one \in Sample(1) }
+(* Incremental Refresh Session Statistics Legacy Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshSessionStatisticsLegacyGroup ==
+    { ZeroIncrementalRefreshSessionStatisticsLegacyGroup }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsLegacyGroup EXCEPT !.mdEntryPx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsLegacyGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsLegacyGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsLegacyGroup EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsLegacyGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsLegacyGroup EXCEPT !.mdEntryTypeStatistics = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsLegacyGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsLegacyGroup EXCEPT !.padding1 = one] : one \in Sample(1) }
 
-(* A run of Incremental Refresh Session Statistics Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshSessionStatisticsGroupList(_)
-EncodeIncrementalRefreshSessionStatisticsGroupList(messages) ==
+(* A run of Incremental Refresh Session Statistics Legacy Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshSessionStatisticsLegacyGroupList(_)
+EncodeIncrementalRefreshSessionStatisticsLegacyGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeIncrementalRefreshSessionStatisticsGroup(Head(messages)) \o EncodeIncrementalRefreshSessionStatisticsGroupList(Tail(messages))
+    ELSE EncodeIncrementalRefreshSessionStatisticsLegacyGroup(Head(messages)) \o EncodeIncrementalRefreshSessionStatisticsLegacyGroupList(Tail(messages))
 
-(* As many Incremental Refresh Session Statistics Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshSessionStatisticsGroupList(_, _)
-ReadIncrementalRefreshSessionStatisticsGroupList(bytes, count) ==
+(* As many Incremental Refresh Session Statistics Legacy Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshSessionStatisticsLegacyGroupList(_, _)
+ReadIncrementalRefreshSessionStatisticsLegacyGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshSessionStatisticsGroup(bytes)
+    ELSE LET one == DecodeIncrementalRefreshSessionStatisticsLegacyGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshSessionStatisticsGroupList(one.rest, count - 1)
+             ELSE LET more == ReadIncrementalRefreshSessionStatisticsLegacyGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Incremental Refresh Session Statistics Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshSessionStatisticsGroup == { ZeroIncrementalRefreshSessionStatisticsGroup }
+(* One Incremental Refresh Session Statistics Legacy Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshSessionStatisticsLegacyGroup == { ZeroIncrementalRefreshSessionStatisticsLegacyGroup }
 
 (***************************************************************************)
-(* Incremental Refresh Session Statistics Groups                           *)
+(* Incremental Refresh Session Statistics Legacy Groups                    *)
 (***************************************************************************)
 
-IncrementalRefreshSessionStatisticsGroups ==
-    [ blockLength                              : Sample(2),
-      incrementalRefreshSessionStatisticsGroup : SampleLists(OneIncrementalRefreshSessionStatisticsGroup) ]
+IncrementalRefreshSessionStatisticsLegacyGroups ==
+    [ blockLength                                    : Sample(2),
+      incrementalRefreshSessionStatisticsLegacyGroup : SampleLists(OneIncrementalRefreshSessionStatisticsLegacyGroup) ]
 
-EncodeIncrementalRefreshSessionStatisticsGroups(message) ==
+EncodeIncrementalRefreshSessionStatisticsLegacyGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshSessionStatisticsGroup), 1)
-        \o EncodeIncrementalRefreshSessionStatisticsGroupList(message.incrementalRefreshSessionStatisticsGroup)
+        \o EncodeUIntBE(Len(message.incrementalRefreshSessionStatisticsLegacyGroup), 1)
+        \o EncodeIncrementalRefreshSessionStatisticsLegacyGroupList(message.incrementalRefreshSessionStatisticsLegacyGroup)
 
-DecodeIncrementalRefreshSessionStatisticsGroups(bytes) ==
+DecodeIncrementalRefreshSessionStatisticsLegacyGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshSessionStatisticsGroup == ReadIncrementalRefreshSessionStatisticsGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshSessionStatisticsGroup.ok THEN Fail ELSE
-    Ok([ blockLength                              |-> blockLength.value,
-         incrementalRefreshSessionStatisticsGroup |-> incrementalRefreshSessionStatisticsGroup.value ], incrementalRefreshSessionStatisticsGroup.rest)
+    LET incrementalRefreshSessionStatisticsLegacyGroup == ReadIncrementalRefreshSessionStatisticsLegacyGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshSessionStatisticsLegacyGroup.ok THEN Fail ELSE
+    Ok([ blockLength                                    |-> blockLength.value,
+         incrementalRefreshSessionStatisticsLegacyGroup |-> incrementalRefreshSessionStatisticsLegacyGroup.value ], incrementalRefreshSessionStatisticsLegacyGroup.rest)
 
-ZeroIncrementalRefreshSessionStatisticsGroups ==
-    [ blockLength                              |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshSessionStatisticsGroup |-> << >> ]
+ZeroIncrementalRefreshSessionStatisticsLegacyGroups ==
+    [ blockLength                                    |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshSessionStatisticsLegacyGroup |-> << >> ]
 
-(* Incremental Refresh Session Statistics Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshSessionStatisticsGroups ==
-    { ZeroIncrementalRefreshSessionStatisticsGroups }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroups EXCEPT !.incrementalRefreshSessionStatisticsGroup = one] : one \in SampleLists(OneIncrementalRefreshSessionStatisticsGroup) }
+(* Incremental Refresh Session Statistics Legacy Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshSessionStatisticsLegacyGroups ==
+    { ZeroIncrementalRefreshSessionStatisticsLegacyGroups }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsLegacyGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsLegacyGroups EXCEPT !.incrementalRefreshSessionStatisticsLegacyGroup = one] : one \in SampleLists(OneIncrementalRefreshSessionStatisticsLegacyGroup) }
 
 (***************************************************************************)
 (* Md Incremental Refresh Session Statistics Legacy                        *)
 (***************************************************************************)
 
 MdIncrementalRefreshSessionStatisticsLegacy ==
-    [ transactTime                              : Sample(8),
-      matchEventIndicator                       : Sample(1),
-      padding2                                  : Sample(2),
-      incrementalRefreshSessionStatisticsGroups : IncrementalRefreshSessionStatisticsGroups ]
+    [ transactTime                                    : Sample(8),
+      matchEventIndicator                             : Sample(1),
+      padding2                                        : Sample(2),
+      incrementalRefreshSessionStatisticsLegacyGroups : IncrementalRefreshSessionStatisticsLegacyGroups ]
 
 EncodeMdIncrementalRefreshSessionStatisticsLegacy(message) ==
     message.transactTime
         \o message.matchEventIndicator
         \o message.padding2
-        \o EncodeIncrementalRefreshSessionStatisticsGroups(message.incrementalRefreshSessionStatisticsGroups)
+        \o EncodeIncrementalRefreshSessionStatisticsLegacyGroups(message.incrementalRefreshSessionStatisticsLegacyGroups)
 
 DecodeMdIncrementalRefreshSessionStatisticsLegacy(bytes) ==
     LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
     LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
     LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshSessionStatisticsGroups == DecodeIncrementalRefreshSessionStatisticsGroups(padding2.rest) IN IF ~incrementalRefreshSessionStatisticsGroups.ok THEN Fail ELSE
-    Ok([ transactTime                              |-> transactTime.value,
-         matchEventIndicator                       |-> matchEventIndicator.value,
-         padding2                                  |-> padding2.value,
-         incrementalRefreshSessionStatisticsGroups |-> incrementalRefreshSessionStatisticsGroups.value ], incrementalRefreshSessionStatisticsGroups.rest)
+    LET incrementalRefreshSessionStatisticsLegacyGroups == DecodeIncrementalRefreshSessionStatisticsLegacyGroups(padding2.rest) IN IF ~incrementalRefreshSessionStatisticsLegacyGroups.ok THEN Fail ELSE
+    Ok([ transactTime                                    |-> transactTime.value,
+         matchEventIndicator                             |-> matchEventIndicator.value,
+         padding2                                        |-> padding2.value,
+         incrementalRefreshSessionStatisticsLegacyGroups |-> incrementalRefreshSessionStatisticsLegacyGroups.value ], incrementalRefreshSessionStatisticsLegacyGroups.rest)
 
 ZeroMdIncrementalRefreshSessionStatisticsLegacy ==
-    [ transactTime                              |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator                       |-> [i \in 1 .. 1 |-> 0],
-      padding2                                  |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshSessionStatisticsGroups |-> ZeroIncrementalRefreshSessionStatisticsGroups ]
+    [ transactTime                                    |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                             |-> [i \in 1 .. 1 |-> 0],
+      padding2                                        |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshSessionStatisticsLegacyGroups |-> ZeroIncrementalRefreshSessionStatisticsLegacyGroups ]
 
 (* Md Incremental Refresh Session Statistics Legacy at zero, then each field in turn at the values it is checked at *)
 CheckedMdIncrementalRefreshSessionStatisticsLegacy ==
@@ -2447,7 +2447,7 @@ CheckedMdIncrementalRefreshSessionStatisticsLegacy ==
         \cup { [ZeroMdIncrementalRefreshSessionStatisticsLegacy EXCEPT !.transactTime = one] : one \in Sample(8) }
         \cup { [ZeroMdIncrementalRefreshSessionStatisticsLegacy EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
         \cup { [ZeroMdIncrementalRefreshSessionStatisticsLegacy EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshSessionStatisticsLegacy EXCEPT !.incrementalRefreshSessionStatisticsGroups = one] : one \in CheckedIncrementalRefreshSessionStatisticsGroups }
+        \cup { [ZeroMdIncrementalRefreshSessionStatisticsLegacy EXCEPT !.incrementalRefreshSessionStatisticsLegacyGroups = one] : one \in CheckedIncrementalRefreshSessionStatisticsLegacyGroups }
 
 (***************************************************************************)
 (* Incremental Refresh Volume Group: 16 bytes                              *)
@@ -2587,11 +2587,11 @@ CheckedMdIncrementalRefreshVolume ==
         \cup { [ZeroMdIncrementalRefreshVolume EXCEPT !.incrementalRefreshVolumeGroups = one] : one \in CheckedIncrementalRefreshVolumeGroups }
 
 (***************************************************************************)
-(* Snapshot Full Refresh Group: 22 bytes                                   *)
+(* Snapshot Full Refresh Legacy Group: 22 bytes                            *)
 (***************************************************************************)
 
-SnapshotFullRefreshGroup ==
-    [ mdEntryPxOptionalEx      : Sample(8),
+SnapshotFullRefreshLegacyGroup ==
+    [ mdEntryPxOptional        : Sample(8),
       mdEntrySizeShortOptional : Sample(4),
       numberOfOrdersOptional   : Sample(4),
       mdPriceLevelOptional     : Sample(1),
@@ -2600,8 +2600,8 @@ SnapshotFullRefreshGroup ==
       settlPriceType           : Sample(1),
       mdEntryType              : Sample(1) ]
 
-EncodeSnapshotFullRefreshGroup(message) ==
-    message.mdEntryPxOptionalEx
+EncodeSnapshotFullRefreshLegacyGroup(message) ==
+    message.mdEntryPxOptional
         \o message.mdEntrySizeShortOptional
         \o message.numberOfOrdersOptional
         \o message.mdPriceLevelOptional
@@ -2610,16 +2610,16 @@ EncodeSnapshotFullRefreshGroup(message) ==
         \o message.settlPriceType
         \o message.mdEntryType
 
-DecodeSnapshotFullRefreshGroup(bytes) ==
-    LET mdEntryPxOptionalEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
-    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
+DecodeSnapshotFullRefreshLegacyGroup(bytes) ==
+    LET mdEntryPxOptional == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptional.ok THEN Fail ELSE
+    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptional.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
     LET numberOfOrdersOptional == ReadBytes(mdEntrySizeShortOptional.rest, 4) IN IF ~numberOfOrdersOptional.ok THEN Fail ELSE
     LET mdPriceLevelOptional == ReadBytes(numberOfOrdersOptional.rest, 1) IN IF ~mdPriceLevelOptional.ok THEN Fail ELSE
     LET tradingReferenceDate == ReadBytes(mdPriceLevelOptional.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
     LET openCloseSettlFlag == ReadBytes(tradingReferenceDate.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
     LET settlPriceType == ReadBytes(openCloseSettlFlag.rest, 1) IN IF ~settlPriceType.ok THEN Fail ELSE
     LET mdEntryType == ReadBytes(settlPriceType.rest, 1) IN IF ~mdEntryType.ok THEN Fail ELSE
-    Ok([ mdEntryPxOptionalEx      |-> mdEntryPxOptionalEx.value,
+    Ok([ mdEntryPxOptional        |-> mdEntryPxOptional.value,
          mdEntrySizeShortOptional |-> mdEntrySizeShortOptional.value,
          numberOfOrdersOptional   |-> numberOfOrdersOptional.value,
          mdPriceLevelOptional     |-> mdPriceLevelOptional.value,
@@ -2628,8 +2628,8 @@ DecodeSnapshotFullRefreshGroup(bytes) ==
          settlPriceType           |-> settlPriceType.value,
          mdEntryType              |-> mdEntryType.value ], mdEntryType.rest)
 
-ZeroSnapshotFullRefreshGroup ==
-    [ mdEntryPxOptionalEx      |-> [i \in 1 .. 8 |-> 0],
+ZeroSnapshotFullRefreshLegacyGroup ==
+    [ mdEntryPxOptional        |-> [i \in 1 .. 8 |-> 0],
       mdEntrySizeShortOptional |-> [i \in 1 .. 4 |-> 0],
       numberOfOrdersOptional   |-> [i \in 1 .. 4 |-> 0],
       mdPriceLevelOptional     |-> [i \in 1 .. 1 |-> 0],
@@ -2638,86 +2638,86 @@ ZeroSnapshotFullRefreshGroup ==
       settlPriceType           |-> [i \in 1 .. 1 |-> 0],
       mdEntryType              |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Snapshot Full Refresh Group at zero, then each field in turn at the values it is checked at *)
-CheckedSnapshotFullRefreshGroup ==
-    { ZeroSnapshotFullRefreshGroup }
-        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.numberOfOrdersOptional = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdPriceLevelOptional = one] : one \in Sample(1) }
-        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
-        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
-        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.settlPriceType = one] : one \in Sample(1) }
-        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdEntryType = one] : one \in Sample(1) }
+(* Snapshot Full Refresh Legacy Group at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefreshLegacyGroup ==
+    { ZeroSnapshotFullRefreshLegacyGroup }
+        \cup { [ZeroSnapshotFullRefreshLegacyGroup EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefreshLegacyGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshLegacyGroup EXCEPT !.numberOfOrdersOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshLegacyGroup EXCEPT !.mdPriceLevelOptional = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefreshLegacyGroup EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotFullRefreshLegacyGroup EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefreshLegacyGroup EXCEPT !.settlPriceType = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefreshLegacyGroup EXCEPT !.mdEntryType = one] : one \in Sample(1) }
 
-(* A run of Snapshot Full Refresh Group, written one after another *)
-RECURSIVE EncodeSnapshotFullRefreshGroupList(_)
-EncodeSnapshotFullRefreshGroupList(messages) ==
+(* A run of Snapshot Full Refresh Legacy Group, written one after another *)
+RECURSIVE EncodeSnapshotFullRefreshLegacyGroupList(_)
+EncodeSnapshotFullRefreshLegacyGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeSnapshotFullRefreshGroup(Head(messages)) \o EncodeSnapshotFullRefreshGroupList(Tail(messages))
+    ELSE EncodeSnapshotFullRefreshLegacyGroup(Head(messages)) \o EncodeSnapshotFullRefreshLegacyGroupList(Tail(messages))
 
-(* As many Snapshot Full Refresh Group as the field that counts them says *)
-RECURSIVE ReadSnapshotFullRefreshGroupList(_, _)
-ReadSnapshotFullRefreshGroupList(bytes, count) ==
+(* As many Snapshot Full Refresh Legacy Group as the field that counts them says *)
+RECURSIVE ReadSnapshotFullRefreshLegacyGroupList(_, _)
+ReadSnapshotFullRefreshLegacyGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeSnapshotFullRefreshGroup(bytes)
+    ELSE LET one == DecodeSnapshotFullRefreshLegacyGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadSnapshotFullRefreshGroupList(one.rest, count - 1)
+             ELSE LET more == ReadSnapshotFullRefreshLegacyGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Snapshot Full Refresh Group of each kind, for the lists that carry them *)
-OneSnapshotFullRefreshGroup == { ZeroSnapshotFullRefreshGroup }
+(* One Snapshot Full Refresh Legacy Group of each kind, for the lists that carry them *)
+OneSnapshotFullRefreshLegacyGroup == { ZeroSnapshotFullRefreshLegacyGroup }
 
 (***************************************************************************)
-(* Snapshot Full Refresh Groups                                            *)
+(* Snapshot Full Refresh Legacy Groups                                     *)
 (***************************************************************************)
 
-SnapshotFullRefreshGroups ==
-    [ blockLength              : Sample(2),
-      snapshotFullRefreshGroup : SampleLists(OneSnapshotFullRefreshGroup) ]
+SnapshotFullRefreshLegacyGroups ==
+    [ blockLength                    : Sample(2),
+      snapshotFullRefreshLegacyGroup : SampleLists(OneSnapshotFullRefreshLegacyGroup) ]
 
-EncodeSnapshotFullRefreshGroups(message) ==
+EncodeSnapshotFullRefreshLegacyGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.snapshotFullRefreshGroup), 1)
-        \o EncodeSnapshotFullRefreshGroupList(message.snapshotFullRefreshGroup)
+        \o EncodeUIntBE(Len(message.snapshotFullRefreshLegacyGroup), 1)
+        \o EncodeSnapshotFullRefreshLegacyGroupList(message.snapshotFullRefreshLegacyGroup)
 
-DecodeSnapshotFullRefreshGroups(bytes) ==
+DecodeSnapshotFullRefreshLegacyGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET snapshotFullRefreshGroup == ReadSnapshotFullRefreshGroupList(numInGroup.rest, numInGroup.value) IN IF ~snapshotFullRefreshGroup.ok THEN Fail ELSE
-    Ok([ blockLength              |-> blockLength.value,
-         snapshotFullRefreshGroup |-> snapshotFullRefreshGroup.value ], snapshotFullRefreshGroup.rest)
+    LET snapshotFullRefreshLegacyGroup == ReadSnapshotFullRefreshLegacyGroupList(numInGroup.rest, numInGroup.value) IN IF ~snapshotFullRefreshLegacyGroup.ok THEN Fail ELSE
+    Ok([ blockLength                    |-> blockLength.value,
+         snapshotFullRefreshLegacyGroup |-> snapshotFullRefreshLegacyGroup.value ], snapshotFullRefreshLegacyGroup.rest)
 
-ZeroSnapshotFullRefreshGroups ==
-    [ blockLength              |-> [i \in 1 .. 2 |-> 0],
-      snapshotFullRefreshGroup |-> << >> ]
+ZeroSnapshotFullRefreshLegacyGroups ==
+    [ blockLength                    |-> [i \in 1 .. 2 |-> 0],
+      snapshotFullRefreshLegacyGroup |-> << >> ]
 
-(* Snapshot Full Refresh Groups at zero, then each field in turn at the values it is checked at *)
-CheckedSnapshotFullRefreshGroups ==
-    { ZeroSnapshotFullRefreshGroups }
-        \cup { [ZeroSnapshotFullRefreshGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroSnapshotFullRefreshGroups EXCEPT !.snapshotFullRefreshGroup = one] : one \in SampleLists(OneSnapshotFullRefreshGroup) }
+(* Snapshot Full Refresh Legacy Groups at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefreshLegacyGroups ==
+    { ZeroSnapshotFullRefreshLegacyGroups }
+        \cup { [ZeroSnapshotFullRefreshLegacyGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotFullRefreshLegacyGroups EXCEPT !.snapshotFullRefreshLegacyGroup = one] : one \in SampleLists(OneSnapshotFullRefreshLegacyGroup) }
 
 (***************************************************************************)
 (* Snapshot Full Refresh Legacy                                            *)
 (***************************************************************************)
 
 SnapshotFullRefreshLegacy ==
-    [ lastMsgSeqNumProcessed    : Sample(4),
-      totNumReports             : Sample(4),
-      securityId                : Sample(4),
-      rptSeq                    : Sample(4),
-      transactTime              : Sample(8),
-      lastUpdateTime            : Sample(8),
-      tradeDate                 : Sample(2),
-      mdSecurityTradingStatus   : Sample(1),
-      highLimitPrice            : Sample(8),
-      lowLimitPrice             : Sample(8),
-      maxPriceVariation         : Sample(8),
-      snapshotFullRefreshGroups : SnapshotFullRefreshGroups ]
+    [ lastMsgSeqNumProcessed          : Sample(4),
+      totNumReports                   : Sample(4),
+      securityId                      : Sample(4),
+      rptSeq                          : Sample(4),
+      transactTime                    : Sample(8),
+      lastUpdateTime                  : Sample(8),
+      tradeDate                       : Sample(2),
+      mdSecurityTradingStatus         : Sample(1),
+      highLimitPrice                  : Sample(8),
+      lowLimitPrice                   : Sample(8),
+      maxPriceVariation               : Sample(8),
+      snapshotFullRefreshLegacyGroups : SnapshotFullRefreshLegacyGroups ]
 
 EncodeSnapshotFullRefreshLegacy(message) ==
     message.lastMsgSeqNumProcessed
@@ -2731,7 +2731,7 @@ EncodeSnapshotFullRefreshLegacy(message) ==
         \o message.highLimitPrice
         \o message.lowLimitPrice
         \o message.maxPriceVariation
-        \o EncodeSnapshotFullRefreshGroups(message.snapshotFullRefreshGroups)
+        \o EncodeSnapshotFullRefreshLegacyGroups(message.snapshotFullRefreshLegacyGroups)
 
 DecodeSnapshotFullRefreshLegacy(bytes) ==
     LET lastMsgSeqNumProcessed == ReadBytes(bytes, 4) IN IF ~lastMsgSeqNumProcessed.ok THEN Fail ELSE
@@ -2745,33 +2745,33 @@ DecodeSnapshotFullRefreshLegacy(bytes) ==
     LET highLimitPrice == ReadBytes(mdSecurityTradingStatus.rest, 8) IN IF ~highLimitPrice.ok THEN Fail ELSE
     LET lowLimitPrice == ReadBytes(highLimitPrice.rest, 8) IN IF ~lowLimitPrice.ok THEN Fail ELSE
     LET maxPriceVariation == ReadBytes(lowLimitPrice.rest, 8) IN IF ~maxPriceVariation.ok THEN Fail ELSE
-    LET snapshotFullRefreshGroups == DecodeSnapshotFullRefreshGroups(maxPriceVariation.rest) IN IF ~snapshotFullRefreshGroups.ok THEN Fail ELSE
-    Ok([ lastMsgSeqNumProcessed    |-> lastMsgSeqNumProcessed.value,
-         totNumReports             |-> totNumReports.value,
-         securityId                |-> securityId.value,
-         rptSeq                    |-> rptSeq.value,
-         transactTime              |-> transactTime.value,
-         lastUpdateTime            |-> lastUpdateTime.value,
-         tradeDate                 |-> tradeDate.value,
-         mdSecurityTradingStatus   |-> mdSecurityTradingStatus.value,
-         highLimitPrice            |-> highLimitPrice.value,
-         lowLimitPrice             |-> lowLimitPrice.value,
-         maxPriceVariation         |-> maxPriceVariation.value,
-         snapshotFullRefreshGroups |-> snapshotFullRefreshGroups.value ], snapshotFullRefreshGroups.rest)
+    LET snapshotFullRefreshLegacyGroups == DecodeSnapshotFullRefreshLegacyGroups(maxPriceVariation.rest) IN IF ~snapshotFullRefreshLegacyGroups.ok THEN Fail ELSE
+    Ok([ lastMsgSeqNumProcessed          |-> lastMsgSeqNumProcessed.value,
+         totNumReports                   |-> totNumReports.value,
+         securityId                      |-> securityId.value,
+         rptSeq                          |-> rptSeq.value,
+         transactTime                    |-> transactTime.value,
+         lastUpdateTime                  |-> lastUpdateTime.value,
+         tradeDate                       |-> tradeDate.value,
+         mdSecurityTradingStatus         |-> mdSecurityTradingStatus.value,
+         highLimitPrice                  |-> highLimitPrice.value,
+         lowLimitPrice                   |-> lowLimitPrice.value,
+         maxPriceVariation               |-> maxPriceVariation.value,
+         snapshotFullRefreshLegacyGroups |-> snapshotFullRefreshLegacyGroups.value ], snapshotFullRefreshLegacyGroups.rest)
 
 ZeroSnapshotFullRefreshLegacy ==
-    [ lastMsgSeqNumProcessed    |-> [i \in 1 .. 4 |-> 0],
-      totNumReports             |-> [i \in 1 .. 4 |-> 0],
-      securityId                |-> [i \in 1 .. 4 |-> 0],
-      rptSeq                    |-> [i \in 1 .. 4 |-> 0],
-      transactTime              |-> [i \in 1 .. 8 |-> 0],
-      lastUpdateTime            |-> [i \in 1 .. 8 |-> 0],
-      tradeDate                 |-> [i \in 1 .. 2 |-> 0],
-      mdSecurityTradingStatus   |-> [i \in 1 .. 1 |-> 0],
-      highLimitPrice            |-> [i \in 1 .. 8 |-> 0],
-      lowLimitPrice             |-> [i \in 1 .. 8 |-> 0],
-      maxPriceVariation         |-> [i \in 1 .. 8 |-> 0],
-      snapshotFullRefreshGroups |-> ZeroSnapshotFullRefreshGroups ]
+    [ lastMsgSeqNumProcessed          |-> [i \in 1 .. 4 |-> 0],
+      totNumReports                   |-> [i \in 1 .. 4 |-> 0],
+      securityId                      |-> [i \in 1 .. 4 |-> 0],
+      rptSeq                          |-> [i \in 1 .. 4 |-> 0],
+      transactTime                    |-> [i \in 1 .. 8 |-> 0],
+      lastUpdateTime                  |-> [i \in 1 .. 8 |-> 0],
+      tradeDate                       |-> [i \in 1 .. 2 |-> 0],
+      mdSecurityTradingStatus         |-> [i \in 1 .. 1 |-> 0],
+      highLimitPrice                  |-> [i \in 1 .. 8 |-> 0],
+      lowLimitPrice                   |-> [i \in 1 .. 8 |-> 0],
+      maxPriceVariation               |-> [i \in 1 .. 8 |-> 0],
+      snapshotFullRefreshLegacyGroups |-> ZeroSnapshotFullRefreshLegacyGroups ]
 
 (* Snapshot Full Refresh Legacy at zero, then each field in turn at the values it is checked at *)
 CheckedSnapshotFullRefreshLegacy ==
@@ -2787,7 +2787,7 @@ CheckedSnapshotFullRefreshLegacy ==
         \cup { [ZeroSnapshotFullRefreshLegacy EXCEPT !.highLimitPrice = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotFullRefreshLegacy EXCEPT !.lowLimitPrice = one] : one \in Sample(8) }
         \cup { [ZeroSnapshotFullRefreshLegacy EXCEPT !.maxPriceVariation = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefreshLegacy EXCEPT !.snapshotFullRefreshGroups = one] : one \in CheckedSnapshotFullRefreshGroups }
+        \cup { [ZeroSnapshotFullRefreshLegacy EXCEPT !.snapshotFullRefreshLegacyGroups = one] : one \in CheckedSnapshotFullRefreshLegacyGroups }
 
 (***************************************************************************)
 (* Related Sym Group: 32 bytes                                             *)
@@ -3751,6 +3751,1005 @@ CheckedMdInstrumentDefinitionOptionLegacy ==
         \cup { [ZeroMdInstrumentDefinitionOptionLegacy EXCEPT !.optionRelatedInstrumentsGroups = one] : one \in CheckedOptionRelatedInstrumentsGroups }
 
 (***************************************************************************)
+(* Incremental Refresh Trade Summary Legacy Group: 32 bytes                *)
+(***************************************************************************)
+
+IncrementalRefreshTradeSummaryLegacyGroup ==
+    [ mdEntryPx              : Sample(8),
+      mdEntrySizeShort       : Sample(4),
+      securityId             : Sample(4),
+      rptSeq                 : Sample(4),
+      numberOfOrdersOptional : Sample(4),
+      aggressorSide          : Sample(1),
+      mdUpdateAction         : Sample(1),
+      mdTradeEntryId         : Sample(4),
+      padding2               : Sample(2) ]
+
+EncodeIncrementalRefreshTradeSummaryLegacyGroup(message) ==
+    message.mdEntryPx
+        \o message.mdEntrySizeShort
+        \o message.securityId
+        \o message.rptSeq
+        \o message.numberOfOrdersOptional
+        \o message.aggressorSide
+        \o message.mdUpdateAction
+        \o message.mdTradeEntryId
+        \o message.padding2
+
+DecodeIncrementalRefreshTradeSummaryLegacyGroup(bytes) ==
+    LET mdEntryPx == ReadBytes(bytes, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
+    LET mdEntrySizeShort == ReadBytes(mdEntryPx.rest, 4) IN IF ~mdEntrySizeShort.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntrySizeShort.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET numberOfOrdersOptional == ReadBytes(rptSeq.rest, 4) IN IF ~numberOfOrdersOptional.ok THEN Fail ELSE
+    LET aggressorSide == ReadBytes(numberOfOrdersOptional.rest, 1) IN IF ~aggressorSide.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(aggressorSide.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET mdTradeEntryId == ReadBytes(mdUpdateAction.rest, 4) IN IF ~mdTradeEntryId.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(mdTradeEntryId.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    Ok([ mdEntryPx              |-> mdEntryPx.value,
+         mdEntrySizeShort       |-> mdEntrySizeShort.value,
+         securityId             |-> securityId.value,
+         rptSeq                 |-> rptSeq.value,
+         numberOfOrdersOptional |-> numberOfOrdersOptional.value,
+         aggressorSide          |-> aggressorSide.value,
+         mdUpdateAction         |-> mdUpdateAction.value,
+         mdTradeEntryId         |-> mdTradeEntryId.value,
+         padding2               |-> padding2.value ], padding2.rest)
+
+ZeroIncrementalRefreshTradeSummaryLegacyGroup ==
+    [ mdEntryPx              |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySizeShort       |-> [i \in 1 .. 4 |-> 0],
+      securityId             |-> [i \in 1 .. 4 |-> 0],
+      rptSeq                 |-> [i \in 1 .. 4 |-> 0],
+      numberOfOrdersOptional |-> [i \in 1 .. 4 |-> 0],
+      aggressorSide          |-> [i \in 1 .. 1 |-> 0],
+      mdUpdateAction         |-> [i \in 1 .. 1 |-> 0],
+      mdTradeEntryId         |-> [i \in 1 .. 4 |-> 0],
+      padding2               |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Incremental Refresh Trade Summary Legacy Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshTradeSummaryLegacyGroup ==
+    { ZeroIncrementalRefreshTradeSummaryLegacyGroup }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroup EXCEPT !.mdEntryPx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroup EXCEPT !.mdEntrySizeShort = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroup EXCEPT !.numberOfOrdersOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroup EXCEPT !.aggressorSide = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroup EXCEPT !.mdTradeEntryId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroup EXCEPT !.padding2 = one] : one \in Sample(2) }
+
+(* A run of Incremental Refresh Trade Summary Legacy Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshTradeSummaryLegacyGroupList(_)
+EncodeIncrementalRefreshTradeSummaryLegacyGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshTradeSummaryLegacyGroup(Head(messages)) \o EncodeIncrementalRefreshTradeSummaryLegacyGroupList(Tail(messages))
+
+(* As many Incremental Refresh Trade Summary Legacy Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshTradeSummaryLegacyGroupList(_, _)
+ReadIncrementalRefreshTradeSummaryLegacyGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshTradeSummaryLegacyGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshTradeSummaryLegacyGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Trade Summary Legacy Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshTradeSummaryLegacyGroup == { ZeroIncrementalRefreshTradeSummaryLegacyGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Trade Summary Legacy Groups                         *)
+(***************************************************************************)
+
+IncrementalRefreshTradeSummaryLegacyGroups ==
+    [ blockLength                               : Sample(2),
+      incrementalRefreshTradeSummaryLegacyGroup : SampleLists(OneIncrementalRefreshTradeSummaryLegacyGroup) ]
+
+EncodeIncrementalRefreshTradeSummaryLegacyGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshTradeSummaryLegacyGroup), 1)
+        \o EncodeIncrementalRefreshTradeSummaryLegacyGroupList(message.incrementalRefreshTradeSummaryLegacyGroup)
+
+DecodeIncrementalRefreshTradeSummaryLegacyGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshTradeSummaryLegacyGroup == ReadIncrementalRefreshTradeSummaryLegacyGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshTradeSummaryLegacyGroup.ok THEN Fail ELSE
+    Ok([ blockLength                               |-> blockLength.value,
+         incrementalRefreshTradeSummaryLegacyGroup |-> incrementalRefreshTradeSummaryLegacyGroup.value ], incrementalRefreshTradeSummaryLegacyGroup.rest)
+
+ZeroIncrementalRefreshTradeSummaryLegacyGroups ==
+    [ blockLength                               |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshTradeSummaryLegacyGroup |-> << >> ]
+
+(* Incremental Refresh Trade Summary Legacy Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshTradeSummaryLegacyGroups ==
+    { ZeroIncrementalRefreshTradeSummaryLegacyGroups }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryLegacyGroups EXCEPT !.incrementalRefreshTradeSummaryLegacyGroup = one] : one \in SampleLists(OneIncrementalRefreshTradeSummaryLegacyGroup) }
+
+(***************************************************************************)
+(* Incremental Refresh Trade Summary Order Id Group: 16 bytes              *)
+(***************************************************************************)
+
+IncrementalRefreshTradeSummaryOrderIdGroup ==
+    [ orderId  : Sample(8),
+      lastQty  : Sample(4),
+      padding4 : Sample(4) ]
+
+EncodeIncrementalRefreshTradeSummaryOrderIdGroup(message) ==
+    message.orderId
+        \o message.lastQty
+        \o message.padding4
+
+DecodeIncrementalRefreshTradeSummaryOrderIdGroup(bytes) ==
+    LET orderId == ReadBytes(bytes, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET lastQty == ReadBytes(orderId.rest, 4) IN IF ~lastQty.ok THEN Fail ELSE
+    LET padding4 == ReadBytes(lastQty.rest, 4) IN IF ~padding4.ok THEN Fail ELSE
+    Ok([ orderId  |-> orderId.value,
+         lastQty  |-> lastQty.value,
+         padding4 |-> padding4.value ], padding4.rest)
+
+ZeroIncrementalRefreshTradeSummaryOrderIdGroup ==
+    [ orderId  |-> [i \in 1 .. 8 |-> 0],
+      lastQty  |-> [i \in 1 .. 4 |-> 0],
+      padding4 |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Incremental Refresh Trade Summary Order Id Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshTradeSummaryOrderIdGroup ==
+    { ZeroIncrementalRefreshTradeSummaryOrderIdGroup }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup EXCEPT !.lastQty = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup EXCEPT !.padding4 = one] : one \in Sample(4) }
+
+(* A run of Incremental Refresh Trade Summary Order Id Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(_)
+EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshTradeSummaryOrderIdGroup(Head(messages)) \o EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(Tail(messages))
+
+(* As many Incremental Refresh Trade Summary Order Id Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshTradeSummaryOrderIdGroupList(_, _)
+ReadIncrementalRefreshTradeSummaryOrderIdGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshTradeSummaryOrderIdGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshTradeSummaryOrderIdGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Trade Summary Order Id Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshTradeSummaryOrderIdGroup == { ZeroIncrementalRefreshTradeSummaryOrderIdGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Trade Summary Order Id Groups                       *)
+(***************************************************************************)
+
+IncrementalRefreshTradeSummaryOrderIdGroups ==
+    [ blockLength                                : Sample(2),
+      padding5                                   : Sample(5),
+      incrementalRefreshTradeSummaryOrderIdGroup : SampleLists(OneIncrementalRefreshTradeSummaryOrderIdGroup) ]
+
+EncodeIncrementalRefreshTradeSummaryOrderIdGroups(message) ==
+    message.blockLength
+        \o message.padding5
+        \o EncodeUIntBE(Len(message.incrementalRefreshTradeSummaryOrderIdGroup), 1)
+        \o EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(message.incrementalRefreshTradeSummaryOrderIdGroup)
+
+DecodeIncrementalRefreshTradeSummaryOrderIdGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET padding5 == ReadBytes(blockLength.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(padding5.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshTradeSummaryOrderIdGroup == ReadIncrementalRefreshTradeSummaryOrderIdGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshTradeSummaryOrderIdGroup.ok THEN Fail ELSE
+    Ok([ blockLength                                |-> blockLength.value,
+         padding5                                   |-> padding5.value,
+         incrementalRefreshTradeSummaryOrderIdGroup |-> incrementalRefreshTradeSummaryOrderIdGroup.value ], incrementalRefreshTradeSummaryOrderIdGroup.rest)
+
+ZeroIncrementalRefreshTradeSummaryOrderIdGroups ==
+    [ blockLength                                |-> [i \in 1 .. 2 |-> 0],
+      padding5                                   |-> [i \in 1 .. 5 |-> 0],
+      incrementalRefreshTradeSummaryOrderIdGroup |-> << >> ]
+
+(* Incremental Refresh Trade Summary Order Id Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshTradeSummaryOrderIdGroups ==
+    { ZeroIncrementalRefreshTradeSummaryOrderIdGroups }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups EXCEPT !.padding5 = one] : one \in Sample(5) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups EXCEPT !.incrementalRefreshTradeSummaryOrderIdGroup = one] : one \in SampleLists(OneIncrementalRefreshTradeSummaryOrderIdGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Trade Summary Legacy                             *)
+(***************************************************************************)
+
+MdIncrementalRefreshTradeSummaryLegacy ==
+    [ transactTime                                : Sample(8),
+      matchEventIndicator                         : Sample(1),
+      padding2                                    : Sample(2),
+      incrementalRefreshTradeSummaryLegacyGroups  : IncrementalRefreshTradeSummaryLegacyGroups,
+      incrementalRefreshTradeSummaryOrderIdGroups : IncrementalRefreshTradeSummaryOrderIdGroups ]
+
+EncodeMdIncrementalRefreshTradeSummaryLegacy(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshTradeSummaryLegacyGroups(message.incrementalRefreshTradeSummaryLegacyGroups)
+        \o EncodeIncrementalRefreshTradeSummaryOrderIdGroups(message.incrementalRefreshTradeSummaryOrderIdGroups)
+
+DecodeMdIncrementalRefreshTradeSummaryLegacy(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshTradeSummaryLegacyGroups == DecodeIncrementalRefreshTradeSummaryLegacyGroups(padding2.rest) IN IF ~incrementalRefreshTradeSummaryLegacyGroups.ok THEN Fail ELSE
+    LET incrementalRefreshTradeSummaryOrderIdGroups == DecodeIncrementalRefreshTradeSummaryOrderIdGroups(incrementalRefreshTradeSummaryLegacyGroups.rest) IN IF ~incrementalRefreshTradeSummaryOrderIdGroups.ok THEN Fail ELSE
+    Ok([ transactTime                                |-> transactTime.value,
+         matchEventIndicator                         |-> matchEventIndicator.value,
+         padding2                                    |-> padding2.value,
+         incrementalRefreshTradeSummaryLegacyGroups  |-> incrementalRefreshTradeSummaryLegacyGroups.value,
+         incrementalRefreshTradeSummaryOrderIdGroups |-> incrementalRefreshTradeSummaryOrderIdGroups.value ], incrementalRefreshTradeSummaryOrderIdGroups.rest)
+
+ZeroMdIncrementalRefreshTradeSummaryLegacy ==
+    [ transactTime                                |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                         |-> [i \in 1 .. 1 |-> 0],
+      padding2                                    |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshTradeSummaryLegacyGroups  |-> ZeroIncrementalRefreshTradeSummaryLegacyGroups,
+      incrementalRefreshTradeSummaryOrderIdGroups |-> ZeroIncrementalRefreshTradeSummaryOrderIdGroups ]
+
+(* Md Incremental Refresh Trade Summary Legacy at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshTradeSummaryLegacy ==
+    { ZeroMdIncrementalRefreshTradeSummaryLegacy }
+        \cup { [ZeroMdIncrementalRefreshTradeSummaryLegacy EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshTradeSummaryLegacy EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshTradeSummaryLegacy EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshTradeSummaryLegacy EXCEPT !.incrementalRefreshTradeSummaryLegacyGroups = one] : one \in CheckedIncrementalRefreshTradeSummaryLegacyGroups }
+        \cup { [ZeroMdIncrementalRefreshTradeSummaryLegacy EXCEPT !.incrementalRefreshTradeSummaryOrderIdGroups = one] : one \in CheckedIncrementalRefreshTradeSummaryOrderIdGroups }
+
+(***************************************************************************)
+(* Incremental Refresh Order Book Legacy Group: 40 bytes                   *)
+(***************************************************************************)
+
+IncrementalRefreshOrderBookLegacyGroup ==
+    [ orderIdOptional      : Sample(8),
+      mdOrderPriority      : Sample(8),
+      mdEntryPxOptional    : Sample(8),
+      mdDisplayQtyOptional : Sample(4),
+      securityId           : Sample(4),
+      mdUpdateAction       : Sample(1),
+      mdEntryTypeBook      : Sample(1),
+      padding6             : Sample(6) ]
+
+EncodeIncrementalRefreshOrderBookLegacyGroup(message) ==
+    message.orderIdOptional
+        \o message.mdOrderPriority
+        \o message.mdEntryPxOptional
+        \o message.mdDisplayQtyOptional
+        \o message.securityId
+        \o message.mdUpdateAction
+        \o message.mdEntryTypeBook
+        \o message.padding6
+
+DecodeIncrementalRefreshOrderBookLegacyGroup(bytes) ==
+    LET orderIdOptional == ReadBytes(bytes, 8) IN IF ~orderIdOptional.ok THEN Fail ELSE
+    LET mdOrderPriority == ReadBytes(orderIdOptional.rest, 8) IN IF ~mdOrderPriority.ok THEN Fail ELSE
+    LET mdEntryPxOptional == ReadBytes(mdOrderPriority.rest, 8) IN IF ~mdEntryPxOptional.ok THEN Fail ELSE
+    LET mdDisplayQtyOptional == ReadBytes(mdEntryPxOptional.rest, 4) IN IF ~mdDisplayQtyOptional.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdDisplayQtyOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(securityId.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET mdEntryTypeBook == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeBook.ok THEN Fail ELSE
+    LET padding6 == ReadBytes(mdEntryTypeBook.rest, 6) IN IF ~padding6.ok THEN Fail ELSE
+    Ok([ orderIdOptional      |-> orderIdOptional.value,
+         mdOrderPriority      |-> mdOrderPriority.value,
+         mdEntryPxOptional    |-> mdEntryPxOptional.value,
+         mdDisplayQtyOptional |-> mdDisplayQtyOptional.value,
+         securityId           |-> securityId.value,
+         mdUpdateAction       |-> mdUpdateAction.value,
+         mdEntryTypeBook      |-> mdEntryTypeBook.value,
+         padding6             |-> padding6.value ], padding6.rest)
+
+ZeroIncrementalRefreshOrderBookLegacyGroup ==
+    [ orderIdOptional      |-> [i \in 1 .. 8 |-> 0],
+      mdOrderPriority      |-> [i \in 1 .. 8 |-> 0],
+      mdEntryPxOptional    |-> [i \in 1 .. 8 |-> 0],
+      mdDisplayQtyOptional |-> [i \in 1 .. 4 |-> 0],
+      securityId           |-> [i \in 1 .. 4 |-> 0],
+      mdUpdateAction       |-> [i \in 1 .. 1 |-> 0],
+      mdEntryTypeBook      |-> [i \in 1 .. 1 |-> 0],
+      padding6             |-> [i \in 1 .. 6 |-> 0] ]
+
+(* Incremental Refresh Order Book Legacy Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshOrderBookLegacyGroup ==
+    { ZeroIncrementalRefreshOrderBookLegacyGroup }
+        \cup { [ZeroIncrementalRefreshOrderBookLegacyGroup EXCEPT !.orderIdOptional = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshOrderBookLegacyGroup EXCEPT !.mdOrderPriority = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshOrderBookLegacyGroup EXCEPT !.mdEntryPxOptional = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshOrderBookLegacyGroup EXCEPT !.mdDisplayQtyOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshOrderBookLegacyGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshOrderBookLegacyGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshOrderBookLegacyGroup EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshOrderBookLegacyGroup EXCEPT !.padding6 = one] : one \in Sample(6) }
+
+(* A run of Incremental Refresh Order Book Legacy Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshOrderBookLegacyGroupList(_)
+EncodeIncrementalRefreshOrderBookLegacyGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshOrderBookLegacyGroup(Head(messages)) \o EncodeIncrementalRefreshOrderBookLegacyGroupList(Tail(messages))
+
+(* As many Incremental Refresh Order Book Legacy Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshOrderBookLegacyGroupList(_, _)
+ReadIncrementalRefreshOrderBookLegacyGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshOrderBookLegacyGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshOrderBookLegacyGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Order Book Legacy Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshOrderBookLegacyGroup == { ZeroIncrementalRefreshOrderBookLegacyGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Order Book Legacy Groups                            *)
+(***************************************************************************)
+
+IncrementalRefreshOrderBookLegacyGroups ==
+    [ blockLength                            : Sample(2),
+      incrementalRefreshOrderBookLegacyGroup : SampleLists(OneIncrementalRefreshOrderBookLegacyGroup) ]
+
+EncodeIncrementalRefreshOrderBookLegacyGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshOrderBookLegacyGroup), 1)
+        \o EncodeIncrementalRefreshOrderBookLegacyGroupList(message.incrementalRefreshOrderBookLegacyGroup)
+
+DecodeIncrementalRefreshOrderBookLegacyGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshOrderBookLegacyGroup == ReadIncrementalRefreshOrderBookLegacyGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshOrderBookLegacyGroup.ok THEN Fail ELSE
+    Ok([ blockLength                            |-> blockLength.value,
+         incrementalRefreshOrderBookLegacyGroup |-> incrementalRefreshOrderBookLegacyGroup.value ], incrementalRefreshOrderBookLegacyGroup.rest)
+
+ZeroIncrementalRefreshOrderBookLegacyGroups ==
+    [ blockLength                            |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshOrderBookLegacyGroup |-> << >> ]
+
+(* Incremental Refresh Order Book Legacy Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshOrderBookLegacyGroups ==
+    { ZeroIncrementalRefreshOrderBookLegacyGroups }
+        \cup { [ZeroIncrementalRefreshOrderBookLegacyGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshOrderBookLegacyGroups EXCEPT !.incrementalRefreshOrderBookLegacyGroup = one] : one \in SampleLists(OneIncrementalRefreshOrderBookLegacyGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Order Book Legacy                                *)
+(***************************************************************************)
+
+MdIncrementalRefreshOrderBookLegacy ==
+    [ transactTime                            : Sample(8),
+      matchEventIndicator                     : Sample(1),
+      padding2                                : Sample(2),
+      incrementalRefreshOrderBookLegacyGroups : IncrementalRefreshOrderBookLegacyGroups ]
+
+EncodeMdIncrementalRefreshOrderBookLegacy(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshOrderBookLegacyGroups(message.incrementalRefreshOrderBookLegacyGroups)
+
+DecodeMdIncrementalRefreshOrderBookLegacy(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshOrderBookLegacyGroups == DecodeIncrementalRefreshOrderBookLegacyGroups(padding2.rest) IN IF ~incrementalRefreshOrderBookLegacyGroups.ok THEN Fail ELSE
+    Ok([ transactTime                            |-> transactTime.value,
+         matchEventIndicator                     |-> matchEventIndicator.value,
+         padding2                                |-> padding2.value,
+         incrementalRefreshOrderBookLegacyGroups |-> incrementalRefreshOrderBookLegacyGroups.value ], incrementalRefreshOrderBookLegacyGroups.rest)
+
+ZeroMdIncrementalRefreshOrderBookLegacy ==
+    [ transactTime                            |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                     |-> [i \in 1 .. 1 |-> 0],
+      padding2                                |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshOrderBookLegacyGroups |-> ZeroIncrementalRefreshOrderBookLegacyGroups ]
+
+(* Md Incremental Refresh Order Book Legacy at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshOrderBookLegacy ==
+    { ZeroMdIncrementalRefreshOrderBookLegacy }
+        \cup { [ZeroMdIncrementalRefreshOrderBookLegacy EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshOrderBookLegacy EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshOrderBookLegacy EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshOrderBookLegacy EXCEPT !.incrementalRefreshOrderBookLegacyGroups = one] : one \in CheckedIncrementalRefreshOrderBookLegacyGroups }
+
+(***************************************************************************)
+(* Snapshot Full Refresh Order Book Legacy Group: 29 bytes                 *)
+(***************************************************************************)
+
+SnapshotFullRefreshOrderBookLegacyGroup ==
+    [ orderId         : Sample(8),
+      mdOrderPriority : Sample(8),
+      mdEntryPx       : Sample(8),
+      mdDisplayQty    : Sample(4),
+      mdEntryTypeBook : Sample(1) ]
+
+EncodeSnapshotFullRefreshOrderBookLegacyGroup(message) ==
+    message.orderId
+        \o message.mdOrderPriority
+        \o message.mdEntryPx
+        \o message.mdDisplayQty
+        \o message.mdEntryTypeBook
+
+DecodeSnapshotFullRefreshOrderBookLegacyGroup(bytes) ==
+    LET orderId == ReadBytes(bytes, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET mdOrderPriority == ReadBytes(orderId.rest, 8) IN IF ~mdOrderPriority.ok THEN Fail ELSE
+    LET mdEntryPx == ReadBytes(mdOrderPriority.rest, 8) IN IF ~mdEntryPx.ok THEN Fail ELSE
+    LET mdDisplayQty == ReadBytes(mdEntryPx.rest, 4) IN IF ~mdDisplayQty.ok THEN Fail ELSE
+    LET mdEntryTypeBook == ReadBytes(mdDisplayQty.rest, 1) IN IF ~mdEntryTypeBook.ok THEN Fail ELSE
+    Ok([ orderId         |-> orderId.value,
+         mdOrderPriority |-> mdOrderPriority.value,
+         mdEntryPx       |-> mdEntryPx.value,
+         mdDisplayQty    |-> mdDisplayQty.value,
+         mdEntryTypeBook |-> mdEntryTypeBook.value ], mdEntryTypeBook.rest)
+
+ZeroSnapshotFullRefreshOrderBookLegacyGroup ==
+    [ orderId         |-> [i \in 1 .. 8 |-> 0],
+      mdOrderPriority |-> [i \in 1 .. 8 |-> 0],
+      mdEntryPx       |-> [i \in 1 .. 8 |-> 0],
+      mdDisplayQty    |-> [i \in 1 .. 4 |-> 0],
+      mdEntryTypeBook |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Snapshot Full Refresh Order Book Legacy Group at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefreshOrderBookLegacyGroup ==
+    { ZeroSnapshotFullRefreshOrderBookLegacyGroup }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacyGroup EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacyGroup EXCEPT !.mdOrderPriority = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacyGroup EXCEPT !.mdEntryPx = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacyGroup EXCEPT !.mdDisplayQty = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacyGroup EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
+
+(* A run of Snapshot Full Refresh Order Book Legacy Group, written one after another *)
+RECURSIVE EncodeSnapshotFullRefreshOrderBookLegacyGroupList(_)
+EncodeSnapshotFullRefreshOrderBookLegacyGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeSnapshotFullRefreshOrderBookLegacyGroup(Head(messages)) \o EncodeSnapshotFullRefreshOrderBookLegacyGroupList(Tail(messages))
+
+(* As many Snapshot Full Refresh Order Book Legacy Group as the field that counts them says *)
+RECURSIVE ReadSnapshotFullRefreshOrderBookLegacyGroupList(_, _)
+ReadSnapshotFullRefreshOrderBookLegacyGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeSnapshotFullRefreshOrderBookLegacyGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadSnapshotFullRefreshOrderBookLegacyGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Snapshot Full Refresh Order Book Legacy Group of each kind, for the lists that carry them *)
+OneSnapshotFullRefreshOrderBookLegacyGroup == { ZeroSnapshotFullRefreshOrderBookLegacyGroup }
+
+(***************************************************************************)
+(* Snapshot Full Refresh Order Book Legacy Groups                          *)
+(***************************************************************************)
+
+SnapshotFullRefreshOrderBookLegacyGroups ==
+    [ blockLength                             : Sample(2),
+      snapshotFullRefreshOrderBookLegacyGroup : SampleLists(OneSnapshotFullRefreshOrderBookLegacyGroup) ]
+
+EncodeSnapshotFullRefreshOrderBookLegacyGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.snapshotFullRefreshOrderBookLegacyGroup), 1)
+        \o EncodeSnapshotFullRefreshOrderBookLegacyGroupList(message.snapshotFullRefreshOrderBookLegacyGroup)
+
+DecodeSnapshotFullRefreshOrderBookLegacyGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET snapshotFullRefreshOrderBookLegacyGroup == ReadSnapshotFullRefreshOrderBookLegacyGroupList(numInGroup.rest, numInGroup.value) IN IF ~snapshotFullRefreshOrderBookLegacyGroup.ok THEN Fail ELSE
+    Ok([ blockLength                             |-> blockLength.value,
+         snapshotFullRefreshOrderBookLegacyGroup |-> snapshotFullRefreshOrderBookLegacyGroup.value ], snapshotFullRefreshOrderBookLegacyGroup.rest)
+
+ZeroSnapshotFullRefreshOrderBookLegacyGroups ==
+    [ blockLength                             |-> [i \in 1 .. 2 |-> 0],
+      snapshotFullRefreshOrderBookLegacyGroup |-> << >> ]
+
+(* Snapshot Full Refresh Order Book Legacy Groups at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefreshOrderBookLegacyGroups ==
+    { ZeroSnapshotFullRefreshOrderBookLegacyGroups }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacyGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacyGroups EXCEPT !.snapshotFullRefreshOrderBookLegacyGroup = one] : one \in SampleLists(OneSnapshotFullRefreshOrderBookLegacyGroup) }
+
+(***************************************************************************)
+(* Snapshot Full Refresh Order Book Legacy                                 *)
+(***************************************************************************)
+
+SnapshotFullRefreshOrderBookLegacy ==
+    [ lastMsgSeqNumProcessed                   : Sample(4),
+      totNumReports                            : Sample(4),
+      securityId                               : Sample(4),
+      noChunks                                 : Sample(4),
+      currentChunk                             : Sample(4),
+      transactTime                             : Sample(8),
+      snapshotFullRefreshOrderBookLegacyGroups : SnapshotFullRefreshOrderBookLegacyGroups ]
+
+EncodeSnapshotFullRefreshOrderBookLegacy(message) ==
+    message.lastMsgSeqNumProcessed
+        \o message.totNumReports
+        \o message.securityId
+        \o message.noChunks
+        \o message.currentChunk
+        \o message.transactTime
+        \o EncodeSnapshotFullRefreshOrderBookLegacyGroups(message.snapshotFullRefreshOrderBookLegacyGroups)
+
+DecodeSnapshotFullRefreshOrderBookLegacy(bytes) ==
+    LET lastMsgSeqNumProcessed == ReadBytes(bytes, 4) IN IF ~lastMsgSeqNumProcessed.ok THEN Fail ELSE
+    LET totNumReports == ReadBytes(lastMsgSeqNumProcessed.rest, 4) IN IF ~totNumReports.ok THEN Fail ELSE
+    LET securityId == ReadBytes(totNumReports.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET noChunks == ReadBytes(securityId.rest, 4) IN IF ~noChunks.ok THEN Fail ELSE
+    LET currentChunk == ReadBytes(noChunks.rest, 4) IN IF ~currentChunk.ok THEN Fail ELSE
+    LET transactTime == ReadBytes(currentChunk.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET snapshotFullRefreshOrderBookLegacyGroups == DecodeSnapshotFullRefreshOrderBookLegacyGroups(transactTime.rest) IN IF ~snapshotFullRefreshOrderBookLegacyGroups.ok THEN Fail ELSE
+    Ok([ lastMsgSeqNumProcessed                   |-> lastMsgSeqNumProcessed.value,
+         totNumReports                            |-> totNumReports.value,
+         securityId                               |-> securityId.value,
+         noChunks                                 |-> noChunks.value,
+         currentChunk                             |-> currentChunk.value,
+         transactTime                             |-> transactTime.value,
+         snapshotFullRefreshOrderBookLegacyGroups |-> snapshotFullRefreshOrderBookLegacyGroups.value ], snapshotFullRefreshOrderBookLegacyGroups.rest)
+
+ZeroSnapshotFullRefreshOrderBookLegacy ==
+    [ lastMsgSeqNumProcessed                   |-> [i \in 1 .. 4 |-> 0],
+      totNumReports                            |-> [i \in 1 .. 4 |-> 0],
+      securityId                               |-> [i \in 1 .. 4 |-> 0],
+      noChunks                                 |-> [i \in 1 .. 4 |-> 0],
+      currentChunk                             |-> [i \in 1 .. 4 |-> 0],
+      transactTime                             |-> [i \in 1 .. 8 |-> 0],
+      snapshotFullRefreshOrderBookLegacyGroups |-> ZeroSnapshotFullRefreshOrderBookLegacyGroups ]
+
+(* Snapshot Full Refresh Order Book Legacy at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefreshOrderBookLegacy ==
+    { ZeroSnapshotFullRefreshOrderBookLegacy }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.lastMsgSeqNumProcessed = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.totNumReports = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.noChunks = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.currentChunk = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.snapshotFullRefreshOrderBookLegacyGroups = one] : one \in CheckedSnapshotFullRefreshOrderBookLegacyGroups }
+
+(***************************************************************************)
+(* Incremental Refresh Book Group: 32 bytes                                *)
+(***************************************************************************)
+
+IncrementalRefreshBookGroup ==
+    [ mdEntryPxOptionalEx      : Sample(8),
+      mdEntrySizeShortOptional : Sample(4),
+      securityId               : Sample(4),
+      rptSeq                   : Sample(4),
+      numberOfOrdersOptional   : Sample(4),
+      mdPriceLevel             : Sample(1),
+      mdUpdateAction           : Sample(1),
+      mdEntryTypeBook          : Sample(1),
+      padding5                 : Sample(5) ]
+
+EncodeIncrementalRefreshBookGroup(message) ==
+    message.mdEntryPxOptionalEx
+        \o message.mdEntrySizeShortOptional
+        \o message.securityId
+        \o message.rptSeq
+        \o message.numberOfOrdersOptional
+        \o message.mdPriceLevel
+        \o message.mdUpdateAction
+        \o message.mdEntryTypeBook
+        \o message.padding5
+
+DecodeIncrementalRefreshBookGroup(bytes) ==
+    LET mdEntryPxOptionalEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
+    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntrySizeShortOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET numberOfOrdersOptional == ReadBytes(rptSeq.rest, 4) IN IF ~numberOfOrdersOptional.ok THEN Fail ELSE
+    LET mdPriceLevel == ReadBytes(numberOfOrdersOptional.rest, 1) IN IF ~mdPriceLevel.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(mdPriceLevel.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET mdEntryTypeBook == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeBook.ok THEN Fail ELSE
+    LET padding5 == ReadBytes(mdEntryTypeBook.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
+    Ok([ mdEntryPxOptionalEx      |-> mdEntryPxOptionalEx.value,
+         mdEntrySizeShortOptional |-> mdEntrySizeShortOptional.value,
+         securityId               |-> securityId.value,
+         rptSeq                   |-> rptSeq.value,
+         numberOfOrdersOptional   |-> numberOfOrdersOptional.value,
+         mdPriceLevel             |-> mdPriceLevel.value,
+         mdUpdateAction           |-> mdUpdateAction.value,
+         mdEntryTypeBook          |-> mdEntryTypeBook.value,
+         padding5                 |-> padding5.value ], padding5.rest)
+
+ZeroIncrementalRefreshBookGroup ==
+    [ mdEntryPxOptionalEx      |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySizeShortOptional |-> [i \in 1 .. 4 |-> 0],
+      securityId               |-> [i \in 1 .. 4 |-> 0],
+      rptSeq                   |-> [i \in 1 .. 4 |-> 0],
+      numberOfOrdersOptional   |-> [i \in 1 .. 4 |-> 0],
+      mdPriceLevel             |-> [i \in 1 .. 1 |-> 0],
+      mdUpdateAction           |-> [i \in 1 .. 1 |-> 0],
+      mdEntryTypeBook          |-> [i \in 1 .. 1 |-> 0],
+      padding5                 |-> [i \in 1 .. 5 |-> 0] ]
+
+(* Incremental Refresh Book Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshBookGroup ==
+    { ZeroIncrementalRefreshBookGroup }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.numberOfOrdersOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdPriceLevel = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookGroup EXCEPT !.padding5 = one] : one \in Sample(5) }
+
+(* A run of Incremental Refresh Book Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshBookGroupList(_)
+EncodeIncrementalRefreshBookGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshBookGroup(Head(messages)) \o EncodeIncrementalRefreshBookGroupList(Tail(messages))
+
+(* As many Incremental Refresh Book Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshBookGroupList(_, _)
+ReadIncrementalRefreshBookGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshBookGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshBookGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Book Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshBookGroup == { ZeroIncrementalRefreshBookGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Book Groups                                         *)
+(***************************************************************************)
+
+IncrementalRefreshBookGroups ==
+    [ blockLength                 : Sample(2),
+      incrementalRefreshBookGroup : SampleLists(OneIncrementalRefreshBookGroup) ]
+
+EncodeIncrementalRefreshBookGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshBookGroup), 1)
+        \o EncodeIncrementalRefreshBookGroupList(message.incrementalRefreshBookGroup)
+
+DecodeIncrementalRefreshBookGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshBookGroup == ReadIncrementalRefreshBookGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshBookGroup.ok THEN Fail ELSE
+    Ok([ blockLength                 |-> blockLength.value,
+         incrementalRefreshBookGroup |-> incrementalRefreshBookGroup.value ], incrementalRefreshBookGroup.rest)
+
+ZeroIncrementalRefreshBookGroups ==
+    [ blockLength                 |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshBookGroup |-> << >> ]
+
+(* Incremental Refresh Book Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshBookGroups ==
+    { ZeroIncrementalRefreshBookGroups }
+        \cup { [ZeroIncrementalRefreshBookGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshBookGroups EXCEPT !.incrementalRefreshBookGroup = one] : one \in SampleLists(OneIncrementalRefreshBookGroup) }
+
+(***************************************************************************)
+(* Incremental Refresh Book Order Id Group: 24 bytes                       *)
+(***************************************************************************)
+
+IncrementalRefreshBookOrderIdGroup2 ==
+    [ orderId              : Sample(8),
+      mdOrderPriority      : Sample(8),
+      mdDisplayQtyOptional : Sample(4),
+      referenceId          : Sample(1),
+      orderUpdateAction    : Sample(1),
+      padding2             : Sample(2) ]
+
+EncodeIncrementalRefreshBookOrderIdGroup2(message) ==
+    message.orderId
+        \o message.mdOrderPriority
+        \o message.mdDisplayQtyOptional
+        \o message.referenceId
+        \o message.orderUpdateAction
+        \o message.padding2
+
+DecodeIncrementalRefreshBookOrderIdGroup2(bytes) ==
+    LET orderId == ReadBytes(bytes, 8) IN IF ~orderId.ok THEN Fail ELSE
+    LET mdOrderPriority == ReadBytes(orderId.rest, 8) IN IF ~mdOrderPriority.ok THEN Fail ELSE
+    LET mdDisplayQtyOptional == ReadBytes(mdOrderPriority.rest, 4) IN IF ~mdDisplayQtyOptional.ok THEN Fail ELSE
+    LET referenceId == ReadBytes(mdDisplayQtyOptional.rest, 1) IN IF ~referenceId.ok THEN Fail ELSE
+    LET orderUpdateAction == ReadBytes(referenceId.rest, 1) IN IF ~orderUpdateAction.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(orderUpdateAction.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    Ok([ orderId              |-> orderId.value,
+         mdOrderPriority      |-> mdOrderPriority.value,
+         mdDisplayQtyOptional |-> mdDisplayQtyOptional.value,
+         referenceId          |-> referenceId.value,
+         orderUpdateAction    |-> orderUpdateAction.value,
+         padding2             |-> padding2.value ], padding2.rest)
+
+ZeroIncrementalRefreshBookOrderIdGroup2 ==
+    [ orderId              |-> [i \in 1 .. 8 |-> 0],
+      mdOrderPriority      |-> [i \in 1 .. 8 |-> 0],
+      mdDisplayQtyOptional |-> [i \in 1 .. 4 |-> 0],
+      referenceId          |-> [i \in 1 .. 1 |-> 0],
+      orderUpdateAction    |-> [i \in 1 .. 1 |-> 0],
+      padding2             |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Incremental Refresh Book Order Id Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshBookOrderIdGroup2 ==
+    { ZeroIncrementalRefreshBookOrderIdGroup2 }
+        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.mdOrderPriority = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.mdDisplayQtyOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.referenceId = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.orderUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.padding2 = one] : one \in Sample(2) }
+
+(* A run of Incremental Refresh Book Order Id Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshBookOrderIdGroup2List(_)
+EncodeIncrementalRefreshBookOrderIdGroup2List(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshBookOrderIdGroup2(Head(messages)) \o EncodeIncrementalRefreshBookOrderIdGroup2List(Tail(messages))
+
+(* As many Incremental Refresh Book Order Id Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshBookOrderIdGroup2List(_, _)
+ReadIncrementalRefreshBookOrderIdGroup2List(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshBookOrderIdGroup2(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshBookOrderIdGroup2List(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Book Order Id Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshBookOrderIdGroup2 == { ZeroIncrementalRefreshBookOrderIdGroup2 }
+
+(***************************************************************************)
+(* Incremental Refresh Book Order Id Groups                                *)
+(***************************************************************************)
+
+IncrementalRefreshBookOrderIdGroups2 ==
+    [ blockLength                        : Sample(2),
+      padding5                           : Sample(5),
+      incrementalRefreshBookOrderIdGroup : SampleLists(OneIncrementalRefreshBookOrderIdGroup2) ]
+
+EncodeIncrementalRefreshBookOrderIdGroups2(message) ==
+    message.blockLength
+        \o message.padding5
+        \o EncodeUIntBE(Len(message.incrementalRefreshBookOrderIdGroup), 1)
+        \o EncodeIncrementalRefreshBookOrderIdGroup2List(message.incrementalRefreshBookOrderIdGroup)
+
+DecodeIncrementalRefreshBookOrderIdGroups2(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET padding5 == ReadBytes(blockLength.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(padding5.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshBookOrderIdGroup == ReadIncrementalRefreshBookOrderIdGroup2List(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshBookOrderIdGroup.ok THEN Fail ELSE
+    Ok([ blockLength                        |-> blockLength.value,
+         padding5                           |-> padding5.value,
+         incrementalRefreshBookOrderIdGroup |-> incrementalRefreshBookOrderIdGroup.value ], incrementalRefreshBookOrderIdGroup.rest)
+
+ZeroIncrementalRefreshBookOrderIdGroups2 ==
+    [ blockLength                        |-> [i \in 1 .. 2 |-> 0],
+      padding5                           |-> [i \in 1 .. 5 |-> 0],
+      incrementalRefreshBookOrderIdGroup |-> << >> ]
+
+(* Incremental Refresh Book Order Id Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshBookOrderIdGroups2 ==
+    { ZeroIncrementalRefreshBookOrderIdGroups2 }
+        \cup { [ZeroIncrementalRefreshBookOrderIdGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshBookOrderIdGroups2 EXCEPT !.padding5 = one] : one \in Sample(5) }
+        \cup { [ZeroIncrementalRefreshBookOrderIdGroups2 EXCEPT !.incrementalRefreshBookOrderIdGroup = one] : one \in SampleLists(OneIncrementalRefreshBookOrderIdGroup2) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Book                                             *)
+(***************************************************************************)
+
+MdIncrementalRefreshBook ==
+    [ transactTime                        : Sample(8),
+      matchEventIndicator                 : Sample(1),
+      padding2                            : Sample(2),
+      incrementalRefreshBookGroups        : IncrementalRefreshBookGroups,
+      incrementalRefreshBookOrderIdGroups : IncrementalRefreshBookOrderIdGroups2 ]
+
+EncodeMdIncrementalRefreshBook(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshBookGroups(message.incrementalRefreshBookGroups)
+        \o EncodeIncrementalRefreshBookOrderIdGroups2(message.incrementalRefreshBookOrderIdGroups)
+
+DecodeMdIncrementalRefreshBook(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshBookGroups == DecodeIncrementalRefreshBookGroups(padding2.rest) IN IF ~incrementalRefreshBookGroups.ok THEN Fail ELSE
+    LET incrementalRefreshBookOrderIdGroups == DecodeIncrementalRefreshBookOrderIdGroups2(incrementalRefreshBookGroups.rest) IN IF ~incrementalRefreshBookOrderIdGroups.ok THEN Fail ELSE
+    Ok([ transactTime                        |-> transactTime.value,
+         matchEventIndicator                 |-> matchEventIndicator.value,
+         padding2                            |-> padding2.value,
+         incrementalRefreshBookGroups        |-> incrementalRefreshBookGroups.value,
+         incrementalRefreshBookOrderIdGroups |-> incrementalRefreshBookOrderIdGroups.value ], incrementalRefreshBookOrderIdGroups.rest)
+
+ZeroMdIncrementalRefreshBook ==
+    [ transactTime                        |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                 |-> [i \in 1 .. 1 |-> 0],
+      padding2                            |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshBookGroups        |-> ZeroIncrementalRefreshBookGroups,
+      incrementalRefreshBookOrderIdGroups |-> ZeroIncrementalRefreshBookOrderIdGroups2 ]
+
+(* Md Incremental Refresh Book at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshBook ==
+    { ZeroMdIncrementalRefreshBook }
+        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.incrementalRefreshBookGroups = one] : one \in CheckedIncrementalRefreshBookGroups }
+        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.incrementalRefreshBookOrderIdGroups = one] : one \in CheckedIncrementalRefreshBookOrderIdGroups2 }
+
+(***************************************************************************)
+(* Incremental Refresh Order Book Group: 40 bytes                          *)
+(***************************************************************************)
+
+IncrementalRefreshOrderBookGroup ==
+    [ orderIdOptional      : Sample(8),
+      mdOrderPriority      : Sample(8),
+      mdEntryPxOptionalEx  : Sample(8),
+      mdDisplayQtyOptional : Sample(4),
+      securityId           : Sample(4),
+      mdUpdateAction       : Sample(1),
+      mdEntryTypeBook      : Sample(1),
+      padding6             : Sample(6) ]
+
+EncodeIncrementalRefreshOrderBookGroup(message) ==
+    message.orderIdOptional
+        \o message.mdOrderPriority
+        \o message.mdEntryPxOptionalEx
+        \o message.mdDisplayQtyOptional
+        \o message.securityId
+        \o message.mdUpdateAction
+        \o message.mdEntryTypeBook
+        \o message.padding6
+
+DecodeIncrementalRefreshOrderBookGroup(bytes) ==
+    LET orderIdOptional == ReadBytes(bytes, 8) IN IF ~orderIdOptional.ok THEN Fail ELSE
+    LET mdOrderPriority == ReadBytes(orderIdOptional.rest, 8) IN IF ~mdOrderPriority.ok THEN Fail ELSE
+    LET mdEntryPxOptionalEx == ReadBytes(mdOrderPriority.rest, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
+    LET mdDisplayQtyOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdDisplayQtyOptional.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdDisplayQtyOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(securityId.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET mdEntryTypeBook == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeBook.ok THEN Fail ELSE
+    LET padding6 == ReadBytes(mdEntryTypeBook.rest, 6) IN IF ~padding6.ok THEN Fail ELSE
+    Ok([ orderIdOptional      |-> orderIdOptional.value,
+         mdOrderPriority      |-> mdOrderPriority.value,
+         mdEntryPxOptionalEx  |-> mdEntryPxOptionalEx.value,
+         mdDisplayQtyOptional |-> mdDisplayQtyOptional.value,
+         securityId           |-> securityId.value,
+         mdUpdateAction       |-> mdUpdateAction.value,
+         mdEntryTypeBook      |-> mdEntryTypeBook.value,
+         padding6             |-> padding6.value ], padding6.rest)
+
+ZeroIncrementalRefreshOrderBookGroup ==
+    [ orderIdOptional      |-> [i \in 1 .. 8 |-> 0],
+      mdOrderPriority      |-> [i \in 1 .. 8 |-> 0],
+      mdEntryPxOptionalEx  |-> [i \in 1 .. 8 |-> 0],
+      mdDisplayQtyOptional |-> [i \in 1 .. 4 |-> 0],
+      securityId           |-> [i \in 1 .. 4 |-> 0],
+      mdUpdateAction       |-> [i \in 1 .. 1 |-> 0],
+      mdEntryTypeBook      |-> [i \in 1 .. 1 |-> 0],
+      padding6             |-> [i \in 1 .. 6 |-> 0] ]
+
+(* Incremental Refresh Order Book Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshOrderBookGroup ==
+    { ZeroIncrementalRefreshOrderBookGroup }
+        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.orderIdOptional = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.mdOrderPriority = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.mdDisplayQtyOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.padding6 = one] : one \in Sample(6) }
+
+(* A run of Incremental Refresh Order Book Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshOrderBookGroupList(_)
+EncodeIncrementalRefreshOrderBookGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshOrderBookGroup(Head(messages)) \o EncodeIncrementalRefreshOrderBookGroupList(Tail(messages))
+
+(* As many Incremental Refresh Order Book Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshOrderBookGroupList(_, _)
+ReadIncrementalRefreshOrderBookGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshOrderBookGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshOrderBookGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Order Book Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshOrderBookGroup == { ZeroIncrementalRefreshOrderBookGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Order Book Groups                                   *)
+(***************************************************************************)
+
+IncrementalRefreshOrderBookGroups ==
+    [ blockLength                      : Sample(2),
+      incrementalRefreshOrderBookGroup : SampleLists(OneIncrementalRefreshOrderBookGroup) ]
+
+EncodeIncrementalRefreshOrderBookGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshOrderBookGroup), 1)
+        \o EncodeIncrementalRefreshOrderBookGroupList(message.incrementalRefreshOrderBookGroup)
+
+DecodeIncrementalRefreshOrderBookGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshOrderBookGroup == ReadIncrementalRefreshOrderBookGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshOrderBookGroup.ok THEN Fail ELSE
+    Ok([ blockLength                      |-> blockLength.value,
+         incrementalRefreshOrderBookGroup |-> incrementalRefreshOrderBookGroup.value ], incrementalRefreshOrderBookGroup.rest)
+
+ZeroIncrementalRefreshOrderBookGroups ==
+    [ blockLength                      |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshOrderBookGroup |-> << >> ]
+
+(* Incremental Refresh Order Book Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshOrderBookGroups ==
+    { ZeroIncrementalRefreshOrderBookGroups }
+        \cup { [ZeroIncrementalRefreshOrderBookGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshOrderBookGroups EXCEPT !.incrementalRefreshOrderBookGroup = one] : one \in SampleLists(OneIncrementalRefreshOrderBookGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Order Book                                       *)
+(***************************************************************************)
+
+MdIncrementalRefreshOrderBook ==
+    [ transactTime                      : Sample(8),
+      matchEventIndicator               : Sample(1),
+      padding2                          : Sample(2),
+      incrementalRefreshOrderBookGroups : IncrementalRefreshOrderBookGroups ]
+
+EncodeMdIncrementalRefreshOrderBook(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshOrderBookGroups(message.incrementalRefreshOrderBookGroups)
+
+DecodeMdIncrementalRefreshOrderBook(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshOrderBookGroups == DecodeIncrementalRefreshOrderBookGroups(padding2.rest) IN IF ~incrementalRefreshOrderBookGroups.ok THEN Fail ELSE
+    Ok([ transactTime                      |-> transactTime.value,
+         matchEventIndicator               |-> matchEventIndicator.value,
+         padding2                          |-> padding2.value,
+         incrementalRefreshOrderBookGroups |-> incrementalRefreshOrderBookGroups.value ], incrementalRefreshOrderBookGroups.rest)
+
+ZeroMdIncrementalRefreshOrderBook ==
+    [ transactTime                      |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator               |-> [i \in 1 .. 1 |-> 0],
+      padding2                          |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshOrderBookGroups |-> ZeroIncrementalRefreshOrderBookGroups ]
+
+(* Md Incremental Refresh Order Book at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshOrderBook ==
+    { ZeroMdIncrementalRefreshOrderBook }
+        \cup { [ZeroMdIncrementalRefreshOrderBook EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshOrderBook EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshOrderBook EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshOrderBook EXCEPT !.incrementalRefreshOrderBookGroups = one] : one \in CheckedIncrementalRefreshOrderBookGroups }
+
+(***************************************************************************)
 (* Incremental Refresh Trade Summary Group: 32 bytes                       *)
 (***************************************************************************)
 
@@ -3875,17 +4874,17 @@ CheckedIncrementalRefreshTradeSummaryGroups ==
 (* Incremental Refresh Trade Summary Order Id Group: 16 bytes              *)
 (***************************************************************************)
 
-IncrementalRefreshTradeSummaryOrderIdGroup ==
+IncrementalRefreshTradeSummaryOrderIdGroup2 ==
     [ orderId  : Sample(8),
       lastQty  : Sample(4),
       padding4 : Sample(4) ]
 
-EncodeIncrementalRefreshTradeSummaryOrderIdGroup(message) ==
+EncodeIncrementalRefreshTradeSummaryOrderIdGroup2(message) ==
     message.orderId
         \o message.lastQty
         \o message.padding4
 
-DecodeIncrementalRefreshTradeSummaryOrderIdGroup(bytes) ==
+DecodeIncrementalRefreshTradeSummaryOrderIdGroup2(bytes) ==
     LET orderId == ReadBytes(bytes, 8) IN IF ~orderId.ok THEN Fail ELSE
     LET lastQty == ReadBytes(orderId.rest, 4) IN IF ~lastQty.ok THEN Fail ELSE
     LET padding4 == ReadBytes(lastQty.rest, 4) IN IF ~padding4.ok THEN Fail ELSE
@@ -3893,275 +4892,776 @@ DecodeIncrementalRefreshTradeSummaryOrderIdGroup(bytes) ==
          lastQty  |-> lastQty.value,
          padding4 |-> padding4.value ], padding4.rest)
 
-ZeroIncrementalRefreshTradeSummaryOrderIdGroup ==
+ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 ==
     [ orderId  |-> [i \in 1 .. 8 |-> 0],
       lastQty  |-> [i \in 1 .. 4 |-> 0],
       padding4 |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Incremental Refresh Trade Summary Order Id Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshTradeSummaryOrderIdGroup ==
-    { ZeroIncrementalRefreshTradeSummaryOrderIdGroup }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup EXCEPT !.lastQty = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup EXCEPT !.padding4 = one] : one \in Sample(4) }
+CheckedIncrementalRefreshTradeSummaryOrderIdGroup2 ==
+    { ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 EXCEPT !.lastQty = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 EXCEPT !.padding4 = one] : one \in Sample(4) }
 
 (* A run of Incremental Refresh Trade Summary Order Id Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(_)
-EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(messages) ==
+RECURSIVE EncodeIncrementalRefreshTradeSummaryOrderIdGroup2List(_)
+EncodeIncrementalRefreshTradeSummaryOrderIdGroup2List(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeIncrementalRefreshTradeSummaryOrderIdGroup(Head(messages)) \o EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(Tail(messages))
+    ELSE EncodeIncrementalRefreshTradeSummaryOrderIdGroup2(Head(messages)) \o EncodeIncrementalRefreshTradeSummaryOrderIdGroup2List(Tail(messages))
 
 (* As many Incremental Refresh Trade Summary Order Id Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshTradeSummaryOrderIdGroupList(_, _)
-ReadIncrementalRefreshTradeSummaryOrderIdGroupList(bytes, count) ==
+RECURSIVE ReadIncrementalRefreshTradeSummaryOrderIdGroup2List(_, _)
+ReadIncrementalRefreshTradeSummaryOrderIdGroup2List(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshTradeSummaryOrderIdGroup(bytes)
+    ELSE LET one == DecodeIncrementalRefreshTradeSummaryOrderIdGroup2(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshTradeSummaryOrderIdGroupList(one.rest, count - 1)
+             ELSE LET more == ReadIncrementalRefreshTradeSummaryOrderIdGroup2List(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
 (* One Incremental Refresh Trade Summary Order Id Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshTradeSummaryOrderIdGroup == { ZeroIncrementalRefreshTradeSummaryOrderIdGroup }
+OneIncrementalRefreshTradeSummaryOrderIdGroup2 == { ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 }
 
 (***************************************************************************)
 (* Incremental Refresh Trade Summary Order Id Groups                       *)
 (***************************************************************************)
 
-IncrementalRefreshTradeSummaryOrderIdGroups ==
+IncrementalRefreshTradeSummaryOrderIdGroups2 ==
     [ blockLength                                : Sample(2),
       padding5                                   : Sample(5),
-      incrementalRefreshTradeSummaryOrderIdGroup : SampleLists(OneIncrementalRefreshTradeSummaryOrderIdGroup) ]
+      incrementalRefreshTradeSummaryOrderIdGroup : SampleLists(OneIncrementalRefreshTradeSummaryOrderIdGroup2) ]
 
-EncodeIncrementalRefreshTradeSummaryOrderIdGroups(message) ==
+EncodeIncrementalRefreshTradeSummaryOrderIdGroups2(message) ==
     message.blockLength
         \o message.padding5
         \o EncodeUIntBE(Len(message.incrementalRefreshTradeSummaryOrderIdGroup), 1)
-        \o EncodeIncrementalRefreshTradeSummaryOrderIdGroupList(message.incrementalRefreshTradeSummaryOrderIdGroup)
+        \o EncodeIncrementalRefreshTradeSummaryOrderIdGroup2List(message.incrementalRefreshTradeSummaryOrderIdGroup)
 
-DecodeIncrementalRefreshTradeSummaryOrderIdGroups(bytes) ==
+DecodeIncrementalRefreshTradeSummaryOrderIdGroups2(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET padding5 == ReadBytes(blockLength.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(padding5.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshTradeSummaryOrderIdGroup == ReadIncrementalRefreshTradeSummaryOrderIdGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshTradeSummaryOrderIdGroup.ok THEN Fail ELSE
+    LET incrementalRefreshTradeSummaryOrderIdGroup == ReadIncrementalRefreshTradeSummaryOrderIdGroup2List(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshTradeSummaryOrderIdGroup.ok THEN Fail ELSE
     Ok([ blockLength                                |-> blockLength.value,
          padding5                                   |-> padding5.value,
          incrementalRefreshTradeSummaryOrderIdGroup |-> incrementalRefreshTradeSummaryOrderIdGroup.value ], incrementalRefreshTradeSummaryOrderIdGroup.rest)
 
-ZeroIncrementalRefreshTradeSummaryOrderIdGroups ==
+ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 ==
     [ blockLength                                |-> [i \in 1 .. 2 |-> 0],
       padding5                                   |-> [i \in 1 .. 5 |-> 0],
       incrementalRefreshTradeSummaryOrderIdGroup |-> << >> ]
 
 (* Incremental Refresh Trade Summary Order Id Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshTradeSummaryOrderIdGroups ==
-    { ZeroIncrementalRefreshTradeSummaryOrderIdGroups }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups EXCEPT !.padding5 = one] : one \in Sample(5) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups EXCEPT !.incrementalRefreshTradeSummaryOrderIdGroup = one] : one \in SampleLists(OneIncrementalRefreshTradeSummaryOrderIdGroup) }
+CheckedIncrementalRefreshTradeSummaryOrderIdGroups2 ==
+    { ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 EXCEPT !.padding5 = one] : one \in Sample(5) }
+        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 EXCEPT !.incrementalRefreshTradeSummaryOrderIdGroup = one] : one \in SampleLists(OneIncrementalRefreshTradeSummaryOrderIdGroup2) }
 
 (***************************************************************************)
-(* Md Incremental Refresh Trade Summary Legacy                             *)
+(* Md Incremental Refresh Trade Summary                                    *)
 (***************************************************************************)
 
-MdIncrementalRefreshTradeSummaryLegacy ==
+MdIncrementalRefreshTradeSummary ==
     [ transactTime                                : Sample(8),
       matchEventIndicator                         : Sample(1),
       padding2                                    : Sample(2),
       incrementalRefreshTradeSummaryGroups        : IncrementalRefreshTradeSummaryGroups,
-      incrementalRefreshTradeSummaryOrderIdGroups : IncrementalRefreshTradeSummaryOrderIdGroups ]
+      incrementalRefreshTradeSummaryOrderIdGroups : IncrementalRefreshTradeSummaryOrderIdGroups2 ]
 
-EncodeMdIncrementalRefreshTradeSummaryLegacy(message) ==
+EncodeMdIncrementalRefreshTradeSummary(message) ==
     message.transactTime
         \o message.matchEventIndicator
         \o message.padding2
         \o EncodeIncrementalRefreshTradeSummaryGroups(message.incrementalRefreshTradeSummaryGroups)
-        \o EncodeIncrementalRefreshTradeSummaryOrderIdGroups(message.incrementalRefreshTradeSummaryOrderIdGroups)
+        \o EncodeIncrementalRefreshTradeSummaryOrderIdGroups2(message.incrementalRefreshTradeSummaryOrderIdGroups)
 
-DecodeMdIncrementalRefreshTradeSummaryLegacy(bytes) ==
+DecodeMdIncrementalRefreshTradeSummary(bytes) ==
     LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
     LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
     LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
     LET incrementalRefreshTradeSummaryGroups == DecodeIncrementalRefreshTradeSummaryGroups(padding2.rest) IN IF ~incrementalRefreshTradeSummaryGroups.ok THEN Fail ELSE
-    LET incrementalRefreshTradeSummaryOrderIdGroups == DecodeIncrementalRefreshTradeSummaryOrderIdGroups(incrementalRefreshTradeSummaryGroups.rest) IN IF ~incrementalRefreshTradeSummaryOrderIdGroups.ok THEN Fail ELSE
+    LET incrementalRefreshTradeSummaryOrderIdGroups == DecodeIncrementalRefreshTradeSummaryOrderIdGroups2(incrementalRefreshTradeSummaryGroups.rest) IN IF ~incrementalRefreshTradeSummaryOrderIdGroups.ok THEN Fail ELSE
     Ok([ transactTime                                |-> transactTime.value,
          matchEventIndicator                         |-> matchEventIndicator.value,
          padding2                                    |-> padding2.value,
          incrementalRefreshTradeSummaryGroups        |-> incrementalRefreshTradeSummaryGroups.value,
          incrementalRefreshTradeSummaryOrderIdGroups |-> incrementalRefreshTradeSummaryOrderIdGroups.value ], incrementalRefreshTradeSummaryOrderIdGroups.rest)
 
-ZeroMdIncrementalRefreshTradeSummaryLegacy ==
+ZeroMdIncrementalRefreshTradeSummary ==
     [ transactTime                                |-> [i \in 1 .. 8 |-> 0],
       matchEventIndicator                         |-> [i \in 1 .. 1 |-> 0],
       padding2                                    |-> [i \in 1 .. 2 |-> 0],
       incrementalRefreshTradeSummaryGroups        |-> ZeroIncrementalRefreshTradeSummaryGroups,
-      incrementalRefreshTradeSummaryOrderIdGroups |-> ZeroIncrementalRefreshTradeSummaryOrderIdGroups ]
+      incrementalRefreshTradeSummaryOrderIdGroups |-> ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 ]
 
-(* Md Incremental Refresh Trade Summary Legacy at zero, then each field in turn at the values it is checked at *)
-CheckedMdIncrementalRefreshTradeSummaryLegacy ==
-    { ZeroMdIncrementalRefreshTradeSummaryLegacy }
-        \cup { [ZeroMdIncrementalRefreshTradeSummaryLegacy EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroMdIncrementalRefreshTradeSummaryLegacy EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroMdIncrementalRefreshTradeSummaryLegacy EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshTradeSummaryLegacy EXCEPT !.incrementalRefreshTradeSummaryGroups = one] : one \in CheckedIncrementalRefreshTradeSummaryGroups }
-        \cup { [ZeroMdIncrementalRefreshTradeSummaryLegacy EXCEPT !.incrementalRefreshTradeSummaryOrderIdGroups = one] : one \in CheckedIncrementalRefreshTradeSummaryOrderIdGroups }
+(* Md Incremental Refresh Trade Summary at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshTradeSummary ==
+    { ZeroMdIncrementalRefreshTradeSummary }
+        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.incrementalRefreshTradeSummaryGroups = one] : one \in CheckedIncrementalRefreshTradeSummaryGroups }
+        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.incrementalRefreshTradeSummaryOrderIdGroups = one] : one \in CheckedIncrementalRefreshTradeSummaryOrderIdGroups2 }
 
 (***************************************************************************)
-(* Incremental Refresh Order Book Group: 40 bytes                          *)
+(* Incremental Refresh Daily Statistics Group: 32 bytes                    *)
 (***************************************************************************)
 
-IncrementalRefreshOrderBookGroup ==
-    [ orderIdOptional      : Sample(8),
-      mdOrderPriority      : Sample(8),
-      mdEntryPxOptionalEx  : Sample(8),
-      mdDisplayQtyOptional : Sample(4),
-      securityId           : Sample(4),
-      mdUpdateAction       : Sample(1),
-      mdEntryTypeBook      : Sample(1),
-      padding6             : Sample(6) ]
+IncrementalRefreshDailyStatisticsGroup ==
+    [ mdEntryPxOptionalEx        : Sample(8),
+      mdEntrySizeShortOptional   : Sample(4),
+      securityId                 : Sample(4),
+      rptSeq                     : Sample(4),
+      tradingReferenceDate       : Sample(2),
+      settlPriceType             : Sample(1),
+      mdUpdateAction             : Sample(1),
+      mdEntryTypeDailyStatistics : Sample(1),
+      padding7                   : Sample(7) ]
 
-EncodeIncrementalRefreshOrderBookGroup(message) ==
-    message.orderIdOptional
-        \o message.mdOrderPriority
-        \o message.mdEntryPxOptionalEx
-        \o message.mdDisplayQtyOptional
+EncodeIncrementalRefreshDailyStatisticsGroup(message) ==
+    message.mdEntryPxOptionalEx
+        \o message.mdEntrySizeShortOptional
         \o message.securityId
+        \o message.rptSeq
+        \o message.tradingReferenceDate
+        \o message.settlPriceType
         \o message.mdUpdateAction
-        \o message.mdEntryTypeBook
-        \o message.padding6
+        \o message.mdEntryTypeDailyStatistics
+        \o message.padding7
 
-DecodeIncrementalRefreshOrderBookGroup(bytes) ==
-    LET orderIdOptional == ReadBytes(bytes, 8) IN IF ~orderIdOptional.ok THEN Fail ELSE
-    LET mdOrderPriority == ReadBytes(orderIdOptional.rest, 8) IN IF ~mdOrderPriority.ok THEN Fail ELSE
-    LET mdEntryPxOptionalEx == ReadBytes(mdOrderPriority.rest, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
-    LET mdDisplayQtyOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdDisplayQtyOptional.ok THEN Fail ELSE
-    LET securityId == ReadBytes(mdDisplayQtyOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET mdUpdateAction == ReadBytes(securityId.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
-    LET mdEntryTypeBook == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeBook.ok THEN Fail ELSE
-    LET padding6 == ReadBytes(mdEntryTypeBook.rest, 6) IN IF ~padding6.ok THEN Fail ELSE
-    Ok([ orderIdOptional      |-> orderIdOptional.value,
-         mdOrderPriority      |-> mdOrderPriority.value,
-         mdEntryPxOptionalEx  |-> mdEntryPxOptionalEx.value,
-         mdDisplayQtyOptional |-> mdDisplayQtyOptional.value,
-         securityId           |-> securityId.value,
-         mdUpdateAction       |-> mdUpdateAction.value,
-         mdEntryTypeBook      |-> mdEntryTypeBook.value,
-         padding6             |-> padding6.value ], padding6.rest)
+DecodeIncrementalRefreshDailyStatisticsGroup(bytes) ==
+    LET mdEntryPxOptionalEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
+    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntrySizeShortOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET tradingReferenceDate == ReadBytes(rptSeq.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
+    LET settlPriceType == ReadBytes(tradingReferenceDate.rest, 1) IN IF ~settlPriceType.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(settlPriceType.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET mdEntryTypeDailyStatistics == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeDailyStatistics.ok THEN Fail ELSE
+    LET padding7 == ReadBytes(mdEntryTypeDailyStatistics.rest, 7) IN IF ~padding7.ok THEN Fail ELSE
+    Ok([ mdEntryPxOptionalEx        |-> mdEntryPxOptionalEx.value,
+         mdEntrySizeShortOptional   |-> mdEntrySizeShortOptional.value,
+         securityId                 |-> securityId.value,
+         rptSeq                     |-> rptSeq.value,
+         tradingReferenceDate       |-> tradingReferenceDate.value,
+         settlPriceType             |-> settlPriceType.value,
+         mdUpdateAction             |-> mdUpdateAction.value,
+         mdEntryTypeDailyStatistics |-> mdEntryTypeDailyStatistics.value,
+         padding7                   |-> padding7.value ], padding7.rest)
 
-ZeroIncrementalRefreshOrderBookGroup ==
-    [ orderIdOptional      |-> [i \in 1 .. 8 |-> 0],
-      mdOrderPriority      |-> [i \in 1 .. 8 |-> 0],
-      mdEntryPxOptionalEx  |-> [i \in 1 .. 8 |-> 0],
-      mdDisplayQtyOptional |-> [i \in 1 .. 4 |-> 0],
-      securityId           |-> [i \in 1 .. 4 |-> 0],
-      mdUpdateAction       |-> [i \in 1 .. 1 |-> 0],
-      mdEntryTypeBook      |-> [i \in 1 .. 1 |-> 0],
-      padding6             |-> [i \in 1 .. 6 |-> 0] ]
+ZeroIncrementalRefreshDailyStatisticsGroup ==
+    [ mdEntryPxOptionalEx        |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySizeShortOptional   |-> [i \in 1 .. 4 |-> 0],
+      securityId                 |-> [i \in 1 .. 4 |-> 0],
+      rptSeq                     |-> [i \in 1 .. 4 |-> 0],
+      tradingReferenceDate       |-> [i \in 1 .. 2 |-> 0],
+      settlPriceType             |-> [i \in 1 .. 1 |-> 0],
+      mdUpdateAction             |-> [i \in 1 .. 1 |-> 0],
+      mdEntryTypeDailyStatistics |-> [i \in 1 .. 1 |-> 0],
+      padding7                   |-> [i \in 1 .. 7 |-> 0] ]
 
-(* Incremental Refresh Order Book Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshOrderBookGroup ==
-    { ZeroIncrementalRefreshOrderBookGroup }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.orderIdOptional = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.mdOrderPriority = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.mdDisplayQtyOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup EXCEPT !.padding6 = one] : one \in Sample(6) }
+(* Incremental Refresh Daily Statistics Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshDailyStatisticsGroup ==
+    { ZeroIncrementalRefreshDailyStatisticsGroup }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.settlPriceType = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.mdEntryTypeDailyStatistics = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup EXCEPT !.padding7 = one] : one \in Sample(7) }
 
-(* A run of Incremental Refresh Order Book Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshOrderBookGroupList(_)
-EncodeIncrementalRefreshOrderBookGroupList(messages) ==
+(* A run of Incremental Refresh Daily Statistics Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshDailyStatisticsGroupList(_)
+EncodeIncrementalRefreshDailyStatisticsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeIncrementalRefreshOrderBookGroup(Head(messages)) \o EncodeIncrementalRefreshOrderBookGroupList(Tail(messages))
+    ELSE EncodeIncrementalRefreshDailyStatisticsGroup(Head(messages)) \o EncodeIncrementalRefreshDailyStatisticsGroupList(Tail(messages))
 
-(* As many Incremental Refresh Order Book Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshOrderBookGroupList(_, _)
-ReadIncrementalRefreshOrderBookGroupList(bytes, count) ==
+(* As many Incremental Refresh Daily Statistics Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshDailyStatisticsGroupList(_, _)
+ReadIncrementalRefreshDailyStatisticsGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshOrderBookGroup(bytes)
+    ELSE LET one == DecodeIncrementalRefreshDailyStatisticsGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshOrderBookGroupList(one.rest, count - 1)
+             ELSE LET more == ReadIncrementalRefreshDailyStatisticsGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Incremental Refresh Order Book Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshOrderBookGroup == { ZeroIncrementalRefreshOrderBookGroup }
+(* One Incremental Refresh Daily Statistics Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshDailyStatisticsGroup == { ZeroIncrementalRefreshDailyStatisticsGroup }
 
 (***************************************************************************)
-(* Incremental Refresh Order Book Groups                                   *)
+(* Incremental Refresh Daily Statistics Groups                             *)
 (***************************************************************************)
 
-IncrementalRefreshOrderBookGroups ==
-    [ blockLength                      : Sample(2),
-      incrementalRefreshOrderBookGroup : SampleLists(OneIncrementalRefreshOrderBookGroup) ]
+IncrementalRefreshDailyStatisticsGroups ==
+    [ blockLength                            : Sample(2),
+      incrementalRefreshDailyStatisticsGroup : SampleLists(OneIncrementalRefreshDailyStatisticsGroup) ]
 
-EncodeIncrementalRefreshOrderBookGroups(message) ==
+EncodeIncrementalRefreshDailyStatisticsGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshOrderBookGroup), 1)
-        \o EncodeIncrementalRefreshOrderBookGroupList(message.incrementalRefreshOrderBookGroup)
+        \o EncodeUIntBE(Len(message.incrementalRefreshDailyStatisticsGroup), 1)
+        \o EncodeIncrementalRefreshDailyStatisticsGroupList(message.incrementalRefreshDailyStatisticsGroup)
 
-DecodeIncrementalRefreshOrderBookGroups(bytes) ==
+DecodeIncrementalRefreshDailyStatisticsGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshOrderBookGroup == ReadIncrementalRefreshOrderBookGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshOrderBookGroup.ok THEN Fail ELSE
-    Ok([ blockLength                      |-> blockLength.value,
-         incrementalRefreshOrderBookGroup |-> incrementalRefreshOrderBookGroup.value ], incrementalRefreshOrderBookGroup.rest)
+    LET incrementalRefreshDailyStatisticsGroup == ReadIncrementalRefreshDailyStatisticsGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshDailyStatisticsGroup.ok THEN Fail ELSE
+    Ok([ blockLength                            |-> blockLength.value,
+         incrementalRefreshDailyStatisticsGroup |-> incrementalRefreshDailyStatisticsGroup.value ], incrementalRefreshDailyStatisticsGroup.rest)
 
-ZeroIncrementalRefreshOrderBookGroups ==
-    [ blockLength                      |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshOrderBookGroup |-> << >> ]
+ZeroIncrementalRefreshDailyStatisticsGroups ==
+    [ blockLength                            |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshDailyStatisticsGroup |-> << >> ]
 
-(* Incremental Refresh Order Book Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshOrderBookGroups ==
-    { ZeroIncrementalRefreshOrderBookGroups }
-        \cup { [ZeroIncrementalRefreshOrderBookGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroups EXCEPT !.incrementalRefreshOrderBookGroup = one] : one \in SampleLists(OneIncrementalRefreshOrderBookGroup) }
+(* Incremental Refresh Daily Statistics Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshDailyStatisticsGroups ==
+    { ZeroIncrementalRefreshDailyStatisticsGroups }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshDailyStatisticsGroups EXCEPT !.incrementalRefreshDailyStatisticsGroup = one] : one \in SampleLists(OneIncrementalRefreshDailyStatisticsGroup) }
 
 (***************************************************************************)
-(* Md Incremental Refresh Order Book Legacy                                *)
+(* Md Incremental Refresh Daily Statistics                                 *)
 (***************************************************************************)
 
-MdIncrementalRefreshOrderBookLegacy ==
-    [ transactTime                      : Sample(8),
-      matchEventIndicator               : Sample(1),
-      padding2                          : Sample(2),
-      incrementalRefreshOrderBookGroups : IncrementalRefreshOrderBookGroups ]
+MdIncrementalRefreshDailyStatistics ==
+    [ transactTime                            : Sample(8),
+      matchEventIndicator                     : Sample(1),
+      padding2                                : Sample(2),
+      incrementalRefreshDailyStatisticsGroups : IncrementalRefreshDailyStatisticsGroups ]
 
-EncodeMdIncrementalRefreshOrderBookLegacy(message) ==
+EncodeMdIncrementalRefreshDailyStatistics(message) ==
     message.transactTime
         \o message.matchEventIndicator
         \o message.padding2
-        \o EncodeIncrementalRefreshOrderBookGroups(message.incrementalRefreshOrderBookGroups)
+        \o EncodeIncrementalRefreshDailyStatisticsGroups(message.incrementalRefreshDailyStatisticsGroups)
 
-DecodeMdIncrementalRefreshOrderBookLegacy(bytes) ==
+DecodeMdIncrementalRefreshDailyStatistics(bytes) ==
     LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
     LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
     LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshOrderBookGroups == DecodeIncrementalRefreshOrderBookGroups(padding2.rest) IN IF ~incrementalRefreshOrderBookGroups.ok THEN Fail ELSE
-    Ok([ transactTime                      |-> transactTime.value,
-         matchEventIndicator               |-> matchEventIndicator.value,
-         padding2                          |-> padding2.value,
-         incrementalRefreshOrderBookGroups |-> incrementalRefreshOrderBookGroups.value ], incrementalRefreshOrderBookGroups.rest)
+    LET incrementalRefreshDailyStatisticsGroups == DecodeIncrementalRefreshDailyStatisticsGroups(padding2.rest) IN IF ~incrementalRefreshDailyStatisticsGroups.ok THEN Fail ELSE
+    Ok([ transactTime                            |-> transactTime.value,
+         matchEventIndicator                     |-> matchEventIndicator.value,
+         padding2                                |-> padding2.value,
+         incrementalRefreshDailyStatisticsGroups |-> incrementalRefreshDailyStatisticsGroups.value ], incrementalRefreshDailyStatisticsGroups.rest)
 
-ZeroMdIncrementalRefreshOrderBookLegacy ==
-    [ transactTime                      |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator               |-> [i \in 1 .. 1 |-> 0],
-      padding2                          |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshOrderBookGroups |-> ZeroIncrementalRefreshOrderBookGroups ]
+ZeroMdIncrementalRefreshDailyStatistics ==
+    [ transactTime                            |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                     |-> [i \in 1 .. 1 |-> 0],
+      padding2                                |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshDailyStatisticsGroups |-> ZeroIncrementalRefreshDailyStatisticsGroups ]
 
-(* Md Incremental Refresh Order Book Legacy at zero, then each field in turn at the values it is checked at *)
-CheckedMdIncrementalRefreshOrderBookLegacy ==
-    { ZeroMdIncrementalRefreshOrderBookLegacy }
-        \cup { [ZeroMdIncrementalRefreshOrderBookLegacy EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroMdIncrementalRefreshOrderBookLegacy EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroMdIncrementalRefreshOrderBookLegacy EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshOrderBookLegacy EXCEPT !.incrementalRefreshOrderBookGroups = one] : one \in CheckedIncrementalRefreshOrderBookGroups }
+(* Md Incremental Refresh Daily Statistics at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshDailyStatistics ==
+    { ZeroMdIncrementalRefreshDailyStatistics }
+        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.incrementalRefreshDailyStatisticsGroups = one] : one \in CheckedIncrementalRefreshDailyStatisticsGroups }
+
+(***************************************************************************)
+(* Incremental Refresh Limits Banding Group: 32 bytes                      *)
+(***************************************************************************)
+
+IncrementalRefreshLimitsBandingGroup ==
+    [ highLimitPriceEx    : Sample(8),
+      lowLimitPriceEx     : Sample(8),
+      maxPriceVariationEx : Sample(8),
+      securityId          : Sample(4),
+      rptSeq              : Sample(4) ]
+
+EncodeIncrementalRefreshLimitsBandingGroup(message) ==
+    message.highLimitPriceEx
+        \o message.lowLimitPriceEx
+        \o message.maxPriceVariationEx
+        \o message.securityId
+        \o message.rptSeq
+
+DecodeIncrementalRefreshLimitsBandingGroup(bytes) ==
+    LET highLimitPriceEx == ReadBytes(bytes, 8) IN IF ~highLimitPriceEx.ok THEN Fail ELSE
+    LET lowLimitPriceEx == ReadBytes(highLimitPriceEx.rest, 8) IN IF ~lowLimitPriceEx.ok THEN Fail ELSE
+    LET maxPriceVariationEx == ReadBytes(lowLimitPriceEx.rest, 8) IN IF ~maxPriceVariationEx.ok THEN Fail ELSE
+    LET securityId == ReadBytes(maxPriceVariationEx.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    Ok([ highLimitPriceEx    |-> highLimitPriceEx.value,
+         lowLimitPriceEx     |-> lowLimitPriceEx.value,
+         maxPriceVariationEx |-> maxPriceVariationEx.value,
+         securityId          |-> securityId.value,
+         rptSeq              |-> rptSeq.value ], rptSeq.rest)
+
+ZeroIncrementalRefreshLimitsBandingGroup ==
+    [ highLimitPriceEx    |-> [i \in 1 .. 8 |-> 0],
+      lowLimitPriceEx     |-> [i \in 1 .. 8 |-> 0],
+      maxPriceVariationEx |-> [i \in 1 .. 8 |-> 0],
+      securityId          |-> [i \in 1 .. 4 |-> 0],
+      rptSeq              |-> [i \in 1 .. 4 |-> 0] ]
+
+(* Incremental Refresh Limits Banding Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshLimitsBandingGroup ==
+    { ZeroIncrementalRefreshLimitsBandingGroup }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.highLimitPriceEx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.lowLimitPriceEx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.maxPriceVariationEx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+
+(* A run of Incremental Refresh Limits Banding Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshLimitsBandingGroupList(_)
+EncodeIncrementalRefreshLimitsBandingGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshLimitsBandingGroup(Head(messages)) \o EncodeIncrementalRefreshLimitsBandingGroupList(Tail(messages))
+
+(* As many Incremental Refresh Limits Banding Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshLimitsBandingGroupList(_, _)
+ReadIncrementalRefreshLimitsBandingGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshLimitsBandingGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshLimitsBandingGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Limits Banding Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshLimitsBandingGroup == { ZeroIncrementalRefreshLimitsBandingGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Limits Banding Groups                               *)
+(***************************************************************************)
+
+IncrementalRefreshLimitsBandingGroups ==
+    [ blockLength                          : Sample(2),
+      incrementalRefreshLimitsBandingGroup : SampleLists(OneIncrementalRefreshLimitsBandingGroup) ]
+
+EncodeIncrementalRefreshLimitsBandingGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshLimitsBandingGroup), 1)
+        \o EncodeIncrementalRefreshLimitsBandingGroupList(message.incrementalRefreshLimitsBandingGroup)
+
+DecodeIncrementalRefreshLimitsBandingGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshLimitsBandingGroup == ReadIncrementalRefreshLimitsBandingGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshLimitsBandingGroup.ok THEN Fail ELSE
+    Ok([ blockLength                          |-> blockLength.value,
+         incrementalRefreshLimitsBandingGroup |-> incrementalRefreshLimitsBandingGroup.value ], incrementalRefreshLimitsBandingGroup.rest)
+
+ZeroIncrementalRefreshLimitsBandingGroups ==
+    [ blockLength                          |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshLimitsBandingGroup |-> << >> ]
+
+(* Incremental Refresh Limits Banding Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshLimitsBandingGroups ==
+    { ZeroIncrementalRefreshLimitsBandingGroups }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshLimitsBandingGroups EXCEPT !.incrementalRefreshLimitsBandingGroup = one] : one \in SampleLists(OneIncrementalRefreshLimitsBandingGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Limits Banding                                   *)
+(***************************************************************************)
+
+MdIncrementalRefreshLimitsBanding ==
+    [ transactTime                          : Sample(8),
+      matchEventIndicator                   : Sample(1),
+      padding2                              : Sample(2),
+      incrementalRefreshLimitsBandingGroups : IncrementalRefreshLimitsBandingGroups ]
+
+EncodeMdIncrementalRefreshLimitsBanding(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshLimitsBandingGroups(message.incrementalRefreshLimitsBandingGroups)
+
+DecodeMdIncrementalRefreshLimitsBanding(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshLimitsBandingGroups == DecodeIncrementalRefreshLimitsBandingGroups(padding2.rest) IN IF ~incrementalRefreshLimitsBandingGroups.ok THEN Fail ELSE
+    Ok([ transactTime                          |-> transactTime.value,
+         matchEventIndicator                   |-> matchEventIndicator.value,
+         padding2                              |-> padding2.value,
+         incrementalRefreshLimitsBandingGroups |-> incrementalRefreshLimitsBandingGroups.value ], incrementalRefreshLimitsBandingGroups.rest)
+
+ZeroMdIncrementalRefreshLimitsBanding ==
+    [ transactTime                          |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                   |-> [i \in 1 .. 1 |-> 0],
+      padding2                              |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshLimitsBandingGroups |-> ZeroIncrementalRefreshLimitsBandingGroups ]
+
+(* Md Incremental Refresh Limits Banding at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshLimitsBanding ==
+    { ZeroMdIncrementalRefreshLimitsBanding }
+        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.incrementalRefreshLimitsBandingGroups = one] : one \in CheckedIncrementalRefreshLimitsBandingGroups }
+
+(***************************************************************************)
+(* Incremental Refresh Session Statistics Group: 24 bytes                  *)
+(***************************************************************************)
+
+IncrementalRefreshSessionStatisticsGroup ==
+    [ mdEntryPxEx              : Sample(8),
+      securityId               : Sample(4),
+      rptSeq                   : Sample(4),
+      openCloseSettlFlag       : Sample(1),
+      mdUpdateAction           : Sample(1),
+      mdEntryTypeStatistics    : Sample(1),
+      mdEntrySizeShortOptional : Sample(4),
+      padding1                 : Sample(1) ]
+
+EncodeIncrementalRefreshSessionStatisticsGroup(message) ==
+    message.mdEntryPxEx
+        \o message.securityId
+        \o message.rptSeq
+        \o message.openCloseSettlFlag
+        \o message.mdUpdateAction
+        \o message.mdEntryTypeStatistics
+        \o message.mdEntrySizeShortOptional
+        \o message.padding1
+
+DecodeIncrementalRefreshSessionStatisticsGroup(bytes) ==
+    LET mdEntryPxEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxEx.ok THEN Fail ELSE
+    LET securityId == ReadBytes(mdEntryPxEx.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET openCloseSettlFlag == ReadBytes(rptSeq.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
+    LET mdUpdateAction == ReadBytes(openCloseSettlFlag.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
+    LET mdEntryTypeStatistics == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeStatistics.ok THEN Fail ELSE
+    LET mdEntrySizeShortOptional == ReadBytes(mdEntryTypeStatistics.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
+    LET padding1 == ReadBytes(mdEntrySizeShortOptional.rest, 1) IN IF ~padding1.ok THEN Fail ELSE
+    Ok([ mdEntryPxEx              |-> mdEntryPxEx.value,
+         securityId               |-> securityId.value,
+         rptSeq                   |-> rptSeq.value,
+         openCloseSettlFlag       |-> openCloseSettlFlag.value,
+         mdUpdateAction           |-> mdUpdateAction.value,
+         mdEntryTypeStatistics    |-> mdEntryTypeStatistics.value,
+         mdEntrySizeShortOptional |-> mdEntrySizeShortOptional.value,
+         padding1                 |-> padding1.value ], padding1.rest)
+
+ZeroIncrementalRefreshSessionStatisticsGroup ==
+    [ mdEntryPxEx              |-> [i \in 1 .. 8 |-> 0],
+      securityId               |-> [i \in 1 .. 4 |-> 0],
+      rptSeq                   |-> [i \in 1 .. 4 |-> 0],
+      openCloseSettlFlag       |-> [i \in 1 .. 1 |-> 0],
+      mdUpdateAction           |-> [i \in 1 .. 1 |-> 0],
+      mdEntryTypeStatistics    |-> [i \in 1 .. 1 |-> 0],
+      mdEntrySizeShortOptional |-> [i \in 1 .. 4 |-> 0],
+      padding1                 |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Incremental Refresh Session Statistics Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshSessionStatisticsGroup ==
+    { ZeroIncrementalRefreshSessionStatisticsGroup }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdEntryPxEx = one] : one \in Sample(8) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdEntryTypeStatistics = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup EXCEPT !.padding1 = one] : one \in Sample(1) }
+
+(* A run of Incremental Refresh Session Statistics Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshSessionStatisticsGroupList(_)
+EncodeIncrementalRefreshSessionStatisticsGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeIncrementalRefreshSessionStatisticsGroup(Head(messages)) \o EncodeIncrementalRefreshSessionStatisticsGroupList(Tail(messages))
+
+(* As many Incremental Refresh Session Statistics Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshSessionStatisticsGroupList(_, _)
+ReadIncrementalRefreshSessionStatisticsGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeIncrementalRefreshSessionStatisticsGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadIncrementalRefreshSessionStatisticsGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Incremental Refresh Session Statistics Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshSessionStatisticsGroup == { ZeroIncrementalRefreshSessionStatisticsGroup }
+
+(***************************************************************************)
+(* Incremental Refresh Session Statistics Groups                           *)
+(***************************************************************************)
+
+IncrementalRefreshSessionStatisticsGroups ==
+    [ blockLength                              : Sample(2),
+      incrementalRefreshSessionStatisticsGroup : SampleLists(OneIncrementalRefreshSessionStatisticsGroup) ]
+
+EncodeIncrementalRefreshSessionStatisticsGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.incrementalRefreshSessionStatisticsGroup), 1)
+        \o EncodeIncrementalRefreshSessionStatisticsGroupList(message.incrementalRefreshSessionStatisticsGroup)
+
+DecodeIncrementalRefreshSessionStatisticsGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET incrementalRefreshSessionStatisticsGroup == ReadIncrementalRefreshSessionStatisticsGroupList(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshSessionStatisticsGroup.ok THEN Fail ELSE
+    Ok([ blockLength                              |-> blockLength.value,
+         incrementalRefreshSessionStatisticsGroup |-> incrementalRefreshSessionStatisticsGroup.value ], incrementalRefreshSessionStatisticsGroup.rest)
+
+ZeroIncrementalRefreshSessionStatisticsGroups ==
+    [ blockLength                              |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshSessionStatisticsGroup |-> << >> ]
+
+(* Incremental Refresh Session Statistics Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshSessionStatisticsGroups ==
+    { ZeroIncrementalRefreshSessionStatisticsGroups }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshSessionStatisticsGroups EXCEPT !.incrementalRefreshSessionStatisticsGroup = one] : one \in SampleLists(OneIncrementalRefreshSessionStatisticsGroup) }
+
+(***************************************************************************)
+(* Md Incremental Refresh Session Statistics                               *)
+(***************************************************************************)
+
+MdIncrementalRefreshSessionStatistics ==
+    [ transactTime                              : Sample(8),
+      matchEventIndicator                       : Sample(1),
+      padding2                                  : Sample(2),
+      incrementalRefreshSessionStatisticsGroups : IncrementalRefreshSessionStatisticsGroups ]
+
+EncodeMdIncrementalRefreshSessionStatistics(message) ==
+    message.transactTime
+        \o message.matchEventIndicator
+        \o message.padding2
+        \o EncodeIncrementalRefreshSessionStatisticsGroups(message.incrementalRefreshSessionStatisticsGroups)
+
+DecodeMdIncrementalRefreshSessionStatistics(bytes) ==
+    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
+    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
+    LET incrementalRefreshSessionStatisticsGroups == DecodeIncrementalRefreshSessionStatisticsGroups(padding2.rest) IN IF ~incrementalRefreshSessionStatisticsGroups.ok THEN Fail ELSE
+    Ok([ transactTime                              |-> transactTime.value,
+         matchEventIndicator                       |-> matchEventIndicator.value,
+         padding2                                  |-> padding2.value,
+         incrementalRefreshSessionStatisticsGroups |-> incrementalRefreshSessionStatisticsGroups.value ], incrementalRefreshSessionStatisticsGroups.rest)
+
+ZeroMdIncrementalRefreshSessionStatistics ==
+    [ transactTime                              |-> [i \in 1 .. 8 |-> 0],
+      matchEventIndicator                       |-> [i \in 1 .. 1 |-> 0],
+      padding2                                  |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshSessionStatisticsGroups |-> ZeroIncrementalRefreshSessionStatisticsGroups ]
+
+(* Md Incremental Refresh Session Statistics at zero, then each field in turn at the values it is checked at *)
+CheckedMdIncrementalRefreshSessionStatistics ==
+    { ZeroMdIncrementalRefreshSessionStatistics }
+        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.padding2 = one] : one \in Sample(2) }
+        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.incrementalRefreshSessionStatisticsGroups = one] : one \in CheckedIncrementalRefreshSessionStatisticsGroups }
+
+(***************************************************************************)
+(* Snapshot Full Refresh Group: 22 bytes                                   *)
+(***************************************************************************)
+
+SnapshotFullRefreshGroup ==
+    [ mdEntryPxOptionalEx      : Sample(8),
+      mdEntrySizeShortOptional : Sample(4),
+      numberOfOrdersOptional   : Sample(4),
+      mdPriceLevelOptional     : Sample(1),
+      tradingReferenceDate     : Sample(2),
+      openCloseSettlFlag       : Sample(1),
+      settlPriceType           : Sample(1),
+      mdEntryType              : Sample(1) ]
+
+EncodeSnapshotFullRefreshGroup(message) ==
+    message.mdEntryPxOptionalEx
+        \o message.mdEntrySizeShortOptional
+        \o message.numberOfOrdersOptional
+        \o message.mdPriceLevelOptional
+        \o message.tradingReferenceDate
+        \o message.openCloseSettlFlag
+        \o message.settlPriceType
+        \o message.mdEntryType
+
+DecodeSnapshotFullRefreshGroup(bytes) ==
+    LET mdEntryPxOptionalEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
+    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
+    LET numberOfOrdersOptional == ReadBytes(mdEntrySizeShortOptional.rest, 4) IN IF ~numberOfOrdersOptional.ok THEN Fail ELSE
+    LET mdPriceLevelOptional == ReadBytes(numberOfOrdersOptional.rest, 1) IN IF ~mdPriceLevelOptional.ok THEN Fail ELSE
+    LET tradingReferenceDate == ReadBytes(mdPriceLevelOptional.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
+    LET openCloseSettlFlag == ReadBytes(tradingReferenceDate.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
+    LET settlPriceType == ReadBytes(openCloseSettlFlag.rest, 1) IN IF ~settlPriceType.ok THEN Fail ELSE
+    LET mdEntryType == ReadBytes(settlPriceType.rest, 1) IN IF ~mdEntryType.ok THEN Fail ELSE
+    Ok([ mdEntryPxOptionalEx      |-> mdEntryPxOptionalEx.value,
+         mdEntrySizeShortOptional |-> mdEntrySizeShortOptional.value,
+         numberOfOrdersOptional   |-> numberOfOrdersOptional.value,
+         mdPriceLevelOptional     |-> mdPriceLevelOptional.value,
+         tradingReferenceDate     |-> tradingReferenceDate.value,
+         openCloseSettlFlag       |-> openCloseSettlFlag.value,
+         settlPriceType           |-> settlPriceType.value,
+         mdEntryType              |-> mdEntryType.value ], mdEntryType.rest)
+
+ZeroSnapshotFullRefreshGroup ==
+    [ mdEntryPxOptionalEx      |-> [i \in 1 .. 8 |-> 0],
+      mdEntrySizeShortOptional |-> [i \in 1 .. 4 |-> 0],
+      numberOfOrdersOptional   |-> [i \in 1 .. 4 |-> 0],
+      mdPriceLevelOptional     |-> [i \in 1 .. 1 |-> 0],
+      tradingReferenceDate     |-> [i \in 1 .. 2 |-> 0],
+      openCloseSettlFlag       |-> [i \in 1 .. 1 |-> 0],
+      settlPriceType           |-> [i \in 1 .. 1 |-> 0],
+      mdEntryType              |-> [i \in 1 .. 1 |-> 0] ]
+
+(* Snapshot Full Refresh Group at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefreshGroup ==
+    { ZeroSnapshotFullRefreshGroup }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.numberOfOrdersOptional = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdPriceLevelOptional = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.settlPriceType = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefreshGroup EXCEPT !.mdEntryType = one] : one \in Sample(1) }
+
+(* A run of Snapshot Full Refresh Group, written one after another *)
+RECURSIVE EncodeSnapshotFullRefreshGroupList(_)
+EncodeSnapshotFullRefreshGroupList(messages) ==
+    IF messages = << >>
+    THEN << >>
+    ELSE EncodeSnapshotFullRefreshGroup(Head(messages)) \o EncodeSnapshotFullRefreshGroupList(Tail(messages))
+
+(* As many Snapshot Full Refresh Group as the field that counts them says *)
+RECURSIVE ReadSnapshotFullRefreshGroupList(_, _)
+ReadSnapshotFullRefreshGroupList(bytes, count) ==
+    IF count = 0
+    THEN Ok(<< >>, bytes)
+    ELSE LET one == DecodeSnapshotFullRefreshGroup(bytes)
+         IN  IF ~one.ok THEN Fail
+             ELSE LET more == ReadSnapshotFullRefreshGroupList(one.rest, count - 1)
+                  IN  IF ~more.ok THEN Fail
+                      ELSE Ok(<<one.value>> \o more.value, more.rest)
+
+(* One Snapshot Full Refresh Group of each kind, for the lists that carry them *)
+OneSnapshotFullRefreshGroup == { ZeroSnapshotFullRefreshGroup }
+
+(***************************************************************************)
+(* Snapshot Full Refresh Groups                                            *)
+(***************************************************************************)
+
+SnapshotFullRefreshGroups ==
+    [ blockLength              : Sample(2),
+      snapshotFullRefreshGroup : SampleLists(OneSnapshotFullRefreshGroup) ]
+
+EncodeSnapshotFullRefreshGroups(message) ==
+    message.blockLength
+        \o EncodeUIntBE(Len(message.snapshotFullRefreshGroup), 1)
+        \o EncodeSnapshotFullRefreshGroupList(message.snapshotFullRefreshGroup)
+
+DecodeSnapshotFullRefreshGroups(bytes) ==
+    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
+    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET snapshotFullRefreshGroup == ReadSnapshotFullRefreshGroupList(numInGroup.rest, numInGroup.value) IN IF ~snapshotFullRefreshGroup.ok THEN Fail ELSE
+    Ok([ blockLength              |-> blockLength.value,
+         snapshotFullRefreshGroup |-> snapshotFullRefreshGroup.value ], snapshotFullRefreshGroup.rest)
+
+ZeroSnapshotFullRefreshGroups ==
+    [ blockLength              |-> [i \in 1 .. 2 |-> 0],
+      snapshotFullRefreshGroup |-> << >> ]
+
+(* Snapshot Full Refresh Groups at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefreshGroups ==
+    { ZeroSnapshotFullRefreshGroups }
+        \cup { [ZeroSnapshotFullRefreshGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotFullRefreshGroups EXCEPT !.snapshotFullRefreshGroup = one] : one \in SampleLists(OneSnapshotFullRefreshGroup) }
+
+(***************************************************************************)
+(* Snapshot Full Refresh                                                   *)
+(***************************************************************************)
+
+SnapshotFullRefresh ==
+    [ lastMsgSeqNumProcessed    : Sample(4),
+      totNumReports             : Sample(4),
+      securityId                : Sample(4),
+      rptSeq                    : Sample(4),
+      transactTime              : Sample(8),
+      lastUpdateTime            : Sample(8),
+      tradeDate                 : Sample(2),
+      mdSecurityTradingStatus   : Sample(1),
+      highLimitPriceEx          : Sample(8),
+      lowLimitPriceEx           : Sample(8),
+      maxPriceVariationEx       : Sample(8),
+      snapshotFullRefreshGroups : SnapshotFullRefreshGroups ]
+
+EncodeSnapshotFullRefresh(message) ==
+    message.lastMsgSeqNumProcessed
+        \o message.totNumReports
+        \o message.securityId
+        \o message.rptSeq
+        \o message.transactTime
+        \o message.lastUpdateTime
+        \o message.tradeDate
+        \o message.mdSecurityTradingStatus
+        \o message.highLimitPriceEx
+        \o message.lowLimitPriceEx
+        \o message.maxPriceVariationEx
+        \o EncodeSnapshotFullRefreshGroups(message.snapshotFullRefreshGroups)
+
+DecodeSnapshotFullRefresh(bytes) ==
+    LET lastMsgSeqNumProcessed == ReadBytes(bytes, 4) IN IF ~lastMsgSeqNumProcessed.ok THEN Fail ELSE
+    LET totNumReports == ReadBytes(lastMsgSeqNumProcessed.rest, 4) IN IF ~totNumReports.ok THEN Fail ELSE
+    LET securityId == ReadBytes(totNumReports.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
+    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
+    LET transactTime == ReadBytes(rptSeq.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
+    LET lastUpdateTime == ReadBytes(transactTime.rest, 8) IN IF ~lastUpdateTime.ok THEN Fail ELSE
+    LET tradeDate == ReadBytes(lastUpdateTime.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
+    LET mdSecurityTradingStatus == ReadBytes(tradeDate.rest, 1) IN IF ~mdSecurityTradingStatus.ok THEN Fail ELSE
+    LET highLimitPriceEx == ReadBytes(mdSecurityTradingStatus.rest, 8) IN IF ~highLimitPriceEx.ok THEN Fail ELSE
+    LET lowLimitPriceEx == ReadBytes(highLimitPriceEx.rest, 8) IN IF ~lowLimitPriceEx.ok THEN Fail ELSE
+    LET maxPriceVariationEx == ReadBytes(lowLimitPriceEx.rest, 8) IN IF ~maxPriceVariationEx.ok THEN Fail ELSE
+    LET snapshotFullRefreshGroups == DecodeSnapshotFullRefreshGroups(maxPriceVariationEx.rest) IN IF ~snapshotFullRefreshGroups.ok THEN Fail ELSE
+    Ok([ lastMsgSeqNumProcessed    |-> lastMsgSeqNumProcessed.value,
+         totNumReports             |-> totNumReports.value,
+         securityId                |-> securityId.value,
+         rptSeq                    |-> rptSeq.value,
+         transactTime              |-> transactTime.value,
+         lastUpdateTime            |-> lastUpdateTime.value,
+         tradeDate                 |-> tradeDate.value,
+         mdSecurityTradingStatus   |-> mdSecurityTradingStatus.value,
+         highLimitPriceEx          |-> highLimitPriceEx.value,
+         lowLimitPriceEx           |-> lowLimitPriceEx.value,
+         maxPriceVariationEx       |-> maxPriceVariationEx.value,
+         snapshotFullRefreshGroups |-> snapshotFullRefreshGroups.value ], snapshotFullRefreshGroups.rest)
+
+ZeroSnapshotFullRefresh ==
+    [ lastMsgSeqNumProcessed    |-> [i \in 1 .. 4 |-> 0],
+      totNumReports             |-> [i \in 1 .. 4 |-> 0],
+      securityId                |-> [i \in 1 .. 4 |-> 0],
+      rptSeq                    |-> [i \in 1 .. 4 |-> 0],
+      transactTime              |-> [i \in 1 .. 8 |-> 0],
+      lastUpdateTime            |-> [i \in 1 .. 8 |-> 0],
+      tradeDate                 |-> [i \in 1 .. 2 |-> 0],
+      mdSecurityTradingStatus   |-> [i \in 1 .. 1 |-> 0],
+      highLimitPriceEx          |-> [i \in 1 .. 8 |-> 0],
+      lowLimitPriceEx           |-> [i \in 1 .. 8 |-> 0],
+      maxPriceVariationEx       |-> [i \in 1 .. 8 |-> 0],
+      snapshotFullRefreshGroups |-> ZeroSnapshotFullRefreshGroups ]
+
+(* Snapshot Full Refresh at zero, then each field in turn at the values it is checked at *)
+CheckedSnapshotFullRefresh ==
+    { ZeroSnapshotFullRefresh }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.lastMsgSeqNumProcessed = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.totNumReports = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.securityId = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.rptSeq = one] : one \in Sample(4) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.transactTime = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.lastUpdateTime = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.tradeDate = one] : one \in Sample(2) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.mdSecurityTradingStatus = one] : one \in Sample(1) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.highLimitPriceEx = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.lowLimitPriceEx = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.maxPriceVariationEx = one] : one \in Sample(8) }
+        \cup { [ZeroSnapshotFullRefresh EXCEPT !.snapshotFullRefreshGroups = one] : one \in CheckedSnapshotFullRefreshGroups }
 
 (***************************************************************************)
 (* Snapshot Full Refresh Order Book Group: 29 bytes                        *)
@@ -4261,10 +5761,10 @@ CheckedSnapshotFullRefreshOrderBookGroups ==
         \cup { [ZeroSnapshotFullRefreshOrderBookGroups EXCEPT !.snapshotFullRefreshOrderBookGroup = one] : one \in SampleLists(OneSnapshotFullRefreshOrderBookGroup) }
 
 (***************************************************************************)
-(* Snapshot Full Refresh Order Book Legacy                                 *)
+(* Snapshot Full Refresh Order Book                                        *)
 (***************************************************************************)
 
-SnapshotFullRefreshOrderBookLegacy ==
+SnapshotFullRefreshOrderBook ==
     [ lastMsgSeqNumProcessed             : Sample(4),
       totNumReports                      : Sample(4),
       securityId                         : Sample(4),
@@ -4273,7 +5773,7 @@ SnapshotFullRefreshOrderBookLegacy ==
       transactTime                       : Sample(8),
       snapshotFullRefreshOrderBookGroups : SnapshotFullRefreshOrderBookGroups ]
 
-EncodeSnapshotFullRefreshOrderBookLegacy(message) ==
+EncodeSnapshotFullRefreshOrderBook(message) ==
     message.lastMsgSeqNumProcessed
         \o message.totNumReports
         \o message.securityId
@@ -4282,7 +5782,7 @@ EncodeSnapshotFullRefreshOrderBookLegacy(message) ==
         \o message.transactTime
         \o EncodeSnapshotFullRefreshOrderBookGroups(message.snapshotFullRefreshOrderBookGroups)
 
-DecodeSnapshotFullRefreshOrderBookLegacy(bytes) ==
+DecodeSnapshotFullRefreshOrderBook(bytes) ==
     LET lastMsgSeqNumProcessed == ReadBytes(bytes, 4) IN IF ~lastMsgSeqNumProcessed.ok THEN Fail ELSE
     LET totNumReports == ReadBytes(lastMsgSeqNumProcessed.rest, 4) IN IF ~totNumReports.ok THEN Fail ELSE
     LET securityId == ReadBytes(totNumReports.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
@@ -4298,1506 +5798,6 @@ DecodeSnapshotFullRefreshOrderBookLegacy(bytes) ==
          transactTime                       |-> transactTime.value,
          snapshotFullRefreshOrderBookGroups |-> snapshotFullRefreshOrderBookGroups.value ], snapshotFullRefreshOrderBookGroups.rest)
 
-ZeroSnapshotFullRefreshOrderBookLegacy ==
-    [ lastMsgSeqNumProcessed             |-> [i \in 1 .. 4 |-> 0],
-      totNumReports                      |-> [i \in 1 .. 4 |-> 0],
-      securityId                         |-> [i \in 1 .. 4 |-> 0],
-      noChunks                           |-> [i \in 1 .. 4 |-> 0],
-      currentChunk                       |-> [i \in 1 .. 4 |-> 0],
-      transactTime                       |-> [i \in 1 .. 8 |-> 0],
-      snapshotFullRefreshOrderBookGroups |-> ZeroSnapshotFullRefreshOrderBookGroups ]
-
-(* Snapshot Full Refresh Order Book Legacy at zero, then each field in turn at the values it is checked at *)
-CheckedSnapshotFullRefreshOrderBookLegacy ==
-    { ZeroSnapshotFullRefreshOrderBookLegacy }
-        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.lastMsgSeqNumProcessed = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.totNumReports = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.noChunks = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.currentChunk = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookLegacy EXCEPT !.snapshotFullRefreshOrderBookGroups = one] : one \in CheckedSnapshotFullRefreshOrderBookGroups }
-
-(***************************************************************************)
-(* Incremental Refresh Book Group: 32 bytes                                *)
-(***************************************************************************)
-
-IncrementalRefreshBookGroup2 ==
-    [ mdEntryPxOptionalEx      : Sample(8),
-      mdEntrySizeShortOptional : Sample(4),
-      securityId               : Sample(4),
-      rptSeq                   : Sample(4),
-      numberOfOrdersOptional   : Sample(4),
-      mdPriceLevel             : Sample(1),
-      mdUpdateAction           : Sample(1),
-      mdEntryTypeBook          : Sample(1),
-      padding5                 : Sample(5) ]
-
-EncodeIncrementalRefreshBookGroup2(message) ==
-    message.mdEntryPxOptionalEx
-        \o message.mdEntrySizeShortOptional
-        \o message.securityId
-        \o message.rptSeq
-        \o message.numberOfOrdersOptional
-        \o message.mdPriceLevel
-        \o message.mdUpdateAction
-        \o message.mdEntryTypeBook
-        \o message.padding5
-
-DecodeIncrementalRefreshBookGroup2(bytes) ==
-    LET mdEntryPxOptionalEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
-    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
-    LET securityId == ReadBytes(mdEntrySizeShortOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
-    LET numberOfOrdersOptional == ReadBytes(rptSeq.rest, 4) IN IF ~numberOfOrdersOptional.ok THEN Fail ELSE
-    LET mdPriceLevel == ReadBytes(numberOfOrdersOptional.rest, 1) IN IF ~mdPriceLevel.ok THEN Fail ELSE
-    LET mdUpdateAction == ReadBytes(mdPriceLevel.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
-    LET mdEntryTypeBook == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeBook.ok THEN Fail ELSE
-    LET padding5 == ReadBytes(mdEntryTypeBook.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
-    Ok([ mdEntryPxOptionalEx      |-> mdEntryPxOptionalEx.value,
-         mdEntrySizeShortOptional |-> mdEntrySizeShortOptional.value,
-         securityId               |-> securityId.value,
-         rptSeq                   |-> rptSeq.value,
-         numberOfOrdersOptional   |-> numberOfOrdersOptional.value,
-         mdPriceLevel             |-> mdPriceLevel.value,
-         mdUpdateAction           |-> mdUpdateAction.value,
-         mdEntryTypeBook          |-> mdEntryTypeBook.value,
-         padding5                 |-> padding5.value ], padding5.rest)
-
-ZeroIncrementalRefreshBookGroup2 ==
-    [ mdEntryPxOptionalEx      |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeShortOptional |-> [i \in 1 .. 4 |-> 0],
-      securityId               |-> [i \in 1 .. 4 |-> 0],
-      rptSeq                   |-> [i \in 1 .. 4 |-> 0],
-      numberOfOrdersOptional   |-> [i \in 1 .. 4 |-> 0],
-      mdPriceLevel             |-> [i \in 1 .. 1 |-> 0],
-      mdUpdateAction           |-> [i \in 1 .. 1 |-> 0],
-      mdEntryTypeBook          |-> [i \in 1 .. 1 |-> 0],
-      padding5                 |-> [i \in 1 .. 5 |-> 0] ]
-
-(* Incremental Refresh Book Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshBookGroup2 ==
-    { ZeroIncrementalRefreshBookGroup2 }
-        \cup { [ZeroIncrementalRefreshBookGroup2 EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshBookGroup2 EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshBookGroup2 EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshBookGroup2 EXCEPT !.rptSeq = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshBookGroup2 EXCEPT !.numberOfOrdersOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshBookGroup2 EXCEPT !.mdPriceLevel = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshBookGroup2 EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshBookGroup2 EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshBookGroup2 EXCEPT !.padding5 = one] : one \in Sample(5) }
-
-(* A run of Incremental Refresh Book Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshBookGroup2List(_)
-EncodeIncrementalRefreshBookGroup2List(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeIncrementalRefreshBookGroup2(Head(messages)) \o EncodeIncrementalRefreshBookGroup2List(Tail(messages))
-
-(* As many Incremental Refresh Book Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshBookGroup2List(_, _)
-ReadIncrementalRefreshBookGroup2List(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshBookGroup2(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshBookGroup2List(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Incremental Refresh Book Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshBookGroup2 == { ZeroIncrementalRefreshBookGroup2 }
-
-(***************************************************************************)
-(* Incremental Refresh Book Groups                                         *)
-(***************************************************************************)
-
-IncrementalRefreshBookGroups2 ==
-    [ blockLength                 : Sample(2),
-      incrementalRefreshBookGroup : SampleLists(OneIncrementalRefreshBookGroup2) ]
-
-EncodeIncrementalRefreshBookGroups2(message) ==
-    message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshBookGroup), 1)
-        \o EncodeIncrementalRefreshBookGroup2List(message.incrementalRefreshBookGroup)
-
-DecodeIncrementalRefreshBookGroups2(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshBookGroup == ReadIncrementalRefreshBookGroup2List(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshBookGroup.ok THEN Fail ELSE
-    Ok([ blockLength                 |-> blockLength.value,
-         incrementalRefreshBookGroup |-> incrementalRefreshBookGroup.value ], incrementalRefreshBookGroup.rest)
-
-ZeroIncrementalRefreshBookGroups2 ==
-    [ blockLength                 |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshBookGroup |-> << >> ]
-
-(* Incremental Refresh Book Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshBookGroups2 ==
-    { ZeroIncrementalRefreshBookGroups2 }
-        \cup { [ZeroIncrementalRefreshBookGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshBookGroups2 EXCEPT !.incrementalRefreshBookGroup = one] : one \in SampleLists(OneIncrementalRefreshBookGroup2) }
-
-(***************************************************************************)
-(* Incremental Refresh Book Order Id Group: 24 bytes                       *)
-(***************************************************************************)
-
-IncrementalRefreshBookOrderIdGroup2 ==
-    [ orderId              : Sample(8),
-      mdOrderPriority      : Sample(8),
-      mdDisplayQtyOptional : Sample(4),
-      referenceId          : Sample(1),
-      orderUpdateAction    : Sample(1),
-      padding2             : Sample(2) ]
-
-EncodeIncrementalRefreshBookOrderIdGroup2(message) ==
-    message.orderId
-        \o message.mdOrderPriority
-        \o message.mdDisplayQtyOptional
-        \o message.referenceId
-        \o message.orderUpdateAction
-        \o message.padding2
-
-DecodeIncrementalRefreshBookOrderIdGroup2(bytes) ==
-    LET orderId == ReadBytes(bytes, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET mdOrderPriority == ReadBytes(orderId.rest, 8) IN IF ~mdOrderPriority.ok THEN Fail ELSE
-    LET mdDisplayQtyOptional == ReadBytes(mdOrderPriority.rest, 4) IN IF ~mdDisplayQtyOptional.ok THEN Fail ELSE
-    LET referenceId == ReadBytes(mdDisplayQtyOptional.rest, 1) IN IF ~referenceId.ok THEN Fail ELSE
-    LET orderUpdateAction == ReadBytes(referenceId.rest, 1) IN IF ~orderUpdateAction.ok THEN Fail ELSE
-    LET padding2 == ReadBytes(orderUpdateAction.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    Ok([ orderId              |-> orderId.value,
-         mdOrderPriority      |-> mdOrderPriority.value,
-         mdDisplayQtyOptional |-> mdDisplayQtyOptional.value,
-         referenceId          |-> referenceId.value,
-         orderUpdateAction    |-> orderUpdateAction.value,
-         padding2             |-> padding2.value ], padding2.rest)
-
-ZeroIncrementalRefreshBookOrderIdGroup2 ==
-    [ orderId              |-> [i \in 1 .. 8 |-> 0],
-      mdOrderPriority      |-> [i \in 1 .. 8 |-> 0],
-      mdDisplayQtyOptional |-> [i \in 1 .. 4 |-> 0],
-      referenceId          |-> [i \in 1 .. 1 |-> 0],
-      orderUpdateAction    |-> [i \in 1 .. 1 |-> 0],
-      padding2             |-> [i \in 1 .. 2 |-> 0] ]
-
-(* Incremental Refresh Book Order Id Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshBookOrderIdGroup2 ==
-    { ZeroIncrementalRefreshBookOrderIdGroup2 }
-        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.mdOrderPriority = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.mdDisplayQtyOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.referenceId = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.orderUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshBookOrderIdGroup2 EXCEPT !.padding2 = one] : one \in Sample(2) }
-
-(* A run of Incremental Refresh Book Order Id Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshBookOrderIdGroup2List(_)
-EncodeIncrementalRefreshBookOrderIdGroup2List(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeIncrementalRefreshBookOrderIdGroup2(Head(messages)) \o EncodeIncrementalRefreshBookOrderIdGroup2List(Tail(messages))
-
-(* As many Incremental Refresh Book Order Id Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshBookOrderIdGroup2List(_, _)
-ReadIncrementalRefreshBookOrderIdGroup2List(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshBookOrderIdGroup2(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshBookOrderIdGroup2List(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Incremental Refresh Book Order Id Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshBookOrderIdGroup2 == { ZeroIncrementalRefreshBookOrderIdGroup2 }
-
-(***************************************************************************)
-(* Incremental Refresh Book Order Id Groups                                *)
-(***************************************************************************)
-
-IncrementalRefreshBookOrderIdGroups2 ==
-    [ blockLength                        : Sample(2),
-      padding5                           : Sample(5),
-      incrementalRefreshBookOrderIdGroup : SampleLists(OneIncrementalRefreshBookOrderIdGroup2) ]
-
-EncodeIncrementalRefreshBookOrderIdGroups2(message) ==
-    message.blockLength
-        \o message.padding5
-        \o EncodeUIntBE(Len(message.incrementalRefreshBookOrderIdGroup), 1)
-        \o EncodeIncrementalRefreshBookOrderIdGroup2List(message.incrementalRefreshBookOrderIdGroup)
-
-DecodeIncrementalRefreshBookOrderIdGroups2(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET padding5 == ReadBytes(blockLength.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(padding5.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshBookOrderIdGroup == ReadIncrementalRefreshBookOrderIdGroup2List(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshBookOrderIdGroup.ok THEN Fail ELSE
-    Ok([ blockLength                        |-> blockLength.value,
-         padding5                           |-> padding5.value,
-         incrementalRefreshBookOrderIdGroup |-> incrementalRefreshBookOrderIdGroup.value ], incrementalRefreshBookOrderIdGroup.rest)
-
-ZeroIncrementalRefreshBookOrderIdGroups2 ==
-    [ blockLength                        |-> [i \in 1 .. 2 |-> 0],
-      padding5                           |-> [i \in 1 .. 5 |-> 0],
-      incrementalRefreshBookOrderIdGroup |-> << >> ]
-
-(* Incremental Refresh Book Order Id Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshBookOrderIdGroups2 ==
-    { ZeroIncrementalRefreshBookOrderIdGroups2 }
-        \cup { [ZeroIncrementalRefreshBookOrderIdGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshBookOrderIdGroups2 EXCEPT !.padding5 = one] : one \in Sample(5) }
-        \cup { [ZeroIncrementalRefreshBookOrderIdGroups2 EXCEPT !.incrementalRefreshBookOrderIdGroup = one] : one \in SampleLists(OneIncrementalRefreshBookOrderIdGroup2) }
-
-(***************************************************************************)
-(* Md Incremental Refresh Book                                             *)
-(***************************************************************************)
-
-MdIncrementalRefreshBook ==
-    [ transactTime                        : Sample(8),
-      matchEventIndicator                 : Sample(1),
-      padding2                            : Sample(2),
-      incrementalRefreshBookGroups        : IncrementalRefreshBookGroups2,
-      incrementalRefreshBookOrderIdGroups : IncrementalRefreshBookOrderIdGroups2 ]
-
-EncodeMdIncrementalRefreshBook(message) ==
-    message.transactTime
-        \o message.matchEventIndicator
-        \o message.padding2
-        \o EncodeIncrementalRefreshBookGroups2(message.incrementalRefreshBookGroups)
-        \o EncodeIncrementalRefreshBookOrderIdGroups2(message.incrementalRefreshBookOrderIdGroups)
-
-DecodeMdIncrementalRefreshBook(bytes) ==
-    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
-    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshBookGroups == DecodeIncrementalRefreshBookGroups2(padding2.rest) IN IF ~incrementalRefreshBookGroups.ok THEN Fail ELSE
-    LET incrementalRefreshBookOrderIdGroups == DecodeIncrementalRefreshBookOrderIdGroups2(incrementalRefreshBookGroups.rest) IN IF ~incrementalRefreshBookOrderIdGroups.ok THEN Fail ELSE
-    Ok([ transactTime                        |-> transactTime.value,
-         matchEventIndicator                 |-> matchEventIndicator.value,
-         padding2                            |-> padding2.value,
-         incrementalRefreshBookGroups        |-> incrementalRefreshBookGroups.value,
-         incrementalRefreshBookOrderIdGroups |-> incrementalRefreshBookOrderIdGroups.value ], incrementalRefreshBookOrderIdGroups.rest)
-
-ZeroMdIncrementalRefreshBook ==
-    [ transactTime                        |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator                 |-> [i \in 1 .. 1 |-> 0],
-      padding2                            |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshBookGroups        |-> ZeroIncrementalRefreshBookGroups2,
-      incrementalRefreshBookOrderIdGroups |-> ZeroIncrementalRefreshBookOrderIdGroups2 ]
-
-(* Md Incremental Refresh Book at zero, then each field in turn at the values it is checked at *)
-CheckedMdIncrementalRefreshBook ==
-    { ZeroMdIncrementalRefreshBook }
-        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.incrementalRefreshBookGroups = one] : one \in CheckedIncrementalRefreshBookGroups2 }
-        \cup { [ZeroMdIncrementalRefreshBook EXCEPT !.incrementalRefreshBookOrderIdGroups = one] : one \in CheckedIncrementalRefreshBookOrderIdGroups2 }
-
-(***************************************************************************)
-(* Incremental Refresh Order Book Group: 40 bytes                          *)
-(***************************************************************************)
-
-IncrementalRefreshOrderBookGroup2 ==
-    [ orderIdOptional      : Sample(8),
-      mdOrderPriority      : Sample(8),
-      mdEntryPxOptionalEx  : Sample(8),
-      mdDisplayQtyOptional : Sample(4),
-      securityId           : Sample(4),
-      mdUpdateAction       : Sample(1),
-      mdEntryTypeBook      : Sample(1),
-      padding6             : Sample(6) ]
-
-EncodeIncrementalRefreshOrderBookGroup2(message) ==
-    message.orderIdOptional
-        \o message.mdOrderPriority
-        \o message.mdEntryPxOptionalEx
-        \o message.mdDisplayQtyOptional
-        \o message.securityId
-        \o message.mdUpdateAction
-        \o message.mdEntryTypeBook
-        \o message.padding6
-
-DecodeIncrementalRefreshOrderBookGroup2(bytes) ==
-    LET orderIdOptional == ReadBytes(bytes, 8) IN IF ~orderIdOptional.ok THEN Fail ELSE
-    LET mdOrderPriority == ReadBytes(orderIdOptional.rest, 8) IN IF ~mdOrderPriority.ok THEN Fail ELSE
-    LET mdEntryPxOptionalEx == ReadBytes(mdOrderPriority.rest, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
-    LET mdDisplayQtyOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdDisplayQtyOptional.ok THEN Fail ELSE
-    LET securityId == ReadBytes(mdDisplayQtyOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET mdUpdateAction == ReadBytes(securityId.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
-    LET mdEntryTypeBook == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeBook.ok THEN Fail ELSE
-    LET padding6 == ReadBytes(mdEntryTypeBook.rest, 6) IN IF ~padding6.ok THEN Fail ELSE
-    Ok([ orderIdOptional      |-> orderIdOptional.value,
-         mdOrderPriority      |-> mdOrderPriority.value,
-         mdEntryPxOptionalEx  |-> mdEntryPxOptionalEx.value,
-         mdDisplayQtyOptional |-> mdDisplayQtyOptional.value,
-         securityId           |-> securityId.value,
-         mdUpdateAction       |-> mdUpdateAction.value,
-         mdEntryTypeBook      |-> mdEntryTypeBook.value,
-         padding6             |-> padding6.value ], padding6.rest)
-
-ZeroIncrementalRefreshOrderBookGroup2 ==
-    [ orderIdOptional      |-> [i \in 1 .. 8 |-> 0],
-      mdOrderPriority      |-> [i \in 1 .. 8 |-> 0],
-      mdEntryPxOptionalEx  |-> [i \in 1 .. 8 |-> 0],
-      mdDisplayQtyOptional |-> [i \in 1 .. 4 |-> 0],
-      securityId           |-> [i \in 1 .. 4 |-> 0],
-      mdUpdateAction       |-> [i \in 1 .. 1 |-> 0],
-      mdEntryTypeBook      |-> [i \in 1 .. 1 |-> 0],
-      padding6             |-> [i \in 1 .. 6 |-> 0] ]
-
-(* Incremental Refresh Order Book Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshOrderBookGroup2 ==
-    { ZeroIncrementalRefreshOrderBookGroup2 }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup2 EXCEPT !.orderIdOptional = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup2 EXCEPT !.mdOrderPriority = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup2 EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup2 EXCEPT !.mdDisplayQtyOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup2 EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup2 EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup2 EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroup2 EXCEPT !.padding6 = one] : one \in Sample(6) }
-
-(* A run of Incremental Refresh Order Book Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshOrderBookGroup2List(_)
-EncodeIncrementalRefreshOrderBookGroup2List(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeIncrementalRefreshOrderBookGroup2(Head(messages)) \o EncodeIncrementalRefreshOrderBookGroup2List(Tail(messages))
-
-(* As many Incremental Refresh Order Book Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshOrderBookGroup2List(_, _)
-ReadIncrementalRefreshOrderBookGroup2List(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshOrderBookGroup2(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshOrderBookGroup2List(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Incremental Refresh Order Book Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshOrderBookGroup2 == { ZeroIncrementalRefreshOrderBookGroup2 }
-
-(***************************************************************************)
-(* Incremental Refresh Order Book Groups                                   *)
-(***************************************************************************)
-
-IncrementalRefreshOrderBookGroups2 ==
-    [ blockLength                      : Sample(2),
-      incrementalRefreshOrderBookGroup : SampleLists(OneIncrementalRefreshOrderBookGroup2) ]
-
-EncodeIncrementalRefreshOrderBookGroups2(message) ==
-    message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshOrderBookGroup), 1)
-        \o EncodeIncrementalRefreshOrderBookGroup2List(message.incrementalRefreshOrderBookGroup)
-
-DecodeIncrementalRefreshOrderBookGroups2(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshOrderBookGroup == ReadIncrementalRefreshOrderBookGroup2List(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshOrderBookGroup.ok THEN Fail ELSE
-    Ok([ blockLength                      |-> blockLength.value,
-         incrementalRefreshOrderBookGroup |-> incrementalRefreshOrderBookGroup.value ], incrementalRefreshOrderBookGroup.rest)
-
-ZeroIncrementalRefreshOrderBookGroups2 ==
-    [ blockLength                      |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshOrderBookGroup |-> << >> ]
-
-(* Incremental Refresh Order Book Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshOrderBookGroups2 ==
-    { ZeroIncrementalRefreshOrderBookGroups2 }
-        \cup { [ZeroIncrementalRefreshOrderBookGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshOrderBookGroups2 EXCEPT !.incrementalRefreshOrderBookGroup = one] : one \in SampleLists(OneIncrementalRefreshOrderBookGroup2) }
-
-(***************************************************************************)
-(* Md Incremental Refresh Order Book                                       *)
-(***************************************************************************)
-
-MdIncrementalRefreshOrderBook ==
-    [ transactTime                      : Sample(8),
-      matchEventIndicator               : Sample(1),
-      padding2                          : Sample(2),
-      incrementalRefreshOrderBookGroups : IncrementalRefreshOrderBookGroups2 ]
-
-EncodeMdIncrementalRefreshOrderBook(message) ==
-    message.transactTime
-        \o message.matchEventIndicator
-        \o message.padding2
-        \o EncodeIncrementalRefreshOrderBookGroups2(message.incrementalRefreshOrderBookGroups)
-
-DecodeMdIncrementalRefreshOrderBook(bytes) ==
-    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
-    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshOrderBookGroups == DecodeIncrementalRefreshOrderBookGroups2(padding2.rest) IN IF ~incrementalRefreshOrderBookGroups.ok THEN Fail ELSE
-    Ok([ transactTime                      |-> transactTime.value,
-         matchEventIndicator               |-> matchEventIndicator.value,
-         padding2                          |-> padding2.value,
-         incrementalRefreshOrderBookGroups |-> incrementalRefreshOrderBookGroups.value ], incrementalRefreshOrderBookGroups.rest)
-
-ZeroMdIncrementalRefreshOrderBook ==
-    [ transactTime                      |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator               |-> [i \in 1 .. 1 |-> 0],
-      padding2                          |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshOrderBookGroups |-> ZeroIncrementalRefreshOrderBookGroups2 ]
-
-(* Md Incremental Refresh Order Book at zero, then each field in turn at the values it is checked at *)
-CheckedMdIncrementalRefreshOrderBook ==
-    { ZeroMdIncrementalRefreshOrderBook }
-        \cup { [ZeroMdIncrementalRefreshOrderBook EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroMdIncrementalRefreshOrderBook EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroMdIncrementalRefreshOrderBook EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshOrderBook EXCEPT !.incrementalRefreshOrderBookGroups = one] : one \in CheckedIncrementalRefreshOrderBookGroups2 }
-
-(***************************************************************************)
-(* Incremental Refresh Trade Summary Group: 32 bytes                       *)
-(***************************************************************************)
-
-IncrementalRefreshTradeSummaryGroup2 ==
-    [ mdEntryPxEx      : Sample(8),
-      mdEntrySizeShort : Sample(4),
-      securityId       : Sample(4),
-      rptSeq           : Sample(4),
-      numberOfOrders   : Sample(4),
-      aggressorSide    : Sample(1),
-      mdUpdateAction   : Sample(1),
-      mdTradeEntryId   : Sample(4),
-      padding2         : Sample(2) ]
-
-EncodeIncrementalRefreshTradeSummaryGroup2(message) ==
-    message.mdEntryPxEx
-        \o message.mdEntrySizeShort
-        \o message.securityId
-        \o message.rptSeq
-        \o message.numberOfOrders
-        \o message.aggressorSide
-        \o message.mdUpdateAction
-        \o message.mdTradeEntryId
-        \o message.padding2
-
-DecodeIncrementalRefreshTradeSummaryGroup2(bytes) ==
-    LET mdEntryPxEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxEx.ok THEN Fail ELSE
-    LET mdEntrySizeShort == ReadBytes(mdEntryPxEx.rest, 4) IN IF ~mdEntrySizeShort.ok THEN Fail ELSE
-    LET securityId == ReadBytes(mdEntrySizeShort.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
-    LET numberOfOrders == ReadBytes(rptSeq.rest, 4) IN IF ~numberOfOrders.ok THEN Fail ELSE
-    LET aggressorSide == ReadBytes(numberOfOrders.rest, 1) IN IF ~aggressorSide.ok THEN Fail ELSE
-    LET mdUpdateAction == ReadBytes(aggressorSide.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
-    LET mdTradeEntryId == ReadBytes(mdUpdateAction.rest, 4) IN IF ~mdTradeEntryId.ok THEN Fail ELSE
-    LET padding2 == ReadBytes(mdTradeEntryId.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    Ok([ mdEntryPxEx      |-> mdEntryPxEx.value,
-         mdEntrySizeShort |-> mdEntrySizeShort.value,
-         securityId       |-> securityId.value,
-         rptSeq           |-> rptSeq.value,
-         numberOfOrders   |-> numberOfOrders.value,
-         aggressorSide    |-> aggressorSide.value,
-         mdUpdateAction   |-> mdUpdateAction.value,
-         mdTradeEntryId   |-> mdTradeEntryId.value,
-         padding2         |-> padding2.value ], padding2.rest)
-
-ZeroIncrementalRefreshTradeSummaryGroup2 ==
-    [ mdEntryPxEx      |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeShort |-> [i \in 1 .. 4 |-> 0],
-      securityId       |-> [i \in 1 .. 4 |-> 0],
-      rptSeq           |-> [i \in 1 .. 4 |-> 0],
-      numberOfOrders   |-> [i \in 1 .. 4 |-> 0],
-      aggressorSide    |-> [i \in 1 .. 1 |-> 0],
-      mdUpdateAction   |-> [i \in 1 .. 1 |-> 0],
-      mdTradeEntryId   |-> [i \in 1 .. 4 |-> 0],
-      padding2         |-> [i \in 1 .. 2 |-> 0] ]
-
-(* Incremental Refresh Trade Summary Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshTradeSummaryGroup2 ==
-    { ZeroIncrementalRefreshTradeSummaryGroup2 }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroup2 EXCEPT !.mdEntryPxEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroup2 EXCEPT !.mdEntrySizeShort = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroup2 EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroup2 EXCEPT !.rptSeq = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroup2 EXCEPT !.numberOfOrders = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroup2 EXCEPT !.aggressorSide = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroup2 EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroup2 EXCEPT !.mdTradeEntryId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroup2 EXCEPT !.padding2 = one] : one \in Sample(2) }
-
-(* A run of Incremental Refresh Trade Summary Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshTradeSummaryGroup2List(_)
-EncodeIncrementalRefreshTradeSummaryGroup2List(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeIncrementalRefreshTradeSummaryGroup2(Head(messages)) \o EncodeIncrementalRefreshTradeSummaryGroup2List(Tail(messages))
-
-(* As many Incremental Refresh Trade Summary Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshTradeSummaryGroup2List(_, _)
-ReadIncrementalRefreshTradeSummaryGroup2List(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshTradeSummaryGroup2(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshTradeSummaryGroup2List(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Incremental Refresh Trade Summary Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshTradeSummaryGroup2 == { ZeroIncrementalRefreshTradeSummaryGroup2 }
-
-(***************************************************************************)
-(* Incremental Refresh Trade Summary Groups                                *)
-(***************************************************************************)
-
-IncrementalRefreshTradeSummaryGroups2 ==
-    [ blockLength                         : Sample(2),
-      incrementalRefreshTradeSummaryGroup : SampleLists(OneIncrementalRefreshTradeSummaryGroup2) ]
-
-EncodeIncrementalRefreshTradeSummaryGroups2(message) ==
-    message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshTradeSummaryGroup), 1)
-        \o EncodeIncrementalRefreshTradeSummaryGroup2List(message.incrementalRefreshTradeSummaryGroup)
-
-DecodeIncrementalRefreshTradeSummaryGroups2(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshTradeSummaryGroup == ReadIncrementalRefreshTradeSummaryGroup2List(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshTradeSummaryGroup.ok THEN Fail ELSE
-    Ok([ blockLength                         |-> blockLength.value,
-         incrementalRefreshTradeSummaryGroup |-> incrementalRefreshTradeSummaryGroup.value ], incrementalRefreshTradeSummaryGroup.rest)
-
-ZeroIncrementalRefreshTradeSummaryGroups2 ==
-    [ blockLength                         |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshTradeSummaryGroup |-> << >> ]
-
-(* Incremental Refresh Trade Summary Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshTradeSummaryGroups2 ==
-    { ZeroIncrementalRefreshTradeSummaryGroups2 }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryGroups2 EXCEPT !.incrementalRefreshTradeSummaryGroup = one] : one \in SampleLists(OneIncrementalRefreshTradeSummaryGroup2) }
-
-(***************************************************************************)
-(* Incremental Refresh Trade Summary Order Id Group: 16 bytes              *)
-(***************************************************************************)
-
-IncrementalRefreshTradeSummaryOrderIdGroup2 ==
-    [ orderId  : Sample(8),
-      lastQty  : Sample(4),
-      padding4 : Sample(4) ]
-
-EncodeIncrementalRefreshTradeSummaryOrderIdGroup2(message) ==
-    message.orderId
-        \o message.lastQty
-        \o message.padding4
-
-DecodeIncrementalRefreshTradeSummaryOrderIdGroup2(bytes) ==
-    LET orderId == ReadBytes(bytes, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET lastQty == ReadBytes(orderId.rest, 4) IN IF ~lastQty.ok THEN Fail ELSE
-    LET padding4 == ReadBytes(lastQty.rest, 4) IN IF ~padding4.ok THEN Fail ELSE
-    Ok([ orderId  |-> orderId.value,
-         lastQty  |-> lastQty.value,
-         padding4 |-> padding4.value ], padding4.rest)
-
-ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 ==
-    [ orderId  |-> [i \in 1 .. 8 |-> 0],
-      lastQty  |-> [i \in 1 .. 4 |-> 0],
-      padding4 |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Incremental Refresh Trade Summary Order Id Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshTradeSummaryOrderIdGroup2 ==
-    { ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 EXCEPT !.lastQty = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 EXCEPT !.padding4 = one] : one \in Sample(4) }
-
-(* A run of Incremental Refresh Trade Summary Order Id Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshTradeSummaryOrderIdGroup2List(_)
-EncodeIncrementalRefreshTradeSummaryOrderIdGroup2List(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeIncrementalRefreshTradeSummaryOrderIdGroup2(Head(messages)) \o EncodeIncrementalRefreshTradeSummaryOrderIdGroup2List(Tail(messages))
-
-(* As many Incremental Refresh Trade Summary Order Id Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshTradeSummaryOrderIdGroup2List(_, _)
-ReadIncrementalRefreshTradeSummaryOrderIdGroup2List(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshTradeSummaryOrderIdGroup2(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshTradeSummaryOrderIdGroup2List(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Incremental Refresh Trade Summary Order Id Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshTradeSummaryOrderIdGroup2 == { ZeroIncrementalRefreshTradeSummaryOrderIdGroup2 }
-
-(***************************************************************************)
-(* Incremental Refresh Trade Summary Order Id Groups                       *)
-(***************************************************************************)
-
-IncrementalRefreshTradeSummaryOrderIdGroups2 ==
-    [ blockLength                                : Sample(2),
-      padding5                                   : Sample(5),
-      incrementalRefreshTradeSummaryOrderIdGroup : SampleLists(OneIncrementalRefreshTradeSummaryOrderIdGroup2) ]
-
-EncodeIncrementalRefreshTradeSummaryOrderIdGroups2(message) ==
-    message.blockLength
-        \o message.padding5
-        \o EncodeUIntBE(Len(message.incrementalRefreshTradeSummaryOrderIdGroup), 1)
-        \o EncodeIncrementalRefreshTradeSummaryOrderIdGroup2List(message.incrementalRefreshTradeSummaryOrderIdGroup)
-
-DecodeIncrementalRefreshTradeSummaryOrderIdGroups2(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET padding5 == ReadBytes(blockLength.rest, 5) IN IF ~padding5.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(padding5.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshTradeSummaryOrderIdGroup == ReadIncrementalRefreshTradeSummaryOrderIdGroup2List(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshTradeSummaryOrderIdGroup.ok THEN Fail ELSE
-    Ok([ blockLength                                |-> blockLength.value,
-         padding5                                   |-> padding5.value,
-         incrementalRefreshTradeSummaryOrderIdGroup |-> incrementalRefreshTradeSummaryOrderIdGroup.value ], incrementalRefreshTradeSummaryOrderIdGroup.rest)
-
-ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 ==
-    [ blockLength                                |-> [i \in 1 .. 2 |-> 0],
-      padding5                                   |-> [i \in 1 .. 5 |-> 0],
-      incrementalRefreshTradeSummaryOrderIdGroup |-> << >> ]
-
-(* Incremental Refresh Trade Summary Order Id Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshTradeSummaryOrderIdGroups2 ==
-    { ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 EXCEPT !.padding5 = one] : one \in Sample(5) }
-        \cup { [ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 EXCEPT !.incrementalRefreshTradeSummaryOrderIdGroup = one] : one \in SampleLists(OneIncrementalRefreshTradeSummaryOrderIdGroup2) }
-
-(***************************************************************************)
-(* Md Incremental Refresh Trade Summary                                    *)
-(***************************************************************************)
-
-MdIncrementalRefreshTradeSummary ==
-    [ transactTime                                : Sample(8),
-      matchEventIndicator                         : Sample(1),
-      padding2                                    : Sample(2),
-      incrementalRefreshTradeSummaryGroups        : IncrementalRefreshTradeSummaryGroups2,
-      incrementalRefreshTradeSummaryOrderIdGroups : IncrementalRefreshTradeSummaryOrderIdGroups2 ]
-
-EncodeMdIncrementalRefreshTradeSummary(message) ==
-    message.transactTime
-        \o message.matchEventIndicator
-        \o message.padding2
-        \o EncodeIncrementalRefreshTradeSummaryGroups2(message.incrementalRefreshTradeSummaryGroups)
-        \o EncodeIncrementalRefreshTradeSummaryOrderIdGroups2(message.incrementalRefreshTradeSummaryOrderIdGroups)
-
-DecodeMdIncrementalRefreshTradeSummary(bytes) ==
-    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
-    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshTradeSummaryGroups == DecodeIncrementalRefreshTradeSummaryGroups2(padding2.rest) IN IF ~incrementalRefreshTradeSummaryGroups.ok THEN Fail ELSE
-    LET incrementalRefreshTradeSummaryOrderIdGroups == DecodeIncrementalRefreshTradeSummaryOrderIdGroups2(incrementalRefreshTradeSummaryGroups.rest) IN IF ~incrementalRefreshTradeSummaryOrderIdGroups.ok THEN Fail ELSE
-    Ok([ transactTime                                |-> transactTime.value,
-         matchEventIndicator                         |-> matchEventIndicator.value,
-         padding2                                    |-> padding2.value,
-         incrementalRefreshTradeSummaryGroups        |-> incrementalRefreshTradeSummaryGroups.value,
-         incrementalRefreshTradeSummaryOrderIdGroups |-> incrementalRefreshTradeSummaryOrderIdGroups.value ], incrementalRefreshTradeSummaryOrderIdGroups.rest)
-
-ZeroMdIncrementalRefreshTradeSummary ==
-    [ transactTime                                |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator                         |-> [i \in 1 .. 1 |-> 0],
-      padding2                                    |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshTradeSummaryGroups        |-> ZeroIncrementalRefreshTradeSummaryGroups2,
-      incrementalRefreshTradeSummaryOrderIdGroups |-> ZeroIncrementalRefreshTradeSummaryOrderIdGroups2 ]
-
-(* Md Incremental Refresh Trade Summary at zero, then each field in turn at the values it is checked at *)
-CheckedMdIncrementalRefreshTradeSummary ==
-    { ZeroMdIncrementalRefreshTradeSummary }
-        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.incrementalRefreshTradeSummaryGroups = one] : one \in CheckedIncrementalRefreshTradeSummaryGroups2 }
-        \cup { [ZeroMdIncrementalRefreshTradeSummary EXCEPT !.incrementalRefreshTradeSummaryOrderIdGroups = one] : one \in CheckedIncrementalRefreshTradeSummaryOrderIdGroups2 }
-
-(***************************************************************************)
-(* Incremental Refresh Daily Statistics Group: 32 bytes                    *)
-(***************************************************************************)
-
-IncrementalRefreshDailyStatisticsGroup2 ==
-    [ mdEntryPxOptionalEx        : Sample(8),
-      mdEntrySizeShortOptional   : Sample(4),
-      securityId                 : Sample(4),
-      rptSeq                     : Sample(4),
-      tradingReferenceDate       : Sample(2),
-      settlPriceType             : Sample(1),
-      mdUpdateAction             : Sample(1),
-      mdEntryTypeDailyStatistics : Sample(1),
-      padding7                   : Sample(7) ]
-
-EncodeIncrementalRefreshDailyStatisticsGroup2(message) ==
-    message.mdEntryPxOptionalEx
-        \o message.mdEntrySizeShortOptional
-        \o message.securityId
-        \o message.rptSeq
-        \o message.tradingReferenceDate
-        \o message.settlPriceType
-        \o message.mdUpdateAction
-        \o message.mdEntryTypeDailyStatistics
-        \o message.padding7
-
-DecodeIncrementalRefreshDailyStatisticsGroup2(bytes) ==
-    LET mdEntryPxOptionalEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
-    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
-    LET securityId == ReadBytes(mdEntrySizeShortOptional.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
-    LET tradingReferenceDate == ReadBytes(rptSeq.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
-    LET settlPriceType == ReadBytes(tradingReferenceDate.rest, 1) IN IF ~settlPriceType.ok THEN Fail ELSE
-    LET mdUpdateAction == ReadBytes(settlPriceType.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
-    LET mdEntryTypeDailyStatistics == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeDailyStatistics.ok THEN Fail ELSE
-    LET padding7 == ReadBytes(mdEntryTypeDailyStatistics.rest, 7) IN IF ~padding7.ok THEN Fail ELSE
-    Ok([ mdEntryPxOptionalEx        |-> mdEntryPxOptionalEx.value,
-         mdEntrySizeShortOptional   |-> mdEntrySizeShortOptional.value,
-         securityId                 |-> securityId.value,
-         rptSeq                     |-> rptSeq.value,
-         tradingReferenceDate       |-> tradingReferenceDate.value,
-         settlPriceType             |-> settlPriceType.value,
-         mdUpdateAction             |-> mdUpdateAction.value,
-         mdEntryTypeDailyStatistics |-> mdEntryTypeDailyStatistics.value,
-         padding7                   |-> padding7.value ], padding7.rest)
-
-ZeroIncrementalRefreshDailyStatisticsGroup2 ==
-    [ mdEntryPxOptionalEx        |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeShortOptional   |-> [i \in 1 .. 4 |-> 0],
-      securityId                 |-> [i \in 1 .. 4 |-> 0],
-      rptSeq                     |-> [i \in 1 .. 4 |-> 0],
-      tradingReferenceDate       |-> [i \in 1 .. 2 |-> 0],
-      settlPriceType             |-> [i \in 1 .. 1 |-> 0],
-      mdUpdateAction             |-> [i \in 1 .. 1 |-> 0],
-      mdEntryTypeDailyStatistics |-> [i \in 1 .. 1 |-> 0],
-      padding7                   |-> [i \in 1 .. 7 |-> 0] ]
-
-(* Incremental Refresh Daily Statistics Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshDailyStatisticsGroup2 ==
-    { ZeroIncrementalRefreshDailyStatisticsGroup2 }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup2 EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup2 EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup2 EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup2 EXCEPT !.rptSeq = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup2 EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup2 EXCEPT !.settlPriceType = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup2 EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup2 EXCEPT !.mdEntryTypeDailyStatistics = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroup2 EXCEPT !.padding7 = one] : one \in Sample(7) }
-
-(* A run of Incremental Refresh Daily Statistics Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshDailyStatisticsGroup2List(_)
-EncodeIncrementalRefreshDailyStatisticsGroup2List(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeIncrementalRefreshDailyStatisticsGroup2(Head(messages)) \o EncodeIncrementalRefreshDailyStatisticsGroup2List(Tail(messages))
-
-(* As many Incremental Refresh Daily Statistics Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshDailyStatisticsGroup2List(_, _)
-ReadIncrementalRefreshDailyStatisticsGroup2List(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshDailyStatisticsGroup2(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshDailyStatisticsGroup2List(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Incremental Refresh Daily Statistics Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshDailyStatisticsGroup2 == { ZeroIncrementalRefreshDailyStatisticsGroup2 }
-
-(***************************************************************************)
-(* Incremental Refresh Daily Statistics Groups                             *)
-(***************************************************************************)
-
-IncrementalRefreshDailyStatisticsGroups2 ==
-    [ blockLength                            : Sample(2),
-      incrementalRefreshDailyStatisticsGroup : SampleLists(OneIncrementalRefreshDailyStatisticsGroup2) ]
-
-EncodeIncrementalRefreshDailyStatisticsGroups2(message) ==
-    message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshDailyStatisticsGroup), 1)
-        \o EncodeIncrementalRefreshDailyStatisticsGroup2List(message.incrementalRefreshDailyStatisticsGroup)
-
-DecodeIncrementalRefreshDailyStatisticsGroups2(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshDailyStatisticsGroup == ReadIncrementalRefreshDailyStatisticsGroup2List(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshDailyStatisticsGroup.ok THEN Fail ELSE
-    Ok([ blockLength                            |-> blockLength.value,
-         incrementalRefreshDailyStatisticsGroup |-> incrementalRefreshDailyStatisticsGroup.value ], incrementalRefreshDailyStatisticsGroup.rest)
-
-ZeroIncrementalRefreshDailyStatisticsGroups2 ==
-    [ blockLength                            |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshDailyStatisticsGroup |-> << >> ]
-
-(* Incremental Refresh Daily Statistics Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshDailyStatisticsGroups2 ==
-    { ZeroIncrementalRefreshDailyStatisticsGroups2 }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshDailyStatisticsGroups2 EXCEPT !.incrementalRefreshDailyStatisticsGroup = one] : one \in SampleLists(OneIncrementalRefreshDailyStatisticsGroup2) }
-
-(***************************************************************************)
-(* Md Incremental Refresh Daily Statistics                                 *)
-(***************************************************************************)
-
-MdIncrementalRefreshDailyStatistics ==
-    [ transactTime                            : Sample(8),
-      matchEventIndicator                     : Sample(1),
-      padding2                                : Sample(2),
-      incrementalRefreshDailyStatisticsGroups : IncrementalRefreshDailyStatisticsGroups2 ]
-
-EncodeMdIncrementalRefreshDailyStatistics(message) ==
-    message.transactTime
-        \o message.matchEventIndicator
-        \o message.padding2
-        \o EncodeIncrementalRefreshDailyStatisticsGroups2(message.incrementalRefreshDailyStatisticsGroups)
-
-DecodeMdIncrementalRefreshDailyStatistics(bytes) ==
-    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
-    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshDailyStatisticsGroups == DecodeIncrementalRefreshDailyStatisticsGroups2(padding2.rest) IN IF ~incrementalRefreshDailyStatisticsGroups.ok THEN Fail ELSE
-    Ok([ transactTime                            |-> transactTime.value,
-         matchEventIndicator                     |-> matchEventIndicator.value,
-         padding2                                |-> padding2.value,
-         incrementalRefreshDailyStatisticsGroups |-> incrementalRefreshDailyStatisticsGroups.value ], incrementalRefreshDailyStatisticsGroups.rest)
-
-ZeroMdIncrementalRefreshDailyStatistics ==
-    [ transactTime                            |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator                     |-> [i \in 1 .. 1 |-> 0],
-      padding2                                |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshDailyStatisticsGroups |-> ZeroIncrementalRefreshDailyStatisticsGroups2 ]
-
-(* Md Incremental Refresh Daily Statistics at zero, then each field in turn at the values it is checked at *)
-CheckedMdIncrementalRefreshDailyStatistics ==
-    { ZeroMdIncrementalRefreshDailyStatistics }
-        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshDailyStatistics EXCEPT !.incrementalRefreshDailyStatisticsGroups = one] : one \in CheckedIncrementalRefreshDailyStatisticsGroups2 }
-
-(***************************************************************************)
-(* Incremental Refresh Limits Banding Group: 32 bytes                      *)
-(***************************************************************************)
-
-IncrementalRefreshLimitsBandingGroup2 ==
-    [ highLimitPriceEx    : Sample(8),
-      lowLimitPriceEx     : Sample(8),
-      maxPriceVariationEx : Sample(8),
-      securityId          : Sample(4),
-      rptSeq              : Sample(4) ]
-
-EncodeIncrementalRefreshLimitsBandingGroup2(message) ==
-    message.highLimitPriceEx
-        \o message.lowLimitPriceEx
-        \o message.maxPriceVariationEx
-        \o message.securityId
-        \o message.rptSeq
-
-DecodeIncrementalRefreshLimitsBandingGroup2(bytes) ==
-    LET highLimitPriceEx == ReadBytes(bytes, 8) IN IF ~highLimitPriceEx.ok THEN Fail ELSE
-    LET lowLimitPriceEx == ReadBytes(highLimitPriceEx.rest, 8) IN IF ~lowLimitPriceEx.ok THEN Fail ELSE
-    LET maxPriceVariationEx == ReadBytes(lowLimitPriceEx.rest, 8) IN IF ~maxPriceVariationEx.ok THEN Fail ELSE
-    LET securityId == ReadBytes(maxPriceVariationEx.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
-    Ok([ highLimitPriceEx    |-> highLimitPriceEx.value,
-         lowLimitPriceEx     |-> lowLimitPriceEx.value,
-         maxPriceVariationEx |-> maxPriceVariationEx.value,
-         securityId          |-> securityId.value,
-         rptSeq              |-> rptSeq.value ], rptSeq.rest)
-
-ZeroIncrementalRefreshLimitsBandingGroup2 ==
-    [ highLimitPriceEx    |-> [i \in 1 .. 8 |-> 0],
-      lowLimitPriceEx     |-> [i \in 1 .. 8 |-> 0],
-      maxPriceVariationEx |-> [i \in 1 .. 8 |-> 0],
-      securityId          |-> [i \in 1 .. 4 |-> 0],
-      rptSeq              |-> [i \in 1 .. 4 |-> 0] ]
-
-(* Incremental Refresh Limits Banding Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshLimitsBandingGroup2 ==
-    { ZeroIncrementalRefreshLimitsBandingGroup2 }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroup2 EXCEPT !.highLimitPriceEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroup2 EXCEPT !.lowLimitPriceEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroup2 EXCEPT !.maxPriceVariationEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroup2 EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroup2 EXCEPT !.rptSeq = one] : one \in Sample(4) }
-
-(* A run of Incremental Refresh Limits Banding Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshLimitsBandingGroup2List(_)
-EncodeIncrementalRefreshLimitsBandingGroup2List(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeIncrementalRefreshLimitsBandingGroup2(Head(messages)) \o EncodeIncrementalRefreshLimitsBandingGroup2List(Tail(messages))
-
-(* As many Incremental Refresh Limits Banding Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshLimitsBandingGroup2List(_, _)
-ReadIncrementalRefreshLimitsBandingGroup2List(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshLimitsBandingGroup2(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshLimitsBandingGroup2List(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Incremental Refresh Limits Banding Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshLimitsBandingGroup2 == { ZeroIncrementalRefreshLimitsBandingGroup2 }
-
-(***************************************************************************)
-(* Incremental Refresh Limits Banding Groups                               *)
-(***************************************************************************)
-
-IncrementalRefreshLimitsBandingGroups2 ==
-    [ blockLength                          : Sample(2),
-      incrementalRefreshLimitsBandingGroup : SampleLists(OneIncrementalRefreshLimitsBandingGroup2) ]
-
-EncodeIncrementalRefreshLimitsBandingGroups2(message) ==
-    message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshLimitsBandingGroup), 1)
-        \o EncodeIncrementalRefreshLimitsBandingGroup2List(message.incrementalRefreshLimitsBandingGroup)
-
-DecodeIncrementalRefreshLimitsBandingGroups2(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshLimitsBandingGroup == ReadIncrementalRefreshLimitsBandingGroup2List(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshLimitsBandingGroup.ok THEN Fail ELSE
-    Ok([ blockLength                          |-> blockLength.value,
-         incrementalRefreshLimitsBandingGroup |-> incrementalRefreshLimitsBandingGroup.value ], incrementalRefreshLimitsBandingGroup.rest)
-
-ZeroIncrementalRefreshLimitsBandingGroups2 ==
-    [ blockLength                          |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshLimitsBandingGroup |-> << >> ]
-
-(* Incremental Refresh Limits Banding Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshLimitsBandingGroups2 ==
-    { ZeroIncrementalRefreshLimitsBandingGroups2 }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshLimitsBandingGroups2 EXCEPT !.incrementalRefreshLimitsBandingGroup = one] : one \in SampleLists(OneIncrementalRefreshLimitsBandingGroup2) }
-
-(***************************************************************************)
-(* Md Incremental Refresh Limits Banding                                   *)
-(***************************************************************************)
-
-MdIncrementalRefreshLimitsBanding ==
-    [ transactTime                          : Sample(8),
-      matchEventIndicator                   : Sample(1),
-      padding2                              : Sample(2),
-      incrementalRefreshLimitsBandingGroups : IncrementalRefreshLimitsBandingGroups2 ]
-
-EncodeMdIncrementalRefreshLimitsBanding(message) ==
-    message.transactTime
-        \o message.matchEventIndicator
-        \o message.padding2
-        \o EncodeIncrementalRefreshLimitsBandingGroups2(message.incrementalRefreshLimitsBandingGroups)
-
-DecodeMdIncrementalRefreshLimitsBanding(bytes) ==
-    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
-    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshLimitsBandingGroups == DecodeIncrementalRefreshLimitsBandingGroups2(padding2.rest) IN IF ~incrementalRefreshLimitsBandingGroups.ok THEN Fail ELSE
-    Ok([ transactTime                          |-> transactTime.value,
-         matchEventIndicator                   |-> matchEventIndicator.value,
-         padding2                              |-> padding2.value,
-         incrementalRefreshLimitsBandingGroups |-> incrementalRefreshLimitsBandingGroups.value ], incrementalRefreshLimitsBandingGroups.rest)
-
-ZeroMdIncrementalRefreshLimitsBanding ==
-    [ transactTime                          |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator                   |-> [i \in 1 .. 1 |-> 0],
-      padding2                              |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshLimitsBandingGroups |-> ZeroIncrementalRefreshLimitsBandingGroups2 ]
-
-(* Md Incremental Refresh Limits Banding at zero, then each field in turn at the values it is checked at *)
-CheckedMdIncrementalRefreshLimitsBanding ==
-    { ZeroMdIncrementalRefreshLimitsBanding }
-        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshLimitsBanding EXCEPT !.incrementalRefreshLimitsBandingGroups = one] : one \in CheckedIncrementalRefreshLimitsBandingGroups2 }
-
-(***************************************************************************)
-(* Incremental Refresh Session Statistics Group: 24 bytes                  *)
-(***************************************************************************)
-
-IncrementalRefreshSessionStatisticsGroup2 ==
-    [ mdEntryPxEx              : Sample(8),
-      securityId               : Sample(4),
-      rptSeq                   : Sample(4),
-      openCloseSettlFlag       : Sample(1),
-      mdUpdateAction           : Sample(1),
-      mdEntryTypeStatistics    : Sample(1),
-      mdEntrySizeShortOptional : Sample(4),
-      padding1                 : Sample(1) ]
-
-EncodeIncrementalRefreshSessionStatisticsGroup2(message) ==
-    message.mdEntryPxEx
-        \o message.securityId
-        \o message.rptSeq
-        \o message.openCloseSettlFlag
-        \o message.mdUpdateAction
-        \o message.mdEntryTypeStatistics
-        \o message.mdEntrySizeShortOptional
-        \o message.padding1
-
-DecodeIncrementalRefreshSessionStatisticsGroup2(bytes) ==
-    LET mdEntryPxEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxEx.ok THEN Fail ELSE
-    LET securityId == ReadBytes(mdEntryPxEx.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
-    LET openCloseSettlFlag == ReadBytes(rptSeq.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
-    LET mdUpdateAction == ReadBytes(openCloseSettlFlag.rest, 1) IN IF ~mdUpdateAction.ok THEN Fail ELSE
-    LET mdEntryTypeStatistics == ReadBytes(mdUpdateAction.rest, 1) IN IF ~mdEntryTypeStatistics.ok THEN Fail ELSE
-    LET mdEntrySizeShortOptional == ReadBytes(mdEntryTypeStatistics.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
-    LET padding1 == ReadBytes(mdEntrySizeShortOptional.rest, 1) IN IF ~padding1.ok THEN Fail ELSE
-    Ok([ mdEntryPxEx              |-> mdEntryPxEx.value,
-         securityId               |-> securityId.value,
-         rptSeq                   |-> rptSeq.value,
-         openCloseSettlFlag       |-> openCloseSettlFlag.value,
-         mdUpdateAction           |-> mdUpdateAction.value,
-         mdEntryTypeStatistics    |-> mdEntryTypeStatistics.value,
-         mdEntrySizeShortOptional |-> mdEntrySizeShortOptional.value,
-         padding1                 |-> padding1.value ], padding1.rest)
-
-ZeroIncrementalRefreshSessionStatisticsGroup2 ==
-    [ mdEntryPxEx              |-> [i \in 1 .. 8 |-> 0],
-      securityId               |-> [i \in 1 .. 4 |-> 0],
-      rptSeq                   |-> [i \in 1 .. 4 |-> 0],
-      openCloseSettlFlag       |-> [i \in 1 .. 1 |-> 0],
-      mdUpdateAction           |-> [i \in 1 .. 1 |-> 0],
-      mdEntryTypeStatistics    |-> [i \in 1 .. 1 |-> 0],
-      mdEntrySizeShortOptional |-> [i \in 1 .. 4 |-> 0],
-      padding1                 |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Incremental Refresh Session Statistics Group at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshSessionStatisticsGroup2 ==
-    { ZeroIncrementalRefreshSessionStatisticsGroup2 }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup2 EXCEPT !.mdEntryPxEx = one] : one \in Sample(8) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup2 EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup2 EXCEPT !.rptSeq = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup2 EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup2 EXCEPT !.mdUpdateAction = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup2 EXCEPT !.mdEntryTypeStatistics = one] : one \in Sample(1) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup2 EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroup2 EXCEPT !.padding1 = one] : one \in Sample(1) }
-
-(* A run of Incremental Refresh Session Statistics Group, written one after another *)
-RECURSIVE EncodeIncrementalRefreshSessionStatisticsGroup2List(_)
-EncodeIncrementalRefreshSessionStatisticsGroup2List(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeIncrementalRefreshSessionStatisticsGroup2(Head(messages)) \o EncodeIncrementalRefreshSessionStatisticsGroup2List(Tail(messages))
-
-(* As many Incremental Refresh Session Statistics Group as the field that counts them says *)
-RECURSIVE ReadIncrementalRefreshSessionStatisticsGroup2List(_, _)
-ReadIncrementalRefreshSessionStatisticsGroup2List(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeIncrementalRefreshSessionStatisticsGroup2(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadIncrementalRefreshSessionStatisticsGroup2List(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Incremental Refresh Session Statistics Group of each kind, for the lists that carry them *)
-OneIncrementalRefreshSessionStatisticsGroup2 == { ZeroIncrementalRefreshSessionStatisticsGroup2 }
-
-(***************************************************************************)
-(* Incremental Refresh Session Statistics Groups                           *)
-(***************************************************************************)
-
-IncrementalRefreshSessionStatisticsGroups2 ==
-    [ blockLength                              : Sample(2),
-      incrementalRefreshSessionStatisticsGroup : SampleLists(OneIncrementalRefreshSessionStatisticsGroup2) ]
-
-EncodeIncrementalRefreshSessionStatisticsGroups2(message) ==
-    message.blockLength
-        \o EncodeUIntBE(Len(message.incrementalRefreshSessionStatisticsGroup), 1)
-        \o EncodeIncrementalRefreshSessionStatisticsGroup2List(message.incrementalRefreshSessionStatisticsGroup)
-
-DecodeIncrementalRefreshSessionStatisticsGroups2(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET incrementalRefreshSessionStatisticsGroup == ReadIncrementalRefreshSessionStatisticsGroup2List(numInGroup.rest, numInGroup.value) IN IF ~incrementalRefreshSessionStatisticsGroup.ok THEN Fail ELSE
-    Ok([ blockLength                              |-> blockLength.value,
-         incrementalRefreshSessionStatisticsGroup |-> incrementalRefreshSessionStatisticsGroup.value ], incrementalRefreshSessionStatisticsGroup.rest)
-
-ZeroIncrementalRefreshSessionStatisticsGroups2 ==
-    [ blockLength                              |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshSessionStatisticsGroup |-> << >> ]
-
-(* Incremental Refresh Session Statistics Groups at zero, then each field in turn at the values it is checked at *)
-CheckedIncrementalRefreshSessionStatisticsGroups2 ==
-    { ZeroIncrementalRefreshSessionStatisticsGroups2 }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroIncrementalRefreshSessionStatisticsGroups2 EXCEPT !.incrementalRefreshSessionStatisticsGroup = one] : one \in SampleLists(OneIncrementalRefreshSessionStatisticsGroup2) }
-
-(***************************************************************************)
-(* Md Incremental Refresh Session Statistics                               *)
-(***************************************************************************)
-
-MdIncrementalRefreshSessionStatistics ==
-    [ transactTime                              : Sample(8),
-      matchEventIndicator                       : Sample(1),
-      padding2                                  : Sample(2),
-      incrementalRefreshSessionStatisticsGroups : IncrementalRefreshSessionStatisticsGroups2 ]
-
-EncodeMdIncrementalRefreshSessionStatistics(message) ==
-    message.transactTime
-        \o message.matchEventIndicator
-        \o message.padding2
-        \o EncodeIncrementalRefreshSessionStatisticsGroups2(message.incrementalRefreshSessionStatisticsGroups)
-
-DecodeMdIncrementalRefreshSessionStatistics(bytes) ==
-    LET transactTime == ReadBytes(bytes, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET matchEventIndicator == ReadBytes(transactTime.rest, 1) IN IF ~matchEventIndicator.ok THEN Fail ELSE
-    LET padding2 == ReadBytes(matchEventIndicator.rest, 2) IN IF ~padding2.ok THEN Fail ELSE
-    LET incrementalRefreshSessionStatisticsGroups == DecodeIncrementalRefreshSessionStatisticsGroups2(padding2.rest) IN IF ~incrementalRefreshSessionStatisticsGroups.ok THEN Fail ELSE
-    Ok([ transactTime                              |-> transactTime.value,
-         matchEventIndicator                       |-> matchEventIndicator.value,
-         padding2                                  |-> padding2.value,
-         incrementalRefreshSessionStatisticsGroups |-> incrementalRefreshSessionStatisticsGroups.value ], incrementalRefreshSessionStatisticsGroups.rest)
-
-ZeroMdIncrementalRefreshSessionStatistics ==
-    [ transactTime                              |-> [i \in 1 .. 8 |-> 0],
-      matchEventIndicator                       |-> [i \in 1 .. 1 |-> 0],
-      padding2                                  |-> [i \in 1 .. 2 |-> 0],
-      incrementalRefreshSessionStatisticsGroups |-> ZeroIncrementalRefreshSessionStatisticsGroups2 ]
-
-(* Md Incremental Refresh Session Statistics at zero, then each field in turn at the values it is checked at *)
-CheckedMdIncrementalRefreshSessionStatistics ==
-    { ZeroMdIncrementalRefreshSessionStatistics }
-        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.matchEventIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.padding2 = one] : one \in Sample(2) }
-        \cup { [ZeroMdIncrementalRefreshSessionStatistics EXCEPT !.incrementalRefreshSessionStatisticsGroups = one] : one \in CheckedIncrementalRefreshSessionStatisticsGroups2 }
-
-(***************************************************************************)
-(* Snapshot Full Refresh Group: 22 bytes                                   *)
-(***************************************************************************)
-
-SnapshotFullRefreshGroup2 ==
-    [ mdEntryPxOptionalEx      : Sample(8),
-      mdEntrySizeShortOptional : Sample(4),
-      numberOfOrdersOptional   : Sample(4),
-      mdPriceLevelOptional     : Sample(1),
-      tradingReferenceDate     : Sample(2),
-      openCloseSettlFlag       : Sample(1),
-      settlPriceType           : Sample(1),
-      mdEntryType              : Sample(1) ]
-
-EncodeSnapshotFullRefreshGroup2(message) ==
-    message.mdEntryPxOptionalEx
-        \o message.mdEntrySizeShortOptional
-        \o message.numberOfOrdersOptional
-        \o message.mdPriceLevelOptional
-        \o message.tradingReferenceDate
-        \o message.openCloseSettlFlag
-        \o message.settlPriceType
-        \o message.mdEntryType
-
-DecodeSnapshotFullRefreshGroup2(bytes) ==
-    LET mdEntryPxOptionalEx == ReadBytes(bytes, 8) IN IF ~mdEntryPxOptionalEx.ok THEN Fail ELSE
-    LET mdEntrySizeShortOptional == ReadBytes(mdEntryPxOptionalEx.rest, 4) IN IF ~mdEntrySizeShortOptional.ok THEN Fail ELSE
-    LET numberOfOrdersOptional == ReadBytes(mdEntrySizeShortOptional.rest, 4) IN IF ~numberOfOrdersOptional.ok THEN Fail ELSE
-    LET mdPriceLevelOptional == ReadBytes(numberOfOrdersOptional.rest, 1) IN IF ~mdPriceLevelOptional.ok THEN Fail ELSE
-    LET tradingReferenceDate == ReadBytes(mdPriceLevelOptional.rest, 2) IN IF ~tradingReferenceDate.ok THEN Fail ELSE
-    LET openCloseSettlFlag == ReadBytes(tradingReferenceDate.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
-    LET settlPriceType == ReadBytes(openCloseSettlFlag.rest, 1) IN IF ~settlPriceType.ok THEN Fail ELSE
-    LET mdEntryType == ReadBytes(settlPriceType.rest, 1) IN IF ~mdEntryType.ok THEN Fail ELSE
-    Ok([ mdEntryPxOptionalEx      |-> mdEntryPxOptionalEx.value,
-         mdEntrySizeShortOptional |-> mdEntrySizeShortOptional.value,
-         numberOfOrdersOptional   |-> numberOfOrdersOptional.value,
-         mdPriceLevelOptional     |-> mdPriceLevelOptional.value,
-         tradingReferenceDate     |-> tradingReferenceDate.value,
-         openCloseSettlFlag       |-> openCloseSettlFlag.value,
-         settlPriceType           |-> settlPriceType.value,
-         mdEntryType              |-> mdEntryType.value ], mdEntryType.rest)
-
-ZeroSnapshotFullRefreshGroup2 ==
-    [ mdEntryPxOptionalEx      |-> [i \in 1 .. 8 |-> 0],
-      mdEntrySizeShortOptional |-> [i \in 1 .. 4 |-> 0],
-      numberOfOrdersOptional   |-> [i \in 1 .. 4 |-> 0],
-      mdPriceLevelOptional     |-> [i \in 1 .. 1 |-> 0],
-      tradingReferenceDate     |-> [i \in 1 .. 2 |-> 0],
-      openCloseSettlFlag       |-> [i \in 1 .. 1 |-> 0],
-      settlPriceType           |-> [i \in 1 .. 1 |-> 0],
-      mdEntryType              |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Snapshot Full Refresh Group at zero, then each field in turn at the values it is checked at *)
-CheckedSnapshotFullRefreshGroup2 ==
-    { ZeroSnapshotFullRefreshGroup2 }
-        \cup { [ZeroSnapshotFullRefreshGroup2 EXCEPT !.mdEntryPxOptionalEx = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefreshGroup2 EXCEPT !.mdEntrySizeShortOptional = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefreshGroup2 EXCEPT !.numberOfOrdersOptional = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefreshGroup2 EXCEPT !.mdPriceLevelOptional = one] : one \in Sample(1) }
-        \cup { [ZeroSnapshotFullRefreshGroup2 EXCEPT !.tradingReferenceDate = one] : one \in Sample(2) }
-        \cup { [ZeroSnapshotFullRefreshGroup2 EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
-        \cup { [ZeroSnapshotFullRefreshGroup2 EXCEPT !.settlPriceType = one] : one \in Sample(1) }
-        \cup { [ZeroSnapshotFullRefreshGroup2 EXCEPT !.mdEntryType = one] : one \in Sample(1) }
-
-(* A run of Snapshot Full Refresh Group, written one after another *)
-RECURSIVE EncodeSnapshotFullRefreshGroup2List(_)
-EncodeSnapshotFullRefreshGroup2List(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeSnapshotFullRefreshGroup2(Head(messages)) \o EncodeSnapshotFullRefreshGroup2List(Tail(messages))
-
-(* As many Snapshot Full Refresh Group as the field that counts them says *)
-RECURSIVE ReadSnapshotFullRefreshGroup2List(_, _)
-ReadSnapshotFullRefreshGroup2List(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeSnapshotFullRefreshGroup2(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadSnapshotFullRefreshGroup2List(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Snapshot Full Refresh Group of each kind, for the lists that carry them *)
-OneSnapshotFullRefreshGroup2 == { ZeroSnapshotFullRefreshGroup2 }
-
-(***************************************************************************)
-(* Snapshot Full Refresh Groups                                            *)
-(***************************************************************************)
-
-SnapshotFullRefreshGroups2 ==
-    [ blockLength              : Sample(2),
-      snapshotFullRefreshGroup : SampleLists(OneSnapshotFullRefreshGroup2) ]
-
-EncodeSnapshotFullRefreshGroups2(message) ==
-    message.blockLength
-        \o EncodeUIntBE(Len(message.snapshotFullRefreshGroup), 1)
-        \o EncodeSnapshotFullRefreshGroup2List(message.snapshotFullRefreshGroup)
-
-DecodeSnapshotFullRefreshGroups2(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET snapshotFullRefreshGroup == ReadSnapshotFullRefreshGroup2List(numInGroup.rest, numInGroup.value) IN IF ~snapshotFullRefreshGroup.ok THEN Fail ELSE
-    Ok([ blockLength              |-> blockLength.value,
-         snapshotFullRefreshGroup |-> snapshotFullRefreshGroup.value ], snapshotFullRefreshGroup.rest)
-
-ZeroSnapshotFullRefreshGroups2 ==
-    [ blockLength              |-> [i \in 1 .. 2 |-> 0],
-      snapshotFullRefreshGroup |-> << >> ]
-
-(* Snapshot Full Refresh Groups at zero, then each field in turn at the values it is checked at *)
-CheckedSnapshotFullRefreshGroups2 ==
-    { ZeroSnapshotFullRefreshGroups2 }
-        \cup { [ZeroSnapshotFullRefreshGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroSnapshotFullRefreshGroups2 EXCEPT !.snapshotFullRefreshGroup = one] : one \in SampleLists(OneSnapshotFullRefreshGroup2) }
-
-(***************************************************************************)
-(* Snapshot Full Refresh                                                   *)
-(***************************************************************************)
-
-SnapshotFullRefresh ==
-    [ lastMsgSeqNumProcessed    : Sample(4),
-      totNumReports             : Sample(4),
-      securityId                : Sample(4),
-      rptSeq                    : Sample(4),
-      transactTime              : Sample(8),
-      lastUpdateTime            : Sample(8),
-      tradeDate                 : Sample(2),
-      mdSecurityTradingStatus   : Sample(1),
-      highLimitPriceEx          : Sample(8),
-      lowLimitPriceEx           : Sample(8),
-      maxPriceVariationEx       : Sample(8),
-      snapshotFullRefreshGroups : SnapshotFullRefreshGroups2 ]
-
-EncodeSnapshotFullRefresh(message) ==
-    message.lastMsgSeqNumProcessed
-        \o message.totNumReports
-        \o message.securityId
-        \o message.rptSeq
-        \o message.transactTime
-        \o message.lastUpdateTime
-        \o message.tradeDate
-        \o message.mdSecurityTradingStatus
-        \o message.highLimitPriceEx
-        \o message.lowLimitPriceEx
-        \o message.maxPriceVariationEx
-        \o EncodeSnapshotFullRefreshGroups2(message.snapshotFullRefreshGroups)
-
-DecodeSnapshotFullRefresh(bytes) ==
-    LET lastMsgSeqNumProcessed == ReadBytes(bytes, 4) IN IF ~lastMsgSeqNumProcessed.ok THEN Fail ELSE
-    LET totNumReports == ReadBytes(lastMsgSeqNumProcessed.rest, 4) IN IF ~totNumReports.ok THEN Fail ELSE
-    LET securityId == ReadBytes(totNumReports.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET rptSeq == ReadBytes(securityId.rest, 4) IN IF ~rptSeq.ok THEN Fail ELSE
-    LET transactTime == ReadBytes(rptSeq.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET lastUpdateTime == ReadBytes(transactTime.rest, 8) IN IF ~lastUpdateTime.ok THEN Fail ELSE
-    LET tradeDate == ReadBytes(lastUpdateTime.rest, 2) IN IF ~tradeDate.ok THEN Fail ELSE
-    LET mdSecurityTradingStatus == ReadBytes(tradeDate.rest, 1) IN IF ~mdSecurityTradingStatus.ok THEN Fail ELSE
-    LET highLimitPriceEx == ReadBytes(mdSecurityTradingStatus.rest, 8) IN IF ~highLimitPriceEx.ok THEN Fail ELSE
-    LET lowLimitPriceEx == ReadBytes(highLimitPriceEx.rest, 8) IN IF ~lowLimitPriceEx.ok THEN Fail ELSE
-    LET maxPriceVariationEx == ReadBytes(lowLimitPriceEx.rest, 8) IN IF ~maxPriceVariationEx.ok THEN Fail ELSE
-    LET snapshotFullRefreshGroups == DecodeSnapshotFullRefreshGroups2(maxPriceVariationEx.rest) IN IF ~snapshotFullRefreshGroups.ok THEN Fail ELSE
-    Ok([ lastMsgSeqNumProcessed    |-> lastMsgSeqNumProcessed.value,
-         totNumReports             |-> totNumReports.value,
-         securityId                |-> securityId.value,
-         rptSeq                    |-> rptSeq.value,
-         transactTime              |-> transactTime.value,
-         lastUpdateTime            |-> lastUpdateTime.value,
-         tradeDate                 |-> tradeDate.value,
-         mdSecurityTradingStatus   |-> mdSecurityTradingStatus.value,
-         highLimitPriceEx          |-> highLimitPriceEx.value,
-         lowLimitPriceEx           |-> lowLimitPriceEx.value,
-         maxPriceVariationEx       |-> maxPriceVariationEx.value,
-         snapshotFullRefreshGroups |-> snapshotFullRefreshGroups.value ], snapshotFullRefreshGroups.rest)
-
-ZeroSnapshotFullRefresh ==
-    [ lastMsgSeqNumProcessed    |-> [i \in 1 .. 4 |-> 0],
-      totNumReports             |-> [i \in 1 .. 4 |-> 0],
-      securityId                |-> [i \in 1 .. 4 |-> 0],
-      rptSeq                    |-> [i \in 1 .. 4 |-> 0],
-      transactTime              |-> [i \in 1 .. 8 |-> 0],
-      lastUpdateTime            |-> [i \in 1 .. 8 |-> 0],
-      tradeDate                 |-> [i \in 1 .. 2 |-> 0],
-      mdSecurityTradingStatus   |-> [i \in 1 .. 1 |-> 0],
-      highLimitPriceEx          |-> [i \in 1 .. 8 |-> 0],
-      lowLimitPriceEx           |-> [i \in 1 .. 8 |-> 0],
-      maxPriceVariationEx       |-> [i \in 1 .. 8 |-> 0],
-      snapshotFullRefreshGroups |-> ZeroSnapshotFullRefreshGroups2 ]
-
-(* Snapshot Full Refresh at zero, then each field in turn at the values it is checked at *)
-CheckedSnapshotFullRefresh ==
-    { ZeroSnapshotFullRefresh }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.lastMsgSeqNumProcessed = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.totNumReports = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.securityId = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.rptSeq = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.lastUpdateTime = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.tradeDate = one] : one \in Sample(2) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.mdSecurityTradingStatus = one] : one \in Sample(1) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.highLimitPriceEx = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.lowLimitPriceEx = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.maxPriceVariationEx = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefresh EXCEPT !.snapshotFullRefreshGroups = one] : one \in CheckedSnapshotFullRefreshGroups2 }
-
-(***************************************************************************)
-(* Snapshot Full Refresh Order Book Group: 29 bytes                        *)
-(***************************************************************************)
-
-SnapshotFullRefreshOrderBookGroup2 ==
-    [ orderId         : Sample(8),
-      mdOrderPriority : Sample(8),
-      mdEntryPxEx     : Sample(8),
-      mdDisplayQty    : Sample(4),
-      mdEntryTypeBook : Sample(1) ]
-
-EncodeSnapshotFullRefreshOrderBookGroup2(message) ==
-    message.orderId
-        \o message.mdOrderPriority
-        \o message.mdEntryPxEx
-        \o message.mdDisplayQty
-        \o message.mdEntryTypeBook
-
-DecodeSnapshotFullRefreshOrderBookGroup2(bytes) ==
-    LET orderId == ReadBytes(bytes, 8) IN IF ~orderId.ok THEN Fail ELSE
-    LET mdOrderPriority == ReadBytes(orderId.rest, 8) IN IF ~mdOrderPriority.ok THEN Fail ELSE
-    LET mdEntryPxEx == ReadBytes(mdOrderPriority.rest, 8) IN IF ~mdEntryPxEx.ok THEN Fail ELSE
-    LET mdDisplayQty == ReadBytes(mdEntryPxEx.rest, 4) IN IF ~mdDisplayQty.ok THEN Fail ELSE
-    LET mdEntryTypeBook == ReadBytes(mdDisplayQty.rest, 1) IN IF ~mdEntryTypeBook.ok THEN Fail ELSE
-    Ok([ orderId         |-> orderId.value,
-         mdOrderPriority |-> mdOrderPriority.value,
-         mdEntryPxEx     |-> mdEntryPxEx.value,
-         mdDisplayQty    |-> mdDisplayQty.value,
-         mdEntryTypeBook |-> mdEntryTypeBook.value ], mdEntryTypeBook.rest)
-
-ZeroSnapshotFullRefreshOrderBookGroup2 ==
-    [ orderId         |-> [i \in 1 .. 8 |-> 0],
-      mdOrderPriority |-> [i \in 1 .. 8 |-> 0],
-      mdEntryPxEx     |-> [i \in 1 .. 8 |-> 0],
-      mdDisplayQty    |-> [i \in 1 .. 4 |-> 0],
-      mdEntryTypeBook |-> [i \in 1 .. 1 |-> 0] ]
-
-(* Snapshot Full Refresh Order Book Group at zero, then each field in turn at the values it is checked at *)
-CheckedSnapshotFullRefreshOrderBookGroup2 ==
-    { ZeroSnapshotFullRefreshOrderBookGroup2 }
-        \cup { [ZeroSnapshotFullRefreshOrderBookGroup2 EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookGroup2 EXCEPT !.mdOrderPriority = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookGroup2 EXCEPT !.mdEntryPxEx = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookGroup2 EXCEPT !.mdDisplayQty = one] : one \in Sample(4) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookGroup2 EXCEPT !.mdEntryTypeBook = one] : one \in Sample(1) }
-
-(* A run of Snapshot Full Refresh Order Book Group, written one after another *)
-RECURSIVE EncodeSnapshotFullRefreshOrderBookGroup2List(_)
-EncodeSnapshotFullRefreshOrderBookGroup2List(messages) ==
-    IF messages = << >>
-    THEN << >>
-    ELSE EncodeSnapshotFullRefreshOrderBookGroup2(Head(messages)) \o EncodeSnapshotFullRefreshOrderBookGroup2List(Tail(messages))
-
-(* As many Snapshot Full Refresh Order Book Group as the field that counts them says *)
-RECURSIVE ReadSnapshotFullRefreshOrderBookGroup2List(_, _)
-ReadSnapshotFullRefreshOrderBookGroup2List(bytes, count) ==
-    IF count = 0
-    THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeSnapshotFullRefreshOrderBookGroup2(bytes)
-         IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadSnapshotFullRefreshOrderBookGroup2List(one.rest, count - 1)
-                  IN  IF ~more.ok THEN Fail
-                      ELSE Ok(<<one.value>> \o more.value, more.rest)
-
-(* One Snapshot Full Refresh Order Book Group of each kind, for the lists that carry them *)
-OneSnapshotFullRefreshOrderBookGroup2 == { ZeroSnapshotFullRefreshOrderBookGroup2 }
-
-(***************************************************************************)
-(* Snapshot Full Refresh Order Book Groups                                 *)
-(***************************************************************************)
-
-SnapshotFullRefreshOrderBookGroups2 ==
-    [ blockLength                       : Sample(2),
-      snapshotFullRefreshOrderBookGroup : SampleLists(OneSnapshotFullRefreshOrderBookGroup2) ]
-
-EncodeSnapshotFullRefreshOrderBookGroups2(message) ==
-    message.blockLength
-        \o EncodeUIntBE(Len(message.snapshotFullRefreshOrderBookGroup), 1)
-        \o EncodeSnapshotFullRefreshOrderBookGroup2List(message.snapshotFullRefreshOrderBookGroup)
-
-DecodeSnapshotFullRefreshOrderBookGroups2(bytes) ==
-    LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET numInGroup == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup.ok THEN Fail ELSE
-    LET snapshotFullRefreshOrderBookGroup == ReadSnapshotFullRefreshOrderBookGroup2List(numInGroup.rest, numInGroup.value) IN IF ~snapshotFullRefreshOrderBookGroup.ok THEN Fail ELSE
-    Ok([ blockLength                       |-> blockLength.value,
-         snapshotFullRefreshOrderBookGroup |-> snapshotFullRefreshOrderBookGroup.value ], snapshotFullRefreshOrderBookGroup.rest)
-
-ZeroSnapshotFullRefreshOrderBookGroups2 ==
-    [ blockLength                       |-> [i \in 1 .. 2 |-> 0],
-      snapshotFullRefreshOrderBookGroup |-> << >> ]
-
-(* Snapshot Full Refresh Order Book Groups at zero, then each field in turn at the values it is checked at *)
-CheckedSnapshotFullRefreshOrderBookGroups2 ==
-    { ZeroSnapshotFullRefreshOrderBookGroups2 }
-        \cup { [ZeroSnapshotFullRefreshOrderBookGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroSnapshotFullRefreshOrderBookGroups2 EXCEPT !.snapshotFullRefreshOrderBookGroup = one] : one \in SampleLists(OneSnapshotFullRefreshOrderBookGroup2) }
-
-(***************************************************************************)
-(* Snapshot Full Refresh Order Book                                        *)
-(***************************************************************************)
-
-SnapshotFullRefreshOrderBook ==
-    [ lastMsgSeqNumProcessed             : Sample(4),
-      totNumReports                      : Sample(4),
-      securityId                         : Sample(4),
-      noChunks                           : Sample(4),
-      currentChunk                       : Sample(4),
-      transactTime                       : Sample(8),
-      snapshotFullRefreshOrderBookGroups : SnapshotFullRefreshOrderBookGroups2 ]
-
-EncodeSnapshotFullRefreshOrderBook(message) ==
-    message.lastMsgSeqNumProcessed
-        \o message.totNumReports
-        \o message.securityId
-        \o message.noChunks
-        \o message.currentChunk
-        \o message.transactTime
-        \o EncodeSnapshotFullRefreshOrderBookGroups2(message.snapshotFullRefreshOrderBookGroups)
-
-DecodeSnapshotFullRefreshOrderBook(bytes) ==
-    LET lastMsgSeqNumProcessed == ReadBytes(bytes, 4) IN IF ~lastMsgSeqNumProcessed.ok THEN Fail ELSE
-    LET totNumReports == ReadBytes(lastMsgSeqNumProcessed.rest, 4) IN IF ~totNumReports.ok THEN Fail ELSE
-    LET securityId == ReadBytes(totNumReports.rest, 4) IN IF ~securityId.ok THEN Fail ELSE
-    LET noChunks == ReadBytes(securityId.rest, 4) IN IF ~noChunks.ok THEN Fail ELSE
-    LET currentChunk == ReadBytes(noChunks.rest, 4) IN IF ~currentChunk.ok THEN Fail ELSE
-    LET transactTime == ReadBytes(currentChunk.rest, 8) IN IF ~transactTime.ok THEN Fail ELSE
-    LET snapshotFullRefreshOrderBookGroups == DecodeSnapshotFullRefreshOrderBookGroups2(transactTime.rest) IN IF ~snapshotFullRefreshOrderBookGroups.ok THEN Fail ELSE
-    Ok([ lastMsgSeqNumProcessed             |-> lastMsgSeqNumProcessed.value,
-         totNumReports                      |-> totNumReports.value,
-         securityId                         |-> securityId.value,
-         noChunks                           |-> noChunks.value,
-         currentChunk                       |-> currentChunk.value,
-         transactTime                       |-> transactTime.value,
-         snapshotFullRefreshOrderBookGroups |-> snapshotFullRefreshOrderBookGroups.value ], snapshotFullRefreshOrderBookGroups.rest)
-
 ZeroSnapshotFullRefreshOrderBook ==
     [ lastMsgSeqNumProcessed             |-> [i \in 1 .. 4 |-> 0],
       totNumReports                      |-> [i \in 1 .. 4 |-> 0],
@@ -5805,7 +5805,7 @@ ZeroSnapshotFullRefreshOrderBook ==
       noChunks                           |-> [i \in 1 .. 4 |-> 0],
       currentChunk                       |-> [i \in 1 .. 4 |-> 0],
       transactTime                       |-> [i \in 1 .. 8 |-> 0],
-      snapshotFullRefreshOrderBookGroups |-> ZeroSnapshotFullRefreshOrderBookGroups2 ]
+      snapshotFullRefreshOrderBookGroups |-> ZeroSnapshotFullRefreshOrderBookGroups ]
 
 (* Snapshot Full Refresh Order Book at zero, then each field in turn at the values it is checked at *)
 CheckedSnapshotFullRefreshOrderBook ==
@@ -5816,7 +5816,7 @@ CheckedSnapshotFullRefreshOrderBook ==
         \cup { [ZeroSnapshotFullRefreshOrderBook EXCEPT !.noChunks = one] : one \in Sample(4) }
         \cup { [ZeroSnapshotFullRefreshOrderBook EXCEPT !.currentChunk = one] : one \in Sample(4) }
         \cup { [ZeroSnapshotFullRefreshOrderBook EXCEPT !.transactTime = one] : one \in Sample(8) }
-        \cup { [ZeroSnapshotFullRefreshOrderBook EXCEPT !.snapshotFullRefreshOrderBookGroups = one] : one \in CheckedSnapshotFullRefreshOrderBookGroups2 }
+        \cup { [ZeroSnapshotFullRefreshOrderBook EXCEPT !.snapshotFullRefreshOrderBookGroups = one] : one \in CheckedSnapshotFullRefreshOrderBookGroups }
 
 (***************************************************************************)
 (* Maturity Month Year: 5 bytes                                            *)
@@ -9188,15 +9188,15 @@ CheckedPayload ==
         \cup { [tag |-> SubscriberHeartbeatCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
-(* Message, framed by Message Size                                         *)
+(* Mdp3 Message, framed by Message Size                                    *)
 (***************************************************************************)
 
-Message ==
+Mdp3Message ==
     [ blockLength : Sample(2),
       version     : Sample(2),
       payload     : Payload ]
 
-EncodeMessageBody(message) ==
+EncodeMdp3MessageBody(message) ==
     message.blockLength
         \o EncodeUIntLE(message.payload.tag[2], 2)
         \o EncodeUIntLE(message.payload.tag[1], 2)
@@ -9204,11 +9204,11 @@ EncodeMessageBody(message) ==
         \o EncodePayload(message.payload)
 
 (* Message Size counts the bytes it frames, so it is written from them *)
-EncodeMessage(message) ==
-    LET body == EncodeMessageBody(message)
+EncodeMdp3Message(message) ==
+    LET body == EncodeMdp3MessageBody(message)
     IN  EncodeUIntLE(Len(body) + 2, 2) \o body
 
-DecodeMessageBody(bytes) ==
+DecodeMdp3MessageBody(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET templateId == ReadUIntLE(blockLength.rest, 2) IN IF ~templateId.ok THEN Fail ELSE
     LET schemaId == ReadUIntLE(templateId.rest, 2) IN IF ~schemaId.ok THEN Fail ELSE
@@ -9218,88 +9218,88 @@ DecodeMessageBody(bytes) ==
          version     |-> version.value,
          payload     |-> payload.value ], payload.rest)
 
-DecodeMessage(bytes) ==
+DecodeMdp3Message(bytes) ==
     LET length == ReadUIntLE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
     LET size == length.value - 2 IN
     IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, size)
         beyond == SubSeq(length.rest, size + 1, Len(length.rest))
-        body   == DecodeMessageBody(framed)
+        body   == DecodeMdp3MessageBody(framed)
     IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
     Ok(body.value, beyond)
 
-ZeroMessage ==
+ZeroMdp3Message ==
     [ blockLength |-> [i \in 1 .. 2 |-> 0],
       version     |-> [i \in 1 .. 2 |-> 0],
       payload     |-> ZeroPayload ]
 
-(* Message at zero, then each field in turn at the values it is checked at *)
-CheckedMessage ==
-    { ZeroMessage }
-        \cup { [ZeroMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroMessage EXCEPT !.version = one] : one \in Sample(2) }
-        \cup { [ZeroMessage EXCEPT !.payload = one] : one \in CheckedPayload }
+(* Mdp3 Message at zero, then each field in turn at the values it is checked at *)
+CheckedMdp3Message ==
+    { ZeroMdp3Message }
+        \cup { [ZeroMdp3Message EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroMdp3Message EXCEPT !.version = one] : one \in Sample(2) }
+        \cup { [ZeroMdp3Message EXCEPT !.payload = one] : one \in CheckedPayload }
 
-(* A run of Message, written one after another *)
-RECURSIVE EncodeMessageList(_)
-EncodeMessageList(messages) ==
+(* A run of Mdp3 Message, written one after another *)
+RECURSIVE EncodeMdp3MessageList(_)
+EncodeMdp3MessageList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeMessage(Head(messages)) \o EncodeMessageList(Tail(messages))
+    ELSE EncodeMdp3Message(Head(messages)) \o EncodeMdp3MessageList(Tail(messages))
 
-(* As many Message as the bytes hold, which is what its payload rule states. *)
+(* As many Mdp3 Message as the bytes hold, which is what its payload rule states. *)
 (* Each one takes bytes off the reader, so the run ends where the data does. *)
-RECURSIVE ReadMessageAll(_)
-ReadMessageAll(bytes) ==
+RECURSIVE ReadMdp3MessageAll(_)
+ReadMdp3MessageAll(bytes) ==
     IF bytes = << >>
     THEN Ok(<< >>, << >>)
-    ELSE LET one == DecodeMessage(bytes)
+    ELSE LET one == DecodeMdp3Message(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadMessageAll(one.rest)
+             ELSE LET more == ReadMdp3MessageAll(one.rest)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Message of each kind, for the lists that carry them *)
-OneMessage ==
-    { [ZeroMessage EXCEPT !.payload = [tag |-> ChannelResetCode, body |-> ZeroChannelReset]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> AdminHeartbeatCode, body |-> [empty |-> 0]]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> AdminLoginCode, body |-> ZeroAdminLogin]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> AdminLogoutCode, body |-> ZeroAdminLogout]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionFutureLegacyCode, body |-> ZeroMdInstrumentDefinitionFutureLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionSpreadLegacyCode, body |-> ZeroMdInstrumentDefinitionSpreadLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SecurityStatusCode, body |-> ZeroSecurityStatus]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshBookLegacyCode, body |-> ZeroMdIncrementalRefreshBookLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshDailyStatisticsLegacyCode, body |-> ZeroMdIncrementalRefreshDailyStatisticsLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshLimitsBandingLegacyCode, body |-> ZeroMdIncrementalRefreshLimitsBandingLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshSessionStatisticsLegacyCode, body |-> ZeroMdIncrementalRefreshSessionStatisticsLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshVolumeCode, body |-> ZeroMdIncrementalRefreshVolume]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotFullRefreshLegacyCode, body |-> ZeroSnapshotFullRefreshLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> QuoteRequestCode, body |-> ZeroQuoteRequest]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionOptionLegacyCode, body |-> ZeroMdInstrumentDefinitionOptionLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshTradeSummaryLegacyCode, body |-> ZeroMdIncrementalRefreshTradeSummaryLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshOrderBookLegacyCode, body |-> ZeroMdIncrementalRefreshOrderBookLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotFullRefreshOrderBookLegacyCode, body |-> ZeroSnapshotFullRefreshOrderBookLegacy]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshBookCode, body |-> ZeroMdIncrementalRefreshBook]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshOrderBookCode, body |-> ZeroMdIncrementalRefreshOrderBook]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshTradeSummaryCode, body |-> ZeroMdIncrementalRefreshTradeSummary]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshDailyStatisticsCode, body |-> ZeroMdIncrementalRefreshDailyStatistics]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshLimitsBandingCode, body |-> ZeroMdIncrementalRefreshLimitsBanding]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshSessionStatisticsCode, body |-> ZeroMdIncrementalRefreshSessionStatistics]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotFullRefreshCode, body |-> ZeroSnapshotFullRefresh]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotFullRefreshOrderBookCode, body |-> ZeroSnapshotFullRefreshOrderBook]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionFutureCode, body |-> ZeroMdInstrumentDefinitionFuture]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionOptionCode, body |-> ZeroMdInstrumentDefinitionOption]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionSpreadCode, body |-> ZeroMdInstrumentDefinitionSpread]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> NegotiateCode, body |-> ZeroNegotiate]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> NegotiationRejectCode, body |-> ZeroNegotiationReject]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> NegotiationResponseCode, body |-> ZeroNegotiationResponse]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> TerminateCode, body |-> ZeroTerminate]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MarketDataRequestCode, body |-> ZeroMarketDataRequest]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> RequestAckCode, body |-> ZeroRequestAck]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> RequestRejectCode, body |-> ZeroRequestReject]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SecurityListRequestCode, body |-> ZeroSecurityListRequest]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SecurityStatusRequestCode, body |-> ZeroSecurityStatusRequest]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SubscriberHeartbeatCode, body |-> [empty |-> 0]]] }
+(* One Mdp3 Message of each kind, for the lists that carry them *)
+OneMdp3Message ==
+    { [ZeroMdp3Message EXCEPT !.payload = [tag |-> ChannelResetCode, body |-> ZeroChannelReset]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> AdminHeartbeatCode, body |-> [empty |-> 0]]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> AdminLoginCode, body |-> ZeroAdminLogin]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> AdminLogoutCode, body |-> ZeroAdminLogout]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionFutureLegacyCode, body |-> ZeroMdInstrumentDefinitionFutureLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionSpreadLegacyCode, body |-> ZeroMdInstrumentDefinitionSpreadLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SecurityStatusCode, body |-> ZeroSecurityStatus]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshBookLegacyCode, body |-> ZeroMdIncrementalRefreshBookLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshDailyStatisticsLegacyCode, body |-> ZeroMdIncrementalRefreshDailyStatisticsLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshLimitsBandingLegacyCode, body |-> ZeroMdIncrementalRefreshLimitsBandingLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshSessionStatisticsLegacyCode, body |-> ZeroMdIncrementalRefreshSessionStatisticsLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshVolumeCode, body |-> ZeroMdIncrementalRefreshVolume]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SnapshotFullRefreshLegacyCode, body |-> ZeroSnapshotFullRefreshLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> QuoteRequestCode, body |-> ZeroQuoteRequest]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionOptionLegacyCode, body |-> ZeroMdInstrumentDefinitionOptionLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshTradeSummaryLegacyCode, body |-> ZeroMdIncrementalRefreshTradeSummaryLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshOrderBookLegacyCode, body |-> ZeroMdIncrementalRefreshOrderBookLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SnapshotFullRefreshOrderBookLegacyCode, body |-> ZeroSnapshotFullRefreshOrderBookLegacy]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshBookCode, body |-> ZeroMdIncrementalRefreshBook]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshOrderBookCode, body |-> ZeroMdIncrementalRefreshOrderBook]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshTradeSummaryCode, body |-> ZeroMdIncrementalRefreshTradeSummary]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshDailyStatisticsCode, body |-> ZeroMdIncrementalRefreshDailyStatistics]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshLimitsBandingCode, body |-> ZeroMdIncrementalRefreshLimitsBanding]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshSessionStatisticsCode, body |-> ZeroMdIncrementalRefreshSessionStatistics]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SnapshotFullRefreshCode, body |-> ZeroSnapshotFullRefresh]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SnapshotFullRefreshOrderBookCode, body |-> ZeroSnapshotFullRefreshOrderBook]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionFutureCode, body |-> ZeroMdInstrumentDefinitionFuture]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionOptionCode, body |-> ZeroMdInstrumentDefinitionOption]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionSpreadCode, body |-> ZeroMdInstrumentDefinitionSpread]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> NegotiateCode, body |-> ZeroNegotiate]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> NegotiationRejectCode, body |-> ZeroNegotiationReject]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> NegotiationResponseCode, body |-> ZeroNegotiationResponse]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> TerminateCode, body |-> ZeroTerminate]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MarketDataRequestCode, body |-> ZeroMarketDataRequest]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> RequestAckCode, body |-> ZeroRequestAck]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> RequestRejectCode, body |-> ZeroRequestReject]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SecurityListRequestCode, body |-> ZeroSecurityListRequest]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SecurityStatusRequestCode, body |-> ZeroSecurityStatusRequest]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SubscriberHeartbeatCode, body |-> [empty |-> 0]]] }
 
 (***************************************************************************)
 (* Udp Packet                                                              *)
@@ -9307,27 +9307,27 @@ OneMessage ==
 
 UdpPacket ==
     [ binaryPacketHeader : BinaryPacketHeader,
-      message            : SampleLists(OneMessage) ]
+      mdp3Message        : SampleLists(OneMdp3Message) ]
 
 EncodeUdpPacket(message) ==
     EncodeBinaryPacketHeader(message.binaryPacketHeader)
-        \o EncodeMessageList(message.message)
+        \o EncodeMdp3MessageList(message.mdp3Message)
 
 DecodeUdpPacket(bytes) ==
     LET binaryPacketHeader == DecodeBinaryPacketHeader(bytes) IN IF ~binaryPacketHeader.ok THEN Fail ELSE
-    LET message == ReadMessageAll(binaryPacketHeader.rest) IN IF ~message.ok THEN Fail ELSE
+    LET mdp3Message == ReadMdp3MessageAll(binaryPacketHeader.rest) IN IF ~mdp3Message.ok THEN Fail ELSE
     Ok([ binaryPacketHeader |-> binaryPacketHeader.value,
-         message            |-> message.value ], message.rest)
+         mdp3Message        |-> mdp3Message.value ], mdp3Message.rest)
 
 ZeroUdpPacket ==
     [ binaryPacketHeader |-> ZeroBinaryPacketHeader,
-      message            |-> << >> ]
+      mdp3Message        |-> << >> ]
 
 (* Udp Packet at zero, then each field in turn at the values it is checked at *)
 CheckedUdpPacket ==
     { ZeroUdpPacket }
         \cup { [ZeroUdpPacket EXCEPT !.binaryPacketHeader = one] : one \in CheckedBinaryPacketHeader }
-        \cup { [ZeroUdpPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
+        \cup { [ZeroUdpPacket EXCEPT !.mdp3Message = one] : one \in SampleLists(OneMdp3Message) }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -9577,18 +9577,18 @@ RoundTripSecurityStatus ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Book Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshBookGroup ==
-    \A message \in CheckedIncrementalRefreshBookGroup :
-        LET read == DecodeIncrementalRefreshBookGroup(EncodeIncrementalRefreshBookGroup(message))
+(* Every Incremental Refresh Book Legacy Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshBookLegacyGroup ==
+    \A message \in CheckedIncrementalRefreshBookLegacyGroup :
+        LET read == DecodeIncrementalRefreshBookLegacyGroup(EncodeIncrementalRefreshBookLegacyGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Book Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshBookGroups ==
-    \A message \in CheckedIncrementalRefreshBookGroups :
-        LET read == DecodeIncrementalRefreshBookGroups(EncodeIncrementalRefreshBookGroups(message))
+(* Every Incremental Refresh Book Legacy Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshBookLegacyGroups ==
+    \A message \in CheckedIncrementalRefreshBookLegacyGroups :
+        LET read == DecodeIncrementalRefreshBookLegacyGroups(EncodeIncrementalRefreshBookLegacyGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -9617,18 +9617,18 @@ RoundTripMdIncrementalRefreshBookLegacy ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Daily Statistics Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshDailyStatisticsGroup ==
-    \A message \in CheckedIncrementalRefreshDailyStatisticsGroup :
-        LET read == DecodeIncrementalRefreshDailyStatisticsGroup(EncodeIncrementalRefreshDailyStatisticsGroup(message))
+(* Every Incremental Refresh Daily Statistics Legacy Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshDailyStatisticsLegacyGroup ==
+    \A message \in CheckedIncrementalRefreshDailyStatisticsLegacyGroup :
+        LET read == DecodeIncrementalRefreshDailyStatisticsLegacyGroup(EncodeIncrementalRefreshDailyStatisticsLegacyGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Daily Statistics Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshDailyStatisticsGroups ==
-    \A message \in CheckedIncrementalRefreshDailyStatisticsGroups :
-        LET read == DecodeIncrementalRefreshDailyStatisticsGroups(EncodeIncrementalRefreshDailyStatisticsGroups(message))
+(* Every Incremental Refresh Daily Statistics Legacy Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshDailyStatisticsLegacyGroups ==
+    \A message \in CheckedIncrementalRefreshDailyStatisticsLegacyGroups :
+        LET read == DecodeIncrementalRefreshDailyStatisticsLegacyGroups(EncodeIncrementalRefreshDailyStatisticsLegacyGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -9641,18 +9641,18 @@ RoundTripMdIncrementalRefreshDailyStatisticsLegacy ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Limits Banding Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshLimitsBandingGroup ==
-    \A message \in CheckedIncrementalRefreshLimitsBandingGroup :
-        LET read == DecodeIncrementalRefreshLimitsBandingGroup(EncodeIncrementalRefreshLimitsBandingGroup(message))
+(* Every Incremental Refresh Limits Banding Legacy Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshLimitsBandingLegacyGroup ==
+    \A message \in CheckedIncrementalRefreshLimitsBandingLegacyGroup :
+        LET read == DecodeIncrementalRefreshLimitsBandingLegacyGroup(EncodeIncrementalRefreshLimitsBandingLegacyGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Limits Banding Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshLimitsBandingGroups ==
-    \A message \in CheckedIncrementalRefreshLimitsBandingGroups :
-        LET read == DecodeIncrementalRefreshLimitsBandingGroups(EncodeIncrementalRefreshLimitsBandingGroups(message))
+(* Every Incremental Refresh Limits Banding Legacy Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshLimitsBandingLegacyGroups ==
+    \A message \in CheckedIncrementalRefreshLimitsBandingLegacyGroups :
+        LET read == DecodeIncrementalRefreshLimitsBandingLegacyGroups(EncodeIncrementalRefreshLimitsBandingLegacyGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -9665,18 +9665,18 @@ RoundTripMdIncrementalRefreshLimitsBandingLegacy ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Session Statistics Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshSessionStatisticsGroup ==
-    \A message \in CheckedIncrementalRefreshSessionStatisticsGroup :
-        LET read == DecodeIncrementalRefreshSessionStatisticsGroup(EncodeIncrementalRefreshSessionStatisticsGroup(message))
+(* Every Incremental Refresh Session Statistics Legacy Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshSessionStatisticsLegacyGroup ==
+    \A message \in CheckedIncrementalRefreshSessionStatisticsLegacyGroup :
+        LET read == DecodeIncrementalRefreshSessionStatisticsLegacyGroup(EncodeIncrementalRefreshSessionStatisticsLegacyGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Session Statistics Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshSessionStatisticsGroups ==
-    \A message \in CheckedIncrementalRefreshSessionStatisticsGroups :
-        LET read == DecodeIncrementalRefreshSessionStatisticsGroups(EncodeIncrementalRefreshSessionStatisticsGroups(message))
+(* Every Incremental Refresh Session Statistics Legacy Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshSessionStatisticsLegacyGroups ==
+    \A message \in CheckedIncrementalRefreshSessionStatisticsLegacyGroups :
+        LET read == DecodeIncrementalRefreshSessionStatisticsLegacyGroups(EncodeIncrementalRefreshSessionStatisticsLegacyGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -9713,18 +9713,18 @@ RoundTripMdIncrementalRefreshVolume ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snapshot Full Refresh Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripSnapshotFullRefreshGroup ==
-    \A message \in CheckedSnapshotFullRefreshGroup :
-        LET read == DecodeSnapshotFullRefreshGroup(EncodeSnapshotFullRefreshGroup(message))
+(* Every Snapshot Full Refresh Legacy Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripSnapshotFullRefreshLegacyGroup ==
+    \A message \in CheckedSnapshotFullRefreshLegacyGroup :
+        LET read == DecodeSnapshotFullRefreshLegacyGroup(EncodeSnapshotFullRefreshLegacyGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snapshot Full Refresh Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripSnapshotFullRefreshGroups ==
-    \A message \in CheckedSnapshotFullRefreshGroups :
-        LET read == DecodeSnapshotFullRefreshGroups(EncodeSnapshotFullRefreshGroups(message))
+(* Every Snapshot Full Refresh Legacy Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripSnapshotFullRefreshLegacyGroups ==
+    \A message \in CheckedSnapshotFullRefreshLegacyGroups :
+        LET read == DecodeSnapshotFullRefreshLegacyGroups(EncodeSnapshotFullRefreshLegacyGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -9873,18 +9873,18 @@ RoundTripMdInstrumentDefinitionOptionLegacy ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Trade Summary Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshTradeSummaryGroup ==
-    \A message \in CheckedIncrementalRefreshTradeSummaryGroup :
-        LET read == DecodeIncrementalRefreshTradeSummaryGroup(EncodeIncrementalRefreshTradeSummaryGroup(message))
+(* Every Incremental Refresh Trade Summary Legacy Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshTradeSummaryLegacyGroup ==
+    \A message \in CheckedIncrementalRefreshTradeSummaryLegacyGroup :
+        LET read == DecodeIncrementalRefreshTradeSummaryLegacyGroup(EncodeIncrementalRefreshTradeSummaryLegacyGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Trade Summary Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshTradeSummaryGroups ==
-    \A message \in CheckedIncrementalRefreshTradeSummaryGroups :
-        LET read == DecodeIncrementalRefreshTradeSummaryGroups(EncodeIncrementalRefreshTradeSummaryGroups(message))
+(* Every Incremental Refresh Trade Summary Legacy Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshTradeSummaryLegacyGroups ==
+    \A message \in CheckedIncrementalRefreshTradeSummaryLegacyGroups :
+        LET read == DecodeIncrementalRefreshTradeSummaryLegacyGroups(EncodeIncrementalRefreshTradeSummaryLegacyGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -9913,18 +9913,18 @@ RoundTripMdIncrementalRefreshTradeSummaryLegacy ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Order Book Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshOrderBookGroup ==
-    \A message \in CheckedIncrementalRefreshOrderBookGroup :
-        LET read == DecodeIncrementalRefreshOrderBookGroup(EncodeIncrementalRefreshOrderBookGroup(message))
+(* Every Incremental Refresh Order Book Legacy Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshOrderBookLegacyGroup ==
+    \A message \in CheckedIncrementalRefreshOrderBookLegacyGroup :
+        LET read == DecodeIncrementalRefreshOrderBookLegacyGroup(EncodeIncrementalRefreshOrderBookLegacyGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Incremental Refresh Order Book Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshOrderBookGroups ==
-    \A message \in CheckedIncrementalRefreshOrderBookGroups :
-        LET read == DecodeIncrementalRefreshOrderBookGroups(EncodeIncrementalRefreshOrderBookGroups(message))
+(* Every Incremental Refresh Order Book Legacy Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshOrderBookLegacyGroups ==
+    \A message \in CheckedIncrementalRefreshOrderBookLegacyGroups :
+        LET read == DecodeIncrementalRefreshOrderBookLegacyGroups(EncodeIncrementalRefreshOrderBookLegacyGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -9937,18 +9937,18 @@ RoundTripMdIncrementalRefreshOrderBookLegacy ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snapshot Full Refresh Order Book Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripSnapshotFullRefreshOrderBookGroup ==
-    \A message \in CheckedSnapshotFullRefreshOrderBookGroup :
-        LET read == DecodeSnapshotFullRefreshOrderBookGroup(EncodeSnapshotFullRefreshOrderBookGroup(message))
+(* Every Snapshot Full Refresh Order Book Legacy Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripSnapshotFullRefreshOrderBookLegacyGroup ==
+    \A message \in CheckedSnapshotFullRefreshOrderBookLegacyGroup :
+        LET read == DecodeSnapshotFullRefreshOrderBookLegacyGroup(EncodeSnapshotFullRefreshOrderBookLegacyGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Snapshot Full Refresh Order Book Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripSnapshotFullRefreshOrderBookGroups ==
-    \A message \in CheckedSnapshotFullRefreshOrderBookGroups :
-        LET read == DecodeSnapshotFullRefreshOrderBookGroups(EncodeSnapshotFullRefreshOrderBookGroups(message))
+(* Every Snapshot Full Refresh Order Book Legacy Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripSnapshotFullRefreshOrderBookLegacyGroups ==
+    \A message \in CheckedSnapshotFullRefreshOrderBookLegacyGroups :
+        LET read == DecodeSnapshotFullRefreshOrderBookLegacyGroups(EncodeSnapshotFullRefreshOrderBookLegacyGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -9962,17 +9962,17 @@ RoundTripSnapshotFullRefreshOrderBookLegacy ==
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Book Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshBookGroup2 ==
-    \A message \in CheckedIncrementalRefreshBookGroup2 :
-        LET read == DecodeIncrementalRefreshBookGroup2(EncodeIncrementalRefreshBookGroup2(message))
+RoundTripIncrementalRefreshBookGroup ==
+    \A message \in CheckedIncrementalRefreshBookGroup :
+        LET read == DecodeIncrementalRefreshBookGroup(EncodeIncrementalRefreshBookGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Book Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshBookGroups2 ==
-    \A message \in CheckedIncrementalRefreshBookGroups2 :
-        LET read == DecodeIncrementalRefreshBookGroups2(EncodeIncrementalRefreshBookGroups2(message))
+RoundTripIncrementalRefreshBookGroups ==
+    \A message \in CheckedIncrementalRefreshBookGroups :
+        LET read == DecodeIncrementalRefreshBookGroups(EncodeIncrementalRefreshBookGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -10002,17 +10002,17 @@ RoundTripMdIncrementalRefreshBook ==
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Order Book Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshOrderBookGroup2 ==
-    \A message \in CheckedIncrementalRefreshOrderBookGroup2 :
-        LET read == DecodeIncrementalRefreshOrderBookGroup2(EncodeIncrementalRefreshOrderBookGroup2(message))
+RoundTripIncrementalRefreshOrderBookGroup ==
+    \A message \in CheckedIncrementalRefreshOrderBookGroup :
+        LET read == DecodeIncrementalRefreshOrderBookGroup(EncodeIncrementalRefreshOrderBookGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Order Book Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshOrderBookGroups2 ==
-    \A message \in CheckedIncrementalRefreshOrderBookGroups2 :
-        LET read == DecodeIncrementalRefreshOrderBookGroups2(EncodeIncrementalRefreshOrderBookGroups2(message))
+RoundTripIncrementalRefreshOrderBookGroups ==
+    \A message \in CheckedIncrementalRefreshOrderBookGroups :
+        LET read == DecodeIncrementalRefreshOrderBookGroups(EncodeIncrementalRefreshOrderBookGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -10026,17 +10026,17 @@ RoundTripMdIncrementalRefreshOrderBook ==
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Trade Summary Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshTradeSummaryGroup2 ==
-    \A message \in CheckedIncrementalRefreshTradeSummaryGroup2 :
-        LET read == DecodeIncrementalRefreshTradeSummaryGroup2(EncodeIncrementalRefreshTradeSummaryGroup2(message))
+RoundTripIncrementalRefreshTradeSummaryGroup ==
+    \A message \in CheckedIncrementalRefreshTradeSummaryGroup :
+        LET read == DecodeIncrementalRefreshTradeSummaryGroup(EncodeIncrementalRefreshTradeSummaryGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Trade Summary Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshTradeSummaryGroups2 ==
-    \A message \in CheckedIncrementalRefreshTradeSummaryGroups2 :
-        LET read == DecodeIncrementalRefreshTradeSummaryGroups2(EncodeIncrementalRefreshTradeSummaryGroups2(message))
+RoundTripIncrementalRefreshTradeSummaryGroups ==
+    \A message \in CheckedIncrementalRefreshTradeSummaryGroups :
+        LET read == DecodeIncrementalRefreshTradeSummaryGroups(EncodeIncrementalRefreshTradeSummaryGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -10066,17 +10066,17 @@ RoundTripMdIncrementalRefreshTradeSummary ==
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Daily Statistics Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshDailyStatisticsGroup2 ==
-    \A message \in CheckedIncrementalRefreshDailyStatisticsGroup2 :
-        LET read == DecodeIncrementalRefreshDailyStatisticsGroup2(EncodeIncrementalRefreshDailyStatisticsGroup2(message))
+RoundTripIncrementalRefreshDailyStatisticsGroup ==
+    \A message \in CheckedIncrementalRefreshDailyStatisticsGroup :
+        LET read == DecodeIncrementalRefreshDailyStatisticsGroup(EncodeIncrementalRefreshDailyStatisticsGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Daily Statistics Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshDailyStatisticsGroups2 ==
-    \A message \in CheckedIncrementalRefreshDailyStatisticsGroups2 :
-        LET read == DecodeIncrementalRefreshDailyStatisticsGroups2(EncodeIncrementalRefreshDailyStatisticsGroups2(message))
+RoundTripIncrementalRefreshDailyStatisticsGroups ==
+    \A message \in CheckedIncrementalRefreshDailyStatisticsGroups :
+        LET read == DecodeIncrementalRefreshDailyStatisticsGroups(EncodeIncrementalRefreshDailyStatisticsGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -10090,17 +10090,17 @@ RoundTripMdIncrementalRefreshDailyStatistics ==
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Limits Banding Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshLimitsBandingGroup2 ==
-    \A message \in CheckedIncrementalRefreshLimitsBandingGroup2 :
-        LET read == DecodeIncrementalRefreshLimitsBandingGroup2(EncodeIncrementalRefreshLimitsBandingGroup2(message))
+RoundTripIncrementalRefreshLimitsBandingGroup ==
+    \A message \in CheckedIncrementalRefreshLimitsBandingGroup :
+        LET read == DecodeIncrementalRefreshLimitsBandingGroup(EncodeIncrementalRefreshLimitsBandingGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Limits Banding Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshLimitsBandingGroups2 ==
-    \A message \in CheckedIncrementalRefreshLimitsBandingGroups2 :
-        LET read == DecodeIncrementalRefreshLimitsBandingGroups2(EncodeIncrementalRefreshLimitsBandingGroups2(message))
+RoundTripIncrementalRefreshLimitsBandingGroups ==
+    \A message \in CheckedIncrementalRefreshLimitsBandingGroups :
+        LET read == DecodeIncrementalRefreshLimitsBandingGroups(EncodeIncrementalRefreshLimitsBandingGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -10114,17 +10114,17 @@ RoundTripMdIncrementalRefreshLimitsBanding ==
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Session Statistics Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshSessionStatisticsGroup2 ==
-    \A message \in CheckedIncrementalRefreshSessionStatisticsGroup2 :
-        LET read == DecodeIncrementalRefreshSessionStatisticsGroup2(EncodeIncrementalRefreshSessionStatisticsGroup2(message))
+RoundTripIncrementalRefreshSessionStatisticsGroup ==
+    \A message \in CheckedIncrementalRefreshSessionStatisticsGroup :
+        LET read == DecodeIncrementalRefreshSessionStatisticsGroup(EncodeIncrementalRefreshSessionStatisticsGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Incremental Refresh Session Statistics Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripIncrementalRefreshSessionStatisticsGroups2 ==
-    \A message \in CheckedIncrementalRefreshSessionStatisticsGroups2 :
-        LET read == DecodeIncrementalRefreshSessionStatisticsGroups2(EncodeIncrementalRefreshSessionStatisticsGroups2(message))
+RoundTripIncrementalRefreshSessionStatisticsGroups ==
+    \A message \in CheckedIncrementalRefreshSessionStatisticsGroups :
+        LET read == DecodeIncrementalRefreshSessionStatisticsGroups(EncodeIncrementalRefreshSessionStatisticsGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -10138,17 +10138,17 @@ RoundTripMdIncrementalRefreshSessionStatistics ==
             /\ read.rest = << >>
 
 (* Every Snapshot Full Refresh Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripSnapshotFullRefreshGroup2 ==
-    \A message \in CheckedSnapshotFullRefreshGroup2 :
-        LET read == DecodeSnapshotFullRefreshGroup2(EncodeSnapshotFullRefreshGroup2(message))
+RoundTripSnapshotFullRefreshGroup ==
+    \A message \in CheckedSnapshotFullRefreshGroup :
+        LET read == DecodeSnapshotFullRefreshGroup(EncodeSnapshotFullRefreshGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Snapshot Full Refresh Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripSnapshotFullRefreshGroups2 ==
-    \A message \in CheckedSnapshotFullRefreshGroups2 :
-        LET read == DecodeSnapshotFullRefreshGroups2(EncodeSnapshotFullRefreshGroups2(message))
+RoundTripSnapshotFullRefreshGroups ==
+    \A message \in CheckedSnapshotFullRefreshGroups :
+        LET read == DecodeSnapshotFullRefreshGroups(EncodeSnapshotFullRefreshGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -10162,17 +10162,17 @@ RoundTripSnapshotFullRefresh ==
             /\ read.rest = << >>
 
 (* Every Snapshot Full Refresh Order Book Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripSnapshotFullRefreshOrderBookGroup2 ==
-    \A message \in CheckedSnapshotFullRefreshOrderBookGroup2 :
-        LET read == DecodeSnapshotFullRefreshOrderBookGroup2(EncodeSnapshotFullRefreshOrderBookGroup2(message))
+RoundTripSnapshotFullRefreshOrderBookGroup ==
+    \A message \in CheckedSnapshotFullRefreshOrderBookGroup :
+        LET read == DecodeSnapshotFullRefreshOrderBookGroup(EncodeSnapshotFullRefreshOrderBookGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Snapshot Full Refresh Order Book Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripSnapshotFullRefreshOrderBookGroups2 ==
-    \A message \in CheckedSnapshotFullRefreshOrderBookGroups2 :
-        LET read == DecodeSnapshotFullRefreshOrderBookGroups2(EncodeSnapshotFullRefreshOrderBookGroups2(message))
+RoundTripSnapshotFullRefreshOrderBookGroups ==
+    \A message \in CheckedSnapshotFullRefreshOrderBookGroups :
+        LET read == DecodeSnapshotFullRefreshOrderBookGroups(EncodeSnapshotFullRefreshOrderBookGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -10673,10 +10673,10 @@ RoundTripSecurityStatusRequest ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripMessage ==
-    \A message \in CheckedMessage :
-        LET read == DecodeMessage(EncodeMessage(message))
+(* Every Mdp3 Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdp3Message ==
+    \A message \in CheckedMdp3Message :
+        LET read == DecodeMdp3Message(EncodeMdp3Message(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -10697,9 +10697,9 @@ SelectsPayload ==
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Size is written from the bytes it frames *)
-FramesMessage ==
-    \A message \in CheckedMessage :
-        LET bytes == EncodeMessage(message)
+FramesMdp3Message ==
+    \A message \in CheckedMdp3Message :
+        LET bytes == EncodeMdp3Message(message)
         IN  DecodeUIntLE(SubSeq(bytes, 1, 2)) = Len(bytes) - 0
 
 -----------------------------------------------------------------------------

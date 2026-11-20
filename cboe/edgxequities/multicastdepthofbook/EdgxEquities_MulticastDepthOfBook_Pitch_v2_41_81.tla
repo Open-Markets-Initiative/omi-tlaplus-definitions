@@ -931,11 +931,12 @@ CheckedTradingStatusMessage ==
         \cup { [ZeroTradingStatusMessage EXCEPT !.secondReserved1 = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Auction Update Message: 41 bytes                                        *)
+(* Auction Update Message: 45 bytes                                        *)
 (***************************************************************************)
 
 AuctionUpdateMessage ==
-    [ stockSymbol      : Sample(8),
+    [ timeOffset       : Sample(4),
+      stockSymbol      : Sample(8),
       auctionType      : Sample(1),
       referencePrice   : Sample(8),
       buyShares        : Sample(4),
@@ -944,7 +945,8 @@ AuctionUpdateMessage ==
       auctionOnlyPrice : Sample(8) ]
 
 EncodeAuctionUpdateMessage(message) ==
-    message.stockSymbol
+    message.timeOffset
+        \o message.stockSymbol
         \o message.auctionType
         \o message.referencePrice
         \o message.buyShares
@@ -953,14 +955,16 @@ EncodeAuctionUpdateMessage(message) ==
         \o message.auctionOnlyPrice
 
 DecodeAuctionUpdateMessage(bytes) ==
-    LET stockSymbol == ReadBytes(bytes, 8) IN IF ~stockSymbol.ok THEN Fail ELSE
+    LET timeOffset == ReadBytes(bytes, 4) IN IF ~timeOffset.ok THEN Fail ELSE
+    LET stockSymbol == ReadBytes(timeOffset.rest, 8) IN IF ~stockSymbol.ok THEN Fail ELSE
     LET auctionType == ReadBytes(stockSymbol.rest, 1) IN IF ~auctionType.ok THEN Fail ELSE
     LET referencePrice == ReadBytes(auctionType.rest, 8) IN IF ~referencePrice.ok THEN Fail ELSE
     LET buyShares == ReadBytes(referencePrice.rest, 4) IN IF ~buyShares.ok THEN Fail ELSE
     LET sellShares == ReadBytes(buyShares.rest, 4) IN IF ~sellShares.ok THEN Fail ELSE
     LET indicativePrice == ReadBytes(sellShares.rest, 8) IN IF ~indicativePrice.ok THEN Fail ELSE
     LET auctionOnlyPrice == ReadBytes(indicativePrice.rest, 8) IN IF ~auctionOnlyPrice.ok THEN Fail ELSE
-    Ok([ stockSymbol      |-> stockSymbol.value,
+    Ok([ timeOffset       |-> timeOffset.value,
+         stockSymbol      |-> stockSymbol.value,
          auctionType      |-> auctionType.value,
          referencePrice   |-> referencePrice.value,
          buyShares        |-> buyShares.value,
@@ -969,7 +973,8 @@ DecodeAuctionUpdateMessage(bytes) ==
          auctionOnlyPrice |-> auctionOnlyPrice.value ], auctionOnlyPrice.rest)
 
 ZeroAuctionUpdateMessage ==
-    [ stockSymbol      |-> [i \in 1 .. 8 |-> 0],
+    [ timeOffset       |-> [i \in 1 .. 4 |-> 0],
+      stockSymbol      |-> [i \in 1 .. 8 |-> 0],
       auctionType      |-> [i \in 1 .. 1 |-> 0],
       referencePrice   |-> [i \in 1 .. 8 |-> 0],
       buyShares        |-> [i \in 1 .. 4 |-> 0],
@@ -980,6 +985,7 @@ ZeroAuctionUpdateMessage ==
 (* Auction Update Message at zero, then each field in turn at the values it is checked at *)
 CheckedAuctionUpdateMessage ==
     { ZeroAuctionUpdateMessage }
+        \cup { [ZeroAuctionUpdateMessage EXCEPT !.timeOffset = one] : one \in Sample(4) }
         \cup { [ZeroAuctionUpdateMessage EXCEPT !.stockSymbol = one] : one \in Sample(8) }
         \cup { [ZeroAuctionUpdateMessage EXCEPT !.auctionType = one] : one \in Sample(1) }
         \cup { [ZeroAuctionUpdateMessage EXCEPT !.referencePrice = one] : one \in Sample(8) }

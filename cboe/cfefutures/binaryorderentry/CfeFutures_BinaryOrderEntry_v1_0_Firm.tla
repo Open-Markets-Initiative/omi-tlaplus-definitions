@@ -228,10 +228,10 @@ CheckedPreventMatch ==
         \cup { [ZeroPreventMatch EXCEPT !.tradingGroupId = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* New Order Message: 129 bytes                                            *)
+(* New Order: 129 bytes                                                    *)
 (***************************************************************************)
 
-NewOrderMessage ==
+NewOrder ==
     [ clOrdId               : Sample(20),
       side                  : Sample(1),
       orderQty              : Sample(4),
@@ -257,7 +257,7 @@ NewOrderMessage ==
       frequentTraderId      : Sample(6),
       custOrderHandlingInst : Sample(1) ]
 
-EncodeNewOrderMessage(message) ==
+EncodeNewOrder(message) ==
     message.clOrdId
         \o message.side
         \o message.orderQty
@@ -283,7 +283,7 @@ EncodeNewOrderMessage(message) ==
         \o message.frequentTraderId
         \o message.custOrderHandlingInst
 
-DecodeNewOrderMessage(bytes) ==
+DecodeNewOrder(bytes) ==
     LET clOrdId == ReadBytes(bytes, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET side == ReadBytes(clOrdId.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET orderQty == ReadBytes(side.rest, 4) IN IF ~orderQty.ok THEN Fail ELSE
@@ -333,7 +333,7 @@ DecodeNewOrderMessage(bytes) ==
          frequentTraderId      |-> frequentTraderId.value,
          custOrderHandlingInst |-> custOrderHandlingInst.value ], custOrderHandlingInst.rest)
 
-ZeroNewOrderMessage ==
+ZeroNewOrder ==
     [ clOrdId               |-> [i \in 1 .. 20 |-> 0],
       side                  |-> [i \in 1 .. 1 |-> 0],
       orderQty              |-> [i \in 1 .. 4 |-> 0],
@@ -359,39 +359,39 @@ ZeroNewOrderMessage ==
       frequentTraderId      |-> [i \in 1 .. 6 |-> 0],
       custOrderHandlingInst |-> [i \in 1 .. 1 |-> 0] ]
 
-(* New Order Message at zero, then each field in turn at the values it is checked at *)
-CheckedNewOrderMessage ==
-    { ZeroNewOrderMessage }
-        \cup { [ZeroNewOrderMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.orderQty = one] : one \in Sample(4) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.clearingAccount = one] : one \in Sample(4) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.ordType = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.timeInForce = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.minQty = one] : one \in Sample(4) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.symbol = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.capacity = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.account = one] : one \in Sample(16) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.preventMatch = one] : one \in CheckedPreventMatch }
-        \cup { [ZeroNewOrderMessage EXCEPT !.expireTime = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.maturityDate = one] : one \in Sample(4) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.openClose = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.cmtaNumber = one] : one \in Sample(4) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.stopPx = one] : one \in Sample(8) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.customGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.ctiCode = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.oeoId = one] : one \in Sample(18) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.frequentTraderId = one] : one \in Sample(6) }
-        \cup { [ZeroNewOrderMessage EXCEPT !.custOrderHandlingInst = one] : one \in Sample(1) }
+(* New Order at zero, then each field in turn at the values it is checked at *)
+CheckedNewOrder ==
+    { ZeroNewOrder }
+        \cup { [ZeroNewOrder EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroNewOrder EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrder EXCEPT !.orderQty = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrder EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrder EXCEPT !.clearingAccount = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrder EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrder EXCEPT !.ordType = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrder EXCEPT !.timeInForce = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrder EXCEPT !.minQty = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrder EXCEPT !.symbol = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrder EXCEPT !.capacity = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrder EXCEPT !.account = one] : one \in Sample(16) }
+        \cup { [ZeroNewOrder EXCEPT !.preventMatch = one] : one \in CheckedPreventMatch }
+        \cup { [ZeroNewOrder EXCEPT !.expireTime = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrder EXCEPT !.maturityDate = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrder EXCEPT !.openClose = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrder EXCEPT !.cmtaNumber = one] : one \in Sample(4) }
+        \cup { [ZeroNewOrder EXCEPT !.stopPx = one] : one \in Sample(8) }
+        \cup { [ZeroNewOrder EXCEPT !.customGroupId = one] : one \in Sample(2) }
+        \cup { [ZeroNewOrder EXCEPT !.ctiCode = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrder EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroNewOrder EXCEPT !.oeoId = one] : one \in Sample(18) }
+        \cup { [ZeroNewOrder EXCEPT !.frequentTraderId = one] : one \in Sample(6) }
+        \cup { [ZeroNewOrder EXCEPT !.custOrderHandlingInst = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Modify Order Message: 92 bytes                                          *)
+(* Modify Order: 92 bytes                                                  *)
 (***************************************************************************)
 
-ModifyOrderMessage ==
+ModifyOrder ==
     [ clOrdId               : Sample(20),
       origClOrdId           : Sample(20),
       clearingFirm          : Sample(4),
@@ -405,7 +405,7 @@ ModifyOrderMessage ==
       frequentTraderId      : Sample(6),
       custOrderHandlingInst : Sample(1) ]
 
-EncodeModifyOrderMessage(message) ==
+EncodeModifyOrder(message) ==
     message.clOrdId
         \o message.origClOrdId
         \o message.clearingFirm
@@ -419,7 +419,7 @@ EncodeModifyOrderMessage(message) ==
         \o message.frequentTraderId
         \o message.custOrderHandlingInst
 
-DecodeModifyOrderMessage(bytes) ==
+DecodeModifyOrder(bytes) ==
     LET clOrdId == ReadBytes(bytes, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET origClOrdId == ReadBytes(clOrdId.rest, 20) IN IF ~origClOrdId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(origClOrdId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
@@ -445,7 +445,7 @@ DecodeModifyOrderMessage(bytes) ==
          frequentTraderId      |-> frequentTraderId.value,
          custOrderHandlingInst |-> custOrderHandlingInst.value ], custOrderHandlingInst.rest)
 
-ZeroModifyOrderMessage ==
+ZeroModifyOrder ==
     [ clOrdId               |-> [i \in 1 .. 20 |-> 0],
       origClOrdId           |-> [i \in 1 .. 20 |-> 0],
       clearingFirm          |-> [i \in 1 .. 4 |-> 0],
@@ -459,39 +459,39 @@ ZeroModifyOrderMessage ==
       frequentTraderId      |-> [i \in 1 .. 6 |-> 0],
       custOrderHandlingInst |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Modify Order Message at zero, then each field in turn at the values it is checked at *)
-CheckedModifyOrderMessage ==
-    { ZeroModifyOrderMessage }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.origClOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.orderQty = one] : one \in Sample(4) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.ordType = one] : one \in Sample(1) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.cancelOrigOnReject = one] : one \in Sample(1) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.stopPx = one] : one \in Sample(8) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.oeoId = one] : one \in Sample(18) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.frequentTraderId = one] : one \in Sample(6) }
-        \cup { [ZeroModifyOrderMessage EXCEPT !.custOrderHandlingInst = one] : one \in Sample(1) }
+(* Modify Order at zero, then each field in turn at the values it is checked at *)
+CheckedModifyOrder ==
+    { ZeroModifyOrder }
+        \cup { [ZeroModifyOrder EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroModifyOrder EXCEPT !.origClOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroModifyOrder EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroModifyOrder EXCEPT !.orderQty = one] : one \in Sample(4) }
+        \cup { [ZeroModifyOrder EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroModifyOrder EXCEPT !.ordType = one] : one \in Sample(1) }
+        \cup { [ZeroModifyOrder EXCEPT !.cancelOrigOnReject = one] : one \in Sample(1) }
+        \cup { [ZeroModifyOrder EXCEPT !.stopPx = one] : one \in Sample(8) }
+        \cup { [ZeroModifyOrder EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroModifyOrder EXCEPT !.oeoId = one] : one \in Sample(18) }
+        \cup { [ZeroModifyOrder EXCEPT !.frequentTraderId = one] : one \in Sample(6) }
+        \cup { [ZeroModifyOrder EXCEPT !.custOrderHandlingInst = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Cancel Order Message: 43 bytes                                          *)
+(* Cancel Order: 43 bytes                                                  *)
 (***************************************************************************)
 
-CancelOrderMessage ==
+CancelOrder ==
     [ origClOrdId          : Sample(20),
       clearingFirm         : Sample(4),
       manualOrderIndicator : Sample(1),
       oeoId                : Sample(18) ]
 
-EncodeCancelOrderMessage(message) ==
+EncodeCancelOrder(message) ==
     message.origClOrdId
         \o message.clearingFirm
         \o message.manualOrderIndicator
         \o message.oeoId
 
-DecodeCancelOrderMessage(bytes) ==
+DecodeCancelOrder(bytes) ==
     LET origClOrdId == ReadBytes(bytes, 20) IN IF ~origClOrdId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(origClOrdId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
     LET manualOrderIndicator == ReadBytes(clearingFirm.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
@@ -501,19 +501,19 @@ DecodeCancelOrderMessage(bytes) ==
          manualOrderIndicator |-> manualOrderIndicator.value,
          oeoId                |-> oeoId.value ], oeoId.rest)
 
-ZeroCancelOrderMessage ==
+ZeroCancelOrder ==
     [ origClOrdId          |-> [i \in 1 .. 20 |-> 0],
       clearingFirm         |-> [i \in 1 .. 4 |-> 0],
       manualOrderIndicator |-> [i \in 1 .. 1 |-> 0],
       oeoId                |-> [i \in 1 .. 18 |-> 0] ]
 
-(* Cancel Order Message at zero, then each field in turn at the values it is checked at *)
-CheckedCancelOrderMessage ==
-    { ZeroCancelOrderMessage }
-        \cup { [ZeroCancelOrderMessage EXCEPT !.origClOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroCancelOrderMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroCancelOrderMessage EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroCancelOrderMessage EXCEPT !.oeoId = one] : one \in Sample(18) }
+(* Cancel Order at zero, then each field in turn at the values it is checked at *)
+CheckedCancelOrder ==
+    { ZeroCancelOrder }
+        \cup { [ZeroCancelOrder EXCEPT !.origClOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroCancelOrder EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroCancelOrder EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroCancelOrder EXCEPT !.oeoId = one] : one \in Sample(18) }
 
 (***************************************************************************)
 (* Mass Cancel Inst: 16 bytes                                              *)
@@ -568,10 +568,10 @@ CheckedMassCancelInst ==
         \cup { [ZeroMassCancelInst EXCEPT !.instructionDetails = one] : one \in Sample(11) }
 
 (***************************************************************************)
-(* Mass Cancel Order Message: 65 bytes                                     *)
+(* Mass Cancel Order: 65 bytes                                             *)
 (***************************************************************************)
 
-MassCancelOrderMessage ==
+MassCancelOrder ==
     [ massCancelId         : Sample(20),
       clearingFirm         : Sample(4),
       productName          : Sample(6),
@@ -579,7 +579,7 @@ MassCancelOrderMessage ==
       manualOrderIndicator : Sample(1),
       oeoId                : Sample(18) ]
 
-EncodeMassCancelOrderMessage(message) ==
+EncodeMassCancelOrder(message) ==
     message.massCancelId
         \o message.clearingFirm
         \o message.productName
@@ -587,7 +587,7 @@ EncodeMassCancelOrderMessage(message) ==
         \o message.manualOrderIndicator
         \o message.oeoId
 
-DecodeMassCancelOrderMessage(bytes) ==
+DecodeMassCancelOrder(bytes) ==
     LET massCancelId == ReadBytes(bytes, 20) IN IF ~massCancelId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(massCancelId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
     LET productName == ReadBytes(clearingFirm.rest, 6) IN IF ~productName.ok THEN Fail ELSE
@@ -601,7 +601,7 @@ DecodeMassCancelOrderMessage(bytes) ==
          manualOrderIndicator |-> manualOrderIndicator.value,
          oeoId                |-> oeoId.value ], oeoId.rest)
 
-ZeroMassCancelOrderMessage ==
+ZeroMassCancelOrder ==
     [ massCancelId         |-> [i \in 1 .. 20 |-> 0],
       clearingFirm         |-> [i \in 1 .. 4 |-> 0],
       productName          |-> [i \in 1 .. 6 |-> 0],
@@ -609,15 +609,15 @@ ZeroMassCancelOrderMessage ==
       manualOrderIndicator |-> [i \in 1 .. 1 |-> 0],
       oeoId                |-> [i \in 1 .. 18 |-> 0] ]
 
-(* Mass Cancel Order Message at zero, then each field in turn at the values it is checked at *)
-CheckedMassCancelOrderMessage ==
-    { ZeroMassCancelOrderMessage }
-        \cup { [ZeroMassCancelOrderMessage EXCEPT !.massCancelId = one] : one \in Sample(20) }
-        \cup { [ZeroMassCancelOrderMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroMassCancelOrderMessage EXCEPT !.productName = one] : one \in Sample(6) }
-        \cup { [ZeroMassCancelOrderMessage EXCEPT !.massCancelInst = one] : one \in CheckedMassCancelInst }
-        \cup { [ZeroMassCancelOrderMessage EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroMassCancelOrderMessage EXCEPT !.oeoId = one] : one \in Sample(18) }
+(* Mass Cancel Order at zero, then each field in turn at the values it is checked at *)
+CheckedMassCancelOrder ==
+    { ZeroMassCancelOrder }
+        \cup { [ZeroMassCancelOrder EXCEPT !.massCancelId = one] : one \in Sample(20) }
+        \cup { [ZeroMassCancelOrder EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroMassCancelOrder EXCEPT !.productName = one] : one \in Sample(6) }
+        \cup { [ZeroMassCancelOrder EXCEPT !.massCancelInst = one] : one \in CheckedMassCancelInst }
+        \cup { [ZeroMassCancelOrder EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroMassCancelOrder EXCEPT !.oeoId = one] : one \in Sample(18) }
 
 (***************************************************************************)
 (* Mass Cancel Inst: 16 bytes                                              *)
@@ -672,37 +672,37 @@ CheckedMassCancelInst2 ==
         \cup { [ZeroMassCancelInst2 EXCEPT !.instructionDetails = one] : one \in Sample(11) }
 
 (***************************************************************************)
-(* Purge Orders Message: 68 bytes                                          *)
+(* Purge Orders: 68 bytes                                                  *)
 (***************************************************************************)
 
-PurgeOrdersMessage ==
+PurgeOrders ==
     [ massCancelId         : Sample(20),
       clearingFirm         : Sample(4),
       productName          : Sample(6),
       massCancelInst       : MassCancelInst2,
       manualOrderIndicator : Sample(1),
       oeoId                : Sample(18),
-      customGroupIdCnt     : 0 .. 255,
+      customGroupIdCnt     : Sample(1),
       customGroupId        : Sample(2) ]
 
-EncodePurgeOrdersMessage(message) ==
+EncodePurgeOrders(message) ==
     message.massCancelId
         \o message.clearingFirm
         \o message.productName
         \o EncodeMassCancelInst2(message.massCancelInst)
         \o message.manualOrderIndicator
         \o message.oeoId
-        \o EncodeUIntBE(message.customGroupIdCnt, 1)
+        \o message.customGroupIdCnt
         \o message.customGroupId
 
-DecodePurgeOrdersMessage(bytes) ==
+DecodePurgeOrders(bytes) ==
     LET massCancelId == ReadBytes(bytes, 20) IN IF ~massCancelId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(massCancelId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
     LET productName == ReadBytes(clearingFirm.rest, 6) IN IF ~productName.ok THEN Fail ELSE
     LET massCancelInst == DecodeMassCancelInst2(productName.rest) IN IF ~massCancelInst.ok THEN Fail ELSE
     LET manualOrderIndicator == ReadBytes(massCancelInst.rest, 1) IN IF ~manualOrderIndicator.ok THEN Fail ELSE
     LET oeoId == ReadBytes(manualOrderIndicator.rest, 18) IN IF ~oeoId.ok THEN Fail ELSE
-    LET customGroupIdCnt == ReadUIntBE(oeoId.rest, 1) IN IF ~customGroupIdCnt.ok THEN Fail ELSE
+    LET customGroupIdCnt == ReadBytes(oeoId.rest, 1) IN IF ~customGroupIdCnt.ok THEN Fail ELSE
     LET customGroupId == ReadBytes(customGroupIdCnt.rest, 2) IN IF ~customGroupId.ok THEN Fail ELSE
     Ok([ massCancelId         |-> massCancelId.value,
          clearingFirm         |-> clearingFirm.value,
@@ -713,27 +713,27 @@ DecodePurgeOrdersMessage(bytes) ==
          customGroupIdCnt     |-> customGroupIdCnt.value,
          customGroupId        |-> customGroupId.value ], customGroupId.rest)
 
-ZeroPurgeOrdersMessage ==
+ZeroPurgeOrders ==
     [ massCancelId         |-> [i \in 1 .. 20 |-> 0],
       clearingFirm         |-> [i \in 1 .. 4 |-> 0],
       productName          |-> [i \in 1 .. 6 |-> 0],
       massCancelInst       |-> ZeroMassCancelInst2,
       manualOrderIndicator |-> [i \in 1 .. 1 |-> 0],
       oeoId                |-> [i \in 1 .. 18 |-> 0],
-      customGroupIdCnt     |-> 0,
+      customGroupIdCnt     |-> [i \in 1 .. 1 |-> 0],
       customGroupId        |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Purge Orders Message at zero, then each field in turn at the values it is checked at *)
-CheckedPurgeOrdersMessage ==
-    { ZeroPurgeOrdersMessage }
-        \cup { [ZeroPurgeOrdersMessage EXCEPT !.massCancelId = one] : one \in Sample(20) }
-        \cup { [ZeroPurgeOrdersMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroPurgeOrdersMessage EXCEPT !.productName = one] : one \in Sample(6) }
-        \cup { [ZeroPurgeOrdersMessage EXCEPT !.massCancelInst = one] : one \in CheckedMassCancelInst2 }
-        \cup { [ZeroPurgeOrdersMessage EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroPurgeOrdersMessage EXCEPT !.oeoId = one] : one \in Sample(18) }
-        \cup { [ZeroPurgeOrdersMessage EXCEPT !.customGroupIdCnt = one] : one \in {0, 1, 255} }
-        \cup { [ZeroPurgeOrdersMessage EXCEPT !.customGroupId = one] : one \in Sample(2) }
+(* Purge Orders at zero, then each field in turn at the values it is checked at *)
+CheckedPurgeOrders ==
+    { ZeroPurgeOrders }
+        \cup { [ZeroPurgeOrders EXCEPT !.massCancelId = one] : one \in Sample(20) }
+        \cup { [ZeroPurgeOrders EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroPurgeOrders EXCEPT !.productName = one] : one \in Sample(6) }
+        \cup { [ZeroPurgeOrders EXCEPT !.massCancelInst = one] : one \in CheckedMassCancelInst2 }
+        \cup { [ZeroPurgeOrders EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroPurgeOrders EXCEPT !.oeoId = one] : one \in Sample(18) }
+        \cup { [ZeroPurgeOrders EXCEPT !.customGroupIdCnt = one] : one \in Sample(1) }
+        \cup { [ZeroPurgeOrders EXCEPT !.customGroupId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Quote Update Group: 20 bytes                                            *)
@@ -803,10 +803,10 @@ ReadQuoteUpdateGroupList(bytes, count) ==
 OneQuoteUpdateGroup == { ZeroQuoteUpdateGroup }
 
 (***************************************************************************)
-(* Quote Update Message                                                    *)
+(* Quote Update                                                            *)
 (***************************************************************************)
 
-QuoteUpdateMessage ==
+QuoteUpdate ==
     [ quoteUpdateId        : Sample(16),
       clearingFirm         : Sample(4),
       clearingAccount      : Sample(4),
@@ -820,7 +820,7 @@ QuoteUpdateMessage ==
       sizeModifier         : Sample(1),
       quoteUpdateGroup     : SampleLists(OneQuoteUpdateGroup) ]
 
-EncodeQuoteUpdateMessage(message) ==
+EncodeQuoteUpdate(message) ==
     message.quoteUpdateId
         \o message.clearingFirm
         \o message.clearingAccount
@@ -835,7 +835,7 @@ EncodeQuoteUpdateMessage(message) ==
         \o EncodeUIntBE(Len(message.quoteUpdateGroup), 1)
         \o EncodeQuoteUpdateGroupList(message.quoteUpdateGroup)
 
-DecodeQuoteUpdateMessage(bytes) ==
+DecodeQuoteUpdate(bytes) ==
     LET quoteUpdateId == ReadBytes(bytes, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(quoteUpdateId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
     LET clearingAccount == ReadBytes(clearingFirm.rest, 4) IN IF ~clearingAccount.ok THEN Fail ELSE
@@ -862,7 +862,7 @@ DecodeQuoteUpdateMessage(bytes) ==
          sizeModifier         |-> sizeModifier.value,
          quoteUpdateGroup     |-> quoteUpdateGroup.value ], quoteUpdateGroup.rest)
 
-ZeroQuoteUpdateMessage ==
+ZeroQuoteUpdate ==
     [ quoteUpdateId        |-> [i \in 1 .. 16 |-> 0],
       clearingFirm         |-> [i \in 1 .. 4 |-> 0],
       clearingAccount      |-> [i \in 1 .. 4 |-> 0],
@@ -876,41 +876,41 @@ ZeroQuoteUpdateMessage ==
       sizeModifier         |-> [i \in 1 .. 1 |-> 0],
       quoteUpdateGroup     |-> << >> ]
 
-(* Quote Update Message at zero, then each field in turn at the values it is checked at *)
-CheckedQuoteUpdateMessage ==
-    { ZeroQuoteUpdateMessage }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.clearingAccount = one] : one \in Sample(4) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.cmtaNumber = one] : one \in Sample(4) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.account = one] : one \in Sample(16) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.customGroupId = one] : one \in Sample(2) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.capacity = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.ctiCode = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.oeoId = one] : one \in Sample(18) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.sizeModifier = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteUpdateMessage EXCEPT !.quoteUpdateGroup = one] : one \in SampleLists(OneQuoteUpdateGroup) }
+(* Quote Update at zero, then each field in turn at the values it is checked at *)
+CheckedQuoteUpdate ==
+    { ZeroQuoteUpdate }
+        \cup { [ZeroQuoteUpdate EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.clearingAccount = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.cmtaNumber = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.account = one] : one \in Sample(16) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.customGroupId = one] : one \in Sample(2) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.capacity = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.ctiCode = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.oeoId = one] : one \in Sample(18) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.sizeModifier = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteUpdate EXCEPT !.quoteUpdateGroup = one] : one \in SampleLists(OneQuoteUpdateGroup) }
 
 (***************************************************************************)
-(* Reset Risk Message: 36 bytes                                            *)
+(* Reset Risk: 36 bytes                                                    *)
 (***************************************************************************)
 
-ResetRiskMessage ==
+ResetRisk ==
     [ riskStatusId  : Sample(16),
       riskReset     : Sample(8),
       clearingFirm  : Sample(4),
       productName   : Sample(6),
       customGroupId : Sample(2) ]
 
-EncodeResetRiskMessage(message) ==
+EncodeResetRisk(message) ==
     message.riskStatusId
         \o message.riskReset
         \o message.clearingFirm
         \o message.productName
         \o message.customGroupId
 
-DecodeResetRiskMessage(bytes) ==
+DecodeResetRisk(bytes) ==
     LET riskStatusId == ReadBytes(bytes, 16) IN IF ~riskStatusId.ok THEN Fail ELSE
     LET riskReset == ReadBytes(riskStatusId.rest, 8) IN IF ~riskReset.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(riskReset.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
@@ -922,21 +922,21 @@ DecodeResetRiskMessage(bytes) ==
          productName   |-> productName.value,
          customGroupId |-> customGroupId.value ], customGroupId.rest)
 
-ZeroResetRiskMessage ==
+ZeroResetRisk ==
     [ riskStatusId  |-> [i \in 1 .. 16 |-> 0],
       riskReset     |-> [i \in 1 .. 8 |-> 0],
       clearingFirm  |-> [i \in 1 .. 4 |-> 0],
       productName   |-> [i \in 1 .. 6 |-> 0],
       customGroupId |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Reset Risk Message at zero, then each field in turn at the values it is checked at *)
-CheckedResetRiskMessage ==
-    { ZeroResetRiskMessage }
-        \cup { [ZeroResetRiskMessage EXCEPT !.riskStatusId = one] : one \in Sample(16) }
-        \cup { [ZeroResetRiskMessage EXCEPT !.riskReset = one] : one \in Sample(8) }
-        \cup { [ZeroResetRiskMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroResetRiskMessage EXCEPT !.productName = one] : one \in Sample(6) }
-        \cup { [ZeroResetRiskMessage EXCEPT !.customGroupId = one] : one \in Sample(2) }
+(* Reset Risk at zero, then each field in turn at the values it is checked at *)
+CheckedResetRisk ==
+    { ZeroResetRisk }
+        \cup { [ZeroResetRisk EXCEPT !.riskStatusId = one] : one \in Sample(16) }
+        \cup { [ZeroResetRisk EXCEPT !.riskReset = one] : one \in Sample(8) }
+        \cup { [ZeroResetRisk EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroResetRisk EXCEPT !.productName = one] : one \in Sample(6) }
+        \cup { [ZeroResetRisk EXCEPT !.customGroupId = one] : one \in Sample(2) }
 
 (***************************************************************************)
 (* Firm Message, selected by Firm Message Type                             *)
@@ -945,50 +945,50 @@ CheckedResetRiskMessage ==
 LoginRequestMessageCode == 1  \* 0x01
 LogoutRequestCode == 2  \* 0x02
 ClientHeartbeatCode == 3  \* 0x03
-NewOrderMessageCode == 1001  \* 0x3e9
-ModifyOrderMessageCode == 1002  \* 0x3ea
-CancelOrderMessageCode == 1003  \* 0x3eb
-MassCancelOrderMessageCode == 1004  \* 0x3ec
-PurgeOrdersMessageCode == 1005  \* 0x3ed
-QuoteUpdateMessageCode == 1006  \* 0x3ee
-ResetRiskMessageCode == 1007  \* 0x3ef
+NewOrderCode == 1001  \* 0x3e9
+ModifyOrderCode == 1002  \* 0x3ea
+CancelOrderCode == 1003  \* 0x3eb
+MassCancelOrderCode == 1004  \* 0x3ec
+PurgeOrdersCode == 1005  \* 0x3ed
+QuoteUpdateCode == 1006  \* 0x3ee
+ResetRiskCode == 1007  \* 0x3ef
 
 FirmMessage ==
     [ tag : {LoginRequestMessageCode}, body : LoginRequestMessage ]
         \cup [ tag : {LogoutRequestCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {ClientHeartbeatCode}, body : {[empty |-> 0]} ]
-        \cup [ tag : {NewOrderMessageCode}, body : NewOrderMessage ]
-        \cup [ tag : {ModifyOrderMessageCode}, body : ModifyOrderMessage ]
-        \cup [ tag : {CancelOrderMessageCode}, body : CancelOrderMessage ]
-        \cup [ tag : {MassCancelOrderMessageCode}, body : MassCancelOrderMessage ]
-        \cup [ tag : {PurgeOrdersMessageCode}, body : PurgeOrdersMessage ]
-        \cup [ tag : {QuoteUpdateMessageCode}, body : QuoteUpdateMessage ]
-        \cup [ tag : {ResetRiskMessageCode}, body : ResetRiskMessage ]
+        \cup [ tag : {NewOrderCode}, body : NewOrder ]
+        \cup [ tag : {ModifyOrderCode}, body : ModifyOrder ]
+        \cup [ tag : {CancelOrderCode}, body : CancelOrder ]
+        \cup [ tag : {MassCancelOrderCode}, body : MassCancelOrder ]
+        \cup [ tag : {PurgeOrdersCode}, body : PurgeOrders ]
+        \cup [ tag : {QuoteUpdateCode}, body : QuoteUpdate ]
+        \cup [ tag : {ResetRiskCode}, body : ResetRisk ]
 
 EncodeFirmMessage(message) ==
     CASE message.tag = LoginRequestMessageCode -> EncodeLoginRequestMessage(message.body)
       [] message.tag = LogoutRequestCode -> << >>
       [] message.tag = ClientHeartbeatCode -> << >>
-      [] message.tag = NewOrderMessageCode -> EncodeNewOrderMessage(message.body)
-      [] message.tag = ModifyOrderMessageCode -> EncodeModifyOrderMessage(message.body)
-      [] message.tag = CancelOrderMessageCode -> EncodeCancelOrderMessage(message.body)
-      [] message.tag = MassCancelOrderMessageCode -> EncodeMassCancelOrderMessage(message.body)
-      [] message.tag = PurgeOrdersMessageCode -> EncodePurgeOrdersMessage(message.body)
-      [] message.tag = QuoteUpdateMessageCode -> EncodeQuoteUpdateMessage(message.body)
-      [] message.tag = ResetRiskMessageCode -> EncodeResetRiskMessage(message.body)
+      [] message.tag = NewOrderCode -> EncodeNewOrder(message.body)
+      [] message.tag = ModifyOrderCode -> EncodeModifyOrder(message.body)
+      [] message.tag = CancelOrderCode -> EncodeCancelOrder(message.body)
+      [] message.tag = MassCancelOrderCode -> EncodeMassCancelOrder(message.body)
+      [] message.tag = PurgeOrdersCode -> EncodePurgeOrders(message.body)
+      [] message.tag = QuoteUpdateCode -> EncodeQuoteUpdate(message.body)
+      [] message.tag = ResetRiskCode -> EncodeResetRisk(message.body)
 
 DecodeFirmMessage(tag, bytes) ==
     LET read ==
             CASE tag = LoginRequestMessageCode -> DecodeLoginRequestMessage(bytes)
               [] tag = LogoutRequestCode -> Ok([empty |-> 0], bytes)
               [] tag = ClientHeartbeatCode -> Ok([empty |-> 0], bytes)
-              [] tag = NewOrderMessageCode -> DecodeNewOrderMessage(bytes)
-              [] tag = ModifyOrderMessageCode -> DecodeModifyOrderMessage(bytes)
-              [] tag = CancelOrderMessageCode -> DecodeCancelOrderMessage(bytes)
-              [] tag = MassCancelOrderMessageCode -> DecodeMassCancelOrderMessage(bytes)
-              [] tag = PurgeOrdersMessageCode -> DecodePurgeOrdersMessage(bytes)
-              [] tag = QuoteUpdateMessageCode -> DecodeQuoteUpdateMessage(bytes)
-              [] tag = ResetRiskMessageCode -> DecodeResetRiskMessage(bytes)
+              [] tag = NewOrderCode -> DecodeNewOrder(bytes)
+              [] tag = ModifyOrderCode -> DecodeModifyOrder(bytes)
+              [] tag = CancelOrderCode -> DecodeCancelOrder(bytes)
+              [] tag = MassCancelOrderCode -> DecodeMassCancelOrder(bytes)
+              [] tag = PurgeOrdersCode -> DecodePurgeOrders(bytes)
+              [] tag = QuoteUpdateCode -> DecodeQuoteUpdate(bytes)
+              [] tag = ResetRiskCode -> DecodeResetRisk(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -999,13 +999,13 @@ CheckedFirmMessage ==
     { [tag |-> LoginRequestMessageCode, body |-> one] : one \in CheckedLoginRequestMessage }
         \cup { [tag |-> LogoutRequestCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> ClientHeartbeatCode, body |-> [empty |-> 0]] }
-        \cup { [tag |-> NewOrderMessageCode, body |-> one] : one \in CheckedNewOrderMessage }
-        \cup { [tag |-> ModifyOrderMessageCode, body |-> one] : one \in CheckedModifyOrderMessage }
-        \cup { [tag |-> CancelOrderMessageCode, body |-> one] : one \in CheckedCancelOrderMessage }
-        \cup { [tag |-> MassCancelOrderMessageCode, body |-> one] : one \in CheckedMassCancelOrderMessage }
-        \cup { [tag |-> PurgeOrdersMessageCode, body |-> one] : one \in CheckedPurgeOrdersMessage }
-        \cup { [tag |-> QuoteUpdateMessageCode, body |-> one] : one \in CheckedQuoteUpdateMessage }
-        \cup { [tag |-> ResetRiskMessageCode, body |-> one] : one \in CheckedResetRiskMessage }
+        \cup { [tag |-> NewOrderCode, body |-> one] : one \in CheckedNewOrder }
+        \cup { [tag |-> ModifyOrderCode, body |-> one] : one \in CheckedModifyOrder }
+        \cup { [tag |-> CancelOrderCode, body |-> one] : one \in CheckedCancelOrder }
+        \cup { [tag |-> MassCancelOrderCode, body |-> one] : one \in CheckedMassCancelOrder }
+        \cup { [tag |-> PurgeOrdersCode, body |-> one] : one \in CheckedPurgeOrders }
+        \cup { [tag |-> QuoteUpdateCode, body |-> one] : one \in CheckedQuoteUpdate }
+        \cup { [tag |-> ResetRiskCode, body |-> one] : one \in CheckedResetRisk }
 
 (***************************************************************************)
 (* Firm Packet                                                             *)
@@ -1101,26 +1101,26 @@ RoundTripPreventMatch ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every New Order Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripNewOrderMessage ==
-    \A message \in CheckedNewOrderMessage :
-        LET read == DecodeNewOrderMessage(EncodeNewOrderMessage(message))
+(* Every New Order decodes back to what was encoded, and leaves nothing over *)
+RoundTripNewOrder ==
+    \A message \in CheckedNewOrder :
+        LET read == DecodeNewOrder(EncodeNewOrder(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Modify Order Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripModifyOrderMessage ==
-    \A message \in CheckedModifyOrderMessage :
-        LET read == DecodeModifyOrderMessage(EncodeModifyOrderMessage(message))
+(* Every Modify Order decodes back to what was encoded, and leaves nothing over *)
+RoundTripModifyOrder ==
+    \A message \in CheckedModifyOrder :
+        LET read == DecodeModifyOrder(EncodeModifyOrder(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Cancel Order Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCancelOrderMessage ==
-    \A message \in CheckedCancelOrderMessage :
-        LET read == DecodeCancelOrderMessage(EncodeCancelOrderMessage(message))
+(* Every Cancel Order decodes back to what was encoded, and leaves nothing over *)
+RoundTripCancelOrder ==
+    \A message \in CheckedCancelOrder :
+        LET read == DecodeCancelOrder(EncodeCancelOrder(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -1133,10 +1133,10 @@ RoundTripMassCancelInst ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Cancel Order Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripMassCancelOrderMessage ==
-    \A message \in CheckedMassCancelOrderMessage :
-        LET read == DecodeMassCancelOrderMessage(EncodeMassCancelOrderMessage(message))
+(* Every Mass Cancel Order decodes back to what was encoded, and leaves nothing over *)
+RoundTripMassCancelOrder ==
+    \A message \in CheckedMassCancelOrder :
+        LET read == DecodeMassCancelOrder(EncodeMassCancelOrder(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -1149,10 +1149,10 @@ RoundTripMassCancelInst2 ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Purge Orders Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripPurgeOrdersMessage ==
-    \A message \in CheckedPurgeOrdersMessage :
-        LET read == DecodePurgeOrdersMessage(EncodePurgeOrdersMessage(message))
+(* Every Purge Orders decodes back to what was encoded, and leaves nothing over *)
+RoundTripPurgeOrders ==
+    \A message \in CheckedPurgeOrders :
+        LET read == DecodePurgeOrders(EncodePurgeOrders(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -1165,18 +1165,18 @@ RoundTripQuoteUpdateGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Quote Update Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripQuoteUpdateMessage ==
-    \A message \in CheckedQuoteUpdateMessage :
-        LET read == DecodeQuoteUpdateMessage(EncodeQuoteUpdateMessage(message))
+(* Every Quote Update decodes back to what was encoded, and leaves nothing over *)
+RoundTripQuoteUpdate ==
+    \A message \in CheckedQuoteUpdate :
+        LET read == DecodeQuoteUpdate(EncodeQuoteUpdate(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Reset Risk Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripResetRiskMessage ==
-    \A message \in CheckedResetRiskMessage :
-        LET read == DecodeResetRiskMessage(EncodeResetRiskMessage(message))
+(* Every Reset Risk decodes back to what was encoded, and leaves nothing over *)
+RoundTripResetRisk ==
+    \A message \in CheckedResetRisk :
+        LET read == DecodeResetRisk(EncodeResetRisk(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

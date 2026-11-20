@@ -1,11 +1,11 @@
---------- MODULE CfeFutures_BinaryOrderEntry_v1_1_20_Firm_Captures ---------
+---------- MODULE CfeFutures_BinaryOrderEntry_v1_0_Firm_Captures -----------
 (***************************************************************************)
-(* Recorded Chicago Board Options Exchange Futures Binary Order Entry      *)
-(* v1.1.20 packets, as the bytes they were captured as. Each one decodes,  *)
-(* consumes the whole packet, and encodes back to exactly the bytes it was *)
-(* read from.                                                              *)
+(* Recorded Chicago Board Options Exchange Futures Binary Order Entry v1.0 *)
+(* packets, as the bytes they were captured as. Each one decodes, consumes *)
+(* the whole packet, and encodes back to exactly the bytes it was read     *)
+(* from.                                                                   *)
 (***************************************************************************)
-EXTENDS CfeFutures_BinaryOrderEntry_v1_1_20_Firm
+EXTENDS CfeFutures_BinaryOrderEntry_v1_0_Firm
 
 ClientHeartbeatCapture ==
     << 176, 227, 10, 0, 3, 0, 0, 0, 0, 0, 0, 0 >>

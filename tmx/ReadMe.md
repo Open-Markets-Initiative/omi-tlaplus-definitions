@@ -5,7 +5,15 @@
 
 | Division | [Protocol][Omi.Tmx.Protocol.Definitions] | [Encoding][Omi.Encoding.Definitions] | Version | Transport | Date | Size | [Deployment][Omi.Glossary.Deployment] | [Testing][Omi.Glossary.Testing] | [Documentation][Omi.Tmx.Specifications] |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
+| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.11][Tmx.Mx.SolaMulticast.Hsvf.v1.11.Definition] |  | 1/23/2019 | 6,855 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.11.Url] |
+| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.12.2][Tmx.Mx.SolaMulticast.Hsvf.v1.12.2.Definition] |  | 6/18/2020 | 7,546 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.12.2.Url] |
+| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.13.3][Tmx.Mx.SolaMulticast.Hsvf.v1.13.3.Definition] |  | 10/5/2022 | 6,099 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.13.3.Url] |
+| [Mx][Mx.Exchange] | [SolaMulticast][Tmx.Mx.SolaMulticast] | [Hsvf][Omi.Encoding.Hsvf] | [1.14.1][Tmx.Mx.SolaMulticast.Hsvf.v1.14.1.Definition] |  | 2/5/2024 | 6,760 | [Active][Omi.Glossary.Deployment.Active] | [Verified][Omi.Glossary.Testing.Verified] | [url][Tmx.Mx.SolaMulticast.Hsvf.v1.14.1.Url] |
 | [Mx][Mx.Exchange] | [SolaOrderEntry][Tmx.Mx.SolaOrderEntry] | [Sail][Omi.Encoding.Sail] | 1.21 | [Firm][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Firm.Definition] [Exchange][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Exchange.Definition] | 6/18/2020 | 10,609 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaOrderEntry.Sail.v1.21.Url] |
+| [Mx][Mx.Exchange] | [SolaTcpRetransmission][Tmx.Mx.SolaTcpRetransmission] | [Hsvf][Omi.Encoding.Hsvf] | [1.11][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.11.Client.Definition] | [Client][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.11.Client.Definition] | 1/23/2019 | 431 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.11.Url] |
+| [Mx][Mx.Exchange] | [SolaTcpRetransmission][Tmx.Mx.SolaTcpRetransmission] | [Hsvf][Omi.Encoding.Hsvf] | [1.12.2][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.12.2.Client.Definition] | [Client][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.12.2.Client.Definition] | 6/18/2020 | 431 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.12.2.Url] |
+| [Mx][Mx.Exchange] | [SolaTcpRetransmission][Tmx.Mx.SolaTcpRetransmission] | [Hsvf][Omi.Encoding.Hsvf] | [1.13.3][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.13.3.Client.Definition] | [Client][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.13.3.Client.Definition] | 10/5/2022 | 431 | [Deprecated][Omi.Glossary.Deployment.Deprecated] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.13.3.Url] |
+| [Mx][Mx.Exchange] | [SolaTcpRetransmission][Tmx.Mx.SolaTcpRetransmission] | [Hsvf][Omi.Encoding.Hsvf] | [1.14.1][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.14.1.Client.Definition] | [Client][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.14.1.Client.Definition] | 2/5/2024 | 431 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.14.1.Url] |
 | [Tsx][Tsx.Exchange] | [GlobalFx][Tmx.Tsx.GlobalFx] | [Gfx][Omi.Encoding.Gfx] | [1.0][Tmx.Tsx.GlobalFx.Gfx.v1.0.Definition] |  | 5/20/2016 | 415 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.GlobalFx.Gfx.v1.0.Url] |
 | [Tsx][Tsx.Exchange] | [IndexFeed][Tmx.Tsx.IndexFeed] | [Qrtmd][Omi.Encoding.Qrtmd] | [1.19][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Definition] |  | 10/12/2021 | 391 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Url] |
 | [Tsx][Tsx.Exchange] | [Level1][Tmx.Tsx.Level1] | [Qrtmd][Omi.Encoding.Qrtmd] | [2.8][Tmx.Tsx.Level1.Qrtmd.v2.8.Definition] |  | 8/10/2021 | 1,429 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Tmx.Tsx.Level1.Qrtmd.v2.8.Url] |
@@ -38,6 +46,7 @@
 [Omi.Encoding.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Protocols/ReadMe.md "Encoding Directory"
 [Omi.Tmx.Protocol.Definitions]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Tmx/Protocols "Tmx Protocol Directory"
 [Omi.Tmx.Specifications]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Tmx/Specifications "Tmx Specifications Directory"
+[Omi.Encoding.Hsvf]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Hsvf.md "Hsvf Encoding"
 [Omi.Encoding.Sail]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Sail.md "Sail Encoding"
 [Omi.Encoding.Gfx]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Gfx.md "Gfx Encoding"
 [Omi.Encoding.Qrtmd]: https://github.com/Open-Markets-Initiative/Directory/blob/main/Protocols/Qrtmd.md "Qrtmd Encoding"
@@ -45,7 +54,9 @@
 [Mx.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Tmx/Protocols/Mx "Tmx Mx"
 [Tsx.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Tmx/Protocols/Tsx "Tmx Tsx"
 [TsxAlpha.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Tmx/Protocols/TsxAlpha "Tmx TsxAlpha"
+[Tmx.Mx.SolaMulticast]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Mx/SolaMulticast.md "Sola Multicast"
 [Tmx.Mx.SolaOrderEntry]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Mx/SolaOrderEntry.md "Sola Order Entry"
+[Tmx.Mx.SolaTcpRetransmission]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Mx/SolaTcpRetransmission.md "Sola Tcp Retransmission"
 [Tmx.Tsx.GlobalFx]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Tsx/GlobalFx.md "Global Fx Feed"
 [Tmx.Tsx.IndexFeed]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Tsx/IndexFeed.md "Index Feed"
 [Tmx.Tsx.Level1]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/Tsx/Level1.md "Level 1"
@@ -55,9 +66,25 @@
 [Tmx.TsxAlpha.QuantumFeedLevel1Recovery]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/TsxAlpha/QuantumFeedLevel1Recovery.md "Quantum Feed Level 1 Recovery"
 [Tmx.TsxAlpha.QuantumFeedLevel2Recovery]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Tmx/Protocols/TsxAlpha/QuantumFeedLevel2Recovery.md "Quantum Feed Level 2 Recovery"
 
+[Tmx.Mx.SolaMulticast.Hsvf.v1.11.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solamulticast/Mx_SolaMulticast_v1_11.tla "Tmx Mx SolaMulticast Hsvf v1.11 Tla Definition"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.11.Url]: https://www.tmxwebstore.com/products/mx-market-data "TMX Group 1.11 Url"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.12.2.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solamulticast/Mx_SolaMulticast_v1_12_2.tla "Tmx Mx SolaMulticast Hsvf v1.12.2 Tla Definition"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.12.2.Url]: https://www.tmxwebstore.com/products/mx-market-data "TMX Group 1.12.2 Url"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.13.3.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solamulticast/Mx_SolaMulticast_v1_13_3.tla "Tmx Mx SolaMulticast Hsvf v1.13.3 Tla Definition"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.13.3.Url]: https://www.tmxwebstore.com/products/mx-market-data "TMX Group 1.13.3 Url"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.14.1.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solamulticast/Mx_SolaMulticast_v1_14_1.tla "Tmx Mx SolaMulticast Hsvf v1.14.1 Tla Definition"
+[Tmx.Mx.SolaMulticast.Hsvf.v1.14.1.Url]: https://www.tmxwebstore.com/products/mx-market-data "TMX Group 1.14.1 Url"
 [Tmx.Mx.SolaOrderEntry.Sail.v1.21.Firm.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solaorderentry/Mx_SolaOrderEntry_v1_21_Firm.tla "Tmx Mx SolaOrderEntry Sail v1.21 Tla Definition"
 [Tmx.Mx.SolaOrderEntry.Sail.v1.21.Url]: https://www.tmxwebstore.com/products/mx-order-entry "TMX Group 1.21 Url"
 [Tmx.Mx.SolaOrderEntry.Sail.v1.21.Exchange.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solaorderentry/Mx_SolaOrderEntry_v1_21_Exchange.tla "Tmx Mx SolaOrderEntry Sail v1.21 Tla Definition"
+[Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.11.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solatcpretransmission/Mx_SolaTcpRetransmission_v1_11_Client.tla "Tmx Mx SolaTcpRetransmission Hsvf v1.11 Tla Definition"
+[Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.11.Url]: https://www.tmxwebstore.com/products/mx-market-data "TMX Group 1.11 Url"
+[Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.12.2.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solatcpretransmission/Mx_SolaTcpRetransmission_v1_12_2_Client.tla "Tmx Mx SolaTcpRetransmission Hsvf v1.12.2 Tla Definition"
+[Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.12.2.Url]: https://www.tmxwebstore.com/products/mx-market-data "TMX Group 1.12.2 Url"
+[Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.13.3.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solatcpretransmission/Mx_SolaTcpRetransmission_v1_13_3_Client.tla "Tmx Mx SolaTcpRetransmission Hsvf v1.13.3 Tla Definition"
+[Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.13.3.Url]: https://www.tmxwebstore.com/products/mx-market-data "TMX Group 1.13.3 Url"
+[Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.14.1.Client.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/mx/solatcpretransmission/Mx_SolaTcpRetransmission_v1_14_1_Client.tla "Tmx Mx SolaTcpRetransmission Hsvf v1.14.1 Tla Definition"
+[Tmx.Mx.SolaTcpRetransmission.Hsvf.v1.14.1.Url]: https://www.tmxwebstore.com/products/mx-market-data "TMX Group 1.14.1 Url"
 [Tmx.Tsx.GlobalFx.Gfx.v1.0.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/tsx/globalfx/Tsx_GlobalFx_v1_0.tla "Tmx Tsx GlobalFx Gfx v1.0 Tla Definition"
 [Tmx.Tsx.GlobalFx.Gfx.v1.0.Url]: https://www.tmxwebstore.com/products/global-fx "TMX Group 1.0 Url"
 [Tmx.Tsx.IndexFeed.Qrtmd.v1.19.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/tmx/tsx/indexfeed/Tsx_IndexFeed_v1_19.tla "Tmx Tsx IndexFeed Qrtmd v1.19 Tla Definition"

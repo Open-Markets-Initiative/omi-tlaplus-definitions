@@ -819,83 +819,83 @@ CheckedFinalSettlementFuturesPrice ==
         \cup { [ZeroFinalSettlementFuturesPrice EXCEPT !.exponentOptional = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Eris Security Alt Id Group: 27 bytes                                    *)
+(* Eris Reference Data Security Alt Id Group: 27 bytes                     *)
 (***************************************************************************)
 
-ErisSecurityAltIdGroup ==
+ErisReferenceDataSecurityAltIdGroup ==
     [ securityAltId               : Sample(26),
       securityAltIdSourceOptional : Sample(1) ]
 
-EncodeErisSecurityAltIdGroup(message) ==
+EncodeErisReferenceDataSecurityAltIdGroup(message) ==
     message.securityAltId
         \o message.securityAltIdSourceOptional
 
-DecodeErisSecurityAltIdGroup(bytes) ==
+DecodeErisReferenceDataSecurityAltIdGroup(bytes) ==
     LET securityAltId == ReadBytes(bytes, 26) IN IF ~securityAltId.ok THEN Fail ELSE
     LET securityAltIdSourceOptional == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
     Ok([ securityAltId               |-> securityAltId.value,
          securityAltIdSourceOptional |-> securityAltIdSourceOptional.value ], securityAltIdSourceOptional.rest)
 
-ZeroErisSecurityAltIdGroup ==
+ZeroErisReferenceDataSecurityAltIdGroup ==
     [ securityAltId               |-> [i \in 1 .. 26 |-> 0],
       securityAltIdSourceOptional |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Eris Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
-CheckedErisSecurityAltIdGroup ==
-    { ZeroErisSecurityAltIdGroup }
-        \cup { [ZeroErisSecurityAltIdGroup EXCEPT !.securityAltId = one] : one \in Sample(26) }
-        \cup { [ZeroErisSecurityAltIdGroup EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
+(* Eris Reference Data Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
+CheckedErisReferenceDataSecurityAltIdGroup ==
+    { ZeroErisReferenceDataSecurityAltIdGroup }
+        \cup { [ZeroErisReferenceDataSecurityAltIdGroup EXCEPT !.securityAltId = one] : one \in Sample(26) }
+        \cup { [ZeroErisReferenceDataSecurityAltIdGroup EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
 
-(* A run of Eris Security Alt Id Group, written one after another *)
-RECURSIVE EncodeErisSecurityAltIdGroupList(_)
-EncodeErisSecurityAltIdGroupList(messages) ==
+(* A run of Eris Reference Data Security Alt Id Group, written one after another *)
+RECURSIVE EncodeErisReferenceDataSecurityAltIdGroupList(_)
+EncodeErisReferenceDataSecurityAltIdGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeErisSecurityAltIdGroup(Head(messages)) \o EncodeErisSecurityAltIdGroupList(Tail(messages))
+    ELSE EncodeErisReferenceDataSecurityAltIdGroup(Head(messages)) \o EncodeErisReferenceDataSecurityAltIdGroupList(Tail(messages))
 
-(* As many Eris Security Alt Id Group as the field that counts them says *)
-RECURSIVE ReadErisSecurityAltIdGroupList(_, _)
-ReadErisSecurityAltIdGroupList(bytes, count) ==
+(* As many Eris Reference Data Security Alt Id Group as the field that counts them says *)
+RECURSIVE ReadErisReferenceDataSecurityAltIdGroupList(_, _)
+ReadErisReferenceDataSecurityAltIdGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeErisSecurityAltIdGroup(bytes)
+    ELSE LET one == DecodeErisReferenceDataSecurityAltIdGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadErisSecurityAltIdGroupList(one.rest, count - 1)
+             ELSE LET more == ReadErisReferenceDataSecurityAltIdGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Eris Security Alt Id Group of each kind, for the lists that carry them *)
-OneErisSecurityAltIdGroup == { ZeroErisSecurityAltIdGroup }
+(* One Eris Reference Data Security Alt Id Group of each kind, for the lists that carry them *)
+OneErisReferenceDataSecurityAltIdGroup == { ZeroErisReferenceDataSecurityAltIdGroup }
 
 (***************************************************************************)
-(* Eris Security Alt Id Groups                                             *)
+(* Eris Reference Data Security Alt Id Groups                              *)
 (***************************************************************************)
 
-ErisSecurityAltIdGroups ==
-    [ blockLength            : Sample(2),
-      erisSecurityAltIdGroup : SampleLists(OneErisSecurityAltIdGroup) ]
+ErisReferenceDataSecurityAltIdGroups ==
+    [ blockLength                         : Sample(2),
+      erisReferenceDataSecurityAltIdGroup : SampleLists(OneErisReferenceDataSecurityAltIdGroup) ]
 
-EncodeErisSecurityAltIdGroups(message) ==
+EncodeErisReferenceDataSecurityAltIdGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.erisSecurityAltIdGroup), 1)
-        \o EncodeErisSecurityAltIdGroupList(message.erisSecurityAltIdGroup)
+        \o EncodeUIntBE(Len(message.erisReferenceDataSecurityAltIdGroup), 1)
+        \o EncodeErisReferenceDataSecurityAltIdGroupList(message.erisReferenceDataSecurityAltIdGroup)
 
-DecodeErisSecurityAltIdGroups(bytes) ==
+DecodeErisReferenceDataSecurityAltIdGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup8.ok THEN Fail ELSE
-    LET erisSecurityAltIdGroup == ReadErisSecurityAltIdGroupList(numInGroup8.rest, numInGroup8.value) IN IF ~erisSecurityAltIdGroup.ok THEN Fail ELSE
-    Ok([ blockLength            |-> blockLength.value,
-         erisSecurityAltIdGroup |-> erisSecurityAltIdGroup.value ], erisSecurityAltIdGroup.rest)
+    LET erisReferenceDataSecurityAltIdGroup == ReadErisReferenceDataSecurityAltIdGroupList(numInGroup8.rest, numInGroup8.value) IN IF ~erisReferenceDataSecurityAltIdGroup.ok THEN Fail ELSE
+    Ok([ blockLength                         |-> blockLength.value,
+         erisReferenceDataSecurityAltIdGroup |-> erisReferenceDataSecurityAltIdGroup.value ], erisReferenceDataSecurityAltIdGroup.rest)
 
-ZeroErisSecurityAltIdGroups ==
-    [ blockLength            |-> [i \in 1 .. 2 |-> 0],
-      erisSecurityAltIdGroup |-> << >> ]
+ZeroErisReferenceDataSecurityAltIdGroups ==
+    [ blockLength                         |-> [i \in 1 .. 2 |-> 0],
+      erisReferenceDataSecurityAltIdGroup |-> << >> ]
 
-(* Eris Security Alt Id Groups at zero, then each field in turn at the values it is checked at *)
-CheckedErisSecurityAltIdGroups ==
-    { ZeroErisSecurityAltIdGroups }
-        \cup { [ZeroErisSecurityAltIdGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroErisSecurityAltIdGroups EXCEPT !.erisSecurityAltIdGroup = one] : one \in SampleLists(OneErisSecurityAltIdGroup) }
+(* Eris Reference Data Security Alt Id Groups at zero, then each field in turn at the values it is checked at *)
+CheckedErisReferenceDataSecurityAltIdGroups ==
+    { ZeroErisReferenceDataSecurityAltIdGroups }
+        \cup { [ZeroErisReferenceDataSecurityAltIdGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroErisReferenceDataSecurityAltIdGroups EXCEPT !.erisReferenceDataSecurityAltIdGroup = one] : one \in SampleLists(OneErisReferenceDataSecurityAltIdGroup) }
 
 (***************************************************************************)
 (* Incremental Refresh Eris Related Instruments Group: 77 bytes            *)
@@ -1111,7 +1111,7 @@ ErisReferenceDataGroup ==
       settlementNpv                                  : SettlementNpv,
       finalSettlementFuturesPrice                    : FinalSettlementFuturesPrice,
       securityDescription                            : Sample(30),
-      erisSecurityAltIdGroups                        : ErisSecurityAltIdGroups,
+      erisReferenceDataSecurityAltIdGroups           : ErisReferenceDataSecurityAltIdGroups,
       incrementalRefreshErisRelatedInstrumentsGroups : IncrementalRefreshErisRelatedInstrumentsGroups,
       eventsGroups                                   : EventsGroups ]
 
@@ -1161,7 +1161,7 @@ EncodeErisReferenceDataGroup(message) ==
         \o EncodeSettlementNpv(message.settlementNpv)
         \o EncodeFinalSettlementFuturesPrice(message.finalSettlementFuturesPrice)
         \o message.securityDescription
-        \o EncodeErisSecurityAltIdGroups(message.erisSecurityAltIdGroups)
+        \o EncodeErisReferenceDataSecurityAltIdGroups(message.erisReferenceDataSecurityAltIdGroups)
         \o EncodeIncrementalRefreshErisRelatedInstrumentsGroups(message.incrementalRefreshErisRelatedInstrumentsGroups)
         \o EncodeEventsGroups(message.eventsGroups)
 
@@ -1211,8 +1211,8 @@ DecodeErisReferenceDataGroup(bytes) ==
     LET settlementNpv == DecodeSettlementNpv(dV01.rest) IN IF ~settlementNpv.ok THEN Fail ELSE
     LET finalSettlementFuturesPrice == DecodeFinalSettlementFuturesPrice(settlementNpv.rest) IN IF ~finalSettlementFuturesPrice.ok THEN Fail ELSE
     LET securityDescription == ReadBytes(finalSettlementFuturesPrice.rest, 30) IN IF ~securityDescription.ok THEN Fail ELSE
-    LET erisSecurityAltIdGroups == DecodeErisSecurityAltIdGroups(securityDescription.rest) IN IF ~erisSecurityAltIdGroups.ok THEN Fail ELSE
-    LET incrementalRefreshErisRelatedInstrumentsGroups == DecodeIncrementalRefreshErisRelatedInstrumentsGroups(erisSecurityAltIdGroups.rest) IN IF ~incrementalRefreshErisRelatedInstrumentsGroups.ok THEN Fail ELSE
+    LET erisReferenceDataSecurityAltIdGroups == DecodeErisReferenceDataSecurityAltIdGroups(securityDescription.rest) IN IF ~erisReferenceDataSecurityAltIdGroups.ok THEN Fail ELSE
+    LET incrementalRefreshErisRelatedInstrumentsGroups == DecodeIncrementalRefreshErisRelatedInstrumentsGroups(erisReferenceDataSecurityAltIdGroups.rest) IN IF ~incrementalRefreshErisRelatedInstrumentsGroups.ok THEN Fail ELSE
     LET eventsGroups == DecodeEventsGroups(incrementalRefreshErisRelatedInstrumentsGroups.rest) IN IF ~eventsGroups.ok THEN Fail ELSE
     Ok([ mdUpdateActionChar                             |-> mdUpdateActionChar.value,
          mdEntryType                                    |-> mdEntryType.value,
@@ -1259,7 +1259,7 @@ DecodeErisReferenceDataGroup(bytes) ==
          settlementNpv                                  |-> settlementNpv.value,
          finalSettlementFuturesPrice                    |-> finalSettlementFuturesPrice.value,
          securityDescription                            |-> securityDescription.value,
-         erisSecurityAltIdGroups                        |-> erisSecurityAltIdGroups.value,
+         erisReferenceDataSecurityAltIdGroups           |-> erisReferenceDataSecurityAltIdGroups.value,
          incrementalRefreshErisRelatedInstrumentsGroups |-> incrementalRefreshErisRelatedInstrumentsGroups.value,
          eventsGroups                                   |-> eventsGroups.value ], eventsGroups.rest)
 
@@ -1309,7 +1309,7 @@ ZeroErisReferenceDataGroup ==
       settlementNpv                                  |-> ZeroSettlementNpv,
       finalSettlementFuturesPrice                    |-> ZeroFinalSettlementFuturesPrice,
       securityDescription                            |-> [i \in 1 .. 30 |-> 0],
-      erisSecurityAltIdGroups                        |-> ZeroErisSecurityAltIdGroups,
+      erisReferenceDataSecurityAltIdGroups           |-> ZeroErisReferenceDataSecurityAltIdGroups,
       incrementalRefreshErisRelatedInstrumentsGroups |-> ZeroIncrementalRefreshErisRelatedInstrumentsGroups,
       eventsGroups                                   |-> ZeroEventsGroups ]
 
@@ -1361,7 +1361,7 @@ CheckedErisReferenceDataGroup ==
         \cup { [ZeroErisReferenceDataGroup EXCEPT !.settlementNpv = one] : one \in CheckedSettlementNpv }
         \cup { [ZeroErisReferenceDataGroup EXCEPT !.finalSettlementFuturesPrice = one] : one \in CheckedFinalSettlementFuturesPrice }
         \cup { [ZeroErisReferenceDataGroup EXCEPT !.securityDescription = one] : one \in Sample(30) }
-        \cup { [ZeroErisReferenceDataGroup EXCEPT !.erisSecurityAltIdGroups = one] : one \in CheckedErisSecurityAltIdGroups }
+        \cup { [ZeroErisReferenceDataGroup EXCEPT !.erisReferenceDataSecurityAltIdGroups = one] : one \in CheckedErisReferenceDataSecurityAltIdGroups }
         \cup { [ZeroErisReferenceDataGroup EXCEPT !.incrementalRefreshErisRelatedInstrumentsGroups = one] : one \in CheckedIncrementalRefreshErisRelatedInstrumentsGroups }
         \cup { [ZeroErisReferenceDataGroup EXCEPT !.eventsGroups = one] : one \in CheckedEventsGroups }
 
@@ -2720,83 +2720,83 @@ CheckedInstAttribGroups ==
         \cup { [ZeroInstAttribGroups EXCEPT !.instAttribGroup = one] : one \in SampleLists(OneInstAttribGroup) }
 
 (***************************************************************************)
-(* Events Group: 9 bytes                                                   *)
+(* Indices Events Group: 9 bytes                                           *)
 (***************************************************************************)
 
-EventsGroup3 ==
-    [ eventTypeOptional : Sample(1),
-      eventTimeOptional : Sample(8) ]
+IndicesEventsGroup ==
+    [ eventTypeIndices : Sample(1),
+      eventTime        : Sample(8) ]
 
-EncodeEventsGroup3(message) ==
-    message.eventTypeOptional
-        \o message.eventTimeOptional
+EncodeIndicesEventsGroup(message) ==
+    message.eventTypeIndices
+        \o message.eventTime
 
-DecodeEventsGroup3(bytes) ==
-    LET eventTypeOptional == ReadBytes(bytes, 1) IN IF ~eventTypeOptional.ok THEN Fail ELSE
-    LET eventTimeOptional == ReadBytes(eventTypeOptional.rest, 8) IN IF ~eventTimeOptional.ok THEN Fail ELSE
-    Ok([ eventTypeOptional |-> eventTypeOptional.value,
-         eventTimeOptional |-> eventTimeOptional.value ], eventTimeOptional.rest)
+DecodeIndicesEventsGroup(bytes) ==
+    LET eventTypeIndices == ReadBytes(bytes, 1) IN IF ~eventTypeIndices.ok THEN Fail ELSE
+    LET eventTime == ReadBytes(eventTypeIndices.rest, 8) IN IF ~eventTime.ok THEN Fail ELSE
+    Ok([ eventTypeIndices |-> eventTypeIndices.value,
+         eventTime        |-> eventTime.value ], eventTime.rest)
 
-ZeroEventsGroup3 ==
-    [ eventTypeOptional |-> [i \in 1 .. 1 |-> 0],
-      eventTimeOptional |-> [i \in 1 .. 8 |-> 0] ]
+ZeroIndicesEventsGroup ==
+    [ eventTypeIndices |-> [i \in 1 .. 1 |-> 0],
+      eventTime        |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Events Group at zero, then each field in turn at the values it is checked at *)
-CheckedEventsGroup3 ==
-    { ZeroEventsGroup3 }
-        \cup { [ZeroEventsGroup3 EXCEPT !.eventTypeOptional = one] : one \in Sample(1) }
-        \cup { [ZeroEventsGroup3 EXCEPT !.eventTimeOptional = one] : one \in Sample(8) }
+(* Indices Events Group at zero, then each field in turn at the values it is checked at *)
+CheckedIndicesEventsGroup ==
+    { ZeroIndicesEventsGroup }
+        \cup { [ZeroIndicesEventsGroup EXCEPT !.eventTypeIndices = one] : one \in Sample(1) }
+        \cup { [ZeroIndicesEventsGroup EXCEPT !.eventTime = one] : one \in Sample(8) }
 
-(* A run of Events Group, written one after another *)
-RECURSIVE EncodeEventsGroup3List(_)
-EncodeEventsGroup3List(messages) ==
+(* A run of Indices Events Group, written one after another *)
+RECURSIVE EncodeIndicesEventsGroupList(_)
+EncodeIndicesEventsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeEventsGroup3(Head(messages)) \o EncodeEventsGroup3List(Tail(messages))
+    ELSE EncodeIndicesEventsGroup(Head(messages)) \o EncodeIndicesEventsGroupList(Tail(messages))
 
-(* As many Events Group as the field that counts them says *)
-RECURSIVE ReadEventsGroup3List(_, _)
-ReadEventsGroup3List(bytes, count) ==
+(* As many Indices Events Group as the field that counts them says *)
+RECURSIVE ReadIndicesEventsGroupList(_, _)
+ReadIndicesEventsGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeEventsGroup3(bytes)
+    ELSE LET one == DecodeIndicesEventsGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadEventsGroup3List(one.rest, count - 1)
+             ELSE LET more == ReadIndicesEventsGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Events Group of each kind, for the lists that carry them *)
-OneEventsGroup3 == { ZeroEventsGroup3 }
+(* One Indices Events Group of each kind, for the lists that carry them *)
+OneIndicesEventsGroup == { ZeroIndicesEventsGroup }
 
 (***************************************************************************)
-(* Events Groups                                                           *)
+(* Indices Events Groups                                                   *)
 (***************************************************************************)
 
-EventsGroups3 ==
-    [ blockLength : Sample(2),
-      eventsGroup : SampleLists(OneEventsGroup3) ]
+IndicesEventsGroups ==
+    [ blockLength        : Sample(2),
+      indicesEventsGroup : SampleLists(OneIndicesEventsGroup) ]
 
-EncodeEventsGroups3(message) ==
+EncodeIndicesEventsGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.eventsGroup), 1)
-        \o EncodeEventsGroup3List(message.eventsGroup)
+        \o EncodeUIntLE(Len(message.indicesEventsGroup), 2)
+        \o EncodeIndicesEventsGroupList(message.indicesEventsGroup)
 
-DecodeEventsGroups3(bytes) ==
+DecodeIndicesEventsGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
-    LET numInGroup8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup8.ok THEN Fail ELSE
-    LET eventsGroup == ReadEventsGroup3List(numInGroup8.rest, numInGroup8.value) IN IF ~eventsGroup.ok THEN Fail ELSE
-    Ok([ blockLength |-> blockLength.value,
-         eventsGroup |-> eventsGroup.value ], eventsGroup.rest)
+    LET numInGroup == ReadUIntLE(blockLength.rest, 2) IN IF ~numInGroup.ok THEN Fail ELSE
+    LET indicesEventsGroup == ReadIndicesEventsGroupList(numInGroup.rest, numInGroup.value) IN IF ~indicesEventsGroup.ok THEN Fail ELSE
+    Ok([ blockLength        |-> blockLength.value,
+         indicesEventsGroup |-> indicesEventsGroup.value ], indicesEventsGroup.rest)
 
-ZeroEventsGroups3 ==
-    [ blockLength |-> [i \in 1 .. 2 |-> 0],
-      eventsGroup |-> << >> ]
+ZeroIndicesEventsGroups ==
+    [ blockLength        |-> [i \in 1 .. 2 |-> 0],
+      indicesEventsGroup |-> << >> ]
 
-(* Events Groups at zero, then each field in turn at the values it is checked at *)
-CheckedEventsGroups3 ==
-    { ZeroEventsGroups3 }
-        \cup { [ZeroEventsGroups3 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroEventsGroups3 EXCEPT !.eventsGroup = one] : one \in SampleLists(OneEventsGroup3) }
+(* Indices Events Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIndicesEventsGroups ==
+    { ZeroIndicesEventsGroups }
+        \cup { [ZeroIndicesEventsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIndicesEventsGroups EXCEPT !.indicesEventsGroup = one] : one \in SampleLists(OneIndicesEventsGroup) }
 
 (***************************************************************************)
 (* Md Instrument Definition Indices                                        *)
@@ -2811,7 +2811,7 @@ MdInstrumentDefinitionIndices ==
       mdFeedType           : Sample(2),
       applId               : Sample(2),
       instAttribGroups     : InstAttribGroups,
-      eventsGroups         : EventsGroups3 ]
+      indicesEventsGroups  : IndicesEventsGroups ]
 
 EncodeMdInstrumentDefinitionIndices(message) ==
     message.symbol
@@ -2822,7 +2822,7 @@ EncodeMdInstrumentDefinitionIndices(message) ==
         \o message.mdFeedType
         \o message.applId
         \o EncodeInstAttribGroups(message.instAttribGroups)
-        \o EncodeEventsGroups3(message.eventsGroups)
+        \o EncodeIndicesEventsGroups(message.indicesEventsGroups)
 
 DecodeMdInstrumentDefinitionIndices(bytes) ==
     LET symbol == ReadBytes(bytes, 50) IN IF ~symbol.ok THEN Fail ELSE
@@ -2833,7 +2833,7 @@ DecodeMdInstrumentDefinitionIndices(bytes) ==
     LET mdFeedType == ReadBytes(securityUpdateAction.rest, 2) IN IF ~mdFeedType.ok THEN Fail ELSE
     LET applId == ReadBytes(mdFeedType.rest, 2) IN IF ~applId.ok THEN Fail ELSE
     LET instAttribGroups == DecodeInstAttribGroups(applId.rest) IN IF ~instAttribGroups.ok THEN Fail ELSE
-    LET eventsGroups == DecodeEventsGroups3(instAttribGroups.rest) IN IF ~eventsGroups.ok THEN Fail ELSE
+    LET indicesEventsGroups == DecodeIndicesEventsGroups(instAttribGroups.rest) IN IF ~indicesEventsGroups.ok THEN Fail ELSE
     Ok([ symbol               |-> symbol.value,
          product              |-> product.value,
          securityExchange     |-> securityExchange.value,
@@ -2842,7 +2842,7 @@ DecodeMdInstrumentDefinitionIndices(bytes) ==
          mdFeedType           |-> mdFeedType.value,
          applId               |-> applId.value,
          instAttribGroups     |-> instAttribGroups.value,
-         eventsGroups         |-> eventsGroups.value ], eventsGroups.rest)
+         indicesEventsGroups  |-> indicesEventsGroups.value ], indicesEventsGroups.rest)
 
 ZeroMdInstrumentDefinitionIndices ==
     [ symbol               |-> [i \in 1 .. 50 |-> 0],
@@ -2853,7 +2853,7 @@ ZeroMdInstrumentDefinitionIndices ==
       mdFeedType           |-> [i \in 1 .. 2 |-> 0],
       applId               |-> [i \in 1 .. 2 |-> 0],
       instAttribGroups     |-> ZeroInstAttribGroups,
-      eventsGroups         |-> ZeroEventsGroups3 ]
+      indicesEventsGroups  |-> ZeroIndicesEventsGroups ]
 
 (* Md Instrument Definition Indices at zero, then each field in turn at the values it is checked at *)
 CheckedMdInstrumentDefinitionIndices ==
@@ -2866,7 +2866,7 @@ CheckedMdInstrumentDefinitionIndices ==
         \cup { [ZeroMdInstrumentDefinitionIndices EXCEPT !.mdFeedType = one] : one \in Sample(2) }
         \cup { [ZeroMdInstrumentDefinitionIndices EXCEPT !.applId = one] : one \in Sample(2) }
         \cup { [ZeroMdInstrumentDefinitionIndices EXCEPT !.instAttribGroups = one] : one \in CheckedInstAttribGroups }
-        \cup { [ZeroMdInstrumentDefinitionIndices EXCEPT !.eventsGroups = one] : one \in CheckedEventsGroups3 }
+        \cup { [ZeroMdInstrumentDefinitionIndices EXCEPT !.indicesEventsGroups = one] : one \in CheckedIndicesEventsGroups }
 
 (***************************************************************************)
 (* Md Entry Px Decimal: 9 bytes                                            *)
@@ -3013,21 +3013,21 @@ CheckedPercentTrading ==
 (***************************************************************************)
 
 IncrementalRefreshIndicesGroup ==
-    [ mdEntryTypeIndices  : Sample(1),
-      rptSeq              : Sample(4),
-      mdEntryPxDecimal    : MdEntryPxDecimal,
-      mdEntrySizeOptional : Sample(8),
-      symbol              : Sample(50),
-      openCloseSettlFlag  : Sample(1),
-      yieldType           : Sample(8),
-      yield               : Yield,
-      netChgPrevDay       : NetChgPrevDay,
-      netPctChg           : NetPctChg,
-      percentTrading      : PercentTrading,
-      mdEntryCode         : Sample(1),
-      mdEntryDate         : Sample(4),
-      mdEntryTime         : Sample(4),
-      referenceId50       : Sample(50) ]
+    [ mdEntryTypeIndices        : Sample(1),
+      rptSeq                    : Sample(4),
+      mdEntryPxDecimal          : MdEntryPxDecimal,
+      mdEntrySizeOptional       : Sample(8),
+      symbol                    : Sample(50),
+      indicesOpenCloseSettlFlag : Sample(1),
+      yieldType                 : Sample(8),
+      yield                     : Yield,
+      netChgPrevDay             : NetChgPrevDay,
+      netPctChg                 : NetPctChg,
+      percentTrading            : PercentTrading,
+      mdEntryCode               : Sample(1),
+      mdEntryDate               : Sample(4),
+      mdEntryTime               : Sample(4),
+      referenceId50             : Sample(50) ]
 
 EncodeIncrementalRefreshIndicesGroup(message) ==
     message.mdEntryTypeIndices
@@ -3035,7 +3035,7 @@ EncodeIncrementalRefreshIndicesGroup(message) ==
         \o EncodeMdEntryPxDecimal(message.mdEntryPxDecimal)
         \o message.mdEntrySizeOptional
         \o message.symbol
-        \o message.openCloseSettlFlag
+        \o message.indicesOpenCloseSettlFlag
         \o message.yieldType
         \o EncodeYield(message.yield)
         \o EncodeNetChgPrevDay(message.netChgPrevDay)
@@ -3052,8 +3052,8 @@ DecodeIncrementalRefreshIndicesGroup(bytes) ==
     LET mdEntryPxDecimal == DecodeMdEntryPxDecimal(rptSeq.rest) IN IF ~mdEntryPxDecimal.ok THEN Fail ELSE
     LET mdEntrySizeOptional == ReadBytes(mdEntryPxDecimal.rest, 8) IN IF ~mdEntrySizeOptional.ok THEN Fail ELSE
     LET symbol == ReadBytes(mdEntrySizeOptional.rest, 50) IN IF ~symbol.ok THEN Fail ELSE
-    LET openCloseSettlFlag == ReadBytes(symbol.rest, 1) IN IF ~openCloseSettlFlag.ok THEN Fail ELSE
-    LET yieldType == ReadBytes(openCloseSettlFlag.rest, 8) IN IF ~yieldType.ok THEN Fail ELSE
+    LET indicesOpenCloseSettlFlag == ReadBytes(symbol.rest, 1) IN IF ~indicesOpenCloseSettlFlag.ok THEN Fail ELSE
+    LET yieldType == ReadBytes(indicesOpenCloseSettlFlag.rest, 8) IN IF ~yieldType.ok THEN Fail ELSE
     LET yield == DecodeYield(yieldType.rest) IN IF ~yield.ok THEN Fail ELSE
     LET netChgPrevDay == DecodeNetChgPrevDay(yield.rest) IN IF ~netChgPrevDay.ok THEN Fail ELSE
     LET netPctChg == DecodeNetPctChg(netChgPrevDay.rest) IN IF ~netPctChg.ok THEN Fail ELSE
@@ -3062,38 +3062,38 @@ DecodeIncrementalRefreshIndicesGroup(bytes) ==
     LET mdEntryDate == ReadBytes(mdEntryCode.rest, 4) IN IF ~mdEntryDate.ok THEN Fail ELSE
     LET mdEntryTime == ReadBytes(mdEntryDate.rest, 4) IN IF ~mdEntryTime.ok THEN Fail ELSE
     LET referenceId50 == ReadBytes(mdEntryTime.rest, 50) IN IF ~referenceId50.ok THEN Fail ELSE
-    Ok([ mdEntryTypeIndices  |-> mdEntryTypeIndices.value,
-         rptSeq              |-> rptSeq.value,
-         mdEntryPxDecimal    |-> mdEntryPxDecimal.value,
-         mdEntrySizeOptional |-> mdEntrySizeOptional.value,
-         symbol              |-> symbol.value,
-         openCloseSettlFlag  |-> openCloseSettlFlag.value,
-         yieldType           |-> yieldType.value,
-         yield               |-> yield.value,
-         netChgPrevDay       |-> netChgPrevDay.value,
-         netPctChg           |-> netPctChg.value,
-         percentTrading      |-> percentTrading.value,
-         mdEntryCode         |-> mdEntryCode.value,
-         mdEntryDate         |-> mdEntryDate.value,
-         mdEntryTime         |-> mdEntryTime.value,
-         referenceId50       |-> referenceId50.value ], referenceId50.rest)
+    Ok([ mdEntryTypeIndices        |-> mdEntryTypeIndices.value,
+         rptSeq                    |-> rptSeq.value,
+         mdEntryPxDecimal          |-> mdEntryPxDecimal.value,
+         mdEntrySizeOptional       |-> mdEntrySizeOptional.value,
+         symbol                    |-> symbol.value,
+         indicesOpenCloseSettlFlag |-> indicesOpenCloseSettlFlag.value,
+         yieldType                 |-> yieldType.value,
+         yield                     |-> yield.value,
+         netChgPrevDay             |-> netChgPrevDay.value,
+         netPctChg                 |-> netPctChg.value,
+         percentTrading            |-> percentTrading.value,
+         mdEntryCode               |-> mdEntryCode.value,
+         mdEntryDate               |-> mdEntryDate.value,
+         mdEntryTime               |-> mdEntryTime.value,
+         referenceId50             |-> referenceId50.value ], referenceId50.rest)
 
 ZeroIncrementalRefreshIndicesGroup ==
-    [ mdEntryTypeIndices  |-> [i \in 1 .. 1 |-> 0],
-      rptSeq              |-> [i \in 1 .. 4 |-> 0],
-      mdEntryPxDecimal    |-> ZeroMdEntryPxDecimal,
-      mdEntrySizeOptional |-> [i \in 1 .. 8 |-> 0],
-      symbol              |-> [i \in 1 .. 50 |-> 0],
-      openCloseSettlFlag  |-> [i \in 1 .. 1 |-> 0],
-      yieldType           |-> [i \in 1 .. 8 |-> 0],
-      yield               |-> ZeroYield,
-      netChgPrevDay       |-> ZeroNetChgPrevDay,
-      netPctChg           |-> ZeroNetPctChg,
-      percentTrading      |-> ZeroPercentTrading,
-      mdEntryCode         |-> [i \in 1 .. 1 |-> 0],
-      mdEntryDate         |-> [i \in 1 .. 4 |-> 0],
-      mdEntryTime         |-> [i \in 1 .. 4 |-> 0],
-      referenceId50       |-> [i \in 1 .. 50 |-> 0] ]
+    [ mdEntryTypeIndices        |-> [i \in 1 .. 1 |-> 0],
+      rptSeq                    |-> [i \in 1 .. 4 |-> 0],
+      mdEntryPxDecimal          |-> ZeroMdEntryPxDecimal,
+      mdEntrySizeOptional       |-> [i \in 1 .. 8 |-> 0],
+      symbol                    |-> [i \in 1 .. 50 |-> 0],
+      indicesOpenCloseSettlFlag |-> [i \in 1 .. 1 |-> 0],
+      yieldType                 |-> [i \in 1 .. 8 |-> 0],
+      yield                     |-> ZeroYield,
+      netChgPrevDay             |-> ZeroNetChgPrevDay,
+      netPctChg                 |-> ZeroNetPctChg,
+      percentTrading            |-> ZeroPercentTrading,
+      mdEntryCode               |-> [i \in 1 .. 1 |-> 0],
+      mdEntryDate               |-> [i \in 1 .. 4 |-> 0],
+      mdEntryTime               |-> [i \in 1 .. 4 |-> 0],
+      referenceId50             |-> [i \in 1 .. 50 |-> 0] ]
 
 (* Incremental Refresh Indices Group at zero, then each field in turn at the values it is checked at *)
 CheckedIncrementalRefreshIndicesGroup ==
@@ -3103,7 +3103,7 @@ CheckedIncrementalRefreshIndicesGroup ==
         \cup { [ZeroIncrementalRefreshIndicesGroup EXCEPT !.mdEntryPxDecimal = one] : one \in CheckedMdEntryPxDecimal }
         \cup { [ZeroIncrementalRefreshIndicesGroup EXCEPT !.mdEntrySizeOptional = one] : one \in Sample(8) }
         \cup { [ZeroIncrementalRefreshIndicesGroup EXCEPT !.symbol = one] : one \in Sample(50) }
-        \cup { [ZeroIncrementalRefreshIndicesGroup EXCEPT !.openCloseSettlFlag = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshIndicesGroup EXCEPT !.indicesOpenCloseSettlFlag = one] : one \in Sample(1) }
         \cup { [ZeroIncrementalRefreshIndicesGroup EXCEPT !.yieldType = one] : one \in Sample(8) }
         \cup { [ZeroIncrementalRefreshIndicesGroup EXCEPT !.yield = one] : one \in CheckedYield }
         \cup { [ZeroIncrementalRefreshIndicesGroup EXCEPT !.netChgPrevDay = one] : one \in CheckedNetChgPrevDay }
@@ -4051,184 +4051,184 @@ CheckedCalFutPx ==
 (* Eris Security Alt Id Group: 27 bytes                                    *)
 (***************************************************************************)
 
-ErisSecurityAltIdGroup2 ==
-    [ securityAltId               : Sample(26),
-      securityAltIdSourceOptional : Sample(1) ]
+ErisSecurityAltIdGroup ==
+    [ securityAltId       : Sample(26),
+      securityAltIdSource : Sample(1) ]
 
-EncodeErisSecurityAltIdGroup2(message) ==
+EncodeErisSecurityAltIdGroup(message) ==
     message.securityAltId
-        \o message.securityAltIdSourceOptional
+        \o message.securityAltIdSource
 
-DecodeErisSecurityAltIdGroup2(bytes) ==
+DecodeErisSecurityAltIdGroup(bytes) ==
     LET securityAltId == ReadBytes(bytes, 26) IN IF ~securityAltId.ok THEN Fail ELSE
-    LET securityAltIdSourceOptional == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
-    Ok([ securityAltId               |-> securityAltId.value,
-         securityAltIdSourceOptional |-> securityAltIdSourceOptional.value ], securityAltIdSourceOptional.rest)
+    LET securityAltIdSource == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSource.ok THEN Fail ELSE
+    Ok([ securityAltId       |-> securityAltId.value,
+         securityAltIdSource |-> securityAltIdSource.value ], securityAltIdSource.rest)
 
-ZeroErisSecurityAltIdGroup2 ==
-    [ securityAltId               |-> [i \in 1 .. 26 |-> 0],
-      securityAltIdSourceOptional |-> [i \in 1 .. 1 |-> 0] ]
+ZeroErisSecurityAltIdGroup ==
+    [ securityAltId       |-> [i \in 1 .. 26 |-> 0],
+      securityAltIdSource |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Eris Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
-CheckedErisSecurityAltIdGroup2 ==
-    { ZeroErisSecurityAltIdGroup2 }
-        \cup { [ZeroErisSecurityAltIdGroup2 EXCEPT !.securityAltId = one] : one \in Sample(26) }
-        \cup { [ZeroErisSecurityAltIdGroup2 EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
+CheckedErisSecurityAltIdGroup ==
+    { ZeroErisSecurityAltIdGroup }
+        \cup { [ZeroErisSecurityAltIdGroup EXCEPT !.securityAltId = one] : one \in Sample(26) }
+        \cup { [ZeroErisSecurityAltIdGroup EXCEPT !.securityAltIdSource = one] : one \in Sample(1) }
 
 (* A run of Eris Security Alt Id Group, written one after another *)
-RECURSIVE EncodeErisSecurityAltIdGroup2List(_)
-EncodeErisSecurityAltIdGroup2List(messages) ==
+RECURSIVE EncodeErisSecurityAltIdGroupList(_)
+EncodeErisSecurityAltIdGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeErisSecurityAltIdGroup2(Head(messages)) \o EncodeErisSecurityAltIdGroup2List(Tail(messages))
+    ELSE EncodeErisSecurityAltIdGroup(Head(messages)) \o EncodeErisSecurityAltIdGroupList(Tail(messages))
 
 (* As many Eris Security Alt Id Group as the field that counts them says *)
-RECURSIVE ReadErisSecurityAltIdGroup2List(_, _)
-ReadErisSecurityAltIdGroup2List(bytes, count) ==
+RECURSIVE ReadErisSecurityAltIdGroupList(_, _)
+ReadErisSecurityAltIdGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeErisSecurityAltIdGroup2(bytes)
+    ELSE LET one == DecodeErisSecurityAltIdGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadErisSecurityAltIdGroup2List(one.rest, count - 1)
+             ELSE LET more == ReadErisSecurityAltIdGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
 (* One Eris Security Alt Id Group of each kind, for the lists that carry them *)
-OneErisSecurityAltIdGroup2 == { ZeroErisSecurityAltIdGroup2 }
+OneErisSecurityAltIdGroup == { ZeroErisSecurityAltIdGroup }
 
 (***************************************************************************)
 (* Eris Security Alt Id Groups                                             *)
 (***************************************************************************)
 
-ErisSecurityAltIdGroups2 ==
+ErisSecurityAltIdGroups ==
     [ blockLength            : Sample(2),
-      erisSecurityAltIdGroup : SampleLists(OneErisSecurityAltIdGroup2) ]
+      erisSecurityAltIdGroup : SampleLists(OneErisSecurityAltIdGroup) ]
 
-EncodeErisSecurityAltIdGroups2(message) ==
+EncodeErisSecurityAltIdGroups(message) ==
     message.blockLength
         \o EncodeUIntBE(Len(message.erisSecurityAltIdGroup), 1)
-        \o EncodeErisSecurityAltIdGroup2List(message.erisSecurityAltIdGroup)
+        \o EncodeErisSecurityAltIdGroupList(message.erisSecurityAltIdGroup)
 
-DecodeErisSecurityAltIdGroups2(bytes) ==
+DecodeErisSecurityAltIdGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup8.ok THEN Fail ELSE
-    LET erisSecurityAltIdGroup == ReadErisSecurityAltIdGroup2List(numInGroup8.rest, numInGroup8.value) IN IF ~erisSecurityAltIdGroup.ok THEN Fail ELSE
+    LET erisSecurityAltIdGroup == ReadErisSecurityAltIdGroupList(numInGroup8.rest, numInGroup8.value) IN IF ~erisSecurityAltIdGroup.ok THEN Fail ELSE
     Ok([ blockLength            |-> blockLength.value,
          erisSecurityAltIdGroup |-> erisSecurityAltIdGroup.value ], erisSecurityAltIdGroup.rest)
 
-ZeroErisSecurityAltIdGroups2 ==
+ZeroErisSecurityAltIdGroups ==
     [ blockLength            |-> [i \in 1 .. 2 |-> 0],
       erisSecurityAltIdGroup |-> << >> ]
 
 (* Eris Security Alt Id Groups at zero, then each field in turn at the values it is checked at *)
-CheckedErisSecurityAltIdGroups2 ==
-    { ZeroErisSecurityAltIdGroups2 }
-        \cup { [ZeroErisSecurityAltIdGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroErisSecurityAltIdGroups2 EXCEPT !.erisSecurityAltIdGroup = one] : one \in SampleLists(OneErisSecurityAltIdGroup2) }
+CheckedErisSecurityAltIdGroups ==
+    { ZeroErisSecurityAltIdGroups }
+        \cup { [ZeroErisSecurityAltIdGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroErisSecurityAltIdGroups EXCEPT !.erisSecurityAltIdGroup = one] : one \in SampleLists(OneErisSecurityAltIdGroup) }
 
 (***************************************************************************)
-(* Events Group: 9 bytes                                                   *)
+(* Incremental Refresh Eris Events Group: 9 bytes                          *)
 (***************************************************************************)
 
-EventsGroup4 ==
-    [ eventTypeOptional : Sample(1),
+IncrementalRefreshErisEventsGroup ==
+    [ eventType         : Sample(1),
       eventTimeOptional : Sample(8) ]
 
-EncodeEventsGroup4(message) ==
-    message.eventTypeOptional
+EncodeIncrementalRefreshErisEventsGroup(message) ==
+    message.eventType
         \o message.eventTimeOptional
 
-DecodeEventsGroup4(bytes) ==
-    LET eventTypeOptional == ReadBytes(bytes, 1) IN IF ~eventTypeOptional.ok THEN Fail ELSE
-    LET eventTimeOptional == ReadBytes(eventTypeOptional.rest, 8) IN IF ~eventTimeOptional.ok THEN Fail ELSE
-    Ok([ eventTypeOptional |-> eventTypeOptional.value,
+DecodeIncrementalRefreshErisEventsGroup(bytes) ==
+    LET eventType == ReadBytes(bytes, 1) IN IF ~eventType.ok THEN Fail ELSE
+    LET eventTimeOptional == ReadBytes(eventType.rest, 8) IN IF ~eventTimeOptional.ok THEN Fail ELSE
+    Ok([ eventType         |-> eventType.value,
          eventTimeOptional |-> eventTimeOptional.value ], eventTimeOptional.rest)
 
-ZeroEventsGroup4 ==
-    [ eventTypeOptional |-> [i \in 1 .. 1 |-> 0],
+ZeroIncrementalRefreshErisEventsGroup ==
+    [ eventType         |-> [i \in 1 .. 1 |-> 0],
       eventTimeOptional |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Events Group at zero, then each field in turn at the values it is checked at *)
-CheckedEventsGroup4 ==
-    { ZeroEventsGroup4 }
-        \cup { [ZeroEventsGroup4 EXCEPT !.eventTypeOptional = one] : one \in Sample(1) }
-        \cup { [ZeroEventsGroup4 EXCEPT !.eventTimeOptional = one] : one \in Sample(8) }
+(* Incremental Refresh Eris Events Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshErisEventsGroup ==
+    { ZeroIncrementalRefreshErisEventsGroup }
+        \cup { [ZeroIncrementalRefreshErisEventsGroup EXCEPT !.eventType = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshErisEventsGroup EXCEPT !.eventTimeOptional = one] : one \in Sample(8) }
 
-(* A run of Events Group, written one after another *)
-RECURSIVE EncodeEventsGroup4List(_)
-EncodeEventsGroup4List(messages) ==
+(* A run of Incremental Refresh Eris Events Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshErisEventsGroupList(_)
+EncodeIncrementalRefreshErisEventsGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeEventsGroup4(Head(messages)) \o EncodeEventsGroup4List(Tail(messages))
+    ELSE EncodeIncrementalRefreshErisEventsGroup(Head(messages)) \o EncodeIncrementalRefreshErisEventsGroupList(Tail(messages))
 
-(* As many Events Group as the field that counts them says *)
-RECURSIVE ReadEventsGroup4List(_, _)
-ReadEventsGroup4List(bytes, count) ==
+(* As many Incremental Refresh Eris Events Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshErisEventsGroupList(_, _)
+ReadIncrementalRefreshErisEventsGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeEventsGroup4(bytes)
+    ELSE LET one == DecodeIncrementalRefreshErisEventsGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadEventsGroup4List(one.rest, count - 1)
+             ELSE LET more == ReadIncrementalRefreshErisEventsGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Events Group of each kind, for the lists that carry them *)
-OneEventsGroup4 == { ZeroEventsGroup4 }
+(* One Incremental Refresh Eris Events Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshErisEventsGroup == { ZeroIncrementalRefreshErisEventsGroup }
 
 (***************************************************************************)
-(* Events Groups                                                           *)
+(* Incremental Refresh Eris Events Groups                                  *)
 (***************************************************************************)
 
-EventsGroups4 ==
-    [ blockLength : Sample(2),
-      eventsGroup : SampleLists(OneEventsGroup4) ]
+IncrementalRefreshErisEventsGroups ==
+    [ blockLength                       : Sample(2),
+      incrementalRefreshErisEventsGroup : SampleLists(OneIncrementalRefreshErisEventsGroup) ]
 
-EncodeEventsGroups4(message) ==
+EncodeIncrementalRefreshErisEventsGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.eventsGroup), 1)
-        \o EncodeEventsGroup4List(message.eventsGroup)
+        \o EncodeUIntBE(Len(message.incrementalRefreshErisEventsGroup), 1)
+        \o EncodeIncrementalRefreshErisEventsGroupList(message.incrementalRefreshErisEventsGroup)
 
-DecodeEventsGroups4(bytes) ==
+DecodeIncrementalRefreshErisEventsGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup8.ok THEN Fail ELSE
-    LET eventsGroup == ReadEventsGroup4List(numInGroup8.rest, numInGroup8.value) IN IF ~eventsGroup.ok THEN Fail ELSE
-    Ok([ blockLength |-> blockLength.value,
-         eventsGroup |-> eventsGroup.value ], eventsGroup.rest)
+    LET incrementalRefreshErisEventsGroup == ReadIncrementalRefreshErisEventsGroupList(numInGroup8.rest, numInGroup8.value) IN IF ~incrementalRefreshErisEventsGroup.ok THEN Fail ELSE
+    Ok([ blockLength                       |-> blockLength.value,
+         incrementalRefreshErisEventsGroup |-> incrementalRefreshErisEventsGroup.value ], incrementalRefreshErisEventsGroup.rest)
 
-ZeroEventsGroups4 ==
-    [ blockLength |-> [i \in 1 .. 2 |-> 0],
-      eventsGroup |-> << >> ]
+ZeroIncrementalRefreshErisEventsGroups ==
+    [ blockLength                       |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshErisEventsGroup |-> << >> ]
 
-(* Events Groups at zero, then each field in turn at the values it is checked at *)
-CheckedEventsGroups4 ==
-    { ZeroEventsGroups4 }
-        \cup { [ZeroEventsGroups4 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroEventsGroups4 EXCEPT !.eventsGroup = one] : one \in SampleLists(OneEventsGroup4) }
+(* Incremental Refresh Eris Events Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshErisEventsGroups ==
+    { ZeroIncrementalRefreshErisEventsGroups }
+        \cup { [ZeroIncrementalRefreshErisEventsGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshErisEventsGroups EXCEPT !.incrementalRefreshErisEventsGroup = one] : one \in SampleLists(OneIncrementalRefreshErisEventsGroup) }
 
 (***************************************************************************)
 (* Eris Original Group                                                     *)
 (***************************************************************************)
 
 ErisOriginalGroup ==
-    [ mdUpdateActionChar      : Sample(1),
-      mdEntryType             : Sample(1),
-      rptSeq                  : Sample(4),
-      mdEntryPxDecimal        : MdEntryPxDecimal2,
-      mdEntrySizeOptional     : Sample(8),
-      calFutPx                : CalFutPx,
-      mdEntryPositionNo       : Sample(4),
-      numberOfOrders          : Sample(4),
-      tradeId                 : Sample(4),
-      aggressorSide           : Sample(1),
-      symbol                  : Sample(50),
-      securityGroup26         : Sample(26),
-      securityType            : Sample(9),
-      securityExchange        : Sample(4),
-      productOptional         : Sample(1),
-      maturityDate            : Sample(2),
-      referenceId50           : Sample(50),
-      erisSecurityAltIdGroups : ErisSecurityAltIdGroups2,
-      eventsGroups            : EventsGroups4 ]
+    [ mdUpdateActionChar                 : Sample(1),
+      mdEntryType                        : Sample(1),
+      rptSeq                             : Sample(4),
+      mdEntryPxDecimal                   : MdEntryPxDecimal2,
+      mdEntrySizeOptional                : Sample(8),
+      calFutPx                           : CalFutPx,
+      mdEntryPositionNo                  : Sample(4),
+      numberOfOrders                     : Sample(4),
+      tradeId                            : Sample(4),
+      aggressorSide                      : Sample(1),
+      symbol                             : Sample(50),
+      securityGroup26                    : Sample(26),
+      securityType                       : Sample(9),
+      securityExchange                   : Sample(4),
+      productOptional                    : Sample(1),
+      maturityDate                       : Sample(2),
+      referenceId50                      : Sample(50),
+      erisSecurityAltIdGroups            : ErisSecurityAltIdGroups,
+      incrementalRefreshErisEventsGroups : IncrementalRefreshErisEventsGroups ]
 
 EncodeErisOriginalGroup(message) ==
     message.mdUpdateActionChar
@@ -4248,8 +4248,8 @@ EncodeErisOriginalGroup(message) ==
         \o message.productOptional
         \o message.maturityDate
         \o message.referenceId50
-        \o EncodeErisSecurityAltIdGroups2(message.erisSecurityAltIdGroups)
-        \o EncodeEventsGroups4(message.eventsGroups)
+        \o EncodeErisSecurityAltIdGroups(message.erisSecurityAltIdGroups)
+        \o EncodeIncrementalRefreshErisEventsGroups(message.incrementalRefreshErisEventsGroups)
 
 DecodeErisOriginalGroup(bytes) ==
     LET mdUpdateActionChar == ReadBytes(bytes, 1) IN IF ~mdUpdateActionChar.ok THEN Fail ELSE
@@ -4269,48 +4269,48 @@ DecodeErisOriginalGroup(bytes) ==
     LET productOptional == ReadBytes(securityExchange.rest, 1) IN IF ~productOptional.ok THEN Fail ELSE
     LET maturityDate == ReadBytes(productOptional.rest, 2) IN IF ~maturityDate.ok THEN Fail ELSE
     LET referenceId50 == ReadBytes(maturityDate.rest, 50) IN IF ~referenceId50.ok THEN Fail ELSE
-    LET erisSecurityAltIdGroups == DecodeErisSecurityAltIdGroups2(referenceId50.rest) IN IF ~erisSecurityAltIdGroups.ok THEN Fail ELSE
-    LET eventsGroups == DecodeEventsGroups4(erisSecurityAltIdGroups.rest) IN IF ~eventsGroups.ok THEN Fail ELSE
-    Ok([ mdUpdateActionChar      |-> mdUpdateActionChar.value,
-         mdEntryType             |-> mdEntryType.value,
-         rptSeq                  |-> rptSeq.value,
-         mdEntryPxDecimal        |-> mdEntryPxDecimal.value,
-         mdEntrySizeOptional     |-> mdEntrySizeOptional.value,
-         calFutPx                |-> calFutPx.value,
-         mdEntryPositionNo       |-> mdEntryPositionNo.value,
-         numberOfOrders          |-> numberOfOrders.value,
-         tradeId                 |-> tradeId.value,
-         aggressorSide           |-> aggressorSide.value,
-         symbol                  |-> symbol.value,
-         securityGroup26         |-> securityGroup26.value,
-         securityType            |-> securityType.value,
-         securityExchange        |-> securityExchange.value,
-         productOptional         |-> productOptional.value,
-         maturityDate            |-> maturityDate.value,
-         referenceId50           |-> referenceId50.value,
-         erisSecurityAltIdGroups |-> erisSecurityAltIdGroups.value,
-         eventsGroups            |-> eventsGroups.value ], eventsGroups.rest)
+    LET erisSecurityAltIdGroups == DecodeErisSecurityAltIdGroups(referenceId50.rest) IN IF ~erisSecurityAltIdGroups.ok THEN Fail ELSE
+    LET incrementalRefreshErisEventsGroups == DecodeIncrementalRefreshErisEventsGroups(erisSecurityAltIdGroups.rest) IN IF ~incrementalRefreshErisEventsGroups.ok THEN Fail ELSE
+    Ok([ mdUpdateActionChar                 |-> mdUpdateActionChar.value,
+         mdEntryType                        |-> mdEntryType.value,
+         rptSeq                             |-> rptSeq.value,
+         mdEntryPxDecimal                   |-> mdEntryPxDecimal.value,
+         mdEntrySizeOptional                |-> mdEntrySizeOptional.value,
+         calFutPx                           |-> calFutPx.value,
+         mdEntryPositionNo                  |-> mdEntryPositionNo.value,
+         numberOfOrders                     |-> numberOfOrders.value,
+         tradeId                            |-> tradeId.value,
+         aggressorSide                      |-> aggressorSide.value,
+         symbol                             |-> symbol.value,
+         securityGroup26                    |-> securityGroup26.value,
+         securityType                       |-> securityType.value,
+         securityExchange                   |-> securityExchange.value,
+         productOptional                    |-> productOptional.value,
+         maturityDate                       |-> maturityDate.value,
+         referenceId50                      |-> referenceId50.value,
+         erisSecurityAltIdGroups            |-> erisSecurityAltIdGroups.value,
+         incrementalRefreshErisEventsGroups |-> incrementalRefreshErisEventsGroups.value ], incrementalRefreshErisEventsGroups.rest)
 
 ZeroErisOriginalGroup ==
-    [ mdUpdateActionChar      |-> [i \in 1 .. 1 |-> 0],
-      mdEntryType             |-> [i \in 1 .. 1 |-> 0],
-      rptSeq                  |-> [i \in 1 .. 4 |-> 0],
-      mdEntryPxDecimal        |-> ZeroMdEntryPxDecimal2,
-      mdEntrySizeOptional     |-> [i \in 1 .. 8 |-> 0],
-      calFutPx                |-> ZeroCalFutPx,
-      mdEntryPositionNo       |-> [i \in 1 .. 4 |-> 0],
-      numberOfOrders          |-> [i \in 1 .. 4 |-> 0],
-      tradeId                 |-> [i \in 1 .. 4 |-> 0],
-      aggressorSide           |-> [i \in 1 .. 1 |-> 0],
-      symbol                  |-> [i \in 1 .. 50 |-> 0],
-      securityGroup26         |-> [i \in 1 .. 26 |-> 0],
-      securityType            |-> [i \in 1 .. 9 |-> 0],
-      securityExchange        |-> [i \in 1 .. 4 |-> 0],
-      productOptional         |-> [i \in 1 .. 1 |-> 0],
-      maturityDate            |-> [i \in 1 .. 2 |-> 0],
-      referenceId50           |-> [i \in 1 .. 50 |-> 0],
-      erisSecurityAltIdGroups |-> ZeroErisSecurityAltIdGroups2,
-      eventsGroups            |-> ZeroEventsGroups4 ]
+    [ mdUpdateActionChar                 |-> [i \in 1 .. 1 |-> 0],
+      mdEntryType                        |-> [i \in 1 .. 1 |-> 0],
+      rptSeq                             |-> [i \in 1 .. 4 |-> 0],
+      mdEntryPxDecimal                   |-> ZeroMdEntryPxDecimal2,
+      mdEntrySizeOptional                |-> [i \in 1 .. 8 |-> 0],
+      calFutPx                           |-> ZeroCalFutPx,
+      mdEntryPositionNo                  |-> [i \in 1 .. 4 |-> 0],
+      numberOfOrders                     |-> [i \in 1 .. 4 |-> 0],
+      tradeId                            |-> [i \in 1 .. 4 |-> 0],
+      aggressorSide                      |-> [i \in 1 .. 1 |-> 0],
+      symbol                             |-> [i \in 1 .. 50 |-> 0],
+      securityGroup26                    |-> [i \in 1 .. 26 |-> 0],
+      securityType                       |-> [i \in 1 .. 9 |-> 0],
+      securityExchange                   |-> [i \in 1 .. 4 |-> 0],
+      productOptional                    |-> [i \in 1 .. 1 |-> 0],
+      maturityDate                       |-> [i \in 1 .. 2 |-> 0],
+      referenceId50                      |-> [i \in 1 .. 50 |-> 0],
+      erisSecurityAltIdGroups            |-> ZeroErisSecurityAltIdGroups,
+      incrementalRefreshErisEventsGroups |-> ZeroIncrementalRefreshErisEventsGroups ]
 
 (* Eris Original Group at zero, then each field in turn at the values it is checked at *)
 CheckedErisOriginalGroup ==
@@ -4332,8 +4332,8 @@ CheckedErisOriginalGroup ==
         \cup { [ZeroErisOriginalGroup EXCEPT !.productOptional = one] : one \in Sample(1) }
         \cup { [ZeroErisOriginalGroup EXCEPT !.maturityDate = one] : one \in Sample(2) }
         \cup { [ZeroErisOriginalGroup EXCEPT !.referenceId50 = one] : one \in Sample(50) }
-        \cup { [ZeroErisOriginalGroup EXCEPT !.erisSecurityAltIdGroups = one] : one \in CheckedErisSecurityAltIdGroups2 }
-        \cup { [ZeroErisOriginalGroup EXCEPT !.eventsGroups = one] : one \in CheckedEventsGroups4 }
+        \cup { [ZeroErisOriginalGroup EXCEPT !.erisSecurityAltIdGroups = one] : one \in CheckedErisSecurityAltIdGroups }
+        \cup { [ZeroErisOriginalGroup EXCEPT !.incrementalRefreshErisEventsGroups = one] : one \in CheckedIncrementalRefreshErisEventsGroups }
 
 (* A run of Eris Original Group, written one after another *)
 RECURSIVE EncodeErisOriginalGroupList(_)
@@ -4486,185 +4486,185 @@ CheckedCalFutPx2 ==
 (* Eris Security Alt Id Group: 27 bytes                                    *)
 (***************************************************************************)
 
-ErisSecurityAltIdGroup3 ==
-    [ securityAltId               : Sample(26),
-      securityAltIdSourceOptional : Sample(1) ]
+ErisSecurityAltIdGroup2 ==
+    [ securityAltId       : Sample(26),
+      securityAltIdSource : Sample(1) ]
 
-EncodeErisSecurityAltIdGroup3(message) ==
+EncodeErisSecurityAltIdGroup2(message) ==
     message.securityAltId
-        \o message.securityAltIdSourceOptional
+        \o message.securityAltIdSource
 
-DecodeErisSecurityAltIdGroup3(bytes) ==
+DecodeErisSecurityAltIdGroup2(bytes) ==
     LET securityAltId == ReadBytes(bytes, 26) IN IF ~securityAltId.ok THEN Fail ELSE
-    LET securityAltIdSourceOptional == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
-    Ok([ securityAltId               |-> securityAltId.value,
-         securityAltIdSourceOptional |-> securityAltIdSourceOptional.value ], securityAltIdSourceOptional.rest)
+    LET securityAltIdSource == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSource.ok THEN Fail ELSE
+    Ok([ securityAltId       |-> securityAltId.value,
+         securityAltIdSource |-> securityAltIdSource.value ], securityAltIdSource.rest)
 
-ZeroErisSecurityAltIdGroup3 ==
-    [ securityAltId               |-> [i \in 1 .. 26 |-> 0],
-      securityAltIdSourceOptional |-> [i \in 1 .. 1 |-> 0] ]
+ZeroErisSecurityAltIdGroup2 ==
+    [ securityAltId       |-> [i \in 1 .. 26 |-> 0],
+      securityAltIdSource |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Eris Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
-CheckedErisSecurityAltIdGroup3 ==
-    { ZeroErisSecurityAltIdGroup3 }
-        \cup { [ZeroErisSecurityAltIdGroup3 EXCEPT !.securityAltId = one] : one \in Sample(26) }
-        \cup { [ZeroErisSecurityAltIdGroup3 EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
+CheckedErisSecurityAltIdGroup2 ==
+    { ZeroErisSecurityAltIdGroup2 }
+        \cup { [ZeroErisSecurityAltIdGroup2 EXCEPT !.securityAltId = one] : one \in Sample(26) }
+        \cup { [ZeroErisSecurityAltIdGroup2 EXCEPT !.securityAltIdSource = one] : one \in Sample(1) }
 
 (* A run of Eris Security Alt Id Group, written one after another *)
-RECURSIVE EncodeErisSecurityAltIdGroup3List(_)
-EncodeErisSecurityAltIdGroup3List(messages) ==
+RECURSIVE EncodeErisSecurityAltIdGroup2List(_)
+EncodeErisSecurityAltIdGroup2List(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeErisSecurityAltIdGroup3(Head(messages)) \o EncodeErisSecurityAltIdGroup3List(Tail(messages))
+    ELSE EncodeErisSecurityAltIdGroup2(Head(messages)) \o EncodeErisSecurityAltIdGroup2List(Tail(messages))
 
 (* As many Eris Security Alt Id Group as the field that counts them says *)
-RECURSIVE ReadErisSecurityAltIdGroup3List(_, _)
-ReadErisSecurityAltIdGroup3List(bytes, count) ==
+RECURSIVE ReadErisSecurityAltIdGroup2List(_, _)
+ReadErisSecurityAltIdGroup2List(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeErisSecurityAltIdGroup3(bytes)
+    ELSE LET one == DecodeErisSecurityAltIdGroup2(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadErisSecurityAltIdGroup3List(one.rest, count - 1)
+             ELSE LET more == ReadErisSecurityAltIdGroup2List(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
 (* One Eris Security Alt Id Group of each kind, for the lists that carry them *)
-OneErisSecurityAltIdGroup3 == { ZeroErisSecurityAltIdGroup3 }
+OneErisSecurityAltIdGroup2 == { ZeroErisSecurityAltIdGroup2 }
 
 (***************************************************************************)
 (* Eris Security Alt Id Groups                                             *)
 (***************************************************************************)
 
-ErisSecurityAltIdGroups3 ==
+ErisSecurityAltIdGroups2 ==
     [ blockLength            : Sample(2),
-      erisSecurityAltIdGroup : SampleLists(OneErisSecurityAltIdGroup3) ]
+      erisSecurityAltIdGroup : SampleLists(OneErisSecurityAltIdGroup2) ]
 
-EncodeErisSecurityAltIdGroups3(message) ==
+EncodeErisSecurityAltIdGroups2(message) ==
     message.blockLength
         \o EncodeUIntBE(Len(message.erisSecurityAltIdGroup), 1)
-        \o EncodeErisSecurityAltIdGroup3List(message.erisSecurityAltIdGroup)
+        \o EncodeErisSecurityAltIdGroup2List(message.erisSecurityAltIdGroup)
 
-DecodeErisSecurityAltIdGroups3(bytes) ==
+DecodeErisSecurityAltIdGroups2(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup8.ok THEN Fail ELSE
-    LET erisSecurityAltIdGroup == ReadErisSecurityAltIdGroup3List(numInGroup8.rest, numInGroup8.value) IN IF ~erisSecurityAltIdGroup.ok THEN Fail ELSE
+    LET erisSecurityAltIdGroup == ReadErisSecurityAltIdGroup2List(numInGroup8.rest, numInGroup8.value) IN IF ~erisSecurityAltIdGroup.ok THEN Fail ELSE
     Ok([ blockLength            |-> blockLength.value,
          erisSecurityAltIdGroup |-> erisSecurityAltIdGroup.value ], erisSecurityAltIdGroup.rest)
 
-ZeroErisSecurityAltIdGroups3 ==
+ZeroErisSecurityAltIdGroups2 ==
     [ blockLength            |-> [i \in 1 .. 2 |-> 0],
       erisSecurityAltIdGroup |-> << >> ]
 
 (* Eris Security Alt Id Groups at zero, then each field in turn at the values it is checked at *)
-CheckedErisSecurityAltIdGroups3 ==
-    { ZeroErisSecurityAltIdGroups3 }
-        \cup { [ZeroErisSecurityAltIdGroups3 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroErisSecurityAltIdGroups3 EXCEPT !.erisSecurityAltIdGroup = one] : one \in SampleLists(OneErisSecurityAltIdGroup3) }
+CheckedErisSecurityAltIdGroups2 ==
+    { ZeroErisSecurityAltIdGroups2 }
+        \cup { [ZeroErisSecurityAltIdGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroErisSecurityAltIdGroups2 EXCEPT !.erisSecurityAltIdGroup = one] : one \in SampleLists(OneErisSecurityAltIdGroup2) }
 
 (***************************************************************************)
-(* Events Group: 9 bytes                                                   *)
+(* Incremental Refresh Eris Events Group: 9 bytes                          *)
 (***************************************************************************)
 
-EventsGroup5 ==
-    [ eventTypeOptional : Sample(1),
+IncrementalRefreshErisEventsGroup2 ==
+    [ eventType         : Sample(1),
       eventTimeOptional : Sample(8) ]
 
-EncodeEventsGroup5(message) ==
-    message.eventTypeOptional
+EncodeIncrementalRefreshErisEventsGroup2(message) ==
+    message.eventType
         \o message.eventTimeOptional
 
-DecodeEventsGroup5(bytes) ==
-    LET eventTypeOptional == ReadBytes(bytes, 1) IN IF ~eventTypeOptional.ok THEN Fail ELSE
-    LET eventTimeOptional == ReadBytes(eventTypeOptional.rest, 8) IN IF ~eventTimeOptional.ok THEN Fail ELSE
-    Ok([ eventTypeOptional |-> eventTypeOptional.value,
+DecodeIncrementalRefreshErisEventsGroup2(bytes) ==
+    LET eventType == ReadBytes(bytes, 1) IN IF ~eventType.ok THEN Fail ELSE
+    LET eventTimeOptional == ReadBytes(eventType.rest, 8) IN IF ~eventTimeOptional.ok THEN Fail ELSE
+    Ok([ eventType         |-> eventType.value,
          eventTimeOptional |-> eventTimeOptional.value ], eventTimeOptional.rest)
 
-ZeroEventsGroup5 ==
-    [ eventTypeOptional |-> [i \in 1 .. 1 |-> 0],
+ZeroIncrementalRefreshErisEventsGroup2 ==
+    [ eventType         |-> [i \in 1 .. 1 |-> 0],
       eventTimeOptional |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Events Group at zero, then each field in turn at the values it is checked at *)
-CheckedEventsGroup5 ==
-    { ZeroEventsGroup5 }
-        \cup { [ZeroEventsGroup5 EXCEPT !.eventTypeOptional = one] : one \in Sample(1) }
-        \cup { [ZeroEventsGroup5 EXCEPT !.eventTimeOptional = one] : one \in Sample(8) }
+(* Incremental Refresh Eris Events Group at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshErisEventsGroup2 ==
+    { ZeroIncrementalRefreshErisEventsGroup2 }
+        \cup { [ZeroIncrementalRefreshErisEventsGroup2 EXCEPT !.eventType = one] : one \in Sample(1) }
+        \cup { [ZeroIncrementalRefreshErisEventsGroup2 EXCEPT !.eventTimeOptional = one] : one \in Sample(8) }
 
-(* A run of Events Group, written one after another *)
-RECURSIVE EncodeEventsGroup5List(_)
-EncodeEventsGroup5List(messages) ==
+(* A run of Incremental Refresh Eris Events Group, written one after another *)
+RECURSIVE EncodeIncrementalRefreshErisEventsGroup2List(_)
+EncodeIncrementalRefreshErisEventsGroup2List(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeEventsGroup5(Head(messages)) \o EncodeEventsGroup5List(Tail(messages))
+    ELSE EncodeIncrementalRefreshErisEventsGroup2(Head(messages)) \o EncodeIncrementalRefreshErisEventsGroup2List(Tail(messages))
 
-(* As many Events Group as the field that counts them says *)
-RECURSIVE ReadEventsGroup5List(_, _)
-ReadEventsGroup5List(bytes, count) ==
+(* As many Incremental Refresh Eris Events Group as the field that counts them says *)
+RECURSIVE ReadIncrementalRefreshErisEventsGroup2List(_, _)
+ReadIncrementalRefreshErisEventsGroup2List(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeEventsGroup5(bytes)
+    ELSE LET one == DecodeIncrementalRefreshErisEventsGroup2(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadEventsGroup5List(one.rest, count - 1)
+             ELSE LET more == ReadIncrementalRefreshErisEventsGroup2List(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Events Group of each kind, for the lists that carry them *)
-OneEventsGroup5 == { ZeroEventsGroup5 }
+(* One Incremental Refresh Eris Events Group of each kind, for the lists that carry them *)
+OneIncrementalRefreshErisEventsGroup2 == { ZeroIncrementalRefreshErisEventsGroup2 }
 
 (***************************************************************************)
-(* Events Groups                                                           *)
+(* Incremental Refresh Eris Events Groups                                  *)
 (***************************************************************************)
 
-EventsGroups5 ==
-    [ blockLength : Sample(2),
-      eventsGroup : SampleLists(OneEventsGroup5) ]
+IncrementalRefreshErisEventsGroups2 ==
+    [ blockLength                       : Sample(2),
+      incrementalRefreshErisEventsGroup : SampleLists(OneIncrementalRefreshErisEventsGroup2) ]
 
-EncodeEventsGroups5(message) ==
+EncodeIncrementalRefreshErisEventsGroups2(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.eventsGroup), 1)
-        \o EncodeEventsGroup5List(message.eventsGroup)
+        \o EncodeUIntBE(Len(message.incrementalRefreshErisEventsGroup), 1)
+        \o EncodeIncrementalRefreshErisEventsGroup2List(message.incrementalRefreshErisEventsGroup)
 
-DecodeEventsGroups5(bytes) ==
+DecodeIncrementalRefreshErisEventsGroups2(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup8.ok THEN Fail ELSE
-    LET eventsGroup == ReadEventsGroup5List(numInGroup8.rest, numInGroup8.value) IN IF ~eventsGroup.ok THEN Fail ELSE
-    Ok([ blockLength |-> blockLength.value,
-         eventsGroup |-> eventsGroup.value ], eventsGroup.rest)
+    LET incrementalRefreshErisEventsGroup == ReadIncrementalRefreshErisEventsGroup2List(numInGroup8.rest, numInGroup8.value) IN IF ~incrementalRefreshErisEventsGroup.ok THEN Fail ELSE
+    Ok([ blockLength                       |-> blockLength.value,
+         incrementalRefreshErisEventsGroup |-> incrementalRefreshErisEventsGroup.value ], incrementalRefreshErisEventsGroup.rest)
 
-ZeroEventsGroups5 ==
-    [ blockLength |-> [i \in 1 .. 2 |-> 0],
-      eventsGroup |-> << >> ]
+ZeroIncrementalRefreshErisEventsGroups2 ==
+    [ blockLength                       |-> [i \in 1 .. 2 |-> 0],
+      incrementalRefreshErisEventsGroup |-> << >> ]
 
-(* Events Groups at zero, then each field in turn at the values it is checked at *)
-CheckedEventsGroups5 ==
-    { ZeroEventsGroups5 }
-        \cup { [ZeroEventsGroups5 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroEventsGroups5 EXCEPT !.eventsGroup = one] : one \in SampleLists(OneEventsGroup5) }
+(* Incremental Refresh Eris Events Groups at zero, then each field in turn at the values it is checked at *)
+CheckedIncrementalRefreshErisEventsGroups2 ==
+    { ZeroIncrementalRefreshErisEventsGroups2 }
+        \cup { [ZeroIncrementalRefreshErisEventsGroups2 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroIncrementalRefreshErisEventsGroups2 EXCEPT !.incrementalRefreshErisEventsGroup = one] : one \in SampleLists(OneIncrementalRefreshErisEventsGroup2) }
 
 (***************************************************************************)
 (* Eris Group                                                              *)
 (***************************************************************************)
 
 ErisGroup ==
-    [ mdUpdateActionChar      : Sample(1),
-      mdEntryType             : Sample(1),
-      rptSeq                  : Sample(4),
-      mdEntryPxDecimal        : MdEntryPxDecimal3,
-      mdEntrySizeOptional     : Sample(8),
-      calFutPx                : CalFutPx2,
-      mdEntryPositionNo       : Sample(4),
-      numberOfOrders          : Sample(4),
-      tradeId                 : Sample(4),
-      aggressorSide           : Sample(1),
-      symbol                  : Sample(50),
-      securityGroup26         : Sample(26),
-      securityType            : Sample(9),
-      securityExchange        : Sample(4),
-      productOptional         : Sample(1),
-      maturityDate            : Sample(2),
-      referenceId50           : Sample(50),
-      mdQuoteType             : Sample(1),
-      erisSecurityAltIdGroups : ErisSecurityAltIdGroups3,
-      eventsGroups            : EventsGroups5 ]
+    [ mdUpdateActionChar                 : Sample(1),
+      mdEntryType                        : Sample(1),
+      rptSeq                             : Sample(4),
+      mdEntryPxDecimal                   : MdEntryPxDecimal3,
+      mdEntrySizeOptional                : Sample(8),
+      calFutPx                           : CalFutPx2,
+      mdEntryPositionNo                  : Sample(4),
+      numberOfOrders                     : Sample(4),
+      tradeId                            : Sample(4),
+      aggressorSide                      : Sample(1),
+      symbol                             : Sample(50),
+      securityGroup26                    : Sample(26),
+      securityType                       : Sample(9),
+      securityExchange                   : Sample(4),
+      productOptional                    : Sample(1),
+      maturityDate                       : Sample(2),
+      referenceId50                      : Sample(50),
+      mdQuoteType                        : Sample(1),
+      erisSecurityAltIdGroups            : ErisSecurityAltIdGroups2,
+      incrementalRefreshErisEventsGroups : IncrementalRefreshErisEventsGroups2 ]
 
 EncodeErisGroup(message) ==
     message.mdUpdateActionChar
@@ -4685,8 +4685,8 @@ EncodeErisGroup(message) ==
         \o message.maturityDate
         \o message.referenceId50
         \o message.mdQuoteType
-        \o EncodeErisSecurityAltIdGroups3(message.erisSecurityAltIdGroups)
-        \o EncodeEventsGroups5(message.eventsGroups)
+        \o EncodeErisSecurityAltIdGroups2(message.erisSecurityAltIdGroups)
+        \o EncodeIncrementalRefreshErisEventsGroups2(message.incrementalRefreshErisEventsGroups)
 
 DecodeErisGroup(bytes) ==
     LET mdUpdateActionChar == ReadBytes(bytes, 1) IN IF ~mdUpdateActionChar.ok THEN Fail ELSE
@@ -4707,50 +4707,50 @@ DecodeErisGroup(bytes) ==
     LET maturityDate == ReadBytes(productOptional.rest, 2) IN IF ~maturityDate.ok THEN Fail ELSE
     LET referenceId50 == ReadBytes(maturityDate.rest, 50) IN IF ~referenceId50.ok THEN Fail ELSE
     LET mdQuoteType == ReadBytes(referenceId50.rest, 1) IN IF ~mdQuoteType.ok THEN Fail ELSE
-    LET erisSecurityAltIdGroups == DecodeErisSecurityAltIdGroups3(mdQuoteType.rest) IN IF ~erisSecurityAltIdGroups.ok THEN Fail ELSE
-    LET eventsGroups == DecodeEventsGroups5(erisSecurityAltIdGroups.rest) IN IF ~eventsGroups.ok THEN Fail ELSE
-    Ok([ mdUpdateActionChar      |-> mdUpdateActionChar.value,
-         mdEntryType             |-> mdEntryType.value,
-         rptSeq                  |-> rptSeq.value,
-         mdEntryPxDecimal        |-> mdEntryPxDecimal.value,
-         mdEntrySizeOptional     |-> mdEntrySizeOptional.value,
-         calFutPx                |-> calFutPx.value,
-         mdEntryPositionNo       |-> mdEntryPositionNo.value,
-         numberOfOrders          |-> numberOfOrders.value,
-         tradeId                 |-> tradeId.value,
-         aggressorSide           |-> aggressorSide.value,
-         symbol                  |-> symbol.value,
-         securityGroup26         |-> securityGroup26.value,
-         securityType            |-> securityType.value,
-         securityExchange        |-> securityExchange.value,
-         productOptional         |-> productOptional.value,
-         maturityDate            |-> maturityDate.value,
-         referenceId50           |-> referenceId50.value,
-         mdQuoteType             |-> mdQuoteType.value,
-         erisSecurityAltIdGroups |-> erisSecurityAltIdGroups.value,
-         eventsGroups            |-> eventsGroups.value ], eventsGroups.rest)
+    LET erisSecurityAltIdGroups == DecodeErisSecurityAltIdGroups2(mdQuoteType.rest) IN IF ~erisSecurityAltIdGroups.ok THEN Fail ELSE
+    LET incrementalRefreshErisEventsGroups == DecodeIncrementalRefreshErisEventsGroups2(erisSecurityAltIdGroups.rest) IN IF ~incrementalRefreshErisEventsGroups.ok THEN Fail ELSE
+    Ok([ mdUpdateActionChar                 |-> mdUpdateActionChar.value,
+         mdEntryType                        |-> mdEntryType.value,
+         rptSeq                             |-> rptSeq.value,
+         mdEntryPxDecimal                   |-> mdEntryPxDecimal.value,
+         mdEntrySizeOptional                |-> mdEntrySizeOptional.value,
+         calFutPx                           |-> calFutPx.value,
+         mdEntryPositionNo                  |-> mdEntryPositionNo.value,
+         numberOfOrders                     |-> numberOfOrders.value,
+         tradeId                            |-> tradeId.value,
+         aggressorSide                      |-> aggressorSide.value,
+         symbol                             |-> symbol.value,
+         securityGroup26                    |-> securityGroup26.value,
+         securityType                       |-> securityType.value,
+         securityExchange                   |-> securityExchange.value,
+         productOptional                    |-> productOptional.value,
+         maturityDate                       |-> maturityDate.value,
+         referenceId50                      |-> referenceId50.value,
+         mdQuoteType                        |-> mdQuoteType.value,
+         erisSecurityAltIdGroups            |-> erisSecurityAltIdGroups.value,
+         incrementalRefreshErisEventsGroups |-> incrementalRefreshErisEventsGroups.value ], incrementalRefreshErisEventsGroups.rest)
 
 ZeroErisGroup ==
-    [ mdUpdateActionChar      |-> [i \in 1 .. 1 |-> 0],
-      mdEntryType             |-> [i \in 1 .. 1 |-> 0],
-      rptSeq                  |-> [i \in 1 .. 4 |-> 0],
-      mdEntryPxDecimal        |-> ZeroMdEntryPxDecimal3,
-      mdEntrySizeOptional     |-> [i \in 1 .. 8 |-> 0],
-      calFutPx                |-> ZeroCalFutPx2,
-      mdEntryPositionNo       |-> [i \in 1 .. 4 |-> 0],
-      numberOfOrders          |-> [i \in 1 .. 4 |-> 0],
-      tradeId                 |-> [i \in 1 .. 4 |-> 0],
-      aggressorSide           |-> [i \in 1 .. 1 |-> 0],
-      symbol                  |-> [i \in 1 .. 50 |-> 0],
-      securityGroup26         |-> [i \in 1 .. 26 |-> 0],
-      securityType            |-> [i \in 1 .. 9 |-> 0],
-      securityExchange        |-> [i \in 1 .. 4 |-> 0],
-      productOptional         |-> [i \in 1 .. 1 |-> 0],
-      maturityDate            |-> [i \in 1 .. 2 |-> 0],
-      referenceId50           |-> [i \in 1 .. 50 |-> 0],
-      mdQuoteType             |-> [i \in 1 .. 1 |-> 0],
-      erisSecurityAltIdGroups |-> ZeroErisSecurityAltIdGroups3,
-      eventsGroups            |-> ZeroEventsGroups5 ]
+    [ mdUpdateActionChar                 |-> [i \in 1 .. 1 |-> 0],
+      mdEntryType                        |-> [i \in 1 .. 1 |-> 0],
+      rptSeq                             |-> [i \in 1 .. 4 |-> 0],
+      mdEntryPxDecimal                   |-> ZeroMdEntryPxDecimal3,
+      mdEntrySizeOptional                |-> [i \in 1 .. 8 |-> 0],
+      calFutPx                           |-> ZeroCalFutPx2,
+      mdEntryPositionNo                  |-> [i \in 1 .. 4 |-> 0],
+      numberOfOrders                     |-> [i \in 1 .. 4 |-> 0],
+      tradeId                            |-> [i \in 1 .. 4 |-> 0],
+      aggressorSide                      |-> [i \in 1 .. 1 |-> 0],
+      symbol                             |-> [i \in 1 .. 50 |-> 0],
+      securityGroup26                    |-> [i \in 1 .. 26 |-> 0],
+      securityType                       |-> [i \in 1 .. 9 |-> 0],
+      securityExchange                   |-> [i \in 1 .. 4 |-> 0],
+      productOptional                    |-> [i \in 1 .. 1 |-> 0],
+      maturityDate                       |-> [i \in 1 .. 2 |-> 0],
+      referenceId50                      |-> [i \in 1 .. 50 |-> 0],
+      mdQuoteType                        |-> [i \in 1 .. 1 |-> 0],
+      erisSecurityAltIdGroups            |-> ZeroErisSecurityAltIdGroups2,
+      incrementalRefreshErisEventsGroups |-> ZeroIncrementalRefreshErisEventsGroups2 ]
 
 (* Eris Group at zero, then each field in turn at the values it is checked at *)
 CheckedErisGroup ==
@@ -4773,8 +4773,8 @@ CheckedErisGroup ==
         \cup { [ZeroErisGroup EXCEPT !.maturityDate = one] : one \in Sample(2) }
         \cup { [ZeroErisGroup EXCEPT !.referenceId50 = one] : one \in Sample(50) }
         \cup { [ZeroErisGroup EXCEPT !.mdQuoteType = one] : one \in Sample(1) }
-        \cup { [ZeroErisGroup EXCEPT !.erisSecurityAltIdGroups = one] : one \in CheckedErisSecurityAltIdGroups3 }
-        \cup { [ZeroErisGroup EXCEPT !.eventsGroups = one] : one \in CheckedEventsGroups5 }
+        \cup { [ZeroErisGroup EXCEPT !.erisSecurityAltIdGroups = one] : one \in CheckedErisSecurityAltIdGroups2 }
+        \cup { [ZeroErisGroup EXCEPT !.incrementalRefreshErisEventsGroups = one] : one \in CheckedIncrementalRefreshErisEventsGroups2 }
 
 (* A run of Eris Group, written one after another *)
 RECURSIVE EncodeErisGroupList(_)
@@ -5629,159 +5629,159 @@ CheckedErisFeedTypesGroups ==
 (* Events Group: 9 bytes                                                   *)
 (***************************************************************************)
 
-EventsGroup6 ==
+EventsGroup3 ==
     [ eventTypeOptional : Sample(1),
       eventTimeOptional : Sample(8) ]
 
-EncodeEventsGroup6(message) ==
+EncodeEventsGroup3(message) ==
     message.eventTypeOptional
         \o message.eventTimeOptional
 
-DecodeEventsGroup6(bytes) ==
+DecodeEventsGroup3(bytes) ==
     LET eventTypeOptional == ReadBytes(bytes, 1) IN IF ~eventTypeOptional.ok THEN Fail ELSE
     LET eventTimeOptional == ReadBytes(eventTypeOptional.rest, 8) IN IF ~eventTimeOptional.ok THEN Fail ELSE
     Ok([ eventTypeOptional |-> eventTypeOptional.value,
          eventTimeOptional |-> eventTimeOptional.value ], eventTimeOptional.rest)
 
-ZeroEventsGroup6 ==
+ZeroEventsGroup3 ==
     [ eventTypeOptional |-> [i \in 1 .. 1 |-> 0],
       eventTimeOptional |-> [i \in 1 .. 8 |-> 0] ]
 
 (* Events Group at zero, then each field in turn at the values it is checked at *)
-CheckedEventsGroup6 ==
-    { ZeroEventsGroup6 }
-        \cup { [ZeroEventsGroup6 EXCEPT !.eventTypeOptional = one] : one \in Sample(1) }
-        \cup { [ZeroEventsGroup6 EXCEPT !.eventTimeOptional = one] : one \in Sample(8) }
+CheckedEventsGroup3 ==
+    { ZeroEventsGroup3 }
+        \cup { [ZeroEventsGroup3 EXCEPT !.eventTypeOptional = one] : one \in Sample(1) }
+        \cup { [ZeroEventsGroup3 EXCEPT !.eventTimeOptional = one] : one \in Sample(8) }
 
 (* A run of Events Group, written one after another *)
-RECURSIVE EncodeEventsGroup6List(_)
-EncodeEventsGroup6List(messages) ==
+RECURSIVE EncodeEventsGroup3List(_)
+EncodeEventsGroup3List(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeEventsGroup6(Head(messages)) \o EncodeEventsGroup6List(Tail(messages))
+    ELSE EncodeEventsGroup3(Head(messages)) \o EncodeEventsGroup3List(Tail(messages))
 
 (* As many Events Group as the field that counts them says *)
-RECURSIVE ReadEventsGroup6List(_, _)
-ReadEventsGroup6List(bytes, count) ==
+RECURSIVE ReadEventsGroup3List(_, _)
+ReadEventsGroup3List(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeEventsGroup6(bytes)
+    ELSE LET one == DecodeEventsGroup3(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadEventsGroup6List(one.rest, count - 1)
+             ELSE LET more == ReadEventsGroup3List(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
 (* One Events Group of each kind, for the lists that carry them *)
-OneEventsGroup6 == { ZeroEventsGroup6 }
+OneEventsGroup3 == { ZeroEventsGroup3 }
 
 (***************************************************************************)
 (* Events Groups                                                           *)
 (***************************************************************************)
 
-EventsGroups6 ==
+EventsGroups3 ==
     [ blockLength : Sample(2),
-      eventsGroup : SampleLists(OneEventsGroup6) ]
+      eventsGroup : SampleLists(OneEventsGroup3) ]
 
-EncodeEventsGroups6(message) ==
+EncodeEventsGroups3(message) ==
     message.blockLength
         \o EncodeUIntBE(Len(message.eventsGroup), 1)
-        \o EncodeEventsGroup6List(message.eventsGroup)
+        \o EncodeEventsGroup3List(message.eventsGroup)
 
-DecodeEventsGroups6(bytes) ==
+DecodeEventsGroups3(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup8.ok THEN Fail ELSE
-    LET eventsGroup == ReadEventsGroup6List(numInGroup8.rest, numInGroup8.value) IN IF ~eventsGroup.ok THEN Fail ELSE
+    LET eventsGroup == ReadEventsGroup3List(numInGroup8.rest, numInGroup8.value) IN IF ~eventsGroup.ok THEN Fail ELSE
     Ok([ blockLength |-> blockLength.value,
          eventsGroup |-> eventsGroup.value ], eventsGroup.rest)
 
-ZeroEventsGroups6 ==
+ZeroEventsGroups3 ==
     [ blockLength |-> [i \in 1 .. 2 |-> 0],
       eventsGroup |-> << >> ]
 
 (* Events Groups at zero, then each field in turn at the values it is checked at *)
-CheckedEventsGroups6 ==
-    { ZeroEventsGroups6 }
-        \cup { [ZeroEventsGroups6 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroEventsGroups6 EXCEPT !.eventsGroup = one] : one \in SampleLists(OneEventsGroup6) }
+CheckedEventsGroups3 ==
+    { ZeroEventsGroups3 }
+        \cup { [ZeroEventsGroups3 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroEventsGroups3 EXCEPT !.eventsGroup = one] : one \in SampleLists(OneEventsGroup3) }
 
 (***************************************************************************)
 (* Eris Security Alt Id Group: 27 bytes                                    *)
 (***************************************************************************)
 
-ErisSecurityAltIdGroup4 ==
-    [ securityAltId               : Sample(26),
-      securityAltIdSourceOptional : Sample(1) ]
+ErisSecurityAltIdGroup3 ==
+    [ securityAltId       : Sample(26),
+      securityAltIdSource : Sample(1) ]
 
-EncodeErisSecurityAltIdGroup4(message) ==
+EncodeErisSecurityAltIdGroup3(message) ==
     message.securityAltId
-        \o message.securityAltIdSourceOptional
+        \o message.securityAltIdSource
 
-DecodeErisSecurityAltIdGroup4(bytes) ==
+DecodeErisSecurityAltIdGroup3(bytes) ==
     LET securityAltId == ReadBytes(bytes, 26) IN IF ~securityAltId.ok THEN Fail ELSE
-    LET securityAltIdSourceOptional == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
-    Ok([ securityAltId               |-> securityAltId.value,
-         securityAltIdSourceOptional |-> securityAltIdSourceOptional.value ], securityAltIdSourceOptional.rest)
+    LET securityAltIdSource == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSource.ok THEN Fail ELSE
+    Ok([ securityAltId       |-> securityAltId.value,
+         securityAltIdSource |-> securityAltIdSource.value ], securityAltIdSource.rest)
 
-ZeroErisSecurityAltIdGroup4 ==
-    [ securityAltId               |-> [i \in 1 .. 26 |-> 0],
-      securityAltIdSourceOptional |-> [i \in 1 .. 1 |-> 0] ]
+ZeroErisSecurityAltIdGroup3 ==
+    [ securityAltId       |-> [i \in 1 .. 26 |-> 0],
+      securityAltIdSource |-> [i \in 1 .. 1 |-> 0] ]
 
 (* Eris Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
-CheckedErisSecurityAltIdGroup4 ==
-    { ZeroErisSecurityAltIdGroup4 }
-        \cup { [ZeroErisSecurityAltIdGroup4 EXCEPT !.securityAltId = one] : one \in Sample(26) }
-        \cup { [ZeroErisSecurityAltIdGroup4 EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
+CheckedErisSecurityAltIdGroup3 ==
+    { ZeroErisSecurityAltIdGroup3 }
+        \cup { [ZeroErisSecurityAltIdGroup3 EXCEPT !.securityAltId = one] : one \in Sample(26) }
+        \cup { [ZeroErisSecurityAltIdGroup3 EXCEPT !.securityAltIdSource = one] : one \in Sample(1) }
 
 (* A run of Eris Security Alt Id Group, written one after another *)
-RECURSIVE EncodeErisSecurityAltIdGroup4List(_)
-EncodeErisSecurityAltIdGroup4List(messages) ==
+RECURSIVE EncodeErisSecurityAltIdGroup3List(_)
+EncodeErisSecurityAltIdGroup3List(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeErisSecurityAltIdGroup4(Head(messages)) \o EncodeErisSecurityAltIdGroup4List(Tail(messages))
+    ELSE EncodeErisSecurityAltIdGroup3(Head(messages)) \o EncodeErisSecurityAltIdGroup3List(Tail(messages))
 
 (* As many Eris Security Alt Id Group as the field that counts them says *)
-RECURSIVE ReadErisSecurityAltIdGroup4List(_, _)
-ReadErisSecurityAltIdGroup4List(bytes, count) ==
+RECURSIVE ReadErisSecurityAltIdGroup3List(_, _)
+ReadErisSecurityAltIdGroup3List(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeErisSecurityAltIdGroup4(bytes)
+    ELSE LET one == DecodeErisSecurityAltIdGroup3(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadErisSecurityAltIdGroup4List(one.rest, count - 1)
+             ELSE LET more == ReadErisSecurityAltIdGroup3List(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
 (* One Eris Security Alt Id Group of each kind, for the lists that carry them *)
-OneErisSecurityAltIdGroup4 == { ZeroErisSecurityAltIdGroup4 }
+OneErisSecurityAltIdGroup3 == { ZeroErisSecurityAltIdGroup3 }
 
 (***************************************************************************)
 (* Eris Security Alt Id Groups                                             *)
 (***************************************************************************)
 
-ErisSecurityAltIdGroups4 ==
+ErisSecurityAltIdGroups3 ==
     [ blockLength            : Sample(2),
-      erisSecurityAltIdGroup : SampleLists(OneErisSecurityAltIdGroup4) ]
+      erisSecurityAltIdGroup : SampleLists(OneErisSecurityAltIdGroup3) ]
 
-EncodeErisSecurityAltIdGroups4(message) ==
+EncodeErisSecurityAltIdGroups3(message) ==
     message.blockLength
         \o EncodeUIntBE(Len(message.erisSecurityAltIdGroup), 1)
-        \o EncodeErisSecurityAltIdGroup4List(message.erisSecurityAltIdGroup)
+        \o EncodeErisSecurityAltIdGroup3List(message.erisSecurityAltIdGroup)
 
-DecodeErisSecurityAltIdGroups4(bytes) ==
+DecodeErisSecurityAltIdGroups3(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup8.ok THEN Fail ELSE
-    LET erisSecurityAltIdGroup == ReadErisSecurityAltIdGroup4List(numInGroup8.rest, numInGroup8.value) IN IF ~erisSecurityAltIdGroup.ok THEN Fail ELSE
+    LET erisSecurityAltIdGroup == ReadErisSecurityAltIdGroup3List(numInGroup8.rest, numInGroup8.value) IN IF ~erisSecurityAltIdGroup.ok THEN Fail ELSE
     Ok([ blockLength            |-> blockLength.value,
          erisSecurityAltIdGroup |-> erisSecurityAltIdGroup.value ], erisSecurityAltIdGroup.rest)
 
-ZeroErisSecurityAltIdGroups4 ==
+ZeroErisSecurityAltIdGroups3 ==
     [ blockLength            |-> [i \in 1 .. 2 |-> 0],
       erisSecurityAltIdGroup |-> << >> ]
 
 (* Eris Security Alt Id Groups at zero, then each field in turn at the values it is checked at *)
-CheckedErisSecurityAltIdGroups4 ==
-    { ZeroErisSecurityAltIdGroups4 }
-        \cup { [ZeroErisSecurityAltIdGroups4 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroErisSecurityAltIdGroups4 EXCEPT !.erisSecurityAltIdGroup = one] : one \in SampleLists(OneErisSecurityAltIdGroup4) }
+CheckedErisSecurityAltIdGroups3 ==
+    { ZeroErisSecurityAltIdGroups3 }
+        \cup { [ZeroErisSecurityAltIdGroups3 EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroErisSecurityAltIdGroups3 EXCEPT !.erisSecurityAltIdGroup = one] : one \in SampleLists(OneErisSecurityAltIdGroup3) }
 
 (***************************************************************************)
 (* Previous Fixing Rate: 9 bytes                                           *)
@@ -5840,103 +5840,103 @@ CheckedInterpolationFactor ==
         \cup { [ZeroInterpolationFactor EXCEPT !.exponent = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Eris Security Alt Id Group: 27 bytes                                    *)
+(* Eris Leg Security Alt Id Group: 27 bytes                                *)
 (***************************************************************************)
 
-ErisSecurityAltIdGroup5 ==
-    [ securityAltId               : Sample(26),
-      securityAltIdSourceOptional : Sample(1) ]
+ErisLegSecurityAltIdGroup ==
+    [ legSecurityAltId       : Sample(26),
+      legSecurityAltIdSource : Sample(1) ]
 
-EncodeErisSecurityAltIdGroup5(message) ==
-    message.securityAltId
-        \o message.securityAltIdSourceOptional
+EncodeErisLegSecurityAltIdGroup(message) ==
+    message.legSecurityAltId
+        \o message.legSecurityAltIdSource
 
-DecodeErisSecurityAltIdGroup5(bytes) ==
-    LET securityAltId == ReadBytes(bytes, 26) IN IF ~securityAltId.ok THEN Fail ELSE
-    LET securityAltIdSourceOptional == ReadBytes(securityAltId.rest, 1) IN IF ~securityAltIdSourceOptional.ok THEN Fail ELSE
-    Ok([ securityAltId               |-> securityAltId.value,
-         securityAltIdSourceOptional |-> securityAltIdSourceOptional.value ], securityAltIdSourceOptional.rest)
+DecodeErisLegSecurityAltIdGroup(bytes) ==
+    LET legSecurityAltId == ReadBytes(bytes, 26) IN IF ~legSecurityAltId.ok THEN Fail ELSE
+    LET legSecurityAltIdSource == ReadBytes(legSecurityAltId.rest, 1) IN IF ~legSecurityAltIdSource.ok THEN Fail ELSE
+    Ok([ legSecurityAltId       |-> legSecurityAltId.value,
+         legSecurityAltIdSource |-> legSecurityAltIdSource.value ], legSecurityAltIdSource.rest)
 
-ZeroErisSecurityAltIdGroup5 ==
-    [ securityAltId               |-> [i \in 1 .. 26 |-> 0],
-      securityAltIdSourceOptional |-> [i \in 1 .. 1 |-> 0] ]
+ZeroErisLegSecurityAltIdGroup ==
+    [ legSecurityAltId       |-> [i \in 1 .. 26 |-> 0],
+      legSecurityAltIdSource |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Eris Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
-CheckedErisSecurityAltIdGroup5 ==
-    { ZeroErisSecurityAltIdGroup5 }
-        \cup { [ZeroErisSecurityAltIdGroup5 EXCEPT !.securityAltId = one] : one \in Sample(26) }
-        \cup { [ZeroErisSecurityAltIdGroup5 EXCEPT !.securityAltIdSourceOptional = one] : one \in Sample(1) }
+(* Eris Leg Security Alt Id Group at zero, then each field in turn at the values it is checked at *)
+CheckedErisLegSecurityAltIdGroup ==
+    { ZeroErisLegSecurityAltIdGroup }
+        \cup { [ZeroErisLegSecurityAltIdGroup EXCEPT !.legSecurityAltId = one] : one \in Sample(26) }
+        \cup { [ZeroErisLegSecurityAltIdGroup EXCEPT !.legSecurityAltIdSource = one] : one \in Sample(1) }
 
-(* A run of Eris Security Alt Id Group, written one after another *)
-RECURSIVE EncodeErisSecurityAltIdGroup5List(_)
-EncodeErisSecurityAltIdGroup5List(messages) ==
+(* A run of Eris Leg Security Alt Id Group, written one after another *)
+RECURSIVE EncodeErisLegSecurityAltIdGroupList(_)
+EncodeErisLegSecurityAltIdGroupList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeErisSecurityAltIdGroup5(Head(messages)) \o EncodeErisSecurityAltIdGroup5List(Tail(messages))
+    ELSE EncodeErisLegSecurityAltIdGroup(Head(messages)) \o EncodeErisLegSecurityAltIdGroupList(Tail(messages))
 
-(* As many Eris Security Alt Id Group as the field that counts them says *)
-RECURSIVE ReadErisSecurityAltIdGroup5List(_, _)
-ReadErisSecurityAltIdGroup5List(bytes, count) ==
+(* As many Eris Leg Security Alt Id Group as the field that counts them says *)
+RECURSIVE ReadErisLegSecurityAltIdGroupList(_, _)
+ReadErisLegSecurityAltIdGroupList(bytes, count) ==
     IF count = 0
     THEN Ok(<< >>, bytes)
-    ELSE LET one == DecodeErisSecurityAltIdGroup5(bytes)
+    ELSE LET one == DecodeErisLegSecurityAltIdGroup(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadErisSecurityAltIdGroup5List(one.rest, count - 1)
+             ELSE LET more == ReadErisLegSecurityAltIdGroupList(one.rest, count - 1)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Eris Security Alt Id Group of each kind, for the lists that carry them *)
-OneErisSecurityAltIdGroup5 == { ZeroErisSecurityAltIdGroup5 }
+(* One Eris Leg Security Alt Id Group of each kind, for the lists that carry them *)
+OneErisLegSecurityAltIdGroup == { ZeroErisLegSecurityAltIdGroup }
 
 (***************************************************************************)
-(* Eris Security Alt Id Groups                                             *)
+(* Eris Leg Security Alt Id Groups                                         *)
 (***************************************************************************)
 
-ErisSecurityAltIdGroups5 ==
-    [ blockLength            : Sample(2),
-      erisSecurityAltIdGroup : SampleLists(OneErisSecurityAltIdGroup5) ]
+ErisLegSecurityAltIdGroups ==
+    [ blockLength               : Sample(2),
+      erisLegSecurityAltIdGroup : SampleLists(OneErisLegSecurityAltIdGroup) ]
 
-EncodeErisSecurityAltIdGroups5(message) ==
+EncodeErisLegSecurityAltIdGroups(message) ==
     message.blockLength
-        \o EncodeUIntBE(Len(message.erisSecurityAltIdGroup), 1)
-        \o EncodeErisSecurityAltIdGroup5List(message.erisSecurityAltIdGroup)
+        \o EncodeUIntBE(Len(message.erisLegSecurityAltIdGroup), 1)
+        \o EncodeErisLegSecurityAltIdGroupList(message.erisLegSecurityAltIdGroup)
 
-DecodeErisSecurityAltIdGroups5(bytes) ==
+DecodeErisLegSecurityAltIdGroups(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET numInGroup8 == ReadUIntBE(blockLength.rest, 1) IN IF ~numInGroup8.ok THEN Fail ELSE
-    LET erisSecurityAltIdGroup == ReadErisSecurityAltIdGroup5List(numInGroup8.rest, numInGroup8.value) IN IF ~erisSecurityAltIdGroup.ok THEN Fail ELSE
-    Ok([ blockLength            |-> blockLength.value,
-         erisSecurityAltIdGroup |-> erisSecurityAltIdGroup.value ], erisSecurityAltIdGroup.rest)
+    LET erisLegSecurityAltIdGroup == ReadErisLegSecurityAltIdGroupList(numInGroup8.rest, numInGroup8.value) IN IF ~erisLegSecurityAltIdGroup.ok THEN Fail ELSE
+    Ok([ blockLength               |-> blockLength.value,
+         erisLegSecurityAltIdGroup |-> erisLegSecurityAltIdGroup.value ], erisLegSecurityAltIdGroup.rest)
 
-ZeroErisSecurityAltIdGroups5 ==
-    [ blockLength            |-> [i \in 1 .. 2 |-> 0],
-      erisSecurityAltIdGroup |-> << >> ]
+ZeroErisLegSecurityAltIdGroups ==
+    [ blockLength               |-> [i \in 1 .. 2 |-> 0],
+      erisLegSecurityAltIdGroup |-> << >> ]
 
-(* Eris Security Alt Id Groups at zero, then each field in turn at the values it is checked at *)
-CheckedErisSecurityAltIdGroups5 ==
-    { ZeroErisSecurityAltIdGroups5 }
-        \cup { [ZeroErisSecurityAltIdGroups5 EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroErisSecurityAltIdGroups5 EXCEPT !.erisSecurityAltIdGroup = one] : one \in SampleLists(OneErisSecurityAltIdGroup5) }
+(* Eris Leg Security Alt Id Groups at zero, then each field in turn at the values it is checked at *)
+CheckedErisLegSecurityAltIdGroups ==
+    { ZeroErisLegSecurityAltIdGroups }
+        \cup { [ZeroErisLegSecurityAltIdGroups EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroErisLegSecurityAltIdGroups EXCEPT !.erisLegSecurityAltIdGroup = one] : one \in SampleLists(OneErisLegSecurityAltIdGroup) }
 
 (***************************************************************************)
 (* Eris Legs Group                                                         *)
 (***************************************************************************)
 
 ErisLegsGroup ==
-    [ legBenchmarkCurveName   : Sample(5),
-      rateDescriptor          : Sample(8),
-      previousFixingDate      : Sample(2),
-      legPayFrequencey        : Sample(3),
-      previousFixingRate      : PreviousFixingRate,
-      legSymbol               : Sample(50),
-      erisLegRatioQty         : Sample(4),
-      legSide                 : Sample(1),
-      legCurrency             : Sample(3),
-      legSecurityType4        : Sample(8),
-      legSecurityGroup        : Sample(12),
-      legDateOffset           : Sample(1),
-      interpolationFactor     : InterpolationFactor,
-      erisSecurityAltIdGroups : ErisSecurityAltIdGroups5 ]
+    [ legBenchmarkCurveName      : Sample(5),
+      rateDescriptor             : Sample(8),
+      previousFixingDate         : Sample(2),
+      legPayFrequencey           : Sample(3),
+      previousFixingRate         : PreviousFixingRate,
+      legSymbol                  : Sample(50),
+      erisLegRatioQty            : Sample(4),
+      legSide                    : Sample(1),
+      legCurrency                : Sample(3),
+      legSecurityType4           : Sample(8),
+      legSecurityGroup           : Sample(12),
+      legDateOffset              : Sample(1),
+      interpolationFactor        : InterpolationFactor,
+      erisLegSecurityAltIdGroups : ErisLegSecurityAltIdGroups ]
 
 EncodeErisLegsGroup(message) ==
     message.legBenchmarkCurveName
@@ -5952,7 +5952,7 @@ EncodeErisLegsGroup(message) ==
         \o message.legSecurityGroup
         \o message.legDateOffset
         \o EncodeInterpolationFactor(message.interpolationFactor)
-        \o EncodeErisSecurityAltIdGroups5(message.erisSecurityAltIdGroups)
+        \o EncodeErisLegSecurityAltIdGroups(message.erisLegSecurityAltIdGroups)
 
 DecodeErisLegsGroup(bytes) ==
     LET legBenchmarkCurveName == ReadBytes(bytes, 5) IN IF ~legBenchmarkCurveName.ok THEN Fail ELSE
@@ -5968,37 +5968,37 @@ DecodeErisLegsGroup(bytes) ==
     LET legSecurityGroup == ReadBytes(legSecurityType4.rest, 12) IN IF ~legSecurityGroup.ok THEN Fail ELSE
     LET legDateOffset == ReadBytes(legSecurityGroup.rest, 1) IN IF ~legDateOffset.ok THEN Fail ELSE
     LET interpolationFactor == DecodeInterpolationFactor(legDateOffset.rest) IN IF ~interpolationFactor.ok THEN Fail ELSE
-    LET erisSecurityAltIdGroups == DecodeErisSecurityAltIdGroups5(interpolationFactor.rest) IN IF ~erisSecurityAltIdGroups.ok THEN Fail ELSE
-    Ok([ legBenchmarkCurveName   |-> legBenchmarkCurveName.value,
-         rateDescriptor          |-> rateDescriptor.value,
-         previousFixingDate      |-> previousFixingDate.value,
-         legPayFrequencey        |-> legPayFrequencey.value,
-         previousFixingRate      |-> previousFixingRate.value,
-         legSymbol               |-> legSymbol.value,
-         erisLegRatioQty         |-> erisLegRatioQty.value,
-         legSide                 |-> legSide.value,
-         legCurrency             |-> legCurrency.value,
-         legSecurityType4        |-> legSecurityType4.value,
-         legSecurityGroup        |-> legSecurityGroup.value,
-         legDateOffset           |-> legDateOffset.value,
-         interpolationFactor     |-> interpolationFactor.value,
-         erisSecurityAltIdGroups |-> erisSecurityAltIdGroups.value ], erisSecurityAltIdGroups.rest)
+    LET erisLegSecurityAltIdGroups == DecodeErisLegSecurityAltIdGroups(interpolationFactor.rest) IN IF ~erisLegSecurityAltIdGroups.ok THEN Fail ELSE
+    Ok([ legBenchmarkCurveName      |-> legBenchmarkCurveName.value,
+         rateDescriptor             |-> rateDescriptor.value,
+         previousFixingDate         |-> previousFixingDate.value,
+         legPayFrequencey           |-> legPayFrequencey.value,
+         previousFixingRate         |-> previousFixingRate.value,
+         legSymbol                  |-> legSymbol.value,
+         erisLegRatioQty            |-> erisLegRatioQty.value,
+         legSide                    |-> legSide.value,
+         legCurrency                |-> legCurrency.value,
+         legSecurityType4           |-> legSecurityType4.value,
+         legSecurityGroup           |-> legSecurityGroup.value,
+         legDateOffset              |-> legDateOffset.value,
+         interpolationFactor        |-> interpolationFactor.value,
+         erisLegSecurityAltIdGroups |-> erisLegSecurityAltIdGroups.value ], erisLegSecurityAltIdGroups.rest)
 
 ZeroErisLegsGroup ==
-    [ legBenchmarkCurveName   |-> [i \in 1 .. 5 |-> 0],
-      rateDescriptor          |-> [i \in 1 .. 8 |-> 0],
-      previousFixingDate      |-> [i \in 1 .. 2 |-> 0],
-      legPayFrequencey        |-> [i \in 1 .. 3 |-> 0],
-      previousFixingRate      |-> ZeroPreviousFixingRate,
-      legSymbol               |-> [i \in 1 .. 50 |-> 0],
-      erisLegRatioQty         |-> [i \in 1 .. 4 |-> 0],
-      legSide                 |-> [i \in 1 .. 1 |-> 0],
-      legCurrency             |-> [i \in 1 .. 3 |-> 0],
-      legSecurityType4        |-> [i \in 1 .. 8 |-> 0],
-      legSecurityGroup        |-> [i \in 1 .. 12 |-> 0],
-      legDateOffset           |-> [i \in 1 .. 1 |-> 0],
-      interpolationFactor     |-> ZeroInterpolationFactor,
-      erisSecurityAltIdGroups |-> ZeroErisSecurityAltIdGroups5 ]
+    [ legBenchmarkCurveName      |-> [i \in 1 .. 5 |-> 0],
+      rateDescriptor             |-> [i \in 1 .. 8 |-> 0],
+      previousFixingDate         |-> [i \in 1 .. 2 |-> 0],
+      legPayFrequencey           |-> [i \in 1 .. 3 |-> 0],
+      previousFixingRate         |-> ZeroPreviousFixingRate,
+      legSymbol                  |-> [i \in 1 .. 50 |-> 0],
+      erisLegRatioQty            |-> [i \in 1 .. 4 |-> 0],
+      legSide                    |-> [i \in 1 .. 1 |-> 0],
+      legCurrency                |-> [i \in 1 .. 3 |-> 0],
+      legSecurityType4           |-> [i \in 1 .. 8 |-> 0],
+      legSecurityGroup           |-> [i \in 1 .. 12 |-> 0],
+      legDateOffset              |-> [i \in 1 .. 1 |-> 0],
+      interpolationFactor        |-> ZeroInterpolationFactor,
+      erisLegSecurityAltIdGroups |-> ZeroErisLegSecurityAltIdGroups ]
 
 (* Eris Legs Group at zero, then each field in turn at the values it is checked at *)
 CheckedErisLegsGroup ==
@@ -6016,7 +6016,7 @@ CheckedErisLegsGroup ==
         \cup { [ZeroErisLegsGroup EXCEPT !.legSecurityGroup = one] : one \in Sample(12) }
         \cup { [ZeroErisLegsGroup EXCEPT !.legDateOffset = one] : one \in Sample(1) }
         \cup { [ZeroErisLegsGroup EXCEPT !.interpolationFactor = one] : one \in CheckedInterpolationFactor }
-        \cup { [ZeroErisLegsGroup EXCEPT !.erisSecurityAltIdGroups = one] : one \in CheckedErisSecurityAltIdGroups5 }
+        \cup { [ZeroErisLegsGroup EXCEPT !.erisLegSecurityAltIdGroups = one] : one \in CheckedErisLegSecurityAltIdGroups }
 
 (* A run of Eris Legs Group, written one after another *)
 RECURSIVE EncodeErisLegsGroupList(_)
@@ -6088,8 +6088,8 @@ MdInstrumentDefinitionEris ==
       userDefinedInstrument   : Sample(1),
       applId                  : Sample(2),
       erisFeedTypesGroups     : ErisFeedTypesGroups,
-      eventsGroups            : EventsGroups6,
-      erisSecurityAltIdGroups : ErisSecurityAltIdGroups4,
+      eventsGroups            : EventsGroups3,
+      erisSecurityAltIdGroups : ErisSecurityAltIdGroups3,
       erisLegsGroups          : ErisLegsGroups ]
 
 EncodeMdInstrumentDefinitionEris(message) ==
@@ -6107,8 +6107,8 @@ EncodeMdInstrumentDefinitionEris(message) ==
         \o message.userDefinedInstrument
         \o message.applId
         \o EncodeErisFeedTypesGroups(message.erisFeedTypesGroups)
-        \o EncodeEventsGroups6(message.eventsGroups)
-        \o EncodeErisSecurityAltIdGroups4(message.erisSecurityAltIdGroups)
+        \o EncodeEventsGroups3(message.eventsGroups)
+        \o EncodeErisSecurityAltIdGroups3(message.erisSecurityAltIdGroups)
         \o EncodeErisLegsGroups(message.erisLegsGroups)
 
 DecodeMdInstrumentDefinitionEris(bytes) ==
@@ -6126,8 +6126,8 @@ DecodeMdInstrumentDefinitionEris(bytes) ==
     LET userDefinedInstrument == ReadBytes(couponRate.rest, 1) IN IF ~userDefinedInstrument.ok THEN Fail ELSE
     LET applId == ReadBytes(userDefinedInstrument.rest, 2) IN IF ~applId.ok THEN Fail ELSE
     LET erisFeedTypesGroups == DecodeErisFeedTypesGroups(applId.rest) IN IF ~erisFeedTypesGroups.ok THEN Fail ELSE
-    LET eventsGroups == DecodeEventsGroups6(erisFeedTypesGroups.rest) IN IF ~eventsGroups.ok THEN Fail ELSE
-    LET erisSecurityAltIdGroups == DecodeErisSecurityAltIdGroups4(eventsGroups.rest) IN IF ~erisSecurityAltIdGroups.ok THEN Fail ELSE
+    LET eventsGroups == DecodeEventsGroups3(erisFeedTypesGroups.rest) IN IF ~eventsGroups.ok THEN Fail ELSE
+    LET erisSecurityAltIdGroups == DecodeErisSecurityAltIdGroups3(eventsGroups.rest) IN IF ~erisSecurityAltIdGroups.ok THEN Fail ELSE
     LET erisLegsGroups == DecodeErisLegsGroups(erisSecurityAltIdGroups.rest) IN IF ~erisLegsGroups.ok THEN Fail ELSE
     Ok([ securityGroup12         |-> securityGroup12.value,
          symbol                  |-> symbol.value,
@@ -6162,8 +6162,8 @@ ZeroMdInstrumentDefinitionEris ==
       userDefinedInstrument   |-> [i \in 1 .. 1 |-> 0],
       applId                  |-> [i \in 1 .. 2 |-> 0],
       erisFeedTypesGroups     |-> ZeroErisFeedTypesGroups,
-      eventsGroups            |-> ZeroEventsGroups6,
-      erisSecurityAltIdGroups |-> ZeroErisSecurityAltIdGroups4,
+      eventsGroups            |-> ZeroEventsGroups3,
+      erisSecurityAltIdGroups |-> ZeroErisSecurityAltIdGroups3,
       erisLegsGroups          |-> ZeroErisLegsGroups ]
 
 (* Md Instrument Definition Eris at zero, then each field in turn at the values it is checked at *)
@@ -6183,8 +6183,8 @@ CheckedMdInstrumentDefinitionEris ==
         \cup { [ZeroMdInstrumentDefinitionEris EXCEPT !.userDefinedInstrument = one] : one \in Sample(1) }
         \cup { [ZeroMdInstrumentDefinitionEris EXCEPT !.applId = one] : one \in Sample(2) }
         \cup { [ZeroMdInstrumentDefinitionEris EXCEPT !.erisFeedTypesGroups = one] : one \in CheckedErisFeedTypesGroups }
-        \cup { [ZeroMdInstrumentDefinitionEris EXCEPT !.eventsGroups = one] : one \in CheckedEventsGroups6 }
-        \cup { [ZeroMdInstrumentDefinitionEris EXCEPT !.erisSecurityAltIdGroups = one] : one \in CheckedErisSecurityAltIdGroups4 }
+        \cup { [ZeroMdInstrumentDefinitionEris EXCEPT !.eventsGroups = one] : one \in CheckedEventsGroups3 }
+        \cup { [ZeroMdInstrumentDefinitionEris EXCEPT !.erisSecurityAltIdGroups = one] : one \in CheckedErisSecurityAltIdGroups3 }
         \cup { [ZeroMdInstrumentDefinitionEris EXCEPT !.erisLegsGroups = one] : one \in CheckedErisLegsGroups }
 
 (***************************************************************************)
@@ -8172,18 +8172,18 @@ RoundTripFinalSettlementFuturesPrice ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Eris Security Alt Id Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripErisSecurityAltIdGroup ==
-    \A message \in CheckedErisSecurityAltIdGroup :
-        LET read == DecodeErisSecurityAltIdGroup(EncodeErisSecurityAltIdGroup(message))
+(* Every Eris Reference Data Security Alt Id Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripErisReferenceDataSecurityAltIdGroup ==
+    \A message \in CheckedErisReferenceDataSecurityAltIdGroup :
+        LET read == DecodeErisReferenceDataSecurityAltIdGroup(EncodeErisReferenceDataSecurityAltIdGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Eris Security Alt Id Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripErisSecurityAltIdGroups ==
-    \A message \in CheckedErisSecurityAltIdGroups :
-        LET read == DecodeErisSecurityAltIdGroups(EncodeErisSecurityAltIdGroups(message))
+(* Every Eris Reference Data Security Alt Id Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripErisReferenceDataSecurityAltIdGroups ==
+    \A message \in CheckedErisReferenceDataSecurityAltIdGroups :
+        LET read == DecodeErisReferenceDataSecurityAltIdGroups(EncodeErisReferenceDataSecurityAltIdGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -8436,18 +8436,18 @@ RoundTripInstAttribGroups ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Events Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripEventsGroup3 ==
-    \A message \in CheckedEventsGroup3 :
-        LET read == DecodeEventsGroup3(EncodeEventsGroup3(message))
+(* Every Indices Events Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIndicesEventsGroup ==
+    \A message \in CheckedIndicesEventsGroup :
+        LET read == DecodeIndicesEventsGroup(EncodeIndicesEventsGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Events Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripEventsGroups3 ==
-    \A message \in CheckedEventsGroups3 :
-        LET read == DecodeEventsGroups3(EncodeEventsGroups3(message))
+(* Every Indices Events Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIndicesEventsGroups ==
+    \A message \in CheckedIndicesEventsGroups :
+        LET read == DecodeIndicesEventsGroups(EncodeIndicesEventsGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -8645,33 +8645,33 @@ RoundTripCalFutPx ==
             /\ read.rest = << >>
 
 (* Every Eris Security Alt Id Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripErisSecurityAltIdGroup2 ==
-    \A message \in CheckedErisSecurityAltIdGroup2 :
-        LET read == DecodeErisSecurityAltIdGroup2(EncodeErisSecurityAltIdGroup2(message))
+RoundTripErisSecurityAltIdGroup ==
+    \A message \in CheckedErisSecurityAltIdGroup :
+        LET read == DecodeErisSecurityAltIdGroup(EncodeErisSecurityAltIdGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Eris Security Alt Id Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripErisSecurityAltIdGroups2 ==
-    \A message \in CheckedErisSecurityAltIdGroups2 :
-        LET read == DecodeErisSecurityAltIdGroups2(EncodeErisSecurityAltIdGroups2(message))
+RoundTripErisSecurityAltIdGroups ==
+    \A message \in CheckedErisSecurityAltIdGroups :
+        LET read == DecodeErisSecurityAltIdGroups(EncodeErisSecurityAltIdGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Events Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripEventsGroup4 ==
-    \A message \in CheckedEventsGroup4 :
-        LET read == DecodeEventsGroup4(EncodeEventsGroup4(message))
+(* Every Incremental Refresh Eris Events Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshErisEventsGroup ==
+    \A message \in CheckedIncrementalRefreshErisEventsGroup :
+        LET read == DecodeIncrementalRefreshErisEventsGroup(EncodeIncrementalRefreshErisEventsGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Events Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripEventsGroups4 ==
-    \A message \in CheckedEventsGroups4 :
-        LET read == DecodeEventsGroups4(EncodeEventsGroups4(message))
+(* Every Incremental Refresh Eris Events Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshErisEventsGroups ==
+    \A message \in CheckedIncrementalRefreshErisEventsGroups :
+        LET read == DecodeIncrementalRefreshErisEventsGroups(EncodeIncrementalRefreshErisEventsGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -8717,33 +8717,33 @@ RoundTripCalFutPx2 ==
             /\ read.rest = << >>
 
 (* Every Eris Security Alt Id Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripErisSecurityAltIdGroup3 ==
-    \A message \in CheckedErisSecurityAltIdGroup3 :
-        LET read == DecodeErisSecurityAltIdGroup3(EncodeErisSecurityAltIdGroup3(message))
+RoundTripErisSecurityAltIdGroup2 ==
+    \A message \in CheckedErisSecurityAltIdGroup2 :
+        LET read == DecodeErisSecurityAltIdGroup2(EncodeErisSecurityAltIdGroup2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Eris Security Alt Id Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripErisSecurityAltIdGroups3 ==
-    \A message \in CheckedErisSecurityAltIdGroups3 :
-        LET read == DecodeErisSecurityAltIdGroups3(EncodeErisSecurityAltIdGroups3(message))
+RoundTripErisSecurityAltIdGroups2 ==
+    \A message \in CheckedErisSecurityAltIdGroups2 :
+        LET read == DecodeErisSecurityAltIdGroups2(EncodeErisSecurityAltIdGroups2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Events Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripEventsGroup5 ==
-    \A message \in CheckedEventsGroup5 :
-        LET read == DecodeEventsGroup5(EncodeEventsGroup5(message))
+(* Every Incremental Refresh Eris Events Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshErisEventsGroup2 ==
+    \A message \in CheckedIncrementalRefreshErisEventsGroup2 :
+        LET read == DecodeIncrementalRefreshErisEventsGroup2(EncodeIncrementalRefreshErisEventsGroup2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Events Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripEventsGroups5 ==
-    \A message \in CheckedEventsGroups5 :
-        LET read == DecodeEventsGroups5(EncodeEventsGroups5(message))
+(* Every Incremental Refresh Eris Events Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripIncrementalRefreshErisEventsGroups2 ==
+    \A message \in CheckedIncrementalRefreshErisEventsGroups2 :
+        LET read == DecodeIncrementalRefreshErisEventsGroups2(EncodeIncrementalRefreshErisEventsGroups2(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -8893,33 +8893,33 @@ RoundTripErisFeedTypesGroups ==
             /\ read.rest = << >>
 
 (* Every Events Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripEventsGroup6 ==
-    \A message \in CheckedEventsGroup6 :
-        LET read == DecodeEventsGroup6(EncodeEventsGroup6(message))
+RoundTripEventsGroup3 ==
+    \A message \in CheckedEventsGroup3 :
+        LET read == DecodeEventsGroup3(EncodeEventsGroup3(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Events Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripEventsGroups6 ==
-    \A message \in CheckedEventsGroups6 :
-        LET read == DecodeEventsGroups6(EncodeEventsGroups6(message))
+RoundTripEventsGroups3 ==
+    \A message \in CheckedEventsGroups3 :
+        LET read == DecodeEventsGroups3(EncodeEventsGroups3(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Eris Security Alt Id Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripErisSecurityAltIdGroup4 ==
-    \A message \in CheckedErisSecurityAltIdGroup4 :
-        LET read == DecodeErisSecurityAltIdGroup4(EncodeErisSecurityAltIdGroup4(message))
+RoundTripErisSecurityAltIdGroup3 ==
+    \A message \in CheckedErisSecurityAltIdGroup3 :
+        LET read == DecodeErisSecurityAltIdGroup3(EncodeErisSecurityAltIdGroup3(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
 (* Every Eris Security Alt Id Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripErisSecurityAltIdGroups4 ==
-    \A message \in CheckedErisSecurityAltIdGroups4 :
-        LET read == DecodeErisSecurityAltIdGroups4(EncodeErisSecurityAltIdGroups4(message))
+RoundTripErisSecurityAltIdGroups3 ==
+    \A message \in CheckedErisSecurityAltIdGroups3 :
+        LET read == DecodeErisSecurityAltIdGroups3(EncodeErisSecurityAltIdGroups3(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -8940,18 +8940,18 @@ RoundTripInterpolationFactor ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Eris Security Alt Id Group decodes back to what was encoded, and leaves nothing over *)
-RoundTripErisSecurityAltIdGroup5 ==
-    \A message \in CheckedErisSecurityAltIdGroup5 :
-        LET read == DecodeErisSecurityAltIdGroup5(EncodeErisSecurityAltIdGroup5(message))
+(* Every Eris Leg Security Alt Id Group decodes back to what was encoded, and leaves nothing over *)
+RoundTripErisLegSecurityAltIdGroup ==
+    \A message \in CheckedErisLegSecurityAltIdGroup :
+        LET read == DecodeErisLegSecurityAltIdGroup(EncodeErisLegSecurityAltIdGroup(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Eris Security Alt Id Groups decodes back to what was encoded, and leaves nothing over *)
-RoundTripErisSecurityAltIdGroups5 ==
-    \A message \in CheckedErisSecurityAltIdGroups5 :
-        LET read == DecodeErisSecurityAltIdGroups5(EncodeErisSecurityAltIdGroups5(message))
+(* Every Eris Leg Security Alt Id Groups decodes back to what was encoded, and leaves nothing over *)
+RoundTripErisLegSecurityAltIdGroups ==
+    \A message \in CheckedErisLegSecurityAltIdGroups :
+        LET read == DecodeErisLegSecurityAltIdGroups(EncodeErisLegSecurityAltIdGroups(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

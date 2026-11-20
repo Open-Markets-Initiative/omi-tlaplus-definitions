@@ -17,7 +17,7 @@
 (* License: MIT No Attribution                                             *)
 (*                                                                         *)
 (* Note: Itch Frame is of no one width: each is read by its own fields,    *)
-(* and since every reading of it takes at least 14 bytes off the reader    *)
+(* and since every reading of it takes at least 15 bytes off the reader    *)
 (* the run ends where the data does.                                       *)
 (***************************************************************************)
 EXTENDS Integers, Sequences
@@ -345,12 +345,12 @@ CheckedSubscriptionReply ==
         \cup { [ZeroSubscriptionReply EXCEPT !.rejectReason = one] : one \in Sample(50) }
 
 (***************************************************************************)
-(* Price Message: 29 bytes                                                 *)
+(* Price Message: 32 bytes                                                 *)
 (***************************************************************************)
 
 PriceMessage ==
     [ instrumentIndex : Sample(2),
-      priceId         : Sample(1),
+      priceId         : Sample(4),
       side            : Sample(1),
       maxAmount       : Sample(8),
       minAmount       : Sample(8),
@@ -370,7 +370,7 @@ EncodePriceMessage(message) ==
 
 DecodePriceMessage(bytes) ==
     LET instrumentIndex == ReadBytes(bytes, 2) IN IF ~instrumentIndex.ok THEN Fail ELSE
-    LET priceId == ReadBytes(instrumentIndex.rest, 1) IN IF ~priceId.ok THEN Fail ELSE
+    LET priceId == ReadBytes(instrumentIndex.rest, 4) IN IF ~priceId.ok THEN Fail ELSE
     LET side == ReadBytes(priceId.rest, 1) IN IF ~side.ok THEN Fail ELSE
     LET maxAmount == ReadBytes(side.rest, 8) IN IF ~maxAmount.ok THEN Fail ELSE
     LET minAmount == ReadBytes(maxAmount.rest, 8) IN IF ~minAmount.ok THEN Fail ELSE
@@ -388,7 +388,7 @@ DecodePriceMessage(bytes) ==
 
 ZeroPriceMessage ==
     [ instrumentIndex |-> [i \in 1 .. 2 |-> 0],
-      priceId         |-> [i \in 1 .. 1 |-> 0],
+      priceId         |-> [i \in 1 .. 4 |-> 0],
       side            |-> [i \in 1 .. 1 |-> 0],
       maxAmount       |-> [i \in 1 .. 8 |-> 0],
       minAmount       |-> [i \in 1 .. 8 |-> 0],
@@ -400,7 +400,7 @@ ZeroPriceMessage ==
 CheckedPriceMessage ==
     { ZeroPriceMessage }
         \cup { [ZeroPriceMessage EXCEPT !.instrumentIndex = one] : one \in Sample(2) }
-        \cup { [ZeroPriceMessage EXCEPT !.priceId = one] : one \in Sample(1) }
+        \cup { [ZeroPriceMessage EXCEPT !.priceId = one] : one \in Sample(4) }
         \cup { [ZeroPriceMessage EXCEPT !.side = one] : one \in Sample(1) }
         \cup { [ZeroPriceMessage EXCEPT !.maxAmount = one] : one \in Sample(8) }
         \cup { [ZeroPriceMessage EXCEPT !.minAmount = one] : one \in Sample(8) }
@@ -409,12 +409,12 @@ CheckedPriceMessage ==
         \cup { [ZeroPriceMessage EXCEPT !.priceProvider = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Price Cancel Message: 3 bytes                                           *)
+(* Price Cancel Message: 6 bytes                                           *)
 (***************************************************************************)
 
 PriceCancelMessage ==
     [ instrumentIndex : Sample(2),
-      priceId         : Sample(1) ]
+      priceId         : Sample(4) ]
 
 EncodePriceCancelMessage(message) ==
     message.instrumentIndex
@@ -422,19 +422,19 @@ EncodePriceCancelMessage(message) ==
 
 DecodePriceCancelMessage(bytes) ==
     LET instrumentIndex == ReadBytes(bytes, 2) IN IF ~instrumentIndex.ok THEN Fail ELSE
-    LET priceId == ReadBytes(instrumentIndex.rest, 1) IN IF ~priceId.ok THEN Fail ELSE
+    LET priceId == ReadBytes(instrumentIndex.rest, 4) IN IF ~priceId.ok THEN Fail ELSE
     Ok([ instrumentIndex |-> instrumentIndex.value,
          priceId         |-> priceId.value ], priceId.rest)
 
 ZeroPriceCancelMessage ==
     [ instrumentIndex |-> [i \in 1 .. 2 |-> 0],
-      priceId         |-> [i \in 1 .. 1 |-> 0] ]
+      priceId         |-> [i \in 1 .. 4 |-> 0] ]
 
 (* Price Cancel Message at zero, then each field in turn at the values it is checked at *)
 CheckedPriceCancelMessage ==
     { ZeroPriceCancelMessage }
         \cup { [ZeroPriceCancelMessage EXCEPT !.instrumentIndex = one] : one \in Sample(2) }
-        \cup { [ZeroPriceCancelMessage EXCEPT !.priceId = one] : one \in Sample(1) }
+        \cup { [ZeroPriceCancelMessage EXCEPT !.priceId = one] : one \in Sample(4) }
 
 (***************************************************************************)
 (* Trade Ticker Message: 15 bytes                                          *)

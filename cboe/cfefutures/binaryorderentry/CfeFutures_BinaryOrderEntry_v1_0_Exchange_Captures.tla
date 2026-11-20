@@ -1,11 +1,11 @@
-------- MODULE CfeFutures_BinaryOrderEntry_v1_1_20_Exchange_Captures -------
+-------- MODULE CfeFutures_BinaryOrderEntry_v1_0_Exchange_Captures ---------
 (***************************************************************************)
-(* Recorded Chicago Board Options Exchange Futures Binary Order Entry      *)
-(* v1.1.20 packets, as the bytes they were captured as. Each one decodes,  *)
-(* consumes the whole packet, and encodes back to exactly the bytes it was *)
-(* read from.                                                              *)
+(* Recorded Chicago Board Options Exchange Futures Binary Order Entry v1.0 *)
+(* packets, as the bytes they were captured as. Each one decodes, consumes *)
+(* the whole packet, and encodes back to exactly the bytes it was read     *)
+(* from.                                                                   *)
 (***************************************************************************)
-EXTENDS CfeFutures_BinaryOrderEntry_v1_1_20_Exchange
+EXTENDS CfeFutures_BinaryOrderEntry_v1_0_Exchange
 
 QuoteUpdateAcknowledgementCapture ==
     << 176, 227, 53, 0, 235, 5, 1, 0, 0, 0, 0, 0, 144, 210, 55, 36,

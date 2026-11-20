@@ -389,16 +389,16 @@ CheckedPayload ==
         \cup { [tag |-> AdminHeartbeatCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
-(* Message, framed by Message Size                                         *)
+(* Mdp3 Message, framed by Message Size                                    *)
 (***************************************************************************)
 
-Message ==
+Mdp3Message ==
     [ blockLength : Sample(2),
       schemaId    : Sample(2),
       version     : Sample(2),
       payload     : Payload ]
 
-EncodeMessageBody(message) ==
+EncodeMdp3MessageBody(message) ==
     message.blockLength
         \o EncodeUIntLE(message.payload.tag, 2)
         \o message.schemaId
@@ -406,11 +406,11 @@ EncodeMessageBody(message) ==
         \o EncodePayload(message.payload)
 
 (* Message Size counts the bytes it frames, so it is written from them *)
-EncodeMessage(message) ==
-    LET body == EncodeMessageBody(message)
+EncodeMdp3Message(message) ==
+    LET body == EncodeMdp3MessageBody(message)
     IN  EncodeUIntLE(Len(body) + 2, 2) \o body
 
-DecodeMessageBody(bytes) ==
+DecodeMdp3MessageBody(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET templateId == ReadUIntLE(blockLength.rest, 2) IN IF ~templateId.ok THEN Fail ELSE
     LET schemaId == ReadBytes(templateId.rest, 2) IN IF ~schemaId.ok THEN Fail ELSE
@@ -421,53 +421,53 @@ DecodeMessageBody(bytes) ==
          version     |-> version.value,
          payload     |-> payload.value ], payload.rest)
 
-DecodeMessage(bytes) ==
+DecodeMdp3Message(bytes) ==
     LET length == ReadUIntLE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
     LET size == length.value - 2 IN
     IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, size)
         beyond == SubSeq(length.rest, size + 1, Len(length.rest))
-        body   == DecodeMessageBody(framed)
+        body   == DecodeMdp3MessageBody(framed)
     IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
     Ok(body.value, beyond)
 
-ZeroMessage ==
+ZeroMdp3Message ==
     [ blockLength |-> [i \in 1 .. 2 |-> 0],
       schemaId    |-> [i \in 1 .. 2 |-> 0],
       version     |-> [i \in 1 .. 2 |-> 0],
       payload     |-> ZeroPayload ]
 
-(* Message at zero, then each field in turn at the values it is checked at *)
-CheckedMessage ==
-    { ZeroMessage }
-        \cup { [ZeroMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroMessage EXCEPT !.schemaId = one] : one \in Sample(2) }
-        \cup { [ZeroMessage EXCEPT !.version = one] : one \in Sample(2) }
-        \cup { [ZeroMessage EXCEPT !.payload = one] : one \in CheckedPayload }
+(* Mdp3 Message at zero, then each field in turn at the values it is checked at *)
+CheckedMdp3Message ==
+    { ZeroMdp3Message }
+        \cup { [ZeroMdp3Message EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroMdp3Message EXCEPT !.schemaId = one] : one \in Sample(2) }
+        \cup { [ZeroMdp3Message EXCEPT !.version = one] : one \in Sample(2) }
+        \cup { [ZeroMdp3Message EXCEPT !.payload = one] : one \in CheckedPayload }
 
-(* A run of Message, written one after another *)
-RECURSIVE EncodeMessageList(_)
-EncodeMessageList(messages) ==
+(* A run of Mdp3 Message, written one after another *)
+RECURSIVE EncodeMdp3MessageList(_)
+EncodeMdp3MessageList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeMessage(Head(messages)) \o EncodeMessageList(Tail(messages))
+    ELSE EncodeMdp3Message(Head(messages)) \o EncodeMdp3MessageList(Tail(messages))
 
-(* As many Message as the bytes hold, which is what its payload rule states. *)
+(* As many Mdp3 Message as the bytes hold, which is what its payload rule states. *)
 (* Each one takes bytes off the reader, so the run ends where the data does. *)
-RECURSIVE ReadMessageAll(_)
-ReadMessageAll(bytes) ==
+RECURSIVE ReadMdp3MessageAll(_)
+ReadMdp3MessageAll(bytes) ==
     IF bytes = << >>
     THEN Ok(<< >>, << >>)
-    ELSE LET one == DecodeMessage(bytes)
+    ELSE LET one == DecodeMdp3Message(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadMessageAll(one.rest)
+             ELSE LET more == ReadMdp3MessageAll(one.rest)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Message of each kind, for the lists that carry them *)
-OneMessage ==
-    { [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshBtecCode, body |-> ZeroMdIncrementalRefreshBtec]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> AdminHeartbeatCode, body |-> [empty |-> 0]]] }
+(* One Mdp3 Message of each kind, for the lists that carry them *)
+OneMdp3Message ==
+    { [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshBtecCode, body |-> ZeroMdIncrementalRefreshBtec]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> AdminHeartbeatCode, body |-> [empty |-> 0]]] }
 
 (***************************************************************************)
 (* Udp Packet                                                              *)
@@ -475,27 +475,27 @@ OneMessage ==
 
 UdpPacket ==
     [ binaryPacketHeader : BinaryPacketHeader,
-      message            : SampleLists(OneMessage) ]
+      mdp3Message        : SampleLists(OneMdp3Message) ]
 
 EncodeUdpPacket(message) ==
     EncodeBinaryPacketHeader(message.binaryPacketHeader)
-        \o EncodeMessageList(message.message)
+        \o EncodeMdp3MessageList(message.mdp3Message)
 
 DecodeUdpPacket(bytes) ==
     LET binaryPacketHeader == DecodeBinaryPacketHeader(bytes) IN IF ~binaryPacketHeader.ok THEN Fail ELSE
-    LET message == ReadMessageAll(binaryPacketHeader.rest) IN IF ~message.ok THEN Fail ELSE
+    LET mdp3Message == ReadMdp3MessageAll(binaryPacketHeader.rest) IN IF ~mdp3Message.ok THEN Fail ELSE
     Ok([ binaryPacketHeader |-> binaryPacketHeader.value,
-         message            |-> message.value ], message.rest)
+         mdp3Message        |-> mdp3Message.value ], mdp3Message.rest)
 
 ZeroUdpPacket ==
     [ binaryPacketHeader |-> ZeroBinaryPacketHeader,
-      message            |-> << >> ]
+      mdp3Message        |-> << >> ]
 
 (* Udp Packet at zero, then each field in turn at the values it is checked at *)
 CheckedUdpPacket ==
     { ZeroUdpPacket }
         \cup { [ZeroUdpPacket EXCEPT !.binaryPacketHeader = one] : one \in CheckedBinaryPacketHeader }
-        \cup { [ZeroUdpPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
+        \cup { [ZeroUdpPacket EXCEPT !.mdp3Message = one] : one \in SampleLists(OneMdp3Message) }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -561,10 +561,10 @@ RoundTripMdIncrementalRefreshBtec ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripMessage ==
-    \A message \in CheckedMessage :
-        LET read == DecodeMessage(EncodeMessage(message))
+(* Every Mdp3 Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdp3Message ==
+    \A message \in CheckedMdp3Message :
+        LET read == DecodeMdp3Message(EncodeMdp3Message(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -585,9 +585,9 @@ SelectsPayload ==
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Size is written from the bytes it frames *)
-FramesMessage ==
-    \A message \in CheckedMessage :
-        LET bytes == EncodeMessage(message)
+FramesMdp3Message ==
+    \A message \in CheckedMdp3Message :
+        LET bytes == EncodeMdp3Message(message)
         IN  DecodeUIntLE(SubSeq(bytes, 1, 2)) = Len(bytes) - 0
 
 -----------------------------------------------------------------------------

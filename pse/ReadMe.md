@@ -7,6 +7,7 @@
 | --- | --- | --- | --- | ---: | ---: | --- | --- | --- |
 | [PseEquities][PseEquities.Exchange] | [BasicWithLastSale][Pse.PseEquities.BasicWithLastSale] | [Itch][Omi.Encoding.Itch] | [2.3][Pse.PseEquities.BasicWithLastSale.Itch.v2.3.Definition] | 10/5/2018 | 1,010 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Pse.PseEquities.BasicWithLastSale.Itch.v2.3.Url] - [pdf][Pse.PseEquities.BasicWithLastSale.Itch.v2.3.Pdf] |
 | [PseEquities][PseEquities.Exchange] | [Index][Pse.PseEquities.Index] | [Itch][Omi.Encoding.Itch] | [2.3][Pse.PseEquities.Index.Itch.v2.3.Definition] | 10/5/2018 | 590 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Pse.PseEquities.Index.Itch.v2.3.Url] - [pdf][Pse.PseEquities.Index.Itch.v2.3.Pdf] |
+| [PseEquities][PseEquities.Exchange] | [News][Pse.PseEquities.News] | [Itch][Omi.Encoding.Itch] | [2.3][Pse.PseEquities.News.Itch.v2.3.Definition] | 10/5/2018 | 592 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Pse.PseEquities.News.Itch.v2.3.Url] - [pdf][Pse.PseEquities.News.Itch.v2.3.Pdf] |
 | [PseEquities][PseEquities.Exchange] | [TotalView][Pse.PseEquities.TotalView] | [Itch][Omi.Encoding.Itch] | [2.3][Pse.PseEquities.TotalView.Itch.v2.3.Definition] | 10/5/2018 | 1,556 | [Active][Omi.Glossary.Deployment.Active] | [Untested][Omi.Glossary.Testing.Untested] | [url][Pse.PseEquities.TotalView.Itch.v2.3.Url] - [pdf][Pse.PseEquities.TotalView.Itch.v2.3.Pdf] |
 
 
@@ -33,6 +34,7 @@
 [PseEquities.Exchange]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/tree/main/Organizations/Pse/Protocols/PseEquities "Pse PseEquities"
 [Pse.PseEquities.BasicWithLastSale]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Pse/Protocols/PseEquities/BasicWithLastSale.md "Pse Equities Itch Basic With Last Sale"
 [Pse.PseEquities.Index]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Pse/Protocols/PseEquities/Index.md "Pse Equities Itch Index"
+[Pse.PseEquities.News]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Pse/Protocols/PseEquities/News.md "Pse Equities Itch News"
 [Pse.PseEquities.TotalView]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Pse/Protocols/PseEquities/TotalView.md "Pse Equities Itch Total View"
 
 [Pse.PseEquities.BasicWithLastSale.Itch.v2.3.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/pse/pseequities/basicwithlastsale/PseEquities_BasicWithLastSale_v2_3.tla "Pse PseEquities BasicWithLastSale Itch v2.3 Tla Definition"
@@ -41,6 +43,9 @@
 [Pse.PseEquities.Index.Itch.v2.3.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/pse/pseequities/index/PseEquities_Index_v2_3.tla "Pse PseEquities Index Itch v2.3 Tla Definition"
 [Pse.PseEquities.Index.Itch.v2.3.Url]: https://www.pse.com.ph/data-products/ "Philippine Stock Exchange 2.3 Url"
 [Pse.PseEquities.Index.Itch.v2.3.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Pse/Specifications/Documentation/Pse.PseEquities.MarketData.Itch.v2.3.pdf "Philippine Stock Exchange 2.3 Pdf"
+[Pse.PseEquities.News.Itch.v2.3.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/pse/pseequities/news/PseEquities_News_v2_3.tla "Pse PseEquities News Itch v2.3 Tla Definition"
+[Pse.PseEquities.News.Itch.v2.3.Url]: https://www.pse.com.ph/data-products/ "Philippine Stock Exchange 2.3 Url"
+[Pse.PseEquities.News.Itch.v2.3.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Pse/Specifications/Documentation/Pse.PseEquities.MarketData.Itch.v2.3.pdf "Philippine Stock Exchange 2.3 Pdf"
 [Pse.PseEquities.TotalView.Itch.v2.3.Definition]: https://github.com/Open-Markets-Initiative/omi-tlaplus-definitions/blob/main/pse/pseequities/totalview/PseEquities_TotalView_v2_3.tla "Pse PseEquities TotalView Itch v2.3 Tla Definition"
 [Pse.PseEquities.TotalView.Itch.v2.3.Url]: https://www.pse.com.ph/data-products/ "Philippine Stock Exchange 2.3 Url"
 [Pse.PseEquities.TotalView.Itch.v2.3.Pdf]: https://github.com/Open-Markets-Initiative/Open-Markets-Initiative/blob/main/Organizations/Pse/Specifications/Documentation/Pse.PseEquities.MarketData.Itch.v2.3.pdf "Philippine Stock Exchange 2.3 Pdf"

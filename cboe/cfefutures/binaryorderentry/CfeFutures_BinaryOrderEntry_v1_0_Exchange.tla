@@ -250,10 +250,10 @@ CheckedPreventMatch ==
         \cup { [ZeroPreventMatch EXCEPT !.tradingGroupId = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Order Acknowledgement Message: 161 bytes                                *)
+(* Order Acknowledgement: 161 bytes                                        *)
 (***************************************************************************)
 
-OrderAcknowledgementMessage ==
+OrderAcknowledgement ==
     [ transactionTime        : Sample(8),
       clOrdId                : Sample(20),
       orderId                : Sample(8),
@@ -285,7 +285,7 @@ OrderAcknowledgementMessage ==
       custOrderHandlingInst  : Sample(1),
       requestReceivedTime    : Sample(8) ]
 
-EncodeOrderAcknowledgementMessage(message) ==
+EncodeOrderAcknowledgement(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.orderId
@@ -317,7 +317,7 @@ EncodeOrderAcknowledgementMessage(message) ==
         \o message.custOrderHandlingInst
         \o message.requestReceivedTime
 
-DecodeOrderAcknowledgementMessage(bytes) ==
+DecodeOrderAcknowledgement(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET orderId == ReadBytes(clOrdId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
@@ -379,7 +379,7 @@ DecodeOrderAcknowledgementMessage(bytes) ==
          custOrderHandlingInst  |-> custOrderHandlingInst.value,
          requestReceivedTime    |-> requestReceivedTime.value ], requestReceivedTime.rest)
 
-ZeroOrderAcknowledgementMessage ==
+ZeroOrderAcknowledgement ==
     [ transactionTime        |-> [i \in 1 .. 8 |-> 0],
       clOrdId                |-> [i \in 1 .. 20 |-> 0],
       orderId                |-> [i \in 1 .. 8 |-> 0],
@@ -411,59 +411,59 @@ ZeroOrderAcknowledgementMessage ==
       custOrderHandlingInst  |-> [i \in 1 .. 1 |-> 0],
       requestReceivedTime    |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Order Acknowledgement Message at zero, then each field in turn at the values it is checked at *)
-CheckedOrderAcknowledgementMessage ==
-    { ZeroOrderAcknowledgementMessage }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.ordType = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.timeInForce = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.minQty = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.symbol = one] : one \in Sample(8) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.capacity = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.account = one] : one \in Sample(16) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.clearingAccount = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.orderQty = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.preventMatch = one] : one \in CheckedPreventMatch }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.maturityDate = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.openClose = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.leavesQty = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.baseLiquidityIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.expireTime = one] : one \in Sample(8) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.subLiquidityIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.stopPx = one] : one \in Sample(8) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.cmtaNumber = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.ctiCode = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.oeoId = one] : one \in Sample(18) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.cumQty = one] : one \in Sample(4) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.frequentTraderId = one] : one \in Sample(6) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.custOrderHandlingInst = one] : one \in Sample(1) }
-        \cup { [ZeroOrderAcknowledgementMessage EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
+(* Order Acknowledgement at zero, then each field in turn at the values it is checked at *)
+CheckedOrderAcknowledgement ==
+    { ZeroOrderAcknowledgement }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.ordType = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.timeInForce = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.minQty = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.symbol = one] : one \in Sample(8) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.capacity = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.account = one] : one \in Sample(16) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.clearingAccount = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.orderQty = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.preventMatch = one] : one \in CheckedPreventMatch }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.maturityDate = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.openClose = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.leavesQty = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.baseLiquidityIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.expireTime = one] : one \in Sample(8) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.subLiquidityIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.stopPx = one] : one \in Sample(8) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.cmtaNumber = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.ctiCode = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.manualOrderIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.oeoId = one] : one \in Sample(18) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.cumQty = one] : one \in Sample(4) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.frequentTraderId = one] : one \in Sample(6) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.custOrderHandlingInst = one] : one \in Sample(1) }
+        \cup { [ZeroOrderAcknowledgement EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Order Rejected Message: 93 bytes                                        *)
+(* Order Rejected: 93 bytes                                                *)
 (***************************************************************************)
 
-OrderRejectedMessage ==
+OrderRejected ==
     [ transactionTime   : Sample(8),
       clOrdId           : Sample(20),
       clearingFirm      : Sample(4),
       orderRejectReason : Sample(1),
       text              : Sample(60) ]
 
-EncodeOrderRejectedMessage(message) ==
+EncodeOrderRejected(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.clearingFirm
         \o message.orderRejectReason
         \o message.text
 
-DecodeOrderRejectedMessage(bytes) ==
+DecodeOrderRejected(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(clOrdId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
@@ -475,27 +475,27 @@ DecodeOrderRejectedMessage(bytes) ==
          orderRejectReason |-> orderRejectReason.value,
          text              |-> text.value ], text.rest)
 
-ZeroOrderRejectedMessage ==
+ZeroOrderRejected ==
     [ transactionTime   |-> [i \in 1 .. 8 |-> 0],
       clOrdId           |-> [i \in 1 .. 20 |-> 0],
       clearingFirm      |-> [i \in 1 .. 4 |-> 0],
       orderRejectReason |-> [i \in 1 .. 1 |-> 0],
       text              |-> [i \in 1 .. 60 |-> 0] ]
 
-(* Order Rejected Message at zero, then each field in turn at the values it is checked at *)
-CheckedOrderRejectedMessage ==
-    { ZeroOrderRejectedMessage }
-        \cup { [ZeroOrderRejectedMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroOrderRejectedMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroOrderRejectedMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroOrderRejectedMessage EXCEPT !.orderRejectReason = one] : one \in Sample(1) }
-        \cup { [ZeroOrderRejectedMessage EXCEPT !.text = one] : one \in Sample(60) }
+(* Order Rejected at zero, then each field in turn at the values it is checked at *)
+CheckedOrderRejected ==
+    { ZeroOrderRejected }
+        \cup { [ZeroOrderRejected EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroOrderRejected EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroOrderRejected EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroOrderRejected EXCEPT !.orderRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroOrderRejected EXCEPT !.text = one] : one \in Sample(60) }
 
 (***************************************************************************)
-(* Order Modified Message: 101 bytes                                       *)
+(* Order Modified: 101 bytes                                               *)
 (***************************************************************************)
 
-OrderModifiedMessage ==
+OrderModified ==
     [ transactionTime        : Sample(8),
       clOrdId                : Sample(20),
       origClOrdId            : Sample(20),
@@ -511,7 +511,7 @@ OrderModifiedMessage ==
       custOrderHandlingInst  : Sample(1),
       requestReceivedTime    : Sample(8) ]
 
-EncodeOrderModifiedMessage(message) ==
+EncodeOrderModified(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.origClOrdId
@@ -527,7 +527,7 @@ EncodeOrderModifiedMessage(message) ==
         \o message.custOrderHandlingInst
         \o message.requestReceivedTime
 
-DecodeOrderModifiedMessage(bytes) ==
+DecodeOrderModified(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET origClOrdId == ReadBytes(clOrdId.rest, 20) IN IF ~origClOrdId.ok THEN Fail ELSE
@@ -557,7 +557,7 @@ DecodeOrderModifiedMessage(bytes) ==
          custOrderHandlingInst  |-> custOrderHandlingInst.value,
          requestReceivedTime    |-> requestReceivedTime.value ], requestReceivedTime.rest)
 
-ZeroOrderModifiedMessage ==
+ZeroOrderModified ==
     [ transactionTime        |-> [i \in 1 .. 8 |-> 0],
       clOrdId                |-> [i \in 1 .. 20 |-> 0],
       origClOrdId            |-> [i \in 1 .. 20 |-> 0],
@@ -573,29 +573,29 @@ ZeroOrderModifiedMessage ==
       custOrderHandlingInst  |-> [i \in 1 .. 1 |-> 0],
       requestReceivedTime    |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Order Modified Message at zero, then each field in turn at the values it is checked at *)
-CheckedOrderModifiedMessage ==
-    { ZeroOrderModifiedMessage }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.origClOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.ordType = one] : one \in Sample(1) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.orderQty = one] : one \in Sample(4) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.leavesQty = one] : one \in Sample(4) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.baseLiquidityIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.stopPx = one] : one \in Sample(8) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.frequentTraderId = one] : one \in Sample(6) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.custOrderHandlingInst = one] : one \in Sample(1) }
-        \cup { [ZeroOrderModifiedMessage EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
+(* Order Modified at zero, then each field in turn at the values it is checked at *)
+CheckedOrderModified ==
+    { ZeroOrderModified }
+        \cup { [ZeroOrderModified EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroOrderModified EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroOrderModified EXCEPT !.origClOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroOrderModified EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroOrderModified EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroOrderModified EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroOrderModified EXCEPT !.ordType = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModified EXCEPT !.orderQty = one] : one \in Sample(4) }
+        \cup { [ZeroOrderModified EXCEPT !.leavesQty = one] : one \in Sample(4) }
+        \cup { [ZeroOrderModified EXCEPT !.baseLiquidityIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModified EXCEPT !.stopPx = one] : one \in Sample(8) }
+        \cup { [ZeroOrderModified EXCEPT !.frequentTraderId = one] : one \in Sample(6) }
+        \cup { [ZeroOrderModified EXCEPT !.custOrderHandlingInst = one] : one \in Sample(1) }
+        \cup { [ZeroOrderModified EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Modify Rejected Message: 113 bytes                                      *)
+(* Modify Rejected: 113 bytes                                              *)
 (***************************************************************************)
 
-ModifyRejectedMessage ==
+ModifyRejected ==
     [ transactionTime    : Sample(8),
       clOrdId            : Sample(20),
       origClOrdId        : Sample(20),
@@ -603,7 +603,7 @@ ModifyRejectedMessage ==
       modifyRejectReason : Sample(1),
       text               : Sample(60) ]
 
-EncodeModifyRejectedMessage(message) ==
+EncodeModifyRejected(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.origClOrdId
@@ -611,7 +611,7 @@ EncodeModifyRejectedMessage(message) ==
         \o message.modifyRejectReason
         \o message.text
 
-DecodeModifyRejectedMessage(bytes) ==
+DecodeModifyRejected(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET origClOrdId == ReadBytes(clOrdId.rest, 20) IN IF ~origClOrdId.ok THEN Fail ELSE
@@ -625,7 +625,7 @@ DecodeModifyRejectedMessage(bytes) ==
          modifyRejectReason |-> modifyRejectReason.value,
          text               |-> text.value ], text.rest)
 
-ZeroModifyRejectedMessage ==
+ZeroModifyRejected ==
     [ transactionTime    |-> [i \in 1 .. 8 |-> 0],
       clOrdId            |-> [i \in 1 .. 20 |-> 0],
       origClOrdId        |-> [i \in 1 .. 20 |-> 0],
@@ -633,21 +633,21 @@ ZeroModifyRejectedMessage ==
       modifyRejectReason |-> [i \in 1 .. 1 |-> 0],
       text               |-> [i \in 1 .. 60 |-> 0] ]
 
-(* Modify Rejected Message at zero, then each field in turn at the values it is checked at *)
-CheckedModifyRejectedMessage ==
-    { ZeroModifyRejectedMessage }
-        \cup { [ZeroModifyRejectedMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroModifyRejectedMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroModifyRejectedMessage EXCEPT !.origClOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroModifyRejectedMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroModifyRejectedMessage EXCEPT !.modifyRejectReason = one] : one \in Sample(1) }
-        \cup { [ZeroModifyRejectedMessage EXCEPT !.text = one] : one \in Sample(60) }
+(* Modify Rejected at zero, then each field in turn at the values it is checked at *)
+CheckedModifyRejected ==
+    { ZeroModifyRejected }
+        \cup { [ZeroModifyRejected EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroModifyRejected EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroModifyRejected EXCEPT !.origClOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroModifyRejected EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroModifyRejected EXCEPT !.modifyRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroModifyRejected EXCEPT !.text = one] : one \in Sample(60) }
 
 (***************************************************************************)
-(* Order Execution Message: 91 bytes                                       *)
+(* Order Execution: 91 bytes                                               *)
 (***************************************************************************)
 
-OrderExecutionMessage ==
+OrderExecution ==
     [ transactionTime        : Sample(8),
       clOrdId                : Sample(20),
       execId                 : Sample(8),
@@ -667,7 +667,7 @@ OrderExecutionMessage ==
       multilegReportingType  : Sample(1),
       secondaryExecId        : Sample(8) ]
 
-EncodeOrderExecutionMessage(message) ==
+EncodeOrderExecution(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.execId
@@ -687,7 +687,7 @@ EncodeOrderExecutionMessage(message) ==
         \o message.multilegReportingType
         \o message.secondaryExecId
 
-DecodeOrderExecutionMessage(bytes) ==
+DecodeOrderExecution(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET execId == ReadBytes(clOrdId.rest, 8) IN IF ~execId.ok THEN Fail ELSE
@@ -725,7 +725,7 @@ DecodeOrderExecutionMessage(bytes) ==
          multilegReportingType  |-> multilegReportingType.value,
          secondaryExecId        |-> secondaryExecId.value ], secondaryExecId.rest)
 
-ZeroOrderExecutionMessage ==
+ZeroOrderExecution ==
     [ transactionTime        |-> [i \in 1 .. 8 |-> 0],
       clOrdId                |-> [i \in 1 .. 20 |-> 0],
       execId                 |-> [i \in 1 .. 8 |-> 0],
@@ -745,47 +745,47 @@ ZeroOrderExecutionMessage ==
       multilegReportingType  |-> [i \in 1 .. 1 |-> 0],
       secondaryExecId        |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Order Execution Message at zero, then each field in turn at the values it is checked at *)
-CheckedOrderExecutionMessage ==
-    { ZeroOrderExecutionMessage }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.execId = one] : one \in Sample(8) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.lastShares = one] : one \in Sample(4) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.lastPx = one] : one \in Sample(8) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.leavesQty = one] : one \in Sample(4) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.baseLiquidityIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.subLiquidityIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.symbol = one] : one \in Sample(8) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.maturityDate = one] : one \in Sample(4) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.feeCode = one] : one \in Sample(2) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.tradeDate = one] : one \in Sample(4) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.clearingSize = one] : one \in Sample(4) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.pendingStatus = one] : one \in Sample(1) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.multilegReportingType = one] : one \in Sample(1) }
-        \cup { [ZeroOrderExecutionMessage EXCEPT !.secondaryExecId = one] : one \in Sample(8) }
+(* Order Execution at zero, then each field in turn at the values it is checked at *)
+CheckedOrderExecution ==
+    { ZeroOrderExecution }
+        \cup { [ZeroOrderExecution EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecution EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroOrderExecution EXCEPT !.execId = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecution EXCEPT !.lastShares = one] : one \in Sample(4) }
+        \cup { [ZeroOrderExecution EXCEPT !.lastPx = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecution EXCEPT !.leavesQty = one] : one \in Sample(4) }
+        \cup { [ZeroOrderExecution EXCEPT !.baseLiquidityIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroOrderExecution EXCEPT !.subLiquidityIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroOrderExecution EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroOrderExecution EXCEPT !.symbol = one] : one \in Sample(8) }
+        \cup { [ZeroOrderExecution EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroOrderExecution EXCEPT !.maturityDate = one] : one \in Sample(4) }
+        \cup { [ZeroOrderExecution EXCEPT !.feeCode = one] : one \in Sample(2) }
+        \cup { [ZeroOrderExecution EXCEPT !.tradeDate = one] : one \in Sample(4) }
+        \cup { [ZeroOrderExecution EXCEPT !.clearingSize = one] : one \in Sample(4) }
+        \cup { [ZeroOrderExecution EXCEPT !.pendingStatus = one] : one \in Sample(1) }
+        \cup { [ZeroOrderExecution EXCEPT !.multilegReportingType = one] : one \in Sample(1) }
+        \cup { [ZeroOrderExecution EXCEPT !.secondaryExecId = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Order Cancelled Message: 41 bytes                                       *)
+(* Order Cancelled: 41 bytes                                               *)
 (***************************************************************************)
 
-OrderCancelledMessage ==
+OrderCancelled ==
     [ transactionTime     : Sample(8),
       clOrdId             : Sample(20),
       clearingFirm        : Sample(4),
       cancelReason        : Sample(1),
       requestReceivedTime : Sample(8) ]
 
-EncodeOrderCancelledMessage(message) ==
+EncodeOrderCancelled(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.clearingFirm
         \o message.cancelReason
         \o message.requestReceivedTime
 
-DecodeOrderCancelledMessage(bytes) ==
+DecodeOrderCancelled(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(clOrdId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
@@ -797,41 +797,41 @@ DecodeOrderCancelledMessage(bytes) ==
          cancelReason        |-> cancelReason.value,
          requestReceivedTime |-> requestReceivedTime.value ], requestReceivedTime.rest)
 
-ZeroOrderCancelledMessage ==
+ZeroOrderCancelled ==
     [ transactionTime     |-> [i \in 1 .. 8 |-> 0],
       clOrdId             |-> [i \in 1 .. 20 |-> 0],
       clearingFirm        |-> [i \in 1 .. 4 |-> 0],
       cancelReason        |-> [i \in 1 .. 1 |-> 0],
       requestReceivedTime |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Order Cancelled Message at zero, then each field in turn at the values it is checked at *)
-CheckedOrderCancelledMessage ==
-    { ZeroOrderCancelledMessage }
-        \cup { [ZeroOrderCancelledMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroOrderCancelledMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroOrderCancelledMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroOrderCancelledMessage EXCEPT !.cancelReason = one] : one \in Sample(1) }
-        \cup { [ZeroOrderCancelledMessage EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
+(* Order Cancelled at zero, then each field in turn at the values it is checked at *)
+CheckedOrderCancelled ==
+    { ZeroOrderCancelled }
+        \cup { [ZeroOrderCancelled EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroOrderCancelled EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroOrderCancelled EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroOrderCancelled EXCEPT !.cancelReason = one] : one \in Sample(1) }
+        \cup { [ZeroOrderCancelled EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Cancel Rejected Message: 93 bytes                                       *)
+(* Cancel Rejected: 93 bytes                                               *)
 (***************************************************************************)
 
-CancelRejectedMessage ==
+CancelRejected ==
     [ transactionTime    : Sample(8),
       clOrdId            : Sample(20),
       clearingFirm       : Sample(4),
       cancelRejectReason : Sample(1),
       text               : Sample(60) ]
 
-EncodeCancelRejectedMessage(message) ==
+EncodeCancelRejected(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.clearingFirm
         \o message.cancelRejectReason
         \o message.text
 
-DecodeCancelRejectedMessage(bytes) ==
+DecodeCancelRejected(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(clOrdId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
@@ -843,39 +843,39 @@ DecodeCancelRejectedMessage(bytes) ==
          cancelRejectReason |-> cancelRejectReason.value,
          text               |-> text.value ], text.rest)
 
-ZeroCancelRejectedMessage ==
+ZeroCancelRejected ==
     [ transactionTime    |-> [i \in 1 .. 8 |-> 0],
       clOrdId            |-> [i \in 1 .. 20 |-> 0],
       clearingFirm       |-> [i \in 1 .. 4 |-> 0],
       cancelRejectReason |-> [i \in 1 .. 1 |-> 0],
       text               |-> [i \in 1 .. 60 |-> 0] ]
 
-(* Cancel Rejected Message at zero, then each field in turn at the values it is checked at *)
-CheckedCancelRejectedMessage ==
-    { ZeroCancelRejectedMessage }
-        \cup { [ZeroCancelRejectedMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroCancelRejectedMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroCancelRejectedMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroCancelRejectedMessage EXCEPT !.cancelRejectReason = one] : one \in Sample(1) }
-        \cup { [ZeroCancelRejectedMessage EXCEPT !.text = one] : one \in Sample(60) }
+(* Cancel Rejected at zero, then each field in turn at the values it is checked at *)
+CheckedCancelRejected ==
+    { ZeroCancelRejected }
+        \cup { [ZeroCancelRejected EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroCancelRejected EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroCancelRejected EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroCancelRejected EXCEPT !.cancelRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroCancelRejected EXCEPT !.text = one] : one \in Sample(60) }
 
 (***************************************************************************)
-(* Mass Cancel Acknowledgement Message: 40 bytes                           *)
+(* Mass Cancel Acknowledgement: 40 bytes                                   *)
 (***************************************************************************)
 
-MassCancelAcknowledgementMessage ==
+MassCancelAcknowledgement ==
     [ transactionTime     : Sample(8),
       massCancelId        : Sample(20),
       cancelledOrderCount : Sample(4),
       requestReceivedTime : Sample(8) ]
 
-EncodeMassCancelAcknowledgementMessage(message) ==
+EncodeMassCancelAcknowledgement(message) ==
     message.transactionTime
         \o message.massCancelId
         \o message.cancelledOrderCount
         \o message.requestReceivedTime
 
-DecodeMassCancelAcknowledgementMessage(bytes) ==
+DecodeMassCancelAcknowledgement(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET massCancelId == ReadBytes(transactionTime.rest, 20) IN IF ~massCancelId.ok THEN Fail ELSE
     LET cancelledOrderCount == ReadBytes(massCancelId.rest, 4) IN IF ~cancelledOrderCount.ok THEN Fail ELSE
@@ -885,37 +885,37 @@ DecodeMassCancelAcknowledgementMessage(bytes) ==
          cancelledOrderCount |-> cancelledOrderCount.value,
          requestReceivedTime |-> requestReceivedTime.value ], requestReceivedTime.rest)
 
-ZeroMassCancelAcknowledgementMessage ==
+ZeroMassCancelAcknowledgement ==
     [ transactionTime     |-> [i \in 1 .. 8 |-> 0],
       massCancelId        |-> [i \in 1 .. 20 |-> 0],
       cancelledOrderCount |-> [i \in 1 .. 4 |-> 0],
       requestReceivedTime |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Mass Cancel Acknowledgement Message at zero, then each field in turn at the values it is checked at *)
-CheckedMassCancelAcknowledgementMessage ==
-    { ZeroMassCancelAcknowledgementMessage }
-        \cup { [ZeroMassCancelAcknowledgementMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroMassCancelAcknowledgementMessage EXCEPT !.massCancelId = one] : one \in Sample(20) }
-        \cup { [ZeroMassCancelAcknowledgementMessage EXCEPT !.cancelledOrderCount = one] : one \in Sample(4) }
-        \cup { [ZeroMassCancelAcknowledgementMessage EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
+(* Mass Cancel Acknowledgement at zero, then each field in turn at the values it is checked at *)
+CheckedMassCancelAcknowledgement ==
+    { ZeroMassCancelAcknowledgement }
+        \cup { [ZeroMassCancelAcknowledgement EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroMassCancelAcknowledgement EXCEPT !.massCancelId = one] : one \in Sample(20) }
+        \cup { [ZeroMassCancelAcknowledgement EXCEPT !.cancelledOrderCount = one] : one \in Sample(4) }
+        \cup { [ZeroMassCancelAcknowledgement EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Mass Cancel Rejected Message: 89 bytes                                  *)
+(* Mass Cancel Rejected: 89 bytes                                          *)
 (***************************************************************************)
 
-MassCancelRejectedMessage ==
+MassCancelRejected ==
     [ transactionTime        : Sample(8),
       massCancelId           : Sample(20),
       massCancelRejectReason : Sample(1),
       text                   : Sample(60) ]
 
-EncodeMassCancelRejectedMessage(message) ==
+EncodeMassCancelRejected(message) ==
     message.transactionTime
         \o message.massCancelId
         \o message.massCancelRejectReason
         \o message.text
 
-DecodeMassCancelRejectedMessage(bytes) ==
+DecodeMassCancelRejected(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET massCancelId == ReadBytes(transactionTime.rest, 20) IN IF ~massCancelId.ok THEN Fail ELSE
     LET massCancelRejectReason == ReadBytes(massCancelId.rest, 1) IN IF ~massCancelRejectReason.ok THEN Fail ELSE
@@ -925,37 +925,37 @@ DecodeMassCancelRejectedMessage(bytes) ==
          massCancelRejectReason |-> massCancelRejectReason.value,
          text                   |-> text.value ], text.rest)
 
-ZeroMassCancelRejectedMessage ==
+ZeroMassCancelRejected ==
     [ transactionTime        |-> [i \in 1 .. 8 |-> 0],
       massCancelId           |-> [i \in 1 .. 20 |-> 0],
       massCancelRejectReason |-> [i \in 1 .. 1 |-> 0],
       text                   |-> [i \in 1 .. 60 |-> 0] ]
 
-(* Mass Cancel Rejected Message at zero, then each field in turn at the values it is checked at *)
-CheckedMassCancelRejectedMessage ==
-    { ZeroMassCancelRejectedMessage }
-        \cup { [ZeroMassCancelRejectedMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroMassCancelRejectedMessage EXCEPT !.massCancelId = one] : one \in Sample(20) }
-        \cup { [ZeroMassCancelRejectedMessage EXCEPT !.massCancelRejectReason = one] : one \in Sample(1) }
-        \cup { [ZeroMassCancelRejectedMessage EXCEPT !.text = one] : one \in Sample(60) }
+(* Mass Cancel Rejected at zero, then each field in turn at the values it is checked at *)
+CheckedMassCancelRejected ==
+    { ZeroMassCancelRejected }
+        \cup { [ZeroMassCancelRejected EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroMassCancelRejected EXCEPT !.massCancelId = one] : one \in Sample(20) }
+        \cup { [ZeroMassCancelRejected EXCEPT !.massCancelRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroMassCancelRejected EXCEPT !.text = one] : one \in Sample(60) }
 
 (***************************************************************************)
-(* Purge Acknowledgement Message: 40 bytes                                 *)
+(* Purge Acknowledgement: 40 bytes                                         *)
 (***************************************************************************)
 
-PurgeAcknowledgementMessage ==
+PurgeAcknowledgement ==
     [ transactionTime     : Sample(8),
       massCancelId        : Sample(20),
       cancelledOrderCount : Sample(4),
       requestReceivedTime : Sample(8) ]
 
-EncodePurgeAcknowledgementMessage(message) ==
+EncodePurgeAcknowledgement(message) ==
     message.transactionTime
         \o message.massCancelId
         \o message.cancelledOrderCount
         \o message.requestReceivedTime
 
-DecodePurgeAcknowledgementMessage(bytes) ==
+DecodePurgeAcknowledgement(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET massCancelId == ReadBytes(transactionTime.rest, 20) IN IF ~massCancelId.ok THEN Fail ELSE
     LET cancelledOrderCount == ReadBytes(massCancelId.rest, 4) IN IF ~cancelledOrderCount.ok THEN Fail ELSE
@@ -965,37 +965,37 @@ DecodePurgeAcknowledgementMessage(bytes) ==
          cancelledOrderCount |-> cancelledOrderCount.value,
          requestReceivedTime |-> requestReceivedTime.value ], requestReceivedTime.rest)
 
-ZeroPurgeAcknowledgementMessage ==
+ZeroPurgeAcknowledgement ==
     [ transactionTime     |-> [i \in 1 .. 8 |-> 0],
       massCancelId        |-> [i \in 1 .. 20 |-> 0],
       cancelledOrderCount |-> [i \in 1 .. 4 |-> 0],
       requestReceivedTime |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Purge Acknowledgement Message at zero, then each field in turn at the values it is checked at *)
-CheckedPurgeAcknowledgementMessage ==
-    { ZeroPurgeAcknowledgementMessage }
-        \cup { [ZeroPurgeAcknowledgementMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroPurgeAcknowledgementMessage EXCEPT !.massCancelId = one] : one \in Sample(20) }
-        \cup { [ZeroPurgeAcknowledgementMessage EXCEPT !.cancelledOrderCount = one] : one \in Sample(4) }
-        \cup { [ZeroPurgeAcknowledgementMessage EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
+(* Purge Acknowledgement at zero, then each field in turn at the values it is checked at *)
+CheckedPurgeAcknowledgement ==
+    { ZeroPurgeAcknowledgement }
+        \cup { [ZeroPurgeAcknowledgement EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroPurgeAcknowledgement EXCEPT !.massCancelId = one] : one \in Sample(20) }
+        \cup { [ZeroPurgeAcknowledgement EXCEPT !.cancelledOrderCount = one] : one \in Sample(4) }
+        \cup { [ZeroPurgeAcknowledgement EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Purge Rejected Message: 89 bytes                                        *)
+(* Purge Rejected: 89 bytes                                                *)
 (***************************************************************************)
 
-PurgeRejectedMessage ==
+PurgeRejected ==
     [ transactionTime   : Sample(8),
       massCancelId      : Sample(20),
       purgeRejectReason : Sample(1),
       text              : Sample(60) ]
 
-EncodePurgeRejectedMessage(message) ==
+EncodePurgeRejected(message) ==
     message.transactionTime
         \o message.massCancelId
         \o message.purgeRejectReason
         \o message.text
 
-DecodePurgeRejectedMessage(bytes) ==
+DecodePurgeRejected(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET massCancelId == ReadBytes(transactionTime.rest, 20) IN IF ~massCancelId.ok THEN Fail ELSE
     LET purgeRejectReason == ReadBytes(massCancelId.rest, 1) IN IF ~purgeRejectReason.ok THEN Fail ELSE
@@ -1005,25 +1005,25 @@ DecodePurgeRejectedMessage(bytes) ==
          purgeRejectReason |-> purgeRejectReason.value,
          text              |-> text.value ], text.rest)
 
-ZeroPurgeRejectedMessage ==
+ZeroPurgeRejected ==
     [ transactionTime   |-> [i \in 1 .. 8 |-> 0],
       massCancelId      |-> [i \in 1 .. 20 |-> 0],
       purgeRejectReason |-> [i \in 1 .. 1 |-> 0],
       text              |-> [i \in 1 .. 60 |-> 0] ]
 
-(* Purge Rejected Message at zero, then each field in turn at the values it is checked at *)
-CheckedPurgeRejectedMessage ==
-    { ZeroPurgeRejectedMessage }
-        \cup { [ZeroPurgeRejectedMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroPurgeRejectedMessage EXCEPT !.massCancelId = one] : one \in Sample(20) }
-        \cup { [ZeroPurgeRejectedMessage EXCEPT !.purgeRejectReason = one] : one \in Sample(1) }
-        \cup { [ZeroPurgeRejectedMessage EXCEPT !.text = one] : one \in Sample(60) }
+(* Purge Rejected at zero, then each field in turn at the values it is checked at *)
+CheckedPurgeRejected ==
+    { ZeroPurgeRejected }
+        \cup { [ZeroPurgeRejected EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroPurgeRejected EXCEPT !.massCancelId = one] : one \in Sample(20) }
+        \cup { [ZeroPurgeRejected EXCEPT !.purgeRejectReason = one] : one \in Sample(1) }
+        \cup { [ZeroPurgeRejected EXCEPT !.text = one] : one \in Sample(60) }
 
 (***************************************************************************)
-(* Trade Cancel Or Correct Message: 92 bytes                               *)
+(* Trade Cancel Or Correct: 92 bytes                                       *)
 (***************************************************************************)
 
-TradeCancelOrCorrectMessage ==
+TradeCancelOrCorrect ==
     [ transactionTime        : Sample(8),
       clOrdId                : Sample(20),
       execRefId              : Sample(8),
@@ -1041,7 +1041,7 @@ TradeCancelOrCorrectMessage ==
       openClose              : Sample(1),
       cmtaNumber             : Sample(4) ]
 
-EncodeTradeCancelOrCorrectMessage(message) ==
+EncodeTradeCancelOrCorrect(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.execRefId
@@ -1059,7 +1059,7 @@ EncodeTradeCancelOrCorrectMessage(message) ==
         \o message.openClose
         \o message.cmtaNumber
 
-DecodeTradeCancelOrCorrectMessage(bytes) ==
+DecodeTradeCancelOrCorrect(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET execRefId == ReadBytes(clOrdId.rest, 8) IN IF ~execRefId.ok THEN Fail ELSE
@@ -1093,7 +1093,7 @@ DecodeTradeCancelOrCorrectMessage(bytes) ==
          openClose              |-> openClose.value,
          cmtaNumber             |-> cmtaNumber.value ], cmtaNumber.rest)
 
-ZeroTradeCancelOrCorrectMessage ==
+ZeroTradeCancelOrCorrect ==
     [ transactionTime        |-> [i \in 1 .. 8 |-> 0],
       clOrdId                |-> [i \in 1 .. 20 |-> 0],
       execRefId              |-> [i \in 1 .. 8 |-> 0],
@@ -1111,31 +1111,31 @@ ZeroTradeCancelOrCorrectMessage ==
       openClose              |-> [i \in 1 .. 1 |-> 0],
       cmtaNumber             |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Trade Cancel Or Correct Message at zero, then each field in turn at the values it is checked at *)
-CheckedTradeCancelOrCorrectMessage ==
-    { ZeroTradeCancelOrCorrectMessage }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.execRefId = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.baseLiquidityIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.clearingAccount = one] : one \in Sample(4) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.lastShares = one] : one \in Sample(4) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.lastPx = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.correctedPrice = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.origTime = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.symbol = one] : one \in Sample(8) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.capacity = one] : one \in Sample(1) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.maturityDate = one] : one \in Sample(4) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.openClose = one] : one \in Sample(1) }
-        \cup { [ZeroTradeCancelOrCorrectMessage EXCEPT !.cmtaNumber = one] : one \in Sample(4) }
+(* Trade Cancel Or Correct at zero, then each field in turn at the values it is checked at *)
+CheckedTradeCancelOrCorrect ==
+    { ZeroTradeCancelOrCorrect }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.execRefId = one] : one \in Sample(8) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.baseLiquidityIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.clearingAccount = one] : one \in Sample(4) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.lastShares = one] : one \in Sample(4) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.lastPx = one] : one \in Sample(8) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.correctedPrice = one] : one \in Sample(8) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.origTime = one] : one \in Sample(8) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.symbol = one] : one \in Sample(8) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.capacity = one] : one \in Sample(1) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.maturityDate = one] : one \in Sample(4) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.openClose = one] : one \in Sample(1) }
+        \cup { [ZeroTradeCancelOrCorrect EXCEPT !.cmtaNumber = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Tas Restatement Message: 104 bytes                                      *)
+(* Tas Restatement: 104 bytes                                              *)
 (***************************************************************************)
 
-TasRestatementMessage ==
+TasRestatement ==
     [ transactionTime       : Sample(8),
       clOrdId               : Sample(20),
       clearingFirm          : Sample(4),
@@ -1153,7 +1153,7 @@ TasRestatementMessage ==
       multilegReportingType : Sample(1),
       secondaryExecId       : Sample(8) ]
 
-EncodeTasRestatementMessage(message) ==
+EncodeTasRestatement(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.clearingFirm
@@ -1171,7 +1171,7 @@ EncodeTasRestatementMessage(message) ==
         \o message.multilegReportingType
         \o message.secondaryExecId
 
-DecodeTasRestatementMessage(bytes) ==
+DecodeTasRestatement(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(clOrdId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
@@ -1205,7 +1205,7 @@ DecodeTasRestatementMessage(bytes) ==
          multilegReportingType |-> multilegReportingType.value,
          secondaryExecId       |-> secondaryExecId.value ], secondaryExecId.rest)
 
-ZeroTasRestatementMessage ==
+ZeroTasRestatement ==
     [ transactionTime       |-> [i \in 1 .. 8 |-> 0],
       clOrdId               |-> [i \in 1 .. 20 |-> 0],
       clearingFirm          |-> [i \in 1 .. 4 |-> 0],
@@ -1223,31 +1223,31 @@ ZeroTasRestatementMessage ==
       multilegReportingType |-> [i \in 1 .. 1 |-> 0],
       secondaryExecId       |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Tas Restatement Message at zero, then each field in turn at the values it is checked at *)
-CheckedTasRestatementMessage ==
-    { ZeroTasRestatementMessage }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.execId = one] : one \in Sample(8) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.symbol = one] : one \in Sample(8) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.maturityDate = one] : one \in Sample(4) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.lastShares = one] : one \in Sample(4) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.lastPx = one] : one \in Sample(8) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.feeCode = one] : one \in Sample(2) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.tradeDate = one] : one \in Sample(4) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.clearingPrice = one] : one \in Sample(8) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.clearingSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.multilegReportingType = one] : one \in Sample(1) }
-        \cup { [ZeroTasRestatementMessage EXCEPT !.secondaryExecId = one] : one \in Sample(8) }
+(* Tas Restatement at zero, then each field in turn at the values it is checked at *)
+CheckedTasRestatement ==
+    { ZeroTasRestatement }
+        \cup { [ZeroTasRestatement EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroTasRestatement EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroTasRestatement EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroTasRestatement EXCEPT !.execId = one] : one \in Sample(8) }
+        \cup { [ZeroTasRestatement EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroTasRestatement EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroTasRestatement EXCEPT !.symbol = one] : one \in Sample(8) }
+        \cup { [ZeroTasRestatement EXCEPT !.maturityDate = one] : one \in Sample(4) }
+        \cup { [ZeroTasRestatement EXCEPT !.lastShares = one] : one \in Sample(4) }
+        \cup { [ZeroTasRestatement EXCEPT !.lastPx = one] : one \in Sample(8) }
+        \cup { [ZeroTasRestatement EXCEPT !.feeCode = one] : one \in Sample(2) }
+        \cup { [ZeroTasRestatement EXCEPT !.tradeDate = one] : one \in Sample(4) }
+        \cup { [ZeroTasRestatement EXCEPT !.clearingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroTasRestatement EXCEPT !.clearingSymbol = one] : one \in Sample(8) }
+        \cup { [ZeroTasRestatement EXCEPT !.multilegReportingType = one] : one \in Sample(1) }
+        \cup { [ZeroTasRestatement EXCEPT !.secondaryExecId = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Variance Restatement Message: 108 bytes                                 *)
+(* Variance Restatement: 108 bytes                                         *)
 (***************************************************************************)
 
-VarianceRestatementMessage ==
+VarianceRestatement ==
     [ transactionTime       : Sample(8),
       clOrdId               : Sample(20),
       clearingFirm          : Sample(4),
@@ -1266,7 +1266,7 @@ VarianceRestatementMessage ==
       multilegReportingType : Sample(1),
       secondaryExecId       : Sample(8) ]
 
-EncodeVarianceRestatementMessage(message) ==
+EncodeVarianceRestatement(message) ==
     message.transactionTime
         \o message.clOrdId
         \o message.clearingFirm
@@ -1285,7 +1285,7 @@ EncodeVarianceRestatementMessage(message) ==
         \o message.multilegReportingType
         \o message.secondaryExecId
 
-DecodeVarianceRestatementMessage(bytes) ==
+DecodeVarianceRestatement(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET clOrdId == ReadBytes(transactionTime.rest, 20) IN IF ~clOrdId.ok THEN Fail ELSE
     LET clearingFirm == ReadBytes(clOrdId.rest, 4) IN IF ~clearingFirm.ok THEN Fail ELSE
@@ -1321,7 +1321,7 @@ DecodeVarianceRestatementMessage(bytes) ==
          multilegReportingType |-> multilegReportingType.value,
          secondaryExecId       |-> secondaryExecId.value ], secondaryExecId.rest)
 
-ZeroVarianceRestatementMessage ==
+ZeroVarianceRestatement ==
     [ transactionTime       |-> [i \in 1 .. 8 |-> 0],
       clOrdId               |-> [i \in 1 .. 20 |-> 0],
       clearingFirm          |-> [i \in 1 .. 4 |-> 0],
@@ -1340,26 +1340,26 @@ ZeroVarianceRestatementMessage ==
       multilegReportingType |-> [i \in 1 .. 1 |-> 0],
       secondaryExecId       |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Variance Restatement Message at zero, then each field in turn at the values it is checked at *)
-CheckedVarianceRestatementMessage ==
-    { ZeroVarianceRestatementMessage }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.clOrdId = one] : one \in Sample(20) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.execId = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.price = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.symbol = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.maturityDate = one] : one \in Sample(4) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.lastShares = one] : one \in Sample(4) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.lastPx = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.feeCode = one] : one \in Sample(2) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.tradeDate = one] : one \in Sample(4) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.clearingPrice = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.clearingSize = one] : one \in Sample(4) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.clearingSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.multilegReportingType = one] : one \in Sample(1) }
-        \cup { [ZeroVarianceRestatementMessage EXCEPT !.secondaryExecId = one] : one \in Sample(8) }
+(* Variance Restatement at zero, then each field in turn at the values it is checked at *)
+CheckedVarianceRestatement ==
+    { ZeroVarianceRestatement }
+        \cup { [ZeroVarianceRestatement EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.clOrdId = one] : one \in Sample(20) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.execId = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.price = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.symbol = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.maturityDate = one] : one \in Sample(4) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.lastShares = one] : one \in Sample(4) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.lastPx = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.feeCode = one] : one \in Sample(2) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.tradeDate = one] : one \in Sample(4) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.clearingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.clearingSize = one] : one \in Sample(4) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.clearingSymbol = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.multilegReportingType = one] : one \in Sample(1) }
+        \cup { [ZeroVarianceRestatement EXCEPT !.secondaryExecId = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Quote Update Acknowledgement Group: 10 bytes                            *)
@@ -1417,23 +1417,23 @@ ReadQuoteUpdateAcknowledgementGroupList(bytes, count) ==
 OneQuoteUpdateAcknowledgementGroup == { ZeroQuoteUpdateAcknowledgementGroup }
 
 (***************************************************************************)
-(* Quote Update Acknowledgement Message                                    *)
+(* Quote Update Acknowledgement                                            *)
 (***************************************************************************)
 
-QuoteUpdateAcknowledgementMessage ==
+QuoteUpdateAcknowledgement ==
     [ transactionTime                 : Sample(8),
       quoteUpdateId                   : Sample(16),
       requestReceivedTime             : Sample(8),
       quoteUpdateAcknowledgementGroup : SampleLists(OneQuoteUpdateAcknowledgementGroup) ]
 
-EncodeQuoteUpdateAcknowledgementMessage(message) ==
+EncodeQuoteUpdateAcknowledgement(message) ==
     message.transactionTime
         \o message.quoteUpdateId
         \o message.requestReceivedTime
         \o EncodeUIntBE(Len(message.quoteUpdateAcknowledgementGroup), 1)
         \o EncodeQuoteUpdateAcknowledgementGroupList(message.quoteUpdateAcknowledgementGroup)
 
-DecodeQuoteUpdateAcknowledgementMessage(bytes) ==
+DecodeQuoteUpdateAcknowledgement(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET requestReceivedTime == ReadBytes(quoteUpdateId.rest, 8) IN IF ~requestReceivedTime.ok THEN Fail ELSE
@@ -1444,35 +1444,35 @@ DecodeQuoteUpdateAcknowledgementMessage(bytes) ==
          requestReceivedTime             |-> requestReceivedTime.value,
          quoteUpdateAcknowledgementGroup |-> quoteUpdateAcknowledgementGroup.value ], quoteUpdateAcknowledgementGroup.rest)
 
-ZeroQuoteUpdateAcknowledgementMessage ==
+ZeroQuoteUpdateAcknowledgement ==
     [ transactionTime                 |-> [i \in 1 .. 8 |-> 0],
       quoteUpdateId                   |-> [i \in 1 .. 16 |-> 0],
       requestReceivedTime             |-> [i \in 1 .. 8 |-> 0],
       quoteUpdateAcknowledgementGroup |-> << >> ]
 
-(* Quote Update Acknowledgement Message at zero, then each field in turn at the values it is checked at *)
-CheckedQuoteUpdateAcknowledgementMessage ==
-    { ZeroQuoteUpdateAcknowledgementMessage }
-        \cup { [ZeroQuoteUpdateAcknowledgementMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteUpdateAcknowledgementMessage EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
-        \cup { [ZeroQuoteUpdateAcknowledgementMessage EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteUpdateAcknowledgementMessage EXCEPT !.quoteUpdateAcknowledgementGroup = one] : one \in SampleLists(OneQuoteUpdateAcknowledgementGroup) }
+(* Quote Update Acknowledgement at zero, then each field in turn at the values it is checked at *)
+CheckedQuoteUpdateAcknowledgement ==
+    { ZeroQuoteUpdateAcknowledgement }
+        \cup { [ZeroQuoteUpdateAcknowledgement EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteUpdateAcknowledgement EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
+        \cup { [ZeroQuoteUpdateAcknowledgement EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteUpdateAcknowledgement EXCEPT !.quoteUpdateAcknowledgementGroup = one] : one \in SampleLists(OneQuoteUpdateAcknowledgementGroup) }
 
 (***************************************************************************)
-(* Quote Update Rejected Message: 25 bytes                                 *)
+(* Quote Update Rejected: 25 bytes                                         *)
 (***************************************************************************)
 
-QuoteUpdateRejectedMessage ==
+QuoteUpdateRejected ==
     [ transactionTime   : Sample(8),
       quoteUpdateId     : Sample(16),
       quoteRejectReason : Sample(1) ]
 
-EncodeQuoteUpdateRejectedMessage(message) ==
+EncodeQuoteUpdateRejected(message) ==
     message.transactionTime
         \o message.quoteUpdateId
         \o message.quoteRejectReason
 
-DecodeQuoteUpdateRejectedMessage(bytes) ==
+DecodeQuoteUpdateRejected(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET quoteRejectReason == ReadBytes(quoteUpdateId.rest, 1) IN IF ~quoteRejectReason.ok THEN Fail ELSE
@@ -1480,23 +1480,23 @@ DecodeQuoteUpdateRejectedMessage(bytes) ==
          quoteUpdateId     |-> quoteUpdateId.value,
          quoteRejectReason |-> quoteRejectReason.value ], quoteRejectReason.rest)
 
-ZeroQuoteUpdateRejectedMessage ==
+ZeroQuoteUpdateRejected ==
     [ transactionTime   |-> [i \in 1 .. 8 |-> 0],
       quoteUpdateId     |-> [i \in 1 .. 16 |-> 0],
       quoteRejectReason |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Quote Update Rejected Message at zero, then each field in turn at the values it is checked at *)
-CheckedQuoteUpdateRejectedMessage ==
-    { ZeroQuoteUpdateRejectedMessage }
-        \cup { [ZeroQuoteUpdateRejectedMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteUpdateRejectedMessage EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
-        \cup { [ZeroQuoteUpdateRejectedMessage EXCEPT !.quoteRejectReason = one] : one \in Sample(1) }
+(* Quote Update Rejected at zero, then each field in turn at the values it is checked at *)
+CheckedQuoteUpdateRejected ==
+    { ZeroQuoteUpdateRejected }
+        \cup { [ZeroQuoteUpdateRejected EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteUpdateRejected EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
+        \cup { [ZeroQuoteUpdateRejected EXCEPT !.quoteRejectReason = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Quote Restated Message: 52 bytes                                        *)
+(* Quote Restated: 52 bytes                                                *)
 (***************************************************************************)
 
-QuoteRestatedMessage ==
+QuoteRestated ==
     [ transactionTime   : Sample(8),
       quoteUpdateId     : Sample(16),
       orderId           : Sample(8),
@@ -1506,7 +1506,7 @@ QuoteRestatedMessage ==
       side              : Sample(1),
       restatementReason : Sample(1) ]
 
-EncodeQuoteRestatedMessage(message) ==
+EncodeQuoteRestated(message) ==
     message.transactionTime
         \o message.quoteUpdateId
         \o message.orderId
@@ -1516,7 +1516,7 @@ EncodeQuoteRestatedMessage(message) ==
         \o message.side
         \o message.restatementReason
 
-DecodeQuoteRestatedMessage(bytes) ==
+DecodeQuoteRestated(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET orderId == ReadBytes(quoteUpdateId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
@@ -1534,7 +1534,7 @@ DecodeQuoteRestatedMessage(bytes) ==
          side              |-> side.value,
          restatementReason |-> restatementReason.value ], restatementReason.rest)
 
-ZeroQuoteRestatedMessage ==
+ZeroQuoteRestated ==
     [ transactionTime   |-> [i \in 1 .. 8 |-> 0],
       quoteUpdateId     |-> [i \in 1 .. 16 |-> 0],
       orderId           |-> [i \in 1 .. 8 |-> 0],
@@ -1544,23 +1544,23 @@ ZeroQuoteRestatedMessage ==
       side              |-> [i \in 1 .. 1 |-> 0],
       restatementReason |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Quote Restated Message at zero, then each field in turn at the values it is checked at *)
-CheckedQuoteRestatedMessage ==
-    { ZeroQuoteRestatedMessage }
-        \cup { [ZeroQuoteRestatedMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteRestatedMessage EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
-        \cup { [ZeroQuoteRestatedMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteRestatedMessage EXCEPT !.leavesQty = one] : one \in Sample(4) }
-        \cup { [ZeroQuoteRestatedMessage EXCEPT !.workingPrice = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteRestatedMessage EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
-        \cup { [ZeroQuoteRestatedMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteRestatedMessage EXCEPT !.restatementReason = one] : one \in Sample(1) }
+(* Quote Restated at zero, then each field in turn at the values it is checked at *)
+CheckedQuoteRestated ==
+    { ZeroQuoteRestated }
+        \cup { [ZeroQuoteRestated EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteRestated EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
+        \cup { [ZeroQuoteRestated EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteRestated EXCEPT !.leavesQty = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteRestated EXCEPT !.workingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteRestated EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
+        \cup { [ZeroQuoteRestated EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteRestated EXCEPT !.restatementReason = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Quote Execution Message: 71 bytes                                       *)
+(* Quote Execution: 71 bytes                                               *)
 (***************************************************************************)
 
-QuoteExecutionMessage ==
+QuoteExecution ==
     [ transactionTime        : Sample(8),
       quoteUpdateId          : Sample(16),
       orderId                : Sample(8),
@@ -1575,7 +1575,7 @@ QuoteExecutionMessage ==
       subLiquidityIndicator  : Sample(1),
       feeCode                : Sample(2) ]
 
-EncodeQuoteExecutionMessage(message) ==
+EncodeQuoteExecution(message) ==
     message.transactionTime
         \o message.quoteUpdateId
         \o message.orderId
@@ -1590,7 +1590,7 @@ EncodeQuoteExecutionMessage(message) ==
         \o message.subLiquidityIndicator
         \o message.feeCode
 
-DecodeQuoteExecutionMessage(bytes) ==
+DecodeQuoteExecution(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET orderId == ReadBytes(quoteUpdateId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
@@ -1618,7 +1618,7 @@ DecodeQuoteExecutionMessage(bytes) ==
          subLiquidityIndicator  |-> subLiquidityIndicator.value,
          feeCode                |-> feeCode.value ], feeCode.rest)
 
-ZeroQuoteExecutionMessage ==
+ZeroQuoteExecution ==
     [ transactionTime        |-> [i \in 1 .. 8 |-> 0],
       quoteUpdateId          |-> [i \in 1 .. 16 |-> 0],
       orderId                |-> [i \in 1 .. 8 |-> 0],
@@ -1633,28 +1633,28 @@ ZeroQuoteExecutionMessage ==
       subLiquidityIndicator  |-> [i \in 1 .. 1 |-> 0],
       feeCode                |-> [i \in 1 .. 2 |-> 0] ]
 
-(* Quote Execution Message at zero, then each field in turn at the values it is checked at *)
-CheckedQuoteExecutionMessage ==
-    { ZeroQuoteExecutionMessage }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.execId = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.clearingFirm = one] : one \in Sample(4) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.lastShares = one] : one \in Sample(4) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.lastPx = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.leavesQty = one] : one \in Sample(4) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.baseLiquidityIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.subLiquidityIndicator = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteExecutionMessage EXCEPT !.feeCode = one] : one \in Sample(2) }
+(* Quote Execution at zero, then each field in turn at the values it is checked at *)
+CheckedQuoteExecution ==
+    { ZeroQuoteExecution }
+        \cup { [ZeroQuoteExecution EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteExecution EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
+        \cup { [ZeroQuoteExecution EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteExecution EXCEPT !.execId = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteExecution EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
+        \cup { [ZeroQuoteExecution EXCEPT !.clearingFirm = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteExecution EXCEPT !.lastShares = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteExecution EXCEPT !.lastPx = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteExecution EXCEPT !.leavesQty = one] : one \in Sample(4) }
+        \cup { [ZeroQuoteExecution EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteExecution EXCEPT !.baseLiquidityIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteExecution EXCEPT !.subLiquidityIndicator = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteExecution EXCEPT !.feeCode = one] : one \in Sample(2) }
 
 (***************************************************************************)
-(* Quote Cancelled Message: 40 bytes                                       *)
+(* Quote Cancelled: 40 bytes                                               *)
 (***************************************************************************)
 
-QuoteCancelledMessage ==
+QuoteCancelled ==
     [ transactionTime : Sample(8),
       quoteUpdateId   : Sample(16),
       orderId         : Sample(8),
@@ -1662,7 +1662,7 @@ QuoteCancelledMessage ==
       side            : Sample(1),
       cancelReason    : Sample(1) ]
 
-EncodeQuoteCancelledMessage(message) ==
+EncodeQuoteCancelled(message) ==
     message.transactionTime
         \o message.quoteUpdateId
         \o message.orderId
@@ -1670,7 +1670,7 @@ EncodeQuoteCancelledMessage(message) ==
         \o message.side
         \o message.cancelReason
 
-DecodeQuoteCancelledMessage(bytes) ==
+DecodeQuoteCancelled(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET orderId == ReadBytes(quoteUpdateId.rest, 8) IN IF ~orderId.ok THEN Fail ELSE
@@ -1684,7 +1684,7 @@ DecodeQuoteCancelledMessage(bytes) ==
          side            |-> side.value,
          cancelReason    |-> cancelReason.value ], cancelReason.rest)
 
-ZeroQuoteCancelledMessage ==
+ZeroQuoteCancelled ==
     [ transactionTime |-> [i \in 1 .. 8 |-> 0],
       quoteUpdateId   |-> [i \in 1 .. 16 |-> 0],
       orderId         |-> [i \in 1 .. 8 |-> 0],
@@ -1692,21 +1692,21 @@ ZeroQuoteCancelledMessage ==
       side            |-> [i \in 1 .. 1 |-> 0],
       cancelReason    |-> [i \in 1 .. 1 |-> 0] ]
 
-(* Quote Cancelled Message at zero, then each field in turn at the values it is checked at *)
-CheckedQuoteCancelledMessage ==
-    { ZeroQuoteCancelledMessage }
-        \cup { [ZeroQuoteCancelledMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteCancelledMessage EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
-        \cup { [ZeroQuoteCancelledMessage EXCEPT !.orderId = one] : one \in Sample(8) }
-        \cup { [ZeroQuoteCancelledMessage EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
-        \cup { [ZeroQuoteCancelledMessage EXCEPT !.side = one] : one \in Sample(1) }
-        \cup { [ZeroQuoteCancelledMessage EXCEPT !.cancelReason = one] : one \in Sample(1) }
+(* Quote Cancelled at zero, then each field in turn at the values it is checked at *)
+CheckedQuoteCancelled ==
+    { ZeroQuoteCancelled }
+        \cup { [ZeroQuoteCancelled EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteCancelled EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
+        \cup { [ZeroQuoteCancelled EXCEPT !.orderId = one] : one \in Sample(8) }
+        \cup { [ZeroQuoteCancelled EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
+        \cup { [ZeroQuoteCancelled EXCEPT !.side = one] : one \in Sample(1) }
+        \cup { [ZeroQuoteCancelled EXCEPT !.cancelReason = one] : one \in Sample(1) }
 
 (***************************************************************************)
-(* Tas Quote Restatement Message: 54 bytes                                 *)
+(* Tas Quote Restatement: 54 bytes                                         *)
 (***************************************************************************)
 
-TasQuoteRestatementMessage ==
+TasQuoteRestatement ==
     [ transactionTime : Sample(8),
       quoteUpdateId   : Sample(16),
       execId          : Sample(8),
@@ -1714,7 +1714,7 @@ TasQuoteRestatementMessage ==
       clearingSymbol  : Sample(8),
       clearingPrice   : Sample(8) ]
 
-EncodeTasQuoteRestatementMessage(message) ==
+EncodeTasQuoteRestatement(message) ==
     message.transactionTime
         \o message.quoteUpdateId
         \o message.execId
@@ -1722,7 +1722,7 @@ EncodeTasQuoteRestatementMessage(message) ==
         \o message.clearingSymbol
         \o message.clearingPrice
 
-DecodeTasQuoteRestatementMessage(bytes) ==
+DecodeTasQuoteRestatement(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET execId == ReadBytes(quoteUpdateId.rest, 8) IN IF ~execId.ok THEN Fail ELSE
@@ -1736,7 +1736,7 @@ DecodeTasQuoteRestatementMessage(bytes) ==
          clearingSymbol  |-> clearingSymbol.value,
          clearingPrice   |-> clearingPrice.value ], clearingPrice.rest)
 
-ZeroTasQuoteRestatementMessage ==
+ZeroTasQuoteRestatement ==
     [ transactionTime |-> [i \in 1 .. 8 |-> 0],
       quoteUpdateId   |-> [i \in 1 .. 16 |-> 0],
       execId          |-> [i \in 1 .. 8 |-> 0],
@@ -1744,21 +1744,21 @@ ZeroTasQuoteRestatementMessage ==
       clearingSymbol  |-> [i \in 1 .. 8 |-> 0],
       clearingPrice   |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Tas Quote Restatement Message at zero, then each field in turn at the values it is checked at *)
-CheckedTasQuoteRestatementMessage ==
-    { ZeroTasQuoteRestatementMessage }
-        \cup { [ZeroTasQuoteRestatementMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroTasQuoteRestatementMessage EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
-        \cup { [ZeroTasQuoteRestatementMessage EXCEPT !.execId = one] : one \in Sample(8) }
-        \cup { [ZeroTasQuoteRestatementMessage EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
-        \cup { [ZeroTasQuoteRestatementMessage EXCEPT !.clearingSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroTasQuoteRestatementMessage EXCEPT !.clearingPrice = one] : one \in Sample(8) }
+(* Tas Quote Restatement at zero, then each field in turn at the values it is checked at *)
+CheckedTasQuoteRestatement ==
+    { ZeroTasQuoteRestatement }
+        \cup { [ZeroTasQuoteRestatement EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroTasQuoteRestatement EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
+        \cup { [ZeroTasQuoteRestatement EXCEPT !.execId = one] : one \in Sample(8) }
+        \cup { [ZeroTasQuoteRestatement EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
+        \cup { [ZeroTasQuoteRestatement EXCEPT !.clearingSymbol = one] : one \in Sample(8) }
+        \cup { [ZeroTasQuoteRestatement EXCEPT !.clearingPrice = one] : one \in Sample(8) }
 
 (***************************************************************************)
-(* Variance Quote Restatement Message: 58 bytes                            *)
+(* Variance Quote Restatement: 58 bytes                                    *)
 (***************************************************************************)
 
-VarianceQuoteRestatementMessage ==
+VarianceQuoteRestatement ==
     [ transactionTime : Sample(8),
       quoteUpdateId   : Sample(16),
       execId          : Sample(8),
@@ -1767,7 +1767,7 @@ VarianceQuoteRestatementMessage ==
       clearingPrice   : Sample(8),
       clearingSize    : Sample(4) ]
 
-EncodeVarianceQuoteRestatementMessage(message) ==
+EncodeVarianceQuoteRestatement(message) ==
     message.transactionTime
         \o message.quoteUpdateId
         \o message.execId
@@ -1776,7 +1776,7 @@ EncodeVarianceQuoteRestatementMessage(message) ==
         \o message.clearingPrice
         \o message.clearingSize
 
-DecodeVarianceQuoteRestatementMessage(bytes) ==
+DecodeVarianceQuoteRestatement(bytes) ==
     LET transactionTime == ReadBytes(bytes, 8) IN IF ~transactionTime.ok THEN Fail ELSE
     LET quoteUpdateId == ReadBytes(transactionTime.rest, 16) IN IF ~quoteUpdateId.ok THEN Fail ELSE
     LET execId == ReadBytes(quoteUpdateId.rest, 8) IN IF ~execId.ok THEN Fail ELSE
@@ -1792,7 +1792,7 @@ DecodeVarianceQuoteRestatementMessage(bytes) ==
          clearingPrice   |-> clearingPrice.value,
          clearingSize    |-> clearingSize.value ], clearingSize.rest)
 
-ZeroVarianceQuoteRestatementMessage ==
+ZeroVarianceQuoteRestatement ==
     [ transactionTime |-> [i \in 1 .. 8 |-> 0],
       quoteUpdateId   |-> [i \in 1 .. 16 |-> 0],
       execId          |-> [i \in 1 .. 8 |-> 0],
@@ -1801,32 +1801,32 @@ ZeroVarianceQuoteRestatementMessage ==
       clearingPrice   |-> [i \in 1 .. 8 |-> 0],
       clearingSize    |-> [i \in 1 .. 4 |-> 0] ]
 
-(* Variance Quote Restatement Message at zero, then each field in turn at the values it is checked at *)
-CheckedVarianceQuoteRestatementMessage ==
-    { ZeroVarianceQuoteRestatementMessage }
-        \cup { [ZeroVarianceQuoteRestatementMessage EXCEPT !.transactionTime = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceQuoteRestatementMessage EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
-        \cup { [ZeroVarianceQuoteRestatementMessage EXCEPT !.execId = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceQuoteRestatementMessage EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
-        \cup { [ZeroVarianceQuoteRestatementMessage EXCEPT !.clearingSymbol = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceQuoteRestatementMessage EXCEPT !.clearingPrice = one] : one \in Sample(8) }
-        \cup { [ZeroVarianceQuoteRestatementMessage EXCEPT !.clearingSize = one] : one \in Sample(4) }
+(* Variance Quote Restatement at zero, then each field in turn at the values it is checked at *)
+CheckedVarianceQuoteRestatement ==
+    { ZeroVarianceQuoteRestatement }
+        \cup { [ZeroVarianceQuoteRestatement EXCEPT !.transactionTime = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceQuoteRestatement EXCEPT !.quoteUpdateId = one] : one \in Sample(16) }
+        \cup { [ZeroVarianceQuoteRestatement EXCEPT !.execId = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceQuoteRestatement EXCEPT !.quoteSymbol = one] : one \in Sample(6) }
+        \cup { [ZeroVarianceQuoteRestatement EXCEPT !.clearingSymbol = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceQuoteRestatement EXCEPT !.clearingPrice = one] : one \in Sample(8) }
+        \cup { [ZeroVarianceQuoteRestatement EXCEPT !.clearingSize = one] : one \in Sample(4) }
 
 (***************************************************************************)
-(* Reset Risk Acknowledgement Message: 25 bytes                            *)
+(* Reset Risk Acknowledgement: 25 bytes                                    *)
 (***************************************************************************)
 
-ResetRiskAcknowledgementMessage ==
+ResetRiskAcknowledgement ==
     [ riskStatusId        : Sample(16),
       riskResetResult     : Sample(1),
       requestReceivedTime : Sample(8) ]
 
-EncodeResetRiskAcknowledgementMessage(message) ==
+EncodeResetRiskAcknowledgement(message) ==
     message.riskStatusId
         \o message.riskResetResult
         \o message.requestReceivedTime
 
-DecodeResetRiskAcknowledgementMessage(bytes) ==
+DecodeResetRiskAcknowledgement(bytes) ==
     LET riskStatusId == ReadBytes(bytes, 16) IN IF ~riskStatusId.ok THEN Fail ELSE
     LET riskResetResult == ReadBytes(riskStatusId.rest, 1) IN IF ~riskResetResult.ok THEN Fail ELSE
     LET requestReceivedTime == ReadBytes(riskResetResult.rest, 8) IN IF ~requestReceivedTime.ok THEN Fail ELSE
@@ -1834,17 +1834,17 @@ DecodeResetRiskAcknowledgementMessage(bytes) ==
          riskResetResult     |-> riskResetResult.value,
          requestReceivedTime |-> requestReceivedTime.value ], requestReceivedTime.rest)
 
-ZeroResetRiskAcknowledgementMessage ==
+ZeroResetRiskAcknowledgement ==
     [ riskStatusId        |-> [i \in 1 .. 16 |-> 0],
       riskResetResult     |-> [i \in 1 .. 1 |-> 0],
       requestReceivedTime |-> [i \in 1 .. 8 |-> 0] ]
 
-(* Reset Risk Acknowledgement Message at zero, then each field in turn at the values it is checked at *)
-CheckedResetRiskAcknowledgementMessage ==
-    { ZeroResetRiskAcknowledgementMessage }
-        \cup { [ZeroResetRiskAcknowledgementMessage EXCEPT !.riskStatusId = one] : one \in Sample(16) }
-        \cup { [ZeroResetRiskAcknowledgementMessage EXCEPT !.riskResetResult = one] : one \in Sample(1) }
-        \cup { [ZeroResetRiskAcknowledgementMessage EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
+(* Reset Risk Acknowledgement at zero, then each field in turn at the values it is checked at *)
+CheckedResetRiskAcknowledgement ==
+    { ZeroResetRiskAcknowledgement }
+        \cup { [ZeroResetRiskAcknowledgement EXCEPT !.riskStatusId = one] : one \in Sample(16) }
+        \cup { [ZeroResetRiskAcknowledgement EXCEPT !.riskResetResult = one] : one \in Sample(1) }
+        \cup { [ZeroResetRiskAcknowledgement EXCEPT !.requestReceivedTime = one] : one \in Sample(8) }
 
 (***************************************************************************)
 (* Exchange Message, selected by Exchange Message Type                     *)
@@ -1854,84 +1854,84 @@ LoginResponseMessageCode == 501  \* 0x1f5
 ReplayCompleteCode == 502  \* 0x1f6
 LogoutResponseMessageCode == 503  \* 0x1f7
 ServerHeartbeatCode == 504  \* 0x1f8
-OrderAcknowledgementMessageCode == 1501  \* 0x5dd
-OrderRejectedMessageCode == 1502  \* 0x5de
-OrderModifiedMessageCode == 1503  \* 0x5df
-ModifyRejectedMessageCode == 1504  \* 0x5e0
-OrderExecutionMessageCode == 1505  \* 0x5e1
-OrderCancelledMessageCode == 1506  \* 0x5e2
-CancelRejectedMessageCode == 1507  \* 0x5e3
-MassCancelAcknowledgementMessageCode == 1508  \* 0x5e4
-MassCancelRejectedMessageCode == 1509  \* 0x5e5
-PurgeAcknowledgementMessageCode == 1510  \* 0x5e6
-PurgeRejectedMessageCode == 1511  \* 0x5e7
-TradeCancelOrCorrectMessageCode == 1512  \* 0x5e8
-TasRestatementMessageCode == 1513  \* 0x5e9
-VarianceRestatementMessageCode == 1514  \* 0x5ea
-QuoteUpdateAcknowledgementMessageCode == 1515  \* 0x5eb
-QuoteUpdateRejectedMessageCode == 1516  \* 0x5ec
-QuoteRestatedMessageCode == 1517  \* 0x5ed
-QuoteExecutionMessageCode == 1518  \* 0x5ee
-QuoteCancelledMessageCode == 1519  \* 0x5ef
-TasQuoteRestatementMessageCode == 1520  \* 0x5f0
-VarianceQuoteRestatementMessageCode == 1521  \* 0x5f1
-ResetRiskAcknowledgementMessageCode == 1522  \* 0x5f2
+OrderAcknowledgementCode == 1501  \* 0x5dd
+OrderRejectedCode == 1502  \* 0x5de
+OrderModifiedCode == 1503  \* 0x5df
+ModifyRejectedCode == 1504  \* 0x5e0
+OrderExecutionCode == 1505  \* 0x5e1
+OrderCancelledCode == 1506  \* 0x5e2
+CancelRejectedCode == 1507  \* 0x5e3
+MassCancelAcknowledgementCode == 1508  \* 0x5e4
+MassCancelRejectedCode == 1509  \* 0x5e5
+PurgeAcknowledgementCode == 1510  \* 0x5e6
+PurgeRejectedCode == 1511  \* 0x5e7
+TradeCancelOrCorrectCode == 1512  \* 0x5e8
+TasRestatementCode == 1513  \* 0x5e9
+VarianceRestatementCode == 1514  \* 0x5ea
+QuoteUpdateAcknowledgementCode == 1515  \* 0x5eb
+QuoteUpdateRejectedCode == 1516  \* 0x5ec
+QuoteRestatedCode == 1517  \* 0x5ed
+QuoteExecutionCode == 1518  \* 0x5ee
+QuoteCancelledCode == 1519  \* 0x5ef
+TasQuoteRestatementCode == 1520  \* 0x5f0
+VarianceQuoteRestatementCode == 1521  \* 0x5f1
+ResetRiskAcknowledgementCode == 1522  \* 0x5f2
 
 ExchangeMessage ==
     [ tag : {LoginResponseMessageCode}, body : LoginResponseMessage ]
         \cup [ tag : {ReplayCompleteCode}, body : {[empty |-> 0]} ]
         \cup [ tag : {LogoutResponseMessageCode}, body : LogoutResponseMessage ]
         \cup [ tag : {ServerHeartbeatCode}, body : {[empty |-> 0]} ]
-        \cup [ tag : {OrderAcknowledgementMessageCode}, body : OrderAcknowledgementMessage ]
-        \cup [ tag : {OrderRejectedMessageCode}, body : OrderRejectedMessage ]
-        \cup [ tag : {OrderModifiedMessageCode}, body : OrderModifiedMessage ]
-        \cup [ tag : {ModifyRejectedMessageCode}, body : ModifyRejectedMessage ]
-        \cup [ tag : {OrderExecutionMessageCode}, body : OrderExecutionMessage ]
-        \cup [ tag : {OrderCancelledMessageCode}, body : OrderCancelledMessage ]
-        \cup [ tag : {CancelRejectedMessageCode}, body : CancelRejectedMessage ]
-        \cup [ tag : {MassCancelAcknowledgementMessageCode}, body : MassCancelAcknowledgementMessage ]
-        \cup [ tag : {MassCancelRejectedMessageCode}, body : MassCancelRejectedMessage ]
-        \cup [ tag : {PurgeAcknowledgementMessageCode}, body : PurgeAcknowledgementMessage ]
-        \cup [ tag : {PurgeRejectedMessageCode}, body : PurgeRejectedMessage ]
-        \cup [ tag : {TradeCancelOrCorrectMessageCode}, body : TradeCancelOrCorrectMessage ]
-        \cup [ tag : {TasRestatementMessageCode}, body : TasRestatementMessage ]
-        \cup [ tag : {VarianceRestatementMessageCode}, body : VarianceRestatementMessage ]
-        \cup [ tag : {QuoteUpdateAcknowledgementMessageCode}, body : QuoteUpdateAcknowledgementMessage ]
-        \cup [ tag : {QuoteUpdateRejectedMessageCode}, body : QuoteUpdateRejectedMessage ]
-        \cup [ tag : {QuoteRestatedMessageCode}, body : QuoteRestatedMessage ]
-        \cup [ tag : {QuoteExecutionMessageCode}, body : QuoteExecutionMessage ]
-        \cup [ tag : {QuoteCancelledMessageCode}, body : QuoteCancelledMessage ]
-        \cup [ tag : {TasQuoteRestatementMessageCode}, body : TasQuoteRestatementMessage ]
-        \cup [ tag : {VarianceQuoteRestatementMessageCode}, body : VarianceQuoteRestatementMessage ]
-        \cup [ tag : {ResetRiskAcknowledgementMessageCode}, body : ResetRiskAcknowledgementMessage ]
+        \cup [ tag : {OrderAcknowledgementCode}, body : OrderAcknowledgement ]
+        \cup [ tag : {OrderRejectedCode}, body : OrderRejected ]
+        \cup [ tag : {OrderModifiedCode}, body : OrderModified ]
+        \cup [ tag : {ModifyRejectedCode}, body : ModifyRejected ]
+        \cup [ tag : {OrderExecutionCode}, body : OrderExecution ]
+        \cup [ tag : {OrderCancelledCode}, body : OrderCancelled ]
+        \cup [ tag : {CancelRejectedCode}, body : CancelRejected ]
+        \cup [ tag : {MassCancelAcknowledgementCode}, body : MassCancelAcknowledgement ]
+        \cup [ tag : {MassCancelRejectedCode}, body : MassCancelRejected ]
+        \cup [ tag : {PurgeAcknowledgementCode}, body : PurgeAcknowledgement ]
+        \cup [ tag : {PurgeRejectedCode}, body : PurgeRejected ]
+        \cup [ tag : {TradeCancelOrCorrectCode}, body : TradeCancelOrCorrect ]
+        \cup [ tag : {TasRestatementCode}, body : TasRestatement ]
+        \cup [ tag : {VarianceRestatementCode}, body : VarianceRestatement ]
+        \cup [ tag : {QuoteUpdateAcknowledgementCode}, body : QuoteUpdateAcknowledgement ]
+        \cup [ tag : {QuoteUpdateRejectedCode}, body : QuoteUpdateRejected ]
+        \cup [ tag : {QuoteRestatedCode}, body : QuoteRestated ]
+        \cup [ tag : {QuoteExecutionCode}, body : QuoteExecution ]
+        \cup [ tag : {QuoteCancelledCode}, body : QuoteCancelled ]
+        \cup [ tag : {TasQuoteRestatementCode}, body : TasQuoteRestatement ]
+        \cup [ tag : {VarianceQuoteRestatementCode}, body : VarianceQuoteRestatement ]
+        \cup [ tag : {ResetRiskAcknowledgementCode}, body : ResetRiskAcknowledgement ]
 
 EncodeExchangeMessage(message) ==
     CASE message.tag = LoginResponseMessageCode -> EncodeLoginResponseMessage(message.body)
       [] message.tag = ReplayCompleteCode -> << >>
       [] message.tag = LogoutResponseMessageCode -> EncodeLogoutResponseMessage(message.body)
       [] message.tag = ServerHeartbeatCode -> << >>
-      [] message.tag = OrderAcknowledgementMessageCode -> EncodeOrderAcknowledgementMessage(message.body)
-      [] message.tag = OrderRejectedMessageCode -> EncodeOrderRejectedMessage(message.body)
-      [] message.tag = OrderModifiedMessageCode -> EncodeOrderModifiedMessage(message.body)
-      [] message.tag = ModifyRejectedMessageCode -> EncodeModifyRejectedMessage(message.body)
-      [] message.tag = OrderExecutionMessageCode -> EncodeOrderExecutionMessage(message.body)
-      [] message.tag = OrderCancelledMessageCode -> EncodeOrderCancelledMessage(message.body)
-      [] message.tag = CancelRejectedMessageCode -> EncodeCancelRejectedMessage(message.body)
-      [] message.tag = MassCancelAcknowledgementMessageCode -> EncodeMassCancelAcknowledgementMessage(message.body)
-      [] message.tag = MassCancelRejectedMessageCode -> EncodeMassCancelRejectedMessage(message.body)
-      [] message.tag = PurgeAcknowledgementMessageCode -> EncodePurgeAcknowledgementMessage(message.body)
-      [] message.tag = PurgeRejectedMessageCode -> EncodePurgeRejectedMessage(message.body)
-      [] message.tag = TradeCancelOrCorrectMessageCode -> EncodeTradeCancelOrCorrectMessage(message.body)
-      [] message.tag = TasRestatementMessageCode -> EncodeTasRestatementMessage(message.body)
-      [] message.tag = VarianceRestatementMessageCode -> EncodeVarianceRestatementMessage(message.body)
-      [] message.tag = QuoteUpdateAcknowledgementMessageCode -> EncodeQuoteUpdateAcknowledgementMessage(message.body)
-      [] message.tag = QuoteUpdateRejectedMessageCode -> EncodeQuoteUpdateRejectedMessage(message.body)
-      [] message.tag = QuoteRestatedMessageCode -> EncodeQuoteRestatedMessage(message.body)
-      [] message.tag = QuoteExecutionMessageCode -> EncodeQuoteExecutionMessage(message.body)
-      [] message.tag = QuoteCancelledMessageCode -> EncodeQuoteCancelledMessage(message.body)
-      [] message.tag = TasQuoteRestatementMessageCode -> EncodeTasQuoteRestatementMessage(message.body)
-      [] message.tag = VarianceQuoteRestatementMessageCode -> EncodeVarianceQuoteRestatementMessage(message.body)
-      [] message.tag = ResetRiskAcknowledgementMessageCode -> EncodeResetRiskAcknowledgementMessage(message.body)
+      [] message.tag = OrderAcknowledgementCode -> EncodeOrderAcknowledgement(message.body)
+      [] message.tag = OrderRejectedCode -> EncodeOrderRejected(message.body)
+      [] message.tag = OrderModifiedCode -> EncodeOrderModified(message.body)
+      [] message.tag = ModifyRejectedCode -> EncodeModifyRejected(message.body)
+      [] message.tag = OrderExecutionCode -> EncodeOrderExecution(message.body)
+      [] message.tag = OrderCancelledCode -> EncodeOrderCancelled(message.body)
+      [] message.tag = CancelRejectedCode -> EncodeCancelRejected(message.body)
+      [] message.tag = MassCancelAcknowledgementCode -> EncodeMassCancelAcknowledgement(message.body)
+      [] message.tag = MassCancelRejectedCode -> EncodeMassCancelRejected(message.body)
+      [] message.tag = PurgeAcknowledgementCode -> EncodePurgeAcknowledgement(message.body)
+      [] message.tag = PurgeRejectedCode -> EncodePurgeRejected(message.body)
+      [] message.tag = TradeCancelOrCorrectCode -> EncodeTradeCancelOrCorrect(message.body)
+      [] message.tag = TasRestatementCode -> EncodeTasRestatement(message.body)
+      [] message.tag = VarianceRestatementCode -> EncodeVarianceRestatement(message.body)
+      [] message.tag = QuoteUpdateAcknowledgementCode -> EncodeQuoteUpdateAcknowledgement(message.body)
+      [] message.tag = QuoteUpdateRejectedCode -> EncodeQuoteUpdateRejected(message.body)
+      [] message.tag = QuoteRestatedCode -> EncodeQuoteRestated(message.body)
+      [] message.tag = QuoteExecutionCode -> EncodeQuoteExecution(message.body)
+      [] message.tag = QuoteCancelledCode -> EncodeQuoteCancelled(message.body)
+      [] message.tag = TasQuoteRestatementCode -> EncodeTasQuoteRestatement(message.body)
+      [] message.tag = VarianceQuoteRestatementCode -> EncodeVarianceQuoteRestatement(message.body)
+      [] message.tag = ResetRiskAcknowledgementCode -> EncodeResetRiskAcknowledgement(message.body)
 
 DecodeExchangeMessage(tag, bytes) ==
     LET read ==
@@ -1939,28 +1939,28 @@ DecodeExchangeMessage(tag, bytes) ==
               [] tag = ReplayCompleteCode -> Ok([empty |-> 0], bytes)
               [] tag = LogoutResponseMessageCode -> DecodeLogoutResponseMessage(bytes)
               [] tag = ServerHeartbeatCode -> Ok([empty |-> 0], bytes)
-              [] tag = OrderAcknowledgementMessageCode -> DecodeOrderAcknowledgementMessage(bytes)
-              [] tag = OrderRejectedMessageCode -> DecodeOrderRejectedMessage(bytes)
-              [] tag = OrderModifiedMessageCode -> DecodeOrderModifiedMessage(bytes)
-              [] tag = ModifyRejectedMessageCode -> DecodeModifyRejectedMessage(bytes)
-              [] tag = OrderExecutionMessageCode -> DecodeOrderExecutionMessage(bytes)
-              [] tag = OrderCancelledMessageCode -> DecodeOrderCancelledMessage(bytes)
-              [] tag = CancelRejectedMessageCode -> DecodeCancelRejectedMessage(bytes)
-              [] tag = MassCancelAcknowledgementMessageCode -> DecodeMassCancelAcknowledgementMessage(bytes)
-              [] tag = MassCancelRejectedMessageCode -> DecodeMassCancelRejectedMessage(bytes)
-              [] tag = PurgeAcknowledgementMessageCode -> DecodePurgeAcknowledgementMessage(bytes)
-              [] tag = PurgeRejectedMessageCode -> DecodePurgeRejectedMessage(bytes)
-              [] tag = TradeCancelOrCorrectMessageCode -> DecodeTradeCancelOrCorrectMessage(bytes)
-              [] tag = TasRestatementMessageCode -> DecodeTasRestatementMessage(bytes)
-              [] tag = VarianceRestatementMessageCode -> DecodeVarianceRestatementMessage(bytes)
-              [] tag = QuoteUpdateAcknowledgementMessageCode -> DecodeQuoteUpdateAcknowledgementMessage(bytes)
-              [] tag = QuoteUpdateRejectedMessageCode -> DecodeQuoteUpdateRejectedMessage(bytes)
-              [] tag = QuoteRestatedMessageCode -> DecodeQuoteRestatedMessage(bytes)
-              [] tag = QuoteExecutionMessageCode -> DecodeQuoteExecutionMessage(bytes)
-              [] tag = QuoteCancelledMessageCode -> DecodeQuoteCancelledMessage(bytes)
-              [] tag = TasQuoteRestatementMessageCode -> DecodeTasQuoteRestatementMessage(bytes)
-              [] tag = VarianceQuoteRestatementMessageCode -> DecodeVarianceQuoteRestatementMessage(bytes)
-              [] tag = ResetRiskAcknowledgementMessageCode -> DecodeResetRiskAcknowledgementMessage(bytes)
+              [] tag = OrderAcknowledgementCode -> DecodeOrderAcknowledgement(bytes)
+              [] tag = OrderRejectedCode -> DecodeOrderRejected(bytes)
+              [] tag = OrderModifiedCode -> DecodeOrderModified(bytes)
+              [] tag = ModifyRejectedCode -> DecodeModifyRejected(bytes)
+              [] tag = OrderExecutionCode -> DecodeOrderExecution(bytes)
+              [] tag = OrderCancelledCode -> DecodeOrderCancelled(bytes)
+              [] tag = CancelRejectedCode -> DecodeCancelRejected(bytes)
+              [] tag = MassCancelAcknowledgementCode -> DecodeMassCancelAcknowledgement(bytes)
+              [] tag = MassCancelRejectedCode -> DecodeMassCancelRejected(bytes)
+              [] tag = PurgeAcknowledgementCode -> DecodePurgeAcknowledgement(bytes)
+              [] tag = PurgeRejectedCode -> DecodePurgeRejected(bytes)
+              [] tag = TradeCancelOrCorrectCode -> DecodeTradeCancelOrCorrect(bytes)
+              [] tag = TasRestatementCode -> DecodeTasRestatement(bytes)
+              [] tag = VarianceRestatementCode -> DecodeVarianceRestatement(bytes)
+              [] tag = QuoteUpdateAcknowledgementCode -> DecodeQuoteUpdateAcknowledgement(bytes)
+              [] tag = QuoteUpdateRejectedCode -> DecodeQuoteUpdateRejected(bytes)
+              [] tag = QuoteRestatedCode -> DecodeQuoteRestated(bytes)
+              [] tag = QuoteExecutionCode -> DecodeQuoteExecution(bytes)
+              [] tag = QuoteCancelledCode -> DecodeQuoteCancelled(bytes)
+              [] tag = TasQuoteRestatementCode -> DecodeTasQuoteRestatement(bytes)
+              [] tag = VarianceQuoteRestatementCode -> DecodeVarianceQuoteRestatement(bytes)
+              [] tag = ResetRiskAcknowledgementCode -> DecodeResetRiskAcknowledgement(bytes)
               [] OTHER -> Fail
     IN  IF ~read.ok THEN Fail ELSE Ok([tag |-> tag, body |-> read.value], read.rest)
 
@@ -1972,28 +1972,28 @@ CheckedExchangeMessage ==
         \cup { [tag |-> ReplayCompleteCode, body |-> [empty |-> 0]] }
         \cup { [tag |-> LogoutResponseMessageCode, body |-> one] : one \in CheckedLogoutResponseMessage }
         \cup { [tag |-> ServerHeartbeatCode, body |-> [empty |-> 0]] }
-        \cup { [tag |-> OrderAcknowledgementMessageCode, body |-> one] : one \in CheckedOrderAcknowledgementMessage }
-        \cup { [tag |-> OrderRejectedMessageCode, body |-> one] : one \in CheckedOrderRejectedMessage }
-        \cup { [tag |-> OrderModifiedMessageCode, body |-> one] : one \in CheckedOrderModifiedMessage }
-        \cup { [tag |-> ModifyRejectedMessageCode, body |-> one] : one \in CheckedModifyRejectedMessage }
-        \cup { [tag |-> OrderExecutionMessageCode, body |-> one] : one \in CheckedOrderExecutionMessage }
-        \cup { [tag |-> OrderCancelledMessageCode, body |-> one] : one \in CheckedOrderCancelledMessage }
-        \cup { [tag |-> CancelRejectedMessageCode, body |-> one] : one \in CheckedCancelRejectedMessage }
-        \cup { [tag |-> MassCancelAcknowledgementMessageCode, body |-> one] : one \in CheckedMassCancelAcknowledgementMessage }
-        \cup { [tag |-> MassCancelRejectedMessageCode, body |-> one] : one \in CheckedMassCancelRejectedMessage }
-        \cup { [tag |-> PurgeAcknowledgementMessageCode, body |-> one] : one \in CheckedPurgeAcknowledgementMessage }
-        \cup { [tag |-> PurgeRejectedMessageCode, body |-> one] : one \in CheckedPurgeRejectedMessage }
-        \cup { [tag |-> TradeCancelOrCorrectMessageCode, body |-> one] : one \in CheckedTradeCancelOrCorrectMessage }
-        \cup { [tag |-> TasRestatementMessageCode, body |-> one] : one \in CheckedTasRestatementMessage }
-        \cup { [tag |-> VarianceRestatementMessageCode, body |-> one] : one \in CheckedVarianceRestatementMessage }
-        \cup { [tag |-> QuoteUpdateAcknowledgementMessageCode, body |-> one] : one \in CheckedQuoteUpdateAcknowledgementMessage }
-        \cup { [tag |-> QuoteUpdateRejectedMessageCode, body |-> one] : one \in CheckedQuoteUpdateRejectedMessage }
-        \cup { [tag |-> QuoteRestatedMessageCode, body |-> one] : one \in CheckedQuoteRestatedMessage }
-        \cup { [tag |-> QuoteExecutionMessageCode, body |-> one] : one \in CheckedQuoteExecutionMessage }
-        \cup { [tag |-> QuoteCancelledMessageCode, body |-> one] : one \in CheckedQuoteCancelledMessage }
-        \cup { [tag |-> TasQuoteRestatementMessageCode, body |-> one] : one \in CheckedTasQuoteRestatementMessage }
-        \cup { [tag |-> VarianceQuoteRestatementMessageCode, body |-> one] : one \in CheckedVarianceQuoteRestatementMessage }
-        \cup { [tag |-> ResetRiskAcknowledgementMessageCode, body |-> one] : one \in CheckedResetRiskAcknowledgementMessage }
+        \cup { [tag |-> OrderAcknowledgementCode, body |-> one] : one \in CheckedOrderAcknowledgement }
+        \cup { [tag |-> OrderRejectedCode, body |-> one] : one \in CheckedOrderRejected }
+        \cup { [tag |-> OrderModifiedCode, body |-> one] : one \in CheckedOrderModified }
+        \cup { [tag |-> ModifyRejectedCode, body |-> one] : one \in CheckedModifyRejected }
+        \cup { [tag |-> OrderExecutionCode, body |-> one] : one \in CheckedOrderExecution }
+        \cup { [tag |-> OrderCancelledCode, body |-> one] : one \in CheckedOrderCancelled }
+        \cup { [tag |-> CancelRejectedCode, body |-> one] : one \in CheckedCancelRejected }
+        \cup { [tag |-> MassCancelAcknowledgementCode, body |-> one] : one \in CheckedMassCancelAcknowledgement }
+        \cup { [tag |-> MassCancelRejectedCode, body |-> one] : one \in CheckedMassCancelRejected }
+        \cup { [tag |-> PurgeAcknowledgementCode, body |-> one] : one \in CheckedPurgeAcknowledgement }
+        \cup { [tag |-> PurgeRejectedCode, body |-> one] : one \in CheckedPurgeRejected }
+        \cup { [tag |-> TradeCancelOrCorrectCode, body |-> one] : one \in CheckedTradeCancelOrCorrect }
+        \cup { [tag |-> TasRestatementCode, body |-> one] : one \in CheckedTasRestatement }
+        \cup { [tag |-> VarianceRestatementCode, body |-> one] : one \in CheckedVarianceRestatement }
+        \cup { [tag |-> QuoteUpdateAcknowledgementCode, body |-> one] : one \in CheckedQuoteUpdateAcknowledgement }
+        \cup { [tag |-> QuoteUpdateRejectedCode, body |-> one] : one \in CheckedQuoteUpdateRejected }
+        \cup { [tag |-> QuoteRestatedCode, body |-> one] : one \in CheckedQuoteRestated }
+        \cup { [tag |-> QuoteExecutionCode, body |-> one] : one \in CheckedQuoteExecution }
+        \cup { [tag |-> QuoteCancelledCode, body |-> one] : one \in CheckedQuoteCancelled }
+        \cup { [tag |-> TasQuoteRestatementCode, body |-> one] : one \in CheckedTasQuoteRestatement }
+        \cup { [tag |-> VarianceQuoteRestatementCode, body |-> one] : one \in CheckedVarianceQuoteRestatement }
+        \cup { [tag |-> ResetRiskAcknowledgementCode, body |-> one] : one \in CheckedResetRiskAcknowledgement }
 
 (***************************************************************************)
 (* Exchange Packet                                                         *)
@@ -2097,114 +2097,114 @@ RoundTripPreventMatch ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Acknowledgement Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderAcknowledgementMessage ==
-    \A message \in CheckedOrderAcknowledgementMessage :
-        LET read == DecodeOrderAcknowledgementMessage(EncodeOrderAcknowledgementMessage(message))
+(* Every Order Acknowledgement decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderAcknowledgement ==
+    \A message \in CheckedOrderAcknowledgement :
+        LET read == DecodeOrderAcknowledgement(EncodeOrderAcknowledgement(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Rejected Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderRejectedMessage ==
-    \A message \in CheckedOrderRejectedMessage :
-        LET read == DecodeOrderRejectedMessage(EncodeOrderRejectedMessage(message))
+(* Every Order Rejected decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderRejected ==
+    \A message \in CheckedOrderRejected :
+        LET read == DecodeOrderRejected(EncodeOrderRejected(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Modified Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderModifiedMessage ==
-    \A message \in CheckedOrderModifiedMessage :
-        LET read == DecodeOrderModifiedMessage(EncodeOrderModifiedMessage(message))
+(* Every Order Modified decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderModified ==
+    \A message \in CheckedOrderModified :
+        LET read == DecodeOrderModified(EncodeOrderModified(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Modify Rejected Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripModifyRejectedMessage ==
-    \A message \in CheckedModifyRejectedMessage :
-        LET read == DecodeModifyRejectedMessage(EncodeModifyRejectedMessage(message))
+(* Every Modify Rejected decodes back to what was encoded, and leaves nothing over *)
+RoundTripModifyRejected ==
+    \A message \in CheckedModifyRejected :
+        LET read == DecodeModifyRejected(EncodeModifyRejected(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Execution Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderExecutionMessage ==
-    \A message \in CheckedOrderExecutionMessage :
-        LET read == DecodeOrderExecutionMessage(EncodeOrderExecutionMessage(message))
+(* Every Order Execution decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderExecution ==
+    \A message \in CheckedOrderExecution :
+        LET read == DecodeOrderExecution(EncodeOrderExecution(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Order Cancelled Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripOrderCancelledMessage ==
-    \A message \in CheckedOrderCancelledMessage :
-        LET read == DecodeOrderCancelledMessage(EncodeOrderCancelledMessage(message))
+(* Every Order Cancelled decodes back to what was encoded, and leaves nothing over *)
+RoundTripOrderCancelled ==
+    \A message \in CheckedOrderCancelled :
+        LET read == DecodeOrderCancelled(EncodeOrderCancelled(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Cancel Rejected Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripCancelRejectedMessage ==
-    \A message \in CheckedCancelRejectedMessage :
-        LET read == DecodeCancelRejectedMessage(EncodeCancelRejectedMessage(message))
+(* Every Cancel Rejected decodes back to what was encoded, and leaves nothing over *)
+RoundTripCancelRejected ==
+    \A message \in CheckedCancelRejected :
+        LET read == DecodeCancelRejected(EncodeCancelRejected(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Cancel Acknowledgement Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripMassCancelAcknowledgementMessage ==
-    \A message \in CheckedMassCancelAcknowledgementMessage :
-        LET read == DecodeMassCancelAcknowledgementMessage(EncodeMassCancelAcknowledgementMessage(message))
+(* Every Mass Cancel Acknowledgement decodes back to what was encoded, and leaves nothing over *)
+RoundTripMassCancelAcknowledgement ==
+    \A message \in CheckedMassCancelAcknowledgement :
+        LET read == DecodeMassCancelAcknowledgement(EncodeMassCancelAcknowledgement(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Mass Cancel Rejected Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripMassCancelRejectedMessage ==
-    \A message \in CheckedMassCancelRejectedMessage :
-        LET read == DecodeMassCancelRejectedMessage(EncodeMassCancelRejectedMessage(message))
+(* Every Mass Cancel Rejected decodes back to what was encoded, and leaves nothing over *)
+RoundTripMassCancelRejected ==
+    \A message \in CheckedMassCancelRejected :
+        LET read == DecodeMassCancelRejected(EncodeMassCancelRejected(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Purge Acknowledgement Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripPurgeAcknowledgementMessage ==
-    \A message \in CheckedPurgeAcknowledgementMessage :
-        LET read == DecodePurgeAcknowledgementMessage(EncodePurgeAcknowledgementMessage(message))
+(* Every Purge Acknowledgement decodes back to what was encoded, and leaves nothing over *)
+RoundTripPurgeAcknowledgement ==
+    \A message \in CheckedPurgeAcknowledgement :
+        LET read == DecodePurgeAcknowledgement(EncodePurgeAcknowledgement(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Purge Rejected Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripPurgeRejectedMessage ==
-    \A message \in CheckedPurgeRejectedMessage :
-        LET read == DecodePurgeRejectedMessage(EncodePurgeRejectedMessage(message))
+(* Every Purge Rejected decodes back to what was encoded, and leaves nothing over *)
+RoundTripPurgeRejected ==
+    \A message \in CheckedPurgeRejected :
+        LET read == DecodePurgeRejected(EncodePurgeRejected(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Trade Cancel Or Correct Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripTradeCancelOrCorrectMessage ==
-    \A message \in CheckedTradeCancelOrCorrectMessage :
-        LET read == DecodeTradeCancelOrCorrectMessage(EncodeTradeCancelOrCorrectMessage(message))
+(* Every Trade Cancel Or Correct decodes back to what was encoded, and leaves nothing over *)
+RoundTripTradeCancelOrCorrect ==
+    \A message \in CheckedTradeCancelOrCorrect :
+        LET read == DecodeTradeCancelOrCorrect(EncodeTradeCancelOrCorrect(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Tas Restatement Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripTasRestatementMessage ==
-    \A message \in CheckedTasRestatementMessage :
-        LET read == DecodeTasRestatementMessage(EncodeTasRestatementMessage(message))
+(* Every Tas Restatement decodes back to what was encoded, and leaves nothing over *)
+RoundTripTasRestatement ==
+    \A message \in CheckedTasRestatement :
+        LET read == DecodeTasRestatement(EncodeTasRestatement(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Variance Restatement Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripVarianceRestatementMessage ==
-    \A message \in CheckedVarianceRestatementMessage :
-        LET read == DecodeVarianceRestatementMessage(EncodeVarianceRestatementMessage(message))
+(* Every Variance Restatement decodes back to what was encoded, and leaves nothing over *)
+RoundTripVarianceRestatement ==
+    \A message \in CheckedVarianceRestatement :
+        LET read == DecodeVarianceRestatement(EncodeVarianceRestatement(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -2217,66 +2217,66 @@ RoundTripQuoteUpdateAcknowledgementGroup ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Quote Update Acknowledgement Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripQuoteUpdateAcknowledgementMessage ==
-    \A message \in CheckedQuoteUpdateAcknowledgementMessage :
-        LET read == DecodeQuoteUpdateAcknowledgementMessage(EncodeQuoteUpdateAcknowledgementMessage(message))
+(* Every Quote Update Acknowledgement decodes back to what was encoded, and leaves nothing over *)
+RoundTripQuoteUpdateAcknowledgement ==
+    \A message \in CheckedQuoteUpdateAcknowledgement :
+        LET read == DecodeQuoteUpdateAcknowledgement(EncodeQuoteUpdateAcknowledgement(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Quote Update Rejected Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripQuoteUpdateRejectedMessage ==
-    \A message \in CheckedQuoteUpdateRejectedMessage :
-        LET read == DecodeQuoteUpdateRejectedMessage(EncodeQuoteUpdateRejectedMessage(message))
+(* Every Quote Update Rejected decodes back to what was encoded, and leaves nothing over *)
+RoundTripQuoteUpdateRejected ==
+    \A message \in CheckedQuoteUpdateRejected :
+        LET read == DecodeQuoteUpdateRejected(EncodeQuoteUpdateRejected(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Quote Restated Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripQuoteRestatedMessage ==
-    \A message \in CheckedQuoteRestatedMessage :
-        LET read == DecodeQuoteRestatedMessage(EncodeQuoteRestatedMessage(message))
+(* Every Quote Restated decodes back to what was encoded, and leaves nothing over *)
+RoundTripQuoteRestated ==
+    \A message \in CheckedQuoteRestated :
+        LET read == DecodeQuoteRestated(EncodeQuoteRestated(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Quote Execution Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripQuoteExecutionMessage ==
-    \A message \in CheckedQuoteExecutionMessage :
-        LET read == DecodeQuoteExecutionMessage(EncodeQuoteExecutionMessage(message))
+(* Every Quote Execution decodes back to what was encoded, and leaves nothing over *)
+RoundTripQuoteExecution ==
+    \A message \in CheckedQuoteExecution :
+        LET read == DecodeQuoteExecution(EncodeQuoteExecution(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Quote Cancelled Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripQuoteCancelledMessage ==
-    \A message \in CheckedQuoteCancelledMessage :
-        LET read == DecodeQuoteCancelledMessage(EncodeQuoteCancelledMessage(message))
+(* Every Quote Cancelled decodes back to what was encoded, and leaves nothing over *)
+RoundTripQuoteCancelled ==
+    \A message \in CheckedQuoteCancelled :
+        LET read == DecodeQuoteCancelled(EncodeQuoteCancelled(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Tas Quote Restatement Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripTasQuoteRestatementMessage ==
-    \A message \in CheckedTasQuoteRestatementMessage :
-        LET read == DecodeTasQuoteRestatementMessage(EncodeTasQuoteRestatementMessage(message))
+(* Every Tas Quote Restatement decodes back to what was encoded, and leaves nothing over *)
+RoundTripTasQuoteRestatement ==
+    \A message \in CheckedTasQuoteRestatement :
+        LET read == DecodeTasQuoteRestatement(EncodeTasQuoteRestatement(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Variance Quote Restatement Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripVarianceQuoteRestatementMessage ==
-    \A message \in CheckedVarianceQuoteRestatementMessage :
-        LET read == DecodeVarianceQuoteRestatementMessage(EncodeVarianceQuoteRestatementMessage(message))
+(* Every Variance Quote Restatement decodes back to what was encoded, and leaves nothing over *)
+RoundTripVarianceQuoteRestatement ==
+    \A message \in CheckedVarianceQuoteRestatement :
+        LET read == DecodeVarianceQuoteRestatement(EncodeVarianceQuoteRestatement(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Reset Risk Acknowledgement Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripResetRiskAcknowledgementMessage ==
-    \A message \in CheckedResetRiskAcknowledgementMessage :
-        LET read == DecodeResetRiskAcknowledgementMessage(EncodeResetRiskAcknowledgementMessage(message))
+(* Every Reset Risk Acknowledgement decodes back to what was encoded, and leaves nothing over *)
+RoundTripResetRiskAcknowledgement ==
+    \A message \in CheckedResetRiskAcknowledgement :
+        LET read == DecodeResetRiskAcknowledgement(EncodeResetRiskAcknowledgement(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>

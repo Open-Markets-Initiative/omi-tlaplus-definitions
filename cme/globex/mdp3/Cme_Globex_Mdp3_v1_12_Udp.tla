@@ -9614,15 +9614,15 @@ CheckedPayload ==
         \cup { [tag |-> SubscriberHeartbeatCode, body |-> [empty |-> 0]] }
 
 (***************************************************************************)
-(* Message, framed by Message Size                                         *)
+(* Mdp3 Message, framed by Message Size                                    *)
 (***************************************************************************)
 
-Message ==
+Mdp3Message ==
     [ blockLength : Sample(2),
       version     : Sample(2),
       payload     : Payload ]
 
-EncodeMessageBody(message) ==
+EncodeMdp3MessageBody(message) ==
     message.blockLength
         \o EncodeUIntLE(message.payload.tag[2], 2)
         \o EncodeUIntLE(message.payload.tag[1], 2)
@@ -9630,11 +9630,11 @@ EncodeMessageBody(message) ==
         \o EncodePayload(message.payload)
 
 (* Message Size counts the bytes it frames, so it is written from them *)
-EncodeMessage(message) ==
-    LET body == EncodeMessageBody(message)
+EncodeMdp3Message(message) ==
+    LET body == EncodeMdp3MessageBody(message)
     IN  EncodeUIntLE(Len(body) + 2, 2) \o body
 
-DecodeMessageBody(bytes) ==
+DecodeMdp3MessageBody(bytes) ==
     LET blockLength == ReadBytes(bytes, 2) IN IF ~blockLength.ok THEN Fail ELSE
     LET templateId == ReadUIntLE(blockLength.rest, 2) IN IF ~templateId.ok THEN Fail ELSE
     LET schemaId == ReadUIntLE(templateId.rest, 2) IN IF ~schemaId.ok THEN Fail ELSE
@@ -9644,90 +9644,90 @@ DecodeMessageBody(bytes) ==
          version     |-> version.value,
          payload     |-> payload.value ], payload.rest)
 
-DecodeMessage(bytes) ==
+DecodeMdp3Message(bytes) ==
     LET length == ReadUIntLE(bytes, 2) IN IF ~length.ok THEN Fail ELSE
     LET size == length.value - 2 IN
     IF size < 0 \/ Len(length.rest) < size THEN Fail ELSE
     LET framed == SubSeq(length.rest, 1, size)
         beyond == SubSeq(length.rest, size + 1, Len(length.rest))
-        body   == DecodeMessageBody(framed)
+        body   == DecodeMdp3MessageBody(framed)
     IN  IF ~body.ok \/ body.rest # << >> THEN Fail ELSE
     Ok(body.value, beyond)
 
-ZeroMessage ==
+ZeroMdp3Message ==
     [ blockLength |-> [i \in 1 .. 2 |-> 0],
       version     |-> [i \in 1 .. 2 |-> 0],
       payload     |-> ZeroPayload ]
 
-(* Message at zero, then each field in turn at the values it is checked at *)
-CheckedMessage ==
-    { ZeroMessage }
-        \cup { [ZeroMessage EXCEPT !.blockLength = one] : one \in Sample(2) }
-        \cup { [ZeroMessage EXCEPT !.version = one] : one \in Sample(2) }
-        \cup { [ZeroMessage EXCEPT !.payload = one] : one \in CheckedPayload }
+(* Mdp3 Message at zero, then each field in turn at the values it is checked at *)
+CheckedMdp3Message ==
+    { ZeroMdp3Message }
+        \cup { [ZeroMdp3Message EXCEPT !.blockLength = one] : one \in Sample(2) }
+        \cup { [ZeroMdp3Message EXCEPT !.version = one] : one \in Sample(2) }
+        \cup { [ZeroMdp3Message EXCEPT !.payload = one] : one \in CheckedPayload }
 
-(* A run of Message, written one after another *)
-RECURSIVE EncodeMessageList(_)
-EncodeMessageList(messages) ==
+(* A run of Mdp3 Message, written one after another *)
+RECURSIVE EncodeMdp3MessageList(_)
+EncodeMdp3MessageList(messages) ==
     IF messages = << >>
     THEN << >>
-    ELSE EncodeMessage(Head(messages)) \o EncodeMessageList(Tail(messages))
+    ELSE EncodeMdp3Message(Head(messages)) \o EncodeMdp3MessageList(Tail(messages))
 
-(* As many Message as the bytes hold, which is what its payload rule states. *)
+(* As many Mdp3 Message as the bytes hold, which is what its payload rule states. *)
 (* Each one takes bytes off the reader, so the run ends where the data does. *)
-RECURSIVE ReadMessageAll(_)
-ReadMessageAll(bytes) ==
+RECURSIVE ReadMdp3MessageAll(_)
+ReadMdp3MessageAll(bytes) ==
     IF bytes = << >>
     THEN Ok(<< >>, << >>)
-    ELSE LET one == DecodeMessage(bytes)
+    ELSE LET one == DecodeMdp3Message(bytes)
          IN  IF ~one.ok THEN Fail
-             ELSE LET more == ReadMessageAll(one.rest)
+             ELSE LET more == ReadMdp3MessageAll(one.rest)
                   IN  IF ~more.ok THEN Fail
                       ELSE Ok(<<one.value>> \o more.value, more.rest)
 
-(* One Message of each kind, for the lists that carry them *)
-OneMessage ==
-    { [ZeroMessage EXCEPT !.payload = [tag |-> ChannelResetCode, body |-> ZeroChannelReset]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> AdminHeartbeatCode, body |-> [empty |-> 0]]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> AdminLoginCode, body |-> ZeroAdminLogin]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> AdminLogoutCode, body |-> ZeroAdminLogout]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SecurityStatusCode, body |-> ZeroSecurityStatus]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshVolumeCode, body |-> ZeroMdIncrementalRefreshVolume]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> QuoteRequestCode, body |-> ZeroQuoteRequest]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshBookCode, body |-> ZeroMdIncrementalRefreshBook]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshOrderBookCode, body |-> ZeroMdIncrementalRefreshOrderBook]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshTradeSummaryCode, body |-> ZeroMdIncrementalRefreshTradeSummary]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshDailyStatisticsCode, body |-> ZeroMdIncrementalRefreshDailyStatistics]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshLimitsBandingCode, body |-> ZeroMdIncrementalRefreshLimitsBanding]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshSessionStatisticsCode, body |-> ZeroMdIncrementalRefreshSessionStatistics]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotFullRefreshCode, body |-> ZeroSnapshotFullRefresh]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotFullRefreshOrderBookCode, body |-> ZeroSnapshotFullRefreshOrderBook]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionFutureCode, body |-> ZeroMdInstrumentDefinitionFuture]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionOptionCode, body |-> ZeroMdInstrumentDefinitionOption]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionSpreadCode, body |-> ZeroMdInstrumentDefinitionSpread]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionFixedIncomeCode, body |-> ZeroMdInstrumentDefinitionFixedIncome]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionRepoCode, body |-> ZeroMdInstrumentDefinitionRepo]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotRefreshTopOrdersCode, body |-> ZeroSnapshotRefreshTopOrders]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SecurityStatusWorkupCode, body |-> ZeroSecurityStatusWorkup]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotFullRefreshTcpCode, body |-> ZeroSnapshotFullRefreshTcp]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> CollateralMarketValueCode, body |-> ZeroCollateralMarketValue]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdInstrumentDefinitionFxCode, body |-> ZeroMdInstrumentDefinitionFx]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshBookLongQtyCode, body |-> ZeroMdIncrementalRefreshBookLongQty]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshTradeSummaryLongQtyCode, body |-> ZeroMdIncrementalRefreshTradeSummaryLongQty]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshVolumeLongQtyCode, body |-> ZeroMdIncrementalRefreshVolumeLongQty]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MdIncrementalRefreshSessionStatisticsLongQtyCode, body |-> ZeroMdIncrementalRefreshSessionStatisticsLongQty]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotFullRefreshTcpLongQtyCode, body |-> ZeroSnapshotFullRefreshTcpLongQty]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SnapshotFullRefreshLongQtyCode, body |-> ZeroSnapshotFullRefreshLongQty]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> NegotiateCode, body |-> ZeroNegotiate]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> NegotiationRejectCode, body |-> ZeroNegotiationReject]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> NegotiationResponseCode, body |-> ZeroNegotiationResponse]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> TerminateCode, body |-> ZeroTerminate]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> MarketDataRequestCode, body |-> ZeroMarketDataRequest]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> RequestAckCode, body |-> ZeroRequestAck]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> RequestRejectCode, body |-> ZeroRequestReject]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SecurityListRequestCode, body |-> ZeroSecurityListRequest]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SecurityStatusRequestCode, body |-> ZeroSecurityStatusRequest]],
-      [ZeroMessage EXCEPT !.payload = [tag |-> SubscriberHeartbeatCode, body |-> [empty |-> 0]]] }
+(* One Mdp3 Message of each kind, for the lists that carry them *)
+OneMdp3Message ==
+    { [ZeroMdp3Message EXCEPT !.payload = [tag |-> ChannelResetCode, body |-> ZeroChannelReset]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> AdminHeartbeatCode, body |-> [empty |-> 0]]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> AdminLoginCode, body |-> ZeroAdminLogin]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> AdminLogoutCode, body |-> ZeroAdminLogout]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SecurityStatusCode, body |-> ZeroSecurityStatus]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshVolumeCode, body |-> ZeroMdIncrementalRefreshVolume]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> QuoteRequestCode, body |-> ZeroQuoteRequest]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshBookCode, body |-> ZeroMdIncrementalRefreshBook]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshOrderBookCode, body |-> ZeroMdIncrementalRefreshOrderBook]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshTradeSummaryCode, body |-> ZeroMdIncrementalRefreshTradeSummary]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshDailyStatisticsCode, body |-> ZeroMdIncrementalRefreshDailyStatistics]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshLimitsBandingCode, body |-> ZeroMdIncrementalRefreshLimitsBanding]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshSessionStatisticsCode, body |-> ZeroMdIncrementalRefreshSessionStatistics]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SnapshotFullRefreshCode, body |-> ZeroSnapshotFullRefresh]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SnapshotFullRefreshOrderBookCode, body |-> ZeroSnapshotFullRefreshOrderBook]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionFutureCode, body |-> ZeroMdInstrumentDefinitionFuture]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionOptionCode, body |-> ZeroMdInstrumentDefinitionOption]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionSpreadCode, body |-> ZeroMdInstrumentDefinitionSpread]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionFixedIncomeCode, body |-> ZeroMdInstrumentDefinitionFixedIncome]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionRepoCode, body |-> ZeroMdInstrumentDefinitionRepo]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SnapshotRefreshTopOrdersCode, body |-> ZeroSnapshotRefreshTopOrders]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SecurityStatusWorkupCode, body |-> ZeroSecurityStatusWorkup]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SnapshotFullRefreshTcpCode, body |-> ZeroSnapshotFullRefreshTcp]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> CollateralMarketValueCode, body |-> ZeroCollateralMarketValue]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdInstrumentDefinitionFxCode, body |-> ZeroMdInstrumentDefinitionFx]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshBookLongQtyCode, body |-> ZeroMdIncrementalRefreshBookLongQty]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshTradeSummaryLongQtyCode, body |-> ZeroMdIncrementalRefreshTradeSummaryLongQty]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshVolumeLongQtyCode, body |-> ZeroMdIncrementalRefreshVolumeLongQty]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MdIncrementalRefreshSessionStatisticsLongQtyCode, body |-> ZeroMdIncrementalRefreshSessionStatisticsLongQty]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SnapshotFullRefreshTcpLongQtyCode, body |-> ZeroSnapshotFullRefreshTcpLongQty]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SnapshotFullRefreshLongQtyCode, body |-> ZeroSnapshotFullRefreshLongQty]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> NegotiateCode, body |-> ZeroNegotiate]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> NegotiationRejectCode, body |-> ZeroNegotiationReject]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> NegotiationResponseCode, body |-> ZeroNegotiationResponse]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> TerminateCode, body |-> ZeroTerminate]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> MarketDataRequestCode, body |-> ZeroMarketDataRequest]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> RequestAckCode, body |-> ZeroRequestAck]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> RequestRejectCode, body |-> ZeroRequestReject]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SecurityListRequestCode, body |-> ZeroSecurityListRequest]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SecurityStatusRequestCode, body |-> ZeroSecurityStatusRequest]],
+      [ZeroMdp3Message EXCEPT !.payload = [tag |-> SubscriberHeartbeatCode, body |-> [empty |-> 0]]] }
 
 (***************************************************************************)
 (* Udp Packet                                                              *)
@@ -9735,27 +9735,27 @@ OneMessage ==
 
 UdpPacket ==
     [ binaryPacketHeader : BinaryPacketHeader,
-      message            : SampleLists(OneMessage) ]
+      mdp3Message        : SampleLists(OneMdp3Message) ]
 
 EncodeUdpPacket(message) ==
     EncodeBinaryPacketHeader(message.binaryPacketHeader)
-        \o EncodeMessageList(message.message)
+        \o EncodeMdp3MessageList(message.mdp3Message)
 
 DecodeUdpPacket(bytes) ==
     LET binaryPacketHeader == DecodeBinaryPacketHeader(bytes) IN IF ~binaryPacketHeader.ok THEN Fail ELSE
-    LET message == ReadMessageAll(binaryPacketHeader.rest) IN IF ~message.ok THEN Fail ELSE
+    LET mdp3Message == ReadMdp3MessageAll(binaryPacketHeader.rest) IN IF ~mdp3Message.ok THEN Fail ELSE
     Ok([ binaryPacketHeader |-> binaryPacketHeader.value,
-         message            |-> message.value ], message.rest)
+         mdp3Message        |-> mdp3Message.value ], mdp3Message.rest)
 
 ZeroUdpPacket ==
     [ binaryPacketHeader |-> ZeroBinaryPacketHeader,
-      message            |-> << >> ]
+      mdp3Message        |-> << >> ]
 
 (* Udp Packet at zero, then each field in turn at the values it is checked at *)
 CheckedUdpPacket ==
     { ZeroUdpPacket }
         \cup { [ZeroUdpPacket EXCEPT !.binaryPacketHeader = one] : one \in CheckedBinaryPacketHeader }
-        \cup { [ZeroUdpPacket EXCEPT !.message = one] : one \in SampleLists(OneMessage) }
+        \cup { [ZeroUdpPacket EXCEPT !.mdp3Message = one] : one \in SampleLists(OneMdp3Message) }
 
 (***************************************************************************)
 (* What TLC checks                                                         *)
@@ -11133,10 +11133,10 @@ RoundTripSecurityStatusRequest ==
             /\ read.value = message
             /\ read.rest = << >>
 
-(* Every Message decodes back to what was encoded, and leaves nothing over *)
-RoundTripMessage ==
-    \A message \in CheckedMessage :
-        LET read == DecodeMessage(EncodeMessage(message))
+(* Every Mdp3 Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripMdp3Message ==
+    \A message \in CheckedMdp3Message :
+        LET read == DecodeMdp3Message(EncodeMdp3Message(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
@@ -11157,9 +11157,9 @@ SelectsPayload ==
         IN  read.ok /\ read.value.tag = message.tag
 
 (* Message Size is written from the bytes it frames *)
-FramesMessage ==
-    \A message \in CheckedMessage :
-        LET bytes == EncodeMessage(message)
+FramesMdp3Message ==
+    \A message \in CheckedMdp3Message :
+        LET bytes == EncodeMdp3Message(message)
         IN  DecodeUIntLE(SubSeq(bytes, 1, 2)) = Len(bytes) - 0
 
 -----------------------------------------------------------------------------
