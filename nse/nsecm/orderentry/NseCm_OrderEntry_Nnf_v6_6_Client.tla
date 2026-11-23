@@ -233,6 +233,28 @@ CheckedMessageDownloadRequestMessage ==
         \cup { [ZeroMessageDownloadRequestMessage EXCEPT !.sequenceNumber = one] : one \in Sample(8) }
 
 (***************************************************************************)
+(* Secure Box Registration Request Message: 2 bytes                        *)
+(***************************************************************************)
+
+SecureBoxRegistrationRequestMessage ==
+    [ boxId : Sample(2) ]
+
+EncodeSecureBoxRegistrationRequestMessage(message) ==
+    message.boxId
+
+DecodeSecureBoxRegistrationRequestMessage(bytes) ==
+    LET boxId == ReadBytes(bytes, 2) IN IF ~boxId.ok THEN Fail ELSE
+    Ok([ boxId |-> boxId.value ], boxId.rest)
+
+ZeroSecureBoxRegistrationRequestMessage ==
+    [ boxId |-> [i \in 1 .. 2 |-> 0] ]
+
+(* Secure Box Registration Request Message at zero, then each field in turn at the values it is checked at *)
+CheckedSecureBoxRegistrationRequestMessage ==
+    { ZeroSecureBoxRegistrationRequestMessage }
+        \cup { [ZeroSecureBoxRegistrationRequestMessage EXCEPT !.boxId = one] : one \in Sample(2) }
+
+(***************************************************************************)
 (* Sec Info: 12 bytes                                                      *)
 (***************************************************************************)
 
@@ -1309,6 +1331,7 @@ CheckedUserOrderValueLimitUpdateInMessage ==
 BranchOrderValueLimitUpdateInMessageCode == 5716  \* 0x1654
 CancelOnLogoutStatusRequestMessageCode == 5790  \* 0x169e
 MessageDownloadRequestMessageCode == 7000  \* 0x1b58
+SecureBoxRegistrationRequestMessageCode == 23008  \* 0x59e0
 AuctionInquiryRequestMessageCode == 18016  \* 0x4660
 BoxSignOffMessageCode == 20322  \* 0x4f62
 BoxSignOnRequestMessageCode == 23000  \* 0x59d8
@@ -1333,6 +1356,7 @@ ClientMessagePayload ==
     [ tag : {BranchOrderValueLimitUpdateInMessageCode}, body : BranchOrderValueLimitUpdateInMessage ]
         \cup [ tag : {CancelOnLogoutStatusRequestMessageCode}, body : CancelOnLogoutStatusRequestMessage ]
         \cup [ tag : {MessageDownloadRequestMessageCode}, body : MessageDownloadRequestMessage ]
+        \cup [ tag : {SecureBoxRegistrationRequestMessageCode}, body : SecureBoxRegistrationRequestMessage ]
         \cup [ tag : {AuctionInquiryRequestMessageCode}, body : AuctionInquiryRequestMessage ]
         \cup [ tag : {BoxSignOffMessageCode}, body : BoxSignOffMessage ]
         \cup [ tag : {BoxSignOnRequestMessageCode}, body : BoxSignOnRequestMessage ]
@@ -1357,6 +1381,7 @@ EncodeClientMessagePayload(message) ==
     CASE message.tag = BranchOrderValueLimitUpdateInMessageCode -> EncodeBranchOrderValueLimitUpdateInMessage(message.body)
       [] message.tag = CancelOnLogoutStatusRequestMessageCode -> EncodeCancelOnLogoutStatusRequestMessage(message.body)
       [] message.tag = MessageDownloadRequestMessageCode -> EncodeMessageDownloadRequestMessage(message.body)
+      [] message.tag = SecureBoxRegistrationRequestMessageCode -> EncodeSecureBoxRegistrationRequestMessage(message.body)
       [] message.tag = AuctionInquiryRequestMessageCode -> EncodeAuctionInquiryRequestMessage(message.body)
       [] message.tag = BoxSignOffMessageCode -> EncodeBoxSignOffMessage(message.body)
       [] message.tag = BoxSignOnRequestMessageCode -> EncodeBoxSignOnRequestMessage(message.body)
@@ -1382,6 +1407,7 @@ DecodeClientMessagePayload(tag, bytes) ==
             CASE tag = BranchOrderValueLimitUpdateInMessageCode -> DecodeBranchOrderValueLimitUpdateInMessage(bytes)
               [] tag = CancelOnLogoutStatusRequestMessageCode -> DecodeCancelOnLogoutStatusRequestMessage(bytes)
               [] tag = MessageDownloadRequestMessageCode -> DecodeMessageDownloadRequestMessage(bytes)
+              [] tag = SecureBoxRegistrationRequestMessageCode -> DecodeSecureBoxRegistrationRequestMessage(bytes)
               [] tag = AuctionInquiryRequestMessageCode -> DecodeAuctionInquiryRequestMessage(bytes)
               [] tag = BoxSignOffMessageCode -> DecodeBoxSignOffMessage(bytes)
               [] tag = BoxSignOnRequestMessageCode -> DecodeBoxSignOnRequestMessage(bytes)
@@ -1411,6 +1437,7 @@ CheckedClientMessagePayload ==
     { [tag |-> BranchOrderValueLimitUpdateInMessageCode, body |-> one] : one \in CheckedBranchOrderValueLimitUpdateInMessage }
         \cup { [tag |-> CancelOnLogoutStatusRequestMessageCode, body |-> one] : one \in CheckedCancelOnLogoutStatusRequestMessage }
         \cup { [tag |-> MessageDownloadRequestMessageCode, body |-> one] : one \in CheckedMessageDownloadRequestMessage }
+        \cup { [tag |-> SecureBoxRegistrationRequestMessageCode, body |-> one] : one \in CheckedSecureBoxRegistrationRequestMessage }
         \cup { [tag |-> AuctionInquiryRequestMessageCode, body |-> one] : one \in CheckedAuctionInquiryRequestMessage }
         \cup { [tag |-> BoxSignOffMessageCode, body |-> one] : one \in CheckedBoxSignOffMessage }
         \cup { [tag |-> BoxSignOnRequestMessageCode, body |-> one] : one \in CheckedBoxSignOnRequestMessage }
@@ -1525,6 +1552,7 @@ OneClientMessage ==
     { [ZeroClientMessage EXCEPT !.clientMessagePayload = [tag |-> BranchOrderValueLimitUpdateInMessageCode, body |-> ZeroBranchOrderValueLimitUpdateInMessage]],
       [ZeroClientMessage EXCEPT !.clientMessagePayload = [tag |-> CancelOnLogoutStatusRequestMessageCode, body |-> ZeroCancelOnLogoutStatusRequestMessage]],
       [ZeroClientMessage EXCEPT !.clientMessagePayload = [tag |-> MessageDownloadRequestMessageCode, body |-> ZeroMessageDownloadRequestMessage]],
+      [ZeroClientMessage EXCEPT !.clientMessagePayload = [tag |-> SecureBoxRegistrationRequestMessageCode, body |-> ZeroSecureBoxRegistrationRequestMessage]],
       [ZeroClientMessage EXCEPT !.clientMessagePayload = [tag |-> AuctionInquiryRequestMessageCode, body |-> ZeroAuctionInquiryRequestMessage]],
       [ZeroClientMessage EXCEPT !.clientMessagePayload = [tag |-> BoxSignOffMessageCode, body |-> ZeroBoxSignOffMessage]],
       [ZeroClientMessage EXCEPT !.clientMessagePayload = [tag |-> BoxSignOnRequestMessageCode, body |-> ZeroBoxSignOnRequestMessage]],
@@ -1611,6 +1639,14 @@ RoundTripCancelOnLogoutStatusRequestMessage ==
 RoundTripMessageDownloadRequestMessage ==
     \A message \in CheckedMessageDownloadRequestMessage :
         LET read == DecodeMessageDownloadRequestMessage(EncodeMessageDownloadRequestMessage(message))
+        IN  /\ read.ok
+            /\ read.value = message
+            /\ read.rest = << >>
+
+(* Every Secure Box Registration Request Message decodes back to what was encoded, and leaves nothing over *)
+RoundTripSecureBoxRegistrationRequestMessage ==
+    \A message \in CheckedSecureBoxRegistrationRequestMessage :
+        LET read == DecodeSecureBoxRegistrationRequestMessage(EncodeSecureBoxRegistrationRequestMessage(message))
         IN  /\ read.ok
             /\ read.value = message
             /\ read.rest = << >>
